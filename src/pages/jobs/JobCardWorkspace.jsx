@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Camera, Clock3, FileText, PackageSearch, PackagePlus, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 
@@ -50,6 +50,7 @@ const normalizeEntries = (job) => {
 export function JobCardWorkspace() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -72,6 +73,10 @@ export function JobCardWorkspace() {
   };
 
   useEffect(() => { load(); }, [id]);
+
+  useEffect(() => {
+    if (location.pathname.endsWith('/parts')) setActiveTab('parts');
+  }, [location.pathname]);
 
   const entries = useMemo(() => normalizeEntries(job), [job]);
   const totalCost = useMemo(() => entries.reduce((sum, item) => sum + (Number(item.qty || 0) * Number(item.costPrice || 0)), 0), [entries]);
