@@ -9,6 +9,7 @@ import './api/registerSaasEndpoints';
 import { AppRoutes } from './routes/AppRoutes';
 import './routes/saasRouteRegistration';
 import './index.css';
+import './styles/tailwind-system.css';
 import './styles/globals.css';
 import './styles/component-system.css';
 import './styles/responsive.css';
