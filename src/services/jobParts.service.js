@@ -95,8 +95,7 @@ const persist = async (jobId, state) => {
       lines: cleanLines,
       transactions: state.transactions,
       purchaseOrders: state.purchaseOrders
-    },
-    status: state.canComplete ? job.status : (job.status === 'Delivered' ? job.status : 'Waiting for Parts')
+    }
   });
 };
 
