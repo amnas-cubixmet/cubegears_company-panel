@@ -108,6 +108,11 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id" element={<JobDetails />} />
       <Route path="/jobs/:id/edit" element={<JobDetails />} />
       <Route path="/jobs/:id/status" element={<JobStatus />} />
+      <Route path="/jobs/:id/parts" element={<JobDetails />} />
+      <Route path="/jobs/:id/costs" element={<JobDetails />} />
+      <Route path="/jobs/:id/work" element={<JobDetails />} />
+      <Route path="/jobs/:id/photos" element={<JobDetails />} />
+      <Route path="/jobs/:id/history" element={<JobDetails />} />
       <Route path="/jobs/:id/*" element={<JobDetails />} />
 
       <Route path="/inventory" element={<InventoryList />} />
