@@ -284,10 +284,6 @@
   /* ===== Sidebar / navigation ===== */
   .sidebar { @apply border-r border-cg-border bg-cg-surface; }
   .sidebar a,.sidebar button { @apply transition-colors; }
-
-  /* ===== Guidance ===== */
-  .guidance-window { @apply border-cg-border bg-cg-surface text-cg-text; }
-  .guidance-btn { @apply font-semibold; }
 }
 
 @layer utilities {
@@ -361,9 +357,7 @@
   .sidebar,
   .app-header,
   .mobile-bottom-nav,
-  .app-footer,
-  .guidance-layer,
-  .guidance-page-action-wrap,
+  .app-footer,,
   .no-print {
     display:none !important;
   }
