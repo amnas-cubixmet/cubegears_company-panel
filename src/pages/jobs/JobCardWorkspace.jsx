@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Camera, Clock3, FileText, IndianRupee, PackagePlus, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
+import { ArrowLeft, Camera, Clock3, FileText, PackageSearch, PackagePlus, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
+import { JobPartsWorkflow } from './JobPartsWorkflow';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const entryTypes = ['Part', 'Consumable', 'Outside Work', 'Labour', 'Other'];
@@ -164,7 +165,8 @@ export function JobCardWorkspace() {
 
   const tabs = [
     ['overview', 'Overview'],
-    ['costs', 'Parts & Costs'],
+    ['parts', 'Parts Issue'],
+    ['costs', 'Costs'],
     ['work', 'Work Updates'],
     ['photos', 'Photos'],
     ['history', 'History']
@@ -216,6 +218,14 @@ export function JobCardWorkspace() {
         </article>
       </section>}
 
+      {activeTab === 'parts' && (
+        <JobPartsWorkflow
+          jobId={job.id}
+          assignedTo={job.assignedEmployeeName || job.assignedStaff || ''}
+          onJobUpdated={load}
+        />
+      )}
+
       {activeTab === 'costs' && <section className="job-simple-card">
         <div className="job-section-head"><div><span className="job-kicker">INTERNAL COST LEDGER</span><h2>Parts & Expenses</h2><p>Keep adding costs until the vehicle is ready. This is internal workshop cost, not the customer invoice.</p></div><button className="job-primary-button" onClick={() => setShowEntryForm((value) => !value)}><PackagePlus size={16}/>{showEntryForm ? 'Close' : 'Add Part / Expense'}</button></div>
         {showEntryForm && <form className="job-cost-form" onSubmit={addEntry}>
@@ -243,7 +253,7 @@ export function JobCardWorkspace() {
       {activeTab === 'history' && <section className="job-simple-card"><div className="job-section-head"><div><span className="job-kicker">HISTORY</span><h2>Job Timeline</h2></div></div><div className="job-work-row"><strong>Job card opened</strong><span>{job.createdDate || job.createdAt || '—'}</span></div>{entries.map((item) => <div className="job-work-row" key={`h-${item.id}`}><strong>{item.type}: {item.description}</strong><span>{new Date(item.createdAt || Date.now()).toLocaleString('en-IN')}</span></div>)}</section>}
 
       <div className="job-mobile-actions">
-        <button onClick={() => { setActiveTab('costs'); setShowEntryForm(true); }}><Plus size={18}/><span>Add Cost</span></button>
+        <button onClick={() => setActiveTab('parts')}><PackageSearch size={18}/><span>Parts</span></button>
         <button onClick={() => setActiveTab('work')}><Wrench size={18}/><span>Work</span></button>
         <button onClick={() => setActiveTab('photos')}><Camera size={18}/><span>Photo</span></button>
         <button onClick={createInvoice}><FileText size={18}/><span>Invoice</span></button>
