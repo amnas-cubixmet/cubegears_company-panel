@@ -88,7 +88,6 @@ const buildState = async (job) => {
 };
 
 const persist = async (jobId, state) => {
-  const job = await jobService.getJobById(jobId);
   const cleanLines = state.lines.map(({ stockItem, qtyOnHand, availableQty, grossIssued, returnedQty, netIssued, pendingQty, stockState, ...line }) => line);
   return jobService.updateJob(jobId, {
     partsWorkflow: {
