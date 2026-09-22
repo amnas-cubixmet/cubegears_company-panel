@@ -1,0 +1,378 @@
+/* CubixGear full-site Tailwind v4 bridge.
+   Tailwind is imported once in src/index.css; this file maps the existing
+   semantic class names to a consistent Tailwind-driven SaaS design system. */
+
+@theme inline {
+  --color-cg-primary: var(--primary);
+  --color-cg-primary-hover: var(--primary-hover);
+  --color-cg-primary-soft: var(--primary-soft);
+  --color-cg-bg: var(--app-bg);
+  --color-cg-surface: var(--surface);
+  --color-cg-surface-2: var(--surface-2);
+  --color-cg-border: var(--border);
+  --color-cg-border-strong: var(--border-strong);
+  --color-cg-text: var(--text-primary);
+  --color-cg-secondary: var(--text-secondary);
+  --color-cg-muted: var(--text-muted);
+  --color-cg-success: var(--success);
+  --color-cg-warning: var(--warning);
+  --color-cg-danger: var(--danger);
+  --color-cg-info: var(--info);
+}
+
+@layer base {
+  *,::before,::after { @apply box-border; }
+  html { @apply antialiased; }
+  body { @apply m-0 min-h-screen bg-cg-bg text-cg-text; }
+  button,input,select,textarea { font: inherit; }
+  button { @apply touch-manipulation; }
+  a { @apply text-inherit no-underline; }
+  img,video { @apply max-w-full; }
+  :focus-visible { @apply outline-none ring-2 ring-cg-primary/35 ring-offset-2; }
+}
+
+@layer components {
+  /* ===== Layout ===== */
+  .app-shell { @apply min-h-screen bg-cg-bg text-cg-text; }
+  .main-area,.main-content { @apply min-w-0; }
+  .main-content { @apply bg-cg-bg; }
+
+  .page-container,
+  .page-content,
+  .dashboard-page,
+  .crud-page,
+  .settings-page,
+  .billing-page,
+  .job-card-page,
+  .account-page {
+    @apply w-full min-w-0;
+  }
+
+  .page-header,
+  .crud-page-header,
+  .settings-header,
+  .billing-header,
+  .job-card-header,
+  .account-page-header {
+    @apply mb-5 flex flex-wrap items-start justify-between gap-3;
+  }
+
+  .page-header h1,
+  .crud-page-header h1,
+  .settings-header h1,
+  .billing-header h1,
+  .job-card-header h1,
+  .account-page-header h1 {
+    @apply m-0 text-xl font-bold tracking-tight text-cg-text md:text-2xl;
+  }
+
+  .page-header p,
+  .crud-page-header p,
+  .settings-header p,
+  .billing-header p,
+  .job-card-header p,
+  .account-page-header p {
+    @apply mt-1 text-sm leading-6 text-cg-muted;
+  }
+
+  /* ===== Cards ===== */
+  .card,
+  .ui-card,
+  .dashboard-card,
+  .stat-card,
+  .summary-card,
+  .crud-card,
+  .settings-card,
+  .billing-card,
+  .job-card-section,
+  .account-card,
+  .panel {
+    @apply rounded-[14px] border border-cg-border bg-cg-surface shadow-sm;
+  }
+
+  .card-body,.ui-card-body,.panel-body { @apply p-4 md:p-5; }
+
+  /* ===== Buttons ===== */
+  .btn,
+  .ui-button,
+  .primary-button,
+  .secondary-button,
+  .action-button,
+  .crud-button {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition duration-150 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary,
+  .ui-button-primary,
+  .primary-button,
+  .crud-button.primary {
+    @apply border border-cg-primary bg-cg-primary text-white hover:bg-cg-primary-hover;
+  }
+
+  .btn-secondary,
+  .ui-button-secondary,
+  .secondary-button,
+  .crud-button.secondary {
+    @apply border border-cg-border bg-cg-surface text-cg-text hover:bg-cg-surface-2;
+  }
+
+  .btn-danger,
+  .danger-button,
+  .crud-button.danger {
+    @apply border border-red-200 bg-red-50 text-red-700 hover:bg-red-100;
+  }
+
+  .icon-button,.ui-icon-button,.crud-icon-button {
+    @apply inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-cg-border bg-cg-surface text-cg-muted transition hover:bg-cg-surface-2 hover:text-cg-text;
+  }
+
+  /* ===== Forms ===== */
+  .input,
+  .ui-input,
+  .form-input,
+  .cubegears-input,
+  .select,
+  .ui-select,
+  .cubegears-select,
+  .textarea,
+  .ui-textarea,
+  .cubegears-textarea {
+    @apply w-full rounded-xl border border-cg-border bg-cg-surface text-sm text-cg-text outline-none transition placeholder:text-cg-muted/70 focus:border-cg-primary focus:ring-2 focus:ring-cg-primary/15;
+  }
+
+  .input,.ui-input,.form-input,.cubegears-input,.select,.ui-select,.cubegears-select {
+    @apply min-h-11 px-3;
+  }
+
+  .textarea,.ui-textarea,.cubegears-textarea { @apply min-h-24 px-3 py-3; }
+
+  .form-label,.ui-label,.cubegears-label {
+    @apply mb-1.5 block text-xs font-semibold text-cg-text;
+  }
+
+  .form-helper { @apply mt-1 text-xs text-cg-muted; }
+  .form-error,.cubegears-error-text { @apply mt-1 text-xs font-medium text-red-600; }
+
+  .form-grid,
+  .crud-form-grid,
+  .settings-form-grid,
+  .form-grid-2 {
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2;
+  }
+
+  .form-grid-full { @apply md:col-span-2; }
+
+  .form-actions,.crud-form-actions {
+    @apply mt-5 flex flex-wrap items-center justify-end gap-2;
+  }
+
+  /* ===== Search ===== */
+  .app-search,
+  .global-search,
+  .search-bar,
+  .search-input-shell {
+    @apply border border-cg-border bg-cg-surface shadow-sm;
+  }
+
+  .app-search,.search-bar,.search-input-shell { @apply rounded-xl; }
+  .global-search { @apply rounded-full; }
+
+  /* ===== Tables ===== */
+  .table-wrap,.ui-table-wrap,.crud-table-wrap {
+    @apply w-full overflow-x-auto rounded-[14px] border border-cg-border bg-cg-surface;
+  }
+
+  table,.ui-table,.crud-table { @apply w-full border-collapse text-left text-sm; }
+  thead { @apply bg-cg-surface-2; }
+  th { @apply whitespace-nowrap px-4 py-3 text-xs font-semibold text-cg-muted; }
+  td { @apply border-t border-cg-border px-4 py-3 align-middle text-cg-text; }
+  tbody tr { @apply transition hover:bg-cg-surface-2/70; }
+
+  /* ===== Badges / status ===== */
+  .badge,.status-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold;
+  }
+  .badge-success,.status-success { @apply bg-emerald-50 text-emerald-700; }
+  .badge-warning,.status-warning { @apply bg-amber-50 text-amber-700; }
+  .badge-danger,.status-danger { @apply bg-red-50 text-red-700; }
+  .badge-info,.status-info { @apply bg-blue-50 text-blue-700; }
+
+  /* ===== Dashboard ===== */
+  .dashboard-grid,.summary-grid,.stats-grid {
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .quick-actions-grid { @apply grid grid-cols-2 gap-3 lg:grid-cols-4; }
+
+  .quick-actions-grid button,
+  .quick-actions-grid a {
+    @apply min-h-14 rounded-[14px] border border-cg-border bg-cg-surface px-4 text-left text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:border-cg-primary/40 hover:shadow-md;
+  }
+
+  /* ===== CRUD / card views ===== */
+  .mobile-card-list { @apply grid grid-cols-1 gap-3; }
+  .mobile-card,.crud-mobile-card {
+    @apply rounded-[14px] border border-cg-border bg-cg-surface p-4 shadow-sm;
+  }
+
+  .crud-toolbar {
+    @apply mb-4 flex flex-wrap items-center justify-between gap-3;
+  }
+
+  .crud-actions { @apply flex flex-wrap items-center gap-2; }
+
+  /* ===== Jobs ===== */
+  .job-card-tabs,.section-tabs {
+    @apply flex gap-2 overflow-x-auto pb-1;
+    scrollbar-width:none;
+  }
+
+  .job-card-tabs::-webkit-scrollbar,.section-tabs::-webkit-scrollbar { display:none; }
+
+  .job-card-tabs button,.section-tabs button {
+    @apply min-h-10 shrink-0 rounded-xl border border-cg-border bg-cg-surface px-3 text-xs font-semibold text-cg-muted transition;
+  }
+
+  .job-card-tabs button.active,.section-tabs button.active {
+    @apply border-cg-primary bg-cg-primary-soft text-cg-primary;
+  }
+
+  .job-cost-entry,.job-work-entry,.job-photo-card {
+    @apply rounded-xl border border-cg-border bg-cg-surface p-3;
+  }
+
+  /* ===== Billing / invoice ===== */
+  .billing-item-row,.invoice-item-row {
+    @apply grid min-w-0 grid-cols-1 gap-2 rounded-[14px] border border-cg-border bg-cg-surface p-3 lg:grid-cols-[130px_minmax(180px,2fr)_150px_80px_120px_120px_110px_auto];
+  }
+
+  .billing-summary,.invoice-summary {
+    @apply rounded-[14px] border border-cg-border bg-cg-surface p-4;
+  }
+
+  /* ===== Settings ===== */
+  .settings-layout { @apply grid grid-cols-1 gap-4 lg:grid-cols-[220px_minmax(0,1fr)]; }
+  .settings-nav { @apply flex gap-2 overflow-x-auto lg:flex-col; }
+
+  .settings-nav button,.settings-nav a {
+    @apply shrink-0 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-cg-muted transition hover:bg-cg-surface-2;
+  }
+
+  .settings-nav .active { @apply bg-cg-primary-soft text-cg-primary; }
+
+  /* ===== Modal / drawer ===== */
+  .modal-overlay,.dialog-backdrop,.responsive-modal-overlay {
+    @apply fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-[2px];
+  }
+
+  .modal-content,.responsive-modal-sheet,[role="dialog"] {
+    @apply max-h-[90dvh] w-full max-w-xl overflow-auto rounded-[18px] border border-cg-border bg-cg-surface shadow-2xl;
+  }
+
+  .modal-header,.modal-footer {
+    @apply flex items-center justify-between gap-3 border-cg-border p-4;
+  }
+
+  .modal-header { @apply border-b; }
+  .modal-footer { @apply border-t; }
+
+  /* ===== Empty states ===== */
+  .empty-state,.empty-guide {
+    @apply flex min-h-48 flex-col items-center justify-center rounded-[14px] border border-dashed border-cg-border bg-cg-surface px-5 py-8 text-center;
+  }
+
+  /* ===== Sidebar / navigation ===== */
+  .sidebar { @apply border-r border-cg-border bg-cg-surface; }
+  .sidebar a,.sidebar button { @apply transition-colors; }
+
+  /* ===== Guidance ===== */
+  .guidance-window { @apply border-cg-border bg-cg-surface text-cg-text; }
+  .guidance-btn { @apply font-semibold; }
+}
+
+@layer utilities {
+  .cg-scrollbar-hidden {
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .cg-scrollbar-hidden::-webkit-scrollbar { display:none; }
+
+  .cg-safe-bottom {
+    padding-bottom:max(1rem,env(safe-area-inset-bottom));
+  }
+}
+
+/* ===== Responsive safety net ===== */
+@media (max-width:767px) {
+  .main-content { @apply px-3 py-3; }
+
+  .page-header,
+  .crud-page-header,
+  .settings-header,
+  .billing-header,
+  .job-card-header,
+  .account-page-header {
+    @apply mb-4 gap-2;
+  }
+
+  .desktop-table-view { @apply hidden; }
+  .mobile-card-view { @apply block; }
+
+  .form-actions,.crud-form-actions {
+    @apply sticky bottom-0 z-20 -mx-3 border-t border-cg-border bg-cg-surface/95 px-3 py-3 backdrop-blur;
+  }
+
+  .form-actions > *,.crud-form-actions > * {
+    @apply min-h-11 flex-1;
+  }
+
+  .quick-actions-grid { @apply grid-cols-2; }
+  .billing-item-row,.invoice-item-row { @apply grid-cols-1; }
+
+  .modal-overlay,.dialog-backdrop,.responsive-modal-overlay {
+    @apply items-end p-0;
+  }
+
+  .modal-content,.responsive-modal-sheet,[role="dialog"] {
+    @apply max-h-[88dvh] max-w-none rounded-b-none rounded-t-2xl;
+  }
+}
+
+@media (min-width:768px) {
+  .desktop-table-view { @apply block; }
+  .mobile-card-view { @apply hidden; }
+}
+
+@media (max-width:340px) {
+  .main-content { @apply px-2.5; }
+  .quick-actions-grid { @apply gap-2; }
+
+  .quick-actions-grid button,.quick-actions-grid a {
+    @apply min-h-12 px-3 text-xs;
+  }
+
+  .btn,.ui-button,.primary-button,.secondary-button,.action-button,.crud-button {
+    @apply px-3 text-xs;
+  }
+}
+
+/* Printing: app chrome must never leak into invoice PDF */
+@media print {
+  .sidebar,
+  .app-header,
+  .mobile-bottom-nav,
+  .app-footer,
+  .guidance-layer,
+  .guidance-page-action-wrap,
+  .no-print {
+    display:none !important;
+  }
+
+  .main-area,
+  .main-content {
+    margin:0 !important;
+    padding:0 !important;
+    width:100% !important;
+    background:#fff !important;
+  }
+}
