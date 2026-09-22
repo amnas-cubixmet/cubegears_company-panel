@@ -30,10 +30,10 @@ export function App() {
       <ThemeProvider>
         <AuthProvider>
           <CompanyProvider>
-              <PayrollPeriodProvider>
-                <AppRoutes />
-              </PayrollPeriodProvider>
-            </CompanyProvider>
+            <PayrollPeriodProvider>
+              <AppRoutes />
+            </PayrollPeriodProvider>
+          </CompanyProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
