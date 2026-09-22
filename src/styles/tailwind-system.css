@@ -277,7 +277,7 @@
   .modal-footer { @apply border-t; }
 
   /* ===== Empty states ===== */
-  .empty-state,.empty-guide {
+  .empty-state {
     @apply flex min-h-48 flex-col items-center justify-center rounded-[14px] border border-dashed border-cg-border bg-cg-surface px-5 py-8 text-center;
   }
 
@@ -357,7 +357,7 @@
   .sidebar,
   .app-header,
   .mobile-bottom-nav,
-  .app-footer,,
+  .app-footer,
   .no-print {
     display:none !important;
   }
