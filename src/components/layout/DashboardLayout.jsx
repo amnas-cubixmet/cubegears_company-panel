@@ -12,15 +12,16 @@ export const DashboardLayout = ({ children }) => {
       <div className="main-area">
         <Header />
 
-        <main className="main-content scroll-hidden" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1 }}>
-{children}
-          </div>
+        <main
+          className="main-content scroll-hidden"
+          style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}
+        >
+          <div style={{ flex: 1 }}>{children}</div>
           <Footer />
         </main>
       </div>
 
       <MobileBottomNav />
-</div>
+    </div>
   );
 };
