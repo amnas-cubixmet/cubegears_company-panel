@@ -75,7 +75,9 @@ export function JobCardWorkspace() {
   useEffect(() => { load(); }, [id]);
 
   useEffect(() => {
-    if (location.pathname.endsWith('/parts')) setActiveTab('parts');
+    const section = location.pathname.split('/').filter(Boolean).at(-1);
+    const routeTabs = ['parts', 'costs', 'work', 'photos', 'history'];
+    setActiveTab(routeTabs.includes(section) ? section : 'overview');
   }, [location.pathname]);
 
   const entries = useMemo(() => normalizeEntries(job), [job]);
@@ -177,6 +179,11 @@ export function JobCardWorkspace() {
     ['history', 'History']
   ];
 
+  const openTab = (key) => {
+    setActiveTab(key);
+    navigate(key === 'overview' ? `/jobs/${job.id}` : `/jobs/${job.id}/${key}`);
+  };
+
   return (
     <div className="job-simple-page">
       <header className="job-simple-header">
@@ -202,7 +209,7 @@ export function JobCardWorkspace() {
       </section>
 
       <nav className="job-simple-tabs" aria-label="Job card sections">
-        {tabs.map(([key, label]) => <button key={key} className={activeTab === key ? 'active' : ''} onClick={() => setActiveTab(key)}>{label}</button>)}
+        {tabs.map(([key, label]) => <button key={key} className={activeTab === key ? 'active' : ''} onClick={() => openTab(key)}>{label}</button>)}
       </nav>
 
       {error && <div className="job-simple-error">{error}</div>}
@@ -258,9 +265,9 @@ export function JobCardWorkspace() {
       {activeTab === 'history' && <section className="job-simple-card"><div className="job-section-head"><div><span className="job-kicker">HISTORY</span><h2>Job Timeline</h2></div></div><div className="job-work-row"><strong>Job card opened</strong><span>{job.createdDate || job.createdAt || '—'}</span></div>{entries.map((item) => <div className="job-work-row" key={`h-${item.id}`}><strong>{item.type}: {item.description}</strong><span>{new Date(item.createdAt || Date.now()).toLocaleString('en-IN')}</span></div>)}</section>}
 
       <div className="job-mobile-actions">
-        <button onClick={() => setActiveTab('parts')}><PackageSearch size={18}/><span>Parts</span></button>
-        <button onClick={() => setActiveTab('work')}><Wrench size={18}/><span>Work</span></button>
-        <button onClick={() => setActiveTab('photos')}><Camera size={18}/><span>Photo</span></button>
+        <button onClick={() => openTab('parts')}><PackageSearch size={18}/><span>Parts</span></button>
+        <button onClick={() => openTab('work')}><Wrench size={18}/><span>Work</span></button>
+        <button onClick={() => openTab('photos')}><Camera size={18}/><span>Photo</span></button>
         <button onClick={createInvoice}><FileText size={18}/><span>Invoice</span></button>
       </div>
     </div>
