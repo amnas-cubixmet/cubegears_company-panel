@@ -17,6 +17,7 @@ import {
   eWayBillService,
   validateEWayBill
 } from '../../services/eWayBill.service';
+import { billingService } from '../../services/billing.service';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const n = (value) => Number(value || 0);
@@ -85,10 +86,56 @@ export function EWayBillPage() {
     setError('');
     if (mode === 'list') loadList();
     else if (mode === 'create') {
-      setForm(blankEWayBill());
-      setLoading(false);
+      const invoiceId = new URLSearchParams(location.search).get('invoiceId');
+      if (!invoiceId) {
+        setForm(blankEWayBill());
+        setLoading(false);
+      } else {
+        setLoading(true);
+        billingService.get(invoiceId)
+          .then((invoice) => {
+            if (!invoice) throw new Error('Source invoice not found.');
+            const base = blankEWayBill();
+            const goods = (invoice.items || [])
+              .filter((item) => ['Stock Part', 'Outside Purchase', 'Consumable', 'Custom Item'].includes(item.type))
+              .map((item, index) => ({
+                id: `EWI-PREFILL-${index}-${Date.now()}`,
+                productName: item.description || 'Goods',
+                description: item.code || '',
+                hsnCode: '',
+                qty: Number(item.qty || 1),
+                unit: 'PCS',
+                taxableValue: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) - Number(item.discount || 0)),
+                cgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.cgstRate || 0) : '',
+                sgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.sgstRate || 0) : '',
+                igstRate: invoice.taxMode === 'igst' ? Number(invoice.igstRate || 0) : '',
+                cessRate: ''
+              }));
+
+            setForm({
+              ...base,
+              documentType: invoice.invoiceType === 'gst' ? 'Tax Invoice' : 'Bill of Supply',
+              documentNo: invoice.number || invoice.id || '',
+              documentDate: invoice.date || base.documentDate,
+              invoiceId: invoice.id || '',
+              jobCardNo: invoice.jobCardNo || '',
+              to: {
+                ...base.to,
+                gstin: invoice.customer?.gstin || 'URP',
+                tradeName: invoice.customer?.name || '',
+                address: invoice.customer?.address || '',
+                place: invoice.customer?.placeOfSupply || '',
+                stateCode: invoice.customer?.stateCode || base.to.stateCode
+              },
+              items: goods.length ? goods : base.items,
+              notes: invoice.number ? `Created from CubixGear invoice ${invoice.number}` : ''
+            });
+          })
+          .catch((e) => setError(e?.message || 'Unable to prefill from invoice.'))
+          .finally(() => setLoading(false));
+      }
     } else loadOne();
-  }, [location.pathname, ewbId]);
+  }, [location.pathname, location.search, ewbId]);
 
   const update = (key, value) => setForm((old) => ({ ...old, [key]: value }));
   const updateGroup = (group, key, value) => setForm((old) => ({
