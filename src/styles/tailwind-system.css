@@ -373,3 +373,27 @@
     background:#fff !important;
   }
 }
+
+
+/* Remove top-level Back buttons across the app.
+   Scoped to page/header areas so pagination and in-content previous controls stay available. */
+.main-content header button:has(.lucide-arrow-left),
+.main-content header a:has(.lucide-arrow-left),
+.page-header button:has(.lucide-arrow-left),
+.page-header a:has(.lucide-arrow-left),
+.crud-page-header button:has(.lucide-arrow-left),
+.crud-page-header a:has(.lucide-arrow-left),
+.billing-editor-head button:has(.lucide-arrow-left),
+.billing-editor-head a:has(.lucide-arrow-left),
+.job-simple-header button:has(.lucide-arrow-left),
+.job-simple-header a:has(.lucide-arrow-left),
+.job-card-header button:has(.lucide-arrow-left),
+.job-card-header a:has(.lucide-arrow-left),
+.settings-header button:has(.lucide-arrow-left),
+.settings-header a:has(.lucide-arrow-left),
+.account-page-header button:has(.lucide-arrow-left),
+.account-page-header a:has(.lucide-arrow-left),
+.eway-editor-head button:has(.lucide-arrow-left),
+.eway-editor-head a:has(.lucide-arrow-left) {
+  display: none !important;
+}
