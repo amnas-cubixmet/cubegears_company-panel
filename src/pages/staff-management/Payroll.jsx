@@ -17,7 +17,7 @@ import { DollarSign, CheckCircle2, AlertCircle, Clock, CreditCard, FileText, Plu
 
 export const Payroll = ({ section = 'dashboard' }) => {
   const activeSection = section;
-  const { selectedMonth, selectedYear, selectedBranch, selectedStaff, periodString } = usePayrollPeriod();
+  const { selectedMonth, selectedYear, selectedBranch, setSelectedBranch, selectedStaff, periodString } = usePayrollPeriod();
 
   const [payrolls, setPayrolls] = useState([]);
   const [salaryStructures, setSalaryStructures] = useState([]);
