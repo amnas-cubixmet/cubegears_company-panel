@@ -265,12 +265,16 @@ export function EWayBillPage() {
   if (mode === 'view') {
     return (
       <div className="billing-page invoice-view-page">
-        <div className="billing-editor-head no-print">
-          <div>
-            <button className="bill-btn secondary" onClick={() => navigate('/invoices/e-way-bills')}><ArrowLeft size={16}/>Back</button>
-            <span className="billing-kicker">E-WAY BILL</span>
-            <h1>{form.documentNo || form.id}</h1>
-            <p>{form.supplyType} · {form.status}</p>
+        <div className="billing-editor-head eway-editor-head no-print">
+          <div className="eway-title-block">
+            <button className="bill-btn secondary eway-back-btn" onClick={() => navigate('/invoices/e-way-bills')}>
+              <ArrowLeft size={16}/>Back
+            </button>
+            <div className="eway-title-copy">
+              <span className="billing-kicker">E-WAY BILL</span>
+              <h1>{form.documentNo || form.id}</h1>
+              <p>{form.supplyType} · {form.status}</p>
+            </div>
           </div>
           <div className="billing-head-actions">
             <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit</button>
@@ -287,14 +291,16 @@ export function EWayBillPage() {
 
   return (
     <div className="billing-page">
-      <div className="billing-editor-head no-print">
-        <div>
-          <button className="bill-btn secondary" onClick={() => navigate(mode === 'edit' ? `/invoices/e-way-bills/${ewbId}` : '/invoices/e-way-bills')}>
+      <div className="billing-editor-head eway-editor-head no-print">
+        <div className="eway-title-block">
+          <button className="bill-btn secondary eway-back-btn" onClick={() => navigate(mode === 'edit' ? `/invoices/e-way-bills/${ewbId}` : '/invoices/e-way-bills')}>
             <ArrowLeft size={16}/>Back
           </button>
-          <span className="billing-kicker">E-WAY BILL</span>
-          <h1>{mode === 'edit' ? 'Edit E-Way Bill' : 'Create E-Way Bill'}</h1>
-          <p>Goods movement document for inward/outward transport.</p>
+          <div className="eway-title-copy">
+            <span className="billing-kicker">E-WAY BILL</span>
+            <h1>{mode === 'edit' ? 'Edit E-Way Bill' : 'Create E-Way Bill'}</h1>
+            <p>Goods movement document for inward/outward transport.</p>
+          </div>
         </div>
         <div className="billing-head-actions">
           <button className="bill-btn secondary" disabled={saving} onClick={save}>Save Draft</button>
