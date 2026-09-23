@@ -63,6 +63,11 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
           <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
             {payroll.designation} • {payroll.branch}
           </div>
+          <div style={{ fontSize: '11px', color: 'var(--primary)', marginTop: '4px', fontWeight: '700' }}>
+            Salary Type: {payroll.salaryBasis || 'Fixed Monthly'}
+            {payroll.salaryBasis === 'Hourly' && payroll.salaryRate ? ` • ${formatINR(payroll.salaryRate)}/hour` : ''}
+            {payroll.salaryBasis === 'Daily' && payroll.salaryRate ? ` • ${formatINR(payroll.salaryRate)}/day` : ''}
+          </div>
         </div>
         <span style={{
           fontSize: '11px',
@@ -88,7 +93,9 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
         fontSize: '13px'
       }}>
         <div style={{ backgroundColor: 'var(--surface-2)', padding: '8px 10px', borderRadius: '8px' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Basic Salary</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            {payroll.salaryBasis === 'Hourly' ? 'Worked-hours Pay' : payroll.salaryBasis === 'Daily' ? 'Present-days Pay' : payroll.salaryBasis === 'Commission Only' ? 'Base Pay' : 'Fixed Monthly Salary'}
+          </div>
           <div style={{ fontWeight: '700', color: 'var(--text-primary)' }}>{formatINR(basic)}</div>
         </div>
 
