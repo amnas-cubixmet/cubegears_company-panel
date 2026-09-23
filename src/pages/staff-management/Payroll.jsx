@@ -28,6 +28,7 @@ export const Payroll = ({ section = 'dashboard' }) => {
   // Local Filter Overrides
   const [selectedApproval, setSelectedApproval] = useState('All');
   const [selectedSettlement, setSelectedSettlement] = useState('All');
+  const [selectedSalaryBasis, setSelectedSalaryBasis] = useState('All');
 
   // Sheet & Modal Item States
   const [paymentTargetItem, setPaymentTargetItem] = useState(null);
@@ -122,6 +123,17 @@ export const Payroll = ({ section = 'dashboard' }) => {
   const unpaidStaff = payrolls.filter((p) => p.paymentStatus === 'Unpaid').length;
   const partialStaff = payrolls.filter((p) => p.paymentStatus === 'Partially Paid').length;
   const paidStaff = payrolls.filter((p) => p.paymentStatus === 'Paid').length;
+
+  const filteredSalaryStructures = selectedSalaryBasis === 'All'
+    ? salaryStructures
+    : salaryStructures.filter((item) => item.salaryBasis === selectedSalaryBasis);
+
+  const salaryPrimaryValue = (structure) => {
+    if (structure.salaryBasis === 'Hourly') return `${formatINR(structure.hourlyRate)} / hour`;
+    if (structure.salaryBasis === 'Daily') return `${formatINR(structure.dailyRate)} / day`;
+    if (structure.salaryBasis === 'Commission Only') return 'Approved commission';
+    return `${formatINR(structure.fixedMonthlySalary ?? structure.basicSalary)} / month`;
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
@@ -223,27 +235,96 @@ export const Payroll = ({ section = 'dashboard' }) => {
       {/* Section 2: Salary Structure */}
       {activeSection === 'salary' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ fontSize: '16px', fontWeight: '700' }}>Staff Salary Configurations</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-            {salaryStructures.map((s) => (
-              <div key={s.id} style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>{s.staffName}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Basis: <strong>{s.salaryBasis}</strong></div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px', fontSize: '12px', backgroundColor: 'var(--surface-2)', padding: '10px', borderRadius: '10px' }}>
-                  <div>Basic: <strong>{formatINR(s.basicSalary)}</strong></div>
-                  <div>Allowances: <strong>{formatINR(s.allowances)}</strong></div>
-                  <div>Incentives: <strong>{formatINR(s.fixedIncentives)}</strong></div>
-                  <div>Effective: <strong>{s.effectiveDate}</strong></div>
-                </div>
-                <button
-                  onClick={() => setStructureEditTarget(s)}
-                  style={{ width: '100%', height: '36px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--primary)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', marginTop: '4px' }}
-                >
-                  Edit Structure
-                </button>
-              </div>
-            ))}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            padding: '12px',
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '14px'
+          }}>
+            <div>
+              <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)' }}>Staff Salary Configurations</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Fixed monthly, hourly, daily or commission salary can be set per employee.</div>
+            </div>
+            <select
+              value={selectedSalaryBasis}
+              onChange={(e) => setSelectedSalaryBasis(e.target.value)}
+              style={{
+                minWidth: '170px',
+                height: '38px',
+                padding: '0 10px',
+                borderRadius: '9px',
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--surface-2)',
+                color: 'var(--text-primary)',
+                fontSize: '12px',
+                fontWeight: '600'
+              }}
+            >
+              <option value="All">All Salary Types</option>
+              <option value="Fixed Monthly">Fixed Monthly</option>
+              <option value="Hourly">Per Hour</option>
+              <option value="Daily">Per Day</option>
+              <option value="Commission Only">Commission Only</option>
+            </select>
           </div>
+
+          {filteredSalaryStructures.length === 0 ? (
+            <div style={{
+              padding: '28px',
+              textAlign: 'center',
+              backgroundColor: 'var(--surface)',
+              border: '1px dashed var(--border)',
+              borderRadius: '14px',
+              color: 'var(--text-muted)',
+              fontSize: '13px'
+            }}>
+              No salary structures found for this salary type.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+              {filteredSalaryStructures.map((s) => (
+                <div key={s.id} style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '9px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                    <div>
+                      <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-primary)' }}>{s.staffName}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{s.effectiveDate ? `Effective ${s.effectiveDate}` : 'Active salary structure'}</div>
+                    </div>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '999px',
+                      backgroundColor: 'var(--primary-soft)',
+                      color: 'var(--primary)',
+                      fontSize: '10px',
+                      fontWeight: '800',
+                      whiteSpace: 'nowrap'
+                    }}>{s.salaryBasis}</span>
+                  </div>
+
+                  <div style={{ padding: '12px', borderRadius: '11px', backgroundColor: 'var(--surface-2)' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Primary Pay</div>
+                    <div style={{ marginTop: '3px', fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>{salaryPrimaryValue(s)}</div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px', fontSize: '12px' }}>
+                    <div style={{ padding: '8px', borderRadius: '9px', border: '1px solid var(--border)' }}>Allowances<br/><strong>{formatINR(s.allowances)}</strong></div>
+                    <div style={{ padding: '8px', borderRadius: '9px', border: '1px solid var(--border)' }}>Incentives<br/><strong>{formatINR(s.fixedIncentives)}</strong></div>
+                  </div>
+
+                  <button
+                    onClick={() => setStructureEditTarget(s)}
+                    style={{ width: '100%', minHeight: '38px', borderRadius: '9px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--primary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                  >
+                    Edit Salary Structure
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
