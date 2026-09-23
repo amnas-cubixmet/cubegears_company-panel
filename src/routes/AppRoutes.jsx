@@ -55,7 +55,7 @@ export const AppRoutes = () => (
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<Dashboard />} />
 
-      <Route path="/my-attendance" element={<MyAttendance />} />
+      <Route path="/my-attendance" element={<Navigate to="/my-attendance/calendar" replace />} />
       <Route path="/my-attendance/calendar" element={<MyAttendance />} />
       <Route path="/my-attendance/history" element={<MyAttendance />} />
       <Route path="/my-attendance/leave" element={<MyAttendance />} />
