@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { Footer } from './Footer';
+import { AppBreadcrumbs } from './AppBreadcrumbs';
 
 export const DashboardLayout = ({ children }) => {
   const location = useLocation();
@@ -22,7 +23,10 @@ export const DashboardLayout = ({ children }) => {
           className="main-content scroll-hidden"
           style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}
         >
-          <div style={{ flex: 1 }}>{children}</div>
+          <div style={{ flex: 1 }}>
+            <AppBreadcrumbs />
+            {children}
+          </div>
           {!isInvoiceWorkspace && <Footer />}
         </main>
       </div>
