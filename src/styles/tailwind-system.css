@@ -357,6 +357,7 @@
   .sidebar,
   .app-header,
   .mobile-bottom-nav,
+  .mobile-only-bottom-nav,
   .app-footer,
   .no-print {
     display:none !important;
