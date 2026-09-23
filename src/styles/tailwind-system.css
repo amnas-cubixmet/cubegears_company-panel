@@ -1,3 +1,5 @@
+@reference "../index.css";
+
 /* CubixGear full-site Tailwind v4 bridge.
    Tailwind is imported once in src/index.css; this file maps the existing
    semantic class names to a consistent Tailwind-driven SaaS design system. */
