@@ -239,7 +239,7 @@ export const Dashboard = () => {
         {/* Quick Actions 2-Column Responsive Grid */}
         <div className="quick-actions-grid">
           <Button
-            variant="primary"
+            variant="outline"
             size="md"
             onClick={() => navigate('/customers/add')}
             style={{
@@ -261,7 +261,7 @@ export const Dashboard = () => {
           </Button>
 
           <Button
-            variant="secondary"
+            variant="outline"
             size="md"
             onClick={() => navigate('/jobs/add')}
             style={{
