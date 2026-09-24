@@ -63,7 +63,7 @@ export const Login = () => {
                 Email address
               </span>
               <div className="login-input-shell">
-                <Mail size={17} className="shrink-0 text-slate-500" />
+                <span className="login-input-icon" aria-hidden="true"><Mail size={16} strokeWidth={1.8} /></span>
                 <input
                   className="login-input"
                   type="email"
@@ -89,7 +89,7 @@ export const Login = () => {
               </div>
 
               <div className="flex h-12 items-center gap-3 rounded-xl border border-slate-700 bg-[#0d1728] px-3.5 transition focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-500/15">
-                <LockKeyhole size={17} className="shrink-0 text-slate-500" />
+                <span className="login-input-icon" aria-hidden="true"><LockKeyhole size={16} strokeWidth={1.8} /></span>
                 <input
                   className="login-input"
                   type={showPassword ? 'text' : 'password'}
