@@ -144,7 +144,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                       </NavLink>
 
                       {hasChildren && isActive && (
-                        <div className="ml-7 flex flex-col gap-1 border-l border-line pl-2.5">
+                        <div className="ml-7 mr-1 mt-1 flex flex-col gap-1 rounded-xl border border-line bg-surface-2/70 p-1.5">
                           {route.children.map((child) => {
                             const childPathname = child.path.split('?')[0];
                             const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
@@ -158,10 +158,10 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                                 to={child.path}
                                 onClick={onClose}
                                 className={[
-                                  'rounded-lg px-2.5 py-2 text-[11px] no-underline transition',
+                                  'flex min-h-9 items-center rounded-lg px-3 py-2 text-[11.5px] leading-tight no-underline transition',
                                   isChildActive
-                                    ? 'bg-primary-soft font-bold text-primary'
-                                    : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
+                                    ? 'bg-surface font-bold text-primary shadow-sm ring-1 ring-line'
+                                    : 'font-medium text-secondary hover:bg-surface hover:text-content'
                                 ].join(' ')}
                               >
                                 {child.label}
