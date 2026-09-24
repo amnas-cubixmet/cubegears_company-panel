@@ -149,6 +149,35 @@ export let jobsMock = [
       { id: "SRV-10", serviceCategory: "Mechanical Works", serviceName: "Clutch Assembly Replacement", qty: 1, labourRate: 3500, assignedStaff: "Niyas P", estimatedDuration: "5 Hours", status: "Waiting" }
     ],
     partsUsed: [],
+    partsWorkflow: {
+      lines: [
+        {
+          id: "JPL-00252-01",
+          partId: "STK-0007",
+          partName: "Honda City Clutch Kit Assembly",
+          partNo: "CLT-HON-CITY-15",
+          barcode: "",
+          brand: "Honda Genuine Parts",
+          requestedQty: 1,
+          sellingPrice: 9500,
+          issuedTo: "Niyas P",
+          lineStatus: "Open",
+          issues: [],
+          returns: []
+        }
+      ],
+      transactions: [
+        {
+          id: "REQ-00252-01",
+          type: "Required",
+          partName: "Honda City Clutch Kit Assembly",
+          qty: 1,
+          createdAt: "2026-09-13T16:45:00.000Z",
+          createdBy: "Rajesh V"
+        }
+      ],
+      purchaseOrders: []
+    },
     outsidePurchases: [],
     labourRecords: [],
     estimates: [
