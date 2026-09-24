@@ -384,3 +384,25 @@
 .login-form > label + label {
   margin-top: 0;
 }
+
+
+.login-input-icon {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  color: #718096;
+  line-height: 0;
+}
+
+.login-input-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.login-input-shell:focus-within .login-input-icon {
+  color: #a5b4fc;
+}
