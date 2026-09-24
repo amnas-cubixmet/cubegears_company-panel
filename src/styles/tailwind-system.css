@@ -468,3 +468,262 @@
     gap:4px;
   }
 }
+
+
+/* =========================================================
+   FULL-PROJECT TAILWIND APPLICATION LAYER
+   Loaded last from App.jsx so these semantic rules are the
+   final shared UI contract across CubixGear.
+   ========================================================= */
+@layer components {
+  /* App content shell */
+  .cg-main-content {
+    @apply flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-cg-bg p-6 max-[767px]:p-3;
+  }
+  .cg-main-content__body {
+    @apply min-w-0 flex-1;
+  }
+
+  /* Header */
+  .app-header {
+    @apply relative z-40 shrink-0 border-b border-cg-border bg-cg-surface text-cg-text;
+  }
+  .app-header-desktop {
+    @apply hidden h-16 w-full items-center gap-3 px-4 md:flex;
+  }
+  .app-header-mobile {
+    @apply hidden w-full flex-col bg-cg-surface max-[767px]:flex;
+  }
+  .mobile-header-topline {
+    @apply flex min-h-14 items-center justify-between gap-3 px-3 pt-1;
+  }
+  .mobile-header-search-row {
+    @apply w-full px-3 pb-2;
+  }
+  .header-brand {
+    @apply inline-flex min-w-0 shrink-0 items-center gap-2.5 border-0 bg-transparent p-0 text-cg-text;
+  }
+  .header-brand-mark {
+    @apply grid size-9 shrink-0 place-items-center rounded-xl bg-cg-primary text-sm font-black text-white shadow-sm;
+  }
+  .header-brand-name {
+    @apply truncate text-sm font-extrabold tracking-tight text-cg-text;
+  }
+  .header-right-actions,
+  .mobile-header-actions {
+    @apply ml-auto flex shrink-0 items-center gap-2;
+  }
+  .header-icon-button,
+  .header-avatar-button {
+    @apply relative grid size-10 shrink-0 place-items-center rounded-full border border-cg-border bg-cg-surface-2 text-cg-secondary transition hover:bg-cg-surface;
+  }
+  .header-notification-dot {
+    @apply absolute right-2 top-2 size-2 rounded-full bg-red-500 ring-2 ring-cg-surface;
+  }
+  .header-profile-wrap {
+    @apply relative;
+  }
+  .header-profile-btn {
+    @apply flex min-h-10 items-center gap-2 rounded-xl border border-cg-border bg-cg-surface px-2.5 text-cg-text transition hover:bg-cg-surface-2;
+  }
+  .header-profile-btn img,
+  .header-avatar-button img {
+    @apply size-8 rounded-full object-cover;
+  }
+  .header-profile-copy {
+    @apply hidden min-w-0 flex-col text-left lg:flex;
+  }
+  .header-profile-copy strong {
+    @apply max-w-32 truncate text-xs font-bold text-cg-text;
+  }
+  .header-profile-copy small {
+    @apply mt-0.5 text-[9px] font-bold uppercase tracking-wider text-cg-muted;
+  }
+  .header-profile-menu {
+    @apply absolute right-0 top-[calc(100%+8px)] z-[100] w-52 rounded-xl border border-cg-border bg-cg-surface p-1.5 shadow-xl;
+  }
+  .header-profile-menu button {
+    @apply flex min-h-9 w-full items-center gap-2 rounded-lg border-0 bg-transparent px-2.5 text-left text-xs font-semibold text-cg-text transition hover:bg-cg-surface-2;
+  }
+  .header-profile-menu button.danger {
+    @apply text-red-600;
+  }
+  .header-profile-divider {
+    @apply my-1 h-px bg-cg-border;
+  }
+
+  /* Common page rhythm */
+  .my-attendance-page,
+  .payroll-page,
+  .reports-page,
+  .notifications-page,
+  .profile-page {
+    @apply flex w-full min-w-0 flex-col gap-4;
+  }
+
+  /* Billing workspace */
+  .billing-page {
+    @apply flex w-full min-w-0 flex-col gap-4 text-cg-text;
+  }
+  .billing-page-head,
+  .billing-editor-head {
+    @apply flex flex-wrap items-start justify-between gap-3;
+  }
+  .billing-page-head h1,
+  .billing-editor-head h1 {
+    @apply m-0 text-xl font-extrabold tracking-tight text-cg-text md:text-2xl;
+  }
+  .billing-page-head p,
+  .billing-editor-head p {
+    @apply mt-1 text-xs leading-5 text-cg-muted;
+  }
+  .billing-kicker {
+    @apply inline-block text-[10px] font-extrabold uppercase tracking-[0.08em] text-cg-primary;
+  }
+  .billing-head-actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+  .bill-btn {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-cg-primary bg-cg-primary px-4 text-xs font-bold text-white shadow-sm transition hover:bg-cg-primary-hover disabled:pointer-events-none disabled:opacity-50;
+  }
+  .bill-btn.secondary {
+    @apply border-cg-border bg-cg-surface text-cg-text hover:bg-cg-surface-2;
+  }
+  .bill-btn.danger {
+    @apply border-red-500 bg-red-500 text-white hover:bg-red-600;
+  }
+  .bill-icon-btn {
+    @apply inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-cg-border bg-cg-surface text-cg-secondary transition hover:bg-cg-surface-2 hover:text-cg-text;
+  }
+  .billing-tabs {
+    @apply flex w-full items-stretch gap-2 overflow-x-auto;
+    scrollbar-width:none;
+  }
+  .billing-tabs::-webkit-scrollbar {
+    display:none;
+  }
+  .billing-tabs button {
+    @apply inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-cg-border bg-cg-surface px-3 text-xs font-bold text-cg-secondary transition hover:bg-cg-surface-2;
+  }
+  .billing-tabs button.active {
+    @apply border-cg-primary bg-cg-primary text-white;
+  }
+  .billing-card {
+    @apply rounded-[14px] border border-cg-border bg-cg-surface p-4 shadow-sm;
+  }
+  .billing-card h3 {
+    @apply mb-3 mt-0 text-sm font-extrabold text-cg-text;
+  }
+  .billing-card label {
+    @apply mb-3 flex min-w-0 flex-col gap-1.5 text-[11px] font-bold text-cg-secondary;
+  }
+  .billing-card input:not([type="checkbox"]):not([type="radio"]),
+  .billing-card select,
+  .billing-card textarea {
+    @apply w-full min-w-0 rounded-xl border border-cg-border bg-cg-surface-2 px-3 text-xs font-medium text-cg-text outline-none transition placeholder:text-cg-muted focus:border-cg-primary focus:ring-2 focus:ring-cg-primary/15;
+  }
+  .billing-card input:not([type="checkbox"]):not([type="radio"]),
+  .billing-card select {
+    @apply min-h-10;
+  }
+  .billing-card textarea {
+    @apply min-h-24 py-2.5;
+  }
+  .billing-error {
+    @apply rounded-xl border border-red-500/25 bg-red-500/10 px-3.5 py-3 text-xs font-semibold text-red-600;
+  }
+  .billing-empty {
+    @apply rounded-xl border border-dashed border-cg-border bg-cg-surface px-5 py-8 text-center text-xs text-cg-muted;
+  }
+  .billing-doc-row {
+    @apply border-cg-border bg-cg-surface-2 transition hover:border-cg-border-strong hover:bg-cg-surface;
+  }
+  .billing-list-actions button {
+    @apply border-cg-border bg-cg-surface text-cg-secondary hover:bg-cg-surface-2 hover:text-cg-text;
+  }
+
+  /* Settings / account / SaaS */
+  .settings-card,
+  .saas-card,
+  .account-card {
+    @apply rounded-[14px] border border-cg-border bg-cg-surface shadow-sm;
+  }
+  .settings-section-title,
+  .account-section-title {
+    @apply text-sm font-extrabold text-cg-text;
+  }
+
+  /* Attendance / payroll shared controls */
+  .attendance-filter-scroll,
+  .payroll-filter-scroll {
+    @apply flex w-full gap-2 overflow-x-auto;
+    scrollbar-width:none;
+  }
+  .attendance-filter-scroll::-webkit-scrollbar,
+  .payroll-filter-scroll::-webkit-scrollbar {
+    display:none;
+  }
+  .attendance-filter-scroll > button,
+  .payroll-filter-scroll > button {
+    @apply shrink-0;
+  }
+
+  /* Generic tabs across modules */
+  .mobile-tab-rail,
+  .tab-rail,
+  .section-tab-rail {
+    @apply flex w-full gap-2 overflow-x-auto;
+    scrollbar-width:none;
+  }
+  .mobile-tab-rail::-webkit-scrollbar,
+  .tab-rail::-webkit-scrollbar,
+  .section-tab-rail::-webkit-scrollbar {
+    display:none;
+  }
+
+  /* Footer */
+  .app-footer {
+    @apply mt-6 border-t border-cg-border py-4 text-center text-[11px] text-cg-muted max-[767px]:hidden;
+  }
+}
+
+@media (max-width:767px) {
+  .billing-page-head,
+  .billing-editor-head {
+    @apply flex-col;
+  }
+
+  .billing-head-actions {
+    @apply grid w-full grid-cols-2 gap-2;
+  }
+
+  .billing-head-actions .bill-btn {
+    @apply w-full px-3;
+  }
+
+  .billing-tabs {
+    @apply grid grid-cols-3 gap-1.5 overflow-visible;
+  }
+
+  .billing-tabs button {
+    @apply w-full min-w-0 px-2 text-[11px];
+  }
+
+  .header-profile-menu {
+    @apply right-0;
+  }
+}
+
+@media (max-width:340px) {
+  .billing-head-actions {
+    @apply grid-cols-1;
+  }
+
+  .billing-tabs button {
+    @apply px-1.5 text-[10px];
+  }
+
+  .header-brand-name {
+    @apply max-w-28;
+  }
+}
