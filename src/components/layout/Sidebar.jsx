@@ -162,7 +162,11 @@ export const Sidebar = () => {
                     {!collapsed && hasChildren && isActive && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingLeft: '32px', marginBottom: '4px' }}>
                         {route.children.map((child) => {
-                          const isChildActive = location.pathname === child.path;
+                          const childPathname = child.path.split('?')[0];
+                          const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
+                          const isChildActive = child.matchSearch
+                            ? location.pathname === childPathname && currentKind === child.matchSearch
+                            : location.pathname === childPathname;
                           return (
                             <NavLink
                               key={child.id}
