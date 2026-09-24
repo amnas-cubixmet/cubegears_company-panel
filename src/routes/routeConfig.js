@@ -86,7 +86,8 @@ export const routeConfig = [
     mobilePrimary: false,
     permission: 'invoices.view',
     children: [
-      { id: 'billing-invoices', label: 'Invoices & Estimates', path: '/invoices' },
+      { id: 'billing-invoices', label: 'Invoices', path: '/invoices', matchSearch: 'invoice' },
+      { id: 'billing-estimates', label: 'Estimates', path: '/invoices?kind=estimate', matchSearch: 'estimate' },
       { id: 'billing-eway-bills', label: 'E-Way Bills', path: '/invoices/e-way-bills' }
     ]
   },
