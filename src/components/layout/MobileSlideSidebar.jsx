@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { routeConfig, ROUTE_SECTIONS } from '../../routes/routeConfig';
-import { X, Sun, Moon, Laptop, LogOut } from 'lucide-react';
+import { Laptop, LogOut, Moon, Sun, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -12,179 +12,165 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   const activeItemRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Close on Escape key press
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && isOpen) onClose();
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Lock body scroll when panel is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    if (!isOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
 
-  // Auto-scroll active route into view when sidebar opens
   useEffect(() => {
     if (isOpen && activeItemRef.current && containerRef.current) {
-      setTimeout(() => {
+      const timer = window.setTimeout(() => {
         activeItemRef.current?.scrollIntoView({
           behavior: 'smooth',
           block: 'center'
         });
-      }, 100);
+      }, 120);
+
+      return () => window.clearTimeout(timer);
     }
-  }, [isOpen, location.pathname]);
+
+    return undefined;
+  }, [isOpen, location.pathname, location.search]);
 
   const sections = Object.values(ROUTE_SECTIONS);
 
+  const isRouteActive = (route) => {
+    if (route.path === '/dashboard') return location.pathname === '/dashboard';
+    return location.pathname === route.path || location.pathname.startsWith(`${route.path}/`);
+  };
+
+  const themeClass = (mode) =>
+    [
+      'flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg border-0 px-2 text-[11px] font-semibold transition',
+      themeMode === mode
+        ? 'bg-surface text-primary shadow-sm'
+        : 'bg-transparent text-muted hover:bg-surface hover:text-content'
+    ].join(' ');
+
   return (
     <>
-      {/* Semi-transparent Backdrop */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.65)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 90,
-          opacity: isOpen ? 1 : 0,
-          pointerEvents: isOpen ? 'auto' : 'none',
-          transition: 'opacity 0.25s ease'
-        }}
+      <button
+        type="button"
+        aria-label="Close menu backdrop"
         onClick={onClose}
+        className={[
+          'fixed inset-0 z-[90] border-0 bg-slate-950/55 p-0 backdrop-blur-[2px] transition-opacity duration-200 md:hidden',
+          isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+        ].join(' ')}
       />
 
-      {/* Right-to-Left Slide-In Mobile Sidebar */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: 'min(88vw, 360px)',
-          height: '100dvh',
-          backgroundColor: 'var(--surface)',
-          borderLeft: '1px solid var(--border)',
-          zIndex: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: '-8px 0 24px rgba(0,0,0,0.3)'
-        }}
+      <aside
+        aria-hidden={!isOpen}
+        className={[
+          'fixed bottom-0 right-0 top-0 z-[100] flex h-dvh w-[min(88vw,360px)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 md:hidden',
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        ].join(' ')}
       >
-        {/* Header: Brand & Close Button */}
-        <div style={{
-          height: '64px',
-          padding: '0 20px',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '34px',
-              height: '34px',
-              backgroundColor: 'var(--primary)',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: '800',
-              color: '#ffffff',
-              fontSize: '16px'
-            }}>
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-sm font-black text-white shadow-sm">
               CG
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: '700', fontSize: '16px', color: 'var(--text-primary)', lineHeight: 1.2 }}>CubeGears</span>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Garage Workspace</span>
+
+            <div className="min-w-0">
+              <div className="truncate text-sm font-extrabold tracking-tight text-content">
+                CubeGears
+              </div>
+              <div className="truncate text-[10px] font-medium text-muted">
+                Garage Workspace
+              </div>
             </div>
           </div>
+
           <button
+            type="button"
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              padding: '6px'
-            }}
+            className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-surface-2 text-secondary transition hover:bg-surface hover:text-content"
+            aria-label="Close menu"
           >
-            <X size={22} />
+            <X size={18} />
           </button>
         </div>
 
-        {/* Scrollable Navigation Area (Visually Hidden Scrollbar) */}
         <div
           ref={containerRef}
-          className="scroll-hidden"
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-          }}
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {sections.map((sec) => {
-            const items = routeConfig.filter(r => r.section === sec);
-            if (items.length === 0) return null;
+          {sections.map((section) => {
+            const items = routeConfig.filter((route) => route.section === section);
+            if (!items.length) return null;
 
             return (
-              <div key={sec} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <span style={{
-                  padding: '0 8px 4px 8px',
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  {sec}
+              <div key={section} className="flex flex-col gap-1.5">
+                <span className="px-2 pb-1 text-[9px] font-black uppercase tracking-[0.11em] text-muted">
+                  {section}
                 </span>
+
                 {items.map((route) => {
                   const IconComp = route.icon;
-                  const isActive = location.pathname.startsWith(route.path);
+                  const isActive = isRouteActive(route);
+                  const hasChildren = Boolean(route.children?.length);
 
                   return (
-                    <NavLink
-                      key={route.id}
-                      to={route.path}
-                      onClick={onClose}
-                      ref={isActive ? activeItemRef : null}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '10px 14px',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: isActive ? '600' : '500',
-                        textDecoration: 'none',
-                        color: isActive ? '#ffffff' : 'var(--text-secondary)',
-                        backgroundColor: isActive ? 'var(--primary)' : 'transparent',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <IconComp size={18} style={{ flexShrink: 0 }} />
-                      <span>{route.label}</span>
-                    </NavLink>
+                    <React.Fragment key={route.id}>
+                      <NavLink
+                        to={route.path}
+                        onClick={onClose}
+                        ref={isActive ? activeItemRef : null}
+                        className={[
+                          'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition',
+                          isActive
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'font-medium text-content hover:bg-surface-2'
+                        ].join(' ')}
+                      >
+                        <IconComp size={17} strokeWidth={1.9} className="shrink-0" />
+                        <span className="min-w-0 flex-1 truncate">{route.label}</span>
+                      </NavLink>
+
+                      {hasChildren && isActive && (
+                        <div className="ml-7 flex flex-col gap-1 border-l border-line pl-2.5">
+                          {route.children.map((child) => {
+                            const childPathname = child.path.split('?')[0];
+                            const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
+                            const isChildActive = child.matchSearch
+                              ? location.pathname === childPathname && currentKind === child.matchSearch
+                              : location.pathname === childPathname;
+
+                            return (
+                              <NavLink
+                                key={child.id}
+                                to={child.path}
+                                onClick={onClose}
+                                className={[
+                                  'rounded-lg px-2.5 py-2 text-[11px] no-underline transition',
+                                  isChildActive
+                                    ? 'bg-primary-soft font-bold text-primary'
+                                    : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
+                                ].join(' ')}
+                              >
+                                {child.label}
+                              </NavLink>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -192,101 +178,49 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
           })}
         </div>
 
-        {/* Bottom Section: Theme Switcher & User Profile */}
-        <div style={{
-          padding: '16px',
-          borderTop: '1px solid var(--border)',
-          backgroundColor: 'var(--surface)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          flexShrink: 0
-        }}>
-          {/* Theme Switcher Widget */}
-          <div style={{
-            display: 'flex',
-            backgroundColor: 'var(--surface-secondary)',
-            borderRadius: '8px',
-            padding: '4px',
-            gap: '4px'
-          }}>
-            <button
-              onClick={() => setThemeMode('light')}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '6px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: themeMode === 'light' ? 'var(--surface)' : 'transparent',
-                color: themeMode === 'light' ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: '600',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              <Sun size={14} /> Light
+        <div className="shrink-0 border-t border-line bg-surface p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+          <div className="mb-3 flex rounded-xl border border-line bg-surface-2 p-1">
+            <button type="button" onClick={() => setThemeMode('light')} className={themeClass('light')}>
+              <Sun size={14}/>Light
             </button>
-            <button
-              onClick={() => setThemeMode('dark')}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '6px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: themeMode === 'dark' ? 'var(--surface)' : 'transparent',
-                color: themeMode === 'dark' ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: '600',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              <Moon size={14} /> Dark
+            <button type="button" onClick={() => setThemeMode('dark')} className={themeClass('dark')}>
+              <Moon size={14}/>Dark
             </button>
-            <button
-              onClick={() => setThemeMode('system')}
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '6px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: themeMode === 'system' ? 'var(--surface)' : 'transparent',
-                color: themeMode === 'system' ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: '600',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              <Laptop size={14} /> System
+            <button type="button" onClick={() => setThemeMode('system')} className={themeClass('system')}>
+              <Laptop size={14}/>System
             </button>
           </div>
 
-          {/* Profile & Logout */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src={user?.avatar} alt="User" style={{ width: '34px', height: '34px', borderRadius: '50%' }} />
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{user?.name}</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{user?.role}</span>
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-2.5">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <img
+                src={user?.avatar}
+                alt="User"
+                className="size-9 shrink-0 rounded-full border border-line bg-surface object-cover"
+              />
+
+              <div className="min-w-0">
+                <div className="truncate text-[11px] font-extrabold text-content">
+                  {user?.name || 'User'}
+                </div>
+                <div className="mt-0.5 truncate text-[9px] font-bold uppercase tracking-wide text-muted">
+                  {user?.role || 'ADMIN'}
+                </div>
               </div>
             </div>
-            <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '6px' }} title="Log out">
-              <LogOut size={18} />
+
+            <button
+              type="button"
+              onClick={logout}
+              className="grid size-9 shrink-0 place-items-center rounded-xl border border-transparent bg-transparent text-danger transition hover:border-red-200 hover:bg-red-50"
+              title="Log out"
+              aria-label="Log out"
+            >
+              <LogOut size={17}/>
             </button>
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 };
