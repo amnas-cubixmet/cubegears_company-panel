@@ -183,7 +183,13 @@ export const Dashboard = () => {
             height: '48px',
             marginTop: '16px',
             fontSize: '15px',
-            fontWeight: '600'
+            fontWeight: '700',
+            backgroundColor: isClockedIn ? 'var(--danger)' : 'var(--primary)',
+            border: isClockedIn ? '1px solid var(--danger)' : '1px solid var(--primary)',
+            color: '#ffffff',
+            boxShadow: isClockedIn
+              ? '0 8px 20px rgba(239, 68, 68, 0.20)'
+              : '0 8px 20px rgba(99, 102, 241, 0.20)'
           }}
         >
           {isClockedIn ? 'Clock Out Shift' : 'Clock In Duty'}
