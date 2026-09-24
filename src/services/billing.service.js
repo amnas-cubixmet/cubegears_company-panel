@@ -13,8 +13,8 @@ const seedDocuments = [
     vehicle: { registration: 'KL-08-BQ-4581', makeModel: 'Toyota Innova Crysta', odometer: '52,400 km', vin: '' },
     jobCardNo: 'JOB-2048', staff: 'Rahul', notes: 'Periodic maintenance completed.',
     items: [
-      { id: 'L1', type: 'Labour', description: 'Periodic service labour', code: '', qty: 1, purchasePrice: 0, rate: 1200, discount: 0, inventoryId: '' },
-      { id: 'P1', type: 'Stock Part', description: 'Oil Filter', code: 'FLT-OIL-02', qty: 1, purchasePrice: 280, rate: 450, discount: 0, inventoryId: 'ITM-1002' }
+      { id: 'L1', type: 'Labour', description: 'Periodic service labour', code: '', hsnCode: '998729', qty: 1, unit: 'NOS', purchasePrice: 0, rate: 1200, taxRate: 18, discount: 0, inventoryId: '' },
+      { id: 'P1', type: 'Stock Part', description: 'Oil Filter', code: 'FLT-OIL-02', hsnCode: '84212300', qty: 1, unit: 'PCS', purchasePrice: 280, rate: 450, taxRate: 18, discount: 0, inventoryId: 'ITM-1002' }
     ],
     discount: 0, taxMode: 'none', cgstRate: 0, sgstRate: 0, igstRate: 0, paid: 1650, paymentMode: 'UPI', paymentTerms: 'C.O.D', finalizedAt: '2026-09-12T10:00:00.000Z'
   }
@@ -58,29 +58,91 @@ export const blankBillingDocument = (kind = 'invoice') => {
     jobCardNo: prefill?.jobNumber || prefill?.jobId || '',
     sourceJobId: prefill?.jobId || '',
     staff: '',
+    transportation: { vehicleNo: '', transporterName: '', ...(prefill?.transportation || {}) },
     notes: prefill?.jobId ? `Created from Job Card ${prefill.jobNumber || prefill.jobId}` : '',
-    items: Array.isArray(prefill?.items) ? clone(prefill.items) : [],
+    items: Array.isArray(prefill?.items)
+      ? clone(prefill.items).map((item) => ({ unit: 'PCS', hsnCode: '', taxRate: 18, ...item }))
+      : [],
     discount: 0,
+    adjustment: '',
     taxMode: 'none', cgstRate: 9, sgstRate: 9, igstRate: 18,
-    paid: '', paymentMode: 'Cash', paymentTerms: 'C.O.D'
+    paid: '', paymentMode: 'Cash', paymentType: 'Credit', paymentTerms: 'C.O.D',
+    termsAndConditions: 'Thank you for choosing CubixGear.'
   };
 };
 
 export const calculateDocumentTotals = (doc) => {
-  const itemSubtotal = (doc.items || []).reduce((sum, item) => {
+  const rows = (doc.items || []).map((item) => {
     const gross = Number(item.qty || 0) * Number(item.rate || 0);
-    return sum + Math.max(0, gross - Number(item.discount || 0));
-  }, 0);
+    return {
+      item,
+      taxable: Math.max(0, gross - Number(item.discount || 0))
+    };
+  });
+
+  const itemSubtotal = rows.reduce((sum, row) => sum + row.taxable, 0);
   const documentDiscount = Number(doc.discount || 0);
   const taxable = Math.max(0, itemSubtotal - documentDiscount);
-  const cgst = doc.taxMode === 'cgst_sgst' ? taxable * Number(doc.cgstRate || 0) / 100 : 0;
-  const sgst = doc.taxMode === 'cgst_sgst' ? taxable * Number(doc.sgstRate || 0) / 100 : 0;
-  const igst = doc.taxMode === 'igst' ? taxable * Number(doc.igstRate || 0) / 100 : 0;
-  const beforeRounding = taxable + cgst + sgst + igst;
-  const total = Math.round(beforeRounding);
-  const rounding = Number((total - beforeRounding).toFixed(2));
+  const ratio = itemSubtotal > 0 ? taxable / itemSubtotal : 0;
+
+  let cgst = 0;
+  let sgst = 0;
+  let igst = 0;
+  const taxGroups = new Map();
+
+  if (doc.invoiceType === 'gst' && doc.taxMode !== 'none') {
+    rows.forEach(({ item, taxable: lineTaxable }) => {
+      const adjustedTaxable = lineTaxable * ratio;
+      const fallbackRate = doc.taxMode === 'igst'
+        ? Number(doc.igstRate || 0)
+        : Number(doc.cgstRate || 0) + Number(doc.sgstRate || 0);
+      const rate = item.taxRate === '' || item.taxRate == null
+        ? fallbackRate
+        : Number(item.taxRate || 0);
+      const tax = adjustedTaxable * rate / 100;
+
+      if (doc.taxMode === 'igst') {
+        igst += tax;
+      } else {
+        cgst += tax / 2;
+        sgst += tax / 2;
+      }
+
+      const key = `${doc.taxMode}:${rate}`;
+      const current = taxGroups.get(key) || {
+        type: doc.taxMode === 'igst' ? 'IGST' : 'CGST + SGST',
+        rate,
+        taxable: 0,
+        tax: 0
+      };
+      current.taxable += adjustedTaxable;
+      current.tax += tax;
+      taxGroups.set(key, current);
+    });
+  }
+
+  const beforeAdjustment = taxable + cgst + sgst + igst;
+  const hasManualAdjustment = doc.adjustment !== '' && doc.adjustment != null;
+  const adjustment = hasManualAdjustment
+    ? Number(doc.adjustment || 0)
+    : Number((Math.round(beforeAdjustment) - beforeAdjustment).toFixed(2));
+  const total = Number((beforeAdjustment + adjustment).toFixed(2));
   const paid = Number(doc.paid || 0);
-  return { itemSubtotal, documentDiscount, taxable, cgst, sgst, igst, rounding, total, paid, balance: Math.max(0, total - paid) };
+
+  return {
+    itemSubtotal,
+    documentDiscount,
+    taxable,
+    cgst,
+    sgst,
+    igst,
+    taxGroups: Array.from(taxGroups.values()),
+    adjustment,
+    rounding: adjustment,
+    total,
+    paid,
+    balance: Math.max(0, Number((total - paid).toFixed(2)))
+  };
 };
 
 const nextNumber = (kind, docs) => {
