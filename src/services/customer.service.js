@@ -10,6 +10,7 @@ import {
   checkDuplicateMockCustomer
 } from '../mock/customers.mock';
 import { getMockJobs } from '../mock/jobs.mock';
+import { getMockVehicles } from '../mock/vehicles.mock';
 
 const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -89,47 +90,51 @@ export const checkDuplicateCustomer = async (payload) => {
 export const getCustomerVehicles = async (customerId) => {
   if (USE_MOCK_API) {
     await delay();
-    const jobs = getMockJobs().filter(j => j.customerId === customerId);
+
+    // Prefer the real vehicle master linked to this customer.
+    const masterVehicles = getMockVehicles()
+      .filter((vehicle) => String(vehicle.customerId) === String(customerId))
+      .map((vehicle) => ({
+        id: vehicle.id,
+        regNo: vehicle.licensePlate || '',
+        makeModel: [vehicle.make, vehicle.model].filter(Boolean).join(' '),
+        vehicleType: vehicle.vehicleType || 'Car / SUV',
+        fuelType: vehicle.fuelType || vehicle.engineType || '',
+        transmission: vehicle.transmission || '',
+        year: vehicle.year || '',
+        color: vehicle.color || '',
+        vin: vehicle.vin || '',
+        kilometres: vehicle.kilometres || '',
+        lastService: vehicle.lastServiceDate || ''
+      }));
+
+    if (masterVehicles.length) return masterVehicles;
+
+    // Fall back to vehicle information captured in previous job cards.
+    const jobs = getMockJobs().filter((job) => String(job.customerId) === String(customerId));
     const vehicleMap = {};
-    jobs.forEach(j => {
-      if (j.vehicleReg && !vehicleMap[j.vehicleReg]) {
-        vehicleMap[j.vehicleReg] = {
-          id: j.vehicleId || `VEH-${Date.now()}`,
-          regNo: j.vehicleReg,
-          makeModel: j.vehicleInfo,
+
+    jobs.forEach((job) => {
+      if (job.vehicleReg && !vehicleMap[job.vehicleReg]) {
+        vehicleMap[job.vehicleReg] = {
+          id: job.vehicleId || `JOB-VEH-${job.vehicleReg}`,
+          regNo: job.vehicleReg,
+          makeModel: job.vehicleInfo || '',
           vehicleType: 'Car / SUV',
-          fuelType: 'Diesel',
-          transmission: 'Manual',
-          year: '2021',
-          color: 'Pearl White',
-          vin: 'MBJ112233445566',
-          kilometres: j.kilometre,
-          lastService: j.createdDate
+          fuelType: '',
+          transmission: '',
+          year: '',
+          color: '',
+          vin: job.vin || '',
+          kilometres: job.kilometre || '',
+          lastService: job.createdDate || ''
         };
       }
     });
-    
-    // Default fallback if no jobs found
-    if (Object.keys(vehicleMap).length === 0) {
-      return [
-        {
-          id: "VEH-0001",
-          regNo: "KL 10 AB 1234",
-          makeModel: "Toyota Innova 2.5V",
-          vehicleType: "MPV",
-          fuelType: "Diesel",
-          transmission: "Manual",
-          year: "2019",
-          color: "Silver Metallic",
-          vin: "MBJ10AB1234567",
-          kilometres: "1,24,500 km",
-          lastService: "2026-09-14"
-        }
-      ];
-    }
 
     return Object.values(vehicleMap);
   }
+
   return apiClient.get(`${API_ENDPOINTS.CUSTOMERS}/${customerId}/vehicles`);
 };
 
