@@ -140,7 +140,7 @@ export const Sidebar = () => {
                     </NavLink>
 
                     {!collapsed && hasChildren && isActive && (
-                      <div className="mb-2 ml-7 mr-1 mt-1 flex flex-col gap-1 rounded-xl border border-line bg-surface-2/70 p-1.5">
+                      <div className="mb-2 ml-7 mr-1 mt-1 flex flex-col gap-[5px] rounded-xl border border-line bg-surface-2/70 p-1.5">
                         {route.children.map((child) => {
                           const childPathname = child.path.split('?')[0];
                           const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
