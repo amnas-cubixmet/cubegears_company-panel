@@ -18,6 +18,7 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
+import { DocumentFormHeader, DocumentFormSheet } from '../../components/common/DocumentFormShell';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const n = (value) => Number(value || 0);
@@ -292,27 +293,29 @@ export function EWayBillPage() {
 
   return (
     <div className="billing-page">
-      <div className="billing-editor-head eway-editor-head no-print">
-        <div className="eway-title-block">
-          <button className="bill-btn secondary eway-back-btn" onClick={() => navigate(mode === 'edit' ? `/invoices/e-way-bills/${ewbId}` : '/invoices/e-way-bills')}>
-            <ArrowLeft size={16}/>Back
-          </button>
-          <div className="eway-title-copy">
-            <span className="billing-kicker">E-WAY BILL</span>
-            <h1>{mode === 'edit' ? 'Edit E-Way Bill' : 'Create E-Way Bill'}</h1>
-            <p>Goods movement document for inward/outward transport.</p>
-          </div>
-        </div>
-        <div className="billing-head-actions">
-          <button className="bill-btn secondary" disabled={saving} onClick={save}>Save Draft</button>
-          <button className="bill-btn" disabled={saving} onClick={submit}><CheckCircle2 size={16}/>Prepare for API</button>
-        </div>
-      </div>
+      <DocumentFormHeader
+        eyebrow="E-WAY BILL"
+        title={mode === 'edit' ? 'Edit E-Way Bill' : 'Create E-Way Bill'}
+        description="Goods movement document for inward/outward transport."
+        actions={
+          <>
+            <button className="bill-btn secondary" disabled={saving} onClick={save}>
+              Save Draft
+            </button>
+            <button className="bill-btn" disabled={saving} onClick={submit}>
+              <CheckCircle2 size={16}/>{saving ? 'Working…' : 'Prepare for API'}
+            </button>
+          </>
+        }
+      />
 
       {error && <div className="billing-error no-print">{error}</div>}
 
-      <div className="eway-editor-scroll no-print">
-        <section className="eway-pdf-editor">
+      <DocumentFormSheet
+        className="eway-pdf-editor no-print"
+        minWidth="860px"
+        maxWidth="980px"
+      >
           <div className="eway-editor-paper-head">
             <div>
               <h2>e-Way Bill</h2>
@@ -542,8 +545,7 @@ export function EWayBillPage() {
               <textarea value={form.notes || ''} onChange={(e) => update('notes', e.target.value)} placeholder="Optional transport / goods movement remarks"/>
             </label>
           </div>
-        </section>
-      </div>
+      </DocumentFormSheet>
 
       <EWayBillPrint doc={form} totals={totals}/>
     </div>
