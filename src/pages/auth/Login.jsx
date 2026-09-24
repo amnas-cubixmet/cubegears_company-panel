@@ -79,7 +79,7 @@ export const Login = () => {
 
             <label className="block">
               <div className="login-password-label">
-                <span className="text-[12px] font-semibold text-slate-300">Password</span>
+                <span className="login-field-label">Password</span>
                 <Link
                   to="/forgot-password"
                   className="login-forgot"
@@ -88,7 +88,7 @@ export const Login = () => {
                 </Link>
               </div>
 
-              <div className="flex h-12 items-center gap-3 rounded-xl border border-slate-700 bg-[#0d1728] px-3.5 transition focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-500/15">
+              <div className="login-input-shell">
                 <span className="login-input-icon" aria-hidden="true"><Lock size={17} strokeWidth={1.9} /></span>
                 <input
                   className="login-input"
