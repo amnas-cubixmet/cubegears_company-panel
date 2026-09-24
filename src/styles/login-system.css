@@ -387,20 +387,21 @@
 
 
 .login-input-icon {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
   display: grid;
   place-items: center;
   align-self: center;
-  color: #718096;
+  margin-left: 1px;
+  color: #8190a5;
   line-height: 0;
 }
 
 .login-input-icon svg {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
 }
 
 .login-input-shell:focus-within .login-input-icon {
