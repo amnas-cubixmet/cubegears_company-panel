@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, LockKeyhole, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/login-system.css';
@@ -89,7 +89,7 @@ export const Login = () => {
               </div>
 
               <div className="flex h-12 items-center gap-3 rounded-xl border border-slate-700 bg-[#0d1728] px-3.5 transition focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-500/15">
-                <span className="login-input-icon" aria-hidden="true"><LockKeyhole size={16} strokeWidth={1.8} /></span>
+                <span className="login-input-icon" aria-hidden="true"><Lock size={17} strokeWidth={1.9} /></span>
                 <input
                   className="login-input"
                   type={showPassword ? 'text' : 'password'}
