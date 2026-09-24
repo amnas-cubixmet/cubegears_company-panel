@@ -117,8 +117,16 @@ export const blankEWayBill = () => ({
     transportDocDate: ''
   },
   notes: '',
+  otherAmount: '',
+  cessNonAdvolAmount: '',
+  portal: '1',
+  enteredFrom: '',
+  enteredBy: '',
+  cewbNo: '',
+  multiVehicleInfo: '',
   ewayBillNo: '',
   generatedAt: '',
+  generatedBy: '',
   validUntil: '',
   createdAt: '',
   updatedAt: ''
@@ -130,13 +138,17 @@ export const calculateEWayTotals = (doc) => {
   const sgst = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0) * Number(item.sgstRate || 0) / 100, 0);
   const igst = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0) * Number(item.igstRate || 0) / 100, 0);
   const cess = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0) * Number(item.cessRate || 0) / 100, 0);
+  const cessNonAdvol = Number(doc.cessNonAdvolAmount || 0);
+  const otherAmount = Number(doc.otherAmount || 0);
   return {
     taxableValue,
     cgst,
     sgst,
     igst,
     cess,
-    totalValue: taxableValue + cgst + sgst + igst + cess
+    cessNonAdvol,
+    otherAmount,
+    totalValue: taxableValue + cgst + sgst + igst + cess + cessNonAdvol + otherAmount
   };
 };
 
