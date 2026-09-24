@@ -116,7 +116,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
             if (!items.length) return null;
 
             return (
-              <div key={section} className="flex flex-col gap-1.5">
+              <div key={section} className="flex flex-col gap-[5px]">
                 <span className="px-2 pb-1 text-[9px] font-black uppercase tracking-[0.11em] text-muted">
                   {section}
                 </span>
