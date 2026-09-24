@@ -432,31 +432,36 @@ export function EWayBillPage() {
           </section>
         </div>
 
-        <section className="billing-card eway-goods-card">
-          <div className="eway-goods-header">
-            <div>
-              <span className="billing-kicker">GOODS</span>
-              <h3>Goods Details</h3>
-              <p>Add goods, HSN, quantity, taxable value and applicable GST rates.</p>
+        <section className="rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-5">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-primary">GOODS</span>
+              <h3 className="mt-1 text-base font-extrabold text-content">Goods Details</h3>
+              <p className="mt-1 text-xs leading-5 text-muted">
+                Add goods, HSN, quantity, taxable value and applicable GST rates.
+              </p>
             </div>
 
             <button
               type="button"
-              className="bill-btn secondary eway-add-goods-btn"
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-xs font-bold text-content shadow-sm transition hover:bg-surface-2"
               onClick={() => update('items', [...form.items, newItem()])}
             >
               <Plus size={16}/>Add Goods
             </button>
           </div>
 
-          <div className="eway-goods-list">
+          <div className="space-y-4">
             {form.items.map((item, index) => (
-              <article key={item.id} className="eway-goods-item">
-                <div className="eway-goods-item-head">
-                  <strong>Item {index + 1}</strong>
+              <article key={item.id} className="rounded-2xl border border-line bg-surface-2 p-3 sm:p-4">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <strong className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-muted">
+                    Item {index + 1}
+                  </strong>
+
                   <button
                     type="button"
-                    className="bill-icon-btn danger"
+                    className="grid size-9 shrink-0 place-items-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
                     aria-label="Remove goods item"
                     onClick={() => update('items', form.items.filter((x) => x.id !== item.id))}
                   >
@@ -464,9 +469,10 @@ export function EWayBillPage() {
                   </button>
                 </div>
 
-                <div className="eway-goods-main-grid">
-                  <label>HSN
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[110px_minmax(180px,1.25fr)_minmax(180px,1.25fr)_90px_100px_150px]">
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">HSN
                     <input
+                      className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       inputMode="numeric"
                       value={item.hsnCode}
                       onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, ''))}
@@ -474,24 +480,27 @@ export function EWayBillPage() {
                     />
                   </label>
 
-                  <label>Product Name
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Product Name
                     <input
+                      className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       value={item.productName}
                       onChange={(e) => updateItem(item.id, 'productName', e.target.value)}
                       placeholder={`Item ${index + 1} name`}
                     />
                   </label>
 
-                  <label>Description
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Description
                     <input
+                      className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       value={item.description}
                       onChange={(e) => updateItem(item.id, 'description', e.target.value)}
                       placeholder="Description"
                     />
                   </label>
 
-                  <label>Quantity
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Quantity
                     <input
+                      className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       inputMode="decimal"
                       value={item.qty}
                       onChange={(e) => updateItem(item.id, 'qty', dec(e.target.value))}
@@ -499,14 +508,19 @@ export function EWayBillPage() {
                     />
                   </label>
 
-                  <label>Unit
-                    <select value={item.unit} onChange={(e) => updateItem(item.id, 'unit', e.target.value)}>
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Unit
+                    <select
+                      className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      value={item.unit}
+                      onChange={(e) => updateItem(item.id, 'unit', e.target.value)}
+                    >
                       <option>PCS</option><option>SET</option><option>UNT</option><option>KGS</option><option>LTR</option><option>BOX</option><option>OTH</option>
                     </select>
                   </label>
 
-                  <label>Taxable Value
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Taxable Value
                     <input
+                      className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       inputMode="decimal"
                       value={item.taxableValue}
                       onChange={(e) => updateItem(item.id, 'taxableValue', dec(e.target.value))}
@@ -515,11 +529,15 @@ export function EWayBillPage() {
                   </label>
                 </div>
 
-                <div className="eway-goods-tax-panel">
-                  <div className="eway-goods-tax-title">Tax Rates %</div>
-                  <div className="eway-goods-tax-grid">
-                    <label>CGST
+                <div className="mt-4 rounded-xl border border-line bg-surface p-3 sm:p-4">
+                  <div className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted">
+                    Tax Rates %
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">CGST
                       <input
+                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                         aria-label="CGST rate"
                         inputMode="decimal"
                         value={item.cgstRate}
@@ -527,8 +545,10 @@ export function EWayBillPage() {
                         placeholder="0"
                       />
                     </label>
-                    <label>SGST
+
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">SGST
                       <input
+                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                         aria-label="SGST rate"
                         inputMode="decimal"
                         value={item.sgstRate}
@@ -536,8 +556,10 @@ export function EWayBillPage() {
                         placeholder="0"
                       />
                     </label>
-                    <label>IGST
+
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">IGST
                       <input
+                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                         aria-label="IGST rate"
                         inputMode="decimal"
                         value={item.igstRate}
@@ -545,8 +567,10 @@ export function EWayBillPage() {
                         placeholder="0"
                       />
                     </label>
-                    <label>CESS
+
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">CESS
                       <input
+                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                         aria-label="CESS rate"
                         inputMode="decimal"
                         value={item.cessRate}
@@ -560,7 +584,7 @@ export function EWayBillPage() {
             ))}
           </div>
 
-          <div className="eway-goods-summary">
+          <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
             {[
               ['Taxable', totals.taxableValue],
               ['CGST', totals.cgst],
@@ -568,15 +592,16 @@ export function EWayBillPage() {
               ['IGST', totals.igst],
               ['CESS', totals.cess]
             ].map(([label, value]) => (
-              <div key={label} className="eway-total-card">
-                <span>{label}</span>
-                <strong>{money.format(value)}</strong>
+              <div key={label} className="flex min-h-[88px] flex-col justify-between rounded-xl border border-line bg-surface-2 p-3">
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.05em] text-muted">{label}</span>
+                <strong className="mt-2 text-base font-black text-content">{money.format(value)}</strong>
               </div>
             ))}
 
-            <label className="eway-total-input-card">
-              <span>CESS Non-Advol</span>
+            <label className="flex min-h-[88px] flex-col justify-between rounded-xl border border-line bg-surface-2 p-2.5 text-[10px] font-extrabold uppercase tracking-[0.04em] text-muted">
+              CESS Non-Advol
               <input
+                className="mt-2 h-10 w-full rounded-lg border border-line bg-surface px-2.5 text-sm font-semibold normal-case tracking-normal text-content outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                 inputMode="decimal"
                 value={form.cessNonAdvolAmount || ''}
                 onChange={(e) => update('cessNonAdvolAmount', dec(e.target.value))}
@@ -584,9 +609,10 @@ export function EWayBillPage() {
               />
             </label>
 
-            <label className="eway-total-input-card">
-              <span>Other Amount</span>
+            <label className="flex min-h-[88px] flex-col justify-between rounded-xl border border-line bg-surface-2 p-2.5 text-[10px] font-extrabold uppercase tracking-[0.04em] text-muted">
+              Other Amount
               <input
+                className="mt-2 h-10 w-full rounded-lg border border-line bg-surface px-2.5 text-sm font-semibold normal-case tracking-normal text-content outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                 inputMode="decimal"
                 value={form.otherAmount || ''}
                 onChange={(e) => update('otherAmount', dec(e.target.value))}
@@ -594,9 +620,9 @@ export function EWayBillPage() {
               />
             </label>
 
-            <div className="eway-total-card eway-total-card-primary">
-              <span>Total</span>
-              <strong>{money.format(totals.totalValue)}</strong>
+            <div className="flex min-h-[88px] flex-col justify-between rounded-xl border border-primary bg-primary-soft p-3">
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.05em] text-primary">Total</span>
+              <strong className="mt-2 text-lg font-black text-primary">{money.format(totals.totalValue)}</strong>
             </div>
           </div>
         </section>
