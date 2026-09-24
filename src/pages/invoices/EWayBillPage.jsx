@@ -313,7 +313,7 @@ export function EWayBillPage() {
 
       <div className="eway-grid no-print">
         <section className="billing-card">
-          <h3>Transaction</h3>
+          <h3>1. E-WAY BILL Details</h3>
 
           <label>Supply Type
             <select value={form.supplyType} onChange={(e) => update('supplyType', e.target.value)}>
@@ -364,11 +364,11 @@ export function EWayBillPage() {
           </label>
         </section>
 
-        <PartyCard title="Bill From / Dispatch From" data={form.from} onChange={(key, value) => updateGroup('from', key, value)} />
-        <PartyCard title="Bill To / Ship To" data={form.to} onChange={(key, value) => updateGroup('to', key, value)} />
+        <PartyCard title="2. Address Details · From / Dispatch From" data={form.from} onChange={(key, value) => updateGroup('from', key, value)} />
+        <PartyCard title="2. Address Details · To / Ship To" data={form.to} onChange={(key, value) => updateGroup('to', key, value)} />
 
         <section className="billing-card">
-          <h3>Transporter & Vehicle</h3>
+          <h3>4 & 5. Transportation / Vehicle Details</h3>
           <label>Transport Mode
             <select value={form.transport.mode} onChange={(e) => updateGroup('transport', 'mode', e.target.value)}>
               <option>Road</option>
@@ -406,7 +406,7 @@ export function EWayBillPage() {
 
       <section className="billing-card no-print eway-items-card">
         <div className="billing-section-head">
-          <div><span className="billing-kicker">GOODS</span><h3>Item details</h3></div>
+          <div><span className="billing-kicker">GOODS</span><h3>3. Goods Details</h3></div>
           <button className="bill-btn" onClick={() => update('items', [...form.items, newItem()])}><Plus size={16}/>Add Goods</button>
         </div>
 
@@ -431,6 +431,25 @@ export function EWayBillPage() {
       </section>
 
       <section className="billing-card no-print">
+        <span className="billing-kicker">PORTAL / PDF DETAILS</span>
+        <h3>Portal metadata</h3>
+        <div className="eway-pdf-meta-grid">
+          <label>Other Amount ₹
+            <input inputMode="decimal" value={form.otherAmount || ''} onChange={(e) => update('otherAmount', dec(e.target.value))} placeholder="0.00"/>
+          </label>
+          <label>CESS Non-Advol Amount ₹
+            <input inputMode="decimal" value={form.cessNonAdvolAmount || ''} onChange={(e) => update('cessNonAdvolAmount', dec(e.target.value))} placeholder="0.00"/>
+          </label>
+          <label>Portal
+            <input value={form.portal || '1'} onChange={(e) => update('portal', e.target.value)} placeholder="1"/>
+          </label>
+          <label>Entered From
+            <input value={form.enteredFrom || ''} onChange={(e) => update('enteredFrom', e.target.value.toUpperCase())} placeholder="PALAKKAD"/>
+          </label>
+          <label>Entered By
+            <input value={form.enteredBy || ''} onChange={(e) => update('enteredBy', e.target.value.toUpperCase())} placeholder="GSTIN / User"/>
+          </label>
+        </div>
         <label>Remarks / Notes<textarea value={form.notes || ''} onChange={(e) => update('notes', e.target.value)} placeholder="Transport or goods movement remarks"/></label>
       </section>
 
@@ -461,46 +480,152 @@ function PartyCard({ title, data, onChange }) {
 }
 
 function EWayBillPrint({ doc, totals }) {
+  const plain = (value) => Number(value || 0).toFixed(2);
+  const dateTime = (value) => {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+  const ratePart = (value) => Number(value || 0) > 0 ? Number(value).toFixed(3) : 'NE';
+  const ewbReady = Boolean(doc.ewayBillNo);
+
   return (
-    <section className="eway-print-sheet">
-      <div className="eway-print-head">
-        <div><div className="invoice-logo">CUBIXGEAR</div><strong>E-Way Bill Transport Record</strong></div>
-        <div className="eway-print-meta"><strong>{doc.status}</strong><span>{doc.documentType}</span><span>{doc.documentNo || 'DRAFT'}</span><span>{doc.documentDate || '—'}</span></div>
+    <section className="eway-print-sheet eway-official-model">
+      <div className="eway-official-top">
+        <div>
+          <h2>e-Way Bill</h2>
+          <span className="eway-local-badge">{ewbReady ? 'API GENERATED RECORD' : 'LOCAL PREVIEW · READY FOR NIC API'}</span>
+        </div>
+        <div className="eway-qr-placeholder" aria-label="Official QR placeholder">
+          <strong>{ewbReady ? 'OFFICIAL QR' : 'QR'}</strong>
+          <span>{ewbReady ? 'Render from NIC response' : 'Available after NIC generation'}</span>
+        </div>
       </div>
 
-      <div className="eway-print-band">
-        <div><span>Supply Type</span><strong>{doc.supplyType}</strong></div>
-        <div><span>Sub-Supply</span><strong>{doc.subSupplyType}</strong></div>
-        <div><span>Transaction</span><strong>{doc.transactionType}</strong></div>
+      <div className="eway-pdf-section">
+        <div className="eway-pdf-section-title">1. E-WAY BILL Details</div>
+        <div className="eway-detail-grid primary">
+          <div><span>eWay Bill No:</span><strong>{doc.ewayBillNo || 'Pending NIC generation'}</strong></div>
+          <div><span>Generated Date:</span><strong>{dateTime(doc.generatedAt)}</strong></div>
+          <div><span>Generated By:</span><strong>{doc.generatedBy || '—'}</strong></div>
+          <div><span>Valid Upto:</span><strong>{doc.validUntil || '—'}</strong></div>
+        </div>
+        <div className="eway-detail-grid secondary">
+          <div><span>Mode:</span><strong>{doc.transport?.mode || '—'}</strong></div>
+          <div><span>Approx Distance:</span><strong>{doc.transport?.distanceKm ? `${doc.transport.distanceKm}km` : '—'}</strong></div>
+          <div><span>Type:</span><strong>{doc.supplyType || '—'} - {doc.subSupplyType || '—'}</strong></div>
+          <div><span>Document Details:</span><strong>{doc.documentType || '—'} - {doc.documentNo || 'DRAFT'} - {doc.documentDate || '—'}</strong></div>
+          <div><span>Transaction type:</span><strong>{doc.transactionType || '—'}</strong></div>
+          <div><span>Portal:</span><strong>{doc.portal || '1'}</strong></div>
+        </div>
       </div>
 
-      <div className="eway-party-grid">
-        <div><h4>From</h4><strong>{doc.from?.tradeName || '—'}</strong><span>{doc.from?.gstin || '—'}</span><span>{doc.from?.address || '—'}</span><span>{doc.from?.place || ''} {doc.from?.pincode || ''}</span></div>
-        <div><h4>To</h4><strong>{doc.to?.tradeName || '—'}</strong><span>{doc.to?.gstin || '—'}</span><span>{doc.to?.address || '—'}</span><span>{doc.to?.place || ''} {doc.to?.pincode || ''}</span></div>
+      <div className="eway-pdf-section">
+        <div className="eway-pdf-section-title">2. Address Details</div>
+        <div className="eway-address-grid">
+          <div className="eway-address-box">
+            <h4>From</h4>
+            <span>GSTIN : {doc.from?.gstin || '—'}</span>
+            <strong>{doc.from?.tradeName || '—'}</strong>
+            <span>{doc.from?.stateCode ? `State Code: ${doc.from.stateCode}` : ''}</span>
+            <b>:: Dispatch From ::</b>
+            <span>{doc.from?.address || '—'}</span>
+            <span>{[doc.from?.place, doc.from?.pincode].filter(Boolean).join(', ') || '—'}</span>
+          </div>
+          <div className="eway-address-box">
+            <h4>To</h4>
+            <span>GSTIN : {doc.to?.gstin || '—'}</span>
+            <strong>{doc.to?.tradeName || '—'}</strong>
+            <span>{doc.to?.stateCode ? `State Code: ${doc.to.stateCode}` : ''}</span>
+            <b>:: Ship To ::</b>
+            <span>{doc.to?.address || '—'}</span>
+            <span>{[doc.to?.place, doc.to?.pincode].filter(Boolean).join(', ') || '—'}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="eway-print-table">
-        <div className="head"><span>Goods</span><span>HSN</span><span>Qty</span><span>Value</span></div>
-        {(doc.items || []).map((item) => (
-          <div className="row" key={item.id}><span>{item.productName || '—'}</span><span>{item.hsnCode || '—'}</span><span>{item.qty || 0} {item.unit}</span><span>{money.format(n(item.taxableValue))}</span></div>
-        ))}
+      <div className="eway-pdf-section">
+        <div className="eway-pdf-section-title">3. Goods Details</div>
+        <div className="eway-goods-table">
+          <div className="head">
+            <span>HSN Code</span>
+            <span>Product Name & Desc.</span>
+            <span>Quantity</span>
+            <span>Taxable Amount Rs.</span>
+            <span>Tax Rate (C+S+I+Cess+Cess Non.Advol)</span>
+          </div>
+          {(doc.items || []).map((item, index) => (
+            <div className="row" key={item.id || index}>
+              <span>{item.hsnCode || '—'}</span>
+              <span><strong>{item.productName || '—'}</strong>{item.description ? ` · ${item.description}` : ''}</span>
+              <span>{plain(item.qty)}<small>{item.unit || 'PCS'}</small></span>
+              <span>{plain(item.taxableValue)}</span>
+              <span>{ratePart(item.cgstRate)}+{ratePart(item.sgstRate)}+{ratePart(item.igstRate)}+{ratePart(item.cessRate)}+0.00</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="eway-tax-strip">
+          <div><span>Tot. Tax'ble Amt</span><strong>{plain(totals.taxableValue)}</strong></div>
+          <div><span>CGST Amt</span><strong>{plain(totals.cgst)}</strong></div>
+          <div><span>SGST Amt</span><strong>{plain(totals.sgst)}</strong></div>
+          <div><span>IGST Amt</span><strong>{plain(totals.igst)}</strong></div>
+          <div><span>CESS Amt</span><strong>{plain(totals.cess)}</strong></div>
+          <div><span>CESS Non.Advol Amt</span><strong>{plain(totals.cessNonAdvol)}</strong></div>
+          <div><span>Other Amt</span><strong>{plain(totals.otherAmount)}</strong></div>
+          <div><span>Total Inv.Amt</span><strong>{plain(totals.totalValue)}</strong></div>
+        </div>
       </div>
 
-      <div className="eway-transport-print">
-        <h4>Transport</h4>
-        <div><span>Mode</span><strong>{doc.transport?.mode || '—'}</strong></div>
-        <div><span>Transporter</span><strong>{doc.transport?.transporterName || doc.transport?.transporterId || '—'}</strong></div>
-        <div><span>Vehicle No.</span><strong>{doc.transport?.vehicleNo || '—'}</strong></div>
-        <div><span>Distance</span><strong>{doc.transport?.distanceKm ? `${doc.transport.distanceKm} km` : '—'}</strong></div>
+      <div className="eway-pdf-section">
+        <div className="eway-pdf-section-title">4. Transportation Details</div>
+        <div className="eway-transport-row">
+          <div><span>Transporter ID & Name :</span><strong>{[doc.transport?.transporterId, doc.transport?.transporterName].filter(Boolean).join(' · ') || '—'}</strong></div>
+          <div><span>Transporter Doc. No & Date :</span><strong>{[doc.transport?.transportDocNo, doc.transport?.transportDocDate].filter(Boolean).join(' · ') || '—'}</strong></div>
+        </div>
       </div>
 
-      <div className="invoice-totals">
-        <div><span>Taxable Value</span><strong>{money.format(totals.taxableValue)}</strong></div>
-        <div><span>GST</span><strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong></div>
-        <div className="grand"><span>Total Value</span><strong>{money.format(totals.totalValue)}</strong></div>
+      <div className="eway-pdf-section">
+        <div className="eway-pdf-section-title">5. Vehicle Details</div>
+        <div className="eway-vehicle-table">
+          <div className="head">
+            <span>Mode</span>
+            <span>Vehicle / Trans Doc No & Dt.</span>
+            <span>From</span>
+            <span>Entered Date</span>
+            <span>Entered By</span>
+            <span>CEWB No. (If any)</span>
+            <span>Multi Veh.Info (If any)</span>
+            <span>Portal</span>
+          </div>
+          <div className="row">
+            <span>{doc.transport?.mode || '—'}</span>
+            <span>{doc.transport?.vehicleNo || doc.transport?.transportDocNo || '—'}</span>
+            <span>{doc.enteredFrom || doc.from?.place || '—'}</span>
+            <span>{dateTime(doc.generatedAt || doc.updatedAt || doc.createdAt)}</span>
+            <span>{doc.enteredBy || doc.generatedBy || doc.from?.gstin || '—'}</span>
+            <span>{doc.cewbNo || '-'}</span>
+            <span>{doc.multiVehicleInfo || '-'}</span>
+            <span>{doc.portal || '1'}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="eway-disclaimer">CubixGear local transport record. Official E-Way Bill number/status is populated only after GST/NIC API generation.</div>
+      <div className="eway-barcode-placeholder">
+        <div className="eway-barcode-bars" aria-hidden="true"></div>
+        <span>{doc.ewayBillNo || doc.documentNo || 'NIC E-Way Bill barcode after generation'}</span>
+      </div>
+
+      <div className="eway-disclaimer">
+        CubixGear local preview. Official E-Way Bill number, QR/barcode, generated date and validity must come from the GST/NIC API response.
+      </div>
     </section>
   );
 }
