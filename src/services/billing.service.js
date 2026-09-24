@@ -224,10 +224,67 @@ export const billingService = {
     return true;
   },
   async convertEstimateToInvoice(estimateId) {
-    const estimate = await this.get(estimateId);
-    if (!estimate) throw new Error('Estimate not found.');
-    const { id: _id, number: _number, status: _status, finalizedAt: _finalizedAt, ...copy } = estimate;
-    return this.saveDraft({ ...copy, kind: 'invoice', invoiceType: estimate.invoiceType || 'regular', status: 'Draft' });
+    if (!USE_MOCK_API) {
+      return apiClient.post(`/billing/documents/${estimateId}/convert-to-invoice`);
+    }
+
+    const docs = read(DOCS_KEY, seedDocuments);
+    const estimate = docs.find((row) => row.id === estimateId);
+
+    if (!estimate) throw new Error('Estimate / quotation not found.');
+    if (estimate.kind !== 'estimate') throw new Error('Only estimates can be converted to invoices.');
+
+    // Prevent duplicate sales from the same quotation.
+    if (estimate.convertedToInvoiceId) {
+      const existingInvoice = docs.find((row) => row.id === estimate.convertedToInvoiceId);
+      if (existingInvoice) return clone(existingInvoice);
+    }
+
+    const {
+      id: _id,
+      number: _number,
+      status: _status,
+      finalizedAt: _finalizedAt,
+      cancelledAt: _cancelledAt,
+      convertedAt: _convertedAt,
+      convertedToInvoiceId: _convertedToInvoiceId,
+      convertedToInvoiceNo: _convertedToInvoiceNo,
+      ...copy
+    } = estimate;
+
+    const invoiceId = id('INV');
+    const invoiceNumber = nextNumber('invoice', docs);
+    const now = new Date().toISOString();
+
+    const invoice = {
+      ...blankBillingDocument('invoice'),
+      ...clone(copy),
+      id: invoiceId,
+      number: invoiceNumber,
+      kind: 'invoice',
+      invoiceType: estimate.invoiceType || 'regular',
+      status: 'Draft',
+      date: today(),
+      sourceEstimateId: estimate.id,
+      sourceEstimateNo: estimate.number,
+      paid: '',
+      createdAt: now,
+      updatedAt: now
+    };
+
+    const convertedEstimate = {
+      ...estimate,
+      status: 'Converted',
+      convertedAt: now,
+      convertedToInvoiceId: invoice.id,
+      convertedToInvoiceNo: invoice.number,
+      updatedAt: now
+    };
+
+    const nextDocs = docs.map((row) => row.id === estimateId ? convertedEstimate : row);
+    write(DOCS_KEY, [invoice, ...nextDocs]);
+
+    return clone(invoice);
   },
   async inventory() {
     if (!USE_MOCK_API) return apiClient.get('/inventory');
