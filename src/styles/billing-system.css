@@ -2,4 +2,129 @@
 @media(max-width:1100px){.billing-item-head{display:none}.billing-item-row{grid-template-columns:repeat(4,minmax(0,1fr))}.billing-item-row>*:nth-child(2),.billing-item-row>*:nth-child(3){grid-column:span 2}.billing-line-total{text-align:left}.billing-form-grid{grid-template-columns:1fr 1fr}.billing-tax-grid,.billing-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.billing-doc-row{grid-template-columns:minmax(0,1.5fr) 120px 100px 112px}}
 @media(max-width:700px){.billing-page-head,.billing-editor-head,.billing-section-head{flex-direction:column}.billing-head-actions{width:100%;justify-content:stretch}.billing-head-actions .bill-btn,.billing-page-head>.bill-btn,.billing-section-head>.bill-btn{flex:1}.billing-form-grid{grid-template-columns:1fr}.billing-item-row{grid-template-columns:1fr 1fr;padding:10px}.billing-item-row>*:nth-child(2),.billing-item-row>*:nth-child(3),.billing-line-total{grid-column:1/-1}.billing-tax-grid,.billing-summary{grid-template-columns:1fr 1fr}.billing-doc-row{grid-template-columns:minmax(0,1fr) auto;gap:10px}.billing-doc-main{grid-column:1/-1}.billing-doc-meta{grid-column:1}.billing-status{grid-column:2;grid-row:2;justify-self:end}.billing-list-actions{grid-column:1/-1;justify-content:flex-start}.billing-list-actions button{flex:1;max-width:52px}.invoice-print-sheet{padding:12px}.invoice-info-band{grid-template-columns:1fr}.invoice-table-head,.invoice-line{grid-template-columns:minmax(0,1fr) 44px 72px 76px;font-size:9px}.invoice-totals{width:100%}}
 @media(max-width:360px){.billing-tax-grid,.billing-summary{grid-template-columns:1fr}.billing-item-row{grid-template-columns:1fr}.billing-item-row>*{grid-column:1/-1}.billing-tabs button{flex:1;justify-content:center;padding:0 8px}}
-@media print{html,body,#root{margin:0!important;padding:0!important;width:100%!important;background:#fff!important}.app-shell{display:block!important}.app-shell>.sidebar,.app-shell>aside,.header,.mobile-bottom-nav,.footer,.no-print{display:none!important}.main-area,.main-content,.main-content>div,.billing-page,.invoice-view-page{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;overflow:visible!important}.invoice-print-sheet{display:block!important;border:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:10mm!important;box-shadow:none!important;background:#fff!important}@page{size:A4;margin:0}}
+@media print{html,body,#root{margin:0!important;padding:0!important;width:100%!important;background:#fff!important}.app-shell{display:block!important}.app-shell>.sidebar,.app-shell>aside,.header,.app-header,.mobile-bottom-nav,.mobile-only-bottom-nav,.footer,.app-footer,.no-print{display:none!important}.main-area,.main-content,.main-content>div,.billing-page,.invoice-view-page{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;overflow:visible!important}.invoice-print-sheet,.eway-print-sheet{display:block!important;border:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:10mm!important;box-shadow:none!important;background:#fff!important}@page{size:A4;margin:0}}
+
+/* E-Way Bill */
+.eway-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.eway-items-card{display:flex;flex-direction:column;gap:12px}
+.eway-item-list{display:flex;flex-direction:column;gap:12px}
+.eway-item-card{border:1px solid var(--border);border-radius:12px;background:var(--surface-2);padding:12px}
+.eway-item-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.eway-item-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.eway-item-grid label{margin:0}
+.eway-item-grid .wide{grid-column:span 2}
+.eway-print-sheet{width:min(100%,794px);margin:0 auto;background:#fff;color:#111;border:1px solid #d4d4d4;padding:18px;box-sizing:border-box;font-family:Arial,sans-serif;font-size:11px}
+.eway-print-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:12px}
+.eway-print-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.eway-print-band{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#ececec;padding:10px;margin-bottom:10px}
+.eway-print-band div{display:flex;flex-direction:column;gap:2px}
+.eway-print-band span,.eway-transport-print span{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.04em}
+.eway-party-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.eway-party-grid>div{border:1px solid #bbb;padding:9px;display:flex;flex-direction:column;gap:2px}
+.eway-party-grid h4,.eway-transport-print h4{margin:0 0 5px;font-size:11px;text-transform:uppercase}
+.eway-print-table{border:1px solid #bbb;margin-top:10px}
+.eway-print-table .head,.eway-print-table .row{display:grid;grid-template-columns:minmax(0,1fr) 90px 90px 110px;gap:8px;padding:6px 8px;align-items:center}
+.eway-print-table .head{background:#2f2f2f;color:#fff;font-weight:700}
+.eway-print-table .row{border-top:1px solid #ddd}
+.eway-print-table .row span:last-child,.eway-print-table .head span:last-child{text-align:right}
+.eway-transport-print{margin-top:10px;border:1px solid #bbb;padding:9px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.eway-transport-print h4{grid-column:1/-1}
+.eway-transport-print>div{display:flex;flex-direction:column;gap:2px}
+.eway-disclaimer{margin-top:14px;border-top:1px solid #bbb;padding-top:8px;color:#555;font-size:9px;line-height:1.4}
+
+@media(max-width:900px){
+  .eway-grid{grid-template-columns:1fr}
+  .eway-item-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .eway-item-grid .wide{grid-column:1/-1}
+}
+@media(max-width:520px){
+  .eway-item-grid{grid-template-columns:1fr}
+  .eway-item-grid .wide{grid-column:auto}
+  .eway-print-band,.eway-party-grid,.eway-transport-print{grid-template-columns:1fr}
+  .eway-transport-print h4{grid-column:auto}
+  .eway-print-table .head,.eway-print-table .row{grid-template-columns:minmax(0,1fr) 52px 62px 76px;font-size:9px}
+}
+
+
+/* E-Way Bill header polish */
+.eway-editor-head{
+  align-items:flex-start;
+}
+.eway-title-block{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:12px;
+  min-width:0;
+}
+.eway-back-btn{
+  flex:0 0 auto;
+  min-height:38px;
+  padding:0 12px;
+  margin:0;
+}
+.eway-title-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+  min-width:0;
+}
+.eway-title-copy .billing-kicker{
+  display:block;
+  margin:0;
+  line-height:1.2;
+}
+.eway-title-copy h1{
+  margin:0!important;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+.eway-title-copy p{
+  margin:2px 0 0!important;
+}
+@media(min-width:701px){
+  .eway-editor-head{
+    gap:24px;
+  }
+}
+@media(max-width:700px){
+  .eway-editor-head{
+    width:100%;
+    gap:14px;
+  }
+  .eway-title-block{
+    width:100%;
+    gap:10px;
+  }
+  .eway-back-btn{
+    min-height:38px;
+    width:auto!important;
+    flex:none!important;
+  }
+  .eway-title-copy h1{
+    font-size:22px;
+    line-height:1.2;
+  }
+  .eway-editor-head>.billing-head-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  .eway-editor-head>.billing-head-actions .bill-btn{
+    width:100%;
+  }
+}
+@media(max-width:360px){
+  .eway-title-copy h1{
+    font-size:20px;
+  }
+  .eway-back-btn{
+    min-height:36px;
+    padding:0 10px;
+  }
+  .eway-editor-head>.billing-head-actions{
+    grid-template-columns:1fr;
+  }
+}
