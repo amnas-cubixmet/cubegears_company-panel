@@ -102,6 +102,23 @@ export let stockMockItems = [
     supplier: "AutoParts Wholesale Co.",
     location: "Rack D-02",
     status: "Out of Stock"
+  },
+  {
+    id: "STK-0007",
+    partName: "Honda City Clutch Kit Assembly",
+    sku: "CLT-HON-CITY-15",
+    category: "Clutch Parts",
+    brand: "Honda Genuine Parts",
+    unit: "Set",
+    onHand: 0,
+    reserved: 0,
+    minimumStock: 2,
+    reorderLevel: 3,
+    costPrice: 7200,
+    sellingPrice: 9500,
+    supplier: "Honda Authorized Distributor",
+    location: "Rack C-08",
+    status: "Out of Stock"
   }
 ];
 
