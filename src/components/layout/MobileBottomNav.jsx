@@ -8,97 +8,50 @@ export const MobileBottomNav = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Check if current route is inside More menu
-  const isMoreActive = mobileMoreRoutes.some(r => location.pathname.startsWith(r.path));
+  const isMoreActive = mobileMoreRoutes.some((route) => location.pathname.startsWith(route.path));
+
+  const itemClass = (active) =>
+    [
+      'flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-1',
+      'text-[11px] font-medium no-underline transition-colors duration-150',
+      active ? 'text-primary' : 'text-secondary'
+    ].join(' ');
+
+  const iconShellClass = (active) =>
+    [
+      'flex min-h-7 items-center justify-center rounded-full px-3 transition-colors duration-150',
+      active ? 'bg-primary-soft text-primary' : 'bg-transparent text-secondary'
+    ].join(' ');
 
   return (
     <>
-      <nav
-        className="mobile-only-bottom-nav"
-        style={{
-          display: 'none',
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 'calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom))',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          backgroundColor: 'var(--surface)',
-          borderTop: '1px solid var(--border)',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          zIndex: 50
-        }}
-      >
+      <nav className="mobile-only-bottom-nav fixed inset-x-0 bottom-0 z-50 hidden h-[calc(var(--mobile-bottom-nav-height)+env(safe-area-inset-bottom))] items-center justify-around border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] max-[767px]:flex">
         {mobilePrimaryRoutes.map((route) => {
           const IconComp = route.icon;
           const isActive = location.pathname.startsWith(route.path);
 
           return (
-            <NavLink
-              key={route.id}
-              to={route.path}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                flex: 1,
-                height: '100%',
-                textDecoration: 'none',
-                color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <div style={{
-                padding: '4px 12px',
-                borderRadius: '16px',
-                backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <IconComp size={20} color={isActive ? 'var(--primary)' : 'var(--text-secondary)'} />
-              </div>
-              <span style={{ fontSize: '11px', fontWeight: isActive ? '600' : '500' }}>{route.label}</span>
+            <NavLink key={route.id} to={route.path} className={itemClass(isActive)}>
+              <span className={iconShellClass(isActive)}>
+                <IconComp size={20} />
+              </span>
+              <span className={isActive ? 'font-bold' : 'font-medium'}>{route.label}</span>
             </NavLink>
           );
         })}
 
-        {/* The 5th and LAST button: MORE */}
         <button
+          type="button"
           onClick={() => setIsSidebarOpen(true)}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            flex: 1,
-            height: '100%',
-            background: 'none',
-            border: 'none',
-            color: isMoreActive ? 'var(--primary)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            padding: 0
-          }}
+          className={`${itemClass(isMoreActive)} border-0 bg-transparent p-0`}
         >
-          <div style={{
-            padding: '4px 12px',
-            borderRadius: '16px',
-            backgroundColor: isMoreActive ? 'var(--primary-light)' : 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <MoreHorizontal size={20} color={isMoreActive ? 'var(--primary)' : 'var(--text-secondary)'} />
-          </div>
-          <span style={{ fontSize: '11px', fontWeight: isMoreActive ? '600' : '500' }}>More</span>
+          <span className={iconShellClass(isMoreActive)}>
+            <MoreHorizontal size={20} />
+          </span>
+          <span className={isMoreActive ? 'font-bold' : 'font-medium'}>More</span>
         </button>
       </nav>
 
-      {/* Full-Height Right-to-Left Mobile Slide Sidebar */}
       <MobileSlideSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
     </>
   );
