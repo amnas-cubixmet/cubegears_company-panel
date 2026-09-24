@@ -1337,3 +1337,28 @@
     min-width:860px;
   }
 }
+
+
+/* E-Way Bill normal form + print-only PDF preview */
+.eway-print-only{
+  display:none;
+}
+
+.eway-qr-placeholder.has-image{
+  background:#fff;
+  padding:4px;
+}
+
+.eway-qr-placeholder.has-image img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#fff;
+}
+
+@media print{
+  .eway-print-only{
+    display:block!important;
+  }
+}
