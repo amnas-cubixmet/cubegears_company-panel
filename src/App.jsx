@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CompanyProvider } from './context/CompanyContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PayrollPeriodProvider } from './context/PayrollPeriodContext';
+import { AppErrorBoundary } from './components/feedback/AppErrorBoundary';
 import './api/registerSaasEndpoints';
 import { AppRoutes } from './routes/AppRoutes';
 import './routes/saasRouteRegistration';
@@ -26,7 +27,8 @@ import './styles/header-system.css';
 
 export function App() {
   return (
-    <BrowserRouter>
+    <AppErrorBoundary>
+      <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
           <CompanyProvider>
@@ -36,7 +38,8 @@ export function App() {
           </CompanyProvider>
         </AuthProvider>
       </ThemeProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AppErrorBoundary>
   );
 }
 
