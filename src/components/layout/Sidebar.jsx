@@ -15,52 +15,67 @@ export const Sidebar = () => {
 
   useEffect(() => {
     if (activeItemRef.current && navContainerRef.current) {
-      activeItemRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      activeItemRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
     }
   }, [location.pathname, location.search]);
 
   const sections = Object.values(ROUTE_SECTIONS);
 
+  const isRouteActive = (route) => {
+    if (route.path === '/dashboard') return location.pathname === '/dashboard';
+    return location.pathname === route.path || location.pathname.startsWith(`${route.path}/`);
+  };
+
   const navClass = (active) =>
     [
-      'flex min-h-10 items-center gap-3 rounded-lg text-sm no-underline transition-colors duration-150',
+      'group flex h-11 items-center gap-3 rounded-xl text-[13px] no-underline transition-all duration-150',
       collapsed ? 'justify-center px-0' : 'justify-start px-3',
       active
-        ? 'bg-primary-soft font-semibold text-primary'
-        : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
+        ? 'bg-primary-soft font-bold text-primary shadow-[inset_3px_0_0_var(--primary)]'
+        : 'font-medium text-content hover:bg-surface-2'
     ].join(' ');
 
   const themeButtonClass = (mode) =>
     [
-      'grid min-h-7 flex-1 place-items-center rounded-md border-0 p-1 transition-colors',
-      themeMode === mode ? 'bg-surface text-primary shadow-sm' : 'bg-transparent text-muted hover:text-content'
+      'grid h-8 flex-1 place-items-center rounded-lg border-0 transition',
+      themeMode === mode
+        ? 'bg-surface text-primary shadow-sm'
+        : 'bg-transparent text-muted hover:bg-surface hover:text-content'
     ].join(' ');
 
   return (
     <aside
       className={[
-        'sidebar desktop-only-sidebar scroll-hidden relative z-30 hidden h-[100dvh] shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-300 md:flex',
-        collapsed ? 'w-[var(--sidebar-width-collapsed)]' : 'w-[var(--sidebar-width-expanded)]'
+        'sidebar desktop-only-sidebar relative z-30 hidden h-dvh shrink-0 flex-col overflow-hidden border-r border-line bg-surface transition-[width] duration-300 md:flex',
+        collapsed ? 'w-[80px]' : 'w-[260px]'
       ].join(' ')}
     >
       <div
         className={[
-          'flex h-16 shrink-0 items-center border-b border-line bg-surface',
+          'flex h-[72px] shrink-0 items-center border-b border-line bg-surface',
           collapsed ? 'justify-center px-3' : 'justify-between px-4'
         ].join(' ')}
       >
         {!collapsed ? (
           <div className="flex min-w-0 items-center gap-3">
-            <div className="grid size-[34px] shrink-0 place-items-center rounded-lg bg-primary text-base font-extrabold text-white">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-sm font-black text-white shadow-sm">
               CG
             </div>
+
             <div className="min-w-0">
-              <div className="truncate text-base font-bold leading-tight text-content">CubeGears</div>
-              <div className="truncate text-[11px] text-muted">Garage Enterprise</div>
+              <div className="truncate text-[15px] font-extrabold leading-tight tracking-tight text-content">
+                CubeGears
+              </div>
+              <div className="mt-0.5 truncate text-[10px] font-medium text-muted">
+                Garage Enterprise
+              </div>
             </div>
           </div>
         ) : (
-          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary font-bold text-white">
+          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-sm font-black text-white shadow-sm">
             CG
           </div>
         )}
@@ -69,8 +84,8 @@ export const Sidebar = () => {
           type="button"
           onClick={() => setCollapsed((value) => !value)}
           className={[
-            'grid size-7 shrink-0 place-items-center rounded-md border border-line bg-surface-2 text-secondary transition hover:bg-surface-3 hover:text-content',
-            collapsed ? 'absolute -right-3 top-[18px]' : ''
+            'grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-surface-2 text-secondary transition hover:border-primary/30 hover:bg-primary-soft hover:text-primary',
+            collapsed ? 'absolute -right-4 top-5 shadow-sm' : ''
           ].join(' ')}
           title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           aria-label={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
@@ -81,23 +96,23 @@ export const Sidebar = () => {
 
       <div
         ref={navContainerRef}
-        className="sidebar-nav scroll-hidden flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 py-4"
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {sections.map((section) => {
           const items = routeConfig.filter((route) => route.section === section);
           if (!items.length) return null;
 
           return (
-            <div key={section} className="flex flex-col gap-1">
+            <div key={section} className="flex flex-col gap-1.5">
               {!collapsed && (
-                <span className="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
+                <span className="px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[0.11em] text-muted">
                   {section}
                 </span>
               )}
 
               {items.map((route) => {
                 const IconComp = route.icon;
-                const isActive = location.pathname.startsWith(route.path);
+                const isActive = isRouteActive(route);
                 const hasChildren = Boolean(route.children?.length);
 
                 return (
@@ -108,12 +123,24 @@ export const Sidebar = () => {
                       className={navClass(isActive)}
                       title={collapsed ? route.label : undefined}
                     >
-                      <IconComp size={18} className="shrink-0" />
-                      {!collapsed && <span className="truncate whitespace-nowrap">{route.label}</span>}
+                      <IconComp
+                        size={17}
+                        strokeWidth={1.9}
+                        className={[
+                          'shrink-0 transition',
+                          isActive ? 'text-primary' : 'text-secondary group-hover:text-content'
+                        ].join(' ')}
+                      />
+
+                      {!collapsed && (
+                        <span className="min-w-0 flex-1 truncate whitespace-nowrap">
+                          {route.label}
+                        </span>
+                      )}
                     </NavLink>
 
                     {!collapsed && hasChildren && isActive && (
-                      <div className="mb-1 ml-8 flex flex-col gap-0.5 border-l border-line pl-2">
+                      <div className="mb-1 ml-7 flex flex-col gap-1 border-l border-line pl-2.5">
                         {route.children.map((child) => {
                           const childPathname = child.path.split('?')[0];
                           const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
@@ -126,9 +153,9 @@ export const Sidebar = () => {
                               key={child.id}
                               to={child.path}
                               className={[
-                                'rounded-md px-2.5 py-1.5 text-xs no-underline transition-colors',
+                                'rounded-lg px-2.5 py-2 text-[11px] no-underline transition-colors',
                                 isChildActive
-                                  ? 'bg-surface-2 font-bold text-primary'
+                                  ? 'bg-primary-soft font-bold text-primary'
                                   : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
                               ].join(' ')}
                             >
@@ -148,30 +175,62 @@ export const Sidebar = () => {
 
       <div className="shrink-0 border-t border-line bg-surface p-3">
         {!collapsed && (
-          <div className="mb-3 flex rounded-lg bg-surface-2 p-1">
-            <button type="button" onClick={() => setThemeMode('light')} className={themeButtonClass('light')} title="Light">
+          <div className="mb-3 flex rounded-xl border border-line bg-surface-2 p-1">
+            <button
+              type="button"
+              onClick={() => setThemeMode('light')}
+              className={themeButtonClass('light')}
+              title="Light theme"
+              aria-label="Light theme"
+            >
               <Sun size={14} />
             </button>
-            <button type="button" onClick={() => setThemeMode('dark')} className={themeButtonClass('dark')} title="Dark">
+
+            <button
+              type="button"
+              onClick={() => setThemeMode('dark')}
+              className={themeButtonClass('dark')}
+              title="Dark theme"
+              aria-label="Dark theme"
+            >
               <Moon size={14} />
             </button>
-            <button type="button" onClick={() => setThemeMode('system')} className={themeButtonClass('system')} title="System">
+
+            <button
+              type="button"
+              onClick={() => setThemeMode('system')}
+              className={themeButtonClass('system')}
+              title="System theme"
+              aria-label="System theme"
+            >
               <Laptop size={14} />
             </button>
           </div>
         )}
 
-        <div className={['flex items-center', collapsed ? 'justify-center' : 'justify-between gap-2'].join(' ')}>
+        <div
+          className={[
+            'flex items-center rounded-xl',
+            collapsed
+              ? 'justify-center'
+              : 'justify-between gap-2 border border-line bg-surface-2 p-2'
+          ].join(' ')}
+        >
           <div className={['flex min-w-0 items-center', collapsed ? '' : 'gap-2.5'].join(' ')}>
             <img
               src={user?.avatar}
               alt="User"
-              className="size-8 shrink-0 rounded-full object-cover"
+              className="size-9 shrink-0 rounded-full border border-line bg-surface object-cover"
             />
+
             {!collapsed && (
               <div className="min-w-0">
-                <div className="truncate text-xs font-bold text-content">{user?.name || 'User'}</div>
-                <div className="truncate text-[10px] text-muted">{user?.role || 'ADMIN'}</div>
+                <div className="truncate text-[11px] font-extrabold text-content">
+                  {user?.name || 'User'}
+                </div>
+                <div className="mt-0.5 truncate text-[9px] font-bold uppercase tracking-wide text-muted">
+                  {user?.role || 'ADMIN'}
+                </div>
               </div>
             )}
           </div>
@@ -180,7 +239,7 @@ export const Sidebar = () => {
             <button
               type="button"
               onClick={logout}
-              className="grid size-8 shrink-0 place-items-center rounded-lg border-0 bg-transparent text-danger transition hover:bg-red-50/70"
+              className="grid size-8 shrink-0 place-items-center rounded-lg border border-transparent bg-transparent text-danger transition hover:border-red-200 hover:bg-red-50"
               title="Log out"
               aria-label="Log out"
             >
