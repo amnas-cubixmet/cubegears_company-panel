@@ -9,7 +9,6 @@ import './api/registerSaasEndpoints';
 import { AppRoutes } from './routes/AppRoutes';
 import './routes/saasRouteRegistration';
 import './index.css';
-import './styles/tailwind-system.css';
 import './styles/globals.css';
 import './styles/component-system.css';
 import './styles/responsive.css';
@@ -24,6 +23,8 @@ import './styles/simple-workflow.css';
 import './styles/simple-jobs.css';
 import './styles/dashboard-polish.css';
 import './styles/header-system.css';
+// Tailwind semantic bridge loads last so it becomes the final app-wide UI layer.
+import './styles/tailwind-system.css';
 
 export function App() {
   return (
