@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { routeConfig, ROUTE_SECTIONS } from '../../routes/routeConfig';
-import { ChevronLeft, ChevronRight, LogOut, Sun, Moon, Laptop } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Laptop, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -13,173 +13,124 @@ export const Sidebar = () => {
   const activeItemRef = useRef(null);
   const navContainerRef = useRef(null);
 
-  // Auto-scroll active menu item into view
   useEffect(() => {
     if (activeItemRef.current && navContainerRef.current) {
-      activeItemRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest'
-      });
+      activeItemRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   const sections = Object.values(ROUTE_SECTIONS);
 
+  const navClass = (active) =>
+    [
+      'flex min-h-10 items-center gap-3 rounded-lg text-sm no-underline transition-colors duration-150',
+      collapsed ? 'justify-center px-0' : 'justify-start px-3',
+      active
+        ? 'bg-primary-soft font-semibold text-primary'
+        : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
+    ].join(' ');
+
+  const themeButtonClass = (mode) =>
+    [
+      'grid min-h-7 flex-1 place-items-center rounded-md border-0 p-1 transition-colors',
+      themeMode === mode ? 'bg-surface text-primary shadow-sm' : 'bg-transparent text-muted hover:text-content'
+    ].join(' ');
+
   return (
     <aside
-      className="sidebar desktop-only-sidebar scroll-hidden"
-      style={{
-        width: collapsed ? 'var(--sidebar-width-collapsed)' : 'var(--sidebar-width-expanded)',
-        backgroundColor: 'var(--sidebar-bg)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        zIndex: 30,
-        position: 'relative'
-      }}
+      className={[
+        'sidebar desktop-only-sidebar scroll-hidden relative z-30 hidden h-[100dvh] shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-300 md:flex',
+        collapsed ? 'w-[var(--sidebar-width-collapsed)]' : 'w-[var(--sidebar-width-expanded)]'
+      ].join(' ')}
     >
-      {/* Brand Header */}
-      <div style={{
-        height: '64px',
-        padding: collapsed ? '0 16px' : '0 20px',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: collapsed ? 'center' : 'space-between',
-        flexShrink: 0,
-        backgroundColor: 'var(--sidebar-bg)'
-      }}>
-        {!collapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '34px',
-              height: '34px',
-              backgroundColor: 'var(--primary)',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: '800',
-              color: '#ffffff',
-              fontSize: '16px'
-            }}>
+      <div
+        className={[
+          'flex h-16 shrink-0 items-center border-b border-line bg-surface',
+          collapsed ? 'justify-center px-3' : 'justify-between px-4'
+        ].join(' ')}
+      >
+        {!collapsed ? (
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid size-[34px] shrink-0 place-items-center rounded-lg bg-primary text-base font-extrabold text-white">
               CG
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: '700', fontSize: '16px', color: 'var(--text-primary)', lineHeight: 1.2 }}>CubeGears</span>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Garage Enterprise</span>
+            <div className="min-w-0">
+              <div className="truncate text-base font-bold leading-tight text-content">CubeGears</div>
+              <div className="truncate text-[11px] text-muted">Garage Enterprise</div>
             </div>
           </div>
-        )}
-        {collapsed && (
-          <div style={{ width: '36px', height: '36px', backgroundColor: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
+        ) : (
+          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary font-bold text-white">
             CG
           </div>
         )}
+
         <button
-          onClick={() => setCollapsed(!collapsed)}
-          style={{
-            background: 'var(--surface-2)',
-            border: '1px solid var(--border)',
-            borderRadius: '6px',
-            color: 'var(--text-secondary)',
-            width: '28px',
-            height: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer'
-          }}
-          title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          type="button"
+          onClick={() => setCollapsed((value) => !value)}
+          className={[
+            'grid size-7 shrink-0 place-items-center rounded-md border border-line bg-surface-2 text-secondary transition hover:bg-surface-3 hover:text-content',
+            collapsed ? 'absolute -right-3 top-[18px]' : ''
+          ].join(' ')}
+          title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          aria-label={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
-      {/* Independent Scrollable Navigation (Visually Hidden Scrollbar) */}
       <div
         ref={navContainerRef}
-        className="sidebar-nav scroll-hidden"
-        style={{
-          flex: 1,
-          padding: '16px 12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px'
-        }}
+        className="sidebar-nav scroll-hidden flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 py-4"
       >
-        {sections.map((sec) => {
-          const items = routeConfig.filter(r => r.section === sec);
-          if (items.length === 0) return null;
+        {sections.map((section) => {
+          const items = routeConfig.filter((route) => route.section === section);
+          if (!items.length) return null;
 
           return (
-            <div key={sec} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div key={section} className="flex flex-col gap-1">
               {!collapsed && (
-                <span style={{
-                  padding: '0 8px 4px 8px',
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>
-                  {sec}
+                <span className="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
+                  {section}
                 </span>
               )}
+
               {items.map((route) => {
                 const IconComp = route.icon;
                 const isActive = location.pathname.startsWith(route.path);
-                const hasChildren = route.children && route.children.length > 0;
+                const hasChildren = Boolean(route.children?.length);
 
                 return (
                   <React.Fragment key={route.id}>
                     <NavLink
                       to={route.path}
                       ref={isActive ? activeItemRef : null}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: collapsed ? '10px 0' : '10px 12px',
-                        justifyContent: collapsed ? 'center' : 'flex-start',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: isActive ? '600' : '500',
-                        textDecoration: 'none',
-                        color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                        backgroundColor: isActive ? 'var(--primary-soft)' : 'transparent',
-                        transition: 'all 0.15s ease'
-                      }}
+                      className={navClass(isActive)}
                       title={collapsed ? route.label : undefined}
                     >
-                      <IconComp size={18} style={{ flexShrink: 0 }} />
-                      {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{route.label}</span>}
+                      <IconComp size={18} className="shrink-0" />
+                      {!collapsed && <span className="truncate whitespace-nowrap">{route.label}</span>}
                     </NavLink>
 
-                    {/* Submenu links if expanded and active */}
                     {!collapsed && hasChildren && isActive && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingLeft: '32px', marginBottom: '4px' }}>
+                      <div className="mb-1 ml-8 flex flex-col gap-0.5 border-l border-line pl-2">
                         {route.children.map((child) => {
                           const childPathname = child.path.split('?')[0];
                           const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
                           const isChildActive = child.matchSearch
                             ? location.pathname === childPathname && currentKind === child.matchSearch
                             : location.pathname === childPathname;
+
                           return (
                             <NavLink
                               key={child.id}
                               to={child.path}
-                              style={{
-                                padding: '6px 10px',
-                                borderRadius: '6px',
-                                fontSize: '13px',
-                                fontWeight: isChildActive ? '600' : '400',
-                                color: isChildActive ? 'var(--primary)' : 'var(--text-muted)',
-                                backgroundColor: isChildActive ? 'var(--surface-2)' : 'transparent',
-                                textDecoration: 'none'
-                              }}
+                              className={[
+                                'rounded-md px-2.5 py-1.5 text-xs no-underline transition-colors',
+                                isChildActive
+                                  ? 'bg-surface-2 font-bold text-primary'
+                                  : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
+                              ].join(' ')}
                             >
                               {child.label}
                             </NavLink>
@@ -195,38 +146,44 @@ export const Sidebar = () => {
         })}
       </div>
 
-      {/* User & Theme Footer Section */}
-      <div style={{
-        padding: '16px 12px',
-        borderTop: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        flexShrink: 0,
-        backgroundColor: 'var(--sidebar-bg)'
-      }}>
+      <div className="shrink-0 border-t border-line bg-surface p-3">
         {!collapsed && (
-          <div style={{ display: 'flex', backgroundColor: 'var(--surface-2)', borderRadius: '6px', padding: '2px' }}>
-            <button onClick={() => setThemeMode('light')} style={{ flex: 1, border: 'none', background: themeMode === 'light' ? 'var(--surface)' : 'transparent', color: themeMode === 'light' ? 'var(--primary)' : 'var(--text-muted)', padding: '4px', borderRadius: '4px', cursor: 'pointer' }} title="Light"><Sun size={14} style={{ margin: '0 auto' }} /></button>
-            <button onClick={() => setThemeMode('dark')} style={{ flex: 1, border: 'none', background: themeMode === 'dark' ? 'var(--surface)' : 'transparent', color: themeMode === 'dark' ? 'var(--primary)' : 'var(--text-muted)', padding: '4px', borderRadius: '4px', cursor: 'pointer' }} title="Dark"><Moon size={14} style={{ margin: '0 auto' }} /></button>
-            <button onClick={() => setThemeMode('system')} style={{ flex: 1, border: 'none', background: themeMode === 'system' ? 'var(--surface)' : 'transparent', color: themeMode === 'system' ? 'var(--primary)' : 'var(--text-muted)', padding: '4px', borderRadius: '4px', cursor: 'pointer' }} title="System"><Laptop size={14} style={{ margin: '0 auto' }} /></button>
+          <div className="mb-3 flex rounded-lg bg-surface-2 p-1">
+            <button type="button" onClick={() => setThemeMode('light')} className={themeButtonClass('light')} title="Light">
+              <Sun size={14} />
+            </button>
+            <button type="button" onClick={() => setThemeMode('dark')} className={themeButtonClass('dark')} title="Dark">
+              <Moon size={14} />
+            </button>
+            <button type="button" onClick={() => setThemeMode('system')} className={themeButtonClass('system')} title="System">
+              <Laptop size={14} />
+            </button>
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between' }}>
-          {!collapsed ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-              <img src={user?.avatar} alt="User" style={{ width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0 }} />
-              <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{user?.role}</span>
+        <div className={['flex items-center', collapsed ? 'justify-center' : 'justify-between gap-2'].join(' ')}>
+          <div className={['flex min-w-0 items-center', collapsed ? '' : 'gap-2.5'].join(' ')}>
+            <img
+              src={user?.avatar}
+              alt="User"
+              className="size-8 shrink-0 rounded-full object-cover"
+            />
+            {!collapsed && (
+              <div className="min-w-0">
+                <div className="truncate text-xs font-bold text-content">{user?.name || 'User'}</div>
+                <div className="truncate text-[10px] text-muted">{user?.role || 'ADMIN'}</div>
               </div>
-            </div>
-          ) : (
-            <img src={user?.avatar} alt="User" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
-          )}
+            )}
+          </div>
+
           {!collapsed && (
-            <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '4px' }} title="Log out">
+            <button
+              type="button"
+              onClick={logout}
+              className="grid size-8 shrink-0 place-items-center rounded-lg border-0 bg-transparent text-danger transition hover:bg-red-50/70"
+              title="Log out"
+              aria-label="Log out"
+            >
               <LogOut size={16} />
             </button>
           )}
