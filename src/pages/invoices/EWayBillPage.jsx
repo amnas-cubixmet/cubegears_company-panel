@@ -205,7 +205,8 @@ export function EWayBillPage() {
         </header>
 
         <div className="billing-tabs">
-          <button onClick={() => navigate('/invoices')}><FileText size={16}/>Invoices</button>
+          <button onClick={() => navigate('/invoices?kind=invoice')}><FileText size={16}/>Invoices</button>
+          <button onClick={() => navigate('/invoices?kind=estimate')}><FileText size={16}/>Estimates</button>
           <button className="active"><Truck size={16}/>E-Way Bills</button>
         </div>
 
