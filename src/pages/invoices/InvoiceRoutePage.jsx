@@ -63,6 +63,7 @@ export function InvoiceRoutePage() {
 
   useEffect(() => {
     setError('');
+    setActiveTab(kindFromUrl);
     if (mode === 'list') loadList();
     else if (mode === 'create') {
       setForm(blankBillingDocument(kindFromUrl));
@@ -170,8 +171,8 @@ export function InvoiceRoutePage() {
         <button className="bill-btn" onClick={() => navigate(`/invoices/new?kind=${activeTab}`)}><Plus size={17}/>{activeTab === 'estimate' ? 'New Estimate' : 'New Invoice'}</button>
       </header>
       <div className="billing-tabs">
-        <button className={activeTab === 'invoice' ? 'active' : ''} onClick={() => setActiveTab('invoice')}><ReceiptText size={16}/>Invoices</button>
-        <button className={activeTab === 'estimate' ? 'active' : ''} onClick={() => setActiveTab('estimate')}><FileText size={16}/>Estimates</button>
+        <button className={activeTab === 'invoice' ? 'active' : ''} onClick={() => navigate('/invoices?kind=invoice')}><ReceiptText size={16}/>Invoices</button>
+        <button className={activeTab === 'estimate' ? 'active' : ''} onClick={() => navigate('/invoices?kind=estimate')}><FileText size={16}/>Estimates</button>
         <button onClick={() => navigate('/invoices/e-way-bills')}><Truck size={16}/>E-Way Bills</button>
       </div>
       {error && <div className="billing-error">{error}</div>}
