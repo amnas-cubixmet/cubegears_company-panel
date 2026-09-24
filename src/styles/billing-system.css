@@ -128,3 +128,63 @@
     grid-template-columns:1fr;
   }
 }
+
+
+/* Billing top tabs — equal, compact, mobile-safe */
+.billing-tabs{
+  width:100%;
+  display:flex;
+  align-items:stretch;
+  gap:8px;
+}
+.billing-tabs button{
+  min-width:0;
+  min-height:42px;
+  height:42px;
+  justify-content:center;
+  white-space:nowrap;
+  line-height:1;
+}
+.billing-tabs button svg{
+  flex:0 0 auto;
+}
+
+@media(max-width:700px){
+  .billing-tabs{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+  .billing-tabs button{
+    width:100%;
+    min-width:0;
+    height:44px;
+    padding:0 8px;
+    gap:6px;
+    font-size:12px;
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .billing-tabs button svg{
+    width:15px;
+    height:15px;
+    min-width:15px;
+  }
+}
+
+@media(max-width:360px){
+  .billing-tabs{
+    gap:6px;
+  }
+  .billing-tabs button{
+    height:42px;
+    padding:0 6px;
+    gap:4px;
+    font-size:11px;
+  }
+  .billing-tabs button svg{
+    width:14px;
+    height:14px;
+    min-width:14px;
+  }
+}
