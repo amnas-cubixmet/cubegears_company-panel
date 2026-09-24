@@ -1,32 +1,37 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { MobileBottomNav } from './MobileBottomNav';
 import { Footer } from './Footer';
-import { GuidancePageAction } from '../../guidance/GuidancePageAction';
-import { GuidanceWindow } from '../../guidance/GuidanceWindow';
-import { DemoModeBanner } from '../../guidance/DemoModeBanner';
+import { AppBreadcrumbs } from './AppBreadcrumbs';
 
 export const DashboardLayout = ({ children }) => {
+  const location = useLocation();
+  const isInvoiceWorkspace =
+    location.pathname.startsWith('/invoices/') ||
+    location.pathname.startsWith('/quotations/');
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell${isInvoiceWorkspace ? ' invoice-workspace-shell' : ''}`}>
       <Sidebar />
 
       <div className="main-area">
         <Header />
 
-        <main className="main-content scroll-hidden" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+        <main
+          className="main-content scroll-hidden"
+          style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}
+        >
           <div style={{ flex: 1 }}>
-            <DemoModeBanner />
-            <GuidancePageAction />
+            <AppBreadcrumbs />
             {children}
           </div>
-          <Footer />
+          {!isInvoiceWorkspace && <Footer />}
         </main>
       </div>
 
-      <MobileBottomNav />
-      <GuidanceWindow />
+      {!isInvoiceWorkspace && <MobileBottomNav />}
     </div>
   );
 };

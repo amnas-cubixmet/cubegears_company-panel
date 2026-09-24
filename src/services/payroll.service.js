@@ -3,6 +3,32 @@ import { mockSalaryStructures, mockSalaryPayments, mockSalaryAdvances } from '..
 import { overtimeService } from './overtime.service';
 import { commissionService } from './commission.service';
 
+const parseWorkedHours = (value) => {
+  if (typeof value === 'number') return value;
+  const text = String(value || '');
+  const h = Number((text.match(/([\d.]+)h/) || [])[1] || 0);
+  const m = Number((text.match(/([\d.]+)m/) || [])[1] || 0);
+  return h + (m / 60);
+};
+
+const resolveBasePay = (payroll, structure) => {
+  const basis = structure?.salaryBasis || payroll.salaryBasis || (payroll.paymentType === 'Commission' ? 'Commission Only' : 'Fixed Monthly');
+
+  if (basis === 'Hourly') {
+    const workedHours = parseWorkedHours(payroll.reviewedAttendance?.workedHours);
+    return workedHours * Number(structure?.hourlyRate || 0);
+  }
+
+  if (basis === 'Daily') {
+    const presentDays = Number(payroll.reviewedAttendance?.present || 0);
+    return presentDays * Number(structure?.dailyRate || 0);
+  }
+
+  if (basis === 'Commission Only') return 0;
+
+  return Number(structure?.fixedMonthlySalary ?? structure?.basicSalary ?? payroll.baseSalary ?? 0);
+};
+
 export const payrollService = {
   // Payroll List & Summaries
   getPayrolls: async (filters = {}) => {
@@ -20,6 +46,7 @@ export const payrollService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         let result = mockPayrollList.map((p) => {
+          const structure = mockSalaryStructures.find((item) => item.staffId === p.staffId && item.status !== 'Inactive');
           // Find approved overtime records for this staff member
           const staffApprovedOt = otList.filter((ot) => ot.staffId === p.staffId && (ot.payrollMonth === p.month || !filters.month));
           const totalOtHours = staffApprovedOt.reduce((acc, curr) => acc + (curr.overtimeHours || 0), 0);
@@ -29,13 +56,24 @@ export const payrollService = {
           const staffApprovedCom = comList.filter((c) => c.staffId === p.staffId && (c.payrollMonth === p.month || !filters.month));
           const totalCommission = staffApprovedCom.reduce((acc, curr) => acc + (curr.amount || 0), 0);
 
-          const baseSalaryVal = p.paymentType === 'Commission' ? 0 : (p.baseSalary || 0);
-          const grossSalary = baseSalaryVal + (p.allowances || 0) + (p.fixedIncentives || 0) + totalOtPay + totalCommission;
+          const salaryBasis = structure?.salaryBasis || (p.paymentType === 'Commission' ? 'Commission Only' : 'Fixed Monthly');
+          const baseSalaryVal = resolveBasePay(p, structure);
+          const allowances = Number(structure?.allowances ?? p.allowances ?? 0);
+          const fixedIncentives = Number(structure?.fixedIncentives ?? p.fixedIncentives ?? p.incentives ?? 0);
+          const grossSalary = baseSalaryVal + allowances + fixedIncentives + totalOtPay + totalCommission;
           const netSalary = grossSalary - (p.deductions || 0) - (p.advanceRecovery || 0);
 
           return {
             ...p,
+            salaryBasis,
+            salaryRate: salaryBasis === 'Hourly'
+              ? Number(structure?.hourlyRate || 0)
+              : salaryBasis === 'Daily'
+                ? Number(structure?.dailyRate || 0)
+                : Number(structure?.fixedMonthlySalary ?? structure?.basicSalary ?? baseSalaryVal),
             baseSalary: baseSalaryVal,
+            allowances,
+            fixedIncentives,
             overtimeHours: totalOtHours ? `${totalOtHours}h` : '0h',
             overtimePay: totalOtPay,
             approvedCommission: totalCommission,

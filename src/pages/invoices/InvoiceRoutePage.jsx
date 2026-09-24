@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Edit3, Eye, FileText, Plus, Printer, ReceiptText, Trash2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Edit3, Eye, FileText, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 
@@ -172,6 +172,7 @@ export function InvoiceRoutePage() {
       <div className="billing-tabs">
         <button className={activeTab === 'invoice' ? 'active' : ''} onClick={() => setActiveTab('invoice')}><ReceiptText size={16}/>Invoices</button>
         <button className={activeTab === 'estimate' ? 'active' : ''} onClick={() => setActiveTab('estimate')}><FileText size={16}/>Estimates</button>
+        <button onClick={() => navigate('/invoices/e-way-bills')}><Truck size={16}/>E-Way Bills</button>
       </div>
       {error && <div className="billing-error">{error}</div>}
       <section className="billing-card billing-list-card">
@@ -210,7 +211,7 @@ export function InvoiceRoutePage() {
     <div className="billing-page invoice-view-page">
       <div className="billing-editor-head no-print">
         <div><button className="bill-btn secondary" onClick={() => navigate('/invoices')}><ArrowLeft size={16}/>Back</button><span className="billing-kicker">{form.kind === 'estimate' ? 'ESTIMATE' : 'INVOICE'}</span><h1>{form.number || id}</h1><p>ID: {id} · Status: {form.status}</p></div>
-        <div className="billing-head-actions"><button className="bill-btn secondary" onClick={() => navigate(`/invoices/${id}/edit`)}><Edit3 size={16}/>Edit</button><button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print / PDF</button>{form.status !== 'Cancelled' && <button className="bill-btn secondary" disabled={saving} onClick={cancelDocument}><XCircle size={16}/>Cancel</button>}<button className="bill-btn danger" onClick={() => navigate(`/invoices/${id}/delete`)}><Trash2 size={16}/>Delete</button></div>
+        <div className="billing-head-actions"><button className="bill-btn secondary" onClick={() => navigate(`/invoices/${id}/edit`)}><Edit3 size={16}/>Edit</button>{form.kind === 'invoice' && <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/new?invoiceId=${encodeURIComponent(id)}`)}><Truck size={16}/>E-Way Bill</button>}<button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print / PDF</button>{form.status !== 'Cancelled' && <button className="bill-btn secondary" disabled={saving} onClick={cancelDocument}><XCircle size={16}/>Cancel</button>}<button className="bill-btn danger" onClick={() => navigate(`/invoices/${id}/delete`)}><Trash2 size={16}/>Delete</button></div>
       </div>
       {error && <div className="billing-error no-print">{error}</div>}
       {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals}/>} 

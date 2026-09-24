@@ -23,6 +23,7 @@ import { JobStatus } from '../pages/jobs/JobStatus';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { StockManagement } from '../pages/stock/StockManagement';
 import { InvoiceList } from '../pages/invoices/InvoiceList';
+import { EWayBillPage } from '../pages/invoices/EWayBillPage';
 import { PaymentList } from '../pages/payments/PaymentList';
 import { ExpenseList } from '../pages/expenses/ExpenseList';
 import { Reports } from '../pages/reports/Reports';
@@ -54,7 +55,7 @@ export const AppRoutes = () => (
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<Dashboard />} />
 
-      <Route path="/my-attendance" element={<MyAttendance />} />
+      <Route path="/my-attendance" element={<Navigate to="/my-attendance/calendar" replace />} />
       <Route path="/my-attendance/calendar" element={<MyAttendance />} />
       <Route path="/my-attendance/history" element={<MyAttendance />} />
       <Route path="/my-attendance/leave" element={<MyAttendance />} />
@@ -108,6 +109,11 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id" element={<JobDetails />} />
       <Route path="/jobs/:id/edit" element={<JobDetails />} />
       <Route path="/jobs/:id/status" element={<JobStatus />} />
+      <Route path="/jobs/:id/parts" element={<JobDetails />} />
+      <Route path="/jobs/:id/costs" element={<JobDetails />} />
+      <Route path="/jobs/:id/work" element={<JobDetails />} />
+      <Route path="/jobs/:id/photos" element={<JobDetails />} />
+      <Route path="/jobs/:id/history" element={<JobDetails />} />
       <Route path="/jobs/:id/*" element={<JobDetails />} />
 
       <Route path="/inventory" element={<InventoryList />} />
@@ -137,6 +143,11 @@ export const AppRoutes = () => (
       <Route path="/stock/:id" element={<StockManagement />} />
 
       <Route path="/invoices" element={<InvoiceList />} />
+      <Route path="/invoices/e-way-bills" element={<EWayBillPage />} />
+      <Route path="/invoices/e-way-bills/new" element={<EWayBillPage />} />
+      <Route path="/invoices/e-way-bills/:ewbId" element={<EWayBillPage />} />
+      <Route path="/invoices/e-way-bills/:ewbId/edit" element={<EWayBillPage />} />
+      <Route path="/invoices/e-way-bills/:ewbId/delete" element={<EWayBillPage />} />
       <Route path="/invoices/new" element={<InvoiceList />} />
       <Route path="/invoices/create" element={<Navigate to="/invoices/new" replace />} />
       <Route path="/invoices/:id" element={<InvoiceList />} />

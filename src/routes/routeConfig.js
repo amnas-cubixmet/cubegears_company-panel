@@ -77,7 +77,19 @@ export const routeConfig = [
   { id: 'vehicles', label: 'Vehicles', path: '/vehicles', icon: Car, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'vehicles.view' },
   { id: 'services', label: 'Services Catalog', path: '/services', icon: Wrench, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'services.view' },
   { id: 'inventory', label: 'Inventory', path: '/inventory', icon: Package, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'inventory.view' },
-  { id: 'invoices', label: 'Invoices & Billing', path: '/invoices', icon: FileText, section: ROUTE_SECTIONS.FINANCE, mobilePrimary: false, permission: 'invoices.view' },
+  {
+    id: 'invoices',
+    label: 'Invoices & Billing',
+    path: '/invoices',
+    icon: FileText,
+    section: ROUTE_SECTIONS.FINANCE,
+    mobilePrimary: false,
+    permission: 'invoices.view',
+    children: [
+      { id: 'billing-invoices', label: 'Invoices & Estimates', path: '/invoices' },
+      { id: 'billing-eway-bills', label: 'E-Way Bills', path: '/invoices/e-way-bills' }
+    ]
+  },
   { id: 'payments', label: 'Payments', path: '/payments', icon: CreditCard, section: ROUTE_SECTIONS.FINANCE, mobilePrimary: false, permission: 'payments.view' },
   { id: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, section: ROUTE_SECTIONS.FINANCE, mobilePrimary: false, permission: 'expenses.view' },
   { id: 'reports', label: 'Reports & BI', path: '/reports', icon: BarChart3, section: ROUTE_SECTIONS.ANALYTICS_SYSTEM, mobilePrimary: false, permission: 'reports.view' },
