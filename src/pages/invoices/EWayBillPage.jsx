@@ -432,51 +432,49 @@ export function EWayBillPage() {
           </section>
         </div>
 
-        <section className="billing-card">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <section className="billing-card eway-goods-card">
+          <div className="eway-goods-header">
             <div>
               <span className="billing-kicker">GOODS</span>
-              <h3 className="!mb-0">Goods Details</h3>
-              <p className="mt-1 text-[11px] text-muted">Add goods, HSN, quantity, taxable value and applicable GST rates.</p>
+              <h3>Goods Details</h3>
+              <p>Add goods, HSN, quantity, taxable value and applicable GST rates.</p>
             </div>
 
             <button
               type="button"
-              className="bill-btn secondary shrink-0"
+              className="bill-btn secondary eway-add-goods-btn"
               onClick={() => update('items', [...form.items, newItem()])}
             >
-              <Plus size={15}/>Add Goods
+              <Plus size={16}/>Add Goods
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="eway-goods-list">
             {form.items.map((item, index) => (
-              <article key={item.id} className="rounded-2xl border border-line bg-surface-2 p-3">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-muted">
-                    Item {index + 1}
-                  </div>
+              <article key={item.id} className="eway-goods-item">
+                <div className="eway-goods-item-head">
+                  <strong>Item {index + 1}</strong>
                   <button
                     type="button"
                     className="bill-icon-btn danger"
                     aria-label="Remove goods item"
                     onClick={() => update('items', form.items.filter((x) => x.id !== item.id))}
                   >
-                    <Trash2 size={15}/>
+                    <Trash2 size={16}/>
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[110px_minmax(220px,1.5fr)_minmax(220px,1.5fr)_80px_90px_130px]">
-                  <label className="!mb-0">HSN
+                <div className="eway-goods-main-grid">
+                  <label>HSN
                     <input
                       inputMode="numeric"
                       value={item.hsnCode}
                       onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, ''))}
-                      placeholder="HSN"
+                      placeholder="HSN code"
                     />
                   </label>
 
-                  <label className="!mb-0">Product Name
+                  <label>Product Name
                     <input
                       value={item.productName}
                       onChange={(e) => updateItem(item.id, 'productName', e.target.value)}
@@ -484,7 +482,7 @@ export function EWayBillPage() {
                     />
                   </label>
 
-                  <label className="!mb-0">Description
+                  <label>Description
                     <input
                       value={item.description}
                       onChange={(e) => updateItem(item.id, 'description', e.target.value)}
@@ -492,7 +490,7 @@ export function EWayBillPage() {
                     />
                   </label>
 
-                  <label className="!mb-0">Qty
+                  <label>Quantity
                     <input
                       inputMode="decimal"
                       value={item.qty}
@@ -501,13 +499,13 @@ export function EWayBillPage() {
                     />
                   </label>
 
-                  <label className="!mb-0">Unit
+                  <label>Unit
                     <select value={item.unit} onChange={(e) => updateItem(item.id, 'unit', e.target.value)}>
                       <option>PCS</option><option>SET</option><option>UNT</option><option>KGS</option><option>LTR</option><option>BOX</option><option>OTH</option>
                     </select>
                   </label>
 
-                  <label className="!mb-0">Taxable Value
+                  <label>Taxable Value
                     <input
                       inputMode="decimal"
                       value={item.taxableValue}
@@ -517,12 +515,10 @@ export function EWayBillPage() {
                   </label>
                 </div>
 
-                <div className="mt-3 rounded-xl border border-line bg-surface p-3">
-                  <div className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted">
-                    Tax Rates %
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <label className="!mb-0">CGST
+                <div className="eway-goods-tax-panel">
+                  <div className="eway-goods-tax-title">Tax Rates %</div>
+                  <div className="eway-goods-tax-grid">
+                    <label>CGST
                       <input
                         aria-label="CGST rate"
                         inputMode="decimal"
@@ -531,7 +527,7 @@ export function EWayBillPage() {
                         placeholder="0"
                       />
                     </label>
-                    <label className="!mb-0">SGST
+                    <label>SGST
                       <input
                         aria-label="SGST rate"
                         inputMode="decimal"
@@ -540,7 +536,7 @@ export function EWayBillPage() {
                         placeholder="0"
                       />
                     </label>
-                    <label className="!mb-0">IGST
+                    <label>IGST
                       <input
                         aria-label="IGST rate"
                         inputMode="decimal"
@@ -549,7 +545,7 @@ export function EWayBillPage() {
                         placeholder="0"
                       />
                     </label>
-                    <label className="!mb-0">CESS
+                    <label>CESS
                       <input
                         aria-label="CESS rate"
                         inputMode="decimal"
@@ -564,7 +560,7 @@ export function EWayBillPage() {
             ))}
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
+          <div className="eway-goods-summary">
             {[
               ['Taxable', totals.taxableValue],
               ['CGST', totals.cgst],
@@ -572,16 +568,15 @@ export function EWayBillPage() {
               ['IGST', totals.igst],
               ['CESS', totals.cess]
             ].map(([label, value]) => (
-              <div key={label} className="min-h-[76px] rounded-xl border border-line bg-surface-2 p-3">
-                <div className="text-[9px] font-extrabold uppercase tracking-[0.05em] text-muted">{label}</div>
-                <div className="mt-2 text-sm font-extrabold text-content">{money.format(value)}</div>
+              <div key={label} className="eway-total-card">
+                <span>{label}</span>
+                <strong>{money.format(value)}</strong>
               </div>
             ))}
 
-            <label className="!mb-0 min-h-[76px] rounded-xl border border-line bg-surface-2 p-2.5">
-              <span className="text-[9px] font-extrabold uppercase tracking-[0.04em] text-muted">CESS Non-Advol</span>
+            <label className="eway-total-input-card">
+              <span>CESS Non-Advol</span>
               <input
-                className="mt-1"
                 inputMode="decimal"
                 value={form.cessNonAdvolAmount || ''}
                 onChange={(e) => update('cessNonAdvolAmount', dec(e.target.value))}
@@ -589,10 +584,9 @@ export function EWayBillPage() {
               />
             </label>
 
-            <label className="!mb-0 min-h-[76px] rounded-xl border border-line bg-surface-2 p-2.5">
-              <span className="text-[9px] font-extrabold uppercase tracking-[0.04em] text-muted">Other Amount</span>
+            <label className="eway-total-input-card">
+              <span>Other Amount</span>
               <input
-                className="mt-1"
                 inputMode="decimal"
                 value={form.otherAmount || ''}
                 onChange={(e) => update('otherAmount', dec(e.target.value))}
@@ -600,9 +594,9 @@ export function EWayBillPage() {
               />
             </label>
 
-            <div className="min-h-[76px] rounded-xl border border-primary bg-primary-soft p-3">
-              <div className="text-[9px] font-extrabold uppercase tracking-[0.05em] text-primary">Total</div>
-              <div className="mt-2 text-base font-black text-primary">{money.format(totals.totalValue)}</div>
+            <div className="eway-total-card eway-total-card-primary">
+              <span>Total</span>
+              <strong>{money.format(totals.totalValue)}</strong>
             </div>
           </div>
         </section>
