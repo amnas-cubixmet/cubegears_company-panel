@@ -433,56 +433,138 @@ export function EWayBillPage() {
         </div>
 
         <section className="billing-card">
-          <div className="billing-section-head">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <span className="billing-kicker">GOODS</span>
-              <h3>Goods Details</h3>
+              <h3 className="!mb-0">Goods Details</h3>
+              <p className="mt-1 text-[11px] text-muted">Add goods, HSN, quantity, taxable value and applicable GST rates.</p>
             </div>
-            <button type="button" className="bill-btn secondary" onClick={() => update('items', [...form.items, newItem()])}>
+
+            <button
+              type="button"
+              className="bill-btn secondary shrink-0"
+              onClick={() => update('items', [...form.items, newItem()])}
+            >
               <Plus size={15}/>Add Goods
             </button>
           </div>
 
-          <div className="overflow-x-auto">
-            <div className="min-w-[920px] space-y-2">
-              <div className="grid grid-cols-[110px_minmax(220px,1.7fr)_120px_130px_minmax(250px,1.5fr)_42px] gap-2 px-2 text-[10px] font-extrabold uppercase tracking-wide text-muted">
-                <span>HSN</span>
-                <span>Product / Description</span>
-                <span>Qty / Unit</span>
-                <span>Taxable Value</span>
-                <span>Tax Rates %</span>
-                <span></span>
-              </div>
-
-              {form.items.map((item, index) => (
-                <div key={item.id} className="grid grid-cols-[110px_minmax(220px,1.7fr)_120px_130px_minmax(250px,1.5fr)_42px] gap-2 rounded-xl border border-line bg-surface-2 p-2">
-                  <input inputMode="numeric" value={item.hsnCode} onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, ''))} placeholder="HSN"/>
-                  <div className="grid gap-2">
-                    <input value={item.productName} onChange={(e) => updateItem(item.id, 'productName', e.target.value)} placeholder={`Item ${index + 1} name`}/>
-                    <input value={item.description} onChange={(e) => updateItem(item.id, 'description', e.target.value)} placeholder="Description"/>
+          <div className="space-y-3">
+            {form.items.map((item, index) => (
+              <article key={item.id} className="rounded-2xl border border-line bg-surface-2 p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-muted">
+                    Item {index + 1}
                   </div>
-                  <div className="grid gap-2">
-                    <input inputMode="decimal" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', dec(e.target.value))} placeholder="Qty"/>
-                    <select value={item.unit} onChange={(e) => updateItem(item.id, 'unit', e.target.value)}>
-                      <option>PCS</option><option>SET</option><option>UNT</option><option>KGS</option><option>LTR</option><option>BOX</option><option>OTH</option>
-                    </select>
-                  </div>
-                  <input inputMode="decimal" value={item.taxableValue} onChange={(e) => updateItem(item.id, 'taxableValue', dec(e.target.value))} placeholder="0.00"/>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    <input aria-label="CGST rate" inputMode="decimal" value={item.cgstRate} onChange={(e) => updateItem(item.id, 'cgstRate', dec(e.target.value))} placeholder="CGST"/>
-                    <input aria-label="SGST rate" inputMode="decimal" value={item.sgstRate} onChange={(e) => updateItem(item.id, 'sgstRate', dec(e.target.value))} placeholder="SGST"/>
-                    <input aria-label="IGST rate" inputMode="decimal" value={item.igstRate} onChange={(e) => updateItem(item.id, 'igstRate', dec(e.target.value))} placeholder="IGST"/>
-                    <input aria-label="CESS rate" inputMode="decimal" value={item.cessRate} onChange={(e) => updateItem(item.id, 'cessRate', dec(e.target.value))} placeholder="CESS"/>
-                  </div>
-                  <button type="button" className="bill-icon-btn danger" aria-label="Remove goods item" onClick={() => update('items', form.items.filter((x) => x.id !== item.id))}>
+                  <button
+                    type="button"
+                    className="bill-icon-btn danger"
+                    aria-label="Remove goods item"
+                    onClick={() => update('items', form.items.filter((x) => x.id !== item.id))}
+                  >
                     <Trash2 size={15}/>
                   </button>
                 </div>
-              ))}
-            </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[110px_minmax(220px,1.5fr)_minmax(220px,1.5fr)_80px_90px_130px]">
+                  <label className="!mb-0">HSN
+                    <input
+                      inputMode="numeric"
+                      value={item.hsnCode}
+                      onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, ''))}
+                      placeholder="HSN"
+                    />
+                  </label>
+
+                  <label className="!mb-0">Product Name
+                    <input
+                      value={item.productName}
+                      onChange={(e) => updateItem(item.id, 'productName', e.target.value)}
+                      placeholder={`Item ${index + 1} name`}
+                    />
+                  </label>
+
+                  <label className="!mb-0">Description
+                    <input
+                      value={item.description}
+                      onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                      placeholder="Description"
+                    />
+                  </label>
+
+                  <label className="!mb-0">Qty
+                    <input
+                      inputMode="decimal"
+                      value={item.qty}
+                      onChange={(e) => updateItem(item.id, 'qty', dec(e.target.value))}
+                      placeholder="1"
+                    />
+                  </label>
+
+                  <label className="!mb-0">Unit
+                    <select value={item.unit} onChange={(e) => updateItem(item.id, 'unit', e.target.value)}>
+                      <option>PCS</option><option>SET</option><option>UNT</option><option>KGS</option><option>LTR</option><option>BOX</option><option>OTH</option>
+                    </select>
+                  </label>
+
+                  <label className="!mb-0">Taxable Value
+                    <input
+                      inputMode="decimal"
+                      value={item.taxableValue}
+                      onChange={(e) => updateItem(item.id, 'taxableValue', dec(e.target.value))}
+                      placeholder="0.00"
+                    />
+                  </label>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-line bg-surface p-3">
+                  <div className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted">
+                    Tax Rates %
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <label className="!mb-0">CGST
+                      <input
+                        aria-label="CGST rate"
+                        inputMode="decimal"
+                        value={item.cgstRate}
+                        onChange={(e) => updateItem(item.id, 'cgstRate', dec(e.target.value))}
+                        placeholder="0"
+                      />
+                    </label>
+                    <label className="!mb-0">SGST
+                      <input
+                        aria-label="SGST rate"
+                        inputMode="decimal"
+                        value={item.sgstRate}
+                        onChange={(e) => updateItem(item.id, 'sgstRate', dec(e.target.value))}
+                        placeholder="0"
+                      />
+                    </label>
+                    <label className="!mb-0">IGST
+                      <input
+                        aria-label="IGST rate"
+                        inputMode="decimal"
+                        value={item.igstRate}
+                        onChange={(e) => updateItem(item.id, 'igstRate', dec(e.target.value))}
+                        placeholder="0"
+                      />
+                    </label>
+                    <label className="!mb-0">CESS
+                      <input
+                        aria-label="CESS rate"
+                        inputMode="decimal"
+                        value={item.cessRate}
+                        onChange={(e) => updateItem(item.id, 'cessRate', dec(e.target.value))}
+                        placeholder="0"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
+          <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
             {[
               ['Taxable', totals.taxableValue],
               ['CGST', totals.cgst],
@@ -490,27 +572,40 @@ export function EWayBillPage() {
               ['IGST', totals.igst],
               ['CESS', totals.cess]
             ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-line bg-surface-2 p-3">
-                <div className="text-[10px] font-bold uppercase text-muted">{label}</div>
-                <div className="mt-1 text-xs font-extrabold text-content">{money.format(value)}</div>
+              <div key={label} className="min-h-[76px] rounded-xl border border-line bg-surface-2 p-3">
+                <div className="text-[9px] font-extrabold uppercase tracking-[0.05em] text-muted">{label}</div>
+                <div className="mt-2 text-sm font-extrabold text-content">{money.format(value)}</div>
               </div>
             ))}
 
-            <label className="!mb-0 rounded-xl border border-line bg-surface-2 p-2">CESS Non-Advol
-              <input inputMode="decimal" value={form.cessNonAdvolAmount || ''} onChange={(e) => update('cessNonAdvolAmount', dec(e.target.value))} placeholder="0.00"/>
+            <label className="!mb-0 min-h-[76px] rounded-xl border border-line bg-surface-2 p-2.5">
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.04em] text-muted">CESS Non-Advol</span>
+              <input
+                className="mt-1"
+                inputMode="decimal"
+                value={form.cessNonAdvolAmount || ''}
+                onChange={(e) => update('cessNonAdvolAmount', dec(e.target.value))}
+                placeholder="0.00"
+              />
             </label>
 
-            <label className="!mb-0 rounded-xl border border-line bg-surface-2 p-2">Other Amount
-              <input inputMode="decimal" value={form.otherAmount || ''} onChange={(e) => update('otherAmount', dec(e.target.value))} placeholder="0.00"/>
+            <label className="!mb-0 min-h-[76px] rounded-xl border border-line bg-surface-2 p-2.5">
+              <span className="text-[9px] font-extrabold uppercase tracking-[0.04em] text-muted">Other Amount</span>
+              <input
+                className="mt-1"
+                inputMode="decimal"
+                value={form.otherAmount || ''}
+                onChange={(e) => update('otherAmount', dec(e.target.value))}
+                placeholder="0.00"
+              />
             </label>
 
-            <div className="rounded-xl border border-primary bg-primary-soft p-3">
-              <div className="text-[10px] font-bold uppercase text-primary">Total</div>
-              <div className="mt-1 text-sm font-extrabold text-primary">{money.format(totals.totalValue)}</div>
+            <div className="min-h-[76px] rounded-xl border border-primary bg-primary-soft p-3">
+              <div className="text-[9px] font-extrabold uppercase tracking-[0.05em] text-primary">Total</div>
+              <div className="mt-2 text-base font-black text-primary">{money.format(totals.totalValue)}</div>
             </div>
           </div>
         </section>
-
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <section className="billing-card">
             <span className="billing-kicker">TRANSPORT</span>
