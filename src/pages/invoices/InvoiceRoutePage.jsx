@@ -303,6 +303,22 @@ export function InvoiceRoutePage() {
     }
   };
 
+  const convertEstimate = async () => {
+    if (form.kind !== 'estimate' || !id) return;
+
+    setSaving(true);
+    setError('');
+
+    try {
+      const invoice = await billingService.convertEstimateToInvoice(id);
+      navigate(`/invoices/${invoice.id}/edit`, { replace: true });
+    } catch (e) {
+      setError(e?.message || 'Unable to convert estimate to invoice.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const deleteDocument = async () => {
     setSaving(true);
     try {
@@ -361,11 +377,70 @@ export function InvoiceRoutePage() {
   if (mode === 'view') return (
     <div className="billing-page invoice-view-page">
       <div className="billing-editor-head no-print">
-        <div><button className="bill-btn secondary" onClick={() => navigate('/invoices')}><ArrowLeft size={16}/>Back</button><span className="billing-kicker">{form.kind === 'estimate' ? 'ESTIMATE' : 'INVOICE'}</span><h1>{form.number || id}</h1><p>ID: {id} · Status: {form.status}</p></div>
-        <div className="billing-head-actions"><button className="bill-btn secondary" onClick={() => navigate(`/invoices/${id}/edit`)}><Edit3 size={16}/>Edit</button>{form.kind === 'invoice' && <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/new?invoiceId=${encodeURIComponent(id)}`)}><Truck size={16}/>E-Way Bill</button>}<button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print / PDF</button>{form.status !== 'Cancelled' && <button className="bill-btn secondary" disabled={saving} onClick={cancelDocument}><XCircle size={16}/>Cancel</button>}<button className="bill-btn danger" onClick={() => navigate(`/invoices/${id}/delete`)}><Trash2 size={16}/>Delete</button></div>
+        <div>
+          <button className="bill-btn secondary" onClick={() => navigate(form.kind === 'estimate' ? '/invoices?kind=estimate' : '/invoices?kind=invoice')}>
+            <ArrowLeft size={16}/>Back
+          </button>
+          <span className="billing-kicker">{form.kind === 'estimate' ? 'ESTIMATE / QUOTATION' : 'INVOICE'}</span>
+          <h1>{form.number || id}</h1>
+          <p>ID: {id} · Status: {form.status}</p>
+        </div>
+
+        <div className="billing-head-actions">
+          {form.status !== 'Converted' && (
+            <button className="bill-btn secondary" onClick={() => navigate(`/invoices/${id}/edit`)}>
+              <Edit3 size={16}/>Edit
+            </button>
+          )}
+
+          {form.kind === 'estimate' && form.status !== 'Converted' && form.status !== 'Cancelled' && (
+            <button className="bill-btn" disabled={saving} onClick={convertEstimate}>
+              <ReceiptText size={16}/>{saving ? 'Converting…' : 'Convert to Invoice'}
+            </button>
+          )}
+
+          {form.kind === 'estimate' && form.status === 'Converted' && form.convertedToInvoiceId && (
+            <button className="bill-btn" onClick={() => navigate(`/invoices/${form.convertedToInvoiceId}`)}>
+              <ReceiptText size={16}/>Open {form.convertedToInvoiceNo || 'Invoice'}
+            </button>
+          )}
+
+          {form.kind === 'invoice' && (
+            <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/new?invoiceId=${encodeURIComponent(id)}`)}>
+              <Truck size={16}/>E-Way Bill
+            </button>
+          )}
+
+          <button className="bill-btn secondary" onClick={() => window.print()}>
+            <Printer size={16}/>Print / PDF
+          </button>
+
+          {form.status !== 'Cancelled' && form.status !== 'Converted' && (
+            <button className="bill-btn secondary" disabled={saving} onClick={cancelDocument}>
+              <XCircle size={16}/>Cancel
+            </button>
+          )}
+
+          <button className="bill-btn danger" onClick={() => navigate(`/invoices/${id}/delete`)}>
+            <Trash2 size={16}/>Delete
+          </button>
+        </div>
       </div>
+
+      {form.kind === 'estimate' && form.status === 'Converted' && form.convertedToInvoiceId && (
+        <div className="estimate-converted-banner no-print">
+          <div>
+            <strong>Converted to Invoice</strong>
+            <span>This quotation is now linked to {form.convertedToInvoiceNo || form.convertedToInvoiceId}. No re-entry is required.</span>
+          </div>
+          <button className="bill-btn" onClick={() => navigate(`/invoices/${form.convertedToInvoiceId}`)}>
+            Open Invoice
+          </button>
+        </div>
+      )}
+
       {error && <div className="billing-error no-print">{error}</div>}
-      {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals}/>} 
+      {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals}/>}
     </div>
   );
 
