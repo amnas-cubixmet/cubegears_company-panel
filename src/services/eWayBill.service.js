@@ -128,6 +128,8 @@ export const blankEWayBill = () => ({
   generatedAt: '',
   generatedBy: '',
   validUntil: '',
+  qrCodeDataUrl: '',
+  qrCodeText: '',
   createdAt: '',
   updatedAt: ''
 });
