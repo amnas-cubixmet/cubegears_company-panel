@@ -2,3 +2,46 @@
 @media(max-width:1050px){.app-header-desktop{grid-template-columns:minmax(160px,1fr) minmax(280px,460px) auto;gap:12px}.header-profile-copy{display:none}.header-profile-btn{padding:3px}.header-brand-name{max-width:150px}}
 @media(max-width:767px){.app-header-desktop{display:none!important}.app-header-mobile{display:block!important;background:var(--surface);padding:8px 10px 10px;box-sizing:border-box;min-height:56px}.app-header{min-height:56px}.header-brand.mobile{max-width:calc(100vw - 110px)}.header-brand.mobile .header-brand-name{font-size:13px}.search-shortcut{display:none}.mobile-header-search-row .global-search input{font-size:11px!important;padding-left:8px!important}.header-profile-menu{right:0;top:calc(100% + 7px)}}
 @media(max-width:360px){.app-header-mobile{padding-left:8px;padding-right:8px}.header-brand.mobile .header-brand-name{max-width:105px}.header-brand-mark{width:30px;height:30px;min-width:30px}.header-icon-button{width:36px;height:36px;min-width:36px}.header-avatar-button{width:36px;height:36px}.header-avatar-button img{width:32px;height:32px;min-width:32px}.mobile-header-search-row .global-search input::placeholder{font-size:10px}}
+
+
+/* Desktop search polish */
+@media(min-width:768px){
+  .header-search-area{
+    max-width:500px;
+  }
+  .header-search-area .global-search{
+    height:40px;
+    min-height:40px;
+    padding:0 3px 0 12px;
+    border-radius:999px!important;
+    box-shadow:none;
+  }
+  .header-search-area .global-search input{
+    height:38px!important;
+    min-height:38px!important;
+    padding:0 8px!important;
+    font-size:11px!important;
+  }
+  .header-search-area .global-search input::placeholder{
+    font-size:11px;
+  }
+  .header-search-area .search-shortcut{
+    height:22px;
+    min-width:34px;
+    padding:0 6px;
+    border-radius:6px;
+    font-size:8px;
+    margin-right:5px;
+  }
+  .header-search-area .global-search-button{
+    width:34px!important;
+    height:34px!important;
+    min-width:34px!important;
+    box-shadow:none;
+  }
+  .header-search-area .global-search-clear{
+    width:26px;
+    height:26px;
+    min-width:26px;
+  }
+}
