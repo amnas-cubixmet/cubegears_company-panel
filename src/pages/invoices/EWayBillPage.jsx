@@ -608,6 +608,7 @@ function EWayBillPrint({ doc, totals }) {
   };
   const ratePart = (value) => Number(value || 0) > 0 ? Number(value).toFixed(3) : 'NE';
   const ewbReady = Boolean(doc.ewayBillNo);
+  const qrImage = doc.qrCodeDataUrl || (doc.qrCodeBase64 ? `data:image/png;base64,${doc.qrCodeBase64}` : '');
 
   return (
     <section className="eway-print-sheet eway-official-model">
@@ -616,9 +617,15 @@ function EWayBillPrint({ doc, totals }) {
           <h2>e-Way Bill</h2>
           <span className="eway-local-badge">{ewbReady ? 'API GENERATED RECORD' : 'LOCAL PREVIEW · READY FOR NIC API'}</span>
         </div>
-        <div className="eway-qr-placeholder" aria-label="Official QR placeholder">
-          <strong>{ewbReady ? 'OFFICIAL QR' : 'QR'}</strong>
-          <span>{ewbReady ? 'Render from NIC response' : 'Available after NIC generation'}</span>
+        <div className={`eway-qr-placeholder${qrImage ? ' has-image' : ''}`} aria-label="E-Way Bill QR">
+          {qrImage ? (
+            <img src={qrImage} alt="E-Way Bill QR" />
+          ) : (
+            <>
+              <strong>{ewbReady ? 'OFFICIAL QR' : 'QR'}</strong>
+              <span>{doc.qrCodeText || (ewbReady ? 'Waiting for QR image from NIC response' : 'Available after NIC generation')}</span>
+            </>
+          )}
         </div>
       </div>
 
