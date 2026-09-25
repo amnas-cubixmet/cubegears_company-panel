@@ -379,6 +379,10 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
               >
                 <option value="Active">Active</option>
                 <option value="Probation">Probation</option>
+                <option value="Notice Period">Notice Period</option>
+                <option value="Suspended">Suspended</option>
+                <option value="Resigned">Resigned</option>
+                <option value="Terminated">Terminated</option>
                 <option value="Inactive">Inactive</option>
               </select>
             </div>
