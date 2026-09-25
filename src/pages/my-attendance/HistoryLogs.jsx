@@ -93,9 +93,9 @@ export const HistoryLogs = () => {
   const filterOptions = ['All', 'Present', 'Missing Clock Out', 'On Leave', 'Late'];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="attendance-module attendance-history-page" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* 1. Page Header */}
-      <div>
+      <div className="attendance-section-heading">
         <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', margin: 0 }}>
           Attendance History & Logs
         </h2>
@@ -134,7 +134,7 @@ export const HistoryLogs = () => {
       </div>
 
       {/* Date Filter Toolbar */}
-      <div style={{
+      <div className="attendance-toolbar-card history-filter-toolbar" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -191,6 +191,7 @@ export const HistoryLogs = () => {
         {logs.map((log) => (
           <div
             key={log.id}
+            className="attendance-record-card history-record-card"
             style={{
               backgroundColor: 'var(--surface)',
               border: log.status === 'Missing Clock Out' ? '1px solid var(--danger)' : '1px solid var(--border)',
@@ -311,7 +312,7 @@ export const HistoryLogs = () => {
       </div>
 
       {/* DESKTOP HISTORY TABLE (>= 768px) */}
-      <div className="desktop-table-view" style={{
+      <div className="desktop-table-view attendance-table-card" style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '16px',
