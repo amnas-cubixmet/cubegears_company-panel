@@ -6,12 +6,14 @@ export const PayrollTabRail = () => {
   const location = useLocation();
 
   const tabs = [
-    { label: 'Dashboard', path: '/payroll' },
-    { label: 'Salary Structure', path: '/payroll/salary-structure' },
-    { label: 'Monthly Payroll', path: '/payroll/monthly' },
-    { label: 'Approvals', path: '/payroll/approvals' },
-    { label: 'Disbursal', path: '/payroll/disbursal' },
+    { label: 'Overview', path: '/payroll' },
+    { label: 'Employees', path: '/payroll/employees' },
+    { label: 'Attendance', path: '/payroll/attendance' },
+    { label: 'Salary Setup', path: '/payroll/salary-setup' },
+    { label: 'Incentives', path: '/payroll/incentives' },
+    { label: 'Overtime', path: '/payroll/overtime' },
     { label: 'Advances', path: '/payroll/advances' },
+    { label: 'Run Payroll', path: '/payroll/run' },
     { label: 'Payslips', path: '/payroll/payslips' },
     { label: 'Reports', path: '/payroll/reports' }
   ];
@@ -35,13 +37,10 @@ export const PayrollTabRail = () => {
   }, [location.pathname]);
 
   return (
-    <div style={{ width: '100%', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)' }}>
+    <div className="w-full border-b border-line bg-surface">
       <div
         ref={railRef}
-        className="payroll-subnav"
-        style={{
-          padding: '0 12px'
-        }}
+        className="payroll-subnav flex w-full gap-1 overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {tabs.map((t, idx) => (
           <NavLink
@@ -49,17 +48,12 @@ export const PayrollTabRail = () => {
             to={t.path}
             end={t.path === '/payroll'}
             className={({ isActive }) => `payroll-subnav-item ${isActive ? 'active' : ''}`}
-            style={({ isActive }) => ({
-              padding: '10px 14px',
-              fontSize: '13px',
-              fontWeight: isActive ? '700' : '500',
-              color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-              borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent',
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              display: 'inline-flex',
-              alignItems: 'center'
-            })}
+            className={({ isActive }) => [
+              'payroll-subnav-item inline-flex min-h-10 shrink-0 items-center border-b-2 px-3 text-[12px] no-underline transition',
+              isActive
+                ? 'active border-primary font-bold text-primary'
+                : 'border-transparent font-medium text-secondary hover:text-content'
+            ].join(' ')}
           >
             {t.label}
           </NavLink>
