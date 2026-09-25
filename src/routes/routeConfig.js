@@ -46,11 +46,13 @@ export const routeConfig = [
   {
     id: 'attendance-manager', label: 'Attendance Manager', path: '/attendance-manager', icon: UserCheck, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'attendance.manage',
     children: [
-      { id: 'att-mgr-approvals', label: 'Approvals', path: '/attendance-manager/approvals' },
-      { id: 'att-mgr-team', label: 'Team Review', path: '/attendance-manager/team-review' },
-      { id: 'att-mgr-master', label: 'Master Records', path: '/attendance-manager/master-records' },
-      { id: 'att-mgr-leave-types', label: 'Leave Types', path: '/attendance-manager/leave-types' },
-      { id: 'att-mgr-holidays', label: 'Holidays', path: '/attendance-manager/holidays' },
+      { id: 'att-mgr-overview', label: 'Overview', path: '/attendance-manager/overview' },
+      { id: 'att-mgr-daily', label: 'Daily Attendance', path: '/attendance-manager/daily' },
+      { id: 'att-mgr-calendar', label: 'Monthly Calendar', path: '/attendance-manager/calendar' },
+      { id: 'att-mgr-leave', label: 'Leave Requests', path: '/attendance-manager/leave-requests' },
+      { id: 'att-mgr-overtime', label: 'Overtime', path: '/attendance-manager/overtime' },
+      { id: 'att-mgr-shifts', label: 'Shifts', path: '/attendance-manager/shifts' },
+      { id: 'att-mgr-reports', label: 'Reports', path: '/attendance-manager/reports' },
       { id: 'att-mgr-rules', label: 'Rules & Settings', path: '/attendance-manager/rules' }
     ]
   },
