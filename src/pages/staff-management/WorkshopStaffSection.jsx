@@ -79,6 +79,9 @@ export const WorkshopStaffSection = ({ section }) => {
   const [loading, setLoading] = useState(true);
   const [isTeamFormOpen, setIsTeamFormOpen] = useState(false);
   const [savingTeam, setSavingTeam] = useState(false);
+  const [teamStaffTarget, setTeamStaffTarget] = useState(null);
+  const [teamStaffSelection, setTeamStaffSelection] = useState([]);
+  const [savingTeamStaff, setSavingTeamStaff] = useState(false);
   const [teamForm, setTeamForm] = useState({
     name: '',
     lead: '',
@@ -116,6 +119,35 @@ export const WorkshopStaffSection = ({ section }) => {
       setIsTeamFormOpen(false);
     } finally {
       setSavingTeam(false);
+    }
+  };
+
+  const openTeamStaff = (team) => {
+    setTeamStaffTarget(team);
+    setTeamStaffSelection([]);
+  };
+
+  const toggleTeamStaff = (staffId) => {
+    setTeamStaffSelection((current) =>
+      current.includes(staffId)
+        ? current.filter((id) => id !== staffId)
+        : [...current, staffId]
+    );
+  };
+
+  const assignTeamStaff = async (event) => {
+    event.preventDefault();
+    if (!teamStaffTarget || !teamStaffSelection.length || savingTeamStaff) return;
+
+    setSavingTeamStaff(true);
+    try {
+      await staffManagementService.assignStaffToTeam(teamStaffTarget.id, teamStaffSelection);
+      const nextStaff = await staffService.getStaff();
+      setStaff(nextStaff);
+      setTeamStaffSelection([]);
+      setTeamStaffTarget(null);
+    } finally {
+      setSavingTeamStaff(false);
     }
   };
 
@@ -305,6 +337,14 @@ export const WorkshopStaffSection = ({ section }) => {
                     </div>
                   )) : <div className="staff-workshop-empty is-compact">No staff assigned.</div>}
                 </div>
+
+                <button
+                  type="button"
+                  className="staff-team-assign-button"
+                  onClick={() => openTeamStaff(department)}
+                >
+                  <UserPlus size={14}/> Add Staff
+                </button>
               </article>
             );
           })}
@@ -375,6 +415,68 @@ export const WorkshopStaffSection = ({ section }) => {
               <button type="submit" className="staff-team-save-button" disabled={savingTeam}>
                 <Save size={14} />
                 {savingTeam ? 'Creating...' : 'Create Team'}
+              </button>
+            </div>
+          </form>
+        </ResponsiveModalSheet>
+
+        <ResponsiveModalSheet
+          isOpen={!!teamStaffTarget}
+          onClose={() => {
+            setTeamStaffTarget(null);
+            setTeamStaffSelection([]);
+          }}
+          title={teamStaffTarget ? `Add Staff to ${teamStaffTarget.name}` : 'Add Staff to Team'}
+          maxWidth="560px"
+        >
+          <form className="staff-crud-form" onSubmit={assignTeamStaff}>
+            <div className="staff-assignment-note">
+              Selected staff will be moved from their current department/team to <strong>{teamStaffTarget?.name}</strong>.
+            </div>
+
+            <fieldset className="staff-crud-assignment-fieldset">
+              <legend>Select Staff</legend>
+              <div className="staff-crud-check-grid">
+                {activeStaff
+                  .filter((person) => person.department !== teamStaffTarget?.name)
+                  .map((person) => (
+                    <label key={person.id} className="staff-crud-check">
+                      <input
+                        type="checkbox"
+                        checked={teamStaffSelection.includes(person.id)}
+                        onChange={() => toggleTeamStaff(person.id)}
+                      />
+                      <span>
+                        <strong>{person.name}</strong>
+                        <small>{person.designation} · Current: {person.department || 'Unassigned'}</small>
+                      </span>
+                    </label>
+                  ))}
+              </div>
+            </fieldset>
+
+            {!activeStaff.some((person) => person.department !== teamStaffTarget?.name) ? (
+              <div className="staff-workshop-empty is-compact">All active staff are already in this team.</div>
+            ) : null}
+
+            <div className="staff-crud-form__actions">
+              <button
+                type="button"
+                className="staff-crud-cancel-button"
+                onClick={() => {
+                  setTeamStaffTarget(null);
+                  setTeamStaffSelection([]);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="staff-crud-save-button"
+                disabled={!teamStaffSelection.length || savingTeamStaff}
+              >
+                <UserPlus size={14}/>
+                {savingTeamStaff ? 'Assigning...' : `Add ${teamStaffSelection.length || ''} Staff`}
               </button>
             </div>
           </form>
