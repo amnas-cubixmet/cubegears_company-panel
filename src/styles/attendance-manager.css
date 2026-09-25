@@ -1,0 +1,494 @@
+/* =========================================================
+   CUBIXGEAR — ATTENDANCE MANAGER UI
+   Shared UI for overview/daily/calendar/leave/overtime/shifts/reports/rules.
+   ========================================================= */
+
+.cg-attendance-manager {
+  --am-radius: 14px;
+  --am-inner-radius: 10px;
+  --am-border: var(--border);
+  --am-surface: var(--surface);
+  --am-inner: var(--surface-2);
+  --am-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  width: 100%;
+  min-width: 0;
+  gap: 14px !important;
+}
+
+.cg-attendance-manager *,
+.cg-attendance-manager *::before,
+.cg-attendance-manager *::after {
+  box-sizing: border-box;
+}
+
+.cg-attendance-manager .attendance-manager-header {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 2px;
+}
+
+.cg-attendance-manager .attendance-manager-header h1 {
+  margin: 0 !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--text-primary) !important;
+}
+
+.cg-attendance-manager .attendance-manager-header p {
+  margin: 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+.cg-attendance-manager .attendance-manager-tabs {
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  padding: 5px !important;
+  gap: 4px !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-tabs button {
+  min-height: 38px !important;
+  height: 38px !important;
+  border-radius: 9px !important;
+  padding-inline: 12px !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+}
+
+.cg-attendance-manager .attendance-manager-content,
+.cg-attendance-manager .attendance-manager-module {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.cg-attendance-manager .attendance-manager-module {
+  gap: 12px !important;
+}
+
+/* Shared cards */
+.cg-attendance-manager .attendance-manager-module .rounded-2xl,
+.cg-attendance-manager .attendance-manager-overtime,
+.cg-attendance-manager .attendance-manager-overtime > div > div[style*="backgroundColor: 'var(--surface)'"] {
+  border-radius: var(--am-radius) !important;
+}
+
+.cg-attendance-manager .attendance-manager-module > .rounded-2xl,
+.cg-attendance-manager .attendance-manager-module .border.border-line.bg-surface,
+.cg-attendance-manager .attendance-manager-overtime {
+  border: 1px solid var(--am-border) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-module .bg-surface-2 {
+  border-radius: var(--am-inner-radius);
+}
+
+.cg-attendance-manager .attendance-manager-module h2,
+.cg-attendance-manager .attendance-manager-module h3 {
+  color: var(--text-primary);
+}
+
+/* Overview */
+.cg-attendance-manager .attendance-manager-overview > .grid:first-child {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-attendance-manager .attendance-manager-overview > .grid:first-child > div {
+  min-width: 0;
+  min-height: 100px;
+  padding: 13px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-overview > .grid:first-child > div .text-2xl {
+  font-size: 22px !important;
+  line-height: 1.1 !important;
+}
+
+.cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) {
+  gap: 12px !important;
+}
+
+.cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) > div {
+  padding: 14px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-overview .rounded-xl {
+  border-radius: var(--am-inner-radius) !important;
+}
+
+.cg-attendance-manager .attendance-manager-overview a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px !important;
+}
+
+/* Daily attendance */
+.cg-attendance-manager .attendance-manager-daily > .grid:first-child {
+  gap: 8px !important;
+  padding: 10px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-daily > .grid:first-child label,
+.cg-attendance-manager .attendance-manager-daily > .grid:first-child select {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+  background: var(--am-inner) !important;
+}
+
+.cg-attendance-manager .attendance-manager-daily > .overflow-x-auto,
+.cg-attendance-manager .attendance-manager-reports > .overflow-x-auto,
+.cg-attendance-manager .attendance-manager-calendar > .overflow-x-auto {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+  overflow-x: auto !important;
+}
+
+.cg-attendance-manager table {
+  border-collapse: collapse !important;
+}
+
+.cg-attendance-manager table th {
+  padding: 10px 12px !important;
+  color: var(--text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+
+.cg-attendance-manager table td {
+  padding: 11px 12px !important;
+  font-size: 12px !important;
+  vertical-align: middle !important;
+}
+
+.cg-attendance-manager table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.cg-attendance-manager table select,
+.cg-attendance-manager table button {
+  border-radius: 9px !important;
+}
+
+/* Monthly calendar */
+.cg-attendance-manager .attendance-manager-calendar > div:first-child {
+  padding: 14px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-calendar .grid > div {
+  border-radius: 7px;
+}
+
+/* Leave approvals */
+.cg-attendance-manager .attendance-manager-leave > div {
+  border-radius: var(--am-radius) !important;
+}
+
+.cg-attendance-manager .attendance-manager-leave > div:first-child,
+.cg-attendance-manager .attendance-manager-leave > div:not(:first-child) {
+  border-color: var(--am-border) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-leave button {
+  min-height: 38px;
+  border-radius: 9px !important;
+}
+
+/* Overtime */
+.cg-attendance-manager .attendance-manager-overtime {
+  padding: 14px !important;
+}
+
+.cg-attendance-manager .attendance-manager-overtime > div {
+  gap: 12px !important;
+}
+
+.cg-attendance-manager .attendance-manager-overtime button {
+  border-radius: 9px !important;
+}
+
+.cg-attendance-manager .attendance-manager-overtime input,
+.cg-attendance-manager .attendance-manager-overtime select,
+.cg-attendance-manager .attendance-manager-overtime textarea {
+  border-radius: 10px !important;
+}
+
+/* Shifts */
+.cg-attendance-manager .attendance-manager-shifts > div:first-child {
+  padding: 14px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-shifts > .grid {
+  gap: 12px !important;
+}
+
+.cg-attendance-manager .attendance-manager-shifts > .grid > div {
+  padding: 14px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-shifts input,
+.cg-attendance-manager .attendance-manager-shifts select {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+}
+
+/* Reports */
+.cg-attendance-manager .attendance-manager-reports > div:first-child {
+  padding: 14px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-reports > select {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+  background: var(--am-surface) !important;
+}
+
+.cg-attendance-manager .attendance-manager-reports button {
+  min-height: 40px !important;
+  border-radius: 10px !important;
+}
+
+/* Rules */
+.cg-attendance-manager .attendance-manager-rules {
+  gap: 12px !important;
+}
+
+.cg-attendance-manager .attendance-manager-rules .rules-header {
+  padding: 14px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-rules .rules-header h3 {
+  font-size: 16px !important;
+  font-weight: 750 !important;
+}
+
+.cg-attendance-manager .attendance-manager-rules .save-rules-btn {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+}
+
+.cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] {
+  gap: 10px !important;
+}
+
+.cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] > div {
+  padding: 13px !important;
+  border: 1px solid var(--am-border) !important;
+  border-radius: var(--am-radius) !important;
+  background: var(--am-surface) !important;
+  box-shadow: var(--am-shadow) !important;
+}
+
+.cg-attendance-manager .attendance-manager-rules input:not([type="checkbox"]),
+.cg-attendance-manager .attendance-manager-rules select,
+.cg-attendance-manager .attendance-manager-rules textarea {
+  min-height: 42px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+}
+
+@media (max-width: 1280px) {
+  .cg-attendance-manager .attendance-manager-overview > .grid:first-child {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .cg-attendance-manager {
+    --am-radius: 12px;
+    --am-inner-radius: 9px;
+    gap: 12px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-header {
+    padding: 0;
+  }
+
+  .cg-attendance-manager .attendance-manager-header h1 {
+    font-size: 20px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-header p {
+    font-size: 12px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-mobile-tabs .attendance-manager-tabs {
+    padding: 4px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-mobile-tabs .attendance-manager-tabs button {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding-inline: 11px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-module {
+    gap: 10px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-overview > .grid:first-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-overview > .grid:first-child > div {
+    min-height: 92px;
+    padding: 11px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) > div,
+  .cg-attendance-manager .attendance-manager-calendar > div:first-child,
+  .cg-attendance-manager .attendance-manager-shifts > div:first-child,
+  .cg-attendance-manager .attendance-manager-shifts > .grid > div,
+  .cg-attendance-manager .attendance-manager-reports > div:first-child,
+  .cg-attendance-manager .attendance-manager-rules .rules-header,
+  .cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] > div,
+  .cg-attendance-manager .attendance-manager-overtime {
+    padding: 11px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-daily > .grid:first-child {
+    grid-template-columns: 1fr !important;
+    padding: 9px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-daily > .grid:first-child label,
+  .cg-attendance-manager .attendance-manager-daily > .grid:first-child select {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-shifts > .grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-shifts .grid.grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-reports > div:first-child {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-reports > div:first-child > div:last-child {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-reports > div:first-child button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cg-attendance-manager .attendance-manager-reports > select {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-rules .rules-header {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-rules .save-rules-btn {
+    width: 100% !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-overtime > div > div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-leave > div {
+    padding: 11px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .cg-attendance-manager .attendance-manager-overview > .grid:first-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-overview > .grid:first-child > div {
+    padding: 10px !important;
+  }
+
+  .cg-attendance-manager .attendance-manager-tabs button {
+    padding-inline: 9px !important;
+    font-size: 11px !important;
+  }
+}
