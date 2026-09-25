@@ -727,3 +727,165 @@
     @apply max-w-28;
   }
 }
+
+
+/* ===== Full project UI audit overrides ===== */
+
+/* Keep the scrolling/padding contract in one place. Legacy CSS still contains
+   old .main-content !important declarations, so this final layer wins safely. */
+.main-content.cg-main-content {
+  padding: 20px !important;
+}
+
+.cg-main-content__body {
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+/* Remove nested page padding where the app shell already provides it. */
+.cg-main-content__body > .saas-page,
+.cg-main-content__body > .settings-page,
+.cg-main-content__body > .account-page {
+  padding: 0 !important;
+}
+
+/* Shared top-level page rhythm. */
+.crud-page,
+.billing-page,
+.job-simple-page,
+.simple-jobs-page,
+.my-attendance-page,
+.attendance-manager-page,
+.settings-page,
+.account-page,
+.dashboard-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Content must never force the app shell wider than the viewport. */
+.cg-main-content__body *,
+.crud-page *,
+.billing-page *,
+.settings-page *,
+.account-page * {
+  min-width: 0;
+}
+
+.cg-main-content__body img,
+.cg-main-content__body video,
+.cg-main-content__body canvas,
+.cg-main-content__body svg {
+  max-width: 100%;
+}
+
+/* Common table safety. Desktop tables may scroll inside their own card only. */
+.ui-table-wrap,
+.crud-table-wrap,
+.saas-table-wrap,
+.billing-items-editor,
+.desktop-table-view {
+  max-width: 100%;
+}
+
+/* Consistent compact card rhythm for legacy modules. */
+.crud-stat,
+.dashboard-card,
+.summary-card,
+.stat-card,
+.settings-card,
+.billing-card,
+.saas-card,
+.profile-card-simple,
+.job-create-card {
+  border-radius: 14px;
+}
+
+/* Prevent accidental checkbox/radio stretching from old global field rules. */
+input[type='checkbox'],
+input[type='radio'] {
+  min-height: 0 !important;
+  padding: 0;
+}
+
+/* Do not animate geometry on press; avoids Safari/janky list movement. */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Long IDs, VINs, references and customer text should wrap instead of overflow. */
+.crud-mobile-card,
+.booking-card,
+.billing-card,
+.settings-card,
+.saas-card,
+.responsive-modal-sheet {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .main-content.cg-main-content {
+    padding: 12px 12px calc(80px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .cg-main-content__body {
+    max-width: none;
+  }
+
+  /* 16px prevents iOS Safari focus zoom while retaining compact labels. */
+  .cg-main-content__body input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  .cg-main-content__body select,
+  .cg-main-content__body textarea {
+    font-size: 16px !important;
+  }
+
+  .cg-main-content__body table {
+    font-size: 12px;
+  }
+
+  .responsive-modal-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  .page-header,
+  .crud-heading,
+  .billing-page-head,
+  .billing-editor-head,
+  .settings-header,
+  .account-page-header {
+    align-items: stretch;
+  }
+
+  .crud-heading-actions,
+  .billing-head-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .main-content.cg-main-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .cg-main-content__body {
+    width: 100%;
+  }
+
+  .card,
+  .ui-card,
+  .dashboard-card,
+  .crud-card,
+  .settings-card,
+  .billing-card,
+  .account-card,
+  .panel {
+    border-radius: 12px;
+  }
+}
