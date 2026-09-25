@@ -90,61 +90,77 @@ export const DailyAttendance = () => {
   };
 
   return (
-    <div className="attendance-manager-module attendance-manager-daily flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-2 rounded-2xl border border-line bg-surface p-3 md:grid-cols-[minmax(220px,1fr)_180px_180px]">
-        <label className="flex h-10 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3">
-          <Search size={15} className="text-muted" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search employee..."
-            className="min-w-0 flex-1 border-0 bg-transparent text-xs text-content outline-none"
-          />
+    <div className="attendance-manager-module attendance-manager-daily">
+      <section className="am-filter-card">
+        <label className="am-search-field">
+          <Search size={15} />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search employee..." />
         </label>
-        <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
+        <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)}>
           {branches.map((branch) => <option key={branch}>{branch}</option>)}
         </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option>All</option>
           {[...STATUSES, 'Missing Clock Out'].map((status) => <option key={status}>{status}</option>)}
         </select>
+      </section>
+
+      <div className="am-daily-mobile-list">
+        {filtered.map((item) => (
+          <article key={item.id} className="am-staff-card">
+            <div className="am-staff-card__head">
+              <div>
+                <strong>{item.name}</strong>
+                <span>{item.staffId} · {item.designation}</span>
+              </div>
+              <select value={item.status} onChange={(e) => quickMark(item, e.target.value)}>
+                {!STATUSES.includes(item.status) ? <option>{item.status}</option> : null}
+                {STATUSES.map((status) => <option key={status}>{status}</option>)}
+              </select>
+            </div>
+            <div className="am-staff-card__grid">
+              <div><span>Branch</span><strong>{item.branch}</strong></div>
+              <div><span>Check In</span><strong>{item.clockIn || '—'}</strong></div>
+              <div><span>Check Out</span><strong>{item.clockOut || '—'}</strong></div>
+              <div><span>Working</span><strong>{item.worked || '—'}</strong></div>
+              <div><span>OT</span><strong>{item.overtimeHours || 0}h</strong></div>
+              <div><span>Notes</span><strong>{item.notes || '—'}</strong></div>
+            </div>
+            <button type="button" className="am-edit-button" onClick={() => openEdit(item)}>
+              <Edit3 size={14}/> Edit Attendance
+            </button>
+          </article>
+        ))}
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
-        <table className="w-full min-w-[1050px] border-collapse text-left">
-          <thead className="bg-surface-2">
-            <tr className="text-[10px] uppercase tracking-wide text-muted">
+      <div className="am-table-card am-daily-table">
+        <table>
+          <thead>
+            <tr>
               {['Employee','Role / Branch','Check In','Check Out','Working','OT','Status','Notes','Actions'].map((head) => (
-                <th key={head} className="px-3 py-3 font-bold">{head}</th>
+                <th key={head}>{head}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filtered.map((item) => (
-              <tr key={item.id} className="border-t border-line text-xs">
-                <td className="px-3 py-3">
-                  <div className="font-bold text-content">{item.name}</div>
-                  <div className="text-[10px] text-muted">{item.staffId}</div>
-                </td>
-                <td className="px-3 py-3 text-secondary">{item.designation}<br/><span className="text-[10px] text-muted">{item.branch}</span></td>
-                <td className="px-3 py-3 text-content">{item.clockIn || '—'}</td>
-                <td className="px-3 py-3 text-content">{item.clockOut || '—'}</td>
-                <td className="px-3 py-3 font-semibold text-content">{item.worked || '—'}</td>
-                <td className="px-3 py-3 text-content">{item.overtimeHours || 0}h</td>
-                <td className="px-3 py-3">
-                  <select
-                    value={STATUSES.includes(item.status) ? item.status : item.status}
-                    onChange={(e) => quickMark(item, e.target.value)}
-                    className="h-8 rounded-lg border border-line bg-surface-2 px-2 text-[11px] font-semibold text-content"
-                  >
+              <tr key={item.id}>
+                <td><strong>{item.name}</strong><span className="am-table-subtext">{item.staffId}</span></td>
+                <td>{item.designation}<span className="am-table-subtext">{item.branch}</span></td>
+                <td>{item.clockIn || '—'}</td>
+                <td>{item.clockOut || '—'}</td>
+                <td><strong>{item.worked || '—'}</strong></td>
+                <td>{item.overtimeHours || 0}h</td>
+                <td>
+                  <select value={item.status} onChange={(e) => quickMark(item, e.target.value)}>
                     {!STATUSES.includes(item.status) ? <option>{item.status}</option> : null}
                     {STATUSES.map((status) => <option key={status}>{status}</option>)}
                   </select>
                 </td>
-                <td className="max-w-[180px] truncate px-3 py-3 text-muted">{item.notes || '—'}</td>
-                <td className="px-3 py-3">
-                  <button onClick={() => openEdit(item)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 text-[11px] font-semibold text-content">
-                    <Edit3 size={13}/>Edit
+                <td className="am-notes-cell">{item.notes || '—'}</td>
+                <td>
+                  <button type="button" className="am-edit-button am-edit-button--compact" onClick={() => openEdit(item)}>
+                    <Edit3 size={13}/> Edit
                   </button>
                 </td>
               </tr>
@@ -155,36 +171,36 @@ export const DailyAttendance = () => {
 
       <ResponsiveModalSheet isOpen={!!editItem} onClose={() => setEditItem(null)} title="Edit Attendance" maxWidth="520px">
         {editItem && (
-          <form onSubmit={saveEdit} className="flex flex-col gap-3">
-            <div className="rounded-xl bg-surface-2 p-3 text-xs text-secondary">
-              <strong className="text-content">{editItem.name}</strong> · {editItem.staffId}<br/>
+          <form onSubmit={saveEdit} className="am-edit-form">
+            <div className="am-edit-summary">
+              <strong>{editItem.name}</strong> · {editItem.staffId}<br/>
               Shift: {editItem.shift}
             </div>
 
-            <label className="text-xs font-semibold text-secondary">Status
-              <select value={form.status} onChange={(e) => setForm({...form,status:e.target.value})} className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
+            <label>Status
+              <select value={form.status} onChange={(e) => setForm({...form,status:e.target.value})}>
                 {STATUSES.map((status) => <option key={status}>{status}</option>)}
               </select>
             </label>
 
-            <div className="grid grid-cols-2 gap-3">
-              <label className="text-xs font-semibold text-secondary">Check In
-                <input value={form.clockIn} onChange={(e) => setForm({...form,clockIn:e.target.value})} placeholder="09:00 AM" className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
+            <div className="am-form-grid">
+              <label>Check In
+                <input value={form.clockIn} onChange={(e) => setForm({...form,clockIn:e.target.value})} placeholder="09:00 AM"/>
               </label>
-              <label className="text-xs font-semibold text-secondary">Check Out
-                <input value={form.clockOut} onChange={(e) => setForm({...form,clockOut:e.target.value})} placeholder="06:00 PM" className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
+              <label>Check Out
+                <input value={form.clockOut} onChange={(e) => setForm({...form,clockOut:e.target.value})} placeholder="06:00 PM"/>
               </label>
             </div>
 
-            <label className="text-xs font-semibold text-secondary">Notes
-              <input value={form.notes} onChange={(e) => setForm({...form,notes:e.target.value})} className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
+            <label>Notes
+              <input value={form.notes} onChange={(e) => setForm({...form,notes:e.target.value})}/>
             </label>
 
-            <label className="text-xs font-semibold text-secondary">Edit Reason *
-              <textarea required rows={3} value={form.reason} onChange={(e) => setForm({...form,reason:e.target.value})} placeholder="Why is this attendance being corrected?" className="mt-1 min-h-24 w-full rounded-xl border border-line bg-surface-2 p-3 text-sm text-content"/>
+            <label>Edit Reason *
+              <textarea required rows={3} value={form.reason} onChange={(e) => setForm({...form,reason:e.target.value})} placeholder="Why is this attendance being corrected?"/>
             </label>
 
-            <button disabled={saving} className="h-11 rounded-xl border-0 bg-primary text-sm font-bold text-white">
+            <button disabled={saving} className="am-save-button">
               {saving ? 'Saving...' : 'Save Attendance Correction'}
             </button>
           </form>
