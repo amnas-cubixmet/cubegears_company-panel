@@ -7,9 +7,10 @@ import {
 import { staffService } from '../../services/staff.service';
 import { staffManagementService } from '../../services/staffManagement.service';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import { StaffShiftCrud } from './StaffShiftCrud';
+import { StaffSkillCrud } from './StaffSkillCrud';
+import { StaffDocumentCrud } from './StaffDocumentCrud';
 import {
-  workshopSkills,
-  workshopShifts,
   staffJobAssignments,
   staffPerformance
 } from '../../mock/staffManagement.mock';
@@ -383,79 +384,11 @@ export const WorkshopStaffSection = ({ section }) => {
   }
 
   if (section === 'shifts') {
-    return (
-      <div className="staff-workshop-view">
-        <SectionHeader
-          title="Shift Assignment"
-          description="Morning, evening and custom workshop shifts with weekly-off and branch allocation."
-        />
-        <div className="staff-shift-grid">
-          {workshopShifts.map((shift) => {
-            const members = staff.filter((item) =>
-              String(item.shift || '').toLowerCase().includes(shift.name.replace(' Shift', '').toLowerCase())
-            );
-            return (
-              <article key={shift.id} className="staff-workshop-panel staff-shift-card">
-                <div className="staff-shift-card__icon"><Clock3 size={18} /></div>
-                <h3>{shift.name}</h3>
-                <strong>{shift.time}</strong>
-                <div className="staff-shift-card__details">
-                  <span>Weekly Off <b>{shift.weeklyOff}</b></span>
-                  <span>Branch <b>{shift.branch}</b></span>
-                  <span>Assigned Staff <b>{members.length}</b></span>
-                </div>
-                <div className="staff-chip-row">
-                  {members.map((member) => <span key={member.id}>{member.name}</span>)}
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </div>
-    );
+    return <StaffShiftCrud staff={staff} />;
   }
 
   if (section === 'skills') {
-    return (
-      <div className="staff-workshop-view">
-        <SectionHeader
-          title="Skills & Specialization"
-          description="Workshop skill coverage for assignment planning and technician development."
-        />
-
-        <div className="staff-skill-coverage">
-          {workshopSkills.map((skill) => {
-            const count = staff.filter((item) => item.skills?.includes(skill)).length;
-            return (
-              <div key={skill} className="staff-skill-coverage__item">
-                <Wrench size={14} />
-                <span>{skill}</span>
-                <strong>{count}</strong>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="staff-skill-person-grid">
-          {activeStaff.map((person) => (
-            <article key={person.id} className="staff-workshop-panel staff-skill-person">
-              <div className="staff-skill-person__head">
-                <img src={person.photo} alt="" />
-                <div>
-                  <h3>{person.name}</h3>
-                  <p>{person.designation} · {person.department}</p>
-                </div>
-              </div>
-              <div className="staff-chip-row">
-                {person.skills?.length
-                  ? person.skills.map((skill) => <span key={skill}>{skill}</span>)
-                  : <span className="is-muted">No skills assigned</span>}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    );
+    return <StaffSkillCrud staff={staff} />;
   }
 
   if (section === 'performance') {
@@ -508,55 +441,7 @@ export const WorkshopStaffSection = ({ section }) => {
   }
 
   if (section === 'documents') {
-    const documentRows = staff.flatMap((person) =>
-      (person.documents || []).map((document) => ({
-        ...document,
-        staffId: person.id,
-        staffName: person.name
-      }))
-    );
-
-    return (
-      <div className="staff-workshop-view">
-        <SectionHeader
-          title="Staff Documents"
-          description="ID proof, licence, certificates, offer letter and employment contract records."
-        />
-
-        <div className="staff-document-summary">
-          <div><FileText size={16}/><span>Total Documents</span><strong>{documentRows.length}</strong></div>
-          <div><ShieldCheck size={16}/><span>Staff With Documents</span><strong>{staff.filter((item) => item.documents?.length).length}</strong></div>
-          <div><AlertTriangle size={16}/><span>Missing Documents</span><strong>{staff.filter((item) => !item.documents?.length).length}</strong></div>
-        </div>
-
-        <div className="staff-document-grid">
-          {staff.map((person) => (
-            <article key={person.id} className="staff-workshop-panel staff-document-card">
-              <div className="staff-document-card__head">
-                <div>
-                  <h3>{person.name}</h3>
-                  <p>{person.id} · {person.designation}</p>
-                </div>
-                <span className={person.documents?.length ? 'is-complete' : 'is-missing'}>
-                  {person.documents?.length ? `${person.documents.length} files` : 'Missing'}
-                </span>
-              </div>
-              <div className="staff-document-list">
-                {person.documents?.length ? person.documents.map((doc) => (
-                  <div key={doc.id} className="staff-data-row">
-                    <div>
-                      <strong>{doc.name}</strong>
-                      <span>{doc.type} · {doc.uploadedDate}</span>
-                    </div>
-                    <FileText size={14}/>
-                  </div>
-                )) : <div className="staff-workshop-empty is-compact">No documents uploaded.</div>}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    );
+    return <StaffDocumentCrud staff={staff} />;
   }
 
   if (section === 'reports') {
