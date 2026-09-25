@@ -211,5 +211,10 @@ export const mockAttendanceRulesConfig = {
   earlyExitThreshold: 15,
   overtimeThreshold: 60, // 1 hour
   missingPunchPolicy: "Manager Review Required before Payroll Hold",
-  allowSelfApproval: false
+  allowSelfApproval: false,
+  weekendDays: ["Sunday"],
+  alternateSaturdayEnabled: false,
+  alternateSaturdayPattern: "2nd & 4th Saturday",
+  weekendAttendancePolicy: "Mark as Weekly Off",
+  weekendEffectiveFrom: "2026-09-01"
 };
