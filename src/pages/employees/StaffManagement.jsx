@@ -21,8 +21,8 @@ export const StaffManagement = () => {
   }, [location.pathname, navigate]);
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
-      <header>
+    <div className="staff-management-page cg-staff-management flex w-full min-w-0 flex-col gap-4">
+      <header className="staff-management-header">
         <h1 className="m-0 text-[22px] font-extrabold leading-tight text-content">
           Staff Management
         </h1>
@@ -33,7 +33,7 @@ export const StaffManagement = () => {
 
       <StaffManagementTabs />
 
-      <div className="w-full min-w-0">
+      <div className="staff-management-content w-full min-w-0">
         {activeSubmenu === 'staff' ? <Staff /> : <UserRoles />}
       </div>
     </div>
