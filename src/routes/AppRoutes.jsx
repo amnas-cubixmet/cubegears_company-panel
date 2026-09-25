@@ -74,14 +74,21 @@ export const AppRoutes = () => (
       <Route path="/staff-management/staff" element={<StaffManagement />} />
       <Route path="/staff-management/roles" element={<StaffManagement />} />
       <Route path="/staff-management/payroll" element={<Navigate to="/payroll" replace />} />
-      <Route path="/payroll" element={<Payroll section="dashboard" />} />
-      <Route path="/payroll/salary-structure" element={<Payroll section="salary" />} />
-      <Route path="/payroll/monthly" element={<Payroll section="monthly" />} />
-      <Route path="/payroll/approvals" element={<Payroll section="approvals" />} />
-      <Route path="/payroll/disbursal" element={<Payroll section="disbursal" />} />
+      <Route path="/payroll" element={<Payroll section="overview" />} />
+      <Route path="/payroll/employees" element={<Payroll section="employees" />} />
+      <Route path="/payroll/attendance" element={<Payroll section="attendance" />} />
+      <Route path="/payroll/salary-setup" element={<Payroll section="salary" />} />
+      <Route path="/payroll/incentives" element={<Payroll section="incentives" />} />
+      <Route path="/payroll/overtime" element={<Payroll section="overtime" />} />
       <Route path="/payroll/advances" element={<Payroll section="advances" />} />
+      <Route path="/payroll/run" element={<Payroll section="run" />} />
       <Route path="/payroll/payslips" element={<Payroll section="payslips" />} />
       <Route path="/payroll/reports" element={<Payroll section="reports" />} />
+
+      <Route path="/payroll/salary-structure" element={<Navigate to="/payroll/salary-setup" replace />} />
+      <Route path="/payroll/monthly" element={<Navigate to="/payroll/run" replace />} />
+      <Route path="/payroll/approvals" element={<Navigate to="/payroll/run" replace />} />
+      <Route path="/payroll/disbursal" element={<Navigate to="/payroll/run" replace />} />
 
       <Route path="/customers" element={<CustomerList />} />
       <Route path="/customers/new" element={<AddCustomer />} />
