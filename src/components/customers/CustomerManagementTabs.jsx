@@ -4,7 +4,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 const customerTabs = [
   { label: 'Overview', path: '/customers/overview' },
   { label: 'All Customers', path: '/customers/all' },
-  { label: 'Add Customer', path: '/customers/new' },
   { label: 'Vehicles', path: '/customers/vehicles' },
   { label: 'Service History', path: '/customers/service-history' },
   { label: 'Outstanding', path: '/customers/outstanding' },
