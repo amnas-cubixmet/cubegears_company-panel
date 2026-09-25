@@ -90,7 +90,7 @@ export const DailyAttendance = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="attendance-manager-module attendance-manager-daily flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-2 rounded-2xl border border-line bg-surface p-3 md:grid-cols-[minmax(220px,1fr)_180px_180px]">
         <label className="flex h-10 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3">
           <Search size={15} className="text-muted" />
