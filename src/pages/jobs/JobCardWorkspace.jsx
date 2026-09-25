@@ -593,6 +593,27 @@ export function JobCardWorkspace() {
         ))}
       </section>
 
+      <section className="job-status-pipeline" aria-label="Job status progress">
+        {JOB_STATUSES.map((status, index) => {
+          const currentIndex = JOB_STATUSES.indexOf(normalizeJobStatus(job.status));
+          const state = index < currentIndex ? 'is-done' : index === currentIndex ? 'is-current' : 'is-next';
+
+          return (
+            <button
+              type="button"
+              key={status}
+              className={`job-status-step ${state}`}
+              onClick={() => setStatus(status)}
+              disabled={saving}
+              title={`Set status to ${status}`}
+            >
+              <span>{index + 1}</span>
+              <strong>{status}</strong>
+            </button>
+          );
+        })}
+      </section>
+
       <nav className="job-detail-tabs flex w-full gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TABS.map(([key, label]) => (
           <button
@@ -1028,7 +1049,7 @@ export function JobCardWorkspace() {
 
 function Info({ label, value }) {
   return (
-    <div className="min-w-0 rounded-xl bg-surface-2 p-3">
+    <div className="job-info-card min-w-0 rounded-xl bg-surface-2 p-3">
       <div className="text-[10px] font-semibold text-muted">{label}</div>
       <div className="mt-1 break-words text-xs font-bold text-content">{value || '—'}</div>
     </div>
@@ -1037,7 +1058,7 @@ function Info({ label, value }) {
 
 function AmountRow({ label, value }) {
   return (
-    <div className="flex items-center justify-between border-b border-line py-2">
+    <div className="job-amount-row flex items-center justify-between border-b border-line py-2">
       <span className="text-secondary">{label}</span>
       <strong className="text-content">{money.format(value || 0)}</strong>
     </div>
