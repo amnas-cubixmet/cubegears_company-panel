@@ -241,7 +241,7 @@ export const Dashboard = () => {
           <Button
             variant="outline"
             size="md"
-            onClick={() => navigate('/customers/add')}
+            onClick={() => navigate('/customers/new')}
             style={{
               width: '100%',
               minWidth: 0,
@@ -263,7 +263,7 @@ export const Dashboard = () => {
           <Button
             variant="outline"
             size="md"
-            onClick={() => navigate('/jobs/add')}
+            onClick={() => navigate('/jobs/new')}
             style={{
               width: '100%',
               minWidth: 0,
@@ -285,7 +285,7 @@ export const Dashboard = () => {
           <Button
             variant="outline"
             size="md"
-            onClick={() => navigate('/invoices/create')}
+            onClick={() => navigate('/invoices/new')}
             style={{
               width: '100%',
               minWidth: 0,
@@ -423,7 +423,7 @@ export const Dashboard = () => {
           <SummaryCard title="Vehicle Delivery Queue">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', minWidth: 0 }}>
               {data?.deliveries?.map((d) => (
-                <div key={d.id} style={{
+                <div key={d.id} className="dashboard-item-card delivery-item" style={{
                   backgroundColor: 'var(--surface-2)',
                   border: '1px solid var(--border)',
                   borderRadius: '12px',
@@ -523,15 +523,15 @@ export const Dashboard = () => {
           {/* SECTION 8: PAYMENTS & COLLECTIONS OVERVIEW */}
           <SummaryCard title="Finance & Collections">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', minWidth: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '12px' }}>
+              <div className="dashboard-data-row finance-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '12px' }}>
                 <span style={{ color: 'var(--text-secondary)', fontSize: '13px', minWidth: 0 }}>Billed Revenue</span>
                 <span style={{ color: 'var(--text-primary)', fontWeight: '700', flexShrink: 0 }}>{data?.payments?.billedAmount}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '12px' }}>
+              <div className="dashboard-data-row finance-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '12px' }}>
                 <span style={{ color: 'var(--text-secondary)', fontSize: '13px', minWidth: 0 }}>Collected Cash</span>
                 <span style={{ color: 'var(--success)', fontWeight: '700', flexShrink: 0 }}>{data?.payments?.receivedPayments}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '12px' }}>
+              <div className="dashboard-data-row finance-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '12px' }}>
                 <span style={{ color: 'var(--text-secondary)', fontSize: '13px', minWidth: 0 }}>Overdue Dues</span>
                 <span style={{ color: 'var(--danger)', fontWeight: '700', flexShrink: 0 }}>{data?.payments?.overdueAmount}</span>
               </div>
@@ -542,7 +542,7 @@ export const Dashboard = () => {
           <SummaryCard title="Critical Stock Alerts & Approvals">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', minWidth: 0 }}>
               {data?.stockAlerts?.map((a) => (
-                <div key={a.id} style={{
+                <div key={a.id} className="dashboard-item-card stock-alert-item" style={{
                   backgroundColor: 'var(--surface-2)',
                   borderLeft: `4px solid ${a.priority === 'critical' ? 'var(--danger)' : 'var(--warning)'}`,
                   borderRadius: '10px',
@@ -567,7 +567,7 @@ export const Dashboard = () => {
           <SummaryCard title="Workshop Staff Workload">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', minWidth: 0 }}>
               {data?.staffAvailability?.map((s, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '8px' }}>
+                <div key={idx} className="dashboard-data-row staff-workload-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '8px', minWidth: 0, gap: '8px' }}>
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <span style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '14px' }}>{s.name}</span>
                     <p style={{ color: 'var(--text-muted)', fontSize: '11px', margin: 0 }}>{s.role} • {s.activeJobs} Active Jobs</p>
@@ -581,19 +581,19 @@ export const Dashboard = () => {
           {/* SECTION 12: MY ATTENDANCE SUMMARY */}
           <SummaryCard title="My Personal Attendance Stats">
             <div className="attendance-stats-grid">
-              <div style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
+              <div className="dashboard-item-card attendance-stat-tile" style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Today's Punches</span>
                 <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', margin: '2px 0 0 0' }}>{data?.myAttendanceSummary?.todayPunches || '2 Sessions'}</h4>
               </div>
-              <div style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
+              <div className="dashboard-item-card attendance-stat-tile" style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Monthly Hours</span>
                 <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--primary)', margin: '2px 0 0 0' }}>{data?.myAttendanceSummary?.monthlyHours || '142h'}</h4>
               </div>
-              <div style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
+              <div className="dashboard-item-card attendance-stat-tile" style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Present Days</span>
                 <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--success)', margin: '2px 0 0 0' }}>18 Days</h4>
               </div>
-              <div style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
+              <div className="dashboard-item-card attendance-stat-tile" style={{ padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'center', minWidth: 0 }}>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Overtime</span>
                 <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--warning)', margin: '2px 0 0 0' }}>+{data?.myAttendanceSummary?.approvedOvertime || '12h'}</h4>
               </div>
@@ -614,7 +614,7 @@ export const Dashboard = () => {
           <SummaryCard title="Workshop Activity Log">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', minWidth: 0 }}>
               {data?.recentActivity?.map((act) => (
-                <div key={act.id} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', minWidth: 0 }}>
+                <div key={act.id} className="dashboard-data-row activity-row" style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', minWidth: 0 }}>
                   <Activity size={16} color="var(--primary)" style={{ marginTop: '2px', flexShrink: 0 }} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <p style={{ fontSize: '13px', color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>{act.text}</p>
@@ -629,7 +629,7 @@ export const Dashboard = () => {
           <SummaryCard title="Upcoming Service Follow-Ups">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', minWidth: 0 }}>
               {data?.serviceFollowUps?.map((f, idx) => (
-                <div key={idx} style={{ backgroundColor: 'var(--surface-2)', borderRadius: '10px', padding: '12px', border: '1px solid var(--border)', minWidth: 0 }}>
+                <div key={idx} className="dashboard-item-card followup-item" style={{ backgroundColor: 'var(--surface-2)', borderRadius: '10px', padding: '12px', border: '1px solid var(--border)', minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', minWidth: 0, gap: '8px' }}>
                     <h4 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>{f.customer}</h4>
                     <a href={`tel:${f.phone}`} style={{ color: 'var(--primary)', flexShrink: 0 }} title="Call Customer"><Phone size={16} /></a>
