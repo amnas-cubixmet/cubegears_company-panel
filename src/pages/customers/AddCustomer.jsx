@@ -65,7 +65,7 @@ export const AddCustomer = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <form className="customer-add-form cg-customers" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         
         {/* BASIC INFORMATION */}
         <FormSection
