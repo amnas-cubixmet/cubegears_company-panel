@@ -55,7 +55,7 @@ export const Staff = () => {
                           item.id.toLowerCase().includes(search.toLowerCase()) ||
                           item.designation.toLowerCase().includes(search.toLowerCase());
     const matchesBranch = selectedBranch === 'All' || item.branch === selectedBranch;
-    const matchesStatus = selectedStatus === 'All' || item.accountStatus === selectedStatus;
+    const matchesStatus = selectedStatus === 'All' || item.employmentStatus === selectedStatus;
     return matchesSearch && matchesBranch && matchesStatus;
   });
 
@@ -204,10 +204,10 @@ export const Staff = () => {
                 fontWeight: '700',
                 padding: '2px 8px',
                 borderRadius: '6px',
-                backgroundColor: staff.accountStatus === 'Active' ? 'var(--success-soft)' : 'var(--danger-soft)',
-                color: staff.accountStatus === 'Active' ? 'var(--success)' : 'var(--danger)'
+                backgroundColor: staff.employmentStatus === 'Active' ? 'var(--success-soft)' : ['Probation', 'Notice Period'].includes(staff.employmentStatus) ? 'var(--warning-soft)' : 'var(--danger-soft)',
+                color: staff.employmentStatus === 'Active' ? 'var(--success)' : ['Probation', 'Notice Period'].includes(staff.employmentStatus) ? 'var(--warning)' : 'var(--danger)'
               }}>
-                {staff.accountStatus}
+                {staff.employmentStatus}
               </span>
             </div>
 
