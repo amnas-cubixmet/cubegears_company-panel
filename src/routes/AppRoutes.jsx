@@ -79,9 +79,17 @@ export const AppRoutes = () => (
       <Route path="/attendance-manager/leave-types" element={<Navigate to="/attendance-manager/rules" replace />} />
       <Route path="/attendance-manager/holidays" element={<Navigate to="/attendance-manager/calendar" replace />} />
 
-      <Route path="/staff-management" element={<Navigate to="/staff-management/staff" replace />} />
+      <Route path="/staff-management" element={<Navigate to="/staff-management/overview" replace />} />
+      <Route path="/staff-management/overview" element={<StaffManagement />} />
       <Route path="/staff-management/staff" element={<StaffManagement />} />
+      <Route path="/staff-management/add" element={<StaffManagement />} />
       <Route path="/staff-management/roles" element={<StaffManagement />} />
+      <Route path="/staff-management/teams" element={<StaffManagement />} />
+      <Route path="/staff-management/shifts" element={<StaffManagement />} />
+      <Route path="/staff-management/skills" element={<StaffManagement />} />
+      <Route path="/staff-management/performance" element={<StaffManagement />} />
+      <Route path="/staff-management/documents" element={<StaffManagement />} />
+      <Route path="/staff-management/reports" element={<StaffManagement />} />
       <Route path="/staff-management/payroll" element={<Navigate to="/payroll" replace />} />
       <Route path="/payroll" element={<Payroll section="overview" />} />
       <Route path="/payroll/employees" element={<Payroll section="employees" />} />
