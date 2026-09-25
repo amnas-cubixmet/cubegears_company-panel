@@ -77,11 +77,11 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
       <aside
         aria-hidden={!isOpen}
         className={[
-          'fixed bottom-0 right-0 top-0 z-[100] flex h-dvh w-[min(88vw,360px)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 md:hidden',
+          'fixed bottom-0 right-0 top-0 z-[100] flex h-dvh w-[min(90vw,340px)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 md:hidden',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         ].join(' ')}
       >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-3.5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-sm font-black text-white shadow-sm">
               CG
@@ -92,7 +92,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                 CubeGears
               </div>
               <div className="truncate text-[10px] font-medium text-muted">
-                Garage Workspace
+                Workshop Management
               </div>
             </div>
           </div>
@@ -133,13 +133,13 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                         onClick={onClose}
                         ref={isActive ? activeItemRef : null}
                         className={[
-                          'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition-all',
+                          'relative flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition-colors',
                           isActive
                             ? 'bg-primary-soft font-semibold text-primary'
                             : 'font-medium text-content hover:bg-surface-2'
                         ].join(' ')}
                       >
-                        <IconComp size={17} strokeWidth={1.9} className={isActive ? 'shrink-0 text-primary' : 'shrink-0 text-secondary'} />
+                        {isActive && <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-primary" />}<IconComp size={18} strokeWidth={isActive ? 2.2 : 1.8} className={isActive ? 'shrink-0 text-primary' : 'shrink-0 text-secondary'} />
                         <span className="min-w-0 flex-1 truncate">{route.label}</span>
                       </NavLink>
 
