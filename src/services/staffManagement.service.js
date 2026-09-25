@@ -1,7 +1,8 @@
 import {
   workshopDepartments,
   workshopShifts,
-  workshopSkills
+  workshopSkills,
+  staffWorkshopProfiles
 } from '../mock/staffManagement.mock';
 import { mockStaffList } from '../mock/staff.mock';
 
@@ -26,8 +27,18 @@ const staffUsingShift = (shiftName) =>
     )
   );
 
+const getStaffSkills = (staff) =>
+  Array.isArray(staff.skills)
+    ? staff.skills
+    : [...(staffWorkshopProfiles[staff.id]?.skills || [])];
+
+const ensureStaffSkills = (staff) => {
+  if (!Array.isArray(staff.skills)) staff.skills = getStaffSkills(staff);
+  return staff.skills;
+};
+
 const assignedToSkill = (skillName) =>
-  mockStaffList.filter((staff) => Array.isArray(staff.skills) && staff.skills.includes(skillName));
+  mockStaffList.filter((staff) => getStaffSkills(staff).includes(skillName));
 
 const touchActivity = (staff, action, oldValue, newValue) => {
   staff.activityHistory = Array.isArray(staff.activityHistory) ? staff.activityHistory : [];
@@ -212,7 +223,7 @@ export const staffManagementService = {
 
         const assignedIds = new Set(skillData.assignedStaffIds || []);
         mockStaffList.forEach((staff) => {
-          staff.skills = Array.isArray(staff.skills) ? staff.skills : [];
+          ensureStaffSkills(staff);
           if (assignedIds.has(staff.id) && !staff.skills.includes(name)) {
             staff.skills.push(name);
             touchActivity(staff, 'Skill Assigned', '-', name);
@@ -251,7 +262,7 @@ export const staffManagementService = {
 
         const assignedIds = new Set(skillData.assignedStaffIds || []);
         mockStaffList.forEach((staff) => {
-          staff.skills = Array.isArray(staff.skills) ? staff.skills : [];
+          ensureStaffSkills(staff);
           const hadSkill = staff.skills.includes(currentName);
           const shouldHave = assignedIds.has(staff.id);
 
