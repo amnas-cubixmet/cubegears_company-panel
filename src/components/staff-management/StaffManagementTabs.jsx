@@ -2,8 +2,16 @@ import React, { useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 const tabs = [
-  { label: 'Staff', path: '/staff-management/staff' },
-  { label: 'User Roles', path: '/staff-management/roles' }
+  { label: 'Overview', path: '/staff-management/overview' },
+  { label: 'All Staff', path: '/staff-management/staff' },
+  { label: 'Add Staff', path: '/staff-management/add' },
+  { label: 'Roles & Permissions', path: '/staff-management/roles' },
+  { label: 'Teams', path: '/staff-management/teams' },
+  { label: 'Shifts', path: '/staff-management/shifts' },
+  { label: 'Skills', path: '/staff-management/skills' },
+  { label: 'Performance', path: '/staff-management/performance' },
+  { label: 'Documents', path: '/staff-management/documents' },
+  { label: 'Staff Reports', path: '/staff-management/reports' }
 ];
 
 export const StaffManagementTabs = () => {
