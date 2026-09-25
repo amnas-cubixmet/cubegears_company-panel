@@ -659,3 +659,1594 @@
     flex: none !important;
   }
 }
+
+
+/* =========================================================
+   STAFF MANAGEMENT — WORKSHOP MODULE EXPANSION
+   Overview / teams / shifts / skills / performance /
+   documents / reports / add staff / 360 staff profile.
+   ========================================================= */
+
+.cg-staff-management .staff-workshop-view,
+.cg-staff-management .staff-add-page {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cg-staff-management .staff-workshop-section-header,
+.cg-staff-management .staff-add-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-workshop-section-header h2,
+.cg-staff-management .staff-add-page__header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.cg-staff-management .staff-workshop-section-header p,
+.cg-staff-management .staff-add-page__header p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.cg-staff-management .staff-workshop-panel {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-workshop-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--staff-border);
+}
+
+.cg-staff-management .staff-workshop-panel__header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.cg-staff-management .staff-workshop-panel__header p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.cg-staff-management .staff-workshop-panel__header > svg {
+  flex: 0 0 auto;
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-workshop-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cg-staff-management .staff-workshop-kpi-grid.is-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cg-staff-management .staff-workshop-kpi-card {
+  min-width: 0;
+  min-height: 98px;
+  padding: 12px 13px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-workshop-kpi-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.cg-staff-management .staff-workshop-kpi-card__icon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-workshop-kpi-card__icon.is-success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.cg-staff-management .staff-workshop-kpi-card__icon.is-warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.cg-staff-management .staff-workshop-kpi-card__icon.is-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.cg-staff-management .staff-workshop-kpi-card > strong {
+  display: block;
+  margin-top: 12px;
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+
+.cg-staff-management .staff-workshop-kpi-card > small {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff-workshop-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cg-staff-management .staff-data-row {
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-data-row > div {
+  min-width: 0;
+}
+
+.cg-staff-management .staff-data-row strong,
+.cg-staff-management .staff-data-row span {
+  display: block;
+}
+
+.cg-staff-management .staff-data-row strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cg-staff-management .staff-data-row span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff-data-row > b {
+  flex: 0 0 auto;
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.cg-staff-management .staff-department-list,
+.cg-staff-management .staff-report-status-list,
+.cg-staff-management .staff-document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.cg-staff-management .staff-attention-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cg-staff-management .staff-attention-grid > div {
+  min-height: 68px;
+  padding: 9px 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-attention-grid span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.cg-staff-management .staff-attention-grid strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-primary);
+  font-size: 19px;
+}
+
+/* Job assignment */
+.cg-staff-management .staff-job-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cg-staff-management .staff-job-card {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-job-card__head,
+.cg-staff-management .staff-job-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cg-staff-management .staff-job-card__head strong {
+  color: var(--primary);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff-job-card__head span {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.cg-staff-management .staff-job-card h4 {
+  margin: 8px 0 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cg-staff-management .staff-job-card p {
+  margin: 3px 0 8px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff-job-card__meta {
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff-progress {
+  width: 100%;
+  height: 6px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+.cg-staff-management .staff-progress > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+/* Teams */
+.cg-staff-management .staff-team-grid,
+.cg-staff-management .staff-shift-grid,
+.cg-staff-management .staff-skill-person-grid,
+.cg-staff-management .staff-performance-grid,
+.cg-staff-management .staff-document-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cg-staff-management .staff-team-card,
+.cg-staff-management .staff-shift-card,
+.cg-staff-management .staff-skill-person,
+.cg-staff-management .staff-performance-card,
+.cg-staff-management .staff-document-card {
+  min-width: 0;
+}
+
+.cg-staff-management .staff-team-card__head,
+.cg-staff-management .staff-document-card__head,
+.cg-staff-management .staff-performance-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cg-staff-management .staff-team-card__head h3,
+.cg-staff-management .staff-document-card__head h3,
+.cg-staff-management .staff-performance-card__head h3,
+.cg-staff-management .staff-shift-card h3,
+.cg-staff-management .staff-skill-person h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.cg-staff-management .staff-team-card__head p,
+.cg-staff-management .staff-document-card__head p,
+.cg-staff-management .staff-performance-card__head p,
+.cg-staff-management .staff-skill-person p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff-team-card__head > span {
+  min-width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.cg-staff-management .staff-team-members {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.cg-staff-management .staff-team-member {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-team-member img,
+.cg-staff-management .staff-skill-person__head img {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.cg-staff-management .staff-team-member strong,
+.cg-staff-management .staff-team-member span {
+  display: block;
+}
+
+.cg-staff-management .staff-team-member strong {
+  color: var(--text-primary);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff-team-member span {
+  margin-top: 1px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+/* Shifts */
+.cg-staff-management .staff-shift-card__icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  border-radius: 9px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-shift-card > strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.cg-staff-management .staff-shift-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.cg-staff-management .staff-shift-card__details span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 1px solid var(--staff-border);
+  border-radius: 8px;
+  background: var(--staff-soft);
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff-shift-card__details b {
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* Skills */
+.cg-staff-management .staff-skill-coverage {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cg-staff-management .staff-skill-coverage__item {
+  min-width: 0;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 9px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-skill-coverage__item svg {
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-skill-coverage__item span {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 9px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cg-staff-management .staff-skill-coverage__item strong {
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.cg-staff-management .staff-skill-person__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.cg-staff-management .staff-chip-row,
+.cg-staff-management .staff-directory-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.cg-staff-management .staff-chip-row > span,
+.cg-staff-management .staff-directory-skills > span {
+  display: inline-flex;
+  min-height: 25px;
+  align-items: center;
+  border: 1px solid var(--staff-border);
+  border-radius: 999px;
+  background: var(--staff-soft);
+  padding: 0 8px;
+  color: var(--text-secondary);
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.cg-staff-management .staff-chip-row > span.is-muted {
+  color: var(--text-muted);
+}
+
+/* Performance */
+.cg-staff-management .staff-performance-card__head > strong {
+  min-width: 42px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 11px;
+}
+
+.cg-staff-management .staff-performance-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.cg-staff-management .staff-performance-metrics > div {
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid var(--staff-border);
+  border-radius: 8px;
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-performance-metrics span,
+.cg-staff-management .staff-performance-metrics b {
+  display: block;
+}
+
+.cg-staff-management .staff-performance-metrics span {
+  color: var(--text-muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.cg-staff-management .staff-performance-metrics b {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Documents */
+.cg-staff-management .staff-document-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cg-staff-management .staff-document-summary > div {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 11px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-document-summary svg {
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-document-summary span {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff-document-summary strong {
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.cg-staff-management .staff-document-card__head > span,
+.cg-staff-management .staff360-document-head > span {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: 9px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.cg-staff-management .is-complete {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.cg-staff-management .is-missing {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* Reports */
+.cg-staff-management .staff-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cg-staff-management .staff-report-grid > button {
+  width: 100%;
+  min-width: 0;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-surface);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-report-grid > button > svg:first-child {
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-report-grid strong,
+.cg-staff-management .staff-report-grid small {
+  display: block;
+}
+
+.cg-staff-management .staff-report-grid strong {
+  font-size: 11px;
+}
+
+.cg-staff-management .staff-report-grid small {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+/* Add staff */
+.cg-staff-management .staff-add-page__header {
+  align-items: center;
+}
+
+.cg-staff-management .staff-back-button {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cg-staff-management .staff-save-button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  background: var(--primary);
+  padding: 0 14px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cg-staff-management .staff-add-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: 12px;
+}
+
+.cg-staff-management .staff-add-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cg-staff-management .staff-form-panel,
+.cg-staff-management .staff-add-summary {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-form-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.cg-staff-management .staff-form-panel__title svg {
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cg-staff-management .staff-form-grid label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.cg-staff-management .staff-form-grid label.is-wide {
+  grid-column: 1 / -1;
+}
+
+.cg-staff-management .staff-form-grid input,
+.cg-staff-management .staff-form-grid select {
+  min-height: 42px !important;
+  height: 42px !important;
+  padding: 0 10px;
+  background: var(--staff-soft) !important;
+}
+
+.cg-staff-management .staff-form-grid textarea {
+  min-height: 84px;
+  padding: 9px 10px;
+  background: var(--staff-soft) !important;
+}
+
+.cg-staff-management .staff-skill-picker {
+  margin-top: 12px;
+}
+
+.cg-staff-management .staff-skill-picker > span {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.cg-staff-management .staff-chip-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.cg-staff-management .staff-chip-picker button {
+  min-height: 31px;
+  border: 1px solid var(--staff-border);
+  border-radius: 999px;
+  background: var(--staff-soft);
+  padding: 0 9px;
+  color: var(--text-secondary);
+  font-size: 9px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.cg-staff-management .staff-chip-picker button.is-selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.cg-staff-management .staff-add-summary {
+  position: sticky;
+  top: 84px;
+  text-align: center;
+}
+
+.cg-staff-management .staff-add-summary__avatar {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.cg-staff-management .staff-add-summary h3 {
+  margin: 10px 0 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.cg-staff-management .staff-add-summary > p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff-add-summary__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.cg-staff-management .staff-add-summary__rows > div {
+  padding: 8px 9px;
+  border: 1px solid var(--staff-border);
+  border-radius: 9px;
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-add-summary__rows span,
+.cg-staff-management .staff-add-summary__rows strong {
+  display: block;
+}
+
+.cg-staff-management .staff-add-summary__rows span {
+  color: var(--text-muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.cg-staff-management .staff-add-summary__rows strong {
+  margin-top: 2px;
+  color: var(--text-primary);
+  font-size: 10px;
+}
+
+/* 360 degree profile */
+.cg-staff-management .staff360 {
+  gap: 12px !important;
+}
+
+.cg-staff-management .staff360-toast {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--success);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cg-staff-management .staff-profile-topbar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+
+.cg-staff-management .staff-profile-topbar > div {
+  min-width: 0;
+}
+
+.cg-staff-management .staff-profile-topbar p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff360-hero {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.cg-staff-management .staff360-person {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.cg-staff-management .staff360-person > img,
+.cg-staff-management .staff360-avatar-fallback {
+  width: 56px !important;
+  height: 56px !important;
+  flex: 0 0 56px;
+  border-radius: 13px !important;
+}
+
+.cg-staff-management .staff360-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.cg-staff-management .staff360-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cg-staff-management .staff360-name-row h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.cg-staff-management .staff360-person p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff360-contact-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 6px;
+}
+
+.cg-staff-management .staff360-contact-line span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff360-status {
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 8px;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.cg-staff-management .staff360-status.is-suspended,
+.cg-staff-management .staff360-status.is-terminated,
+.cg-staff-management .staff360-status.is-resigned,
+.cg-staff-management .staff360-status.is-inactive {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.cg-staff-management .staff360-status.is-probation,
+.cg-staff-management .staff360-status.is-notice-period {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.cg-staff-management .staff360-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.cg-staff-management .staff360-secondary-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid var(--staff-border);
+  border-radius: 9px;
+  background: var(--staff-soft);
+  padding: 0 10px;
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cg-staff-management .staff360-tabs {
+  border: 1px solid var(--staff-border) !important;
+}
+
+.cg-staff-management .staff360-tabs button {
+  min-height: 38px;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  padding: 0 11px !important;
+  color: var(--text-secondary) !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+}
+
+.cg-staff-management .staff360-tabs button.is-active {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+.cg-staff-management .staff360-panel {
+  padding: 14px !important;
+}
+
+.cg-staff-management .staff360-overview,
+.cg-staff-management .staff360-tab-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cg-staff-management .staff360-section {
+  min-width: 0;
+}
+
+.cg-staff-management .staff360-section + .staff360-section {
+  padding-top: 12px;
+  border-top: 1px solid var(--staff-border);
+}
+
+.cg-staff-management .staff360-section__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.cg-staff-management .staff360-section__title svg {
+  color: var(--primary);
+}
+
+.cg-staff-management .staff360-info-grid,
+.cg-staff-management .staff360-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cg-staff-management .staff360-info-item,
+.cg-staff-management .staff360-metric-grid > div {
+  min-width: 0;
+  min-height: 64px;
+  padding: 9px 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff360-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.cg-staff-management .staff360-info-item > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--primary);
+}
+
+.cg-staff-management .staff360-info-item span,
+.cg-staff-management .staff360-metric-grid span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.cg-staff-management .staff360-info-item strong,
+.cg-staff-management .staff360-metric-grid strong {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.cg-staff-management .staff360-note-card,
+.cg-staff-management .staff360-payroll-banner {
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff360-note-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.cg-staff-management .staff360-note-card > svg {
+  color: var(--primary);
+}
+
+.cg-staff-management .staff360-note-card strong,
+.cg-staff-management .staff360-note-card span {
+  display: block;
+}
+
+.cg-staff-management .staff360-note-card strong {
+  color: var(--text-primary);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff360-note-card span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff360-note-card .staff-progress {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
+.cg-staff-management .staff360-note-card.is-warning > svg {
+  color: var(--warning);
+}
+
+.cg-staff-management .staff360-job-list,
+.cg-staff-management .staff360-document-list,
+.cg-staff-management .staff360-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cg-staff-management .staff360-job-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 10px 11px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff360-job-card > div:first-child > span {
+  color: var(--primary);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.cg-staff-management .staff360-job-card > div:first-child > strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.cg-staff-management .staff360-job-card p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff360-job-side {
+  text-align: right;
+}
+
+.cg-staff-management .staff360-job-side b,
+.cg-staff-management .staff360-job-side span {
+  display: block;
+}
+
+.cg-staff-management .staff360-job-side b {
+  color: var(--primary);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff360-job-side span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 8px;
+}
+
+.cg-staff-management .staff360-job-card .staff-progress {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
+.cg-staff-management .staff360-payroll-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cg-staff-management .staff360-payroll-banner span,
+.cg-staff-management .staff360-payroll-banner strong {
+  display: block;
+}
+
+.cg-staff-management .staff360-payroll-banner span {
+  color: var(--text-muted);
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.cg-staff-management .staff360-payroll-banner strong {
+  margin-top: 2px;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.cg-staff-management .staff360-payroll-banner > b {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  padding: 0 8px;
+  color: var(--primary);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff360-document-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cg-staff-management .staff360-document-head strong,
+.cg-staff-management .staff360-document-head span {
+  display: block;
+}
+
+.cg-staff-management .staff360-document-head strong {
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.cg-staff-management .staff360-document-head div > span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.cg-staff-management .staff360-document-list > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff360-document-list svg {
+  color: var(--primary);
+}
+
+.cg-staff-management .staff360-document-list strong,
+.cg-staff-management .staff360-document-list span {
+  display: block;
+}
+
+.cg-staff-management .staff360-document-list strong {
+  color: var(--text-primary);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff360-document-list span,
+.cg-staff-management .staff360-document-list b {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 8px;
+}
+
+.cg-staff-management .staff360-activity-list > div {
+  display: flex;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff360-activity-icon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.cg-staff-management .staff360-activity-list strong {
+  color: var(--text-primary);
+  font-size: 10px;
+}
+
+.cg-staff-management .staff360-activity-list p,
+.cg-staff-management .staff360-activity-list small {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 8px;
+}
+
+/* Directory skill chips */
+.cg-staff-management .staff-directory-skills {
+  margin-top: 0;
+}
+
+/* Empty states */
+.cg-staff-management .staff-workshop-empty {
+  width: 100%;
+  padding: 26px 14px;
+  border: 1px dashed var(--staff-border);
+  border-radius: var(--staff-radius);
+  background: var(--staff-surface);
+  color: var(--text-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.cg-staff-management .staff-workshop-empty.is-compact {
+  padding: 12px 8px;
+  border-radius: var(--staff-inner-radius);
+}
+
+/* Responsive workshop module */
+@media (max-width: 1280px) {
+  .cg-staff-management .staff-workshop-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff-workshop-kpi-grid.is-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff-job-grid,
+  .cg-staff-management .staff-team-grid,
+  .cg-staff-management .staff-shift-grid,
+  .cg-staff-management .staff-skill-person-grid,
+  .cg-staff-management .staff-performance-grid,
+  .cg-staff-management .staff-document-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff-skill-coverage {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff360-info-grid,
+  .cg-staff-management .staff360-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .cg-staff-management .staff-workshop-two-column,
+  .cg-staff-management .staff-add-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-staff-management .staff-add-summary {
+    position: static;
+  }
+
+  .cg-staff-management .staff-skill-coverage {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff360-hero {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .cg-staff-management .staff360-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 767px) {
+  .cg-staff-management .staff-workshop-section-header,
+  .cg-staff-management .staff-add-page__header {
+    padding: 11px;
+  }
+
+  .cg-staff-management .staff-add-page__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cg-staff-management .staff-save-button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .cg-staff-management .staff-workshop-kpi-grid,
+  .cg-staff-management .staff-workshop-kpi-grid.is-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .cg-staff-management .staff-workshop-kpi-card {
+    min-height: 88px;
+    padding: 10px;
+  }
+
+  .cg-staff-management .staff-workshop-kpi-card > strong {
+    margin-top: 10px;
+    font-size: 19px;
+  }
+
+  .cg-staff-management .staff-workshop-two-column,
+  .cg-staff-management .staff-job-grid,
+  .cg-staff-management .staff-team-grid,
+  .cg-staff-management .staff-shift-grid,
+  .cg-staff-management .staff-skill-person-grid,
+  .cg-staff-management .staff-performance-grid,
+  .cg-staff-management .staff-document-grid,
+  .cg-staff-management .staff-report-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cg-staff-management .staff-workshop-panel,
+  .cg-staff-management .staff-form-panel,
+  .cg-staff-management .staff-add-summary {
+    padding: 11px;
+  }
+
+  .cg-staff-management .staff-skill-coverage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff-document-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-staff-management .staff-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-staff-management .staff-form-grid label.is-wide {
+    grid-column: auto;
+  }
+
+  .cg-staff-management .staff-form-grid input,
+  .cg-staff-management .staff-form-grid select,
+  .cg-staff-management .staff-form-grid textarea {
+    font-size: 16px !important;
+  }
+
+  .cg-staff-management .staff360-person {
+    align-items: flex-start;
+  }
+
+  .cg-staff-management .staff360-person > img,
+  .cg-staff-management .staff360-avatar-fallback {
+    width: 48px !important;
+    height: 48px !important;
+    flex-basis: 48px;
+  }
+
+  .cg-staff-management .staff360-contact-line {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cg-staff-management .staff360-hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff360-secondary-button {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .cg-staff-management .staff360-panel {
+    padding: 11px !important;
+  }
+
+  .cg-staff-management .staff360-info-grid,
+  .cg-staff-management .staff360-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff360-info-item,
+  .cg-staff-management .staff360-metric-grid > div {
+    min-height: 60px;
+    padding: 8px;
+  }
+
+  .cg-staff-management .staff360-document-list > div {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .cg-staff-management .staff360-document-list > div > b {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 360px) {
+  .cg-staff-management .staff-workshop-kpi-card {
+    min-height: 84px;
+    padding: 9px;
+  }
+
+  .cg-staff-management .staff-skill-coverage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .cg-staff-management .staff-attention-grid,
+  .cg-staff-management .staff-performance-metrics,
+  .cg-staff-management .staff360-info-grid,
+  .cg-staff-management .staff360-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cg-staff-management .staff360-hero-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-staff-management .staff360-job-card {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-staff-management .staff360-job-side {
+    text-align: left;
+  }
+}
