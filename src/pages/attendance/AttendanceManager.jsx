@@ -52,16 +52,16 @@ export const AttendanceManager = () => {
   };
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
-      <div>
+    <div className="attendance-manager-page cg-attendance-manager flex w-full min-w-0 flex-col gap-4">
+      <div className="attendance-manager-header">
         <h1 className="m-0 text-[22px] font-extrabold leading-tight text-content">Attendance Manager</h1>
         <p className="mt-1 text-[13px] leading-5 text-muted">
           Manage daily attendance, leave, overtime, shifts, productivity and payroll-ready attendance records.
         </p>
       </div>
 
-      <div className="hidden w-full md:block">
-        <div className="flex gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="attendance-manager-desktop-tabs hidden w-full md:block">
+        <div className="attendance-manager-tabs flex gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => {
             const active = activeTab === tab.id;
             const Icon = tab.icon;
@@ -85,8 +85,9 @@ export const AttendanceManager = () => {
         </div>
       </div>
 
-      <div className="w-full md:hidden">
+      <div className="attendance-manager-mobile-tabs w-full md:hidden">
         <MobileTabRail
+          className="attendance-manager-tabs"
           tabs={tabs.map((tab) => ({
             id: tab.id,
             label: tab.mobileLabel || tab.label,
@@ -97,13 +98,13 @@ export const AttendanceManager = () => {
         />
       </div>
 
-      <div className="w-full min-w-0">
+      <div className="attendance-manager-content w-full min-w-0">
         {activeTab === 'overview' && <AttendanceOverview />}
         {activeTab === 'daily' && <DailyAttendance />}
         {activeTab === 'calendar' && <MonthlyAttendanceCalendar />}
         {activeTab === 'leave-requests' && <LeaveRequestsManager />}
         {activeTab === 'overtime' && (
-          <div className="rounded-2xl border border-line bg-surface-2 p-3 sm:p-4">
+          <div className="attendance-manager-overtime rounded-2xl border border-line bg-surface-2 p-3 sm:p-4">
             <OvertimeManager />
           </div>
         )}
