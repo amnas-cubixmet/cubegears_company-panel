@@ -39,10 +39,10 @@ export const Sidebar = () => {
 
   const navClass = (active) =>
     [
-      'group flex h-10 items-center gap-3 rounded-lg text-[13px] no-underline transition-colors duration-150',
+      'group flex h-10 items-center gap-3 rounded-xl text-[13px] no-underline transition-all duration-150',
       collapsed ? 'mx-1 justify-center px-0' : 'ml-2 mr-2 px-3',
       active
-        ? 'bg-surface-2 font-semibold text-content ring-1 ring-line'
+        ? 'bg-primary-soft font-semibold text-primary'
         : 'font-medium text-content hover:bg-surface-2'
     ].join(' ');
 
@@ -57,18 +57,18 @@ export const Sidebar = () => {
   return (
     <aside
       className={[
-        'sidebar desktop-only-sidebar relative z-30 hidden h-dvh shrink-0 flex-col overflow-hidden border-r border-line bg-surface transition-[width] duration-300 md:flex',
+        'sidebar desktop-only-sidebar relative z-30 hidden h-dvh shrink-0 flex-col overflow-hidden border-r border-line bg-surface shadow-[1px_0_0_rgba(15,23,42,0.02)] transition-[width] duration-300 md:flex',
         collapsed ? 'w-[72px]' : 'w-[220px]'
       ].join(' ')}
     >
       <div
         className={[
-          'flex h-16 shrink-0 items-center border-b border-line',
+          'flex h-[60px] shrink-0 items-center border-b border-line',
           collapsed ? 'justify-center px-2.5' : 'justify-between px-3'
         ].join(' ')}
       >
         <div className={['flex min-w-0 items-center', collapsed ? '' : 'gap-3'].join(' ')}>
-          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-xs font-black text-white">
+          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-xs font-black text-white shadow-sm">
             CG
           </div>
 
@@ -111,7 +111,7 @@ export const Sidebar = () => {
 
       <div
         ref={navContainerRef}
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-2 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden px-2 py-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {sections.map((section) => {
           const items = routeConfig.filter((route) => route.section === section);
@@ -120,7 +120,7 @@ export const Sidebar = () => {
           return (
             <section key={section} className="flex flex-col gap-[5px]">
               {!collapsed ? (
-                <div className="px-3 pb-1 text-[9px] font-bold uppercase tracking-[0.11em] text-muted">
+                <div className="px-3 pb-1 pt-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-muted">
                   {section}
                 </div>
               ) : null}
@@ -155,7 +155,7 @@ export const Sidebar = () => {
                     </NavLink>
 
                     {!collapsed && active && hasChildren ? (
-                      <div className="ml-[32px] mr-2 mt-1 flex flex-col">
+                      <div className="ml-[32px] mr-2 mt-1.5 flex flex-col">
                         {route.children.map((child, childIndex) => {
                           const childActive = isChildActive(child);
                           const isLastChild = childIndex === route.children.length - 1;
@@ -165,21 +165,22 @@ export const Sidebar = () => {
                               <span
                                 aria-hidden="true"
                                 className={[
-                                  'absolute left-0 top-0 w-px bg-line',
+                                  'absolute left-0 top-0 w-px',
+                                  childActive ? 'bg-primary/35' : 'bg-line',
                                   isLastChild ? 'h-1/2' : 'h-full'
                                 ].join(' ')}
                               />
                               <span
                                 aria-hidden="true"
-                                className="absolute left-0 top-1/2 h-px w-3 bg-line"
+                                className={['absolute left-0 top-1/2 h-px w-3', childActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
                               />
 
                               <NavLink
                                 to={child.path}
                                 className={[
-                                  'flex min-h-8 items-center justify-center rounded-md px-2 text-center text-[11px] leading-tight no-underline transition-colors',
+                                  'flex min-h-8 items-center justify-center rounded-lg px-2 text-center text-[11px] leading-tight no-underline transition-all',
                                   childActive
-                                    ? 'bg-surface-2 font-semibold text-primary'
+                                    ? 'bg-primary-soft font-semibold text-primary'
                                     : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
                                 ].join(' ')}
                               >
@@ -200,7 +201,7 @@ export const Sidebar = () => {
 
       <div className="shrink-0 border-t border-line bg-surface p-2.5">
         {!collapsed ? (
-          <div className="mb-3 flex rounded-lg bg-surface-2 p-1">
+          <div className="mb-3 flex rounded-xl border border-line bg-surface-2 p-1">
             <button type="button" onClick={() => setThemeMode('light')} className={themeButtonClass('light')} title="Light theme">
               <Sun size={14}/>
             </button>
@@ -218,7 +219,7 @@ export const Sidebar = () => {
             'flex items-center',
             collapsed
               ? 'justify-center'
-              : 'justify-between gap-2 rounded-lg bg-surface-2 p-2'
+              : 'justify-between gap-2 rounded-xl border border-line bg-surface-2 p-2'
           ].join(' ')}
         >
           <div className={['flex min-w-0 items-center', collapsed ? '' : 'gap-2.5'].join(' ')}>
