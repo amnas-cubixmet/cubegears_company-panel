@@ -855,3 +855,386 @@
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
+
+/* =========================================================
+   PAYROLL UI — FINAL CONSISTENCY PASS
+   ========================================================= */
+
+.cg-payroll .payroll-section-header{
+  min-width:0;
+  padding:14px!important;
+  border:1px solid var(--pay-border)!important;
+  border-radius:var(--pay-radius)!important;
+  background:var(--pay-surface)!important;
+  box-shadow:var(--pay-shadow)!important;
+}
+
+.cg-payroll .payroll-section-title{
+  color:var(--text-primary)!important;
+  font-size:15px!important;
+  font-weight:800!important;
+  line-height:1.3!important;
+  letter-spacing:-.01em;
+}
+
+.cg-payroll .payroll-state-card{
+  width:100%;
+  min-height:82px;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  border:1px dashed var(--pay-border);
+  border-radius:var(--pay-radius);
+  background:var(--pay-surface);
+  color:var(--text-muted);
+  font-size:12px;
+  text-align:center;
+}
+
+/* Tabs */
+.cg-payroll .payroll-tabs-shell{
+  position:relative;
+  overflow:hidden;
+}
+
+.cg-payroll .payroll-subnav{
+  scroll-snap-type:x proximity;
+}
+
+.cg-payroll .payroll-subnav-item{
+  scroll-snap-align:center;
+}
+
+/* Period filter */
+.cg-payroll .payroll-period-filter{
+  min-width:0;
+}
+
+.cg-payroll .payroll-period-filter select{
+  min-width:0!important;
+}
+
+.cg-payroll .payroll-period-filter__period{
+  min-width:0!important;
+}
+
+/* Employee / attendance cards */
+.cg-payroll .payroll-employee-card,
+.cg-payroll .payroll-attendance-card{
+  min-width:0;
+  border:1px solid var(--pay-border)!important;
+  border-radius:var(--pay-radius)!important;
+  background:var(--pay-surface)!important;
+  box-shadow:var(--pay-shadow)!important;
+}
+
+.cg-payroll .payroll-employee-card img{
+  background:var(--pay-soft);
+}
+
+.cg-payroll .payroll-employee-card .bg-surface-2,
+.cg-payroll .payroll-attendance-card .bg-surface-2{
+  border:1px solid var(--pay-border);
+  border-radius:var(--pay-inner-radius)!important;
+}
+
+.cg-payroll .payroll-attendance-card > div:last-child > div{
+  min-width:0;
+  border-radius:9px!important;
+  background:var(--pay-soft);
+}
+
+/* Salary setup */
+.cg-payroll .payroll-salary-header{
+  align-items:flex-start!important;
+}
+
+.cg-payroll .payroll-salary-header > div:first-child{
+  min-width:0;
+}
+
+.cg-payroll .payroll-salary-header select{
+  flex:0 0 auto;
+  min-width:180px!important;
+  min-height:40px!important;
+  height:40px!important;
+  border-radius:9px!important;
+}
+
+.cg-payroll .payroll-salary-card{
+  min-width:0;
+  border:1px solid var(--pay-border)!important;
+  border-radius:var(--pay-radius)!important;
+  background:var(--pay-surface)!important;
+  box-shadow:var(--pay-shadow)!important;
+}
+
+.cg-payroll .payroll-salary-card > div:nth-child(2){
+  border:1px solid var(--pay-border);
+  border-radius:var(--pay-inner-radius)!important;
+  background:var(--pay-soft)!important;
+}
+
+.cg-payroll .payroll-salary-card > div:nth-child(3) > div{
+  min-width:0;
+  border-radius:9px!important;
+  background:var(--pay-surface)!important;
+}
+
+.cg-payroll .payroll-salary-card button{
+  width:100%;
+  min-height:40px!important;
+  border-radius:9px!important;
+}
+
+/* Run payroll */
+.cg-payroll .payroll-run{
+  gap:12px!important;
+}
+
+.cg-payroll .payroll-run > .rounded-2xl{
+  margin:0!important;
+}
+
+/* Advances */
+.cg-payroll .advance-page-header{
+  align-items:center!important;
+}
+
+.cg-payroll .payroll-advances > div:last-child{
+  align-items:stretch;
+}
+
+/* Payslips */
+.cg-payroll .payroll-payslip-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+
+.cg-payroll .payroll-payslip-card{
+  min-width:0;
+  min-height:86px;
+  gap:10px;
+  border:1px solid var(--pay-border)!important;
+  border-radius:var(--pay-radius)!important;
+  background:var(--pay-surface)!important;
+  box-shadow:var(--pay-shadow)!important;
+}
+
+.cg-payroll .payroll-payslip-card > div:first-child{
+  min-width:0;
+}
+
+.cg-payroll .payroll-payslip-card > div:first-child > div:first-child{
+  overflow:hidden;
+  color:var(--text-primary);
+  font-size:13px!important;
+  font-weight:750!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.cg-payroll .payroll-payslip-card > div:first-child > div:last-child{
+  margin-top:2px;
+  color:var(--text-muted)!important;
+  font-size:10px!important;
+}
+
+.cg-payroll .payroll-payslip-card button{
+  min-height:38px;
+  flex:0 0 auto;
+  border-radius:9px!important;
+  padding:0 10px!important;
+  font-size:10px!important;
+  white-space:nowrap;
+}
+
+/* Reports */
+.cg-payroll .payroll-reports{
+  padding:14px!important;
+  border:1px solid var(--pay-border)!important;
+  border-radius:var(--pay-radius)!important;
+  background:var(--pay-surface)!important;
+  box-shadow:var(--pay-shadow)!important;
+}
+
+.cg-payroll .payroll-report-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+
+.cg-payroll .payroll-report-grid > div{
+  min-width:0;
+  min-height:78px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:10px 11px!important;
+  border:1px solid var(--pay-border);
+  border-radius:var(--pay-inner-radius)!important;
+  background:var(--pay-soft)!important;
+}
+
+.cg-payroll .payroll-report-grid > div > div:first-child{
+  color:var(--text-muted)!important;
+  font-size:9px!important;
+  font-weight:650;
+  text-transform:uppercase;
+}
+
+.cg-payroll .payroll-report-grid > div > div:last-child{
+  margin-top:4px;
+  font-size:16px!important;
+  font-weight:800!important;
+  line-height:1.1;
+}
+
+/* Modal content */
+.payroll-modal-stack{
+  width:100%;
+  min-width:0;
+}
+
+.payroll-modal-stack > div{
+  min-width:0;
+}
+
+.payroll-modal-stack button{
+  min-height:42px;
+  border-radius:10px!important;
+}
+
+.payroll-modal-stack [style*="gridTemplateColumns"]{
+  min-width:0;
+}
+
+.payroll-modal-stack [style*="backgroundColor: 'var(--surface-2)'"],
+.payroll-modal-stack [style*="background-color: var(--surface-2)"]{
+  border:1px solid var(--border);
+}
+
+/* Common cards */
+.cg-payroll .payroll-record-card,
+.cg-payroll .payroll-employee-card,
+.cg-payroll .payroll-attendance-card,
+.cg-payroll .payroll-salary-card,
+.cg-payroll .payroll-advance-card,
+.cg-payroll .payroll-commission-card,
+.cg-payroll .am-overtime-card{
+  transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+
+@media (hover:hover){
+  .cg-payroll .payroll-record-card:hover,
+  .cg-payroll .payroll-employee-card:hover,
+  .cg-payroll .payroll-attendance-card:hover,
+  .cg-payroll .payroll-salary-card:hover,
+  .cg-payroll .payroll-advance-card:hover,
+  .cg-payroll .payroll-commission-card:hover,
+  .cg-payroll .am-overtime-card:hover{
+    border-color:color-mix(in srgb,var(--primary) 28%,var(--pay-border))!important;
+    box-shadow:0 5px 16px rgba(15,23,42,.06)!important;
+  }
+}
+
+@media(max-width:1280px){
+  .cg-payroll .payroll-payslip-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:1024px){
+  .cg-payroll .payroll-salary-header{
+    align-items:stretch!important;
+    flex-direction:column!important;
+  }
+
+  .cg-payroll .payroll-salary-header select{
+    width:100%!important;
+    min-width:0!important;
+  }
+}
+
+@media(max-width:767px){
+  .cg-payroll .payroll-section-header{
+    padding:11px!important;
+  }
+
+  .cg-payroll .payroll-section-title{
+    font-size:14px!important;
+  }
+
+  .cg-payroll .payroll-state-card{
+    min-height:72px;
+    padding:16px 10px;
+    font-size:11px;
+  }
+
+  .cg-payroll .payroll-employee-card,
+  .cg-payroll .payroll-attendance-card,
+  .cg-payroll .payroll-salary-card{
+    padding:11px!important;
+  }
+
+  .cg-payroll .payroll-employee-card > div:first-child,
+  .cg-payroll .payroll-attendance-card > div:first-child{
+    gap:8px!important;
+  }
+
+  .cg-payroll .payroll-employee-card > div:nth-child(2),
+  .cg-payroll .payroll-attendance-card > div:nth-child(2){
+    gap:6px!important;
+  }
+
+  .cg-payroll .payroll-payslip-grid,
+  .cg-payroll .payroll-report-grid{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+
+  .cg-payroll .payroll-payslip-card{
+    min-height:0;
+    align-items:stretch!important;
+    flex-direction:column!important;
+    padding:11px!important;
+  }
+
+  .cg-payroll .payroll-payslip-card button{
+    width:100%;
+    min-height:42px;
+    justify-content:center;
+  }
+
+  .cg-payroll .payroll-reports{
+    padding:11px!important;
+  }
+
+  .cg-payroll .advance-page-header{
+    align-items:stretch!important;
+  }
+
+  .payroll-modal-stack [style*="gridTemplateColumns"]{
+    grid-template-columns:1fr!important;
+  }
+}
+
+@media(max-width:360px){
+  .cg-payroll .payroll-section-header{
+    padding:10px!important;
+  }
+
+  .cg-payroll .payroll-kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .cg-payroll .payroll-settlement-summary{
+    grid-template-columns:1fr!important;
+  }
+
+  .cg-payroll .payroll-settlement-summary > div{
+    min-height:54px;
+  }
+}
