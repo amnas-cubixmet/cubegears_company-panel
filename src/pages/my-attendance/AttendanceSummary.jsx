@@ -47,7 +47,7 @@ export const AttendanceSummary = () => {
   ];
 
   return (
-    <div className="my-attendance-summary-page" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="my-attendance-summary-page attendance-module attendance-summary-page" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* 2. Compact Month Selector Card */}
       <div className="month-selector-card" style={{
         display: 'flex',
@@ -167,15 +167,16 @@ export const AttendanceSummary = () => {
       </div>
 
       {/* 4. Leave Balance Section */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="attendance-section-block" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
           Leave Balance Breakdown
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px', width: '100%' }}>
+        <div className="leave-balance-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px', width: '100%' }}>
           {mockLeaveBalances.map((b) => (
             <div
               key={b.id}
+              className="attendance-card leave-balance-summary-card"
               style={{
                 backgroundColor: 'var(--surface)',
                 border: '1px solid var(--border)',
@@ -222,7 +223,7 @@ export const AttendanceSummary = () => {
       </div>
 
       {/* 5. Monthly Breakdown Section */}
-      <div style={{
+      <div className="attendance-card attendance-monthly-card" style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '14px',
@@ -241,6 +242,7 @@ export const AttendanceSummary = () => {
           {monthlyBreakdown.map((row, i) => (
             <div
               key={i}
+              className="attendance-data-row"
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -259,7 +261,7 @@ export const AttendanceSummary = () => {
       </div>
 
       {/* 6. Attendance Flags & Review Items Section */}
-      <div style={{
+      <div className="attendance-card attendance-flags-card" style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '14px',
@@ -278,6 +280,7 @@ export const AttendanceSummary = () => {
           {attendanceFlags.map((flag, idx) => (
             <div
               key={idx}
+              className="attendance-data-row attendance-flag-row"
               onClick={() => navigate(flag.route)}
               style={{
                 display: 'flex',
