@@ -218,7 +218,7 @@ export const CustomerList = () => {
   const newThisMonthCount = customers.filter(c => c.createdAt && c.createdAt.startsWith('2026-09')).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingBottom: '70px' }}>
+    <div className="customer-directory-page cg-customers" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingBottom: '70px' }}>
       
       {/* Toast Banner */}
       {toastMsg && (
