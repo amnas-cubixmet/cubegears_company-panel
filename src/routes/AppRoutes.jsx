@@ -122,11 +122,20 @@ export const AppRoutes = () => (
       <Route path="/jobs/new" element={<JobCreatePage />} />
       <Route path="/jobs/add" element={<Navigate to="/jobs/new" replace />} />
       <Route path="/jobs/:id" element={<JobDetails />} />
+      <Route path="/jobs/:id/overview" element={<JobDetails />} />
+      <Route path="/jobs/:id/complaints" element={<JobDetails />} />
+      <Route path="/jobs/:id/inspection" element={<JobDetails />} />
+      <Route path="/jobs/:id/work" element={<JobDetails />} />
+      <Route path="/jobs/:id/parts" element={<JobDetails />} />
+      <Route path="/jobs/:id/estimate" element={<JobDetails />} />
+      <Route path="/jobs/:id/updates" element={<JobDetails />} />
+      <Route path="/jobs/:id/qc" element={<JobDetails />} />
+      <Route path="/jobs/:id/invoice" element={<JobDetails />} />
+      <Route path="/jobs/:id/activity" element={<JobDetails />} />
       <Route path="/jobs/:id/edit" element={<JobDetails />} />
       <Route path="/jobs/:id/status" element={<JobStatus />} />
-      <Route path="/jobs/:id/parts" element={<JobDetails />} />
+
       <Route path="/jobs/:id/costs" element={<JobDetails />} />
-      <Route path="/jobs/:id/work" element={<JobDetails />} />
       <Route path="/jobs/:id/photos" element={<JobDetails />} />
       <Route path="/jobs/:id/history" element={<JobDetails />} />
       <Route path="/jobs/:id/*" element={<JobDetails />} />
