@@ -161,7 +161,7 @@ export const UserRoles = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="staff-roles" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* Toast Feedback */}
       {toastMsg && (
         <div style={{
@@ -178,7 +178,7 @@ export const UserRoles = () => {
       )}
 
       {/* Header UI Fix (Stacked on Mobile, Row on Desktop) */}
-      <div className="user-role-header" style={{ width: '100%', boxSizing: 'border-box' }}>
+      <div className="user-role-header staff-section-header" style={{ width: '100%', boxSizing: 'border-box' }}>
         <div style={{ width: '100%' }}>
           <h3 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: 'var(--text-primary)', lineHeight: 1.25 }}>
             Company User Roles
@@ -214,10 +214,11 @@ export const UserRoles = () => {
       </div>
 
       {/* Role List Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', width: '100%' }}>
+      <div className="role-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', width: '100%' }}>
         {roles.map((r) => (
           <div
             key={r.id}
+            className="role-card"
             style={{
               backgroundColor: 'var(--surface)',
               border: '1px solid var(--border)',
@@ -287,7 +288,7 @@ export const UserRoles = () => {
         title={editingRole ? `Edit Role: ${editingRole.name}` : 'Add New Role'}
         maxWidth="720px"
       >
-        <form onSubmit={handleSaveRole} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form className="role-form-sheet" onSubmit={handleSaveRole} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '4px' }}>
               Role Name *
@@ -399,6 +400,7 @@ export const UserRoles = () => {
               return (
                 <div
                   key={mod.key}
+                  className="permission-module-card"
                   style={{
                     width: '100%',
                     boxSizing: 'border-box',
@@ -469,7 +471,7 @@ export const UserRoles = () => {
           </div>
 
           {/* Sticky Action Footer Bar */}
-          <div style={{
+          <div className="role-form-actions" style={{
             display: 'flex',
             gap: '12px',
             paddingTop: '12px',
