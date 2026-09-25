@@ -32,7 +32,7 @@ export const PayrollTabRail = () => {
   }, [location.pathname]);
 
   return (
-    <div className="w-full min-w-0 rounded-2xl border border-line bg-surface p-1.5 shadow-sm">
+    <div className="payroll-tabs-shell w-full min-w-0 rounded-2xl border border-line bg-surface p-1.5 shadow-sm">
       <div
         ref={railRef}
         className="payroll-subnav flex w-full min-w-0 gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
