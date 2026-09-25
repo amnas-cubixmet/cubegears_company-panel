@@ -286,3 +286,204 @@
     min-height:92px!important;
   }
 }
+
+
+/* =========================================================
+   DASHBOARD SINGLE-MODEL PASS
+   Makes every dashboard module follow the same visual language
+   as the attendance/filter/KPI cards shown at the top.
+   ========================================================= */
+.cg-dashboard{
+  --dash-card-radius:14px;
+  --dash-inner-radius:11px;
+  --dash-card-border:var(--border);
+  --dash-card-bg:var(--surface);
+  --dash-inner-bg:var(--surface-2);
+  --dash-card-shadow:0 1px 2px rgba(15,23,42,.04);
+}
+
+.cg-dashboard .dashboard-attendance-card,
+.cg-dashboard .filters-actions-card,
+.cg-dashboard .summary-grid .ui-stat-card,
+.cg-dashboard .summary-card-container,
+.cg-dashboard .mobile-card{
+  border:1px solid var(--dash-card-border)!important;
+  border-radius:var(--dash-card-radius)!important;
+  background:var(--dash-card-bg)!important;
+  box-shadow:var(--dash-card-shadow)!important;
+}
+
+.cg-dashboard .summary-card-container{
+  padding:14px!important;
+}
+
+.cg-dashboard .summary-card-container > div:first-child{
+  min-height:28px!important;
+  margin-bottom:10px!important;
+  padding-bottom:10px!important;
+  border-bottom:1px solid var(--border)!important;
+}
+
+.cg-dashboard .summary-card-container > div:first-child h3{
+  font-size:14px!important;
+  font-weight:700!important;
+  color:var(--text-primary)!important;
+}
+
+.cg-dashboard .dashboard-item-card,
+.cg-dashboard .booking-card,
+.cg-dashboard .job-progress-grid > *,
+.cg-dashboard .attendance-stats-grid > *{
+  border:1px solid var(--border)!important;
+  border-radius:var(--dash-inner-radius)!important;
+  background:var(--dash-inner-bg)!important;
+  box-shadow:none!important;
+}
+
+.cg-dashboard .dashboard-item-card,
+.cg-dashboard .booking-card{
+  padding:12px!important;
+}
+
+.cg-dashboard .dashboard-data-row{
+  min-width:0!important;
+  padding:10px 11px!important;
+  border:1px solid var(--border)!important;
+  border-radius:var(--dash-inner-radius)!important;
+  background:var(--dash-inner-bg)!important;
+}
+
+.cg-dashboard .finance-row,
+.cg-dashboard .staff-workload-row{
+  border-bottom:1px solid var(--border)!important;
+}
+
+.cg-dashboard .stock-alert-item{
+  border-left-width:4px!important;
+}
+
+.cg-dashboard .activity-row{
+  align-items:flex-start!important;
+}
+
+.cg-dashboard .attendance-stats-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+
+.cg-dashboard .attendance-stat-tile{
+  min-height:70px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+.cg-dashboard .quick-links-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+
+.cg-dashboard .quick-links-grid .ui-button{
+  width:100%!important;
+  min-height:40px!important;
+  border-radius:var(--dash-inner-radius)!important;
+}
+
+.cg-dashboard .bookings-list,
+.cg-dashboard .job-progress-grid{
+  gap:8px!important;
+}
+
+.cg-dashboard .booking-card{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:7px!important;
+}
+
+.cg-dashboard .job-progress-grid > *{
+  padding:12px 10px!important;
+}
+
+.cg-dashboard .delivery-item{
+  gap:8px!important;
+}
+
+.cg-dashboard .delivery-item .ui-button{
+  min-height:38px!important;
+  border-radius:9px!important;
+}
+
+.cg-dashboard .desktop-table-view{
+  border:1px solid var(--border)!important;
+  border-radius:var(--dash-inner-radius)!important;
+  background:var(--surface)!important;
+  overflow:auto!important;
+}
+
+.cg-dashboard .ui-table{
+  background:transparent!important;
+}
+
+.cg-dashboard .ui-table thead{
+  background:var(--surface-2)!important;
+}
+
+.cg-dashboard .ui-table tbody tr:not(:last-child) td{
+  border-bottom:1px solid var(--border)!important;
+}
+
+.cg-dashboard .filters-select-grid select,
+.cg-dashboard .filters-select-grid .ui-select,
+.cg-dashboard .filters-select-grid .ui-input-shell{
+  border-radius:10px!important;
+  background:var(--surface-2)!important;
+}
+
+.cg-dashboard .quick-actions-grid .ui-button{
+  background:var(--surface)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text-primary)!important;
+}
+
+.cg-dashboard .quick-actions-grid .ui-button:hover{
+  background:var(--surface-2)!important;
+  border-color:color-mix(in srgb,var(--primary) 35%,var(--border))!important;
+}
+
+@media(max-width:767px){
+  .cg-dashboard{
+    --dash-card-radius:12px;
+    --dash-inner-radius:10px;
+  }
+
+  .cg-dashboard .summary-card-container{
+    padding:12px!important;
+  }
+
+  .cg-dashboard .summary-card-container > div:first-child{
+    min-height:26px!important;
+    margin-bottom:9px!important;
+    padding-bottom:9px!important;
+  }
+
+  .cg-dashboard .dashboard-data-row,
+  .cg-dashboard .dashboard-item-card,
+  .cg-dashboard .booking-card{
+    padding:10px!important;
+  }
+
+  .cg-dashboard .attendance-stats-grid,
+  .cg-dashboard .quick-links-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:359px){
+  .cg-dashboard .attendance-stats-grid,
+  .cg-dashboard .quick-links-grid{
+    grid-template-columns:1fr!important;
+  }
+}
