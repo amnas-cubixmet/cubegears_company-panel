@@ -59,8 +59,16 @@ export const routeConfig = [
   {
     id: 'staff-management', label: 'Staff Management', path: '/staff-management', icon: UserPlus, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'staff.view',
     children: [
-      { id: 'staff-list', label: 'Staff', path: '/staff-management/staff' },
-      { id: 'staff-roles', label: 'User Roles', path: '/staff-management/roles' }
+      { id: 'staff-overview', label: 'Overview', path: '/staff-management/overview' },
+      { id: 'staff-list', label: 'All Staff', path: '/staff-management/staff' },
+      { id: 'staff-add', label: 'Add Staff', path: '/staff-management/add' },
+      { id: 'staff-roles', label: 'Roles & Permissions', path: '/staff-management/roles' },
+      { id: 'staff-teams', label: 'Teams', path: '/staff-management/teams' },
+      { id: 'staff-shifts', label: 'Shifts', path: '/staff-management/shifts' },
+      { id: 'staff-skills', label: 'Skills', path: '/staff-management/skills' },
+      { id: 'staff-performance', label: 'Performance', path: '/staff-management/performance' },
+      { id: 'staff-documents', label: 'Documents', path: '/staff-management/documents' },
+      { id: 'staff-reports', label: 'Staff Reports', path: '/staff-management/reports' }
     ]
   },
   {
