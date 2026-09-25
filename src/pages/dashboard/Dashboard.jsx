@@ -89,10 +89,10 @@ export const Dashboard = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', minWidth: 0 }}>
+    <div className="dashboard-page cg-dashboard" style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', minWidth: 0 }}>
       
       {/* SECTION 1: PERSONAL ATTENDANCE CLOCK */}
-      <div style={{
+      <div className="dashboard-attendance-card" style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '16px',
