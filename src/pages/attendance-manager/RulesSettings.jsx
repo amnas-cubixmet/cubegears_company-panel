@@ -67,7 +67,7 @@ export const RulesSettings = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="attendance-manager-module attendance-manager-rules" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* Toast Feedback */}
       {toastMsg && (
         <div style={{
