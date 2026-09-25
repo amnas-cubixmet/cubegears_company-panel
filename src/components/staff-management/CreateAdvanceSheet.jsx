@@ -42,7 +42,7 @@ export const CreateAdvanceSheet = ({ isOpen, onClose, onSave }) => {
       title="Create Salary Advance"
       maxWidth="540px"
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <form className="payroll-sheet-form payroll-advance-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {error && (
           <div style={{ padding: '10px 14px', borderRadius: '10px', backgroundColor: 'var(--danger-soft)', color: 'var(--danger)', fontSize: '13px', fontWeight: '600' }}>
             {error}
