@@ -144,7 +144,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                       </NavLink>
 
                       {hasChildren && isActive && (
-                        <div className="ml-[26px] mr-2 mt-1.5 flex flex-col">
+                        <div className="ml-[22px] mr-2 mt-1 flex flex-col">
                           {route.children.map((child, childIndex) => {
                             const childPathname = child.path.split('?')[0];
                             const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
@@ -154,7 +154,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                             const isLastChild = childIndex === route.children.length - 1;
 
                             return (
-                              <div key={child.id} className="relative min-h-9 pl-4">
+                              <div key={child.id} className="relative min-h-[36px] pl-[26px]">
                                 <span
                                   aria-hidden="true"
                                   className={[
@@ -165,14 +165,14 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                                 />
                                 <span
                                   aria-hidden="true"
-                                  className={['absolute left-0 top-1/2 h-px w-3', isChildActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
+                                  className={['absolute left-0 top-1/2 h-px w-[18px]', isChildActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
                                 />
 
                                 <NavLink
                                   to={child.path}
                                   onClick={onClose}
                                   className={[
-                                    'flex min-h-9 items-center justify-center rounded-lg px-2 py-2 text-center text-[11.5px] leading-tight no-underline transition-all',
+                                    'flex min-h-[34px] min-w-0 items-center justify-start rounded-lg px-2.5 text-left text-[11px] leading-4 no-underline transition-colors',
                                     isChildActive
                                       ? 'bg-primary-soft font-semibold text-primary'
                                       : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
