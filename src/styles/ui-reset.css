@@ -1,0 +1,384 @@
+/* =========================================================
+   CUBIXGEAR — FULL PROJECT UI RESET
+   Final visual contract loaded after all legacy/module styles.
+   Keeps business logic untouched and normalizes app-wide UI.
+   ========================================================= */
+
+:root {
+  --cg-content-max: 1600px;
+  --cg-page-gap: 16px;
+  --cg-card-radius: 14px;
+  --cg-control-radius: 10px;
+  --cg-control-height: 42px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.app-shell,
+.main-area,
+.main-content,
+.cg-main-content__body {
+  min-width: 0;
+}
+
+.main-content.cg-main-content {
+  padding: 20px !important;
+  overscroll-behavior: contain;
+}
+
+.cg-main-content__body {
+  width: min(100%, var(--cg-content-max));
+  margin-inline: auto;
+}
+
+.cg-main-content__body > * {
+  min-width: 0;
+}
+
+/* ---------- Typography ---------- */
+.cg-main-content__body h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(20px, 1.8vw, 24px);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+
+.cg-main-content__body h2 {
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 750;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+}
+
+.cg-main-content__body h3 {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.cg-main-content__body p,
+.cg-main-content__body li,
+.cg-main-content__body td,
+.cg-main-content__body label {
+  line-height: 1.45;
+}
+
+.page-header,
+.ui-page-header,
+.crud-page-header,
+.crud-heading,
+.settings-header,
+.billing-page-head,
+.job-card-header,
+.account-page-header {
+  margin-bottom: 16px !important;
+  gap: 12px !important;
+}
+
+.page-header p,
+.ui-page-header p,
+.crud-page-header p,
+.settings-header p,
+.billing-page-head p,
+.job-card-header p,
+.account-page-header p {
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- Cards / panels ---------- */
+.card,
+.ui-card,
+.panel,
+.crud-card,
+.dashboard-card,
+.stat-card,
+.summary-card,
+.settings-card,
+.billing-card,
+.saas-card,
+.account-card,
+.job-card-section,
+.job-create-card,
+.crud-mobile-card,
+.mobile-card {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--cg-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.035) !important;
+}
+
+/* ---------- Buttons ---------- */
+.ui-button,
+.btn,
+.primary-button,
+.secondary-button,
+.action-button,
+.crud-button,
+.photo-action,
+.bill-btn {
+  min-height: 40px;
+  border-radius: var(--cg-control-radius) !important;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  transform: none;
+}
+
+/* ---------- Form controls ---------- */
+.ui-input-shell,
+.form-control,
+.app-search,
+.search-bar,
+.search-input-shell,
+.cubegears-input,
+.cubegears-select,
+.input,
+.select,
+.form-input,
+textarea,
+.ui-textarea,
+.cubegears-textarea {
+  border-radius: var(--cg-control-radius) !important;
+}
+
+.ui-input-shell,
+.form-control,
+.cubegears-input,
+.cubegears-select,
+.input,
+.select,
+.form-input {
+  min-height: var(--cg-control-height);
+}
+
+.form-label,
+.ui-label,
+.cubegears-label {
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+/* ---------- Tables ---------- */
+.table-wrap,
+.ui-table-wrap,
+.crud-table-wrap,
+.saas-table-wrap,
+.desktop-table-view {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: var(--cg-card-radius) !important;
+}
+
+.cg-main-content__body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.cg-main-content__body th {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.015em;
+}
+
+.cg-main-content__body th,
+.cg-main-content__body td {
+  padding: 11px 13px;
+  vertical-align: middle;
+}
+
+/* ---------- Tabs / rails ---------- */
+.tabs-scroll,
+.section-tabs,
+.job-card-tabs,
+.mobile-tab-rail,
+.tab-rail,
+.section-tab-rail,
+.attendance-filter-scroll,
+.payroll-filter-scroll,
+.payroll-subnav {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabs-scroll::-webkit-scrollbar,
+.section-tabs::-webkit-scrollbar,
+.job-card-tabs::-webkit-scrollbar,
+.mobile-tab-rail::-webkit-scrollbar,
+.tab-rail::-webkit-scrollbar,
+.section-tab-rail::-webkit-scrollbar,
+.attendance-filter-scroll::-webkit-scrollbar,
+.payroll-filter-scroll::-webkit-scrollbar,
+.payroll-subnav::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Navigation ---------- */
+.desktop-only-sidebar nav a {
+  justify-content: flex-start;
+}
+
+.desktop-only-sidebar nav section {
+  min-width: 0;
+}
+
+.mobile-only-bottom-nav {
+  isolation: isolate;
+}
+
+/* ---------- Media / overflow safety ---------- */
+.cg-main-content__body img,
+.cg-main-content__body video,
+.cg-main-content__body canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.cg-main-content__body pre,
+.cg-main-content__body code,
+.cg-main-content__body td,
+.cg-main-content__body .truncate-safe {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1024px) {
+  .main-content.cg-main-content {
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --cg-page-gap: 12px;
+    --cg-card-radius: 12px;
+    --cg-control-height: 44px;
+  }
+
+  .main-content.cg-main-content {
+    padding: 12px 12px calc(82px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .cg-main-content__body h1 {
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .cg-main-content__body h2 {
+    font-size: 16px;
+  }
+
+  .page-header,
+  .ui-page-header,
+  .crud-page-header,
+  .crud-heading,
+  .settings-header,
+  .billing-page-head,
+  .job-card-header,
+  .account-page-header {
+    margin-bottom: 14px !important;
+    gap: 10px !important;
+  }
+
+  .cg-main-content__body input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .cg-main-content__body select,
+  .cg-main-content__body textarea {
+    font-size: 16px !important;
+  }
+
+  .cg-main-content__body table {
+    font-size: 12px;
+  }
+
+  .cg-main-content__body th,
+  .cg-main-content__body td {
+    padding: 10px 11px;
+  }
+
+  .ui-button,
+  .btn,
+  .primary-button,
+  .secondary-button,
+  .action-button,
+  .crud-button,
+  .photo-action,
+  .bill-btn {
+    min-height: 42px;
+  }
+
+  .responsive-modal-sheet,
+  .modal-content,
+  [role="dialog"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .main-content.cg-main-content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .cg-main-content__body {
+    width: 100%;
+  }
+
+  .cg-main-content__body h1 {
+    font-size: 19px;
+  }
+
+  .cg-main-content__body th,
+  .cg-main-content__body td {
+    padding-inline: 9px;
+  }
+}
