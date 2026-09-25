@@ -63,7 +63,7 @@ export const Sidebar = () => {
     >
       <div
         className={[
-          'flex h-[60px] shrink-0 items-center border-b border-line',
+          'flex h-16 shrink-0 items-center border-b border-line',
           collapsed ? 'justify-center px-2.5' : 'justify-between px-3'
         ].join(' ')}
       >
