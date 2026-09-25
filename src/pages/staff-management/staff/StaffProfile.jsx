@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Send, Lock, Unlock, User, Building2, Clock3, Wrench,
-  Briefcase, Gauge, DollarSign, FileText, Activity, ShieldCheck,
+  Gauge, DollarSign, FileText, Activity, ShieldCheck,
   Phone, Mail, MapPin, CalendarDays, Star, AlertTriangle
 } from 'lucide-react';
 import { staffService } from '../../../services/staff.service';
