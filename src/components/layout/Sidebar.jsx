@@ -177,7 +177,7 @@ export const Sidebar = () => {
                               <NavLink
                                 to={child.path}
                                 className={[
-                                  'flex min-h-8 items-center rounded-md px-2 text-[11px] leading-tight no-underline transition-colors',
+                                  'flex min-h-8 items-center justify-center rounded-md px-2 text-center text-[11px] leading-tight no-underline transition-colors',
                                   childActive
                                     ? 'bg-surface-2 font-semibold text-primary'
                                     : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
