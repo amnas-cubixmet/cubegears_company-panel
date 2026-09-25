@@ -107,7 +107,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
   });
 
   return (
-    <section className="space-y-4">
+    <section className="job-parts-workflow space-y-4">
       <div className="rounded-[18px] border border-cg-border bg-cg-surface p-4 shadow-sm md:p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
