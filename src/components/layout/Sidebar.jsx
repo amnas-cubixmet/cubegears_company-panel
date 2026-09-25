@@ -58,13 +58,13 @@ export const Sidebar = () => {
     <aside
       className={[
         'sidebar desktop-only-sidebar relative z-30 hidden h-dvh shrink-0 flex-col overflow-hidden border-r border-line bg-surface transition-[width] duration-300 md:flex',
-        collapsed ? 'w-[72px]' : 'w-[240px]'
+        collapsed ? 'w-[72px]' : 'w-[220px]'
       ].join(' ')}
     >
       <div
         className={[
           'flex h-16 shrink-0 items-center border-b border-line',
-          collapsed ? 'justify-center px-2.5' : 'justify-between px-3.5'
+          collapsed ? 'justify-center px-2.5' : 'justify-between px-3'
         ].join(' ')}
       >
         <div className={['flex min-w-0 items-center', collapsed ? '' : 'gap-3'].join(' ')}>
