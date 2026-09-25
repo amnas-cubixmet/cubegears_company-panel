@@ -17,7 +17,7 @@ export const RecoveryHistoryModal = ({ isOpen, onClose, advance }) => {
       title={`Recovery History: ${advance.staffName}`}
       maxWidth="540px"
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div className="payroll-recovery-history" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {/* Advance Header Summary */}
         <div style={{ backgroundColor: 'var(--surface-2)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' }}>
           <div>
