@@ -32,12 +32,50 @@ export const updateApprovalStatus = async (approvalId, decision, note) => {
   return apiClient.post(`/api/attendance-manager/approvals/${approvalId}`, { decision, note });
 };
 
-export const getTeamAttendance = async (params) => {
+export const getTeamAttendance = async (params = {}) => {
   if (USE_MOCK_API) {
     await delay();
-    return Promise.resolve([...mockTeamAttendance]);
+    let result = [...mockTeamAttendance];
+
+    if (params.branch && params.branch !== 'All') {
+      result = result.filter((item) => item.branch === params.branch);
+    }
+    if (params.status && params.status !== 'All') {
+      result = result.filter((item) => item.status === params.status);
+    }
+    if (params.role && params.role !== 'All') {
+      result = result.filter((item) => item.designation === params.role);
+    }
+
+    return Promise.resolve(result);
   }
   return apiClient.get('/api/attendance-manager/team', { params });
+};
+
+export const updateTeamAttendance = async (attendanceId, updates, auditReason = '') => {
+  if (USE_MOCK_API) {
+    await delay();
+    const item = mockTeamAttendance.find((row) => row.id === attendanceId);
+    if (!item) throw new Error('Attendance record not found.');
+
+    item.auditHistory = item.auditHistory || [];
+    item.auditHistory.unshift({
+      action: 'Attendance Updated',
+      reason: auditReason || 'Manager attendance correction',
+      previousStatus: item.status,
+      nextStatus: updates.status ?? item.status,
+      actor: 'Attendance Manager',
+      timestamp: new Date().toLocaleString()
+    });
+
+    Object.assign(item, updates);
+    return Promise.resolve({ ...item });
+  }
+
+  return apiClient.put(`/api/attendance-manager/team/${attendanceId}`, {
+    ...updates,
+    auditReason
+  });
 };
 
 export const getMasterRecords = async (params) => {
@@ -149,6 +187,7 @@ export const attendanceManagerService = {
   getApprovals,
   updateApprovalStatus,
   getTeamAttendance,
+  updateTeamAttendance,
   getMasterRecords,
   getLeaveTypes,
   createLeaveType,
