@@ -1,6 +1,7 @@
 /* =========================================================
-   CUBIXGEAR — ATTENDANCE MANAGER UI
-   Shared UI for overview/daily/calendar/leave/overtime/shifts/reports/rules.
+   CUBIXGEAR — ATTENDANCE MANAGER
+   One visual system for overview, daily, calendar, leave,
+   overtime, shifts, reports and rules.
    ========================================================= */
 
 .cg-attendance-manager {
@@ -8,11 +9,13 @@
   --am-inner-radius: 10px;
   --am-border: var(--border);
   --am-surface: var(--surface);
-  --am-inner: var(--surface-2);
+  --am-soft: var(--surface-2);
   --am-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   width: 100%;
   min-width: 0;
   gap: 14px !important;
+  color: var(--text-primary);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .cg-attendance-manager *,
@@ -21,6 +24,14 @@
   box-sizing: border-box;
 }
 
+.cg-attendance-manager button,
+.cg-attendance-manager input,
+.cg-attendance-manager select,
+.cg-attendance-manager textarea {
+  font: inherit;
+}
+
+/* ---------- Page shell ---------- */
 .cg-attendance-manager .attendance-manager-header {
   display: flex;
   min-width: 0;
@@ -31,11 +42,11 @@
 
 .cg-attendance-manager .attendance-manager-header h1 {
   margin: 0 !important;
+  color: var(--text-primary) !important;
   font-size: 22px !important;
   font-weight: 800 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.02em !important;
-  color: var(--text-primary) !important;
 }
 
 .cg-attendance-manager .attendance-manager-header p {
@@ -46,6 +57,8 @@
 }
 
 .cg-attendance-manager .attendance-manager-tabs {
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--am-border) !important;
   border-radius: var(--am-radius) !important;
   background: var(--am-surface) !important;
@@ -58,9 +71,10 @@
   min-height: 38px !important;
   height: 38px !important;
   border-radius: 9px !important;
-  padding-inline: 12px !important;
+  padding: 0 12px !important;
   font-size: 12px !important;
   font-weight: 650 !important;
+  white-space: nowrap;
   box-shadow: none !important;
 }
 
@@ -71,187 +85,815 @@
   min-width: 0;
 }
 
-.cg-attendance-manager .attendance-manager-module {
+.cg-attendance-manager .attendance-manager-module,
+.cg-attendance-manager .am-overtime-module {
+  display: flex !important;
+  flex-direction: column !important;
   gap: 12px !important;
 }
 
-/* Shared cards */
-.cg-attendance-manager .attendance-manager-module .rounded-2xl,
-.cg-attendance-manager .attendance-manager-overtime,
-.cg-attendance-manager .attendance-manager-overtime > div > div[style*="backgroundColor: 'var(--surface)'"] {
-  border-radius: var(--am-radius) !important;
-}
-
-.cg-attendance-manager .attendance-manager-module > .rounded-2xl,
-.cg-attendance-manager .attendance-manager-module .border.border-line.bg-surface,
-.cg-attendance-manager .attendance-manager-overtime {
-  border: 1px solid var(--am-border) !important;
-  background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
-}
-
-.cg-attendance-manager .attendance-manager-module .bg-surface-2 {
-  border-radius: var(--am-inner-radius);
-}
-
-.cg-attendance-manager .attendance-manager-module h2,
-.cg-attendance-manager .attendance-manager-module h3 {
-  color: var(--text-primary);
-}
-
-/* Overview */
-.cg-attendance-manager .attendance-manager-overview > .grid:first-child {
-  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-  gap: 10px !important;
-}
-
-.cg-attendance-manager .attendance-manager-overview > .grid:first-child > div {
-  min-width: 0;
-  min-height: 100px;
-  padding: 13px !important;
+/* ---------- Shared primitives ---------- */
+.cg-attendance-manager .am-panel,
+.cg-attendance-manager .am-section-header,
+.cg-attendance-manager .am-filter-card,
+.cg-attendance-manager .am-table-card,
+.cg-attendance-manager .am-calendar-block,
+.cg-attendance-manager .am-calendar-header,
+.cg-attendance-manager .am-approval-card,
+.cg-attendance-manager .am-empty-state,
+.cg-attendance-manager .am-report-filter,
+.cg-attendance-manager .am-rule-card,
+.cg-attendance-manager .rules-header,
+.cg-attendance-manager .am-overtime-card {
   border: 1px solid var(--am-border) !important;
   border-radius: var(--am-radius) !important;
   background: var(--am-surface) !important;
   box-shadow: var(--am-shadow) !important;
 }
 
-.cg-attendance-manager .attendance-manager-overview > .grid:first-child > div .text-2xl {
-  font-size: 22px !important;
-  line-height: 1.1 !important;
-}
-
-.cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) {
-  gap: 12px !important;
-}
-
-.cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) > div {
+.cg-attendance-manager .am-panel,
+.cg-attendance-manager .am-section-header,
+.cg-attendance-manager .am-calendar-header,
+.cg-attendance-manager .am-approval-card,
+.cg-attendance-manager .am-report-filter,
+.cg-attendance-manager .am-rule-card,
+.cg-attendance-manager .rules-header,
+.cg-attendance-manager .am-overtime-card {
   padding: 14px !important;
-  border: 1px solid var(--am-border) !important;
-  border-radius: var(--am-radius) !important;
-  background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
 }
 
-.cg-attendance-manager .attendance-manager-overview .rounded-xl {
-  border-radius: var(--am-inner-radius) !important;
+.cg-attendance-manager .am-panel__header,
+.cg-attendance-manager .am-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.cg-attendance-manager .attendance-manager-overview a {
+.cg-attendance-manager .am-panel__header h2,
+.cg-attendance-manager .am-section-header h2,
+.cg-attendance-manager .am-calendar-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.cg-attendance-manager .am-panel__header p,
+.cg-attendance-manager .am-section-header p,
+.cg-attendance-manager .am-calendar-header p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.cg-attendance-manager .am-primary-button,
+.cg-attendance-manager .am-secondary-button,
+.cg-attendance-manager .am-action-button,
+.cg-attendance-manager .am-edit-button,
+.cg-attendance-manager .am-approve-button,
+.cg-attendance-manager .am-reject-button,
+.cg-attendance-manager .am-save-button {
   min-height: 40px;
+  border-radius: 10px !important;
+  border: 1px solid var(--am-border);
+  padding: 0 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px !important;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-/* Daily attendance */
-.cg-attendance-manager .attendance-manager-daily > .grid:first-child {
-  gap: 8px !important;
-  padding: 10px !important;
-  border: 1px solid var(--am-border) !important;
-  border-radius: var(--am-radius) !important;
+.cg-attendance-manager .am-primary-button,
+.cg-attendance-manager .am-action-button--primary,
+.cg-attendance-manager .am-save-button,
+.cg-attendance-manager .am-approve-button {
+  border-color: var(--primary) !important;
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+.cg-attendance-manager .am-secondary-button,
+.cg-attendance-manager .am-action-button,
+.cg-attendance-manager .am-edit-button {
   background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
+  color: var(--text-primary) !important;
 }
 
-.cg-attendance-manager .attendance-manager-daily > .grid:first-child label,
-.cg-attendance-manager .attendance-manager-daily > .grid:first-child select {
-  min-height: 42px !important;
-  height: 42px !important;
-  border-radius: 10px !important;
-  background: var(--am-inner) !important;
+.cg-attendance-manager .am-reject-button {
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent) !important;
+  background: var(--danger-soft) !important;
+  color: var(--danger) !important;
 }
 
-.cg-attendance-manager .attendance-manager-daily > .overflow-x-auto,
-.cg-attendance-manager .attendance-manager-reports > .overflow-x-auto,
-.cg-attendance-manager .attendance-manager-calendar > .overflow-x-auto {
+.cg-attendance-manager .am-secondary-button:hover,
+.cg-attendance-manager .am-action-button:not(.am-action-button--primary):hover,
+.cg-attendance-manager .am-edit-button:hover {
+  background: var(--am-soft) !important;
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--am-border)) !important;
+}
+
+.cg-attendance-manager input:not([type="checkbox"]):not([type="radio"]),
+.cg-attendance-manager select,
+.cg-attendance-manager textarea {
   width: 100%;
-  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--am-border) !important;
-  border-radius: var(--am-radius) !important;
-  background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
-  overflow-x: auto !important;
+  border-radius: 10px !important;
+  background: var(--am-soft) !important;
+  color: var(--text-primary) !important;
+  outline: none;
 }
 
-.cg-attendance-manager table {
-  border-collapse: collapse !important;
+.cg-attendance-manager input:not([type="checkbox"]):not([type="radio"]),
+.cg-attendance-manager select {
+  min-height: 42px;
+  padding: 0 11px;
 }
 
-.cg-attendance-manager table th {
-  padding: 10px 12px !important;
-  color: var(--text-muted) !important;
-  font-size: 10px !important;
-  font-weight: 750 !important;
-  letter-spacing: .03em;
+.cg-attendance-manager textarea {
+  min-height: 92px;
+  padding: 10px 11px;
+  resize: vertical;
+}
+
+.cg-attendance-manager input:focus,
+.cg-attendance-manager select:focus,
+.cg-attendance-manager textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.cg-attendance-manager label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+/* ---------- Overview ---------- */
+.cg-attendance-manager .am-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cg-attendance-manager .am-stat-card {
+  min-width: 0;
+  min-height: 102px;
+  padding: 13px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-radius);
+  background: var(--am-surface);
+  box-shadow: var(--am-shadow);
+}
+
+.cg-attendance-manager .am-stat-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.cg-attendance-manager .am-stat-card__icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.cg-attendance-manager .am-stat-card__value {
+  display: block;
+  margin-top: 14px;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.cg-attendance-manager .am-overview-grid,
+.cg-attendance-manager .am-two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cg-attendance-manager .am-mini-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cg-attendance-manager .am-mini-metric {
+  min-width: 0;
+  min-height: 72px;
+  padding: 10px 11px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-inner-radius);
+  background: var(--am-soft);
+}
+
+.cg-attendance-manager .am-mini-metric span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.cg-attendance-manager .am-mini-metric strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cg-attendance-manager .am-productivity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.cg-attendance-manager .am-productivity-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 116px) minmax(80px, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.cg-attendance-manager .am-productivity-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-weight: 650;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cg-attendance-manager table td {
-  padding: 11px 12px !important;
-  font-size: 12px !important;
-  vertical-align: middle !important;
+.cg-attendance-manager .am-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--am-soft);
 }
 
-.cg-attendance-manager table tbody tr:hover {
-  background: var(--surface-2);
+.cg-attendance-manager .am-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
 }
 
-.cg-attendance-manager table select,
-.cg-attendance-manager table button {
-  border-radius: 9px !important;
+.cg-attendance-manager .am-productivity-row > strong {
+  color: var(--text-secondary);
+  font-size: 10px;
+  text-align: right;
 }
 
-/* Monthly calendar */
-.cg-attendance-manager .attendance-manager-calendar > div:first-child {
-  padding: 14px !important;
-  border: 1px solid var(--am-border) !important;
-  border-radius: var(--am-radius) !important;
-  background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
+.cg-attendance-manager .am-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 13px;
 }
 
-.cg-attendance-manager .attendance-manager-calendar .grid > div {
+.cg-attendance-manager .am-action-button {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding-inline: 10px;
+  text-align: center;
+}
+
+/* ---------- Daily attendance ---------- */
+.cg-attendance-manager .am-filter-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 190px 190px;
+  gap: 8px;
+  padding: 10px;
+}
+
+.cg-attendance-manager .am-search-field {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--am-border);
+  border-radius: 10px;
+  background: var(--am-soft);
+  padding: 0 11px;
+  color: var(--text-muted);
+}
+
+.cg-attendance-manager .am-search-field input {
+  min-height: 38px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.cg-attendance-manager .am-table-card {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.cg-attendance-manager .am-table-card table {
+  width: 100%;
+  min-width: 930px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+
+.cg-attendance-manager .am-table-card th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--am-border);
+  background: var(--am-soft);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cg-attendance-manager .am-table-card td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--am-border);
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.cg-attendance-manager .am-table-card tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.cg-attendance-manager .am-table-card tbody tr:hover {
+  background: var(--am-soft);
+}
+
+.cg-attendance-manager .am-table-card td strong {
+  color: var(--text-primary);
+}
+
+.cg-attendance-manager .am-table-subtext {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-attendance-manager .am-notes-cell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cg-attendance-manager .am-table-card td select {
+  min-width: 118px;
+  min-height: 34px;
+  height: 34px;
+  padding-inline: 8px;
+  font-size: 11px;
+}
+
+.cg-attendance-manager .am-edit-button--compact {
+  min-height: 34px;
+  height: 34px;
+  padding: 0 10px;
+}
+
+.cg-attendance-manager .am-daily-mobile-list {
+  display: none;
+}
+
+.cg-attendance-manager .am-staff-card {
+  padding: 12px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-radius);
+  background: var(--am-surface);
+  box-shadow: var(--am-shadow);
+}
+
+.cg-attendance-manager .am-staff-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cg-attendance-manager .am-staff-card__head strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.cg-attendance-manager .am-staff-card__head span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-attendance-manager .am-staff-card__head select {
+  width: auto;
+  min-width: 120px;
+  min-height: 34px;
+  height: 34px;
+  padding-inline: 8px;
+  font-size: 11px;
+}
+
+.cg-attendance-manager .am-staff-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.cg-attendance-manager .am-staff-card__grid > div {
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-inner-radius);
+  background: var(--am-soft);
+}
+
+.cg-attendance-manager .am-staff-card__grid span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.cg-attendance-manager .am-staff-card__grid strong {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cg-attendance-manager .am-staff-card .am-edit-button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.cg-attendance-manager .am-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cg-attendance-manager .am-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cg-attendance-manager .am-edit-summary {
+  padding: 10px 11px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-inner-radius);
+  background: var(--am-soft);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cg-attendance-manager .am-edit-summary strong {
+  color: var(--text-primary);
+}
+
+.cg-attendance-manager .am-form-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.cg-attendance-manager .am-form-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cg-attendance-manager .am-save-button {
+  width: 100%;
+  min-height: 44px;
+}
+
+/* ---------- Monthly calendar ---------- */
+.cg-attendance-manager .am-calendar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cg-attendance-manager .am-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px 12px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-attendance-manager .am-calendar-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.cg-attendance-manager .am-calendar-legend .am-day {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+}
+
+.cg-attendance-manager .am-calendar-blocks {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.cg-attendance-manager .am-calendar-block {
+  overflow: hidden;
+}
+
+.cg-attendance-manager .am-calendar-block__title {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--am-border);
+  background: var(--am-soft);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cg-attendance-manager .am-calendar-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong, var(--border)) transparent;
+}
+
+.cg-attendance-manager .am-calendar-grid {
+  --am-days: 15;
+  display: grid;
+  grid-template-columns: minmax(145px, 1.25fr) repeat(var(--am-days), minmax(30px, 1fr));
+  gap: 4px;
+  min-width: 760px;
+}
+
+.cg-attendance-manager .am-calendar-employee-head,
+.cg-attendance-manager .am-calendar-day-head {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.cg-attendance-manager .am-calendar-employee-head {
+  padding-inline: 7px;
+}
+
+.cg-attendance-manager .am-calendar-day-head {
+  justify-content: center;
+}
+
+.cg-attendance-manager .am-calendar-employee {
+  min-width: 0;
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  padding: 0 7px;
   border-radius: 7px;
+  background: var(--am-soft);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Leave approvals */
-.cg-attendance-manager .attendance-manager-leave > div {
-  border-radius: var(--am-radius) !important;
+.cg-attendance-manager .am-day {
+  min-width: 0;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 750;
 }
 
-.cg-attendance-manager .attendance-manager-leave > div:first-child,
-.cg-attendance-manager .attendance-manager-leave > div:not(:first-child) {
-  border-color: var(--am-border) !important;
-  box-shadow: var(--am-shadow) !important;
+.cg-attendance-manager .am-day--present {
+  background: var(--success-soft);
+  color: var(--success);
 }
 
-.cg-attendance-manager .attendance-manager-leave button {
-  min-height: 38px;
-  border-radius: 9px !important;
+.cg-attendance-manager .am-day--absent {
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
-/* Overtime */
+.cg-attendance-manager .am-day--leave {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.cg-attendance-manager .am-day--half {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.cg-attendance-manager .am-day--off {
+  background: var(--am-soft);
+  color: var(--text-muted);
+  border-color: var(--am-border);
+}
+
+/* ---------- Leave approvals ---------- */
+.cg-attendance-manager .am-count-badge,
+.cg-attendance-manager .am-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.cg-attendance-manager .am-count-badge {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.cg-attendance-manager .am-status-badge--pending {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.cg-attendance-manager .am-status-badge--approved {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.cg-attendance-manager .am-status-badge--rejected {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.cg-attendance-manager .am-approval-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cg-attendance-manager .am-approval-card {
+  min-width: 0;
+}
+
+.cg-attendance-manager .am-approval-card__head,
+.cg-attendance-manager .am-approval-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cg-attendance-manager .am-approval-card__head {
+  justify-content: space-between;
+}
+
+.cg-attendance-manager .am-approval-person {
+  min-width: 0;
+}
+
+.cg-attendance-manager .am-approval-person img {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cg-attendance-manager .am-approval-person strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.cg-attendance-manager .am-approval-person span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.cg-attendance-manager .am-approval-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.cg-attendance-manager .am-approval-details > div {
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-inner-radius);
+  background: var(--am-soft);
+}
+
+.cg-attendance-manager .am-approval-details__wide {
+  grid-column: 1 / -1;
+}
+
+.cg-attendance-manager .am-approval-details span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.cg-attendance-manager .am-approval-details strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-primary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.cg-attendance-manager .am-approval-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px !important;
+  margin-top: 11px;
+  padding-top: 10px !important;
+  border-top: 1px solid var(--am-border) !important;
+}
+
+.cg-attendance-manager .am-approval-actions > button {
+  width: 100%;
+  min-height: 38px !important;
+}
+
+.cg-attendance-manager .am-empty-state,
+.cg-attendance-manager .am-loading-state {
+  padding: 28px 14px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ---------- Overtime ---------- */
 .cg-attendance-manager .attendance-manager-overtime {
-  padding: 14px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
 }
 
-.cg-attendance-manager .attendance-manager-overtime > div {
-  gap: 12px !important;
-}
-
-.cg-attendance-manager .attendance-manager-overtime button {
-  border-radius: 9px !important;
-}
-
-.cg-attendance-manager .attendance-manager-overtime input,
-.cg-attendance-manager .attendance-manager-overtime select,
-.cg-attendance-manager .attendance-manager-overtime textarea {
-  border-radius: 10px !important;
-}
-
-/* Shifts */
-.cg-attendance-manager .attendance-manager-shifts > div:first-child {
+.cg-attendance-manager .am-overtime-header {
   padding: 14px !important;
   border: 1px solid var(--am-border) !important;
   border-radius: var(--am-radius) !important;
@@ -259,75 +901,153 @@
   box-shadow: var(--am-shadow) !important;
 }
 
-.cg-attendance-manager .attendance-manager-shifts > .grid {
-  gap: 12px !important;
+.cg-attendance-manager .am-overtime-header h3 {
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
 }
 
-.cg-attendance-manager .attendance-manager-shifts > .grid > div {
-  padding: 14px !important;
-  border: 1px solid var(--am-border) !important;
-  border-radius: var(--am-radius) !important;
-  background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
+.cg-attendance-manager .am-overtime-header p {
+  margin: 3px 0 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
 }
 
-.cg-attendance-manager .attendance-manager-shifts input,
-.cg-attendance-manager .attendance-manager-shifts select {
-  min-height: 42px !important;
-  height: 42px !important;
-  border-radius: 10px !important;
+.cg-attendance-manager .am-overtime-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
 }
 
-/* Reports */
-.cg-attendance-manager .attendance-manager-reports > div:first-child {
-  padding: 14px !important;
-  border: 1px solid var(--am-border) !important;
-  border-radius: var(--am-radius) !important;
-  background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
+.cg-attendance-manager .am-overtime-card {
+  min-width: 0;
+  gap: 9px !important;
 }
 
-.cg-attendance-manager .attendance-manager-reports > select {
-  min-height: 42px !important;
-  height: 42px !important;
-  border-radius: 10px !important;
-  background: var(--am-surface) !important;
+.cg-attendance-manager .am-overtime-details {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  padding: 9px !important;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-inner-radius) !important;
+  background: var(--am-soft) !important;
 }
 
-.cg-attendance-manager .attendance-manager-reports button {
-  min-height: 40px !important;
-  border-radius: 10px !important;
+/* ---------- Shifts ---------- */
+.cg-attendance-manager .am-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-/* Rules */
+.cg-attendance-manager .am-rule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.cg-attendance-manager .am-rule-list > div {
+  padding: 10px 11px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-inner-radius);
+  background: var(--am-soft);
+}
+
+.cg-attendance-manager .am-rule-list strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.cg-attendance-manager .am-rule-list span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+/* ---------- Reports ---------- */
+.cg-attendance-manager .am-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.cg-attendance-manager .am-report-filter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cg-attendance-manager .am-report-filter label {
+  width: min(320px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cg-attendance-manager .am-report-filter label > span,
+.cg-attendance-manager .am-report-count span {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cg-attendance-manager .am-report-count {
+  min-width: 92px;
+  padding: 8px 10px;
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-inner-radius);
+  background: var(--am-soft);
+  text-align: right;
+}
+
+.cg-attendance-manager .am-report-count strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+/* ---------- Rules ---------- */
 .cg-attendance-manager .attendance-manager-rules {
   gap: 12px !important;
 }
 
-.cg-attendance-manager .attendance-manager-rules .rules-header {
-  padding: 14px !important;
-  border: 1px solid var(--am-border) !important;
-  border-radius: var(--am-radius) !important;
-  background: var(--am-surface) !important;
-  box-shadow: var(--am-shadow) !important;
+.cg-attendance-manager .am-rules-header {
+  align-items: center !important;
 }
 
-.cg-attendance-manager .attendance-manager-rules .rules-header h3 {
-  font-size: 16px !important;
+.cg-attendance-manager .am-rules-header h3 {
+  font-size: 15px !important;
   font-weight: 750 !important;
 }
 
-.cg-attendance-manager .attendance-manager-rules .save-rules-btn {
+.cg-attendance-manager .am-rules-header p {
+  margin: 3px 0 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+}
+
+.cg-attendance-manager .save-rules-btn {
   min-height: 42px !important;
   height: 42px !important;
   border-radius: 10px !important;
 }
 
-.cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] {
+.cg-attendance-manager .am-rules-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 10px !important;
 }
 
-.cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] > div {
+.cg-attendance-manager .am-rule-card {
+  min-width: 0;
   padding: 13px !important;
   border: 1px solid var(--am-border) !important;
   border-radius: var(--am-radius) !important;
@@ -335,25 +1055,45 @@
   box-shadow: var(--am-shadow) !important;
 }
 
-.cg-attendance-manager .attendance-manager-rules input:not([type="checkbox"]),
-.cg-attendance-manager .attendance-manager-rules select,
-.cg-attendance-manager .attendance-manager-rules textarea {
+.cg-attendance-manager .am-rule-card > div:first-child {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.cg-attendance-manager .am-rule-card input:not([type="checkbox"]),
+.cg-attendance-manager .am-rule-card select {
   min-height: 42px !important;
+  height: 42px !important;
   border-radius: 10px !important;
-  border: 1px solid var(--border) !important;
-  background: var(--surface-2) !important;
-  color: var(--text-primary) !important;
 }
 
 @media (max-width: 1280px) {
-  .cg-attendance-manager .attendance-manager-overview > .grid:first-child {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  .cg-attendance-manager .am-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cg-attendance-manager .am-overtime-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
 @media (max-width: 1024px) {
-  .cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) {
+  .cg-attendance-manager .am-overview-grid,
+  .cg-attendance-manager .am-two-column-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-attendance-manager .am-approval-grid,
+  .cg-attendance-manager .am-rules-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .cg-attendance-manager .am-calendar-header {
+    flex-direction: column;
+  }
+
+  .cg-attendance-manager .am-calendar-legend {
+    justify-content: flex-start;
   }
 }
 
@@ -376,119 +1116,183 @@
     font-size: 12px !important;
   }
 
-  .cg-attendance-manager .attendance-manager-mobile-tabs .attendance-manager-tabs {
+  .cg-attendance-manager .attendance-manager-tabs {
     padding: 4px !important;
   }
 
-  .cg-attendance-manager .attendance-manager-mobile-tabs .attendance-manager-tabs button {
+  .cg-attendance-manager .attendance-manager-tabs button {
     min-height: 40px !important;
     height: 40px !important;
-    padding-inline: 11px !important;
+    padding-inline: 10px !important;
   }
 
-  .cg-attendance-manager .attendance-manager-module {
-    gap: 10px !important;
+  .cg-attendance-manager .am-panel,
+  .cg-attendance-manager .am-section-header,
+  .cg-attendance-manager .am-calendar-header,
+  .cg-attendance-manager .am-approval-card,
+  .cg-attendance-manager .am-report-filter,
+  .cg-attendance-manager .am-rule-card,
+  .cg-attendance-manager .rules-header,
+  .cg-attendance-manager .am-overtime-card {
+    padding: 11px !important;
   }
 
-  .cg-attendance-manager .attendance-manager-overview > .grid:first-child {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
+  .cg-attendance-manager .am-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
-  .cg-attendance-manager .attendance-manager-overview > .grid:first-child > div {
+  .cg-attendance-manager .am-stat-card {
     min-height: 92px;
-    padding: 11px !important;
+    padding: 11px;
   }
 
-  .cg-attendance-manager .attendance-manager-overview > .grid:nth-child(2) > div,
-  .cg-attendance-manager .attendance-manager-calendar > div:first-child,
-  .cg-attendance-manager .attendance-manager-shifts > div:first-child,
-  .cg-attendance-manager .attendance-manager-shifts > .grid > div,
-  .cg-attendance-manager .attendance-manager-reports > div:first-child,
-  .cg-attendance-manager .attendance-manager-rules .rules-header,
-  .cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] > div,
-  .cg-attendance-manager .attendance-manager-overtime {
-    padding: 11px !important;
+  .cg-attendance-manager .am-stat-card__value {
+    margin-top: 11px;
+    font-size: 21px;
   }
 
-  .cg-attendance-manager .attendance-manager-daily > .grid:first-child {
-    grid-template-columns: 1fr !important;
-    padding: 9px !important;
+  .cg-attendance-manager .am-mini-metric {
+    min-height: 66px;
+    padding: 9px;
   }
 
-  .cg-attendance-manager .attendance-manager-daily > .grid:first-child label,
-  .cg-attendance-manager .attendance-manager-daily > .grid:first-child select {
+  .cg-attendance-manager .am-mini-metric strong {
+    font-size: 18px;
+  }
+
+  .cg-attendance-manager .am-productivity-row {
+    grid-template-columns: 82px minmax(60px, 1fr) 36px;
+    gap: 7px;
+  }
+
+  .cg-attendance-manager .am-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cg-attendance-manager .am-action-button {
+    min-height: 44px;
+  }
+
+  .cg-attendance-manager .am-filter-card {
+    grid-template-columns: 1fr;
+    padding: 9px;
+  }
+
+  .cg-attendance-manager .am-search-field,
+  .cg-attendance-manager .am-filter-card > select {
     min-height: 44px !important;
     height: 44px !important;
   }
 
-  .cg-attendance-manager .attendance-manager-shifts > .grid {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
+  .cg-attendance-manager .am-daily-table {
+    display: none;
   }
 
-  .cg-attendance-manager .attendance-manager-shifts .grid.grid-cols-2 {
-    grid-template-columns: 1fr !important;
+  .cg-attendance-manager .am-daily-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  .cg-attendance-manager .attendance-manager-reports > div:first-child {
-    align-items: stretch !important;
-    flex-direction: column !important;
+  .cg-attendance-manager .am-form-grid--2 {
+    grid-template-columns: 1fr;
   }
 
-  .cg-attendance-manager .attendance-manager-reports > div:first-child > div:last-child {
+  .cg-attendance-manager .am-calendar-scroll {
+    padding: 8px;
+  }
+
+  .cg-attendance-manager .am-calendar-grid {
+    grid-template-columns: 128px repeat(var(--am-days), 32px);
+    min-width: max-content;
+  }
+
+  .cg-attendance-manager .am-calendar-legend {
+    gap: 6px 9px;
+  }
+
+  .cg-attendance-manager .am-approval-grid {
+    gap: 8px;
+  }
+
+  .cg-attendance-manager .am-approval-details {
+    gap: 6px;
+  }
+
+  .cg-attendance-manager .am-section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cg-attendance-manager .am-section-header > .am-primary-button,
+  .cg-attendance-manager .am-section-header > .am-header-actions {
     width: 100%;
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  .cg-attendance-manager .attendance-manager-reports > div:first-child button {
+  .cg-attendance-manager .am-header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cg-attendance-manager .am-header-actions button {
     width: 100%;
-    justify-content: center;
   }
 
-  .cg-attendance-manager .attendance-manager-reports > select {
-    width: 100% !important;
-    max-width: none !important;
-    min-height: 44px !important;
-    height: 44px !important;
+  .cg-attendance-manager .am-report-filter {
+    align-items: stretch;
+    flex-direction: column;
   }
 
-  .cg-attendance-manager .attendance-manager-rules .rules-header {
-    align-items: stretch !important;
+  .cg-attendance-manager .am-report-filter label {
+    width: 100%;
+  }
+
+  .cg-attendance-manager .am-report-count {
+    width: 100%;
+    text-align: left;
+  }
+
+  .cg-attendance-manager .am-overtime-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cg-attendance-manager .am-rules-header {
     flex-direction: column !important;
+    align-items: stretch !important;
   }
 
-  .cg-attendance-manager .attendance-manager-rules .save-rules-btn {
+  .cg-attendance-manager .save-rules-btn {
     width: 100% !important;
     min-height: 44px !important;
     height: 44px !important;
   }
 
-  .cg-attendance-manager .attendance-manager-rules > div[style*="gridTemplateColumns"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  .cg-attendance-manager .attendance-manager-overtime > div > div[style*="gridTemplateColumns"] {
-    grid-template-columns: 1fr !important;
-  }
-
-  .cg-attendance-manager .attendance-manager-leave > div {
-    padding: 11px !important;
+  .cg-attendance-manager input:not([type="checkbox"]):not([type="radio"]),
+  .cg-attendance-manager select,
+  .cg-attendance-manager textarea {
+    font-size: 16px !important;
   }
 }
 
 @media (max-width: 360px) {
-  .cg-attendance-manager .attendance-manager-overview > .grid:first-child {
+  .cg-attendance-manager .am-stat-card {
+    padding: 10px;
+  }
+
+  .cg-attendance-manager .am-stat-card__top {
+    font-size: 10px;
+  }
+
+  .cg-attendance-manager .am-mini-metrics,
+  .cg-attendance-manager .am-staff-card__grid,
+  .cg-attendance-manager .am-approval-details,
+  .cg-attendance-manager .am-overtime-details {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  .cg-attendance-manager .attendance-manager-overview > .grid:first-child > div {
-    padding: 10px !important;
-  }
-
   .cg-attendance-manager .attendance-manager-tabs button {
-    padding-inline: 9px !important;
+    padding-inline: 8px !important;
     font-size: 11px !important;
   }
 }
