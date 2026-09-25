@@ -2250,3 +2250,146 @@
     text-align: left;
   }
 }
+
+
+/* Team creation */
+.cg-staff-management .staff-team-add-button,
+.staff-team-form .staff-team-save-button,
+.staff-team-form .staff-team-cancel-button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  padding: 0 13px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cg-staff-management .staff-team-add-button,
+.staff-team-form .staff-team-save-button {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.staff-team-form .staff-team-cancel-button {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-primary);
+}
+
+.cg-staff-management .staff-team-card__meta {
+  margin-top: 10px;
+  padding: 8px 9px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-team-card__meta > span {
+  color: var(--primary);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.cg-staff-management .staff-team-card__meta > p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.cg-staff-management .staff-team-member__avatar {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.staff-team-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.staff-team-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.staff-team-form input,
+.staff-team-form select,
+.staff-team-form textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font: inherit;
+  outline: none;
+}
+
+.staff-team-form input,
+.staff-team-form select {
+  min-height: 44px;
+  height: 44px;
+  padding: 0 11px;
+}
+
+.staff-team-form textarea {
+  min-height: 92px;
+  padding: 10px 11px;
+  resize: vertical;
+}
+
+.staff-team-form input:focus,
+.staff-team-form select:focus,
+.staff-team-form textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.staff-team-form__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.staff-team-form__actions > button {
+  width: 100%;
+  min-height: 44px;
+}
+
+@media (max-width: 767px) {
+  .cg-staff-management .staff-workshop-section-header > .staff-team-add-button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .staff-team-form input,
+  .staff-team-form select,
+  .staff-team-form textarea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .staff-team-form__actions {
+    grid-template-columns: 1fr;
+  }
+}
