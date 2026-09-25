@@ -23,7 +23,7 @@ export const ShiftSettings = () => {
   const input = 'mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content outline-none focus:border-primary';
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="attendance-manager-module attendance-manager-shifts flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-line bg-surface p-4">
         <div>
           <div className="flex items-center gap-2 text-base font-extrabold text-content"><Clock3 size={17} className="text-primary"/>Shift Settings</div>
