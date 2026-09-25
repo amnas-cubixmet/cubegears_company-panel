@@ -98,9 +98,14 @@ export const JobList = () => {
           <h1 className="mt-1 text-2xl font-black tracking-tight text-content">Job Cards</h1>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Track every vehicle from check-in and customer complaint through inspection, approval, repair, QC, invoice and delivery.</p>
         </div>
-        <button type="button" className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white" onClick={() => navigate('/jobs/new')}>
-          <Plus size={16}/>New Job Card
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-xs font-bold text-content" onClick={() => navigate('/jobs/reports')}>
+            <History size={16}/>Reports
+          </button>
+          <button type="button" className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white" onClick={() => navigate('/jobs/new')}>
+            <Plus size={16}/>New Job Card
+          </button>
+        </div>
       </header>
 
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
