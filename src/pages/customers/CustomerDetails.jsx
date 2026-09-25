@@ -30,7 +30,9 @@ import {
   Search,
   Tag,
   ShieldCheck,
-  Check
+  Check,
+  Trash2,
+  Upload
 } from 'lucide-react';
 
 export const CustomerDetails = () => {
@@ -56,6 +58,7 @@ export const CustomerDetails = () => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
   const [isEditCustomerOpen, setIsEditCustomerOpen] = useState(false);
+  const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
 
   // New Vehicle form state
   const [vRegNo, setVRegNo] = useState('');
@@ -94,6 +97,13 @@ export const CustomerDetails = () => {
   // Customer Note form state
   const [newNoteText, setNewNoteText] = useState('');
   const [notesList, setNotesList] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [docName, setDocName] = useState('');
+  const [docType, setDocType] = useState('Vehicle RC');
+  const [docVehicle, setDocVehicle] = useState('');
+  const [docExpiry, setDocExpiry] = useState('');
+  const [docStatus, setDocStatus] = useState('Valid');
+  const [docFileName, setDocFileName] = useState('');
 
   // Service History filter state
   const [serviceSearch, setServiceSearch] = useState('');
@@ -122,6 +132,7 @@ export const CustomerDetails = () => {
         setEditCompany(cust.companyName || '');
         setEditGst(cust.gstNo || '');
         setEditBranch(cust.branch || 'Main Garage Branch');
+        setDocuments(Array.isArray(cust.documents) ? cust.documents : []);
 
         setNotesList(cust.notes ? [{ id: 1, text: cust.notes, addedBy: 'Service Advisor', date: '2026-09-14 09:15 AM' }] : [
           { id: 1, text: 'Prefers evening delivery.', addedBy: 'Rajesh V', date: '2026-09-10 04:30 PM' },
@@ -245,11 +256,47 @@ export const CustomerDetails = () => {
     showToast('Customer note saved.');
   };
 
+  const handleAddDocumentSubmit = async (e) => {
+    e.preventDefault();
+    if (!docName.trim()) return;
+
+    const nextDocument = {
+      id: `CDOC-${Date.now()}`,
+      name: docName.trim(),
+      type: docType,
+      vehicleReg: docVehicle,
+      expiryDate: docExpiry,
+      status: docStatus,
+      fileName: docFileName,
+      uploadedDate: new Date().toISOString().split('T')[0]
+    };
+
+    const nextDocuments = [nextDocument, ...documents];
+    await customerService.updateCustomer(customer.id, { documents: nextDocuments });
+    setDocuments(nextDocuments);
+    setDocName('');
+    setDocType('Vehicle RC');
+    setDocVehicle('');
+    setDocExpiry('');
+    setDocStatus('Valid');
+    setDocFileName('');
+    setIsAddDocumentOpen(false);
+    showToast('Customer document added.');
+  };
+
+  const deleteDocument = async (documentId) => {
+    if (!window.confirm('Delete this customer document record?')) return;
+    const nextDocuments = documents.filter((document) => document.id !== documentId);
+    await customerService.updateCustomer(customer.id, { documents: nextDocuments });
+    setDocuments(nextDocuments);
+    showToast('Customer document removed.');
+  };
+
   const handleArchiveCustomer = async () => {
     if (window.confirm(`Are you sure you want to archive ${customer.name}? This will preserve historical records.`)) {
       await customerService.archiveCustomer(customer.id);
       showToast('Customer archived.');
-      navigate('/customers');
+      navigate('/customers/all');
     }
   };
 
@@ -272,7 +319,7 @@ export const CustomerDetails = () => {
         <h2 style={{ fontSize: '18px', color: 'var(--text-primary)', margin: 0 }}>Customer Not Found</h2>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>The requested customer profile does not exist or has been removed.</p>
         <button
-          onClick={() => navigate('/customers')}
+          onClick={() => navigate('/customers/all')}
           style={{ height: '42px', padding: '0 20px', borderRadius: '11px', backgroundColor: 'var(--primary)', color: '#ffffff', border: 'none', fontWeight: '700', cursor: 'pointer' }}
         >
           Back to Customers
@@ -295,11 +342,12 @@ export const CustomerDetails = () => {
     { id: 'invoices', label: `Invoices (${invoices.length})`, icon: FileText },
     { id: 'payments', label: `Payments (${payments.length})`, icon: CreditCard },
     { id: 'notes', label: `Notes (${notesList.length})`, icon: MessageSquare },
+    { id: 'documents', label: `Documents (${documents.length})`, icon: FileText },
     { id: 'activity', label: 'Activity', icon: Clock }
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingBottom: '90px' }}>
+    <div className="customer-profile-page cg-customers" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingBottom: '90px' }}>
       
       {/* TOAST FEEDBACK */}
       {toastMsg && (
@@ -316,7 +364,7 @@ export const CustomerDetails = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button
-              onClick={() => navigate('/customers')}
+              onClick={() => navigate('/customers/all')}
               style={{ width: '34px', height: '34px', borderRadius: '9px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               title="Back to Customers"
             >
@@ -342,7 +390,7 @@ export const CustomerDetails = () => {
             <button
               onClick={() => {
                 const targetVehicle = vehicles[0]?.regNo || '';
-                navigate(`/jobs/add?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
+                navigate(`/jobs/new?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
               }}
               style={{ height: '40px', padding: '0 14px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#ffffff', border: 'none', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             >
@@ -368,15 +416,20 @@ export const CustomerDetails = () => {
 
         {/* Contact Info & Meta Row */}
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '12.5px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Phone size={14} style={{ color: 'var(--primary)' }} />
+          <a className="customer-contact-action" href={`tel:${customer.phone}`}>
+            <Phone size={14} />
             <strong>{customer.phone}</strong>
-          </div>
+          </a>
           {customer.whatsapp && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--success)' }}>
+            <a
+              className="customer-contact-action is-whatsapp"
+              href={`https://wa.me/${String(customer.whatsapp).replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noreferrer"
+            >
               <MessageSquare size={14} />
               <span>{customer.whatsapp}</span>
-            </div>
+            </a>
           )}
           {customer.email && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -504,7 +557,7 @@ export const CustomerDetails = () => {
                 <button
                   onClick={() => {
                     const targetVehicle = vehicles[0]?.regNo || '';
-                    navigate(`/jobs/add?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
+                    navigate(`/jobs/new?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
                   }}
                   style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--primary)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
                 >
@@ -677,7 +730,7 @@ export const CustomerDetails = () => {
                       View Vehicle
                     </button>
                     <button
-                      onClick={() => navigate(`/jobs/add?customerId=${customer.id}&vehicle=${encodeURIComponent(v.regNo)}`)}
+                      onClick={() => navigate(`/jobs/new?customerId=${customer.id}&vehicle=${encodeURIComponent(v.regNo)}`)}
                       style={{ flex: 1, height: '34px', borderRadius: '8px', border: 'none', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                     >
                       Create Job
@@ -698,7 +751,7 @@ export const CustomerDetails = () => {
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>All repair & service jobs executed for this customer</p>
               </div>
               <button
-                onClick={() => navigate(`/jobs/add?customerId=${customer.id}`)}
+                onClick={() => navigate(`/jobs/new?customerId=${customer.id}`)}
                 style={{ height: '38px', padding: '0 14px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#ffffff', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Plus size={15} /> Create Job Card
@@ -940,6 +993,50 @@ export const CustomerDetails = () => {
           </div>
         )}
 
+        {/* DOCUMENTS TAB */}
+        {activeTab === 'documents' && (
+          <div className="customer-profile-documents">
+            <div className="customer-profile-documents__head">
+              <div>
+                <h3>Customer & Vehicle Documents</h3>
+                <p>Vehicle RC, insurance, company documents and attachments.</p>
+              </div>
+              <button onClick={() => setIsAddDocumentOpen(true)}>
+                <Plus size={15}/> Add Document
+              </button>
+            </div>
+
+            {documents.length ? (
+              <div className="customer-document-grid">
+                {documents.map((document) => (
+                  <article key={document.id} className="customer-document-card">
+                    <div className="customer-document-card__head">
+                      <span><FileText size={16}/></span>
+                      <div>
+                        <strong>{document.name}</strong>
+                        <small>{document.type}{document.vehicleReg ? ` · ${document.vehicleReg}` : ''}</small>
+                      </div>
+                      <b className={`is-${String(document.status || 'valid').toLowerCase().replaceAll(' ', '-')}`}>
+                        {document.status || 'Valid'}
+                      </b>
+                    </div>
+                    <div className="customer-document-meta">
+                      <div><span>Uploaded</span><strong>{document.uploadedDate || '—'}</strong></div>
+                      <div><span>Expiry</span><strong>{document.expiryDate || 'No expiry'}</strong></div>
+                      <div><span>File</span><strong>{document.fileName || 'Metadata only'}</strong></div>
+                    </div>
+                    <button className="customer-document-delete" onClick={() => deleteDocument(document.id)}>
+                      <Trash2 size={13}/> Delete
+                    </button>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="customer-empty">No customer or vehicle documents uploaded yet.</div>
+            )}
+          </div>
+        )}
+
         {/* 13. ACTIVITY TAB */}
         {activeTab === 'activity' && (
           <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -1103,7 +1200,9 @@ export const CustomerDetails = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <Select label="Customer Type" value={editType} onChange={(e) => setEditType(e.target.value)}>
               <option value="Individual">Individual</option>
-              <option value="Business / Company">Business / Company</option>
+              <option value="Company/Fleet">Company / Fleet</option>
+              <option value="Insurance">Insurance</option>
+              <option value="Dealer/Partner">Dealer / Partner</option>
             </Select>
 
             <Select label="Branch" value={editBranch} onChange={(e) => setEditBranch(e.target.value)}>
@@ -1112,7 +1211,7 @@ export const CustomerDetails = () => {
             </Select>
           </div>
 
-          {editType === 'Business / Company' && (
+          {editType !== 'Individual' && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <Input label="Company Name" value={editCompany} onChange={(e) => setEditCompany(e.target.value)} />
               <Input label="GST Number" value={editGst} onChange={(e) => setEditGst(e.target.value)} />
@@ -1145,6 +1244,43 @@ export const CustomerDetails = () => {
           <button type="submit" style={{ height: '44px', borderRadius: '11px', border: 'none', backgroundColor: 'var(--primary)', color: '#ffffff', fontWeight: '700', cursor: 'pointer' }}>
             Save Staff Note
           </button>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet
+        isOpen={isAddDocumentOpen}
+        onClose={() => setIsAddDocumentOpen(false)}
+        title="Add Customer Document"
+        maxWidth="520px"
+      >
+        <form className="customer-document-form" onSubmit={handleAddDocumentSubmit}>
+          <Input label="Document Name" required value={docName} onChange={(e)=>setDocName(e.target.value)} placeholder="Toyota Innova RC"/>
+          <div className="customer-document-form__grid">
+            <Select label="Document Type" value={docType} onChange={(e)=>setDocType(e.target.value)}>
+              <option>Vehicle RC</option>
+              <option>Insurance</option>
+              <option>Company Document</option>
+              <option>GST / Tax Document</option>
+              <option>Attachment</option>
+            </Select>
+            <Select label="Vehicle" value={docVehicle} onChange={(e)=>setDocVehicle(e.target.value)}>
+              <option value="">Customer / Company level</option>
+              {vehicles.map((vehicle)=><option key={vehicle.id} value={vehicle.regNo}>{vehicle.regNo}</option>)}
+            </Select>
+            <Input label="Expiry Date" type="date" value={docExpiry} onChange={(e)=>setDocExpiry(e.target.value)}/>
+            <Select label="Status" value={docStatus} onChange={(e)=>setDocStatus(e.target.value)}>
+              <option>Valid</option>
+              <option>Expiring Soon</option>
+              <option>Expired</option>
+              <option>Archived</option>
+            </Select>
+          </div>
+          <label className="customer-document-upload">
+            <Upload size={16}/>
+            <span>{docFileName || 'Choose attachment'}</span>
+            <input type="file" onChange={(e)=>setDocFileName(e.target.files?.[0]?.name || '')}/>
+          </label>
+          <button className="customer-document-save" type="submit">Save Document</button>
         </form>
       </ResponsiveModalSheet>
 
