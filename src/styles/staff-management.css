@@ -1,0 +1,661 @@
+/* =========================================================
+   CUBIXGEAR — STAFF MANAGEMENT
+   Shared visual system for staff directory, roles, profile,
+   add/edit staff sheet and role permission sheet.
+   ========================================================= */
+
+.cg-staff-management {
+  --staff-radius: 14px;
+  --staff-inner-radius: 10px;
+  --staff-border: var(--border);
+  --staff-surface: var(--surface);
+  --staff-soft: var(--surface-2);
+  --staff-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  width: 100%;
+  min-width: 0;
+  gap: 14px !important;
+}
+
+.cg-staff-management *,
+.cg-staff-management *::before,
+.cg-staff-management *::after {
+  box-sizing: border-box;
+}
+
+.cg-staff-management button,
+.cg-staff-management input,
+.cg-staff-management select,
+.cg-staff-management textarea {
+  font: inherit;
+}
+
+/* ---------- Page shell ---------- */
+.cg-staff-management .staff-management-header {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 2px;
+}
+
+.cg-staff-management .staff-management-header h1 {
+  margin: 0 !important;
+  color: var(--text-primary) !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.cg-staff-management .staff-management-header p {
+  margin: 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+.cg-staff-management .staff-management-tabs {
+  border: 1px solid var(--staff-border) !important;
+  border-radius: var(--staff-radius) !important;
+  background: var(--staff-surface) !important;
+  padding: 5px !important;
+  box-shadow: var(--staff-shadow) !important;
+}
+
+.cg-staff-management .staff-management-tabs__rail {
+  gap: 4px !important;
+}
+
+.cg-staff-management .staff-tab {
+  min-height: 38px !important;
+  height: 38px !important;
+  border-radius: 9px !important;
+  padding-inline: 14px !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+}
+
+.cg-staff-management .staff-management-content,
+.cg-staff-management .staff-directory,
+.cg-staff-management .staff-roles,
+.cg-staff-management .staff-profile {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ---------- Shared controls ---------- */
+.cg-staff-management input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.cg-staff-management select,
+.cg-staff-management textarea,
+.staff-form-sheet input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.staff-form-sheet select,
+.staff-form-sheet textarea,
+.role-form-sheet input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.role-form-sheet select,
+.role-form-sheet textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--staff-border, var(--border)) !important;
+  border-radius: 10px !important;
+  color: var(--text-primary) !important;
+  outline: none;
+}
+
+.cg-staff-management input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.cg-staff-management select,
+.staff-form-sheet input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.staff-form-sheet select,
+.role-form-sheet input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.role-form-sheet select {
+  min-height: 42px !important;
+  height: 42px !important;
+}
+
+.cg-staff-management textarea,
+.staff-form-sheet textarea,
+.role-form-sheet textarea {
+  min-height: 96px;
+  padding: 10px 11px !important;
+  resize: vertical;
+}
+
+.cg-staff-management input:focus,
+.cg-staff-management select:focus,
+.cg-staff-management textarea:focus,
+.staff-form-sheet input:focus,
+.staff-form-sheet select:focus,
+.staff-form-sheet textarea:focus,
+.role-form-sheet input:focus,
+.role-form-sheet select:focus,
+.role-form-sheet textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* ---------- Staff directory ---------- */
+.cg-staff-management .staff-directory {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.cg-staff-management .staff-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px !important;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-toolbar > div:first-child {
+  min-width: 0 !important;
+}
+
+.cg-staff-management .staff-toolbar > div:first-child > div {
+  min-width: 0;
+}
+
+.cg-staff-management .staff-toolbar > div:last-child {
+  display: grid !important;
+  grid-template-columns: minmax(150px, auto) minmax(120px, auto) auto;
+  gap: 8px !important;
+  align-items: center;
+}
+
+.cg-staff-management .staff-toolbar input,
+.cg-staff-management .staff-toolbar select {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+  background: var(--staff-soft) !important;
+}
+
+.cg-staff-management .staff-toolbar input {
+  padding-left: 36px !important;
+}
+
+.cg-staff-management .staff-add-button {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border: 1px solid var(--primary) !important;
+  background: var(--primary) !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+
+.cg-staff-management .staff-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100%;
+}
+
+.cg-staff-management .staff-member-card {
+  min-width: 0;
+  padding: 13px !important;
+  gap: 10px !important;
+  border: 1px solid var(--staff-border) !important;
+  border-radius: var(--staff-radius) !important;
+  background: var(--staff-surface) !important;
+  box-shadow: var(--staff-shadow) !important;
+}
+
+.cg-staff-management .staff-member-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--staff-border)) !important;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06) !important;
+}
+
+.cg-staff-management .staff-member-card img {
+  width: 42px !important;
+  height: 42px !important;
+  flex: 0 0 42px;
+  border-radius: 10px !important;
+}
+
+.cg-staff-management .staff-member-card > div:first-child {
+  gap: 10px !important;
+}
+
+.cg-staff-management .staff-member-card > div:nth-child(2) {
+  gap: 6px !important;
+  padding: 9px 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+}
+
+.cg-staff-management .staff-member-card > div:nth-child(2) > div {
+  min-width: 0;
+}
+
+.cg-staff-management .staff-member-card > div:last-child {
+  margin-top: 0 !important;
+  padding-top: 10px !important;
+}
+
+.cg-staff-management .staff-view-button,
+.cg-staff-management .staff-status-button {
+  min-height: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+}
+
+.cg-staff-management .staff-view-button {
+  background: var(--staff-soft) !important;
+  border: 1px solid var(--staff-border) !important;
+}
+
+.cg-staff-management .staff-status-button {
+  width: 36px !important;
+  flex: 0 0 36px;
+}
+
+/* ---------- User roles ---------- */
+.cg-staff-management .staff-roles {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.cg-staff-management .staff-section-header {
+  padding: 14px !important;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-radius);
+  background: var(--staff-surface);
+  box-shadow: var(--staff-shadow);
+}
+
+.cg-staff-management .staff-section-header h3 {
+  margin: 0 !important;
+  color: var(--text-primary) !important;
+  font-size: 15px !important;
+  font-weight: 750 !important;
+}
+
+.cg-staff-management .staff-section-header p {
+  margin: 3px 0 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+.cg-staff-management .add-role-btn {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+  padding-inline: 14px !important;
+  font-size: 12px !important;
+}
+
+.cg-staff-management .role-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-staff-management .role-card {
+  min-width: 0;
+  padding: 13px !important;
+  gap: 10px !important;
+  border: 1px solid var(--staff-border) !important;
+  border-radius: var(--staff-radius) !important;
+  background: var(--staff-surface) !important;
+  box-shadow: var(--staff-shadow) !important;
+}
+
+.cg-staff-management .role-card > div:nth-child(2) {
+  padding: 9px 10px;
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius);
+  background: var(--staff-soft);
+  gap: 6px !important;
+}
+
+.cg-staff-management .role-card > button {
+  min-height: 38px !important;
+  height: 38px !important;
+  margin-top: 0 !important;
+  border-radius: 9px !important;
+  background: var(--staff-soft) !important;
+}
+
+/* ---------- Staff profile ---------- */
+.cg-staff-management .staff-profile {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.cg-staff-management .staff-profile-topbar {
+  min-height: 40px;
+}
+
+.cg-staff-management .staff-profile-topbar button {
+  width: 38px !important;
+  min-width: 38px;
+  height: 38px !important;
+  border-radius: 9px !important;
+  background: var(--staff-surface) !important;
+}
+
+.cg-staff-management .staff-profile-topbar h2 {
+  margin: 0 !important;
+  font-size: 17px !important;
+  font-weight: 750 !important;
+}
+
+.cg-staff-management .staff-profile-hero {
+  padding: 13px !important;
+  border: 1px solid var(--staff-border) !important;
+  border-radius: var(--staff-radius) !important;
+  background: var(--staff-surface) !important;
+  box-shadow: var(--staff-shadow) !important;
+}
+
+.cg-staff-management .staff-profile-hero img {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 11px !important;
+}
+
+.cg-staff-management .staff-profile-tabs {
+  overflow: hidden;
+  border: 1px solid var(--staff-border) !important;
+  border-radius: var(--staff-radius) !important;
+  background: var(--staff-surface) !important;
+  box-shadow: var(--staff-shadow) !important;
+}
+
+.cg-staff-management .staff-profile-tabs > div {
+  padding: 5px !important;
+  gap: 4px !important;
+  border: 0 !important;
+}
+
+.cg-staff-management .staff-profile-tabs button {
+  min-height: 38px;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+.cg-staff-management .staff-profile-tabs button[style*="var(--primary)"] {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+.cg-staff-management .staff-profile-panel {
+  min-width: 0;
+  padding: 14px !important;
+  border: 1px solid var(--staff-border) !important;
+  border-radius: var(--staff-radius) !important;
+  background: var(--staff-surface) !important;
+  box-shadow: var(--staff-shadow) !important;
+}
+
+.cg-staff-management .staff-profile-panel [style*="background-color: var(--surface-2)"] {
+  border: 1px solid var(--staff-border);
+  border-radius: var(--staff-inner-radius) !important;
+}
+
+/* ---------- Staff form sheet ---------- */
+.staff-form-sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  --staff-border: var(--border);
+  --staff-surface: var(--surface);
+  --staff-soft: var(--surface-2);
+}
+
+.staff-form-sheet > div:first-child {
+  padding: 10px 11px;
+  border: 1px solid var(--staff-border);
+  border-radius: 11px;
+  background: var(--staff-soft);
+}
+
+.staff-form-sheet .staff-form-section {
+  padding: 13px !important;
+  border: 1px solid var(--staff-border) !important;
+  border-radius: 12px !important;
+  background: var(--staff-soft) !important;
+}
+
+.staff-form-sheet .staff-form-section--nested {
+  background: var(--staff-surface) !important;
+}
+
+.staff-form-sheet label,
+.role-form-sheet label {
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+.staff-form-sheet input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.staff-form-sheet select,
+.staff-form-sheet textarea {
+  background: var(--staff-surface) !important;
+}
+
+.staff-form-sheet .form-row-2col,
+.role-form-sheet .form-row-2col {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+/* ---------- Role permission sheet ---------- */
+.role-form-sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  --staff-border: var(--border);
+  --staff-surface: var(--surface);
+  --staff-soft: var(--surface-2);
+}
+
+.role-form-sheet .permission-module-card {
+  padding: 11px !important;
+  border: 1px solid var(--staff-border) !important;
+  border-radius: 11px !important;
+  background: var(--staff-soft) !important;
+  gap: 9px !important;
+}
+
+.role-form-sheet .permission-module-card label {
+  min-height: 38px;
+  border-radius: 9px !important;
+}
+
+.role-form-sheet .role-form-actions {
+  gap: 8px !important;
+  padding-top: 10px !important;
+  background: var(--staff-surface) !important;
+}
+
+.role-form-sheet .role-form-actions button {
+  min-height: 44px !important;
+  height: 44px !important;
+  border-radius: 10px !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  .cg-staff-management .staff-card-grid,
+  .cg-staff-management .role-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .cg-staff-management .staff-toolbar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cg-staff-management .staff-toolbar > div:last-child {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .cg-staff-management {
+    --staff-radius: 12px;
+    --staff-inner-radius: 9px;
+    gap: 12px !important;
+  }
+
+  .cg-staff-management .staff-management-header {
+    padding: 0;
+  }
+
+  .cg-staff-management .staff-management-header h1 {
+    font-size: 20px !important;
+  }
+
+  .cg-staff-management .staff-management-header p {
+    font-size: 12px !important;
+  }
+
+  .cg-staff-management .staff-management-tabs {
+    padding: 4px !important;
+  }
+
+  .cg-staff-management .staff-tab {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding-inline: 12px !important;
+  }
+
+  .cg-staff-management .staff-toolbar {
+    padding: 9px !important;
+  }
+
+  .cg-staff-management .staff-toolbar > div:last-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cg-staff-management .staff-toolbar .staff-add-button {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-staff-management .staff-toolbar input,
+  .cg-staff-management .staff-toolbar select {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-staff-management .staff-card-grid,
+  .cg-staff-management .role-card-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .cg-staff-management .staff-member-card,
+  .cg-staff-management .role-card,
+  .cg-staff-management .staff-section-header,
+  .cg-staff-management .staff-profile-hero,
+  .cg-staff-management .staff-profile-panel {
+    padding: 11px !important;
+  }
+
+  .cg-staff-management .user-role-header {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .cg-staff-management .add-role-btn {
+    width: 100% !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-staff-management .staff-profile-hero {
+    align-items: flex-start !important;
+  }
+
+  .cg-staff-management .staff-profile-hero > div:first-child {
+    min-width: 0;
+  }
+
+  .cg-staff-management .staff-profile-hero > div:first-child > div {
+    min-width: 0;
+  }
+
+  .cg-staff-management .staff-profile-tabs > div {
+    padding: 4px !important;
+  }
+
+  .cg-staff-management .staff-profile-tabs button {
+    min-height: 40px;
+    padding-inline: 10px !important;
+  }
+
+  .staff-form-sheet .form-row-2col,
+  .role-form-sheet .form-row-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  .staff-form-sheet .staff-form-section,
+  .role-form-sheet .permission-module-card {
+    padding: 11px !important;
+  }
+
+  .staff-form-sheet input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .staff-form-sheet select,
+  .staff-form-sheet textarea,
+  .role-form-sheet input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  .role-form-sheet select,
+  .role-form-sheet textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .cg-staff-management .staff-toolbar > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cg-staff-management .staff-toolbar .staff-add-button {
+    grid-column: auto;
+  }
+
+  .cg-staff-management .staff-member-card,
+  .cg-staff-management .role-card {
+    padding: 10px !important;
+  }
+
+  .cg-staff-management .staff-tab {
+    font-size: 11px !important;
+    padding-inline: 10px !important;
+  }
+
+  .role-form-sheet .role-form-actions {
+    flex-direction: column-reverse !important;
+  }
+
+  .role-form-sheet .role-form-actions button {
+    width: 100% !important;
+    flex: none !important;
+  }
+}
