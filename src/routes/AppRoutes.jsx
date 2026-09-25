@@ -61,14 +61,22 @@ export const AppRoutes = () => (
       <Route path="/my-attendance/leave" element={<MyAttendance />} />
       <Route path="/my-attendance/summary" element={<MyAttendance />} />
 
-      <Route path="/attendance-manager" element={<Navigate to="/attendance-manager/approvals" replace />} />
-      <Route path="/attendance-manager/approvals" element={<AttendanceManager />} />
-      <Route path="/attendance-manager/team-review" element={<AttendanceManager />} />
-      <Route path="/attendance-manager/team-review/:staffId/:date" element={<StaffAttendanceDetails />} />
-      <Route path="/attendance-manager/master-records" element={<AttendanceManager />} />
-      <Route path="/attendance-manager/leave-types" element={<AttendanceManager />} />
-      <Route path="/attendance-manager/holidays" element={<AttendanceManager />} />
+      <Route path="/attendance-manager" element={<Navigate to="/attendance-manager/overview" replace />} />
+      <Route path="/attendance-manager/overview" element={<AttendanceManager />} />
+      <Route path="/attendance-manager/daily" element={<AttendanceManager />} />
+      <Route path="/attendance-manager/calendar" element={<AttendanceManager />} />
+      <Route path="/attendance-manager/leave-requests" element={<AttendanceManager />} />
+      <Route path="/attendance-manager/overtime" element={<AttendanceManager />} />
+      <Route path="/attendance-manager/shifts" element={<AttendanceManager />} />
+      <Route path="/attendance-manager/reports" element={<AttendanceManager />} />
       <Route path="/attendance-manager/rules" element={<AttendanceManager />} />
+
+      <Route path="/attendance-manager/approvals" element={<Navigate to="/attendance-manager/leave-requests" replace />} />
+      <Route path="/attendance-manager/team-review" element={<Navigate to="/attendance-manager/daily" replace />} />
+      <Route path="/attendance-manager/team-review/:staffId/:date" element={<StaffAttendanceDetails />} />
+      <Route path="/attendance-manager/master-records" element={<Navigate to="/attendance-manager/reports" replace />} />
+      <Route path="/attendance-manager/leave-types" element={<Navigate to="/attendance-manager/rules" replace />} />
+      <Route path="/attendance-manager/holidays" element={<Navigate to="/attendance-manager/calendar" replace />} />
 
       <Route path="/staff-management" element={<Navigate to="/staff-management/staff" replace />} />
       <Route path="/staff-management/staff" element={<StaffManagement />} />
