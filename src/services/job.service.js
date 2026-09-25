@@ -64,6 +64,16 @@ export const deleteJob = async (id) => {
   return apiClient.delete(`${API_ENDPOINTS.JOBS}/${id}`);
 };
 
+export const getVehicleHistory = async (registration) => {
+  const normalized = String(registration || '').replace(/\s+/g, '').toLowerCase();
+  if (!normalized) return [];
+
+  const jobs = await getJobs();
+  return jobs
+    .filter((job) => String(job.vehicleReg || '').replace(/\s+/g, '').toLowerCase() === normalized)
+    .sort((a, b) => String(b.createdDate || '').localeCompare(String(a.createdDate || '')));
+};
+
 export const jobService = {
   getJobs,
   getJobById,
@@ -71,6 +81,7 @@ export const jobService = {
   updateJobStatus,
   updateJob,
   deleteJob,
+  getVehicleHistory,
   getAll: getJobs,
   getById: getJobById,
   create: createJob
