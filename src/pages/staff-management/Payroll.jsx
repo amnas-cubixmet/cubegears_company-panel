@@ -262,8 +262,8 @@ export const Payroll = ({ section = 'overview' }) => {
 
               return (
                 <div key={employee.id} className="payroll-employee-card rounded-2xl border border-line bg-surface p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-3">
+                  <div className="payroll-employee-card__header flex items-start justify-between gap-3">
+                    <div className="payroll-employee-card__identity flex min-w-0 items-center gap-3">
                       <img
                         src={employee.photo}
                         alt={employee.name}
@@ -284,7 +284,7 @@ export const Payroll = ({ section = 'overview' }) => {
                     </span>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                  <div className="payroll-employee-metrics mt-4 grid grid-cols-2 gap-2 text-xs">
                     <div className="rounded-xl bg-surface-2 p-3">
                       <div className="text-[10px] text-muted">Role</div>
                       <strong className="mt-1 block text-content">{employee.role || employee.designation}</strong>
@@ -303,7 +303,7 @@ export const Payroll = ({ section = 'overview' }) => {
                     </div>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-1 gap-1.5 text-[11px] text-secondary sm:grid-cols-2">
+                  <div className="payroll-employee-meta mt-3 grid grid-cols-1 gap-1.5 text-[11px] text-secondary sm:grid-cols-2">
                     <div>Joining: <strong className="text-content">{employee.joiningDate || '—'}</strong></div>
                     <div>Weekly Off: <strong className="text-content">{employee.weeklyOff || '—'}</strong></div>
                     <div>Phone: <strong className="text-content">{employee.phone || '—'}</strong></div>
@@ -333,8 +333,8 @@ export const Payroll = ({ section = 'overview' }) => {
 
               return (
                 <div key={payroll.id} className="payroll-attendance-card rounded-2xl border border-line bg-surface p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
+                  <div className="payroll-attendance-card__header flex items-start justify-between gap-3">
+                    <div className="payroll-attendance-card__identity">
                       <div className="text-sm font-extrabold text-content">{payroll.staffName}</div>
                       <div className="mt-0.5 text-[11px] text-muted">{payroll.designation} · {payroll.branch}</div>
                     </div>
@@ -343,7 +343,7 @@ export const Payroll = ({ section = 'overview' }) => {
                     </span>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div className="payroll-attendance-primary mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {[
                       ['Present', attendance.present ?? 0],
                       ['Absent', attendance.absent ?? 0],
@@ -357,7 +357,7 @@ export const Payroll = ({ section = 'overview' }) => {
                     ))}
                   </div>
 
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="payroll-attendance-secondary mt-3 grid grid-cols-2 gap-2 text-[11px]">
                     <div className="rounded-lg border border-line p-2">Half Day <strong className="float-right">0</strong></div>
                     <div className="rounded-lg border border-line p-2">Holiday <strong className="float-right">0</strong></div>
                     <div className="rounded-lg border border-line p-2">Late Entries <strong className="float-right">0</strong></div>
