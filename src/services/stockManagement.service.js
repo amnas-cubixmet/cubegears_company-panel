@@ -207,7 +207,11 @@ export const stockManagementService = {
     await delay();
     const index = stockSuppliersMock.findIndex((supplier) => supplier.id === id);
     if (index === -1) throw new Error('Supplier not found.');
-    stockSuppliersMock[index] = { ...stockSuppliersMock[index], ...payload, outstanding: Number(payload.outstanding ?? stockSuppliersMock[index].outstanding || 0) };
+    stockSuppliersMock[index] = {
+      ...stockSuppliersMock[index],
+      ...payload,
+      outstanding: Number(payload.outstanding ?? stockSuppliersMock[index].outstanding ?? 0)
+    };
     return clone(stockSuppliersMock[index]);
   },
 
