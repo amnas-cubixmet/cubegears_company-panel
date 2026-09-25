@@ -19,43 +19,54 @@ export const LeaveRequestsManager = () => {
     load();
   };
 
+  const pendingCount = requests.filter((item) => item.status === 'Pending').length;
+
   return (
-    <div className="attendance-manager-module attendance-manager-leave flex flex-col gap-3">
-      <div className="rounded-2xl border border-line bg-surface p-4">
-        <div className="text-base font-extrabold text-content">Leave Requests</div>
-        <div className="mt-1 text-xs text-muted">Casual, sick, paid, unpaid and emergency leave approval queue.</div>
-      </div>
+    <div className="attendance-manager-module attendance-manager-leave">
+      <section className="am-section-header">
+        <div>
+          <h2>Leave Requests</h2>
+          <p>Casual, sick, paid, unpaid and emergency leave approval queue.</p>
+        </div>
+        <span className="am-count-badge">{pendingCount} Pending</span>
+      </section>
 
       {requests.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-muted">No leave requests.</div>
-      ) : requests.map((item) => (
-        <div key={item.id} className="rounded-2xl border border-line bg-surface p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <img src={item.avatar} alt="" className="size-10 rounded-full object-cover"/>
-              <div>
-                <div className="text-sm font-extrabold text-content">{item.staffName}</div>
-                <div className="text-[11px] text-muted">{item.role} · {item.branch}</div>
+        <div className="am-empty-state">No leave requests.</div>
+      ) : (
+        <div className="am-approval-grid">
+          {requests.map((item) => (
+            <article key={item.id} className="am-approval-card">
+              <div className="am-approval-card__head">
+                <div className="am-approval-person">
+                  <img src={item.avatar} alt="" />
+                  <div>
+                    <strong>{item.staffName}</strong>
+                    <span>{item.role} · {item.branch}</span>
+                  </div>
+                </div>
+                <span className={`am-status-badge am-status-badge--${String(item.status || '').toLowerCase()}`}>
+                  {item.status}
+                </span>
               </div>
-            </div>
-            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">{item.status}</span>
-          </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-2 rounded-xl bg-surface-2 p-3 text-xs sm:grid-cols-2">
-            <div>Date: <strong>{item.affectedDate}</strong></div>
-            <div>Type: <strong>{item.leaveType || 'Leave'}</strong></div>
-            <div className="sm:col-span-2">Request: <strong>{item.requestedValue}</strong></div>
-            <div className="sm:col-span-2">Reason: <strong>{item.reason}</strong></div>
-          </div>
+              <div className="am-approval-details">
+                <div><span>Date</span><strong>{item.affectedDate}</strong></div>
+                <div><span>Type</span><strong>{item.leaveType || 'Leave'}</strong></div>
+                <div className="am-approval-details__wide"><span>Request</span><strong>{item.requestedValue}</strong></div>
+                <div className="am-approval-details__wide"><span>Reason</span><strong>{item.reason}</strong></div>
+              </div>
 
-          {item.status === 'Pending' && !item.isSelfRequest ? (
-            <div className="mt-3 flex gap-2">
-              <button onClick={() => update(item,'approve')} className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border-0 bg-emerald-600 text-xs font-bold text-white"><Check size={14}/>Approve</button>
-              <button onClick={() => update(item,'reject')} className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border-0 bg-red-500 text-xs font-bold text-white"><X size={14}/>Reject</button>
-            </div>
-          ) : null}
+              {item.status === 'Pending' && !item.isSelfRequest ? (
+                <div className="am-approval-actions">
+                  <button onClick={() => update(item,'approve')} className="am-approve-button"><Check size={14}/>Approve</button>
+                  <button onClick={() => update(item,'reject')} className="am-reject-button"><X size={14}/>Reject</button>
+                </div>
+              ) : null}
+            </article>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 };
