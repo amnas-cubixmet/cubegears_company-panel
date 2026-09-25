@@ -208,7 +208,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
       title={initialData ? 'Edit Staff Member' : 'Add New Staff Member'}
       maxWidth="650px"
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <form className="staff-form-sheet" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {/* Photo Upload Area */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)' }}>Staff Photo</label>
@@ -269,7 +269,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
         </div>
 
         {/* Section 1: Personal Information */}
-        <div style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <div className="staff-form-section" style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
             1. Personal Information
           </div>
@@ -318,7 +318,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
         </div>
 
         {/* Section 2: Employment Information */}
-        <div style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <div className="staff-form-section" style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
             2. Employment Information
           </div>
@@ -386,7 +386,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
         </div>
 
         {/* Section 3: Work & Shift */}
-        <div style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <div className="staff-form-section" style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
             3. Work & Shift
           </div>
@@ -421,7 +421,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
         </div>
 
         {/* Section 4: Account & Access */}
-        <div style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <div className="staff-form-section" style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
             4. Account & Access
           </div>
@@ -444,7 +444,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
         </div>
 
         {/* Section 5: Staff Payment Type & Compensation Model */}
-        <div style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="staff-form-section" style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-primary)' }}>
             5. Staff Payment Type & Compensation Model
           </div>
@@ -770,7 +770,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
         )}
 
         {/* Section 6: Notes */}
-        <div style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <div className="staff-form-section" style={{ backgroundColor: 'var(--surface-2)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>
             6. Notes & Instructions
           </div>
