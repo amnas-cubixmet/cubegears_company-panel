@@ -274,6 +274,7 @@ export const mockAttendanceRulesConfig = {
   shiftName: "General Workshop Shift",
   startTime: "09:00 AM",
   endTime: "06:00 PM",
+  breakMinutes: 60,
   lateGraceMinutes: 15,
   earlyExitThreshold: 15,
   overtimeThreshold: 60, // 1 hour
