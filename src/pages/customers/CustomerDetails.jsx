@@ -512,6 +512,7 @@ export const CustomerDetails = () => {
               <button
                 key={t.id}
                 onClick={(e) => handleTabClick(t.id, e)}
+                className={isActive ? 'is-active' : ''}
                 style={{
                   padding: '10px 14px',
                   fontSize: '13px',
