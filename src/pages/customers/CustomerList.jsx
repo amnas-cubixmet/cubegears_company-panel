@@ -6,6 +6,7 @@ import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { customerService } from '../../services/customer.service';
+import { CustomerManagementTabs } from '../../components/customers/CustomerManagementTabs';
 import {
   Users,
   UserCheck,
@@ -83,7 +84,24 @@ export const CustomerList = () => {
         branch: branchFilter,
         customerType: typeFilter
       });
-      setCustomers(data);
+
+      const enriched = await Promise.all(data.map(async (customer) => {
+        const [vehicles, jobs, invoices] = await Promise.all([
+          customerService.getCustomerVehicles(customer.id),
+          customerService.getCustomerJobs(customer.id),
+          customerService.getCustomerInvoices(customer.id)
+        ]);
+
+        return {
+          ...customer,
+          vehicleCount: vehicles.length,
+          jobsCount: jobs.length,
+          totalSpent: invoices.reduce((sum, invoice) => sum + Number(invoice.paidAmount || 0), 0),
+          outstanding: invoices.reduce((sum, invoice) => sum + Number(invoice.balanceDue || 0), 0)
+        };
+      }));
+
+      setCustomers(enriched);
     } catch (e) {
       console.error(e);
     } finally {
@@ -239,6 +257,8 @@ export const CustomerList = () => {
         </button>
       </div>
 
+      <CustomerManagementTabs />
+
       {/* SUMMARY CARDS GRID (4 DESKTOP, 2x2 MOBILE) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px' }} className="customers-summary-grid">
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -313,7 +333,10 @@ export const CustomerList = () => {
             >
               <option value="All">All Types</option>
               <option value="Individual">Individual</option>
-              <option value="Business / Company">Business</option>
+              <option value="Company/Fleet">Company / Fleet</option>
+              <option value="Business / Company">Business / Company</option>
+              <option value="Insurance">Insurance</option>
+              <option value="Dealer/Partner">Dealer / Partner</option>
             </Select>
           </div>
 
@@ -349,9 +372,9 @@ export const CustomerList = () => {
                 <tr style={{ backgroundColor: 'var(--surface-2)', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: '600' }}>
                   <th style={{ padding: '12px 14px' }}>Customer</th>
                   <th style={{ padding: '12px 14px' }}>Phone / WhatsApp</th>
+                  <th style={{ padding: '12px 14px' }}>Customer Type</th>
                   <th style={{ padding: '12px 14px' }}>Vehicles</th>
                   <th style={{ padding: '12px 14px' }}>Last Visit</th>
-                  <th style={{ padding: '12px 14px' }}>Total Spent</th>
                   <th style={{ padding: '12px 14px' }}>Outstanding</th>
                   <th style={{ padding: '12px 14px' }}>Status</th>
                   <th style={{ padding: '12px 14px', textAlign: 'right' }}>Actions</th>
@@ -368,10 +391,10 @@ export const CustomerList = () => {
                       <div style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{c.phone}</div>
                       <span style={{ fontSize: '11px', color: 'var(--success)' }}>WhatsApp ✓</span>
                     </td>
-                    <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>2 Vehicles</td>
-                    <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.lastVisit || '12 Sep 2026'}</td>
-                    <td style={{ padding: '12px 14px', fontWeight: '700', color: 'var(--primary)' }}>{formatINR(42500)}</td>
-                    <td style={{ padding: '12px 14px', fontWeight: '700', color: 'var(--warning)' }}>{formatINR(5000)}</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.customerType || 'Individual'}</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.vehicleCount || 0} Vehicles</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.lastVisit || '—'}</td>
+                    <td style={{ padding: '12px 14px', fontWeight: '700', color: c.outstanding ? 'var(--warning)' : 'var(--success)' }}>{formatINR(c.outstanding)}</td>
                     <td style={{ padding: '12px 14px' }}>
                       <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '6px', backgroundColor: c.status === 'Active' ? 'var(--success-soft)' : 'var(--surface-2)', color: c.status === 'Active' ? 'var(--success)' : 'var(--text-muted)' }}>
                         {c.status}
@@ -412,10 +435,10 @@ export const CustomerList = () => {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', backgroundColor: 'var(--surface-2)', padding: '10px', borderRadius: '10px', fontSize: '12px' }}>
-                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Vehicles & Jobs</span><strong>2 Vehicles • 8 Jobs</strong></div>
-                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Last Visit</span><strong>{c.lastVisit || '12 Sep 2026'}</strong></div>
-                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Total Spent</span><strong style={{ color: 'var(--primary)' }}>{formatINR(42500)}</strong></div>
-                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Outstanding</span><strong style={{ color: 'var(--warning)' }}>{formatINR(5000)}</strong></div>
+                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Vehicles & Jobs</span><strong>{c.vehicleCount || 0} Vehicles • {c.jobsCount || 0} Jobs</strong></div>
+                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Last Visit</span><strong>{c.lastVisit || '—'}</strong></div>
+                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Customer Type</span><strong>{c.customerType || 'Individual'}</strong></div>
+                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Outstanding</span><strong style={{ color: c.outstanding ? 'var(--warning)' : 'var(--success)' }}>{formatINR(c.outstanding)}</strong></div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
