@@ -1238,3 +1238,249 @@
     min-height:54px;
   }
 }
+
+
+/* Payroll Employees + Attendance card refinement */
+.cg-payroll .payroll-employee-card,
+.cg-payroll .payroll-attendance-card{
+  min-height:210px;
+  padding:14px!important;
+}
+
+.cg-payroll .payroll-employee-card__header,
+.cg-payroll .payroll-attendance-card__header{
+  min-height:48px;
+  align-items:flex-start!important;
+}
+
+.cg-payroll .payroll-employee-card__identity{
+  min-width:0;
+}
+
+.cg-payroll .payroll-employee-card__identity img{
+  width:46px!important;
+  height:46px!important;
+  flex:0 0 46px!important;
+  border-radius:10px!important;
+}
+
+.cg-payroll .payroll-employee-card__identity > div{
+  min-width:0;
+}
+
+.cg-payroll .payroll-employee-card__identity > div > div:first-child,
+.cg-payroll .payroll-attendance-card__identity > div:first-child{
+  color:var(--text-primary)!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  line-height:1.2!important;
+}
+
+.cg-payroll .payroll-employee-card__identity > div > div:last-child,
+.cg-payroll .payroll-attendance-card__identity > div:last-child{
+  margin-top:3px!important;
+  color:var(--text-muted)!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+
+.cg-payroll .payroll-employee-card__header > span,
+.cg-payroll .payroll-attendance-card__header > span{
+  min-height:26px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 9px!important;
+  border-radius:999px!important;
+  font-size:9px!important;
+  font-weight:750!important;
+  white-space:nowrap;
+}
+
+.cg-payroll .payroll-employee-metrics{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin-top:12px!important;
+}
+
+.cg-payroll .payroll-employee-metrics > div{
+  min-width:0;
+  min-height:58px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:9px 10px!important;
+  border:1px solid var(--pay-border);
+  border-radius:10px!important;
+  background:var(--pay-soft)!important;
+}
+
+.cg-payroll .payroll-employee-metrics > div > div{
+  color:var(--text-muted)!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+}
+
+.cg-payroll .payroll-employee-metrics strong{
+  display:block!important;
+  margin-top:4px!important;
+  overflow:hidden;
+  color:var(--text-primary)!important;
+  font-size:11px!important;
+  font-weight:750!important;
+  line-height:1.25!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.cg-payroll .payroll-employee-meta{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px 10px!important;
+  margin-top:11px!important;
+  padding-top:10px;
+  border-top:1px solid var(--pay-border);
+}
+
+.cg-payroll .payroll-employee-meta > div{
+  min-width:0;
+  overflow:hidden;
+  color:var(--text-muted)!important;
+  font-size:9px!important;
+  line-height:1.4!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.cg-payroll .payroll-employee-meta strong{
+  color:var(--text-primary)!important;
+  font-weight:700!important;
+}
+
+.cg-payroll .payroll-attendance-primary{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin-top:12px!important;
+}
+
+.cg-payroll .payroll-attendance-primary > div{
+  min-width:0;
+  min-height:62px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:9px 10px!important;
+  border:1px solid var(--pay-border);
+  border-radius:10px!important;
+  background:var(--pay-soft)!important;
+}
+
+.cg-payroll .payroll-attendance-primary > div > div:first-child{
+  color:var(--text-muted)!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+}
+
+.cg-payroll .payroll-attendance-primary > div > div:last-child{
+  margin-top:5px!important;
+  overflow:hidden;
+  color:var(--text-primary)!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  line-height:1.15!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.cg-payroll .payroll-attendance-secondary{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+  margin-top:10px!important;
+}
+
+.cg-payroll .payroll-attendance-secondary > div{
+  min-width:0;
+  min-height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:0 10px!important;
+  border:1px solid var(--pay-border)!important;
+  border-radius:9px!important;
+  background:var(--pay-surface)!important;
+  color:var(--text-secondary)!important;
+  font-size:9px!important;
+  line-height:1!important;
+}
+
+.cg-payroll .payroll-attendance-secondary strong{
+  float:none!important;
+  color:var(--text-primary)!important;
+  font-size:10px!important;
+  font-weight:800!important;
+}
+
+@media(max-width:1100px){
+  .cg-payroll .payroll-attendance-primary{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:767px){
+  .cg-payroll .payroll-employee-card,
+  .cg-payroll .payroll-attendance-card{
+    min-height:0;
+    padding:11px!important;
+  }
+
+  .cg-payroll .payroll-employee-card__header,
+  .cg-payroll .payroll-attendance-card__header{
+    min-height:0;
+  }
+
+  .cg-payroll .payroll-employee-card__identity img{
+    width:42px!important;
+    height:42px!important;
+    flex-basis:42px!important;
+  }
+
+  .cg-payroll .payroll-employee-metrics,
+  .cg-payroll .payroll-attendance-primary,
+  .cg-payroll .payroll-attendance-secondary{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .cg-payroll .payroll-employee-metrics > div,
+  .cg-payroll .payroll-attendance-primary > div{
+    min-height:58px;
+    padding:8px 9px!important;
+  }
+
+  .cg-payroll .payroll-employee-meta{
+    grid-template-columns:1fr!important;
+    gap:5px!important;
+  }
+}
+
+@media(max-width:360px){
+  .cg-payroll .payroll-employee-card__header,
+  .cg-payroll .payroll-attendance-card__header{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+  }
+
+  .cg-payroll .payroll-employee-card__header > span,
+  .cg-payroll .payroll-attendance-card__header > span{
+    align-self:flex-start;
+  }
+
+  .cg-payroll .payroll-employee-metrics,
+  .cg-payroll .payroll-attendance-primary,
+  .cg-payroll .payroll-attendance-secondary{
+    grid-template-columns:1fr!important;
+  }
+}
