@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { payrollService } from '../../services/payroll.service';
+import { staffService } from '../../services/staff.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
 import { PayrollPeriodFilter } from '../../components/payroll/PayrollPeriodFilter';
 import { PayrollTabRail } from '../../components/staff-management/PayrollTabRail';
@@ -15,13 +16,14 @@ import { CommissionManager } from '../../components/payroll/CommissionManager';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { DollarSign, CheckCircle2, AlertCircle, Clock, CreditCard, FileText, Plus, Filter, Printer, ShieldCheck } from 'lucide-react';
 
-export const Payroll = ({ section = 'dashboard' }) => {
+export const Payroll = ({ section = 'overview' }) => {
   const activeSection = section;
   const { selectedMonth, selectedYear, selectedBranch, setSelectedBranch, selectedStaff, periodString } = usePayrollPeriod();
 
   const [payrolls, setPayrolls] = useState([]);
   const [salaryStructures, setSalaryStructures] = useState([]);
   const [advances, setAdvances] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toastMsg, setToastMsg] = useState('');
 
@@ -47,18 +49,23 @@ export const Payroll = ({ section = 'dashboard' }) => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const pData = await payrollService.getPayrolls({
-        month: periodString,
-        branch: selectedBranch,
-        staffId: selectedStaff,
-        approvalStatus: selectedApproval,
-        paymentStatus: selectedSettlement
-      });
-      const sData = await payrollService.getSalaryStructures();
-      const aData = await payrollService.getSalaryAdvances();
+      const [pData, sData, aData, staffData] = await Promise.all([
+        payrollService.getPayrolls({
+          month: periodString,
+          branch: selectedBranch,
+          staffId: selectedStaff,
+          approvalStatus: selectedApproval,
+          paymentStatus: selectedSettlement
+        }),
+        payrollService.getSalaryStructures(),
+        payrollService.getSalaryAdvances(),
+        staffService.getStaff()
+      ]);
+
       setPayrolls(pData);
       setSalaryStructures(sData);
       setAdvances(aData);
+      setEmployees(staffData);
     } catch (e) {
       console.error(e);
     } finally {
@@ -119,6 +126,8 @@ export const Payroll = ({ section = 'dashboard' }) => {
   const approvedCount = payrolls.filter((p) => p.approvalStatus === 'Approved').length;
   const totalPaid = payrolls.reduce((acc, curr) => acc + (curr.paidAmount || 0), 0);
   const outstandingSalary = totalNet - totalPaid;
+  const totalIncentives = payrolls.reduce((acc, curr) => acc + (curr.incentives || curr.approvedCommission || 0), 0);
+  const totalDeductions = payrolls.reduce((acc, curr) => acc + (curr.deductions || 0) + (curr.advanceRecovery || 0), 0);
 
   const unpaidStaff = payrolls.filter((p) => p.paymentStatus === 'Unpaid').length;
   const partialStaff = payrolls.filter((p) => p.paymentStatus === 'Partially Paid').length;
@@ -150,8 +159,8 @@ export const Payroll = ({ section = 'dashboard' }) => {
       {/* Global Shared Payroll Period Filter Toolbar */}
       <PayrollPeriodFilter />
 
-      {/* Section 1: Dashboard */}
-      {activeSection === 'dashboard' && (
+      {/* Section 1: Overview */}
+      {activeSection === 'overview' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {/* Summary KPI Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', width: '100%' }}>
@@ -166,6 +175,14 @@ export const Payroll = ({ section = 'dashboard' }) => {
             <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Approved OT Pay</div>
               <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--primary)', marginTop: '2px' }}>{formatINR(totalApprovedOtPay)}</div>
+            </div>
+            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Incentives</div>
+              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--success)', marginTop: '2px' }}>{formatINR(totalIncentives)}</div>
+            </div>
+            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Deductions</div>
+              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--danger)', marginTop: '2px' }}>{formatINR(totalDeductions)}</div>
             </div>
             <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Paid Amount</div>
@@ -229,6 +246,146 @@ export const Payroll = ({ section = 'dashboard' }) => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Employees */}
+      {activeSection === 'employees' && (
+        <div className="flex flex-col gap-3">
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <div className="text-base font-extrabold text-content">Employee Master</div>
+            <div className="mt-1 text-xs text-muted">
+              Payroll-linked workshop staff, salary type, branch and employment status.
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+            {employees.map((employee) => {
+              const structure = salaryStructures.find((item) => item.staffId === employee.id);
+              const salaryType = structure?.salaryBasis || employee.paymentType || 'Not configured';
+              const baseSalary = structure?.fixedMonthlySalary || structure?.basicSalary || employee.salary?.basic || 0;
+
+              return (
+                <div key={employee.id} className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <img
+                        src={employee.photo}
+                        alt={employee.name}
+                        className="size-11 shrink-0 rounded-xl border border-line object-cover"
+                      />
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-extrabold text-content">{employee.name}</div>
+                        <div className="mt-0.5 text-[11px] text-muted">{employee.id} · {employee.designation || employee.role}</div>
+                      </div>
+                    </div>
+                    <span className={[
+                      'rounded-full px-2.5 py-1 text-[10px] font-bold',
+                      employee.employmentStatus === 'Active'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'bg-surface-2 text-muted'
+                    ].join(' ')}>
+                      {employee.employmentStatus}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                    <div className="rounded-xl bg-surface-2 p-3">
+                      <div className="text-[10px] text-muted">Role</div>
+                      <strong className="mt-1 block text-content">{employee.role || employee.designation}</strong>
+                    </div>
+                    <div className="rounded-xl bg-surface-2 p-3">
+                      <div className="text-[10px] text-muted">Branch</div>
+                      <strong className="mt-1 block text-content">{employee.branch}</strong>
+                    </div>
+                    <div className="rounded-xl bg-surface-2 p-3">
+                      <div className="text-[10px] text-muted">Salary Type</div>
+                      <strong className="mt-1 block text-primary">{salaryType}</strong>
+                    </div>
+                    <div className="rounded-xl bg-surface-2 p-3">
+                      <div className="text-[10px] text-muted">Basic / Primary Pay</div>
+                      <strong className="mt-1 block text-content">{formatINR(baseSalary)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-1 gap-1.5 text-[11px] text-secondary sm:grid-cols-2">
+                    <div>Joining: <strong className="text-content">{employee.joiningDate || '—'}</strong></div>
+                    <div>Weekly Off: <strong className="text-content">{employee.weeklyOff || '—'}</strong></div>
+                    <div>Phone: <strong className="text-content">{employee.phone || '—'}</strong></div>
+                    <div>Bank: <strong className="text-content">{employee.bankDetails?.bankName || 'Not configured'}</strong></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Attendance */}
+      {activeSection === 'attendance' && (
+        <div className="flex flex-col gap-3">
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <div className="text-base font-extrabold text-content">Payroll Attendance Review · {periodString}</div>
+            <div className="mt-1 text-xs text-muted">
+              Present, absent, leave, weekly off and worked hours used during payroll calculation.
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+            {payrolls.map((payroll) => {
+              const employee = employees.find((item) => item.id === payroll.staffId);
+              const attendance = payroll.reviewedAttendance || {};
+
+              return (
+                <div key={payroll.id} className="rounded-2xl border border-line bg-surface p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-extrabold text-content">{payroll.staffName}</div>
+                      <div className="mt-0.5 text-[11px] text-muted">{payroll.designation} · {payroll.branch}</div>
+                    </div>
+                    <span className="rounded-full bg-primary-soft px-2.5 py-1 text-[10px] font-bold text-primary">
+                      {employee?.weeklyOff || 'Weekly Off'}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {[
+                      ['Present', attendance.present ?? 0],
+                      ['Absent', attendance.absent ?? 0],
+                      ['Leave', attendance.leave ?? 0],
+                      ['Worked', attendance.workedHours || '0h']
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-xl bg-surface-2 p-3">
+                        <div className="text-[10px] text-muted">{label}</div>
+                        <div className="mt-1 text-sm font-extrabold text-content">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="rounded-lg border border-line p-2">Half Day <strong className="float-right">0</strong></div>
+                    <div className="rounded-lg border border-line p-2">Holiday <strong className="float-right">0</strong></div>
+                    <div className="rounded-lg border border-line p-2">Late Entries <strong className="float-right">0</strong></div>
+                    <div className="rounded-lg border border-line p-2">Early Exits <strong className="float-right">0</strong></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Incentives */}
+      {activeSection === 'incentives' && (
+        <div className="rounded-2xl border border-line bg-surface-2 p-3 sm:p-4">
+          <CommissionManager />
+        </div>
+      )}
+
+      {/* Overtime */}
+      {activeSection === 'overtime' && (
+        <div className="rounded-2xl border border-line bg-surface-2 p-3 sm:p-4">
+          <OvertimeManager />
         </div>
       )}
 
@@ -328,26 +485,25 @@ export const Payroll = ({ section = 'dashboard' }) => {
         </div>
       )}
 
-      {/* Section 3: Monthly Payroll */}
-      {activeSection === 'monthly' && (
+      {/* Run Payroll */}
+      {activeSection === 'run' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)' }}>
             Monthly Payroll Calculation ({periodString})
           </div>
 
-          {/* Overtime & Commission Review Section */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', backgroundColor: 'var(--surface-2)' }}>
-              <OvertimeManager />
+          <div className="rounded-2xl border border-primary/20 bg-primary-soft p-4">
+            <div className="text-[11px] font-bold uppercase tracking-wide text-primary">Payroll Formula</div>
+            <div className="mt-1 text-sm font-extrabold text-content">
+              Net Salary = Basic / Earned Pay + Allowances + Incentives + OT − Deductions − Advance Recovery
             </div>
-
-            <div style={{ border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', backgroundColor: 'var(--surface-2)' }}>
-              <CommissionManager />
+            <div className="mt-2 text-xs text-secondary">
+              Review attendance, incentives and overtime in their dedicated tabs before approving and recording salary payment.
             </div>
           </div>
 
           <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '8px' }}>
-            Calculated Monthly Payroll Records
+            Calculated Payroll Records
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
