@@ -2977,3 +2977,65 @@
     grid-template-columns:1fr;
   }
 }
+
+
+/* Direct staff assignment — Teams & Skills */
+.cg-staff-management .staff-team-assign-button{
+  width:100%;
+  min-height:38px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:10px;
+  border:1px solid color-mix(in srgb,var(--primary) 28%,var(--staff-border));
+  border-radius:9px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  font-size:10px;
+  font-weight:750;
+  cursor:pointer;
+}
+
+.cg-staff-management .staff-team-assign-button:hover,
+.cg-staff-management .staff-crud-actions button.is-primary-soft:hover{
+  border-color:var(--primary);
+}
+
+.cg-staff-management .staff-crud-actions.is-three{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.cg-staff-management .staff-crud-actions button.is-primary-soft{
+  border-color:color-mix(in srgb,var(--primary) 28%,var(--staff-border));
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+
+.staff-assignment-note{
+  padding:9px 10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface-2);
+  color:var(--text-secondary);
+  font-size:10px;
+  line-height:1.5;
+}
+
+.staff-assignment-note strong{
+  color:var(--text-primary);
+}
+
+@media(max-width:767px){
+  .cg-staff-management .staff-team-assign-button{
+    min-height:42px;
+  }
+
+  .cg-staff-management .staff-crud-actions.is-three{
+    grid-template-columns:1fr;
+  }
+
+  .cg-staff-management .staff-crud-actions.is-three button{
+    min-height:42px;
+  }
+}
