@@ -64,12 +64,14 @@ export const routeConfig = [
   {
     id: 'payroll', label: 'Payroll', path: '/payroll', icon: DollarSign, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'payroll.view',
     children: [
-      { id: 'payroll-dashboard', label: 'Dashboard', path: '/payroll', permission: 'payroll.view' },
-      { id: 'payroll-salary-structure', label: 'Salary Structure', path: '/payroll/salary-structure', permission: 'salary_structure.view' },
-      { id: 'payroll-monthly', label: 'Monthly Payroll', path: '/payroll/monthly', permission: 'payroll.view' },
-      { id: 'payroll-approvals', label: 'Approvals', path: '/payroll/approvals', permission: 'payroll.review' },
-      { id: 'payroll-disbursal', label: 'Disbursal', path: '/payroll/disbursal', permission: 'payroll.record_payment' },
+      { id: 'payroll-overview', label: 'Overview', path: '/payroll', permission: 'payroll.view' },
+      { id: 'payroll-employees', label: 'Employees', path: '/payroll/employees', permission: 'staff.view' },
+      { id: 'payroll-attendance', label: 'Attendance', path: '/payroll/attendance', permission: 'attendance.manage' },
+      { id: 'payroll-salary-setup', label: 'Salary Setup', path: '/payroll/salary-setup', permission: 'salary_structure.view' },
+      { id: 'payroll-incentives', label: 'Incentives', path: '/payroll/incentives', permission: 'payroll.review' },
+      { id: 'payroll-overtime', label: 'Overtime', path: '/payroll/overtime', permission: 'payroll.review' },
       { id: 'payroll-advances', label: 'Advances', path: '/payroll/advances', permission: 'payroll.view' },
+      { id: 'payroll-run', label: 'Run Payroll', path: '/payroll/run', permission: 'payroll.view' },
       { id: 'payroll-payslips', label: 'Payslips', path: '/payroll/payslips', permission: 'payslip.view_staff' },
       { id: 'payroll-reports', label: 'Reports', path: '/payroll/reports', permission: 'payroll.export' }
     ]
