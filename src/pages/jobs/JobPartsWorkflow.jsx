@@ -108,7 +108,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
 
   return (
     <section className="job-parts-workflow space-y-4">
-      <div className="rounded-[18px] border border-cg-border bg-cg-surface p-4 shadow-sm md:p-5">
+      <div className="job-parts-summary-card rounded-[18px] border border-cg-border bg-cg-surface p-4 shadow-sm md:p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <span className="text-[11px] font-bold uppercase tracking-[.14em] text-cg-primary">Parts Issue & Inventory</span>
@@ -126,16 +126,16 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
           />
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="job-parts-metrics mt-4 grid grid-cols-3 gap-2">
           <Metric label="Pending" value={data.lines.reduce((s, x) => s + Number(x.pendingQty || 0), 0)} tone="amber" />
           <Metric label="Issued" value={data.lines.reduce((s, x) => s + Number(x.netIssued || 0), 0)} tone="blue" />
           <Metric label="Returned" value={data.lines.reduce((s, x) => s + Number(x.returnedQty || 0), 0)} tone="green" />
         </div>
       </div>
 
-      <div className="rounded-[18px] border border-cg-border bg-cg-surface shadow-sm">
-        <div className="border-b border-cg-border p-3 md:p-4">
-          <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="job-parts-main-card rounded-[18px] border border-cg-border bg-cg-surface shadow-sm">
+        <div className="job-parts-toolbar border-b border-cg-border p-3 md:p-4">
+          <div className="job-parts-tabs flex gap-2 overflow-x-auto pb-1">
             {[
               ['pending', 'Pending Issue'],
               ['issued', 'Issued'],
@@ -146,14 +146,14 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
                 key={key}
                 type="button"
                 onClick={() => setTab(key)}
-                className={`min-h-10 shrink-0 rounded-xl px-3 text-xs font-semibold transition ${tab === key ? 'bg-cg-primary text-white' : 'border border-cg-border bg-cg-surface text-cg-muted hover:bg-cg-surface-2'}`}
+                className={`job-parts-tab ${tab === key ? 'is-active' : ''}`}
               >
                 {label}
               </button>
             ))}
           </div>
 
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <div className="job-parts-search-row mt-3 flex flex-col gap-2 sm:flex-row">
             <label className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cg-muted" size={16} />
               <input
@@ -184,7 +184,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
           <TransactionHistory transactions={data.transactions} />
         ) : (
           <>
-            <div className="hidden overflow-x-auto md:block">
+            <div className="job-parts-table-wrap hidden overflow-x-auto md:block">
               <table>
                 <thead>
                   <tr>
@@ -245,7 +245,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
             </div>
 
             {!lines.length && (
-              <div className="p-8 text-center">
+              <div className="job-parts-empty p-8 text-center">
                 <PackageCheck className="mx-auto text-cg-muted" size={28} />
                 <h3 className="mt-3 text-sm font-semibold text-cg-text">
                   {tab === 'pending' ? 'No pending parts' : tab === 'issued' ? 'No active issued parts' : 'No returned parts'}
@@ -397,7 +397,7 @@ function PartMobileCard(props) {
 
 function CompletionGuard({ canComplete, reasons, busy, onComplete }) {
   return (
-    <div className={`min-w-[250px] rounded-[14px] border p-3 ${canComplete ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+    <div className={`job-parts-completion min-w-[250px] rounded-[14px] border p-3 ${canComplete ? 'is-clear' : 'is-blocked'}`}>
       <div className="flex items-start gap-2">
         {canComplete ? <CheckCircle2 className="mt-0.5 text-emerald-600" size={18}/> : <AlertTriangle className="mt-0.5 text-amber-600" size={18}/>}
         <div className="min-w-0 flex-1">
@@ -419,7 +419,7 @@ function CompletionGuard({ canComplete, reasons, busy, onComplete }) {
 
 function Metric({ label, value, tone }) {
   const cls = tone === 'green' ? 'text-emerald-600' : tone === 'amber' ? 'text-amber-600' : 'text-blue-600';
-  return <div className="rounded-xl bg-cg-surface-2 p-3"><span className="block text-[10px] font-semibold uppercase tracking-wide text-cg-muted">{label}</span><strong className={`mt-1 block text-xl ${cls}`}>{value}</strong></div>;
+  return <div className="job-parts-metric rounded-xl bg-cg-surface-2 p-3"><span className="block text-[10px] font-semibold uppercase tracking-wide text-cg-muted">{label}</span><strong className={`mt-1 block text-xl ${cls}`}>{value}</strong></div>;
 }
 
 function Mini({ label, value }) {
