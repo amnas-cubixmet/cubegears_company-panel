@@ -5,15 +5,13 @@ export const Input = forwardRef(function Input({ label, error, helper, success, 
   const generatedId = useId();
   const inputId = id || generatedId;
   const message = error || success || helper;
-  return (
-    <div className={`ui-field form-field cubegears-field-group ${className}`.trim()} style={containerStyle}>
-      {label && <Label htmlFor={inputId} required={required}>{label}</Label>}
-      <div className={`ui-input-shell form-control${error ? ' ui-input-shell--error has-error' : ''}${success ? ' ui-input-shell--success' : ''}${disabled ? ' ui-input-shell--disabled is-disabled' : ''}`}>
-        {Icon && <Icon size={17} aria-hidden="true" />}
-        <input ref={ref} id={inputId} className="ui-input" required={required} disabled={disabled} aria-invalid={Boolean(error)} aria-describedby={message ? `${inputId}-message` : undefined} style={style} {...props} />
-        {RightIcon && <RightIcon size={17} aria-hidden="true" />}
-      </div>
-      {message && <span id={`${inputId}-message`} className={`ui-field__message${error ? ' ui-field__message--error' : success ? ' ui-field__message--success' : ''}`}>{message}</span>}
+  return <div className={`flex w-full min-w-0 flex-col gap-1.5 ${className}`.trim()} style={containerStyle}>
+    {label && <Label htmlFor={inputId} required={required}>{label}</Label>}
+    <div className={`flex min-h-11 w-full min-w-0 items-center gap-2 rounded-xl border bg-[var(--field-bg)] px-3 transition focus-within:bg-[var(--field-focus-bg)] focus-within:ring-2 focus-within:ring-primary/15 ${error ? 'border-danger' : success ? 'border-success' : 'border-line focus-within:border-primary'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}>
+      {Icon && <Icon size={17} className="shrink-0 text-muted" aria-hidden="true" />}
+      <input ref={ref} id={inputId} className="h-10 min-w-0 flex-1 border-0 bg-transparent p-0 text-[13px] font-medium text-content outline-none placeholder:font-normal placeholder:text-muted" required={required} disabled={disabled} aria-invalid={Boolean(error)} aria-describedby={message ? `${inputId}-message` : undefined} style={style} {...props} />
+      {RightIcon && <RightIcon size={17} className="shrink-0 text-muted" aria-hidden="true" />}
     </div>
-  );
+    {message && <span id={`${inputId}-message`} className={`text-[11px] ${error ? 'font-medium text-danger' : success ? 'font-medium text-success' : 'text-muted'}`}>{message}</span>}
+  </div>;
 });
