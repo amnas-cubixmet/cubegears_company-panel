@@ -73,10 +73,10 @@ export const CommissionManager = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
         <div>
           <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', margin: 0 }}>
-            Staff Commission Ledger ({periodString})
+            Workshop Incentives & Commission ({periodString})
           </h3>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-            Commission calculated from completed jobs, vehicles, labor, and customer referrals.
+            Job-card linked incentives for labour revenue, completed jobs, services, parts/sales and customer referrals.
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export const CommissionManager = () => {
               gap: '6px'
             }}
           >
-            <Plus size={14} /> Add Manual Commission
+            <Plus size={14} /> Add Manual Incentive
           </button>
         </div>
       </div>
