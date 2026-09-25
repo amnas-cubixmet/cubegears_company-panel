@@ -11,7 +11,6 @@ export const Sidebar = () => {
   const { themeMode, setThemeMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
 
-  const navContainerRef = useRef(null);
   const activeItemRef = useRef(null);
 
   useEffect(() => {
@@ -28,19 +27,10 @@ export const Sidebar = () => {
     return location.pathname === route.path || location.pathname.startsWith(`${route.path}/`);
   };
 
-  const isChildActive = (child) => {
-    const pathname = child.path.split('?')[0];
-    const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
-
-    return child.matchSearch
-      ? location.pathname === pathname && currentKind === child.matchSearch
-      : location.pathname === pathname;
-  };
-
   const navClass = (active) =>
     [
-      'group flex h-10 items-center gap-3 rounded-xl text-[13px] no-underline transition-all duration-150',
-      collapsed ? 'mx-1 justify-center px-0' : 'ml-2 mr-2 px-3',
+      'group flex min-h-10 items-center gap-3 rounded-xl text-left text-[13px] no-underline transition-colors duration-150',
+      collapsed ? 'mx-1 justify-center px-0' : 'mx-1 px-3',
       active
         ? 'bg-primary-soft font-semibold text-primary'
         : 'font-medium text-content hover:bg-surface-2'
@@ -109,8 +99,8 @@ export const Sidebar = () => {
         ) : null}
       </div>
 
-      <div
-        ref={navContainerRef}
+      <nav
+        aria-label="Primary navigation"
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden px-2 py-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {sections.map((section) => {
@@ -128,76 +118,36 @@ export const Sidebar = () => {
               {items.map((route) => {
                 const IconComp = route.icon;
                 const active = isRouteActive(route);
-                const hasChildren = Boolean(route.children?.length);
 
                 return (
-                  <React.Fragment key={route.id}>
-                    <NavLink
-                      to={route.path}
-                      ref={active ? activeItemRef : null}
-                      className={navClass(active)}
-                      title={collapsed ? route.label : undefined}
-                    >
-                      <IconComp
-                        size={17}
-                        strokeWidth={1.9}
-                        className={[
-                          'shrink-0',
-                          active ? 'text-primary' : 'text-secondary group-hover:text-content'
-                        ].join(' ')}
-                      />
+                  <NavLink
+                    key={route.id}
+                    to={route.path}
+                    ref={active ? activeItemRef : null}
+                    className={navClass(active)}
+                    title={collapsed ? route.label : undefined}
+                  >
+                    <IconComp
+                      size={17}
+                      strokeWidth={1.9}
+                      className={[
+                        'shrink-0',
+                        active ? 'text-primary' : 'text-secondary group-hover:text-content'
+                      ].join(' ')}
+                    />
 
-                      {!collapsed ? (
-                        <span className="min-w-0 flex-1 truncate">
-                          {route.label}
-                        </span>
-                      ) : null}
-                    </NavLink>
-
-                    {!collapsed && active && hasChildren ? (
-                      <div className="ml-[32px] mr-2 mt-1.5 flex flex-col">
-                        {route.children.map((child, childIndex) => {
-                          const childActive = isChildActive(child);
-                          const isLastChild = childIndex === route.children.length - 1;
-
-                          return (
-                            <div key={child.id} className="relative min-h-9 pl-4">
-                              <span
-                                aria-hidden="true"
-                                className={[
-                                  'absolute left-0 top-0 w-px',
-                                  childActive ? 'bg-primary/35' : 'bg-line',
-                                  isLastChild ? 'h-1/2' : 'h-full'
-                                ].join(' ')}
-                              />
-                              <span
-                                aria-hidden="true"
-                                className={['absolute left-0 top-1/2 h-px w-3', childActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
-                              />
-
-                              <NavLink
-                                to={child.path}
-                                className={[
-                                  'flex min-h-8 items-center justify-center rounded-lg px-2 text-center text-[11px] leading-tight no-underline transition-all',
-                                  childActive
-                                    ? 'bg-primary-soft font-semibold text-primary'
-                                    : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
-                                ].join(' ')}
-                              >
-                                {child.label}
-                              </NavLink>
-                            </div>
-                          );
-                        })}
-                      </div>
+                    {!collapsed ? (
+                      <span className="min-w-0 flex-1 truncate">
+                        {route.label}
+                      </span>
                     ) : null}
-                  </React.Fragment>
+                  </NavLink>
                 );
               })}
             </section>
           );
         })}
-      </div>
+      </nav>
 
       <div className="shrink-0 border-t border-line bg-surface p-2.5">
         {!collapsed ? (
