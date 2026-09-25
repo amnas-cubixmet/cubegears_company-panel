@@ -76,9 +76,9 @@ export const LeaveRequests = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="attendance-module attendance-leave-page" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* Top Section: Leave Balances & Apply Button */}
-      <div style={{
+      <div className="attendance-module-heading-row" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -90,6 +90,7 @@ export const LeaveRequests = () => {
         </div>
         <button
           onClick={() => setShowApplySheet(true)}
+          className="attendance-primary-button"
           style={{
             padding: '10px 16px',
             borderRadius: '10px',
@@ -109,7 +110,7 @@ export const LeaveRequests = () => {
       </div>
 
       {/* Leave Balances Grid (2x2 Mobile / 3 Desktop) */}
-      <div style={{
+      <div className="leave-balance-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
         gap: '12px',
@@ -118,6 +119,7 @@ export const LeaveRequests = () => {
         {balances.map((b) => (
           <div
             key={b.id}
+            className="attendance-kpi-card leave-balance-card"
             style={{
               backgroundColor: 'var(--surface)',
               border: '1px solid var(--border)',
@@ -144,7 +146,7 @@ export const LeaveRequests = () => {
       </div>
 
       {/* Leave Requests Header */}
-      <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginTop: '8px' }}>
+      <div className="attendance-section-title" style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginTop: '8px' }}>
         Leave Application Records
       </div>
 
@@ -153,6 +155,7 @@ export const LeaveRequests = () => {
         {requests.map((req) => (
           <div
             key={req.id}
+            className="attendance-record-card leave-request-card"
             style={{
               backgroundColor: 'var(--surface)',
               border: '1px solid var(--border)',
@@ -218,7 +221,7 @@ export const LeaveRequests = () => {
       </div>
 
       {/* Desktop Table View (>= 768px) */}
-      <div className="desktop-table-view" style={{
+      <div className="desktop-table-view attendance-table-card" style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '16px',
