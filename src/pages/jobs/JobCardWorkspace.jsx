@@ -38,6 +38,13 @@ const JOB_STATUSES = [
   'Delivered'
 ];
 
+const normalizeJobStatus = (status) => {
+  if (status === 'Checked In') return 'New';
+  if (status === 'Awaiting Approval') return 'Estimate Pending';
+  if (status === 'Quality Check') return 'QC';
+  return JOB_STATUSES.includes(status) ? status : 'New';
+};
+
 const TABS = [
   ['overview', 'Overview'],
   ['complaints', 'Complaints'],
@@ -304,8 +311,8 @@ export function JobCardWorkspace() {
     });
   };
 
-  const setEstimateApproval = async (estimateId, approvalStatus) => {
-    const nextEstimates = estimates.map((item) => item.id === estimateId
+  const setEstimateApproval = async (estimateKey, approvalStatus) => {
+    const nextEstimates = estimates.map((item) => (item.id || item.version) === estimateKey
       ? {
           ...item,
           approvalStatus,
@@ -353,7 +360,10 @@ export function JobCardWorkspace() {
   ];
 
   const qcChecklist = qc.checklist?.length
-    ? qc.checklist
+    ? qc.checklist.map((item, index) => ({
+        ...item,
+        id: item.id || `QC-${index + 1}`
+      }))
     : defaultChecklist.map((item, index) => ({
         id: `QC-${index + 1}`,
         item,
@@ -480,7 +490,7 @@ export function JobCardWorkspace() {
 
         <div className="flex flex-wrap items-center gap-2">
           <select
-            value={job.status || 'New'}
+            value={normalizeJobStatus(job.status)}
             onChange={(e) => setStatus(e.target.value)}
             disabled={saving}
             className="h-10 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"
@@ -721,8 +731,8 @@ export function JobCardWorkspace() {
                     <strong className="text-sm text-content">{money.format(item.grandTotal || 0)}</strong>
                     {item.approvalStatus === 'Pending' ? (
                       <div className="flex gap-2">
-                        <button onClick={()=>setEstimateApproval(item.id,'Approved')} className="h-8 rounded-lg border-0 bg-emerald-600 px-3 text-[10px] font-bold text-white">Approve</button>
-                        <button onClick={()=>setEstimateApproval(item.id,'Rejected')} className="h-8 rounded-lg border-0 bg-red-500 px-3 text-[10px] font-bold text-white">Reject</button>
+                        <button onClick={()=>setEstimateApproval(item.id || item.version,'Approved')} className="h-8 rounded-lg border-0 bg-emerald-600 px-3 text-[10px] font-bold text-white">Approve</button>
+                        <button onClick={()=>setEstimateApproval(item.id || item.version,'Rejected')} className="h-8 rounded-lg border-0 bg-red-500 px-3 text-[10px] font-bold text-white">Reject</button>
                       </div>
                     ) : null}
                   </div>
