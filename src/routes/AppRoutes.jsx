@@ -11,6 +11,7 @@ import { StaffAttendanceDetails } from '../pages/attendance-manager/StaffAttenda
 import { StaffManagement } from '../pages/employees/StaffManagement';
 import { Payroll } from '../pages/staff-management/Payroll';
 import { CustomerList } from '../pages/customers/CustomerList';
+import { CustomerManagement } from '../pages/customers/CustomerManagement';
 import { AddCustomer } from '../pages/customers/AddCustomer';
 import { EditCustomer } from '../pages/customers/EditCustomer';
 import { CustomerDetails } from '../pages/customers/CustomerDetails';
@@ -107,9 +108,16 @@ export const AppRoutes = () => (
       <Route path="/payroll/approvals" element={<Navigate to="/payroll/run" replace />} />
       <Route path="/payroll/disbursal" element={<Navigate to="/payroll/run" replace />} />
 
-      <Route path="/customers" element={<CustomerList />} />
+      <Route path="/customers" element={<Navigate to="/customers/overview" replace />} />
+      <Route path="/customers/overview" element={<CustomerManagement section="overview" />} />
+      <Route path="/customers/all" element={<CustomerList />} />
       <Route path="/customers/new" element={<AddCustomer />} />
       <Route path="/customers/add" element={<Navigate to="/customers/new" replace />} />
+      <Route path="/customers/vehicles" element={<CustomerManagement section="vehicles" />} />
+      <Route path="/customers/service-history" element={<CustomerManagement section="service-history" />} />
+      <Route path="/customers/outstanding" element={<CustomerManagement section="outstanding" />} />
+      <Route path="/customers/reminders" element={<CustomerManagement section="reminders" />} />
+      <Route path="/customers/reports" element={<CustomerManagement section="reports" />} />
       <Route path="/customers/:id" element={<CustomerDetails />} />
       <Route path="/customers/:id/edit" element={<EditCustomer />} />
       <Route path="/customers/edit/:id" element={<EditCustomer />} />
