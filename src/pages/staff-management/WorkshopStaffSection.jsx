@@ -8,7 +8,6 @@ import { staffService } from '../../services/staff.service';
 import { staffManagementService } from '../../services/staffManagement.service';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import {
-  workshopDepartments,
   workshopSkills,
   workshopShifts,
   staffJobAssignments,
