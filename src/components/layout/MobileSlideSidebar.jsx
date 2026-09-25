@@ -144,28 +144,42 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                       </NavLink>
 
                       {hasChildren && isActive && (
-                        <div className="ml-[25px] mr-2 mt-1 flex flex-col gap-[5px] border-l border-line pl-2">
-                          {route.children.map((child) => {
+                        <div className="ml-[26px] mr-2 mt-1 flex flex-col">
+                          {route.children.map((child, childIndex) => {
                             const childPathname = child.path.split('?')[0];
                             const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
                             const isChildActive = child.matchSearch
                               ? location.pathname === childPathname && currentKind === child.matchSearch
                               : location.pathname === childPathname;
+                            const isLastChild = childIndex === route.children.length - 1;
 
                             return (
-                              <NavLink
-                                key={child.id}
-                                to={child.path}
-                                onClick={onClose}
-                                className={[
-                                  'flex min-h-9 items-center rounded-lg px-2 py-2 text-[11.5px] leading-tight no-underline transition',
-                                  isChildActive
-                                    ? 'bg-surface-2 font-semibold text-primary'
-                                    : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
-                                ].join(' ')}
-                              >
-                                {child.label}
-                              </NavLink>
+                              <div key={child.id} className="relative min-h-9 pl-4">
+                                <span
+                                  aria-hidden="true"
+                                  className={[
+                                    'absolute left-0 top-0 w-px bg-line',
+                                    isLastChild ? 'h-1/2' : 'h-full'
+                                  ].join(' ')}
+                                />
+                                <span
+                                  aria-hidden="true"
+                                  className="absolute left-0 top-1/2 h-px w-3 bg-line"
+                                />
+
+                                <NavLink
+                                  to={child.path}
+                                  onClick={onClose}
+                                  className={[
+                                    'flex min-h-9 items-center rounded-lg px-2 py-2 text-[11.5px] leading-tight no-underline transition',
+                                    isChildActive
+                                      ? 'bg-surface-2 font-semibold text-primary'
+                                      : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
+                                  ].join(' ')}
+                                >
+                                  {child.label}
+                                </NavLink>
+                              </div>
                             );
                           })}
                         </div>
