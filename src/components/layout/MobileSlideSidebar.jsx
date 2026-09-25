@@ -10,7 +10,6 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
   const activeItemRef = useRef(null);
-  const containerRef = useRef(null);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -33,18 +32,16 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen && activeItemRef.current && containerRef.current) {
-      const timer = window.setTimeout(() => {
-        activeItemRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }, 120);
+    if (!isOpen || !activeItemRef.current) return undefined;
 
-      return () => window.clearTimeout(timer);
-    }
+    const timer = window.setTimeout(() => {
+      activeItemRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }, 120);
 
-    return undefined;
+    return () => window.clearTimeout(timer);
   }, [isOpen, location.pathname, location.search]);
 
   const sections = Object.values(ROUTE_SECTIONS);
@@ -107,8 +104,8 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        <div
-          ref={containerRef}
+        <nav
+          aria-label="Mobile navigation"
           className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden px-3 py-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {sections.map((section) => {
@@ -116,7 +113,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
             if (!items.length) return null;
 
             return (
-              <div key={section} className="flex flex-col gap-[5px]">
+              <section key={section} className="flex flex-col gap-[5px]">
                 <span className="px-2 pb-1 text-[9px] font-black uppercase tracking-[0.11em] text-muted">
                   {section}
                 </span>
@@ -124,74 +121,29 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                 {items.map((route) => {
                   const IconComp = route.icon;
                   const isActive = isRouteActive(route);
-                  const hasChildren = Boolean(route.children?.length);
 
                   return (
-                    <React.Fragment key={route.id}>
-                      <NavLink
-                        to={route.path}
-                        onClick={onClose}
-                        ref={isActive ? activeItemRef : null}
-                        className={[
-                          'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition-all',
-                          isActive
-                            ? 'bg-primary-soft font-semibold text-primary'
-                            : 'font-medium text-content hover:bg-surface-2'
-                        ].join(' ')}
-                      >
-                        <IconComp size={17} strokeWidth={1.9} className={isActive ? 'shrink-0 text-primary' : 'shrink-0 text-secondary'} />
-                        <span className="min-w-0 flex-1 truncate">{route.label}</span>
-                      </NavLink>
-
-                      {hasChildren && isActive && (
-                        <div className="ml-[26px] mr-2 mt-1.5 flex flex-col">
-                          {route.children.map((child, childIndex) => {
-                            const childPathname = child.path.split('?')[0];
-                            const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
-                            const isChildActive = child.matchSearch
-                              ? location.pathname === childPathname && currentKind === child.matchSearch
-                              : location.pathname === childPathname;
-                            const isLastChild = childIndex === route.children.length - 1;
-
-                            return (
-                              <div key={child.id} className="relative min-h-9 pl-4">
-                                <span
-                                  aria-hidden="true"
-                                  className={[
-                                    'absolute left-0 top-0 w-px',
-                                    isChildActive ? 'bg-primary/35' : 'bg-line',
-                                    isLastChild ? 'h-1/2' : 'h-full'
-                                  ].join(' ')}
-                                />
-                                <span
-                                  aria-hidden="true"
-                                  className={['absolute left-0 top-1/2 h-px w-3', isChildActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
-                                />
-
-                                <NavLink
-                                  to={child.path}
-                                  onClick={onClose}
-                                  className={[
-                                    'flex min-h-9 items-center justify-center rounded-lg px-2 py-2 text-center text-[11.5px] leading-tight no-underline transition-all',
-                                    isChildActive
-                                      ? 'bg-primary-soft font-semibold text-primary'
-                                      : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
-                                  ].join(' ')}
-                                >
-                                  {child.label}
-                                </NavLink>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </React.Fragment>
+                    <NavLink
+                      key={route.id}
+                      to={route.path}
+                      onClick={onClose}
+                      ref={isActive ? activeItemRef : null}
+                      className={[
+                        'flex min-h-11 items-center gap-3 rounded-xl px-3 text-left text-[13px] no-underline transition-colors',
+                        isActive
+                          ? 'bg-primary-soft font-semibold text-primary'
+                          : 'font-medium text-content hover:bg-surface-2'
+                      ].join(' ')}
+                    >
+                      <IconComp size={17} strokeWidth={1.9} className={isActive ? 'shrink-0 text-primary' : 'shrink-0 text-secondary'} />
+                      <span className="min-w-0 flex-1 truncate">{route.label}</span>
+                    </NavLink>
                   );
                 })}
-              </div>
+              </section>
             );
           })}
-        </div>
+        </nav>
 
         <div className="shrink-0 border-t border-line bg-surface p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
           <div className="mb-3 flex rounded-xl border border-line bg-surface-2 p-1">
