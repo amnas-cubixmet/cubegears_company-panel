@@ -37,8 +37,8 @@ export const MyAttendance = () => {
   };
 
   return (
-    <div className="my-attendance-page flex w-full min-w-0 flex-col gap-4">
-      <header>
+    <div className="my-attendance-page cg-attendance flex w-full min-w-0 flex-col gap-4">
+      <header className="attendance-page-header">
         <h1 className="m-0 text-[22px] font-extrabold leading-tight text-content">
           My Attendance
         </h1>
@@ -48,12 +48,13 @@ export const MyAttendance = () => {
       </header>
 
       <MobileTabRail
+        className="my-attendance-tabs"
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={handleTabChange}
       />
 
-      <div className="w-full min-w-0">
+      <div className="attendance-tab-content w-full min-w-0">
         {activeTab === 'calendar' && <HolidayCalendar />}
         {activeTab === 'history' && <HistoryLogs />}
         {activeTab === 'leave' && <LeaveRequests />}
