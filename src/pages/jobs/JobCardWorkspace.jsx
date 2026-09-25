@@ -329,6 +329,25 @@ export function JobCardWorkspace() {
     });
   };
 
+  const addPhoto = async (file, stage = 'Inspection') => {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const record = {
+        id: `PH-${Date.now()}`,
+        stage,
+        url: reader.result,
+        caption: `${stage} photo`,
+        uploadedBy: job.assignedEmployeeName || job.serviceAdvisor || 'Current User',
+        timestamp: new Date().toLocaleString('en-IN')
+      };
+
+      await persist({ photos: [record, ...(job.photos || [])] });
+    };
+    reader.readAsDataURL(file);
+  };
+
   const addTechnicianUpdate = async (presetType) => {
     const note = updateNote.trim() || presetType;
     if (!note) return;
@@ -625,6 +644,19 @@ export function JobCardWorkspace() {
                 <div key={item} className="rounded-xl border border-line bg-surface-2 p-3"><strong className="text-content">{item}</strong><div className="mt-1 text-muted">Inspect & record</div></div>
               ))}
             </div>
+
+            <label className="mt-4 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 text-xs font-bold text-content">
+              <Camera size={15}/>Add Inspection Photo
+              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>addPhoto(e.target.files?.[0],'Inspection')}/>
+            </label>
+
+            {job.photos?.length ? (
+              <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {job.photos.slice(0,8).map((photo)=>(
+                  <img key={photo.id} src={photo.url} alt={photo.caption || photo.stage} className="aspect-square w-full rounded-xl border border-line object-cover"/>
+                ))}
+              </div>
+            ) : null}
           </section>
 
           <section className="rounded-2xl border border-line bg-surface p-4">
@@ -782,7 +814,14 @@ export function JobCardWorkspace() {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-[160px_minmax(0,1fr)_auto]">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 text-[11px] font-semibold text-content">
+              <Camera size={14}/>Add Work Photo
+              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>addPhoto(e.target.files?.[0],'During Repair')}/>
+            </label>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[160px_minmax(0,1fr)_auto]">
             <select value={updateType} onChange={(e)=>setUpdateType(e.target.value)} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
               <option>Work Update</option><option>Inspection</option><option>Parts Update</option><option>Customer Update</option><option>Issue Found</option>
             </select>
