@@ -681,16 +681,16 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'complaints' && (
-        <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="text-sm font-extrabold text-content">Customer Complaints</div>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <section className="job-panel job-complaints-panel rounded-2xl border border-line bg-surface p-4">
+          <div className="job-panel-title text-sm font-extrabold text-content">Customer Complaints</div>
+          <div className="job-complaint-compose mt-3 flex flex-col gap-2 sm:flex-row">
             <textarea value={complaintText} onChange={(e) => setComplaintText(e.target.value)} placeholder="Add complaint exactly as customer explains it..." className="min-h-20 flex-1 rounded-xl border border-line bg-surface-2 p-3 text-sm text-content"/>
             <button onClick={addComplaint} disabled={!complaintText.trim() || saving} className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white"><Plus size={15} className="inline"/> Add Complaint</button>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="job-complaint-list mt-4 flex flex-col gap-2">
             {complaints.map((item) => (
-              <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
+              <div key={item.id} className="job-complaint-card flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold text-content">{item.description}</div>
                   <div className="mt-1 text-[10px] text-muted">{item.relatedService || 'Not linked to work item'}</div>
@@ -706,18 +706,21 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'inspection' && (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Vehicle Inspection</div>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+        <div className="job-inspection-grid grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <section className="job-panel job-inspection-overview rounded-2xl border border-line bg-surface p-4">
+            <div className="job-panel-title text-sm font-extrabold text-content">Vehicle Inspection</div>
+            <div className="job-inspection-summary mt-3 grid grid-cols-2 gap-2 text-xs">
               <Info label="Existing Damage" value={(job.existingDamage || []).join(', ') || 'None recorded'}/>
               <Info label="Accessories" value={(job.accessories || []).join(', ') || 'None recorded'}/>
               <Info label="Fuel Level" value={job.fuelLevel || '—'}/>
               <Info label="Vehicle Photos" value={`${job.photos?.length || 0} uploaded`}/>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
+            <div className="job-inspection-checks mt-4 grid grid-cols-2 gap-2 text-[11px]">
               {['Tyres','Warning Lights','Battery','Engine Oil','Coolant','Brake Fluid'].map((item) => (
-                <div key={item} className="rounded-xl border border-line bg-surface-2 p-3"><strong className="text-content">{item}</strong><div className="mt-1 text-muted">Inspect & record</div></div>
+                <div key={item} className="job-inspection-check rounded-xl border border-line bg-surface-2 p-3">
+                  <strong className="text-content">{item}</strong>
+                  <div className="mt-1 text-muted">Inspect & record</div>
+                </div>
               ))}
             </div>
 
@@ -735,9 +738,9 @@ export function JobCardWorkspace() {
             ) : null}
           </section>
 
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Add Finding</div>
-            <form onSubmit={addFinding} className="mt-3 grid grid-cols-1 gap-3">
+          <section className="job-panel job-finding-panel rounded-2xl border border-line bg-surface p-4">
+            <div className="job-panel-title text-sm font-extrabold text-content">Add Finding</div>
+            <form onSubmit={addFinding} className="job-finding-form mt-3 grid grid-cols-1 gap-3">
               <input value={finding.description} onChange={(e)=>setFinding({...finding,description:e.target.value})} placeholder="Finding / issue" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
               <div className="grid grid-cols-2 gap-2">
                 <select value={finding.severity} onChange={(e)=>setFinding({...finding,severity:e.target.value})} className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
@@ -750,11 +753,11 @@ export function JobCardWorkspace() {
             </form>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
-            <div className="text-sm font-extrabold text-content">Inspection Findings</div>
-            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+          <section className="job-panel job-findings-panel rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
+            <div className="job-panel-title text-sm font-extrabold text-content">Inspection Findings</div>
+            <div className="job-findings-grid mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
               {findings.map((item)=>(
-                <div key={item.id} className="rounded-xl border border-line bg-surface-2 p-3">
+                <div key={item.id} className="job-finding-card rounded-xl border border-line bg-surface-2 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <strong className="text-xs text-content">{item.description}</strong>
                     <span className="rounded-full bg-primary-soft px-2 py-1 text-[9px] font-bold text-primary">{item.severity}</span>
@@ -816,12 +819,12 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'estimate' && (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Estimate History</div>
-            <div className="mt-3 flex flex-col gap-2">
+        <div className="job-estimate-grid grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <section className="job-panel job-estimate-history-panel rounded-2xl border border-line bg-surface p-4">
+            <div className="job-panel-title text-sm font-extrabold text-content">Estimate History</div>
+            <div className="job-estimate-history mt-3 flex flex-col gap-2">
               {estimates.map((item)=>(
-                <div key={item.id || item.version} className="rounded-xl border border-line bg-surface-2 p-3">
+                <div key={item.id || item.version} className="job-estimate-card rounded-xl border border-line bg-surface-2 p-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <div className="text-xs font-extrabold text-content">{item.version}</div>
@@ -829,7 +832,7 @@ export function JobCardWorkspace() {
                     </div>
                     <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-bold text-primary">{item.approvalStatus}</span>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-secondary">
+                  <div className="job-estimate-breakdown mt-3 grid grid-cols-2 gap-2 text-[11px] text-secondary">
                     <div>Parts <strong className="float-right text-content">{money.format(item.partsTotal || 0)}</strong></div>
                     <div>Labour <strong className="float-right text-content">{money.format(item.servicesTotal || 0)}</strong></div>
                     <div>Tax <strong className="float-right text-content">{money.format(item.taxAmount || 0)}</strong></div>
@@ -850,9 +853,9 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Current Estimate</div>
-            <div className="mt-3 flex flex-col gap-2 text-xs">
+          <section className="job-panel job-current-estimate rounded-2xl border border-line bg-surface p-4">
+            <div className="job-panel-title text-sm font-extrabold text-content">Current Estimate</div>
+            <div className="job-current-estimate__body mt-3 flex flex-col gap-2 text-xs">
               <AmountRow label="Parts" value={partsTotal}/>
               <AmountRow label="Outside Purchase" value={outsideTotal}/>
               <AmountRow label="Labour" value={labourTotal}/>
@@ -865,7 +868,7 @@ export function JobCardWorkspace() {
                 </label>
               </div>
               <AmountRow label="Tax" value={estimateTaxAmount}/>
-              <div className="mt-2 flex items-center justify-between rounded-xl bg-primary-soft p-3">
+              <div className="job-estimate-total mt-2 flex items-center justify-between rounded-xl bg-primary-soft p-3">
                 <span className="text-xs font-bold text-primary">Estimated Total</span>
                 <strong className="text-lg text-content">{money.format(estimateGrandTotal)}</strong>
               </div>
@@ -877,13 +880,13 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'updates' && (
-        <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <section className="job-panel job-updates-panel rounded-2xl border border-line bg-surface p-4">
+          <div className="job-updates-header flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="text-sm font-extrabold text-content">Technician Updates</div>
               <div className="mt-1 text-xs text-muted">Track work start, pause/resume, notes, photos and completion.</div>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="job-update-actions flex flex-wrap gap-2">
               {['Work Started','Pause','Resume','Completed Work'].map((type)=>(
                 <button key={type} onClick={()=>addTechnicianUpdate(type)} className="h-9 rounded-xl border border-line bg-surface-2 px-3 text-[11px] font-semibold text-content">{type}</button>
               ))}
@@ -897,7 +900,7 @@ export function JobCardWorkspace() {
             </label>
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[160px_minmax(0,1fr)_auto]">
+          <div className="job-update-compose mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[160px_minmax(0,1fr)_auto]">
             <select value={updateType} onChange={(e)=>setUpdateType(e.target.value)} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
               <option>Work Update</option><option>Inspection</option><option>Parts Update</option><option>Customer Update</option><option>Issue Found</option>
             </select>
@@ -905,9 +908,9 @@ export function JobCardWorkspace() {
             <button onClick={()=>addTechnicianUpdate(updateType)} disabled={!updateNote.trim()} className="h-10 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">Add Update</button>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="job-update-list mt-4 flex flex-col gap-2">
             {updates.map((item)=>(
-              <div key={item.id} className="rounded-xl border border-line bg-surface-2 p-3">
+              <div key={item.id} className="job-update-card rounded-xl border border-line bg-surface-2 p-3">
                 <div className="flex items-center justify-between gap-2">
                   <strong className="text-xs text-content">{item.type || 'Update'}</strong>
                   <span className="text-[10px] text-muted">{item.time || new Date(item.createdAt || Date.now()).toLocaleString('en-IN')}</span>
@@ -921,12 +924,12 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'qc' && (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><ShieldCheck size={16} className="text-primary"/>Quality Check</div>
-            <div className="mt-3 flex flex-col gap-2">
+        <div className="job-qc-grid grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <section className="job-panel job-qc-checklist-panel rounded-2xl border border-line bg-surface p-4">
+            <div className="job-panel-title flex items-center gap-2 text-sm font-extrabold text-content"><ShieldCheck size={16} className="text-primary"/>Quality Check</div>
+            <div className="job-qc-list mt-3 flex flex-col gap-2">
               {qcChecklist.map((item)=>(
-                <div key={item.id} className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
+                <div key={item.id} className="job-qc-row flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
                   <span className="text-xs font-semibold text-content">{item.item}</span>
                   <select value={item.status || 'Pending'} onChange={(e)=>updateQcItem(item.id,e.target.value)} className="h-8 rounded-lg border border-line bg-surface px-2 text-[10px] font-bold text-content">
                     <option>Pending</option><option>Pass</option><option>Fail</option>
@@ -936,10 +939,10 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Road Test & Result</div>
+          <section className="job-panel job-qc-result-panel rounded-2xl border border-line bg-surface p-4">
+            <div className="job-panel-title text-sm font-extrabold text-content">Road Test & Result</div>
             <textarea value={qcRoadTest} onChange={(e)=>setQcRoadTest(e.target.value)} rows={5} placeholder="Road test notes / issues found..." className="mt-3 min-h-28 w-full rounded-xl border border-line bg-surface-2 p-3 text-xs text-content"/>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="job-qc-actions mt-3 grid grid-cols-2 gap-2">
               <button onClick={()=>completeQc('Pass')} className="h-10 rounded-xl border-0 bg-emerald-600 text-xs font-bold text-white">QC Passed</button>
               <button onClick={()=>completeQc('Rework Required')} className="h-10 rounded-xl border-0 bg-red-500 text-xs font-bold text-white">QC Failed</button>
             </div>
@@ -1018,15 +1021,15 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'activity' && (
-        <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="text-sm font-extrabold text-content">Job Activity</div>
-          <div className="mt-4 border-l border-line pl-4">
+        <section className="job-panel job-activity-panel rounded-2xl border border-line bg-surface p-4">
+          <div className="job-panel-title text-sm font-extrabold text-content">Job Activity</div>
+          <div className="job-activity-timeline mt-4 border-l border-line pl-4">
             {[...timeline, ...updates.map((item)=>({
               time: item.time || new Date(item.createdAt || Date.now()).toLocaleString('en-IN'),
               title: item.type || 'Work Update',
               desc: item.note
             }))].map((item,index)=>(
-              <div key={`${item.time}-${index}`} className="relative pb-5">
+              <div key={`${item.time}-${index}`} className="job-activity-item relative pb-5">
                 <span className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-primary ring-4 ring-surface"/>
                 <div className="text-[10px] font-semibold text-muted">{item.time}</div>
                 <div className="mt-1 text-xs font-extrabold text-content">{item.title}</div>
