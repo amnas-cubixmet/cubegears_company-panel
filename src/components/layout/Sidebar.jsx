@@ -48,21 +48,21 @@ export const Sidebar = () => {
             const items = routeConfig.filter((route) => route.section === section);
             if (!items.length) return null;
             return <section key={section} className="flex flex-col gap-1">
-              {!collapsed && <div className="px-3 pb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-muted">{section}</div>}
+              {!collapsed && <div className="px-3 pb-1 text-left text-[9px] font-bold uppercase tracking-[0.14em] text-muted">{section}</div>}
               {items.map((route) => {
                 const Icon = route.icon;
                 const active = isRouteActive(route);
                 return <React.Fragment key={route.id}>
                   <NavLink to={route.path} ref={active ? activeItemRef : null} title={collapsed ? route.label : undefined}
-                    className={`group relative flex h-10 items-center rounded-xl no-underline transition-colors ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} ${active ? 'bg-primary-soft text-primary' : 'text-secondary hover:bg-surface-2 hover:text-content'}`}>
+                    className={`group relative flex h-10 items-center rounded-xl text-left no-underline transition-colors ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} ${active ? 'bg-primary-soft text-primary' : 'text-secondary hover:bg-surface-2 hover:text-content'}`}>
                     {active && !collapsed && <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-primary" />}
-                    <Icon size={18} strokeWidth={active ? 2.2 : 1.8} className="shrink-0" />
-                    {!collapsed && <span className={`min-w-0 flex-1 truncate text-[13px] ${active ? 'font-semibold' : 'font-medium'}`}>{route.label}</span>}
+                    <span className="grid size-5 shrink-0 place-items-center"><Icon size={18} strokeWidth={active ? 2.2 : 1.8} /></span>
+                    {!collapsed && <span className={`min-w-0 flex-1 truncate text-left text-[13px] leading-5 ${active ? 'font-semibold' : 'font-medium'}`}>{route.label}</span>}
                   </NavLink>
                   {!collapsed && active && route.children?.length > 0 && <div className="ml-[21px] mt-1 border-l border-line pl-4">
                     {route.children.map((child) => {
                       const childActive = isChildActive(child);
-                      return <NavLink key={child.id} to={child.path} className={`flex min-h-8 items-center rounded-lg px-3 py-1.5 text-[11px] leading-4 no-underline transition ${childActive ? 'bg-primary-soft font-semibold text-primary' : 'font-medium text-muted hover:bg-surface-2 hover:text-content'}`}>{child.label}</NavLink>;
+                      return <NavLink key={child.id} to={child.path} className={`flex min-h-8 items-center rounded-lg px-3 py-1.5 text-left text-[11px] leading-4 no-underline transition ${childActive ? 'bg-primary-soft font-semibold text-primary' : 'font-medium text-muted hover:bg-surface-2 hover:text-content'}`}>{child.label}</NavLink>;
                     })}
                   </div>}
                 </React.Fragment>;
