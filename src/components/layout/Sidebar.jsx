@@ -155,23 +155,37 @@ export const Sidebar = () => {
                     </NavLink>
 
                     {!collapsed && active && hasChildren ? (
-                      <div className="ml-[33px] mr-2 flex flex-col gap-[5px] border-l border-line pl-2">
-                        {route.children.map((child) => {
+                      <div className="ml-[32px] mr-2 mt-1 flex flex-col">
+                        {route.children.map((child, childIndex) => {
                           const childActive = isChildActive(child);
+                          const isLastChild = childIndex === route.children.length - 1;
 
                           return (
-                            <NavLink
-                              key={child.id}
-                              to={child.path}
-                              className={[
-                                'flex min-h-8 items-center rounded-md px-2 text-[11px] leading-tight no-underline transition-colors',
-                                childActive
-                                  ? 'bg-surface-2 font-semibold text-primary'
-                                  : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
-                              ].join(' ')}
-                            >
-                              {child.label}
-                            </NavLink>
+                            <div key={child.id} className="relative min-h-9 pl-4">
+                              <span
+                                aria-hidden="true"
+                                className={[
+                                  'absolute left-0 top-0 w-px bg-line',
+                                  isLastChild ? 'h-1/2' : 'h-full'
+                                ].join(' ')}
+                              />
+                              <span
+                                aria-hidden="true"
+                                className="absolute left-0 top-1/2 h-px w-3 bg-line"
+                              />
+
+                              <NavLink
+                                to={child.path}
+                                className={[
+                                  'flex min-h-8 items-center rounded-md px-2 text-[11px] leading-tight no-underline transition-colors',
+                                  childActive
+                                    ? 'bg-surface-2 font-semibold text-primary'
+                                    : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
+                                ].join(' ')}
+                              >
+                                {child.label}
+                              </NavLink>
+                            </div>
                           );
                         })}
                       </div>
