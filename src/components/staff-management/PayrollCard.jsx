@@ -41,7 +41,7 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
   const balance = payroll.netSalary - paid;
 
   return (
-    <div style={{
+    <div className="payroll-record-card" style={{
       width: '100%',
       maxWidth: '100%',
       minWidth: 0,
@@ -83,7 +83,7 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
       </div>
 
       {/* Detailed Financial Breakdown Grid */}
-      <div style={{
+      <div className="payroll-record-breakdown" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
         gap: '10px',
@@ -136,7 +136,7 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
       </div>
 
       {/* Settlement & Paid Details Row */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--surface-2)', padding: '10px 12px', borderRadius: '10px' }}>
+      <div className="payroll-record-settlement" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--surface-2)', padding: '10px 12px', borderRadius: '10px' }}>
         <div>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Paid: <strong>{formatINR(paid)}</strong></span>
           <span style={{ fontSize: '13px', fontWeight: '800', color: balance > 0 ? 'var(--warning)' : 'var(--success)' }}>
@@ -157,7 +157,7 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
       </div>
 
       {/* Main Action Buttons */}
-      <div style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
+      <div className="payroll-record-actions" style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
         <button
           onClick={() => onRecordPayment(payroll)}
           disabled={payroll.paymentStatus === 'Paid' || payroll.approvalStatus !== 'Approved'}
@@ -200,7 +200,7 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
       </div>
 
       {/* Secondary Menu Links */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '2px' }}>
+      <div className="payroll-record-links" style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '2px' }}>
         <button
           onClick={() => onViewPayslip(payroll)}
           style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
