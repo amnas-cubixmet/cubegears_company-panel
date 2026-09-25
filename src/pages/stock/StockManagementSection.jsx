@@ -345,6 +345,171 @@ export const StockManagementSection = ({ section, itemId }) => {
     } finally { setSaving(false); }
   };
 
+  const renderModals = () => (
+    <>
+      <ResponsiveModalSheet
+        isOpen={itemEditor !== null}
+        onClose={() => { setItemEditor(null); setItemForm(emptyItemForm); }}
+        title={itemEditor?.id ? 'Edit Part / Product' : 'Add Part / Product'}
+        maxWidth="760px"
+      >
+        <form className="stock-form" onSubmit={saveItem}>
+          {error ? <div className="stock-form-error">{error}</div> : null}
+          <div className="stock-form-grid">
+            <label>Part Name *<input required value={itemForm.partName} onChange={(e)=>setItemForm({...itemForm,partName:e.target.value})}/></label>
+            <label>Part Number / SKU *<input required value={itemForm.sku} onChange={(e)=>setItemForm({...itemForm,sku:e.target.value})}/></label>
+            <label>Barcode<input value={itemForm.barcode} onChange={(e)=>setItemForm({...itemForm,barcode:e.target.value})}/></label>
+            <label>Category<select value={itemForm.category} onChange={(e)=>setItemForm({...itemForm,category:e.target.value})}>{stockCategories.map((category)=><option key={category.id}>{category.name}</option>)}</select></label>
+            <label>Brand<input value={itemForm.brand} onChange={(e)=>setItemForm({...itemForm,brand:e.target.value})}/></label>
+            <label>Compatible Vehicle<input value={itemForm.compatibleVehicle} onChange={(e)=>setItemForm({...itemForm,compatibleVehicle:e.target.value})}/></label>
+            <label>Unit<select value={itemForm.unit} onChange={(e)=>setItemForm({...itemForm,unit:e.target.value})}>{['Piece','Set','Pair','Litre','Can','Box'].map((unit)=><option key={unit}>{unit}</option>)}</select></label>
+            <label>Rack / Bin<input value={itemForm.location} onChange={(e)=>setItemForm({...itemForm,location:e.target.value})}/></label>
+            <label>Purchase Cost<input type="number" min="0" value={itemForm.costPrice} onChange={(e)=>setItemForm({...itemForm,costPrice:e.target.value})}/></label>
+            <label>Selling Price<input type="number" min="0" value={itemForm.sellingPrice} onChange={(e)=>setItemForm({...itemForm,sellingPrice:e.target.value})}/></label>
+            <label>Tax %<input type="number" min="0" value={itemForm.tax} onChange={(e)=>setItemForm({...itemForm,tax:e.target.value})}/></label>
+            <label>Discount Limit %<input type="number" min="0" value={itemForm.discountLimit} onChange={(e)=>setItemForm({...itemForm,discountLimit:e.target.value})}/></label>
+            <label>On Hand<input type="number" min="0" value={itemForm.onHand} onChange={(e)=>setItemForm({...itemForm,onHand:e.target.value})}/></label>
+            <label>Reserved<input type="number" min="0" value={itemForm.reserved} onChange={(e)=>setItemForm({...itemForm,reserved:e.target.value})}/></label>
+            <label>Minimum Stock<input type="number" min="0" value={itemForm.minimumStock} onChange={(e)=>setItemForm({...itemForm,minimumStock:e.target.value})}/></label>
+            <label>Reorder Level<input type="number" min="0" value={itemForm.reorderLevel} onChange={(e)=>setItemForm({...itemForm,reorderLevel:e.target.value})}/></label>
+            <label>Supplier<select value={itemForm.supplier} onChange={(e)=>setItemForm({...itemForm,supplier:e.target.value})}><option value="">Select supplier</option>{suppliers.map((supplier)=><option key={supplier.id}>{supplier.name}</option>)}</select></label>
+            <label>Status<select value={itemForm.status} onChange={(e)=>setItemForm({...itemForm,status:e.target.value})}><option>Active</option><option>Archived</option></select></label>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setItemEditor(null)}>Cancel</button><button className="is-primary" disabled={saving}>{saving?'Saving...':itemEditor?.id?'Update Product':'Add Product'}</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet
+        isOpen={categoryEditor !== null}
+        onClose={() => { setCategoryEditor(null); setCategoryForm(emptyCategory); }}
+        title={categoryEditor?.id ? 'Edit Category' : 'Add Category'}
+        maxWidth="520px"
+      >
+        <form className="stock-form" onSubmit={saveCategory}>
+          {error ? <div className="stock-form-error">{error}</div> : null}
+          <div className="stock-form-grid">
+            <label>Category Name *<input required value={categoryForm.name} onChange={(e)=>setCategoryForm({...categoryForm,name:e.target.value})}/></label>
+            <label>Code<input value={categoryForm.code} onChange={(e)=>setCategoryForm({...categoryForm,code:e.target.value})}/></label>
+            <label>Default Minimum<input type="number" min="0" value={categoryForm.minimumDefault} onChange={(e)=>setCategoryForm({...categoryForm,minimumDefault:e.target.value})}/></label>
+            <label>Status<select value={categoryForm.status} onChange={(e)=>setCategoryForm({...categoryForm,status:e.target.value})}><option>Active</option><option>Inactive</option></select></label>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setCategoryEditor(null)}>Cancel</button><button className="is-primary" disabled={saving}>{saving?'Saving...':'Save Category'}</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet
+        isOpen={supplierEditor !== null}
+        onClose={() => { setSupplierEditor(null); setSupplierForm(emptySupplier); }}
+        title={supplierEditor?.id ? 'Edit Supplier' : 'Add Supplier'}
+        maxWidth="650px"
+      >
+        <form className="stock-form" onSubmit={saveSupplier}>
+          {error ? <div className="stock-form-error">{error}</div> : null}
+          <div className="stock-form-grid">
+            <label>Supplier Name *<input required value={supplierForm.name} onChange={(e)=>setSupplierForm({...supplierForm,name:e.target.value})}/></label>
+            <label>Phone<input value={supplierForm.phone} onChange={(e)=>setSupplierForm({...supplierForm,phone:e.target.value})}/></label>
+            <label>WhatsApp<input value={supplierForm.whatsapp} onChange={(e)=>setSupplierForm({...supplierForm,whatsapp:e.target.value})}/></label>
+            <label>Email<input type="email" value={supplierForm.email} onChange={(e)=>setSupplierForm({...supplierForm,email:e.target.value})}/></label>
+            <label>GST / VAT<input value={supplierForm.gstNo} onChange={(e)=>setSupplierForm({...supplierForm,gstNo:e.target.value})}/></label>
+            <label>Brands Supplied<input value={supplierForm.brands} onChange={(e)=>setSupplierForm({...supplierForm,brands:e.target.value})}/></label>
+            <label>Outstanding<input type="number" min="0" value={supplierForm.outstanding} onChange={(e)=>setSupplierForm({...supplierForm,outstanding:e.target.value})}/></label>
+            <label>Status<select value={supplierForm.status} onChange={(e)=>setSupplierForm({...supplierForm,status:e.target.value})}><option>Active</option><option>Inactive</option></select></label>
+            <label className="is-wide">Address<textarea rows="3" value={supplierForm.address} onChange={(e)=>setSupplierForm({...supplierForm,address:e.target.value})}/></label>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setSupplierEditor(null)}>Cancel</button><button className="is-primary" disabled={saving}>{saving?'Saving...':'Save Supplier'}</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet isOpen={movementOpen} onClose={()=>setMovementOpen(false)} title="Stock Movement" maxWidth="600px">
+        <form className="stock-form" onSubmit={submitMovement}>
+          <div className="stock-form-grid">
+            <label>Movement Type<select value={movementForm.mode} onChange={(e)=>setMovementForm({...movementForm,mode:e.target.value})}><option>Stock In</option><option>Stock Out</option><option>Return to Stock</option></select></label>
+            <label>Part / Product<select required value={movementForm.itemId} onChange={(e)=>setMovementForm({...movementForm,itemId:e.target.value})}><option value="">Select part</option>{items.map((item)=><option key={item.id} value={item.id}>{item.partName} · {item.available} available</option>)}</select></label>
+            <label>Quantity<input required type="number" min="1" value={movementForm.quantity} onChange={(e)=>setMovementForm({...movementForm,quantity:e.target.value})}/></label>
+            {movementForm.mode==='Stock In' ? <><label>Supplier<select value={movementForm.supplier} onChange={(e)=>setMovementForm({...movementForm,supplier:e.target.value})}><option value="">Select supplier</option>{suppliers.map((supplier)=><option key={supplier.id}>{supplier.name}</option>)}</select></label><label>Purchase Invoice No<input value={movementForm.invoiceNo} onChange={(e)=>setMovementForm({...movementForm,invoiceNo:e.target.value})}/></label></> : null}
+            {movementForm.mode!=='Stock In' ? <><label>Job Card No<input value={movementForm.jobId} onChange={(e)=>setMovementForm({...movementForm,jobId:e.target.value})}/></label><label>Technician<input value={movementForm.technician} onChange={(e)=>setMovementForm({...movementForm,technician:e.target.value})}/></label></> : null}
+            {movementForm.mode==='Return to Stock' ? <label>Condition<select value={movementForm.condition} onChange={(e)=>setMovementForm({...movementForm,condition:e.target.value})}><option>Reusable</option><option>Damaged</option></select></label> : null}
+            <label className="is-wide">Notes<textarea rows="3" value={movementForm.notes} onChange={(e)=>setMovementForm({...movementForm,notes:e.target.value})}/></label>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setMovementOpen(false)}>Cancel</button><button className="is-primary" disabled={saving}>Save Movement</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet isOpen={transferOpen} onClose={()=>setTransferOpen(false)} title="New Stock Transfer" maxWidth="560px">
+        <form className="stock-form" onSubmit={submitTransfer}>
+          <div className="stock-form-grid">
+            <label>Part<select required value={transferForm.itemId} onChange={(e)=>setTransferForm({...transferForm,itemId:e.target.value})}><option value="">Select part</option>{items.map((item)=><option key={item.id} value={item.id}>{item.partName}</option>)}</select></label>
+            <label>Quantity<input type="number" min="1" value={transferForm.quantity} onChange={(e)=>setTransferForm({...transferForm,quantity:e.target.value})}/></label>
+            <label>From Branch<select value={transferForm.fromBranch} onChange={(e)=>setTransferForm({...transferForm,fromBranch:e.target.value})}>{stockBranches.map((branch)=><option key={branch}>{branch}</option>)}</select></label>
+            <label>To Branch<select value={transferForm.toBranch} onChange={(e)=>setTransferForm({...transferForm,toBranch:e.target.value})}>{stockBranches.map((branch)=><option key={branch}>{branch}</option>)}</select></label>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setTransferOpen(false)}>Cancel</button><button className="is-primary" disabled={saving}>Create Transfer</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet isOpen={adjustmentOpen} onClose={()=>setAdjustmentOpen(false)} title="Stock Adjustment" maxWidth="560px">
+        <form className="stock-form" onSubmit={submitAdjustment}>
+          <div className="stock-form-grid">
+            <label>Part<select required value={adjustmentForm.itemId} onChange={(e)=>setAdjustmentForm({...adjustmentForm,itemId:e.target.value})}><option value="">Select part</option>{items.map((item)=><option key={item.id} value={item.id}>{item.partName}</option>)}</select></label>
+            <label>Adjustment<select value={adjustmentForm.adjustmentType} onChange={(e)=>setAdjustmentForm({...adjustmentForm,adjustmentType:e.target.value})}><option>Increase</option><option>Decrease</option></select></label>
+            <label>Quantity<input type="number" min="1" value={adjustmentForm.quantity} onChange={(e)=>setAdjustmentForm({...adjustmentForm,quantity:e.target.value})}/></label>
+            <label>Reason<select value={adjustmentForm.reason} onChange={(e)=>setAdjustmentForm({...adjustmentForm,reason:e.target.value})}>{stockAdjustmentReasons.map((reason)=><option key={reason}>{reason}</option>)}</select></label>
+            <label className="is-wide">Notes<textarea rows="3" value={adjustmentForm.notes} onChange={(e)=>setAdjustmentForm({...adjustmentForm,notes:e.target.value})}/></label>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setAdjustmentOpen(false)}>Cancel</button><button className="is-primary" disabled={saving}>Save Adjustment</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet isOpen={auditOpen} onClose={()=>setAuditOpen(false)} title="Start Stock Audit" maxWidth="520px">
+        <form className="stock-form" onSubmit={submitAudit}>
+          <div className="stock-form-grid">
+            <label>Date<input type="date" value={auditForm.date} onChange={(e)=>setAuditForm({...auditForm,date:e.target.value})}/></label>
+            <label>Counter<input value={auditForm.counter} onChange={(e)=>setAuditForm({...auditForm,counter:e.target.value})}/></label>
+            <label>Variance Items<input type="number" min="0" value={auditForm.variances} onChange={(e)=>setAuditForm({...auditForm,variances:e.target.value})}/></label>
+            <label>Status<select value={auditForm.status} onChange={(e)=>setAuditForm({...auditForm,status:e.target.value})}><option>Draft</option><option>In Progress</option><option>Approved</option></select></label>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setAuditOpen(false)}>Cancel</button><button className="is-primary" disabled={saving}>Create Audit</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet isOpen={poOpen} onClose={()=>setPoOpen(false)} title="Create Purchase Order" maxWidth="760px">
+        <form className="stock-form" onSubmit={createPurchaseOrder}>
+          <div className="stock-form-grid">
+            <label>Supplier *<select required value={poSupplier} onChange={(e)=>setPoSupplier(e.target.value)}><option value="">Select supplier</option>{suppliers.map((supplier)=><option key={supplier.id}>{supplier.name}</option>)}</select></label>
+            <label>PO Date<input type="date" value={poDate} onChange={(e)=>setPoDate(e.target.value)}/></label>
+            <label>Status<select value={poStatus} onChange={(e)=>setPoStatus(e.target.value)}><option>Draft</option><option>Ordered</option></select></label>
+          </div>
+          <div className="stock-po-form-lines">
+            {poLines.map((line,index)=>(
+              <div key={index}>
+                <select value={line.itemId} onChange={(e)=>{const item=items.find((entry)=>entry.id===e.target.value);updatePoLine(index,'itemId',e.target.value);if(item) updatePoLine(index,'unitCost',item.costPrice);}}><option value="">Select part</option>{items.map((item)=><option key={item.id} value={item.id}>{item.partName}</option>)}</select>
+                <input type="number" min="1" value={line.orderedQty} onChange={(e)=>updatePoLine(index,'orderedQty',e.target.value)} placeholder="Qty"/>
+                <input type="number" min="0" value={line.unitCost} onChange={(e)=>updatePoLine(index,'unitCost',e.target.value)} placeholder="Unit cost"/>
+                <button type="button" onClick={()=>setPoLines((current)=>current.filter((_,i)=>i!==index))}>×</button>
+              </div>
+            ))}
+            <button type="button" className="stock-add-line" onClick={addPoLine}><Plus size={13}/> Add Line</button>
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setPoOpen(false)}>Cancel</button><button className="is-primary" disabled={saving}>Create Purchase Order</button></div>
+        </form>
+      </ResponsiveModalSheet>
+
+      <ResponsiveModalSheet isOpen={!!receiveTarget} onClose={()=>{setReceiveTarget(null);setReceiveQty({});}} title={receiveTarget ? `Receive Goods · ${receiveTarget.purchaseNo}` : 'Receive Goods'} maxWidth="650px">
+        <form className="stock-form" onSubmit={receivePurchase}>
+          <div className="stock-receive-lines">
+            {(receiveTarget?.lines || []).map((line)=>{
+              const remaining=Math.max(0,Number(line.orderedQty||0)-Number(line.receivedQty||0));
+              return <div key={line.id}><div><strong>{line.partName}</strong><span>Ordered {line.orderedQty} · Received {line.receivedQty} · Remaining {remaining}</span></div><input type="number" min="0" max={remaining} value={receiveQty[line.id]||''} onChange={(e)=>setReceiveQty({...receiveQty,[line.id]:e.target.value})} placeholder="Receive qty"/></div>;
+            })}
+          </div>
+          <div className="stock-form-actions"><button type="button" onClick={()=>setReceiveTarget(null)}>Cancel</button><button className="is-primary" disabled={saving}>Receive & Update Stock</button></div>
+        </form>
+      </ResponsiveModalSheet>
+    </>
+  );
+
+  const withModals = (node) => <>{node}{renderModals()}</>;
+
   if (loading) return <Empty>Loading stock management data...</Empty>;
 
   if (section === 'item-detail') {
@@ -488,7 +653,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'items') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Parts & Products" description="Spare parts, oils and consumables with pricing, stock level and rack location." action={<button className="stock-primary-button" onClick={()=>{setItemEditor({});setItemForm(emptyItemForm);}}><Plus size={14}/> Add Product</button>}/>
         <label className="stock-search"><Search size={16}/><input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Part name / SKU / barcode / brand / vehicle"/></label>
@@ -519,7 +684,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'categories') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Stock Categories" description="Workshop inventory categories and default minimum stock levels." action={<button className="stock-primary-button" onClick={()=>{setCategoryEditor({});setCategoryForm(emptyCategory);}}><Plus size={14}/> Add Category</button>}/>
         <div className="stock-category-grid">
@@ -536,7 +701,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'movements') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Stock In / Out / Returns" description="Receive supplier stock, issue to Job Cards and restore unused parts." action={<button className="stock-primary-button" onClick={()=>{setMovementForm(emptyMovement);setMovementOpen(true);}}><Plus size={14}/> New Movement</button>}/>
         <div className="stock-movement-flow"><span>Purchase</span><i>→</i><span>Stock In</span><i>→</i><span>Job Card Issue</span><i>→</i><span>Stock Out</span><i>→</i><span>Invoice</span></div>
@@ -558,7 +723,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'purchase-orders') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Purchase Orders & Goods Receiving" description="Supplier orders, ordered vs received quantity and PO lifecycle." action={<button className="stock-primary-button" onClick={()=>setPoOpen(true)}><Plus size={14}/> Create PO</button>}/>
         <div className="stock-po-grid">
@@ -583,7 +748,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'suppliers') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Suppliers" description="Supplier contacts, GST/VAT, brands, outstanding and purchase history." action={<button className="stock-primary-button" onClick={()=>{setSupplierEditor({});setSupplierForm(emptySupplier);}}><Plus size={14}/> Add Supplier</button>}/>
         <div className="stock-supplier-grid">
@@ -601,7 +766,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'transfers') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Stock Transfers" description="Transfer stock between branches and store rooms." action={<button className="stock-primary-button" onClick={()=>setTransferOpen(true)}><Plus size={14}/> New Transfer</button>}/>
         <div className="stock-transfer-list">
@@ -618,7 +783,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'adjustments') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Stock Adjustments" description="Damaged, missing, expired and physical-count corrections with reason history." action={<button className="stock-primary-button" onClick={()=>setAdjustmentOpen(true)}><Plus size={14}/> New Adjustment</button>}/>
         <section className="stock-panel">
@@ -638,7 +803,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'audit') {
-    return (
+    return withModals(
       <div className="stock-management-view">
         <SectionHeader title="Inventory Audit" description="Physical stock count vs system stock and variance history." action={<button className="stock-primary-button" onClick={()=>setAuditOpen(true)}><Plus size={14}/> Start Count</button>}/>
         <div className="stock-audit-grid">
