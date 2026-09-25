@@ -14,7 +14,19 @@ export const ROUTE_SECTIONS = {
 export const routeConfig = [
   { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, section: ROUTE_SECTIONS.MAIN, mobilePrimary: true, permission: 'dashboard.view' },
   { id: 'jobs', label: 'Job Cards', path: '/jobs', icon: ClipboardList, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'jobs.view' },
-  { id: 'customers', label: 'Customers', path: '/customers', icon: Users, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'customers.view' },
+  {
+    id: 'customers', label: 'Customers', path: '/customers', icon: Users, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'customers.view',
+    children: [
+      { id: 'customers-overview', label: 'Overview', path: '/customers/overview' },
+      { id: 'customers-all', label: 'All Customers', path: '/customers/all' },
+      { id: 'customers-add', label: 'Add Customer', path: '/customers/new' },
+      { id: 'customers-vehicles', label: 'Vehicles', path: '/customers/vehicles' },
+      { id: 'customers-history', label: 'Service History', path: '/customers/service-history' },
+      { id: 'customers-outstanding', label: 'Outstanding', path: '/customers/outstanding' },
+      { id: 'customers-reminders', label: 'Reminders', path: '/customers/reminders' },
+      { id: 'customers-reports', label: 'Reports', path: '/customers/reports' }
+    ]
+  },
   {
     id: 'stock', label: 'Stock Mgmt', path: '/stock', icon: Boxes, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'stock.view',
     children: [
