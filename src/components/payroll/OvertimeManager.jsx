@@ -75,7 +75,7 @@ export const OvertimeManager = () => {
   };
 
   return (
-    <div className="am-overtime-module" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+    <div className="am-overtime-module payroll-overtime-module" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       {toastMsg && (
         <div style={{ backgroundColor: 'var(--success)', color: '#ffffff', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600' }}>
           {toastMsg}
