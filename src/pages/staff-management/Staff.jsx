@@ -72,7 +72,7 @@ export const Staff = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="staff-directory" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* Toast Feedback */}
       {toastMsg && (
         <div style={{
@@ -89,7 +89,7 @@ export const Staff = () => {
       )}
 
       {/* Header Bar & Actions */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="staff-toolbar" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '240px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -151,10 +151,11 @@ export const Staff = () => {
       </div>
 
       {/* Staff Cards (Mobile/Responsive view) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', width: '100%' }}>
+      <div className="staff-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', width: '100%' }}>
         {filteredStaff.map((staff) => (
           <div
             key={staff.id}
+            className="staff-member-card"
             onClick={() => setViewingProfileId(staff.id)}
             style={{
               backgroundColor: 'var(--surface)',
@@ -209,6 +210,7 @@ export const Staff = () => {
             {/* Actions */}
             <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', paddingTop: '10px', marginTop: '2px' }}>
               <button
+                className="staff-view-button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setViewingProfileId(staff.id);
@@ -233,6 +235,7 @@ export const Staff = () => {
               </button>
 
               <button
+                className="staff-status-button"
                 onClick={(e) => handleToggleStatus(e, staff.id)}
                 title={staff.accountStatus === 'Active' ? 'Deactivate Staff' : 'Activate Staff'}
                 style={{
