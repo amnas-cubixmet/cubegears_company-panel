@@ -135,16 +135,16 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                         className={[
                           'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition',
                           isActive
-                            ? 'bg-primary text-white shadow-sm'
+                            ? 'bg-surface-2 font-semibold text-content ring-1 ring-line'
                             : 'font-medium text-content hover:bg-surface-2'
                         ].join(' ')}
                       >
-                        <IconComp size={17} strokeWidth={1.9} className="shrink-0" />
+                        <IconComp size={17} strokeWidth={1.9} className={isActive ? 'shrink-0 text-primary' : 'shrink-0 text-secondary'} />
                         <span className="min-w-0 flex-1 truncate">{route.label}</span>
                       </NavLink>
 
                       {hasChildren && isActive && (
-                        <div className="ml-7 mr-1 mt-1 flex flex-col gap-[5px] rounded-xl border border-line bg-surface-2/70 p-1.5">
+                        <div className="ml-[25px] mr-2 mt-1 flex flex-col gap-[5px] border-l border-line pl-2">
                           {route.children.map((child) => {
                             const childPathname = child.path.split('?')[0];
                             const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
@@ -158,10 +158,10 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                                 to={child.path}
                                 onClick={onClose}
                                 className={[
-                                  'flex min-h-9 items-center rounded-lg px-3 py-2 text-[11.5px] leading-tight no-underline transition',
+                                  'flex min-h-9 items-center rounded-lg px-2 py-2 text-[11.5px] leading-tight no-underline transition',
                                   isChildActive
-                                    ? 'bg-surface font-bold text-primary shadow-sm ring-1 ring-line'
-                                    : 'font-medium text-secondary hover:bg-surface hover:text-content'
+                                    ? 'bg-surface-2 font-semibold text-primary'
+                                    : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
                                 ].join(' ')}
                               >
                                 {child.label}
