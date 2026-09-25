@@ -133,8 +133,8 @@ export const JobCreatePage = () => {
   const labelClass = 'text-xs font-semibold text-secondary';
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="job-management-page job-create-page flex w-full min-w-0 flex-col gap-4">
+      <div className="job-create-header flex flex-wrap items-start justify-between gap-3">
         <div>
           <button type="button" className="mb-3 inline-flex h-9 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-xs font-semibold text-content" onClick={() => navigate('/jobs')}>
             <ArrowLeft size={15}/>Back
@@ -147,8 +147,8 @@ export const JobCreatePage = () => {
 
       {error ? <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <section className="rounded-2xl border border-line bg-surface p-4 md:p-5">
+      <form onSubmit={submit} className="job-create-form flex flex-col gap-4">
+        <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
           <h2 className="text-base font-extrabold text-content">Job & Customer</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className={labelClass}>Date / Time *
@@ -176,7 +176,7 @@ export const JobCreatePage = () => {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-line bg-surface p-4 md:p-5">
+        <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
           <div className="flex items-center gap-2">
             <Search size={17} className="text-primary"/>
             <h2 className="text-base font-extrabold text-content">Vehicle</h2>
@@ -203,7 +203,7 @@ export const JobCreatePage = () => {
           </div>
 
           {historyLoading ? <div className="mt-3 text-xs text-muted">Checking vehicle history…</div> : history.length ? (
-            <div className="mt-4 rounded-xl border border-primary/20 bg-primary-soft p-3">
+            <div className="job-create-history mt-4 rounded-xl border border-primary/20 bg-primary-soft p-3">
               <div className="flex items-center gap-2 text-xs font-extrabold text-primary"><History size={15}/>{history.length} previous job card{history.length > 1 ? 's' : ''} found</div>
               <div className="mt-2 text-[11px] text-secondary">
                 Last visit: <strong className="text-content">{history[0].createdDate}</strong> · {history[0].status} · {history[0].customerName}
@@ -212,7 +212,7 @@ export const JobCreatePage = () => {
           ) : null}
         </section>
 
-        <section className="rounded-2xl border border-line bg-surface p-4 md:p-5">
+        <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
           <h2 className="text-base font-extrabold text-content">Complaint & Assignment</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className={labelClass + ' md:col-span-2'}>Customer Complaint
@@ -246,7 +246,7 @@ export const JobCreatePage = () => {
           </div>
         </section>
 
-        <div className="sticky bottom-0 z-20 flex gap-2 border-t border-line bg-surface/95 p-3 backdrop-blur md:static md:justify-end md:border-0 md:bg-transparent md:p-0">
+        <div className="job-create-actions sticky bottom-0 z-20 flex gap-2 border-t border-line bg-surface/95 p-3 backdrop-blur md:static md:justify-end md:border-0 md:bg-transparent md:p-0">
           <button type="button" className="h-11 flex-1 rounded-xl border border-line bg-surface px-5 text-sm font-semibold text-content md:flex-none" onClick={() => navigate('/jobs')}>Cancel</button>
           <button disabled={saving} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border-0 bg-primary px-5 text-sm font-bold text-white md:flex-none">
             <CheckCircle2 size={17}/>{saving ? 'Creating…' : 'Create Job Card'}
