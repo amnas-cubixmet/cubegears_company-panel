@@ -40,7 +40,7 @@ export const Sidebar = () => {
   const navClass = (active) =>
     [
       'group flex h-10 items-center gap-3 rounded-lg text-[13px] no-underline transition-colors duration-150',
-      collapsed ? 'mx-1 justify-center px-0' : 'mx-1 px-3',
+      collapsed ? 'mx-1 justify-center px-0' : 'ml-2 mr-1 px-3',
       active
         ? 'bg-primary-soft font-semibold text-primary'
         : 'font-medium text-content hover:bg-surface-2'
