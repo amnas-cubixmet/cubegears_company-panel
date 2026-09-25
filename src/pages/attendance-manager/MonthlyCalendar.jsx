@@ -16,45 +16,66 @@ const statusForDay = (staff, day) => {
 };
 
 const tone = {
-  P: 'bg-emerald-50 text-emerald-700',
-  A: 'bg-red-50 text-red-700',
-  L: 'bg-blue-50 text-blue-700',
-  H: 'bg-amber-50 text-amber-700',
-  WO: 'bg-surface-2 text-muted'
+  P: 'am-day--present',
+  A: 'am-day--absent',
+  L: 'am-day--leave',
+  H: 'am-day--half',
+  WO: 'am-day--off'
 };
 
 export const MonthlyAttendanceCalendar = () => {
   const [month] = useState('September 2026');
   const days = useMemo(() => Array.from({ length: 30 }, (_, index) => index + 1), []);
+  const blocks = [days.slice(0, 15), days.slice(15)];
 
   return (
-    <div className="attendance-manager-module attendance-manager-calendar flex flex-col gap-4">
-      <div className="rounded-2xl border border-line bg-surface p-4">
-        <div className="text-base font-extrabold text-content">Monthly Attendance Calendar</div>
-        <div className="mt-1 text-xs text-muted">{month} · P Present · A Absent · L Leave · H Half Day · WO Weekly Off</div>
-      </div>
-
-      <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
-        <div className="min-w-[1050px] p-3">
-          <div className="grid grid-cols-[170px_repeat(30,28px)] gap-1">
-            <div className="sticky left-0 z-10 bg-surface px-2 py-2 text-[10px] font-bold uppercase text-muted">Employee</div>
-            {days.map((day) => <div key={day} className="py-2 text-center text-[9px] font-bold text-muted">{day}</div>)}
-
-            {mockTeamAttendance.map((staff) => (
-              <React.Fragment key={staff.id}>
-                <div className="sticky left-0 z-10 flex min-h-8 items-center bg-surface px-2 text-[11px] font-semibold text-content">{staff.name}</div>
-                {days.map((day) => {
-                  const status = statusForDay(staff, day);
-                  return (
-                    <div key={day} title={`${staff.name} · ${day} Sep · ${status}`} className={['grid size-7 place-items-center rounded-md text-[9px] font-bold', tone[status]].join(' ')}>
-                      {status}
-                    </div>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-          </div>
+    <div className="attendance-manager-module attendance-manager-calendar">
+      <section className="am-calendar-header">
+        <div>
+          <h2>Monthly Attendance Calendar</h2>
+          <p>{month}</p>
         </div>
+        <div className="am-calendar-legend">
+          <span><i className="am-day am-day--present">P</i> Present</span>
+          <span><i className="am-day am-day--absent">A</i> Absent</span>
+          <span><i className="am-day am-day--leave">L</i> Leave</span>
+          <span><i className="am-day am-day--half">H</i> Half Day</span>
+          <span><i className="am-day am-day--off">WO</i> Weekly Off</span>
+        </div>
+      </section>
+
+      <div className="am-calendar-blocks">
+        {blocks.map((blockDays, blockIndex) => (
+          <section key={blockIndex} className="am-calendar-block">
+            <div className="am-calendar-block__title">
+              Days {blockDays[0]}–{blockDays[blockDays.length - 1]}
+            </div>
+            <div className="am-calendar-scroll">
+              <div className="am-calendar-grid" style={{ '--am-days': blockDays.length }}>
+                <div className="am-calendar-employee-head">Employee</div>
+                {blockDays.map((day) => <div key={day} className="am-calendar-day-head">{day}</div>)}
+
+                {mockTeamAttendance.map((staff) => (
+                  <React.Fragment key={staff.id}>
+                    <div className="am-calendar-employee">{staff.name}</div>
+                    {blockDays.map((day) => {
+                      const status = statusForDay(staff, day);
+                      return (
+                        <div
+                          key={day}
+                          title={`${staff.name} · ${day} Sep · ${status}`}
+                          className={`am-day ${tone[status]}`}
+                        >
+                          {status}
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );
