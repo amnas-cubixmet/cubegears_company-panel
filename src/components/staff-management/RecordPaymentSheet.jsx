@@ -61,7 +61,7 @@ export const RecordPaymentSheet = ({ isOpen, onClose, payroll, onSave }) => {
       title="Record Salary Payment"
       maxWidth="500px"
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <form className="payroll-sheet-form payroll-payment-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {/* Error Alert */}
         {errorMsg && (
           <div style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: 'var(--danger-soft)', color: 'var(--danger)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
