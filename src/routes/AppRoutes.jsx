@@ -20,6 +20,7 @@ import { JobList } from '../pages/jobs/JobList';
 import { JobCreatePage } from '../pages/jobs/JobCreatePage';
 import { JobDetails } from '../pages/jobs/JobDetails';
 import { JobStatus } from '../pages/jobs/JobStatus';
+import { JobReports } from '../pages/jobs/JobReports';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { StockManagement } from '../pages/stock/StockManagement';
 import { InvoiceList } from '../pages/invoices/InvoiceList';
@@ -120,6 +121,7 @@ export const AppRoutes = () => (
 
       <Route path="/jobs" element={<JobList />} />
       <Route path="/jobs/new" element={<JobCreatePage />} />
+      <Route path="/jobs/reports" element={<JobReports />} />
       <Route path="/jobs/add" element={<Navigate to="/jobs/new" replace />} />
       <Route path="/jobs/:id" element={<JobDetails />} />
       <Route path="/jobs/:id/overview" element={<JobDetails />} />
