@@ -59,12 +59,32 @@ export const Sidebar = () => {
                     <span className="grid size-5 shrink-0 place-items-center"><Icon size={18} strokeWidth={active ? 2.2 : 1.8} /></span>
                     {!collapsed && <span className={`min-w-0 flex-1 truncate text-left text-[13px] leading-5 ${active ? 'font-semibold' : 'font-medium'}`}>{route.label}</span>}
                   </NavLink>
-                  {!collapsed && active && route.children?.length > 0 && <div className="ml-[21px] mt-1 border-l border-line pl-4">
-                    {route.children.map((child) => {
-                      const childActive = isChildActive(child);
-                      return <NavLink key={child.id} to={child.path} className={`flex min-h-8 items-center rounded-lg px-3 py-1.5 text-left text-[11px] leading-4 no-underline transition ${childActive ? 'bg-primary-soft font-semibold text-primary' : 'font-medium text-muted hover:bg-surface-2 hover:text-content'}`}>{child.label}</NavLink>;
-                    })}
-                  </div>}
+                  {!collapsed && active && route.children?.length > 0 && (
+                    <div className="ml-[22px] mt-1">
+                      {route.children.map((child, index) => {
+                        const childActive = isChildActive(child);
+                        const isLast = index === route.children.length - 1;
+                        return (
+                          <div key={child.id} className="relative min-h-[36px] pl-[26px]">
+                            <span
+                              aria-hidden="true"
+                              className={`absolute left-0 top-0 w-px ${isLast ? 'h-1/2' : 'h-full'} ${childActive ? 'bg-primary/40' : 'bg-line'}`}
+                            />
+                            <span
+                              aria-hidden="true"
+                              className={`absolute left-0 top-1/2 h-px w-[18px] ${childActive ? 'bg-primary/40' : 'bg-line'}`}
+                            />
+                            <NavLink
+                              to={child.path}
+                              className={`flex min-h-[34px] min-w-0 items-center justify-start rounded-lg px-2.5 text-left text-[11px] leading-4 no-underline transition-colors ${childActive ? 'bg-primary-soft font-semibold text-primary' : 'font-medium text-muted hover:bg-surface-2 hover:text-content'}`}
+                            >
+                              <span className="min-w-0 truncate">{child.label}</span>
+                            </NavLink>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </React.Fragment>;
               })}
             </section>;
