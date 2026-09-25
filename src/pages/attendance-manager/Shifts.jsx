@@ -10,7 +10,7 @@ export const ShiftSettings = () => {
     attendanceManagerService.getRules().then((data) => setRules(data));
   }, []);
 
-  if (!rules) return <div className="p-4 text-sm text-muted">Loading shifts...</div>;
+  if (!rules) return <div className="am-loading-state">Loading shifts...</div>;
 
   const set = (key, value) => setRules((old) => ({ ...old, [key]: value }));
 
@@ -20,54 +20,52 @@ export const ShiftSettings = () => {
     finally { setSaving(false); }
   };
 
-  const input = 'mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content outline-none focus:border-primary';
-
   return (
-    <div className="attendance-manager-module attendance-manager-shifts flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-line bg-surface p-4">
+    <div className="attendance-manager-module attendance-manager-shifts">
+      <section className="am-section-header">
         <div>
-          <div className="flex items-center gap-2 text-base font-extrabold text-content"><Clock3 size={17} className="text-primary"/>Shift Settings</div>
-          <div className="mt-1 text-xs text-muted">Shift time drives late, early exit, working hours and overtime calculations.</div>
+          <h2><Clock3 size={17}/> Shift Settings</h2>
+          <p>Shift time drives late, early exit, working hours and overtime calculations.</p>
         </div>
-        <button onClick={save} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
+        <button onClick={save} className="am-primary-button">
           <Save size={15}/>{saving ? 'Saving...' : 'Save Shift'}
         </button>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <div className="text-sm font-extrabold text-content">General Workshop Shift</div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <label className="text-xs font-semibold text-secondary">Start Time
-              <input value={rules.startTime || ''} onChange={(e)=>set('startTime',e.target.value)} className={input}/>
+      <div className="am-two-column-grid">
+        <section className="am-panel">
+          <div className="am-panel__header"><h2>General Workshop Shift</h2></div>
+          <div className="am-form-grid am-form-grid--2">
+            <label>Start Time
+              <input value={rules.startTime || ''} onChange={(e)=>set('startTime',e.target.value)}/>
             </label>
-            <label className="text-xs font-semibold text-secondary">End Time
-              <input value={rules.endTime || ''} onChange={(e)=>set('endTime',e.target.value)} className={input}/>
+            <label>End Time
+              <input value={rules.endTime || ''} onChange={(e)=>set('endTime',e.target.value)}/>
             </label>
-            <label className="text-xs font-semibold text-secondary">Break Minutes
-              <input type="number" min="0" value={rules.breakMinutes ?? 60} onChange={(e)=>set('breakMinutes',Number(e.target.value))} className={input}/>
+            <label>Break Minutes
+              <input type="number" min="0" value={rules.breakMinutes ?? 60} onChange={(e)=>set('breakMinutes',Number(e.target.value))}/>
             </label>
-            <label className="text-xs font-semibold text-secondary">Late Grace
-              <input type="number" min="0" value={rules.lateGraceMinutes ?? 15} onChange={(e)=>set('lateGraceMinutes',Number(e.target.value))} className={input}/>
+            <label>Late Grace
+              <input type="number" min="0" value={rules.lateGraceMinutes ?? 15} onChange={(e)=>set('lateGraceMinutes',Number(e.target.value))}/>
             </label>
-            <label className="text-xs font-semibold text-secondary">Early Exit Threshold
-              <input type="number" min="0" value={rules.earlyExitThreshold ?? 15} onChange={(e)=>set('earlyExitThreshold',Number(e.target.value))} className={input}/>
+            <label>Early Exit Threshold
+              <input type="number" min="0" value={rules.earlyExitThreshold ?? 15} onChange={(e)=>set('earlyExitThreshold',Number(e.target.value))}/>
             </label>
-            <label className="text-xs font-semibold text-secondary">OT Starts After (min)
-              <input type="number" min="0" value={rules.overtimeThreshold ?? 60} onChange={(e)=>set('overtimeThreshold',Number(e.target.value))} className={input}/>
+            <label>OT Starts After (min)
+              <input type="number" min="0" value={rules.overtimeThreshold ?? 60} onChange={(e)=>set('overtimeThreshold',Number(e.target.value))}/>
             </label>
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <div className="text-sm font-extrabold text-content">Calculation Rules</div>
-          <div className="mt-3 flex flex-col gap-2 text-xs text-secondary">
-            <div className="rounded-xl bg-surface-2 p-3"><strong className="text-content">Working Hours:</strong> Check-out − Check-in − Break Time</div>
-            <div className="rounded-xl bg-surface-2 p-3"><strong className="text-content">Late:</strong> Check-in compared with shift start + grace</div>
-            <div className="rounded-xl bg-surface-2 p-3"><strong className="text-content">Early Exit:</strong> Check-out before configured threshold</div>
-            <div className="rounded-xl bg-surface-2 p-3"><strong className="text-content">Overtime:</strong> Approved time after normal shift threshold</div>
+        <section className="am-panel">
+          <div className="am-panel__header"><h2>Calculation Rules</h2></div>
+          <div className="am-rule-list">
+            <div><strong>Working Hours</strong><span>Check-out − Check-in − Break Time</span></div>
+            <div><strong>Late</strong><span>Check-in compared with shift start + grace</span></div>
+            <div><strong>Early Exit</strong><span>Check-out before configured threshold</span></div>
+            <div><strong>Overtime</strong><span>Approved time after normal shift threshold</span></div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );
