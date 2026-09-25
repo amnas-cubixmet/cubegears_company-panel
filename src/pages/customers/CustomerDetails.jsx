@@ -843,18 +843,20 @@ export const CustomerDetails = () => {
                       <div>
                         <strong style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '11.5px', marginBottom: '4px' }}>Services Performed:</strong>
                         <ul style={{ margin: 0, paddingLeft: '16px', color: 'var(--text-primary)' }}>
-                          <li>Engine Mount Replacement</li>
-                          <li>Engine Oil & Filter Change</li>
-                          <li>Brake System Inspection</li>
+                          {(j.services?.length ? j.services : j.labourRecords || []).slice(0, 5).map((service, index) => (
+                            <li key={service.id || index}>{service.serviceName || service.service || 'Workshop labour'}</li>
+                          ))}
+                          {!(j.services?.length || j.labourRecords?.length) ? <li>No labour items recorded</li> : null}
                         </ul>
                       </div>
 
                       <div>
                         <strong style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '11.5px', marginBottom: '4px' }}>Parts Installed:</strong>
                         <ul style={{ margin: 0, paddingLeft: '16px', color: 'var(--text-primary)' }}>
-                          <li>Engine Mount Bush (OEM)</li>
-                          <li>Synthetic Engine Oil 5W-30 (4L)</li>
-                          <li>Oil Filter Element</li>
+                          {(j.partsUsed || []).slice(0, 5).map((part, index) => (
+                            <li key={part.id || index}>{part.name || part.partName || 'Part'}</li>
+                          ))}
+                          {!j.partsUsed?.length ? <li>No replacement parts recorded</li> : null}
                         </ul>
                       </div>
                     </div>
@@ -862,7 +864,7 @@ export const CustomerDetails = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '8px', fontSize: '12.5px', color: 'var(--text-muted)' }}>
                       <div>Technician: <strong style={{ color: 'var(--text-primary)' }}>{j.serviceAdvisor || 'Ajmal K'}</strong></div>
                       <div>
-                        Labour: <strong>₹2,500</strong> • Parts: <strong>₹6,000</strong> • <strong style={{ color: 'var(--primary)', fontSize: '14px' }}>Total: {formatINR(j.billing?.invoiceTotal || 8500)}</strong>
+                        Labour: <strong>{formatINR((j.labourRecords || []).reduce((sum, item) => sum + Number(item.customerCharge || 0), 0))}</strong> • Parts: <strong>{formatINR((j.partsUsed || []).reduce((sum, item) => sum + Number(item.total || (Number(item.qty || 0) * Number(item.unitPrice || 0))), 0))}</strong> • <strong style={{ color: 'var(--primary)', fontSize: '14px' }}>Total: {formatINR(j.billing?.invoiceTotal || j.estimates?.at(-1)?.grandTotal || 0)}</strong>
                       </div>
                     </div>
                   </div>
