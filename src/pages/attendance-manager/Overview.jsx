@@ -43,76 +43,84 @@ export const AttendanceOverview = () => {
   ];
 
   return (
-    <div className="attendance-manager-module attendance-manager-overview flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+    <div className="attendance-manager-module attendance-manager-overview">
+      <div className="am-stat-grid">
         {cards.map(([label, value, Icon]) => (
-          <div key={label} className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-semibold text-muted">{label}</span>
-              <Icon size={16} className="text-primary" />
+          <article key={label} className="am-stat-card">
+            <div className="am-stat-card__top">
+              <span>{label}</span>
+              <span className="am-stat-card__icon"><Icon size={16} /></span>
             </div>
-            <div className="mt-2 text-2xl font-black text-content">{value}</div>
-          </div>
+            <strong className="am-stat-card__value">{value}</strong>
+          </article>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <div className="text-sm font-extrabold text-content">Workshop Productivity</div>
-          <div className="mt-1 text-xs text-muted">Job Card hours compared with attendance working hours.</div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-surface-2 p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-muted">Productive Hours</div>
-              <div className="mt-2 text-xl font-black text-primary">{productive.toFixed(1)}h</div>
-            </div>
-            <div className="rounded-xl bg-surface-2 p-4">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-muted">Idle Hours</div>
-              <div className="mt-2 text-xl font-black text-content">{idle.toFixed(1)}h</div>
+      <div className="am-overview-grid">
+        <section className="am-panel">
+          <div className="am-panel__header">
+            <div>
+              <h2>Workshop Productivity</h2>
+              <p>Job Card hours compared with attendance working hours.</p>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="am-mini-metrics">
+            <div className="am-mini-metric">
+              <span>Productive Hours</span>
+              <strong>{productive.toFixed(1)}h</strong>
+            </div>
+            <div className="am-mini-metric">
+              <span>Idle Hours</span>
+              <strong>{idle.toFixed(1)}h</strong>
+            </div>
+          </div>
+
+          <div className="am-productivity-list">
             {team.filter((item) => item.productiveHours > 0).slice(0, 5).map((item) => {
               const total = Number(item.productiveHours || 0) + Number(item.idleHours || 0);
               const pct = total ? Math.round((Number(item.productiveHours || 0) / total) * 100) : 0;
               return (
-                <div key={item.id} className="flex items-center gap-3">
-                  <span className="w-28 truncate text-[11px] font-semibold text-content">{item.name}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                <div key={item.id} className="am-productivity-row">
+                  <span className="am-productivity-name">{item.name}</span>
+                  <div className="am-progress-track">
+                    <span className="am-progress-fill" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="w-10 text-right text-[10px] font-bold text-muted">{pct}%</span>
+                  <strong>{pct}%</strong>
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <div className="text-sm font-extrabold text-content">Needs Attention</div>
-          <div className="mt-1 text-xs text-muted">Attendance items that need manager review.</div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-line bg-surface-2 p-4">
-              <div className="text-[10px] uppercase tracking-wide text-muted">Pending Requests</div>
-              <div className="mt-2 text-xl font-black text-content">{pending}</div>
-            </div>
-            <div className="rounded-xl border border-line bg-surface-2 p-4">
-              <div className="text-[10px] uppercase tracking-wide text-muted">Missing Punch</div>
-              <div className="mt-2 text-xl font-black text-content">{team.filter((item) => item.missingPunch).length}</div>
+        <section className="am-panel">
+          <div className="am-panel__header">
+            <div>
+              <h2>Needs Attention</h2>
+              <p>Attendance items that need manager review.</p>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link to="/attendance-manager/daily" className="rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white no-underline">
+          <div className="am-mini-metrics">
+            <div className="am-mini-metric">
+              <span>Pending Requests</span>
+              <strong>{pending}</strong>
+            </div>
+            <div className="am-mini-metric">
+              <span>Missing Punch</span>
+              <strong>{team.filter((item) => item.missingPunch).length}</strong>
+            </div>
+          </div>
+
+          <div className="am-action-grid">
+            <Link to="/attendance-manager/daily" className="am-action-button am-action-button--primary">
               Open Daily Attendance
             </Link>
-            <Link to="/attendance-manager/leave-requests" className="rounded-xl border border-line bg-surface px-4 py-2.5 text-xs font-bold text-content no-underline">
+            <Link to="/attendance-manager/leave-requests" className="am-action-button">
               Review Requests
             </Link>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );
