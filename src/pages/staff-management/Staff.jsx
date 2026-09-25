@@ -133,6 +133,11 @@ export const Staff = () => {
           >
             <option value="All">All Status</option>
             <option value="Active">Active</option>
+            <option value="Probation">Probation</option>
+            <option value="Notice Period">Notice Period</option>
+            <option value="Suspended">Suspended</option>
+            <option value="Resigned">Resigned</option>
+            <option value="Terminated">Terminated</option>
             <option value="Inactive">Inactive</option>
           </select>
 
@@ -212,12 +217,22 @@ export const Staff = () => {
                 <Building size={14} style={{ color: 'var(--text-muted)' }} /> {staff.branch}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={14} style={{ color: 'var(--text-muted)' }} /> {staff.department || 'Workshop'} · {staff.role}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Shield size={14} style={{ color: 'var(--text-muted)' }} /> Shift: {staff.shift}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Calendar size={14} style={{ color: 'var(--text-muted)' }} /> Joined: {staff.joiningDate}
               </div>
             </div>
+
+            {staff.skills?.length ? (
+              <div className="staff-directory-skills">
+                {staff.skills.slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}
+                {staff.skills.length > 3 ? <span>+{staff.skills.length - 3}</span> : null}
+              </div>
+            ) : null}
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', paddingTop: '10px', marginTop: '2px' }}>
