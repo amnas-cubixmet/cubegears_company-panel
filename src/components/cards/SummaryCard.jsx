@@ -18,7 +18,7 @@ export const SummaryCard = ({ title, children, action, className = '' }) => {
     >
       <div style={{
         display: 'flex',
-        justify: 'space-between',
+        justifyContent: 'space-between',
         alignItems: 'center',
         gap: '8px',
         marginBottom: '14px',
