@@ -27,6 +27,8 @@ import './styles/header-system.css';
 import './styles/tailwind-system.css';
 // Final cross-project normalization layer.
 import './styles/ui-reset.css';
+// Final scoped UI contract for all My Attendance routes.
+import './styles/my-attendance.css';
 
 export function App() {
   return (
