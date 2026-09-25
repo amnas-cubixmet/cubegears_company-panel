@@ -1,9 +1,10 @@
 import { mockStaffList } from '../mock/staff.mock';
+import { enrichWorkshopStaff } from '../mock/staffManagement.mock';
 
 export const staffService = {
   getStaff: async () => {
     return new Promise((resolve) => {
-      setTimeout(() => resolve([...mockStaffList]), 150);
+      setTimeout(() => resolve(mockStaffList.map((staff) => enrichWorkshopStaff(staff))), 150);
     });
   },
 
@@ -11,7 +12,7 @@ export const staffService = {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const found = mockStaffList.find((s) => s.id === id);
-        if (found) resolve({ ...found });
+        if (found) resolve(enrichWorkshopStaff(found));
         else reject(new Error('Staff member not found'));
       }, 150);
     });
@@ -21,7 +22,7 @@ export const staffService = {
     return new Promise(async (resolve) => {
       setTimeout(async () => {
         const newId = `EMP-${String(mockStaffList.length + 12).padStart(4, '0')}`;
-        const newStaff = {
+        const newStaff = enrichWorkshopStaff({
           ...staffData,
           id: newId,
           employmentStatus: staffData.employmentStatus || 'Active',
@@ -39,7 +40,7 @@ export const staffService = {
               timestamp: new Date().toLocaleString()
             }
           ]
-        };
+        });
         mockStaffList.unshift(newStaff);
 
         // If salary setup is enabled, create linked salary structure
@@ -78,7 +79,7 @@ export const staffService = {
             actor: 'Current Admin',
             timestamp: new Date().toLocaleString()
           });
-          resolve(mockStaffList[idx]);
+          resolve(enrichWorkshopStaff(mockStaffList[idx]));
         } else {
           resolve(null);
         }
