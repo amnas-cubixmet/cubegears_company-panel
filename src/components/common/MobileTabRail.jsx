@@ -1,63 +1,52 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-export const MobileTabRail = ({ tabs = [], activeTab, onTabChange }) => {
+export const MobileTabRail = ({ tabs = [], activeTab, onTabChange, className = '' }) => {
   const activeTabRef = useRef(null);
   const railRef = useRef(null);
 
   useEffect(() => {
-    if (activeTabRef.current && railRef.current) {
-      activeTabRef.current.scrollIntoView({
+    const timer = window.setTimeout(() => {
+      activeTabRef.current?.scrollIntoView({
         behavior: 'smooth',
         inline: 'center',
         block: 'nearest'
       });
-    }
+    }, 50);
+
+    return () => window.clearTimeout(timer);
   }, [activeTab]);
 
   return (
-    <div
-      ref={railRef}
-      className="scroll-hidden"
-      style={{
-        display: 'flex',
-        gap: '8px',
-        overflowX: 'auto',
-        padding: '4px 0 12px 0',
-        width: '100%',
-        whiteSpace: 'nowrap',
-        borderBottom: '1px solid var(--border)'
-      }}
-    >
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-        const IconComp = tab.icon;
+    <div className={['w-full min-w-0 rounded-2xl border border-line bg-surface p-1.5 shadow-sm', className].join(' ')}>
+      <div
+        ref={railRef}
+        className="mobile-tab-rail scroll-hidden flex w-full min-w-0 gap-1.5 overflow-x-auto"
+      >
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const IconComp = tab.icon;
 
-        return (
-          <button
-            key={tab.id}
-            ref={isActive ? activeTabRef : null}
-            onClick={() => onTabChange(tab.id)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              borderRadius: '20px',
-              fontSize: '13px',
-              fontWeight: isActive ? '600' : '500',
-              color: isActive ? '#ffffff' : 'var(--text-secondary)',
-              backgroundColor: isActive ? 'var(--primary)' : 'var(--surface)',
-              border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
-              cursor: 'pointer',
-              flexShrink: 0,
-              transition: 'all 0.15s ease'
-            }}
-          >
-            {IconComp && <IconComp size={16} />}
-            <span>{tab.label}</span>
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={tab.id}
+              ref={isActive ? activeTabRef : null}
+              type="button"
+              onClick={() => onTabChange(tab.id)}
+              className={[
+                'inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border-0 px-3.5',
+                'text-[12px] font-semibold leading-none transition-all duration-150',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25',
+                isActive
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-transparent text-secondary hover:bg-surface-2 hover:text-content'
+              ].join(' ')}
+            >
+              {IconComp ? <IconComp size={15} /> : null}
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
