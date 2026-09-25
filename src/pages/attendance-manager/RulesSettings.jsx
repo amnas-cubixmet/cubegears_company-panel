@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Clock, ShieldAlert } from 'lucide-react';
+import { Save, Clock, ShieldAlert, CalendarDays } from 'lucide-react';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 
 export const RulesSettings = () => {
@@ -33,6 +33,15 @@ export const RulesSettings = () => {
     setRules(updated);
     const dirty = JSON.stringify(updated) !== JSON.stringify(initialRules);
     setIsDirty(dirty);
+  };
+
+  const toggleWeekendDay = (day) => {
+    const currentDays = Array.isArray(rules.weekendDays) ? rules.weekendDays : [];
+    const nextDays = currentDays.includes(day)
+      ? currentDays.filter((item) => item !== day)
+      : [...currentDays, day];
+
+    handleChange('weekendDays', nextDays);
   };
 
   const handleSaveRules = async (e) => {
@@ -178,7 +187,110 @@ export const RulesSettings = () => {
           </div>
         </div>
 
-        {/* Category 3: Permissions Guard */}
+        {/* Category 3: Weekend Off */}
+        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <CalendarDays size={16} style={{ color: 'var(--primary)' }} /> Weekend Off Settings
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px' }}>
+            <div>
+              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
+                Weekly Off Days
+              </label>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '6px' }}>
+                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => {
+                  const selected = Array.isArray(rules.weekendDays) && rules.weekendDays.includes(day);
+
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleWeekendDay(day)}
+                      style={{
+                        minHeight: '36px',
+                        padding: '0 8px',
+                        borderRadius: '8px',
+                        border: selected ? '1px solid var(--primary)' : '1px solid var(--border)',
+                        backgroundColor: selected ? 'var(--primary-soft)' : 'var(--surface-2)',
+                        color: selected ? 'var(--primary)' : 'var(--text-secondary)',
+                        fontSize: '11px',
+                        fontWeight: selected ? '700' : '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {day.slice(0, 3)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)' }}>
+              <div>
+                <div style={{ color: 'var(--text-primary)', fontWeight: '700' }}>Alternate Saturday Off</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '2px' }}>
+                  Apply a recurring Saturday-off pattern.
+                </div>
+              </div>
+
+              <input
+                type="checkbox"
+                checked={Boolean(rules.alternateSaturdayEnabled)}
+                onChange={(e) => handleChange('alternateSaturdayEnabled', e.target.checked)}
+                style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
+              />
+            </div>
+
+            {rules.alternateSaturdayEnabled && (
+              <div>
+                <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>
+                  Saturday Pattern
+                </label>
+                <select
+                  value={rules.alternateSaturdayPattern || '2nd & 4th Saturday'}
+                  onChange={(e) => handleChange('alternateSaturdayPattern', e.target.value)}
+                  style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                >
+                  <option>1st & 3rd Saturday</option>
+                  <option>2nd & 4th Saturday</option>
+                  <option>1st, 3rd & 5th Saturday</option>
+                  <option>All Saturdays</option>
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>
+                Weekend Attendance Policy
+              </label>
+              <select
+                value={rules.weekendAttendancePolicy || 'Mark as Weekly Off'}
+                onChange={(e) => handleChange('weekendAttendancePolicy', e.target.value)}
+                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              >
+                <option>Mark as Weekly Off</option>
+                <option>Allow Attendance</option>
+                <option>Allow Attendance + Overtime</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>
+                Effective From
+              </label>
+              <input
+                type="date"
+                value={rules.weekendEffectiveFrom || ''}
+                onChange={(e) => handleChange('weekendEffectiveFrom', e.target.value)}
+                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Category 4: Permissions Guard */}
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ShieldAlert size={16} style={{ color: 'var(--danger)' }} /> Approval Permissions Guard
