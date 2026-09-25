@@ -14,11 +14,11 @@ import { RecoveryHistoryModal } from '../../components/staff-management/Recovery
 import { OvertimeManager } from '../../components/payroll/OvertimeManager';
 import { CommissionManager } from '../../components/payroll/CommissionManager';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
-import { DollarSign, CheckCircle2, AlertCircle, Clock, CreditCard, FileText, Plus, Filter, Printer, ShieldCheck } from 'lucide-react';
+import { FileText, Plus, Filter, Printer } from 'lucide-react';
 
 export const Payroll = ({ section = 'overview' }) => {
   const activeSection = section;
-  const { selectedMonth, selectedYear, selectedBranch, setSelectedBranch, selectedStaff, periodString } = usePayrollPeriod();
+  const { selectedMonth, selectedYear, selectedBranch, selectedStaff, periodString } = usePayrollPeriod();
 
   const [payrolls, setPayrolls] = useState([]);
   const [salaryStructures, setSalaryStructures] = useState([]);
