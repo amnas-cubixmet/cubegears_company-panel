@@ -51,9 +51,18 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
     return location.pathname === route.path || location.pathname.startsWith(`${route.path}/`);
   };
 
+  const isChildActive = (child) => {
+    const pathname = child.path.split('?')[0];
+    const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
+
+    return child.matchSearch
+      ? location.pathname === pathname && currentKind === child.matchSearch
+      : location.pathname === pathname;
+  };
+
   const themeClass = (mode) =>
     [
-      'flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg border-0 px-2 text-[11px] font-semibold transition',
+      'grid h-7 flex-1 place-items-center rounded-lg border-0 transition-colors',
       themeMode === mode
         ? 'bg-surface text-primary shadow-sm'
         : 'bg-transparent text-muted hover:bg-surface hover:text-content'
@@ -74,22 +83,23 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
       <aside
         aria-hidden={!isOpen}
         className={[
-          'fixed bottom-0 right-0 top-0 z-[100] flex h-dvh w-[min(88vw,360px)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 md:hidden',
+          'fixed bottom-0 right-0 top-0 z-[100] flex h-dvh w-[min(90vw,340px)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 md:hidden',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         ].join(' ')}
       >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
+        {/* LOGO / HEADER AREA */}
+        <div className="flex h-[64px] shrink-0 items-center justify-between border-b border-line px-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-sm font-black text-white shadow-sm">
+            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary font-sans text-xs font-bold text-white">
               CG
             </div>
 
-            <div className="min-w-0">
-              <div className="truncate text-sm font-extrabold tracking-tight text-content">
+            <div className="min-w-0 text-left">
+              <div className="truncate font-sans text-[14px] font-bold text-content leading-tight">
                 CubeGears
               </div>
-              <div className="truncate text-[10px] font-medium text-muted">
-                Garage Workspace
+              <div className="truncate font-sans text-[10px] font-medium text-muted leading-tight mt-0.5">
+                Workshop Management
               </div>
             </div>
           </div>
@@ -97,10 +107,11 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="grid size-9 shrink-0 place-items-center rounded-xl border border-line bg-surface-2 text-secondary transition hover:bg-surface hover:text-content"
+            className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-surface-2 text-muted transition hover:bg-surface hover:text-content"
             aria-label="Close menu"
+            title="Close menu"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
@@ -145,32 +156,53 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
           })}
         </nav>
 
+        {/* FOOTER AREA */}
         <div className="shrink-0 border-t border-line bg-surface p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+          {/* THEME TOGGLE */}
           <div className="mb-3 flex rounded-xl border border-line bg-surface-2 p-1">
-            <button type="button" onClick={() => setThemeMode('light')} className={themeClass('light')}>
-              <Sun size={14}/>Light
+            <button
+              type="button"
+              onClick={() => setThemeMode('light')}
+              className={themeClass('light')}
+              title="Light theme"
+              aria-label="Light theme"
+            >
+              <Sun size={14} />
             </button>
-            <button type="button" onClick={() => setThemeMode('dark')} className={themeClass('dark')}>
-              <Moon size={14}/>Dark
+            <button
+              type="button"
+              onClick={() => setThemeMode('dark')}
+              className={themeClass('dark')}
+              title="Dark theme"
+              aria-label="Dark theme"
+            >
+              <Moon size={14} />
             </button>
-            <button type="button" onClick={() => setThemeMode('system')} className={themeClass('system')}>
-              <Laptop size={14}/>System
+            <button
+              type="button"
+              onClick={() => setThemeMode('system')}
+              className={themeClass('system')}
+              title="System theme"
+              aria-label="System theme"
+            >
+              <Laptop size={14} />
             </button>
           </div>
 
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-2.5">
+          {/* USER PROFILE */}
+          <div className="flex items-center justify-between rounded-xl border border-line bg-surface-2 p-2.5 gap-2">
             <div className="flex min-w-0 items-center gap-2.5">
               <img
                 src={user?.avatar}
-                alt="User"
-                className="size-9 shrink-0 rounded-full border border-line bg-surface object-cover"
+                alt={user?.name || 'User avatar'}
+                className="size-8 shrink-0 rounded-full border border-line bg-surface object-cover"
               />
 
-              <div className="min-w-0">
-                <div className="truncate text-[11px] font-extrabold text-content">
+              <div className="min-w-0 text-left">
+                <div className="truncate font-sans text-[11px] font-semibold text-content leading-tight">
                   {user?.name || 'User'}
                 </div>
-                <div className="mt-0.5 truncate text-[9px] font-bold uppercase tracking-wide text-muted">
+                <div className="truncate font-sans text-[9px] font-medium uppercase tracking-wider text-muted leading-tight mt-0.5">
                   {user?.role || 'ADMIN'}
                 </div>
               </div>
@@ -179,11 +211,11 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={logout}
-              className="grid size-9 shrink-0 place-items-center rounded-xl border border-transparent bg-transparent text-danger transition hover:border-red-200 hover:bg-red-50"
+              className="grid size-7 shrink-0 place-items-center rounded-lg border-0 bg-transparent text-danger transition hover:bg-red-500/10"
               title="Log out"
               aria-label="Log out"
             >
-              <LogOut size={17}/>
+              <LogOut size={16} />
             </button>
           </div>
         </div>
@@ -191,3 +223,4 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
     </>
   );
 };
+
