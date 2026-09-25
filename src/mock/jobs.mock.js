@@ -283,6 +283,49 @@ export const addMockJob = (data) => {
     ],
     ...data
   };
+  newJob.billing = {
+    advancePaid: 0,
+    invoiceNumber: null,
+    invoiceDate: null,
+    invoiceTotal: 0,
+    paidAmount: 0,
+    outstandingBalance: 0,
+    ...(data.billing || {})
+  };
+
+  newJob.qualityCheck = {
+    inspector: "Unassigned",
+    checkDate: "-",
+    status: "Pending",
+    checklist: [],
+    testDriveNotes: "",
+    remarks: "",
+    ...(data.qualityCheck || {})
+  };
+
+  newJob.delivery = {
+    readyStatus: data.status || "New",
+    finalKm: data.kilometre || "-",
+    deliveryTime: data.expectedDeliveryDate || "-",
+    acknowledgedBy: null,
+    creditDeliveryAllowed: false,
+    notes: "",
+    ...(data.delivery || {})
+  };
+
+  if (!Array.isArray(newJob.workUpdates) || newJob.workUpdates.length === 0) {
+    newJob.workUpdates = [
+      {
+        id: `UPD-${Date.now()}`,
+        staff: data.serviceAdvisor || "Admin",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: "Check-In",
+        note: "New Job Card created.",
+        status: data.status || "New"
+      }
+    ];
+  }
+
   jobsMock.unshift(newJob);
   return newJob;
 };
