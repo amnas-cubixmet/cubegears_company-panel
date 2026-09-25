@@ -40,9 +40,9 @@ export const Sidebar = () => {
   const navClass = (active) =>
     [
       'group flex h-10 items-center gap-3 rounded-lg text-[13px] no-underline transition-colors duration-150',
-      collapsed ? 'mx-1 justify-center px-0' : 'ml-2 mr-1 px-3',
+      collapsed ? 'mx-1 justify-center px-0' : 'ml-2 mr-2 px-3',
       active
-        ? 'bg-primary-soft font-semibold text-primary'
+        ? 'bg-surface-2 font-semibold text-content ring-1 ring-line'
         : 'font-medium text-content hover:bg-surface-2'
     ].join(' ');
 
@@ -155,7 +155,7 @@ export const Sidebar = () => {
                     </NavLink>
 
                     {!collapsed && active && hasChildren ? (
-                      <div className="ml-8 mr-1 flex flex-col gap-[5px] border-l border-line pl-2.5">
+                      <div className="ml-[33px] mr-2 flex flex-col gap-[5px] border-l border-line pl-2">
                         {route.children.map((child) => {
                           const childActive = isChildActive(child);
 
@@ -164,7 +164,7 @@ export const Sidebar = () => {
                               key={child.id}
                               to={child.path}
                               className={[
-                                'flex min-h-8 items-center rounded-md px-2.5 text-[11px] leading-tight no-underline transition-colors',
+                                'flex min-h-8 items-center rounded-md px-2 text-[11px] leading-tight no-underline transition-colors',
                                 childActive
                                   ? 'bg-surface-2 font-semibold text-primary'
                                   : 'font-medium text-muted hover:bg-surface-2 hover:text-content'
