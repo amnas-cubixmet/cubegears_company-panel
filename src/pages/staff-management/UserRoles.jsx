@@ -26,7 +26,6 @@ export const UserRoles = () => {
     { key: 'staff', label: 'Staff' },
     { key: 'payroll', label: 'Payroll' },
     { key: 'reports', label: 'Reports' },
-    { key: 'website', label: 'Website' },
     { key: 'settings', label: 'Settings' }
   ];
 
