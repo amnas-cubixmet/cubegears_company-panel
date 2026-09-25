@@ -23,6 +23,7 @@ export const AdvanceCard = ({ advance, onRecordRecovery, onViewDetails }) => {
 
   return (
     <div
+      className="payroll-advance-card"
       style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
