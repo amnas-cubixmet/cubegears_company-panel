@@ -29,6 +29,8 @@ import './styles/tailwind-system.css';
 import './styles/ui-reset.css';
 // Final scoped UI contract for all My Attendance routes.
 import './styles/my-attendance.css';
+// Final scoped UI contract for all Attendance Manager routes.
+import './styles/attendance-manager.css';
 
 export function App() {
   return (
