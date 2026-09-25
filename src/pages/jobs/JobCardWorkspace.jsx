@@ -101,6 +101,10 @@ export function JobCardWorkspace() {
     customerSignature: '',
     warrantyNotes: ''
   });
+  const [paymentForm, setPaymentForm] = useState({
+    amount: '',
+    method: 'Cash'
+  });
 
   const activeTab = useMemo(() => {
     const section = location.pathname.split('/').filter(Boolean).at(-1);
@@ -133,6 +137,11 @@ export function JobCardWorkspace() {
         warrantyNotes: data?.delivery?.notes || ''
       });
       setQcRoadTest(data?.qualityCheck?.testDriveNotes || '');
+      setPaymentForm((old) => ({
+        ...old,
+        amount: '',
+        method: data?.billing?.paymentMethod || old.method || 'Cash'
+      }));
     } catch (e) {
       setError(e?.message || 'Unable to load job card.');
     } finally {
@@ -222,6 +231,7 @@ export function JobCardWorkspace() {
   const estimateGrandTotal = taxable + estimateTaxAmount;
 
   const latestEstimate = estimates.at(-1) || null;
+  const invoiceTotal = cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0);
 
   const addComplaint = async () => {
     const description = complaintText.trim();
@@ -470,6 +480,51 @@ export function JobCardWorkspace() {
     navigate(`/invoices/new?kind=invoice&jobId=${encodeURIComponent(job.id)}`);
   };
 
+  const recordPayment = async (event) => {
+    event.preventDefault();
+
+    const paymentAmount = cleanNumber(paymentForm.amount);
+    if (paymentAmount <= 0) {
+      setError('Enter a valid payment amount.');
+      return;
+    }
+
+    if (invoiceTotal <= 0) {
+      setError('Create an estimate or invoice before recording payment.');
+      return;
+    }
+
+    const currentPaid = cleanNumber(job.billing?.paidAmount || 0);
+    const paidAmount = Math.min(invoiceTotal, currentPaid + paymentAmount);
+    const outstandingBalance = Math.max(0, invoiceTotal - paidAmount);
+    const paymentStatus = paidAmount <= 0
+      ? 'Pending'
+      : outstandingBalance <= 0
+        ? 'Paid'
+        : 'Partial';
+
+    const paymentEntry = {
+      id: `PAY-${Date.now()}`,
+      amount: paymentAmount,
+      method: paymentForm.method,
+      date: new Date().toLocaleString('en-IN')
+    };
+
+    await persist({
+      paymentStatus,
+      billing: {
+        ...(job.billing || {}),
+        invoiceTotal,
+        paidAmount,
+        outstandingBalance,
+        paymentMethod: paymentForm.method,
+        payments: [paymentEntry, ...(job.billing?.payments || [])]
+      }
+    });
+
+    setPaymentForm((old) => ({ ...old, amount: '' }));
+  };
+
   const saveDelivery = async () => {
     const nextDelivery = {
       ...(job.delivery || {}),
@@ -494,8 +549,8 @@ export function JobCardWorkspace() {
   if (!job) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Job card not found.</div>;
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4 pb-24 md:pb-4">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+    <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-24 md:pb-4">
+      <header className="job-detail-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <button className="grid size-10 shrink-0 place-items-center rounded-xl border border-line bg-surface text-secondary" onClick={() => navigate('/jobs')} aria-label="Back">
             <ArrowLeft size={18}/>
@@ -522,7 +577,7 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
-      <section className="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-6">
+      <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-6">
         {[
           ['Customer', job.customerName || 'Walk-in'],
           ['KM', job.kilometre || '—'],
@@ -538,7 +593,7 @@ export function JobCardWorkspace() {
         ))}
       </section>
 
-      <nav className="flex w-full gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <nav className="job-detail-tabs flex w-full gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {TABS.map(([key, label]) => (
           <button
             key={key}
@@ -557,7 +612,7 @@ export function JobCardWorkspace() {
 
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center gap-2 text-sm font-extrabold text-content"><UserRound size={16} className="text-primary"/>Customer & Vehicle</div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
               <Info label="Customer" value={job.customerName}/>
@@ -571,7 +626,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center gap-2 text-sm font-extrabold text-content"><Wrench size={16} className="text-primary"/>Assignment</div>
             <label className="mt-4 block text-xs font-semibold text-secondary">Assigned Technician
               <select value={job.assignedEmployeeId || ''} onChange={(e) => assignTechnician(e.target.value)} className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
@@ -605,7 +660,7 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'complaints' && (
-        <section className="rounded-2xl border border-line bg-surface p-4">
+        <section className="job-panel rounded-2xl border border-line bg-surface p-4">
           <div className="text-sm font-extrabold text-content">Customer Complaints</div>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <textarea value={complaintText} onChange={(e) => setComplaintText(e.target.value)} placeholder="Add complaint exactly as customer explains it..." className="min-h-20 flex-1 rounded-xl border border-line bg-surface-2 p-3 text-sm text-content"/>
@@ -631,7 +686,7 @@ export function JobCardWorkspace() {
 
       {activeTab === 'inspection' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Vehicle Inspection</div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <Info label="Existing Damage" value={(job.existingDamage || []).join(', ') || 'None recorded'}/>
@@ -659,7 +714,7 @@ export function JobCardWorkspace() {
             ) : null}
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Add Finding</div>
             <form onSubmit={addFinding} className="mt-3 grid grid-cols-1 gap-3">
               <input value={finding.description} onChange={(e)=>setFinding({...finding,description:e.target.value})} placeholder="Finding / issue" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
@@ -695,7 +750,7 @@ export function JobCardWorkspace() {
 
       {activeTab === 'work' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Labour & Work Items</div>
             <div className="mt-3 flex flex-col gap-2">
               {labourRecords.map((item)=>(
@@ -713,7 +768,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Add Labour</div>
             <form onSubmit={addLabour} className="mt-3 flex flex-col gap-2">
               <input value={labour.service} onChange={(e)=>setLabour({...labour,service:e.target.value})} placeholder="Labour / work item" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
@@ -741,7 +796,7 @@ export function JobCardWorkspace() {
 
       {activeTab === 'estimate' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Estimate History</div>
             <div className="mt-3 flex flex-col gap-2">
               {estimates.map((item)=>(
@@ -774,7 +829,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Current Estimate</div>
             <div className="mt-3 flex flex-col gap-2 text-xs">
               <AmountRow label="Parts" value={partsTotal}/>
@@ -801,7 +856,7 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'updates' && (
-        <section className="rounded-2xl border border-line bg-surface p-4">
+        <section className="job-panel rounded-2xl border border-line bg-surface p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <div className="text-sm font-extrabold text-content">Technician Updates</div>
@@ -846,7 +901,7 @@ export function JobCardWorkspace() {
 
       {activeTab === 'qc' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center gap-2 text-sm font-extrabold text-content"><ShieldCheck size={16} className="text-primary"/>Quality Check</div>
             <div className="mt-3 flex flex-col gap-2">
               {qcChecklist.map((item)=>(
@@ -860,7 +915,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Road Test & Result</div>
             <textarea value={qcRoadTest} onChange={(e)=>setQcRoadTest(e.target.value)} rows={5} placeholder="Road test notes / issues found..." className="mt-3 min-h-28 w-full rounded-xl border border-line bg-surface-2 p-3 text-xs text-content"/>
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -873,21 +928,63 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'invoice' && (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="rounded-2xl border border-line bg-surface p-4">
-            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><FileText size={16} className="text-primary"/>Invoice & Payment</div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+        <div className="job-invoice-grid grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
+            <div className="job-panel-title flex items-center gap-2 text-sm font-extrabold text-content"><FileText size={16} className="text-primary"/>Invoice & Payment</div>
+
+            <div className="job-invoice-metrics">
               <Info label="Invoice No" value={job.billing?.invoiceNumber || 'Not generated'}/>
-              <Info label="Invoice Total" value={money.format(job.billing?.invoiceTotal || latestEstimate?.grandTotal || 0)}/>
+              <Info label="Invoice Total" value={money.format(invoiceTotal)}/>
               <Info label="Paid" value={money.format(job.billing?.paidAmount || 0)}/>
-              <Info label="Balance" value={money.format(job.billing?.outstandingBalance || 0)}/>
+              <Info label="Balance" value={money.format(Math.max(0, invoiceTotal - cleanNumber(job.billing?.paidAmount || 0)))}/>
               <Info label="Payment Status" value={job.paymentStatus || 'Pending'}/>
               <Info label="Method" value={job.billing?.paymentMethod || '—'}/>
             </div>
-            <button onClick={createInvoice} className="mt-4 inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white"><ReceiptText size={15}/>Create / Open Invoice</button>
+
+            <div className="job-invoice-actions">
+              <button onClick={createInvoice} className="job-primary-action"><ReceiptText size={15}/>Create / Open Invoice</button>
+            </div>
+
+            <form className="job-payment-form" onSubmit={recordPayment}>
+              <div className="job-payment-form__title">Record Payment</div>
+              <div className="job-payment-form__grid">
+                <label>
+                  Amount
+                  <input
+                    inputMode="decimal"
+                    value={paymentForm.amount}
+                    onChange={(e)=>setPaymentForm({...paymentForm,amount:e.target.value})}
+                    placeholder="₹0"
+                  />
+                </label>
+                <label>
+                  Method
+                  <select value={paymentForm.method} onChange={(e)=>setPaymentForm({...paymentForm,method:e.target.value})}>
+                    <option>Cash</option>
+                    <option>Card</option>
+                    <option>UPI</option>
+                    <option>Bank</option>
+                  </select>
+                </label>
+              </div>
+              <button type="submit" disabled={saving || invoiceTotal <= 0} className="job-payment-submit">
+                Record Payment
+              </button>
+            </form>
+
+            {job.billing?.payments?.length ? (
+              <div className="job-payment-history">
+                {job.billing.payments.slice(0, 4).map((payment) => (
+                  <div key={payment.id}>
+                    <span>{payment.date}</span>
+                    <strong>{money.format(payment.amount)} · {payment.method}</strong>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Delivery</div>
             <div className="mt-3 flex flex-col gap-2">
               <input value={deliveryForm.finalKm} onChange={(e)=>setDeliveryForm({...deliveryForm,finalKm:e.target.value})} placeholder="Final KM" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
@@ -900,7 +997,7 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'activity' && (
-        <section className="rounded-2xl border border-line bg-surface p-4">
+        <section className="job-panel rounded-2xl border border-line bg-surface p-4">
           <div className="text-sm font-extrabold text-content">Job Activity</div>
           <div className="mt-4 border-l border-line pl-4">
             {[...timeline, ...updates.map((item)=>({
