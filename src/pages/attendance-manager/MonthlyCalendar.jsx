@@ -28,7 +28,7 @@ export const MonthlyAttendanceCalendar = () => {
   const days = useMemo(() => Array.from({ length: 30 }, (_, index) => index + 1), []);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="attendance-manager-module attendance-manager-calendar flex flex-col gap-4">
       <div className="rounded-2xl border border-line bg-surface p-4">
         <div className="text-base font-extrabold text-content">Monthly Attendance Calendar</div>
         <div className="mt-1 text-xs text-muted">{month} · P Present · A Absent · L Leave · H Half Day · WO Weekly Off</div>
