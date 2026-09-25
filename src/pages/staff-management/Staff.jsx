@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { staffService } from '../../services/staff.service';
 import { Search, Plus, Filter, User, Phone, Mail, Building, Calendar, Shield, MoreVertical, Eye, Power } from 'lucide-react';
-import { StaffFormSheet } from '../../components/staff-management/StaffFormSheet';
 import { StaffProfile } from './staff/StaffProfile';
 
 export const Staff = () => {
+  const navigate = useNavigate();
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedStaff, setSelectedStaff] = useState(null);
   const [viewingProfileId, setViewingProfileId] = useState(null);
 
   const [toastMsg, setToastMsg] = useState('');
@@ -30,18 +29,6 @@ export const Staff = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSaveStaff = async (formData) => {
-    if (selectedStaff) {
-      await staffService.updateStaff(selectedStaff.id, formData);
-      setToastMsg('Staff member updated successfully.');
-    } else {
-      await staffService.createStaff(formData);
-      setToastMsg('Staff member added successfully.');
-    }
-    setTimeout(() => setToastMsg(''), 3000);
-    loadStaff();
   };
 
   const handleToggleStatus = async (e, id) => {
@@ -142,10 +129,7 @@ export const Staff = () => {
           </select>
 
           <button className="staff-add-button"
-            onClick={() => {
-              setSelectedStaff(null);
-              setIsFormOpen(true);
-            }}
+            onClick={() => navigate('/staff-management/add')}
             style={{
               height: '40px',
               padding: '0 14px',
@@ -285,13 +269,6 @@ export const Staff = () => {
         ))}
       </div>
 
-      {/* Staff Add/Edit Form Dialog */}
-      <StaffFormSheet
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSave={handleSaveStaff}
-        initialData={selectedStaff}
-      />
     </div>
   );
 };
