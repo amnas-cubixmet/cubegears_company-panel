@@ -18,6 +18,7 @@ export const PayrollPeriodFilter = ({ showStaffFilter = true, showBranchFilter =
 
   return (
     <div
+      className="payroll-period-filter"
       style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -31,13 +32,13 @@ export const PayrollPeriodFilter = ({ showStaffFilter = true, showBranchFilter =
         boxSizing: 'border-box'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginRight: '4px' }}>
+      <div className="payroll-period-filter__label" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginRight: '4px' }}>
         <Filter size={15} style={{ color: 'var(--primary)' }} />
         <span>Payroll Period:</span>
       </div>
 
       {/* Month & Year Selects */}
-      <div style={{ display: 'flex', gap: '6px', flex: '1 1 auto', minWidth: '220px' }}>
+      <div className="payroll-period-filter__period" style={{ display: 'flex', gap: '6px', flex: '1 1 auto', minWidth: '220px' }}>
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}
