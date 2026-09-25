@@ -43,9 +43,17 @@ a {
   text-decoration: none;
 }
 
-button, input, select, textarea {
+button,
+input:not([type='checkbox']):not([type='radio']):not([type='file']),
+select,
+textarea {
   font-family: inherit;
   min-height: var(--touch-target-min);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  font-family: inherit;
 }
 
 /* App Shell Layout Utility */
@@ -156,9 +164,9 @@ button, input, select, textarea {
   height: 0 !important;
 }
 
-/* Touch active feedback */
+/* Touch feedback without layout/scroll jitter. */
 button:active {
-  transform: scale(0.98);
+  opacity: 0.92;
 }
 
 /* Dedicated Filter Scroll Utility (Zero visible scrollbars) */
