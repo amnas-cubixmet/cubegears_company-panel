@@ -117,6 +117,7 @@ export const Staff = () => {
           <select
             value={selectedBranch}
             onChange={(e) => setSelectedBranch(e.target.value)}
+            aria-label="Filter staff by branch"
             style={{ height: '40px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '13px' }}
           >
             <option value="All">All Branches</option>
@@ -124,7 +125,18 @@ export const Staff = () => {
             <option value="Kochi South Branch">Kochi South Branch</option>
           </select>
 
-          <button
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            aria-label="Filter staff by status"
+            style={{ height: '40px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '13px' }}
+          >
+            <option value="All">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+
+          <button className="staff-add-button"
             onClick={() => {
               setSelectedStaff(null);
               setIsFormOpen(true);
