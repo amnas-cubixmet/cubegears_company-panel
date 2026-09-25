@@ -67,7 +67,7 @@ export const RecordRecoverySheet = ({ isOpen, onClose, advance, onSave }) => {
       title="Record Advance Recovery"
       maxWidth="520px"
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <form className="payroll-sheet-form payroll-recovery-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {error && (
           <div style={{ padding: '10px 14px', borderRadius: '10px', backgroundColor: 'var(--danger-soft)', color: 'var(--danger)', fontSize: '13px', fontWeight: '600' }}>
             {error}
