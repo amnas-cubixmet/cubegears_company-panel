@@ -61,8 +61,8 @@ export const JobReports = () => {
   }, [jobs]);
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="job-management-page job-reports-page flex w-full min-w-0 flex-col gap-4">
+      <div className="job-reports-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <button onClick={()=>navigate('/jobs')} className="grid size-10 place-items-center rounded-xl border border-line bg-surface text-secondary"><ArrowLeft size={17}/></button>
           <div>
@@ -73,7 +73,7 @@ export const JobReports = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+      <div className="job-report-kpis grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
         {[
           ['Open Jobs', data.open.length, Wrench],
           ['Completed', data.completed.length, FileText],
@@ -89,7 +89,7 @@ export const JobReports = () => {
         ))}
       </div>
 
-      <section className="rounded-2xl border border-line bg-surface p-4">
+      <section className="job-report-table-card rounded-2xl border border-line bg-surface p-4">
         <div className="text-sm font-extrabold text-content">Technician-wise Jobs</div>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-[620px] border-collapse text-left text-xs">
@@ -113,7 +113,7 @@ export const JobReports = () => {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <section className="job-report-lists grid grid-cols-1 gap-4 xl:grid-cols-2">
         <StatusList title="Open Jobs" jobs={data.open} navigate={navigate}/>
         <StatusList title="Waiting for Parts" jobs={data.waitingParts} navigate={navigate}/>
       </section>
