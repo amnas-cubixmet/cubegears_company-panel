@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Users, UserCheck, UserMinus, UserPlus, Building2, Wrench, Clock3, Briefcase,
   Gauge, FileText, AlertTriangle, Star, IndianRupee, Download, ShieldCheck,
-  CalendarDays, Activity, CheckCircle2
+  CalendarDays, Activity, CheckCircle2, Plus, Save
 } from 'lucide-react';
 import { staffService } from '../../services/staff.service';
+import { staffManagementService } from '../../services/staffManagement.service';
+import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import {
   workshopDepartments,
   workshopSkills,
@@ -73,13 +75,49 @@ const MetricCard = ({ label, value, icon: Icon, tone = 'primary', note }) => (
 
 export const WorkshopStaffSection = ({ section }) => {
   const [staff, setStaff] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isTeamFormOpen, setIsTeamFormOpen] = useState(false);
+  const [savingTeam, setSavingTeam] = useState(false);
+  const [teamForm, setTeamForm] = useState({
+    name: '',
+    lead: '',
+    branch: 'Main Garage Branch',
+    description: ''
+  });
 
   useEffect(() => {
-    staffService.getStaff()
-      .then(setStaff)
+    Promise.all([
+      staffService.getStaff(),
+      staffManagementService.getTeams()
+    ])
+      .then(([staffData, teamData]) => {
+        setStaff(staffData);
+        setTeams(teamData);
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  const createTeam = async (event) => {
+    event.preventDefault();
+    if (!teamForm.name.trim() || savingTeam) return;
+
+    setSavingTeam(true);
+    try {
+      await staffManagementService.createTeam(teamForm);
+      const nextTeams = await staffManagementService.getTeams();
+      setTeams(nextTeams);
+      setTeamForm({
+        name: '',
+        lead: '',
+        branch: 'Main Garage Branch',
+        description: ''
+      });
+      setIsTeamFormOpen(false);
+    } finally {
+      setSavingTeam(false);
+    }
+  };
 
   const activeStaff = useMemo(
     () => staff.filter((item) => ['Active', 'Probation', 'Notice Period'].includes(item.employmentStatus)),
@@ -148,7 +186,7 @@ export const WorkshopStaffSection = ({ section }) => {
               <Building2 size={17} />
             </div>
             <div className="staff-department-list">
-              {workshopDepartments.map((department) => {
+              {teams.map((department) => {
                 const members = staff.filter((item) => item.department === department.name);
                 return (
                   <div key={department.id} className="staff-data-row">
@@ -219,9 +257,19 @@ export const WorkshopStaffSection = ({ section }) => {
         <SectionHeader
           title="Departments & Teams"
           description="Group technicians and support staff by workshop function and team lead."
+          action={(
+            <button
+              type="button"
+              className="staff-team-add-button"
+              onClick={() => setIsTeamFormOpen(true)}
+            >
+              <Plus size={15} /> Add Team
+            </button>
+          )}
         />
+
         <div className="staff-team-grid">
-          {workshopDepartments.map((department) => {
+          {teams.map((department) => {
             const members = staff.filter((item) => item.department === department.name);
             return (
               <article key={department.id} className="staff-workshop-panel staff-team-card">
@@ -232,10 +280,24 @@ export const WorkshopStaffSection = ({ section }) => {
                   </div>
                   <span>{members.length}</span>
                 </div>
+
+                {(department.branch || department.description) ? (
+                  <div className="staff-team-card__meta">
+                    {department.branch ? <span>{department.branch}</span> : null}
+                    {department.description ? <p>{department.description}</p> : null}
+                  </div>
+                ) : null}
+
                 <div className="staff-team-members">
                   {members.length ? members.map((member) => (
                     <div key={member.id} className="staff-team-member">
-                      <img src={member.photo} alt="" />
+                      {member.photo ? (
+                        <img src={member.photo} alt="" />
+                      ) : (
+                        <span className="staff-team-member__avatar">
+                          {member.name?.slice(0, 1)}
+                        </span>
+                      )}
                       <div>
                         <strong>{member.name}</strong>
                         <span>{member.designation}</span>
@@ -247,6 +309,76 @@ export const WorkshopStaffSection = ({ section }) => {
             );
           })}
         </div>
+
+        <ResponsiveModalSheet
+          isOpen={isTeamFormOpen}
+          onClose={() => setIsTeamFormOpen(false)}
+          title="Add Workshop Team"
+          maxWidth="520px"
+        >
+          <form className="staff-team-form" onSubmit={createTeam}>
+            <label>
+              Team / Department Name *
+              <input
+                required
+                value={teamForm.name}
+                onChange={(event) => setTeamForm((old) => ({ ...old, name: event.target.value }))}
+                placeholder="e.g. Diesel Team"
+              />
+            </label>
+
+            <label>
+              Team Lead
+              <select
+                value={teamForm.lead}
+                onChange={(event) => setTeamForm((old) => ({ ...old, lead: event.target.value }))}
+              >
+                <option value="">Not Assigned</option>
+                {activeStaff.map((person) => (
+                  <option key={person.id} value={person.name}>
+                    {person.name} · {person.designation}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Branch
+              <select
+                value={teamForm.branch}
+                onChange={(event) => setTeamForm((old) => ({ ...old, branch: event.target.value }))}
+              >
+                <option>Main Garage Branch</option>
+                <option>Kochi South Branch</option>
+                <option>All Branches</option>
+              </select>
+            </label>
+
+            <label>
+              Description
+              <textarea
+                rows={3}
+                value={teamForm.description}
+                onChange={(event) => setTeamForm((old) => ({ ...old, description: event.target.value }))}
+                placeholder="What this team handles in the workshop"
+              />
+            </label>
+
+            <div className="staff-team-form__actions">
+              <button
+                type="button"
+                className="staff-team-cancel-button"
+                onClick={() => setIsTeamFormOpen(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="staff-team-save-button" disabled={savingTeam}>
+                <Save size={14} />
+                {savingTeam ? 'Creating...' : 'Create Team'}
+              </button>
+            </div>
+          </form>
+        </ResponsiveModalSheet>
       </div>
     );
   }
