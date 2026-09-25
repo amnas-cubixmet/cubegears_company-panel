@@ -91,8 +91,8 @@ export const JobList = () => {
   };
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+    <div className="job-management-page job-list-page flex w-full min-w-0 flex-col gap-4">
+      <header className="job-list-header flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="text-[10px] font-black uppercase tracking-[0.12em] text-primary">Workshop</div>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-content">Job Cards</h1>
@@ -108,7 +108,7 @@ export const JobList = () => {
         </div>
       </header>
 
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div className="job-list-kpis grid grid-cols-2 gap-2 md:grid-cols-4">
         {[
           ['Total', counts.total, 'All'],
           ['Active', counts.active, 'All'],
@@ -122,7 +122,7 @@ export const JobList = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 rounded-2xl border border-line bg-surface p-3 md:grid-cols-[minmax(260px,1fr)_200px]">
+      <div className="job-list-toolbar grid grid-cols-1 gap-2 rounded-2xl border border-line bg-surface p-3 md:grid-cols-[minmax(260px,1fr)_200px]">
         <label className="flex h-11 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3">
           <Search size={16} className="text-muted"/>
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search job, customer, phone or vehicle registration" className="min-w-0 flex-1 border-0 bg-transparent text-xs text-content outline-none"/>
@@ -134,7 +134,7 @@ export const JobList = () => {
       </div>
 
       {vehicleLookup ? (
-        <section className="rounded-2xl border border-primary/20 bg-primary-soft p-4">
+        <section className="job-vehicle-lookup rounded-2xl border border-primary/20 bg-primary-soft p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 text-xs font-extrabold text-primary"><Car size={16}/>{vehicleLookup.registration}</div>
@@ -167,9 +167,9 @@ export const JobList = () => {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-muted">No job cards found.</div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="job-list-records flex flex-col gap-2">
           {filtered.map((job) => (
-            <button type="button" className="flex w-full items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4 text-left transition hover:border-primary/25 hover:shadow-sm" key={job.id} onClick={() => navigate(`/jobs/${job.id}/overview`)}>
+            <button type="button" className="job-list-card flex w-full items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4 text-left transition hover:border-primary/25 hover:shadow-sm" key={job.id} onClick={() => navigate(`/jobs/${job.id}/overview`)}>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <strong className="text-sm text-content">{job.jobNumber || job.id}</strong>
