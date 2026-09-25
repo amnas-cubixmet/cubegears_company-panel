@@ -256,7 +256,7 @@ export const CustomerList = () => {
           <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>Manage workshop customers, vehicles and service history.</p>
         </div>
         <button
-          onClick={openAddModal}
+          onClick={() => navigate('/customers/new')}
           style={{
             height: '42px',
             padding: '0 18px',
@@ -381,7 +381,7 @@ export const CustomerList = () => {
           <Users size={36} style={{ color: 'var(--text-muted)' }} />
           <strong style={{ fontSize: '15px', color: 'var(--text-primary)' }}>No matching customers found.</strong>
           <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: 0 }}>Try clearing filters or add a new customer.</p>
-          <button onClick={openAddModal} style={{ padding: '8px 16px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontWeight: '700', fontSize: '12.5px', cursor: 'pointer', marginTop: '6px' }}>
+          <button onClick={() => navigate('/customers/new')} style={{ padding: '8px 16px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontWeight: '700', fontSize: '12.5px', cursor: 'pointer', marginTop: '6px' }}>
             + Add First Customer
           </button>
         </div>
