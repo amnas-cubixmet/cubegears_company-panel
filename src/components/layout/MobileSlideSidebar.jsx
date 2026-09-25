@@ -77,11 +77,11 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
       <aside
         aria-hidden={!isOpen}
         className={[
-          'fixed bottom-0 right-0 top-0 z-[100] flex h-dvh w-[min(88vw,360px)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 md:hidden',
+          'fixed bottom-0 right-0 top-0 z-[100] flex h-dvh w-[min(90vw,340px)] flex-col border-l border-line bg-surface shadow-2xl transition-transform duration-300 md:hidden',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         ].join(' ')}
       >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-3.5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-sm font-black text-white shadow-sm">
               CG
@@ -92,7 +92,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                 CubeGears
               </div>
               <div className="truncate text-[10px] font-medium text-muted">
-                Garage Workspace
+                Workshop Management
               </div>
             </div>
           </div>
@@ -133,18 +133,18 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                         onClick={onClose}
                         ref={isActive ? activeItemRef : null}
                         className={[
-                          'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition-all',
+                          'relative flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition-colors',
                           isActive
                             ? 'bg-primary-soft font-semibold text-primary'
                             : 'font-medium text-content hover:bg-surface-2'
                         ].join(' ')}
                       >
-                        <IconComp size={17} strokeWidth={1.9} className={isActive ? 'shrink-0 text-primary' : 'shrink-0 text-secondary'} />
+                        {isActive && <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-primary" />}<IconComp size={18} strokeWidth={isActive ? 2.2 : 1.8} className={isActive ? 'shrink-0 text-primary' : 'shrink-0 text-secondary'} />
                         <span className="min-w-0 flex-1 truncate">{route.label}</span>
                       </NavLink>
 
                       {hasChildren && isActive && (
-                        <div className="ml-[26px] mr-2 mt-1.5 flex flex-col">
+                        <div className="ml-[22px] mr-2 mt-1 flex flex-col">
                           {route.children.map((child, childIndex) => {
                             const childPathname = child.path.split('?')[0];
                             const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
@@ -154,7 +154,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                             const isLastChild = childIndex === route.children.length - 1;
 
                             return (
-                              <div key={child.id} className="relative min-h-9 pl-4">
+                              <div key={child.id} className="relative min-h-[36px] pl-[26px]">
                                 <span
                                   aria-hidden="true"
                                   className={[
@@ -165,14 +165,14 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                                 />
                                 <span
                                   aria-hidden="true"
-                                  className={['absolute left-0 top-1/2 h-px w-3', isChildActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
+                                  className={['absolute left-0 top-1/2 h-px w-[18px]', isChildActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
                                 />
 
                                 <NavLink
                                   to={child.path}
                                   onClick={onClose}
                                   className={[
-                                    'flex min-h-9 items-center justify-center rounded-lg px-2 py-2 text-center text-[11.5px] leading-tight no-underline transition-all',
+                                    'flex min-h-[34px] min-w-0 items-center justify-start rounded-lg px-2.5 text-left text-[11px] leading-4 no-underline transition-colors',
                                     isChildActive
                                       ? 'bg-primary-soft font-semibold text-primary'
                                       : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
