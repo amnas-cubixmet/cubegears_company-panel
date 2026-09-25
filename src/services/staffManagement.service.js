@@ -74,6 +74,60 @@ export const staffManagementService = {
       }, 180);
     }),
 
+  assignStaffToTeam: async (teamId, staffIds = []) =>
+    new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const team = workshopDepartments.find((item) => item.id === teamId);
+        if (!team) return reject(new Error('Team not found.'));
+
+        const assigned = [];
+        staffIds.forEach((staffId) => {
+          const staff = mockStaffList.find((item) => item.id === staffId);
+          if (!staff) return;
+
+          const oldValue = staff.department || staffWorkshopProfiles[staff.id]?.department || 'Unassigned';
+          staff.department = team.name;
+          touchActivity(staff, 'Team Assigned', oldValue, team.name);
+          assigned.push(staff.id);
+        });
+
+        resolve({
+          ...team,
+          assignedStaffIds: mockStaffList
+            .filter((staff) => (staff.department || staffWorkshopProfiles[staff.id]?.department) === team.name)
+            .map((staff) => staff.id),
+          addedStaffIds: assigned
+        });
+      }, 180);
+    }),
+
+  addStaffToSkill: async (skillId, staffIds = []) =>
+    new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const skillName = workshopSkills.find((name) => skillMeta.get(name)?.id === skillId);
+        if (!skillName) return reject(new Error('Skill not found.'));
+
+        const added = [];
+        staffIds.forEach((staffId) => {
+          const staff = mockStaffList.find((item) => item.id === staffId);
+          if (!staff) return;
+
+          ensureStaffSkills(staff);
+          if (!staff.skills.includes(skillName)) {
+            staff.skills.push(skillName);
+            touchActivity(staff, 'Skill Assigned', '-', skillName);
+            added.push(staff.id);
+          }
+        });
+
+        resolve({
+          ...(skillMeta.get(skillName) || { id: skillId, name: skillName }),
+          assignedStaffIds: assignedToSkill(skillName).map((staff) => staff.id),
+          addedStaffIds: added
+        });
+      }, 180);
+    }),
+
   getShifts: async () =>
     new Promise((resolve) => {
       setTimeout(() => {
