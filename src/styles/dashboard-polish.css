@@ -13,3 +13,276 @@
 @media(max-width:980px){.header-search-area{min-width:220px!important}.quick-actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:700px){.header-desktop-row{display:none!important}.quick-actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.crud-form-grid{grid-template-columns:1fr!important;padding:14px!important;gap:12px!important}.crud-modal-footer{position:sticky!important;bottom:0!important;z-index:8!important;padding:12px!important}.crud-modal-footer .crud-btn{flex:1!important}.ui-table td:last-child{width:auto!important;min-width:0!important}}
 @media(max-width:360px){.quick-actions-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}.quick-actions-grid .ui-button{font-size:11px!important;padding:0 8px!important}.crud-heading{align-items:flex-start!important}}
+
+
+/* =========================================================
+   CUBIXGEAR DASHBOARD — FINAL UI CONTRACT
+   Scoped to /dashboard through .cg-dashboard.
+   ========================================================= */
+.cg-dashboard{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:16px!important;
+  width:100%!important;
+  min-width:0!important;
+}
+
+.cg-dashboard .dashboard-attendance-card,
+.cg-dashboard .filters-actions-card,
+.cg-dashboard .summary-card-container{
+  border:1px solid var(--border)!important;
+  border-radius:14px!important;
+  background:var(--surface)!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)!important;
+}
+
+.cg-dashboard .dashboard-attendance-card{
+  padding:16px!important;
+}
+
+.cg-dashboard .filters-actions-card{
+  padding:14px!important;
+  overflow:visible!important;
+}
+
+.cg-dashboard .filters-select-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+
+.cg-dashboard .filters-select-grid > *{
+  min-width:0!important;
+  margin:0!important;
+}
+
+.cg-dashboard .quick-actions-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin-top:10px!important;
+}
+
+.cg-dashboard .quick-actions-grid .ui-button{
+  width:100%!important;
+  min-width:0!important;
+  min-height:42px!important;
+  height:42px!important;
+  padding-inline:10px!important;
+  border-radius:10px!important;
+  font-size:12px!important;
+  font-weight:650!important;
+  box-shadow:none!important;
+}
+
+.cg-dashboard .summary-grid{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:10px!important;
+  width:100%!important;
+}
+
+.cg-dashboard .summary-grid .ui-stat-card{
+  min-height:104px!important;
+  padding:14px!important;
+  border-radius:14px!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.04)!important;
+}
+
+.cg-dashboard .summary-grid .ui-stat-card h3{
+  font-size:22px!important;
+  font-weight:750!important;
+  letter-spacing:-.02em!important;
+}
+
+.cg-dashboard .dashboard-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr)!important;
+  gap:16px!important;
+  align-items:start!important;
+  width:100%!important;
+}
+
+.cg-dashboard .dashboard-column{
+  gap:16px!important;
+}
+
+.cg-dashboard .summary-card-container{
+  padding:15px!important;
+  overflow:hidden!important;
+}
+
+.cg-dashboard .summary-card-container > div:first-child{
+  margin-bottom:12px!important;
+}
+
+.cg-dashboard .summary-card-container > div:first-child h3{
+  font-size:14px!important;
+  font-weight:750!important;
+  letter-spacing:-.01em!important;
+}
+
+.cg-dashboard .bookings-list{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+
+.cg-dashboard .booking-card{
+  min-width:0!important;
+  border:1px solid var(--border)!important;
+  border-radius:12px!important;
+  background:var(--surface-2)!important;
+  padding:12px!important;
+  box-shadow:none!important;
+}
+
+.cg-dashboard .job-progress-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+
+.cg-dashboard .job-progress-grid > *{
+  min-width:0!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+
+.cg-dashboard .attendance-stats-grid,
+.cg-dashboard .quick-links-grid{
+  gap:8px!important;
+}
+
+.cg-dashboard .ui-table-wrap{
+  border-radius:12px!important;
+  box-shadow:none!important;
+}
+
+.cg-dashboard .ui-table th{
+  padding:10px 12px!important;
+  font-size:10px!important;
+  font-weight:750!important;
+}
+
+.cg-dashboard .ui-table td{
+  padding:10px 12px!important;
+  font-size:12px!important;
+}
+
+.cg-dashboard .badge,
+.cg-dashboard .status-badge{
+  white-space:nowrap!important;
+}
+
+@media(max-width:1280px){
+  .cg-dashboard .summary-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+
+  .cg-dashboard .summary-grid .outstanding-card{
+    grid-column:auto!important;
+  }
+}
+
+@media(max-width:1050px){
+  .cg-dashboard .dashboard-grid{
+    grid-template-columns:1fr!important;
+  }
+
+  .cg-dashboard .summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .cg-dashboard .summary-grid .outstanding-card{
+    grid-column:1 / -1!important;
+  }
+}
+
+@media(max-width:767px){
+  .cg-dashboard{
+    gap:12px!important;
+  }
+
+  .cg-dashboard .dashboard-attendance-card,
+  .cg-dashboard .filters-actions-card,
+  .cg-dashboard .summary-card-container{
+    border-radius:12px!important;
+  }
+
+  .cg-dashboard .dashboard-attendance-card,
+  .cg-dashboard .filters-actions-card,
+  .cg-dashboard .summary-card-container{
+    padding:12px!important;
+  }
+
+  .cg-dashboard .filters-select-grid{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+
+  .cg-dashboard .quick-actions-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin-top:8px!important;
+  }
+
+  .cg-dashboard .quick-actions-grid .ui-button{
+    min-height:44px!important;
+    height:44px!important;
+    padding-inline:8px!important;
+    font-size:11px!important;
+  }
+
+  .cg-dashboard .summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  .cg-dashboard .summary-grid .ui-stat-card{
+    min-height:96px!important;
+    padding:12px!important;
+  }
+
+  .cg-dashboard .summary-grid .ui-stat-card h3{
+    font-size:20px!important;
+  }
+
+  .cg-dashboard .summary-grid .outstanding-card{
+    grid-column:1 / -1!important;
+  }
+
+  .cg-dashboard .dashboard-column{
+    gap:12px!important;
+  }
+
+  .cg-dashboard .bookings-list{
+    grid-template-columns:1fr!important;
+  }
+
+  .cg-dashboard .job-progress-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+
+  .cg-dashboard .ui-table-wrap{
+    overflow-x:auto!important;
+  }
+}
+
+@media(max-width:360px){
+  .cg-dashboard .quick-actions-grid,
+  .cg-dashboard .summary-grid,
+  .cg-dashboard .job-progress-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .cg-dashboard .quick-actions-grid .ui-button{
+    font-size:10.5px!important;
+    padding-inline:6px!important;
+  }
+
+  .cg-dashboard .summary-grid .ui-stat-card{
+    min-height:92px!important;
+  }
+}
