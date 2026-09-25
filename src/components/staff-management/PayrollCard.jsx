@@ -110,7 +110,12 @@ export const PayrollCard = ({ payroll, onRecordPayment, onViewDetails, onViewPay
         </div>
 
         <div style={{ backgroundColor: 'var(--surface-2)', padding: '8px 10px', borderRadius: '8px' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Approved Commission</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Fixed Incentive</div>
+          <div style={{ fontWeight: '700', color: 'var(--success)' }}>{formatINR(payroll.fixedIncentives || 0)}</div>
+        </div>
+
+        <div style={{ backgroundColor: 'var(--surface-2)', padding: '8px 10px', borderRadius: '8px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Workshop / Job Incentive</div>
           <div style={{ fontWeight: '700', color: 'var(--success)' }}>{formatINR(payroll.approvedCommission || 0)}</div>
         </div>
 
