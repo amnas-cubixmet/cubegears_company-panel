@@ -218,26 +218,13 @@ export const Payroll = ({ section = 'overview' }) => {
             </div>
           </div>
 
-          {/* Quick Filters */}
-          <div className="payroll-quick-filter" style={{ display: 'flex', gap: '8px' }}>
-            <select
-              value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
-              style={{ height: '40px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '13px' }}
-            >
-              <option value="All">All Branches</option>
-              <option value="Main Garage Branch">Main Garage Branch</option>
-              <option value="Kochi South Branch">Kochi South Branch</option>
-            </select>
-          </div>
-
           {/* Payroll Cards List */}
           {loading ? (
-            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+            <div className="payroll-state-card">
               Loading records for {periodString}...
             </div>
           ) : payrolls.length === 0 ? (
-            <div style={{ padding: '32px', textAlign: 'center', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-muted)', fontSize: '14px' }}>
+            <div className="payroll-state-card">
               No payroll records found for {periodString}.
             </div>
           ) : (
@@ -260,7 +247,7 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Employees */}
       {activeSection === 'employees' && (
         <div className="payroll-section payroll-employees flex flex-col gap-3">
-          <div className="rounded-2xl border border-line bg-surface p-4">
+          <div className="payroll-section-header rounded-2xl border border-line bg-surface p-4">
             <div className="text-base font-extrabold text-content">Employee Master</div>
             <div className="mt-1 text-xs text-muted">
               Payroll-linked workshop staff, salary type, branch and employment status.
@@ -274,7 +261,7 @@ export const Payroll = ({ section = 'overview' }) => {
               const baseSalary = structure?.fixedMonthlySalary || structure?.basicSalary || employee.salary?.basic || 0;
 
               return (
-                <div key={employee.id} className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
+                <div key={employee.id} className="payroll-employee-card rounded-2xl border border-line bg-surface p-4 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       <img
@@ -332,7 +319,7 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Attendance */}
       {activeSection === 'attendance' && (
         <div className="payroll-section payroll-attendance flex flex-col gap-3">
-          <div className="rounded-2xl border border-line bg-surface p-4">
+          <div className="payroll-section-header rounded-2xl border border-line bg-surface p-4">
             <div className="text-base font-extrabold text-content">Payroll Attendance Review · {periodString}</div>
             <div className="mt-1 text-xs text-muted">
               Present, absent, leave, weekly off and worked hours used during payroll calculation.
@@ -345,7 +332,7 @@ export const Payroll = ({ section = 'overview' }) => {
               const attendance = payroll.reviewedAttendance || {};
 
               return (
-                <div key={payroll.id} className="rounded-2xl border border-line bg-surface p-4">
+                <div key={payroll.id} className="payroll-attendance-card rounded-2xl border border-line bg-surface p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="text-sm font-extrabold text-content">{payroll.staffName}</div>
@@ -400,7 +387,7 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Section 2: Salary Structure */}
       {activeSection === 'salary' && (
         <div className="payroll-section payroll-salary" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{
+          <div className="payroll-section-header payroll-salary-header" style={{
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
@@ -451,9 +438,9 @@ export const Payroll = ({ section = 'overview' }) => {
               No salary structures found for this salary type.
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+            <div className="payroll-payslip-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
               {filteredSalaryStructures.map((s) => (
-                <div key={s.id} style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '9px' }}>
+                <div key={s.id} className="payroll-salary-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '9px' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
                     <div>
                       <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-primary)' }}>{s.staffName}</div>
@@ -496,7 +483,7 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Run Payroll */}
       {activeSection === 'run' && (
         <div className="payroll-section payroll-run" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)' }}>
+          <div className="payroll-section-title">
             Monthly Payroll Calculation ({periodString})
           </div>
 
@@ -510,7 +497,7 @@ export const Payroll = ({ section = 'overview' }) => {
             </div>
           </div>
 
-          <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '8px' }}>
+          <div className="payroll-section-title">
             Calculated Payroll Records
           </div>
 
@@ -587,7 +574,7 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Section 6: Advances & Recovery */}
       {activeSection === 'advances' && (
         <div className="payroll-section payroll-advances" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div className="advance-page-header">
+          <div className="advance-page-header payroll-section-header">
             <div>
               <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', margin: 0 }}>
                 Salary Advances & Recovery Ledger
@@ -635,10 +622,10 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Section 7: Payslips */}
       {activeSection === 'payslips' && (
         <div className="payroll-section payroll-payslips" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ fontSize: '16px', fontWeight: '700' }}>Employee Payslips</div>
+          <div className="payroll-section-title">Employee Payslips</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
             {payrolls.map((p) => (
-              <div key={p.id} style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={p.id} className="payroll-payslip-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: '15px', fontWeight: '700' }}>{p.staffName}</div>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{p.month} • {p.designation}</div>
@@ -658,8 +645,8 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Section 8: Payroll Reports */}
       {activeSection === 'reports' && (
         <div className="payroll-section payroll-reports" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ fontSize: '16px', fontWeight: '700' }}>Payroll Summary Reports</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+          <div className="payroll-section-title">Payroll Summary Reports</div>
+          <div className="payroll-report-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
             <div style={{ backgroundColor: 'var(--surface-2)', padding: '12px', borderRadius: '10px' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Obligations</div>
               <div style={{ fontSize: '16px', fontWeight: '800' }}>{formatINR(totalNet)}</div>
@@ -700,7 +687,7 @@ export const Payroll = ({ section = 'overview' }) => {
           title="Employee Payslip"
           maxWidth="520px"
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="payroll-modal-stack" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
               <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>CubeGears Garage Services</div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Payslip for {payslipTargetItem.month}</div>
@@ -746,7 +733,7 @@ export const Payroll = ({ section = 'overview' }) => {
           title={`Payment History: ${historyTargetItem.staffName}`}
           maxWidth="520px"
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="payroll-modal-stack" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {historyTargetItem.payments?.length === 0 ? (
               <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>No payment transactions recorded yet.</div>
             ) : (
@@ -775,7 +762,7 @@ export const Payroll = ({ section = 'overview' }) => {
           title={`Payroll Details: ${detailTargetItem.staffName}`}
           maxWidth="560px"
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
+          <div className="payroll-modal-stack" style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', backgroundColor: 'var(--surface-2)', padding: '12px', borderRadius: '10px' }}>
               <div>Base Salary: <strong>{formatINR(detailTargetItem.baseSalary)}</strong></div>
               <div>Allowances: <strong>{formatINR(detailTargetItem.allowances)}</strong></div>
