@@ -34,39 +34,45 @@ export const AttendanceReports = () => {
   };
 
   return (
-    <div className="attendance-manager-module attendance-manager-reports flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4">
+    <div className="attendance-manager-module attendance-manager-reports">
+      <section className="am-section-header">
         <div>
-          <div className="text-base font-extrabold text-content">Attendance Reports</div>
-          <div className="mt-1 text-xs text-muted">Daily, monthly, late, absence, overtime and employee-wise reports.</div>
+          <h2>Attendance Reports</h2>
+          <p>Daily, monthly, late, absence, overtime and employee-wise reports.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={exportCsv} className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"><Download size={14}/>Export CSV</button>
-          <button onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"><Printer size={14}/>Print</button>
+        <div className="am-header-actions">
+          <button onClick={exportCsv} className="am-secondary-button"><Download size={14}/>Export CSV</button>
+          <button onClick={() => window.print()} className="am-secondary-button"><Printer size={14}/>Print</button>
         </div>
-      </div>
+      </section>
 
-      <select value={reportType} onChange={(e)=>setReportType(e.target.value)} className="h-11 max-w-xs rounded-xl border border-line bg-surface px-3 text-sm text-content">
-        {['Daily Attendance','Monthly Attendance','Late Report','Absence Report','OT Report','Employee-wise Report'].map((type)=><option key={type}>{type}</option>)}
-      </select>
+      <section className="am-report-filter">
+        <label>
+          <span>Report Type</span>
+          <select value={reportType} onChange={(e)=>setReportType(e.target.value)}>
+            {['Daily Attendance','Monthly Attendance','Late Report','Absence Report','OT Report','Employee-wise Report'].map((type)=><option key={type}>{type}</option>)}
+          </select>
+        </label>
+        <div className="am-report-count"><span>Records</span><strong>{rows.length}</strong></div>
+      </section>
 
-      <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
-        <table className="w-full min-w-[820px] border-collapse text-left text-xs">
-          <thead className="bg-surface-2 text-[10px] uppercase tracking-wide text-muted">
-            <tr>{['Employee','Role','Branch','Status','Check In','Check Out','Worked','OT','Late'].map((head)=><th key={head} className="px-3 py-3">{head}</th>)}</tr>
+      <div className="am-table-card am-report-table">
+        <table>
+          <thead>
+            <tr>{['Employee','Role','Branch','Status','Check In','Check Out','Worked','OT','Late'].map((head)=><th key={head}>{head}</th>)}</tr>
           </thead>
           <tbody>
             {rows.map((item)=>(
-              <tr key={item.id} className="border-t border-line">
-                <td className="px-3 py-3 font-bold text-content">{item.name}</td>
-                <td className="px-3 py-3 text-secondary">{item.designation}</td>
-                <td className="px-3 py-3 text-secondary">{item.branch}</td>
-                <td className="px-3 py-3 font-semibold text-content">{item.status}</td>
-                <td className="px-3 py-3 text-content">{item.clockIn || '—'}</td>
-                <td className="px-3 py-3 text-content">{item.clockOut || '—'}</td>
-                <td className="px-3 py-3 text-content">{item.worked || '—'}</td>
-                <td className="px-3 py-3 text-content">{item.overtimeHours || 0}h</td>
-                <td className="px-3 py-3 text-content">{item.lateMinutes || 0}m</td>
+              <tr key={item.id}>
+                <td><strong>{item.name}</strong></td>
+                <td>{item.designation}</td>
+                <td>{item.branch}</td>
+                <td><strong>{item.status}</strong></td>
+                <td>{item.clockIn || '—'}</td>
+                <td>{item.clockOut || '—'}</td>
+                <td>{item.worked || '—'}</td>
+                <td>{item.overtimeHours || 0}h</td>
+                <td>{item.lateMinutes || 0}m</td>
               </tr>
             ))}
           </tbody>
