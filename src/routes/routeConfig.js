@@ -30,19 +30,15 @@ export const routeConfig = [
   {
     id: 'stock', label: 'Stock Mgmt', path: '/stock', icon: Boxes, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'stock.view',
     children: [
-      { id: 'stock-dashboard', label: 'All Stock', path: '/stock' },
-      { id: 'stock-items', label: 'Stock Items', path: '/stock/items' },
-      { id: 'stock-in', label: 'Stock In', path: '/stock/in' },
-      { id: 'stock-issue', label: 'Stock Issue', path: '/stock/issue' },
-      { id: 'stock-return', label: 'Stock Return', path: '/stock/return' },
-      { id: 'stock-transfer', label: 'Stock Transfer', path: '/stock/transfer' },
-      { id: 'stock-adjustments', label: 'Stock Adjustment', path: '/stock/adjustments' },
-      { id: 'stock-reservations', label: 'Reservations', path: '/stock/reservations' },
-      { id: 'stock-low-stock', label: 'Low Stock', path: '/stock/low-stock' },
-      { id: 'stock-ledger', label: 'Movement Ledger', path: '/stock/ledger' },
+      { id: 'stock-overview', label: 'Overview', path: '/stock/overview' },
+      { id: 'stock-items', label: 'Parts & Products', path: '/stock/items' },
+      { id: 'stock-categories', label: 'Categories', path: '/stock/categories' },
+      { id: 'stock-movements', label: 'Stock In/Out', path: '/stock/movements' },
+      { id: 'stock-purchase-orders', label: 'Purchase Orders', path: '/stock/purchase-orders' },
       { id: 'stock-suppliers', label: 'Suppliers', path: '/stock/suppliers' },
-      { id: 'stock-purchases', label: 'Purchase Records', path: '/stock/purchases' },
-      { id: 'stock-count', label: 'Stock Count', path: '/stock/count' },
+      { id: 'stock-transfers', label: 'Transfers', path: '/stock/transfers' },
+      { id: 'stock-adjustments', label: 'Adjustments', path: '/stock/adjustments' },
+      { id: 'stock-audit', label: 'Stock Audit', path: '/stock/audit' },
       { id: 'stock-reports', label: 'Reports', path: '/stock/reports' }
     ]
   },
