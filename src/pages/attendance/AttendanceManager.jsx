@@ -1,116 +1,114 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Users, Database, Layers, Calendar, Settings } from 'lucide-react';
+import {
+  LayoutDashboard,
+  ClipboardCheck,
+  CalendarDays,
+  CalendarRange,
+  Timer,
+  Clock3,
+  BarChart3,
+  Settings
+} from 'lucide-react';
 import { MobileTabRail } from '../../components/common/MobileTabRail';
-
-import { Approvals } from '../attendance-manager/Approvals';
-import { TeamReview } from '../attendance-manager/TeamReview';
-import { MasterRecords } from '../attendance-manager/MasterRecords';
-import { LeaveTypes } from '../attendance-manager/LeaveTypes';
-import { Holidays } from '../attendance-manager/Holidays';
+import { AttendanceOverview } from '../attendance-manager/Overview';
+import { DailyAttendance } from '../attendance-manager/DailyAttendance';
+import { MonthlyAttendanceCalendar } from '../attendance-manager/MonthlyCalendar';
+import { LeaveRequestsManager } from '../attendance-manager/LeaveRequestsManager';
+import { ShiftSettings } from '../attendance-manager/Shifts';
+import { AttendanceReports } from '../attendance-manager/AttendanceReports';
 import { RulesSettings } from '../attendance-manager/RulesSettings';
+import { OvertimeManager } from '../../components/payroll/OvertimeManager';
+
+const tabs = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'daily', label: 'Daily Attendance', mobileLabel: 'Daily', icon: ClipboardCheck },
+  { id: 'calendar', label: 'Monthly Calendar', mobileLabel: 'Calendar', icon: CalendarDays },
+  { id: 'leave-requests', label: 'Leave Requests', mobileLabel: 'Leave', icon: CalendarRange },
+  { id: 'overtime', label: 'Overtime', mobileLabel: 'OT', icon: Timer },
+  { id: 'shifts', label: 'Shifts', icon: Clock3 },
+  { id: 'reports', label: 'Reports', icon: BarChart3 },
+  { id: 'rules', label: 'Rules & Settings', mobileLabel: 'Rules', icon: Settings }
+];
 
 export const AttendanceManager = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const getInitialTab = () => {
-    if (location.pathname.includes('/team-review')) return 'team-review';
-    if (location.pathname.includes('/master-records')) return 'master-records';
-    if (location.pathname.includes('/leave-types')) return 'leave-types';
-    if (location.pathname.includes('/holidays')) return 'holidays';
-    if (location.pathname.includes('/rules')) return 'rules';
-    return 'approvals';
+  const getActiveTab = () => {
+    const matched = tabs.find((tab) => location.pathname === `/attendance-manager/${tab.id}`);
+    return matched?.id || 'overview';
   };
 
-  const [activeTab, setActiveTab] = useState(getInitialTab());
+  const [activeTab, setActiveTab] = useState(getActiveTab());
 
   useEffect(() => {
-    setActiveTab(getInitialTab());
+    setActiveTab(getActiveTab());
   }, [location.pathname]);
-
-  const tabs = [
-    { id: 'approvals', label: 'Approvals', icon: CheckCircle2 },
-    { id: 'team-review', label: 'Team Review', mobileLabel: 'Team', icon: Users },
-    { id: 'master-records', label: 'Master Records', mobileLabel: 'Records', icon: Database },
-    { id: 'leave-types', label: 'Leave Types', mobileLabel: 'Leave Types', icon: Layers },
-    { id: 'holidays', label: 'Holidays', mobileLabel: 'Holidays', icon: Calendar },
-    { id: 'rules', label: 'Rules & Settings', mobileLabel: 'Rules', icon: Settings }
-  ];
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    navigate(`/attendance-manager/${tabId}`);
+    navigate(tabId === 'overview' ? '/attendance-manager/overview' : `/attendance-manager/${tabId}`);
   };
 
   return (
-    <div className="attendance-manager-page" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
-      {/* Page Header */}
+    <div className="flex w-full min-w-0 flex-col gap-4">
       <div>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
-          Attendance Manager
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '4px 0 0 0' }}>
-          Review team attendance, approvals, leave, corrections and company attendance rules.
+        <h1 className="m-0 text-[22px] font-extrabold leading-tight text-content">Attendance Manager</h1>
+        <p className="mt-1 text-[13px] leading-5 text-muted">
+          Manage daily attendance, leave, overtime, shifts, productivity and payroll-ready attendance records.
         </p>
       </div>
 
-      {/* Desktop Horizontal Tab Bar (>= 768px) */}
-      <div className="desktop-table-view" style={{ width: '100%' }}>
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          paddingBottom: '8px',
-          borderBottom: '1px solid var(--border)',
-          overflowX: 'auto'
-        }} className="attendance-filter-scroll scroll-hidden">
+      <div className="hidden w-full md:block">
+        <div className="flex gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            const IconComp = tab.icon;
+            const active = activeTab === tab.id;
+            const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => handleTabChange(tab.id)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '9px 18px',
-                  borderRadius: '10px',
-                  fontSize: '13px',
-                  fontWeight: isActive ? '700' : '500',
-                  color: isActive ? '#ffffff' : 'var(--text-secondary)',
-                  backgroundColor: isActive ? 'var(--primary)' : 'var(--surface)',
-                  border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
+                className={[
+                  'inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-semibold transition',
+                  active
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-transparent text-secondary hover:bg-surface-2 hover:text-content'
+                ].join(' ')}
               >
-                {IconComp && <IconComp size={16} />}
-                <span>{tab.label}</span>
+                <Icon size={15}/>
+                {tab.label}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Mobile Horizontally Scrollable Tab Rail (< 768px) */}
-      <div className="mobile-card-view" style={{ width: '100%' }}>
+      <div className="w-full md:hidden">
         <MobileTabRail
-          tabs={tabs.map(t => ({ id: t.id, label: t.mobileLabel || t.label, icon: t.icon }))}
+          tabs={tabs.map((tab) => ({
+            id: tab.id,
+            label: tab.mobileLabel || tab.label,
+            icon: tab.icon
+          }))}
           activeTab={activeTab}
           onTabChange={handleTabChange}
         />
       </div>
 
-      {/* Submenu View Routing */}
-      <div style={{ width: '100%', minWidth: 0 }}>
-        {activeTab === 'approvals' && <Approvals />}
-        {activeTab === 'team-review' && <TeamReview />}
-        {activeTab === 'master-records' && <MasterRecords />}
-        {activeTab === 'leave-types' && <LeaveTypes />}
-        {activeTab === 'holidays' && <Holidays />}
+      <div className="w-full min-w-0">
+        {activeTab === 'overview' && <AttendanceOverview />}
+        {activeTab === 'daily' && <DailyAttendance />}
+        {activeTab === 'calendar' && <MonthlyAttendanceCalendar />}
+        {activeTab === 'leave-requests' && <LeaveRequestsManager />}
+        {activeTab === 'overtime' && (
+          <div className="rounded-2xl border border-line bg-surface-2 p-3 sm:p-4">
+            <OvertimeManager />
+          </div>
+        )}
+        {activeTab === 'shifts' && <ShiftSettings />}
+        {activeTab === 'reports' && <AttendanceReports />}
         {activeTab === 'rules' && <RulesSettings />}
       </div>
     </div>
