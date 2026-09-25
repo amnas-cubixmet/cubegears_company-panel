@@ -51,7 +51,8 @@ const itemStatus = (item) => {
   return 'In Stock';
 };
 
-const statusClass = (value = '') => `is-${String(value).toLowerCase().replaceAll(' ', '-').replaceAll('/', '-')}`;
+const statusClass = (value = '') =>
+  `is-${String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 
 const emptyItemForm = {
   partName: '', sku: '', barcode: '', category: 'Engine Parts', brand: '',
