@@ -79,9 +79,9 @@ export const HolidayCalendar = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '100%', minWidth: 0 }}>
+    <div className="attendance-module attendance-calendar-page" style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '100%', minWidth: 0 }}>
       {/* Month Navigation Controls */}
-      <div style={{
+      <div className="attendance-toolbar-card calendar-toolbar" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -90,9 +90,11 @@ export const HolidayCalendar = () => {
         borderRadius: '14px',
         padding: '10px 14px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="calendar-month-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             onClick={handlePrevMonth}
+            className="attendance-icon-button calendar-nav-button"
+            aria-label="Previous month"
             style={{
               width: '32px',
               height: '32px',
@@ -108,11 +110,13 @@ export const HolidayCalendar = () => {
           >
             <ChevronLeft size={16} />
           </button>
-          <span style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
+          <span className="calendar-month-label" style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
             {monthNames[month]} {year}
           </span>
           <button
             onClick={handleNextMonth}
+            className="attendance-icon-button calendar-nav-button"
+            aria-label="Next month"
             style={{
               width: '32px',
               height: '32px',
@@ -133,6 +137,7 @@ export const HolidayCalendar = () => {
         {/* Compact Today Button */}
         <button
           onClick={handleToday}
+          className="attendance-secondary-button calendar-today-button"
           style={{
             padding: '5px 10px',
             borderRadius: '6px',
@@ -150,7 +155,7 @@ export const HolidayCalendar = () => {
       </div>
 
       {/* Legend Container */}
-      <div style={{
+      <div className="calendar-legend" style={{
         display: 'flex',
         flexWrap: 'wrap',
         gap: '6px 14px',
@@ -177,7 +182,7 @@ export const HolidayCalendar = () => {
       </div>
 
       {/* Calendar Grid Container */}
-      <div style={{
+      <div className="attendance-card calendar-shell" style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '16px',
@@ -186,7 +191,7 @@ export const HolidayCalendar = () => {
         boxSizing: 'border-box'
       }}>
         {/* Day Headers (7 Columns) */}
-        <div style={{
+        <div className="calendar-weekdays" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
           gap: '6px',
@@ -201,7 +206,7 @@ export const HolidayCalendar = () => {
         </div>
 
         {/* Days Grid with responsive .calendar-day class */}
-        <div style={{
+        <div className="calendar-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
           gap: '6px'
@@ -292,7 +297,7 @@ export const HolidayCalendar = () => {
 
       {/* Date Details Sheet / Popover Modal */}
       {selectedDateDetails && (
-        <div style={{
+        <div className="calendar-details-overlay" style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -304,7 +309,7 @@ export const HolidayCalendar = () => {
           alignItems: 'flex-end',
           justifyContent: 'center'
         }}>
-          <div style={{
+          <div className="calendar-details-sheet" style={{
             width: '100%',
             maxWidth: '500px',
             backgroundColor: 'var(--surface)',
