@@ -34,7 +34,7 @@ export const AttendanceReports = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="attendance-manager-module attendance-manager-reports flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4">
         <div>
           <div className="text-base font-extrabold text-content">Attendance Reports</div>
