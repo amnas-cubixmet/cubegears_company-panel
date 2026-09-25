@@ -109,7 +109,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
 
         <div
           ref={containerRef}
-          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden px-3 py-3.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {sections.map((section) => {
             const items = routeConfig.filter((route) => route.section === section);
@@ -133,9 +133,9 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                         onClick={onClose}
                         ref={isActive ? activeItemRef : null}
                         className={[
-                          'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition',
+                          'flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] no-underline transition-all',
                           isActive
-                            ? 'bg-surface-2 font-semibold text-content ring-1 ring-line'
+                            ? 'bg-primary-soft font-semibold text-primary'
                             : 'font-medium text-content hover:bg-surface-2'
                         ].join(' ')}
                       >
@@ -144,7 +144,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                       </NavLink>
 
                       {hasChildren && isActive && (
-                        <div className="ml-[26px] mr-2 mt-1 flex flex-col">
+                        <div className="ml-[26px] mr-2 mt-1.5 flex flex-col">
                           {route.children.map((child, childIndex) => {
                             const childPathname = child.path.split('?')[0];
                             const currentKind = new URLSearchParams(location.search).get('kind') || 'invoice';
@@ -158,22 +158,23 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                                 <span
                                   aria-hidden="true"
                                   className={[
-                                    'absolute left-0 top-0 w-px bg-line',
+                                    'absolute left-0 top-0 w-px',
+                                    isChildActive ? 'bg-primary/35' : 'bg-line',
                                     isLastChild ? 'h-1/2' : 'h-full'
                                   ].join(' ')}
                                 />
                                 <span
                                   aria-hidden="true"
-                                  className="absolute left-0 top-1/2 h-px w-3 bg-line"
+                                  className={['absolute left-0 top-1/2 h-px w-3', isChildActive ? 'bg-primary/35' : 'bg-line'].join(' ')}
                                 />
 
                                 <NavLink
                                   to={child.path}
                                   onClick={onClose}
                                   className={[
-                                    'flex min-h-9 items-center justify-center rounded-lg px-2 py-2 text-center text-[11.5px] leading-tight no-underline transition',
+                                    'flex min-h-9 items-center justify-center rounded-lg px-2 py-2 text-center text-[11.5px] leading-tight no-underline transition-all',
                                     isChildActive
-                                      ? 'bg-surface-2 font-semibold text-primary'
+                                      ? 'bg-primary-soft font-semibold text-primary'
                                       : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
                                   ].join(' ')}
                                 >
