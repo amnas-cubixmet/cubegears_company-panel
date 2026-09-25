@@ -20,7 +20,7 @@ export const LeaveRequestsManager = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="attendance-manager-module attendance-manager-leave flex flex-col gap-3">
       <div className="rounded-2xl border border-line bg-surface p-4">
         <div className="text-base font-extrabold text-content">Leave Requests</div>
         <div className="mt-1 text-xs text-muted">Casual, sick, paid, unpaid and emergency leave approval queue.</div>
