@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  AlertTriangle, Archive, ArrowLeftRight, Barcode, Boxes, Building2, CalendarCheck,
-  ClipboardCheck, ClipboardList, Edit3, Eye, FileBarChart, IndianRupee, Package,
-  PackageCheck, PackageMinus, PackagePlus, Plus, RefreshCw, Search, ShoppingCart,
-  Trash2, Truck, Undo2, Wrench
+  AlertTriangle, Archive, ArrowLeftRight, Boxes, Building2,
+  ClipboardCheck, Edit3, Eye, FileBarChart, IndianRupee, Package,
+  PackageCheck, PackageMinus, Plus, Search, ShoppingCart,
+  Trash2, Truck
 } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { stockManagementService } from '../../services/stockManagement.service';
@@ -844,8 +844,6 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   return <Empty>Stock section not available.</Empty>;
-
-  function ItemFormModal() { return null; }
 };
 
 // Shared modals are rendered outside section return through wrapper below.
