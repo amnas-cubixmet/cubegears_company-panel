@@ -1,0 +1,744 @@
+/* =========================================================
+   CUBIXGEAR — MY ATTENDANCE UI
+   Shared visual contract for calendar/history/leave/summary.
+   ========================================================= */
+
+.cg-attendance {
+  --att-radius: 14px;
+  --att-inner-radius: 10px;
+  --att-border: var(--border);
+  --att-surface: var(--surface);
+  --att-inner: var(--surface-2);
+  --att-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  width: 100%;
+  min-width: 0;
+  gap: 14px !important;
+}
+
+.cg-attendance *,
+.cg-attendance *::before,
+.cg-attendance *::after {
+  box-sizing: border-box;
+}
+
+.cg-attendance .attendance-page-header {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 2px;
+}
+
+.cg-attendance .attendance-page-header h1 {
+  margin: 0 !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.cg-attendance .attendance-page-header p {
+  margin: 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+.cg-attendance .my-attendance-tabs {
+  border: 1px solid var(--att-border) !important;
+  border-radius: var(--att-radius) !important;
+  background: var(--att-surface) !important;
+  padding: 5px !important;
+  box-shadow: var(--att-shadow) !important;
+}
+
+.cg-attendance .my-attendance-tabs .mobile-tab-rail {
+  gap: 4px !important;
+}
+
+.cg-attendance .my-attendance-tabs button {
+  min-height: 38px !important;
+  height: 38px !important;
+  border-radius: 9px !important;
+  padding-inline: 12px !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+}
+
+.cg-attendance .attendance-tab-content,
+.cg-attendance .attendance-module {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.cg-attendance .attendance-module {
+  gap: 12px !important;
+}
+
+.cg-attendance .attendance-card,
+.cg-attendance .attendance-toolbar-card,
+.cg-attendance .attendance-kpi-card,
+.cg-attendance .attendance-record-card,
+.cg-attendance .attendance-table-card,
+.cg-attendance .month-selector-card,
+.cg-attendance .summary-kpi-card {
+  border: 1px solid var(--att-border) !important;
+  border-radius: var(--att-radius) !important;
+  background: var(--att-surface) !important;
+  box-shadow: var(--att-shadow) !important;
+}
+
+.cg-attendance .attendance-section-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 2px;
+}
+
+.cg-attendance .attendance-section-heading h2 {
+  margin: 0 !important;
+  font-size: 17px !important;
+  font-weight: 750 !important;
+  line-height: 1.25 !important;
+}
+
+.cg-attendance .attendance-section-heading p {
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  color: var(--text-muted) !important;
+}
+
+.cg-attendance .attendance-section-title,
+.cg-attendance .attendance-section-block > div:first-child,
+.cg-attendance .attendance-monthly-card > div:first-child,
+.cg-attendance .attendance-flags-card > div:first-child {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+}
+
+.cg-attendance .attendance-module-heading-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.cg-attendance .attendance-primary-button,
+.cg-attendance .attendance-secondary-button,
+.cg-attendance .attendance-icon-button {
+  border-radius: 10px !important;
+  font-family: inherit !important;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease !important;
+}
+
+.cg-attendance .attendance-primary-button {
+  min-height: 42px !important;
+  padding: 0 14px !important;
+  background: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+.cg-attendance .attendance-secondary-button {
+  min-height: 38px !important;
+  padding: 0 12px !important;
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+.cg-attendance .attendance-icon-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.cg-attendance .attendance-primary-button:hover,
+.cg-attendance .attendance-secondary-button:hover,
+.cg-attendance .attendance-icon-button:hover {
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--border)) !important;
+}
+
+/* Calendar */
+.cg-attendance .attendance-calendar-page {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cg-attendance .calendar-toolbar {
+  display: flex !important;
+  min-height: 58px !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 10px 12px !important;
+}
+
+.cg-attendance .calendar-month-controls {
+  min-width: 0;
+  gap: 8px !important;
+}
+
+.cg-attendance .calendar-month-label {
+  min-width: 126px;
+  text-align: center;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.cg-attendance .calendar-today-button {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding-inline: 12px !important;
+}
+
+.cg-attendance .calendar-legend {
+  display: flex !important;
+  min-height: 30px;
+  align-items: center !important;
+  gap: 8px 16px !important;
+  padding: 0 4px !important;
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+}
+
+.cg-attendance .calendar-legend > div {
+  white-space: nowrap;
+}
+
+.cg-attendance .calendar-shell {
+  padding: 12px !important;
+  overflow: hidden !important;
+}
+
+.cg-attendance .calendar-weekdays,
+.cg-attendance .calendar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+.cg-attendance .calendar-weekdays {
+  margin-bottom: 7px !important;
+}
+
+.cg-attendance .calendar-weekdays > div {
+  min-width: 0;
+  padding: 5px 2px;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: .03em;
+}
+
+.cg-attendance .calendar-day {
+  min-width: 0 !important;
+  min-height: 88px !important;
+  max-height: none !important;
+  padding: 7px !important;
+  border-radius: var(--att-inner-radius) !important;
+  background: var(--att-inner) !important;
+  border: 1px solid var(--border) !important;
+  overflow: hidden;
+  transition: background-color .15s ease, border-color .15s ease !important;
+}
+
+.cg-attendance .calendar-day:hover {
+  background: var(--surface-3) !important;
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border)) !important;
+}
+
+.cg-attendance .calendar-details-overlay {
+  z-index: 1200 !important;
+  padding: 20px !important;
+  align-items: center !important;
+  background: rgba(15, 23, 42, .48) !important;
+  backdrop-filter: blur(4px);
+}
+
+.cg-attendance .calendar-details-sheet {
+  width: min(100%, 500px) !important;
+  max-height: min(680px, 90dvh) !important;
+  overflow: auto !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  padding: 18px !important;
+  background: var(--surface) !important;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, .22) !important;
+}
+
+/* History */
+.cg-attendance .attendance-history-page {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cg-attendance .attendance-filter-scroll {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  gap: 7px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 1px 0 2px !important;
+}
+
+.cg-attendance .attendance-filter-scroll button {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding: 0 13px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+}
+
+.cg-attendance .history-filter-toolbar {
+  display: flex !important;
+  min-height: 56px !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 9px 11px !important;
+}
+
+.cg-attendance .history-filter-toolbar button {
+  min-height: 34px !important;
+  border-radius: 9px !important;
+}
+
+.cg-attendance .attendance-record-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 12px !important;
+  gap: 9px !important;
+}
+
+.cg-attendance .attendance-table-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.cg-attendance .attendance-table-card table {
+  min-width: 760px;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 12px !important;
+}
+
+.cg-attendance .attendance-table-card th {
+  padding: 10px 12px !important;
+  background: var(--surface-2) !important;
+  color: var(--text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  white-space: nowrap;
+}
+
+.cg-attendance .attendance-table-card td {
+  padding: 11px 12px !important;
+  font-size: 12px !important;
+  vertical-align: middle !important;
+}
+
+.cg-attendance .attendance-table-card tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+
+/* Leave */
+.cg-attendance .attendance-leave-page {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cg-attendance .leave-balance-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.cg-attendance .leave-balance-card {
+  min-width: 0 !important;
+  min-height: 108px !important;
+  padding: 13px !important;
+  gap: 7px !important;
+}
+
+.cg-attendance .leave-request-card {
+  padding: 12px !important;
+}
+
+.cg-attendance .attendance-leave-page input,
+.cg-attendance .attendance-leave-page select,
+.cg-attendance .attendance-leave-page textarea,
+.cg-attendance .attendance-history-page input,
+.cg-attendance .attendance-history-page select,
+.cg-attendance .attendance-history-page textarea {
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  font-family: inherit !important;
+}
+
+.cg-attendance .attendance-leave-page input,
+.cg-attendance .attendance-leave-page select,
+.cg-attendance .attendance-history-page input,
+.cg-attendance .attendance-history-page select {
+  min-height: 44px !important;
+}
+
+/* Summary */
+.cg-attendance .attendance-summary-page {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.cg-attendance .month-selector-card {
+  min-height: 58px !important;
+  padding: 10px 12px !important;
+}
+
+.cg-attendance .month-selector-card > div:first-child {
+  min-width: 0;
+  gap: 8px !important;
+}
+
+.cg-attendance .month-selector-card button {
+  min-height: 36px !important;
+  border-radius: 9px !important;
+}
+
+.cg-attendance .month-selector-card > div:first-child button {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+}
+
+.cg-attendance .summary-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-attendance .summary-kpi-card {
+  min-width: 0 !important;
+  min-height: 96px !important;
+  padding: 13px !important;
+}
+
+.cg-attendance .attendance-section-block {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.cg-attendance .leave-balance-summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-attendance .leave-balance-summary-card {
+  min-width: 0 !important;
+  padding: 13px !important;
+}
+
+.cg-attendance .attendance-monthly-card,
+.cg-attendance .attendance-flags-card {
+  padding: 13px !important;
+  gap: 9px !important;
+}
+
+.cg-attendance .attendance-data-row {
+  min-width: 0 !important;
+  padding: 9px 11px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--att-inner-radius) !important;
+  background: var(--surface-2) !important;
+}
+
+.cg-attendance .attendance-flag-row {
+  transition: background-color .15s ease, border-color .15s ease !important;
+}
+
+.cg-attendance .attendance-flag-row:hover {
+  background: var(--surface-3) !important;
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border)) !important;
+}
+
+@media (max-width: 1024px) {
+  .cg-attendance .summary-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cg-attendance .leave-balance-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cg-attendance .calendar-day {
+    min-height: 72px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .cg-attendance {
+    --att-radius: 12px;
+    --att-inner-radius: 9px;
+    gap: 12px !important;
+  }
+
+  .cg-attendance .attendance-page-header {
+    padding: 0;
+  }
+
+  .cg-attendance .attendance-page-header h1 {
+    font-size: 20px !important;
+  }
+
+  .cg-attendance .attendance-page-header p {
+    font-size: 12px !important;
+  }
+
+  .cg-attendance .my-attendance-tabs {
+    padding: 4px !important;
+  }
+
+  .cg-attendance .my-attendance-tabs button {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding-inline: 11px !important;
+  }
+
+  .cg-attendance .attendance-module-heading-row {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .cg-attendance .attendance-primary-button {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  .cg-attendance .calendar-toolbar {
+    min-height: 54px !important;
+    padding: 8px !important;
+    gap: 6px !important;
+  }
+
+  .cg-attendance .calendar-month-controls {
+    flex: 1;
+    gap: 4px !important;
+  }
+
+  .cg-attendance .calendar-month-label {
+    min-width: 0;
+    flex: 1;
+    font-size: 12px !important;
+  }
+
+  .cg-attendance .calendar-nav-button {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+  }
+
+  .cg-attendance .calendar-today-button {
+    min-height: 34px !important;
+    height: 34px !important;
+    padding-inline: 9px !important;
+    flex-shrink: 0;
+  }
+
+  .cg-attendance .calendar-legend {
+    gap: 7px 11px !important;
+    padding: 0 2px !important;
+    font-size: 10px !important;
+  }
+
+  .cg-attendance .calendar-shell {
+    padding: 7px !important;
+  }
+
+  .cg-attendance .calendar-weekdays,
+  .cg-attendance .calendar-grid {
+    gap: 3px !important;
+  }
+
+  .cg-attendance .calendar-weekdays {
+    margin-bottom: 3px !important;
+  }
+
+  .cg-attendance .calendar-weekdays > div {
+    padding: 3px 0 !important;
+    font-size: 9px !important;
+  }
+
+  .cg-attendance .calendar-day {
+    min-height: 0 !important;
+    max-height: none !important;
+    aspect-ratio: 1 / 1 !important;
+    padding: 4px !important;
+    justify-content: center !important;
+  }
+
+  .cg-attendance .calendar-day > div:first-child {
+    position: absolute;
+    inset: 4px auto auto 4px;
+    width: auto !important;
+  }
+
+  .cg-attendance .calendar-day > div:first-child span:first-child {
+    font-size: 11px !important;
+  }
+
+  .cg-attendance .calendar-details-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .cg-attendance .calendar-details-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 90dvh !important;
+    border-radius: 18px 18px 0 0 !important;
+    padding: 16px 14px calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .cg-attendance .history-filter-toolbar {
+    align-items: stretch !important;
+    flex-direction: column !important;
+    padding: 9px !important;
+  }
+
+  .cg-attendance .history-filter-toolbar > div:first-child {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    gap: 5px !important;
+  }
+
+  .cg-attendance .history-filter-toolbar > div:first-child button {
+    width: 100% !important;
+    padding-inline: 5px !important;
+    font-size: 11px !important;
+  }
+
+  .cg-attendance .history-filter-toolbar > button:last-child {
+    width: 100% !important;
+    justify-content: center !important;
+    min-height: 38px !important;
+  }
+
+  .cg-attendance .attendance-record-card {
+    padding: 11px !important;
+  }
+
+  .cg-attendance .leave-balance-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .cg-attendance .leave-balance-card {
+    min-height: 100px !important;
+    padding: 11px !important;
+  }
+
+  .cg-attendance .summary-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .cg-attendance .summary-kpi-card {
+    min-height: 90px !important;
+    padding: 11px !important;
+  }
+
+  .cg-attendance .leave-balance-summary-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .cg-attendance .attendance-monthly-card,
+  .cg-attendance .attendance-flags-card,
+  .cg-attendance .leave-balance-summary-card {
+    padding: 11px !important;
+  }
+
+  .cg-attendance .month-selector-card {
+    min-height: 54px !important;
+    padding: 8px !important;
+    gap: 6px !important;
+  }
+
+  .cg-attendance .month-selector-card > div:first-child {
+    flex: 1;
+    gap: 4px !important;
+  }
+
+  .cg-attendance .month-selector-card > div:first-child span {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    font-size: 12px !important;
+  }
+
+  .cg-attendance .month-selector-card > button:last-child {
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 8px !important;
+    font-size: 10px !important;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .cg-attendance .calendar-shell {
+    padding: 6px !important;
+  }
+
+  .cg-attendance .calendar-weekdays,
+  .cg-attendance .calendar-grid {
+    gap: 2px !important;
+  }
+
+  .cg-attendance .calendar-day {
+    padding: 3px !important;
+  }
+
+  .cg-attendance .calendar-day > div:first-child {
+    inset: 3px auto auto 3px;
+  }
+
+  .cg-attendance .leave-balance-grid,
+  .cg-attendance .summary-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cg-attendance .leave-balance-card,
+  .cg-attendance .summary-kpi-card {
+    padding: 10px !important;
+  }
+
+  .cg-attendance .attendance-filter-scroll button {
+    padding-inline: 11px !important;
+    font-size: 11px !important;
+  }
+}
