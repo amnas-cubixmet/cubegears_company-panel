@@ -9,6 +9,7 @@ import { Textarea } from '../../components/common/Textarea';
 import { PhoneInput } from '../../components/common/PhoneInput';
 import { Checkbox } from '../../components/common/Checkbox';
 import { customerService } from '../../services/customer.service';
+import { CustomerManagementTabs } from '../../components/customers/CustomerManagementTabs';
 import { User, Phone, Mail, MapPin, Building, FileText, CheckCircle2 } from 'lucide-react';
 
 export const AddCustomer = () => {
@@ -42,7 +43,7 @@ export const AddCustomer = () => {
         whatsapp: formData.whatsapp || formData.phone
       });
       setToastMsg('Customer created successfully.');
-      setTimeout(() => navigate('/customers'), 1000);
+      setTimeout(() => navigate('/customers/all'), 1000);
     } catch (err) {
       console.error("Error creating customer:", err);
     } finally {
@@ -55,6 +56,8 @@ export const AddCustomer = () => {
       title="Add Customer"
       description="Create a new customer profile for workshop operations and billing."
     >
+      <CustomerManagementTabs />
+
       {toastMsg && (
         <div style={{ backgroundColor: 'var(--success)', color: '#ffffff', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CheckCircle2 size={16} />
@@ -110,10 +113,12 @@ export const AddCustomer = () => {
             onChange={(e) => setFormData({ ...formData, customerType: e.target.value })}
           >
             <option value="Individual">Individual</option>
-            <option value="Business / Company">Business / Company</option>
+            <option value="Company/Fleet">Company / Fleet</option>
+            <option value="Insurance">Insurance</option>
+            <option value="Dealer/Partner">Dealer / Partner</option>
           </Select>
 
-          {formData.customerType === 'Business / Company' && (
+          {formData.customerType !== 'Individual' && (
             <>
               <Input
                 label="Company Name"
@@ -206,7 +211,7 @@ export const AddCustomer = () => {
           cancelLabel="Cancel"
           saveLabel="Save Customer"
           isSubmitting={submitting}
-          onCancel={() => navigate('/customers')}
+          onCancel={() => navigate('/customers/all')}
         />
       </form>
     </FormPage>
