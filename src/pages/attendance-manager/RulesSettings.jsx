@@ -84,7 +84,7 @@ export const RulesSettings = () => {
       )}
 
       {/* Header layout */}
-      <div className="rules-header" style={{
+      <div className="rules-header am-section-header am-rules-header" style={{
         width: '100%',
         boxSizing: 'border-box'
       }}>
@@ -132,9 +132,9 @@ export const RulesSettings = () => {
       </div>
 
       {/* Grouped Settings Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', width: '100%' }}>
+      <div className="am-rules-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', width: '100%' }}>
         {/* Category 1: Shift & Grace */}
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Clock size={16} style={{ color: 'var(--primary)' }} /> Shift Timing & Grace Minutes
           </div>
@@ -170,7 +170,7 @@ export const RulesSettings = () => {
         </div>
 
         {/* Category 2: Missing Punch Policy */}
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Clock size={16} style={{ color: 'var(--warning)' }} /> Missing Punch Rules
           </div>
@@ -188,7 +188,7 @@ export const RulesSettings = () => {
         </div>
 
         {/* Category 3: Weekend Off */}
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <CalendarDays size={16} style={{ color: 'var(--primary)' }} /> Weekend Off Settings
           </div>
@@ -291,7 +291,7 @@ export const RulesSettings = () => {
         </div>
 
         {/* Category 4: Permissions Guard */}
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ShieldAlert size={16} style={{ color: 'var(--danger)' }} /> Approval Permissions Guard
           </div>
