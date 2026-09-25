@@ -25,6 +25,8 @@ import './styles/dashboard-polish.css';
 import './styles/header-system.css';
 // Tailwind semantic bridge loads last so it becomes the final app-wide UI layer.
 import './styles/tailwind-system.css';
+// Final cross-project normalization layer.
+import './styles/ui-reset.css';
 
 export function App() {
   return (
