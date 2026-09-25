@@ -97,7 +97,7 @@ export const EditSalaryStructureSheet = ({ isOpen, onClose, structure, onSave })
       title={`Edit Salary Structure: ${formData.staffName}`}
       maxWidth="620px"
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <form className="payroll-sheet-form payroll-salary-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <div>
           <label style={labelStyle}>Staff Member</label>
           <input type="text" disabled value={formData.staffName} style={{ ...inputStyle, color: 'var(--text-muted)' }} />
