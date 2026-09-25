@@ -43,7 +43,7 @@ export const AttendanceOverview = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="attendance-manager-module attendance-manager-overview flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {cards.map(([label, value, Icon]) => (
           <div key={label} className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
