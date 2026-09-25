@@ -79,7 +79,6 @@ export const CustomerList = () => {
     setLoading(true);
     try {
       const data = await customerService.getCustomers({
-        search,
         status: statusFilter,
         branch: branchFilter,
         customerType: typeFilter
@@ -97,11 +96,32 @@ export const CustomerList = () => {
           vehicleCount: vehicles.length,
           jobsCount: jobs.length,
           totalSpent: invoices.reduce((sum, invoice) => sum + Number(invoice.paidAmount || 0), 0),
-          outstanding: invoices.reduce((sum, invoice) => sum + Number(invoice.balanceDue || 0), 0)
+          outstanding: invoices.reduce((sum, invoice) => sum + Number(invoice.balanceDue || 0), 0),
+          __vehicles: vehicles,
+          __jobs: jobs
         };
       }));
 
-      setCustomers(enriched);
+      const q = search.trim().toLowerCase();
+      const filtered = q
+        ? enriched.filter((customer) =>
+            String(customer.name || '').toLowerCase().includes(q) ||
+            String(customer.email || '').toLowerCase().includes(q) ||
+            String(customer.phone || '').toLowerCase().includes(q) ||
+            String(customer.whatsapp || '').toLowerCase().includes(q) ||
+            String(customer.companyName || '').toLowerCase().includes(q) ||
+            customer.__vehicles?.some((vehicle) =>
+              String(vehicle.regNo || '').toLowerCase().includes(q) ||
+              String(vehicle.vin || '').toLowerCase().includes(q)
+            ) ||
+            customer.__jobs?.some((job) =>
+              String(job.jobNumber || job.id || '').toLowerCase().includes(q) ||
+              String(job.vehicleReg || '').toLowerCase().includes(q)
+            )
+          )
+        : enriched;
+
+      setCustomers(filtered);
     } catch (e) {
       console.error(e);
     } finally {
@@ -215,7 +235,9 @@ export const CustomerList = () => {
   // Metrics
   const totalCount = customers.length;
   const activeCount = customers.filter(c => c.status === 'Active').length;
-  const newThisMonthCount = customers.filter(c => c.createdAt && c.createdAt.startsWith('2026-09')).length;
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const newThisMonthCount = customers.filter(c => c.createdAt && c.createdAt.startsWith(currentMonth)).length;
+  const totalOutstandingAmount = customers.reduce((sum, customer) => sum + Number(customer.outstanding || 0), 0);
 
   return (
     <div className="customer-directory-page cg-customers" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingBottom: '70px' }}>
@@ -297,7 +319,7 @@ export const CustomerList = () => {
           </div>
           <div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Outstanding</div>
-            <strong style={{ fontSize: '18px', color: 'var(--warning)' }}>{formatINR(14500)}</strong>
+            <strong style={{ fontSize: '18px', color: 'var(--warning)' }}>{formatINR(totalOutstandingAmount)}</strong>
           </div>
         </div>
       </div>
