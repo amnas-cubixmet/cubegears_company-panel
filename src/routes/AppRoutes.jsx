@@ -164,25 +164,31 @@ export const AppRoutes = () => (
       <Route path="/inventory/:id/edit" element={<InventoryList />} />
       <Route path="/inventory/:id/delete" element={<InventoryList />} />
 
-      <Route path="/stock" element={<StockManagement />} />
-      <Route path="/stock/new" element={<StockManagement />} />
-      <Route path="/stock/:id/edit" element={<StockManagement />} />
-      <Route path="/stock/:id/delete" element={<StockManagement />} />
-      <Route path="/stock/items" element={<StockManagement />} />
-      <Route path="/stock/items/:itemId" element={<StockManagement />} />
-      <Route path="/stock/in" element={<StockManagement />} />
-      <Route path="/stock/issue" element={<StockManagement />} />
-      <Route path="/stock/return" element={<StockManagement />} />
-      <Route path="/stock/transfer" element={<StockManagement />} />
-      <Route path="/stock/adjustments" element={<StockManagement />} />
-      <Route path="/stock/reservations" element={<StockManagement />} />
-      <Route path="/stock/low-stock" element={<StockManagement />} />
-      <Route path="/stock/ledger" element={<StockManagement />} />
-      <Route path="/stock/suppliers" element={<StockManagement />} />
-      <Route path="/stock/purchases" element={<StockManagement />} />
-      <Route path="/stock/count" element={<StockManagement />} />
-      <Route path="/stock/reports" element={<StockManagement />} />
-      <Route path="/stock/:id" element={<StockManagement />} />
+      <Route path="/stock" element={<Navigate to="/stock/overview" replace />} />
+      <Route path="/stock/overview" element={<StockManagement section="overview" />} />
+      <Route path="/stock/items" element={<StockManagement section="items" />} />
+      <Route path="/stock/items/:itemId" element={<StockManagement section="item-detail" />} />
+      <Route path="/stock/categories" element={<StockManagement section="categories" />} />
+      <Route path="/stock/movements" element={<StockManagement section="movements" />} />
+      <Route path="/stock/purchase-orders" element={<StockManagement section="purchase-orders" />} />
+      <Route path="/stock/suppliers" element={<StockManagement section="suppliers" />} />
+      <Route path="/stock/transfers" element={<StockManagement section="transfers" />} />
+      <Route path="/stock/adjustments" element={<StockManagement section="adjustments" />} />
+      <Route path="/stock/audit" element={<StockManagement section="audit" />} />
+      <Route path="/stock/reports" element={<StockManagement section="reports" />} />
+
+      <Route path="/stock/new" element={<Navigate to="/stock/items" replace />} />
+      <Route path="/stock/in" element={<Navigate to="/stock/movements" replace />} />
+      <Route path="/stock/issue" element={<Navigate to="/stock/movements" replace />} />
+      <Route path="/stock/return" element={<Navigate to="/stock/movements" replace />} />
+      <Route path="/stock/ledger" element={<Navigate to="/stock/movements" replace />} />
+      <Route path="/stock/reservations" element={<Navigate to="/stock/movements" replace />} />
+      <Route path="/stock/low-stock" element={<Navigate to="/stock/items" replace />} />
+      <Route path="/stock/purchases" element={<Navigate to="/stock/purchase-orders" replace />} />
+      <Route path="/stock/transfer" element={<Navigate to="/stock/transfers" replace />} />
+      <Route path="/stock/count" element={<Navigate to="/stock/audit" replace />} />
+      <Route path="/stock/:id/edit" element={<Navigate to="/stock/items" replace />} />
+      <Route path="/stock/:id/delete" element={<Navigate to="/stock/items" replace />} />
 
       <Route path="/invoices" element={<InvoiceList />} />
       <Route path="/invoices/e-way-bills" element={<EWayBillPage />} />
