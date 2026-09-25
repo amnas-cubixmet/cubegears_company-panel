@@ -1,0 +1,857 @@
+/* =========================================================
+   CUBIXGEAR — PAYROLL & SALARY
+   Shared UI for overview, employees, attendance, salary setup,
+   incentives, overtime, advances, run payroll, payslips, reports.
+   ========================================================= */
+
+.cg-payroll {
+  --pay-radius: 14px;
+  --pay-inner-radius: 10px;
+  --pay-border: var(--border);
+  --pay-surface: var(--surface);
+  --pay-soft: var(--surface-2);
+  --pay-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  width: 100%;
+  min-width: 0;
+  gap: 14px !important;
+}
+
+.cg-payroll *,
+.cg-payroll *::before,
+.cg-payroll *::after {
+  box-sizing: border-box;
+}
+
+.cg-payroll button,
+.cg-payroll input,
+.cg-payroll select,
+.cg-payroll textarea,
+.payroll-sheet-form button,
+.payroll-sheet-form input,
+.payroll-sheet-form select,
+.payroll-sheet-form textarea {
+  font: inherit;
+}
+
+/* ---------- Header / tabs ---------- */
+.cg-payroll .payroll-page-header {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 2px;
+}
+
+.cg-payroll .payroll-page-header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.cg-payroll .payroll-page-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.cg-payroll .payroll-tabs-shell {
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  padding: 5px !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-subnav {
+  gap: 4px !important;
+}
+
+.cg-payroll .payroll-subnav-item {
+  min-height: 38px !important;
+  height: 38px !important;
+  padding-inline: 12px !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Period filter ---------- */
+.cg-payroll .payroll-period-filter {
+  display: grid !important;
+  grid-template-columns: auto minmax(220px, 1fr) minmax(150px, auto) minmax(140px, auto);
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-period-filter__label {
+  margin: 0 !important;
+  white-space: nowrap;
+  font-size: 12px !important;
+}
+
+.cg-payroll .payroll-period-filter__period {
+  min-width: 0 !important;
+  gap: 6px !important;
+}
+
+.cg-payroll .payroll-period-filter select,
+.cg-payroll .payroll-quick-filter select {
+  min-height: 42px !important;
+  height: 42px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: 10px !important;
+  background: var(--pay-soft) !important;
+  color: var(--text-primary) !important;
+  font-size: 12px !important;
+}
+
+/* ---------- Shared section language ---------- */
+.cg-payroll .payroll-section {
+  width: 100%;
+  min-width: 0;
+  gap: 12px !important;
+}
+
+.cg-payroll .payroll-section > .rounded-2xl,
+.cg-payroll .payroll-employees > div:first-child,
+.cg-payroll .payroll-attendance > div:first-child,
+.cg-payroll .payroll-reports,
+.cg-payroll .advance-page-header,
+.cg-payroll .payroll-module-header,
+.cg-payroll .am-overtime-header {
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-employees > div:first-child,
+.cg-payroll .payroll-attendance > div:first-child,
+.cg-payroll .payroll-reports,
+.cg-payroll .advance-page-header,
+.cg-payroll .payroll-module-header,
+.cg-payroll .am-overtime-header {
+  padding: 14px !important;
+}
+
+.cg-payroll .payroll-employees > div:first-child > div:first-child,
+.cg-payroll .payroll-attendance > div:first-child > div:first-child,
+.cg-payroll .payroll-salary > div:first-child > div:first-child > div:first-child,
+.cg-payroll .payroll-reports > div:first-child {
+  color: var(--text-primary) !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+}
+
+.cg-payroll .payroll-employees > div:first-child > div:last-child,
+.cg-payroll .payroll-attendance > div:first-child > div:last-child {
+  margin-top: 3px !important;
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+}
+
+/* ---------- Overview ---------- */
+.cg-payroll .payroll-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-kpi-grid > div {
+  min-width: 0;
+  min-height: 92px;
+  padding: 12px 13px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-kpi-grid > div > div:first-child {
+  color: var(--text-muted) !important;
+  font-size: 10px !important;
+  font-weight: 650;
+}
+
+.cg-payroll .payroll-kpi-grid > div > div:last-child {
+  margin-top: 9px !important;
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.cg-payroll .payroll-settlement-summary {
+  padding: 10px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-settlement-summary > div {
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-inner-radius);
+  background: var(--pay-soft);
+}
+
+.cg-payroll .payroll-quick-filter {
+  padding: 9px;
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-radius);
+  background: var(--pay-surface);
+  box-shadow: var(--pay-shadow);
+}
+
+.cg-payroll .payroll-quick-filter select {
+  width: min(260px, 100%);
+}
+
+/* ---------- Payroll record cards ---------- */
+.cg-payroll .payroll-card-grid,
+.cg-payroll .payroll-run > div:last-child,
+.cg-payroll .payroll-disbursal > div:last-child {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-record-card {
+  min-width: 0;
+  padding: 13px !important;
+  gap: 10px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-record-card > div:first-child > div:first-child > div:first-child {
+  font-size: 14px !important;
+}
+
+.cg-payroll .payroll-record-breakdown {
+  gap: 7px !important;
+  padding: 10px 0 !important;
+}
+
+.cg-payroll .payroll-record-breakdown > div {
+  min-width: 0;
+  padding: 8px 9px !important;
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-inner-radius) !important;
+  background: var(--pay-soft) !important;
+}
+
+.cg-payroll .payroll-record-settlement {
+  min-height: 58px;
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-inner-radius) !important;
+  background: var(--pay-soft) !important;
+}
+
+.cg-payroll .payroll-record-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px !important;
+}
+
+.cg-payroll .payroll-record-actions button {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px !important;
+  height: 40px !important;
+  border-radius: 9px !important;
+  font-size: 11px !important;
+}
+
+.cg-payroll .payroll-record-links {
+  gap: 8px;
+}
+
+.cg-payroll .payroll-record-links button {
+  min-height: 32px;
+  padding: 4px 2px !important;
+  font-size: 10px !important;
+}
+
+/* ---------- Employees / attendance ---------- */
+.cg-payroll .payroll-employees > .grid,
+.cg-payroll .payroll-attendance > .grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-employees > .grid > div,
+.cg-payroll .payroll-attendance > .grid > div {
+  min-width: 0;
+  padding: 13px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-employees .bg-surface-2,
+.cg-payroll .payroll-attendance .bg-surface-2 {
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-inner-radius) !important;
+}
+
+/* ---------- Incentives / overtime ---------- */
+.cg-payroll .payroll-incentives,
+.cg-payroll .payroll-overtime {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.cg-payroll .payroll-commission-module,
+.cg-payroll .payroll-overtime-module {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.cg-payroll .payroll-module-header,
+.cg-payroll .am-overtime-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.cg-payroll .payroll-module-header h3,
+.cg-payroll .am-overtime-header h3 {
+  margin: 0 !important;
+  color: var(--text-primary) !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+}
+
+.cg-payroll .payroll-module-header p,
+.cg-payroll .am-overtime-header p {
+  margin: 3px 0 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+.cg-payroll .payroll-module-header button,
+.cg-payroll .am-overtime-header button {
+  min-height: 40px !important;
+  border-radius: 10px !important;
+  padding-inline: 13px !important;
+  white-space: nowrap;
+}
+
+.cg-payroll .payroll-commission-grid,
+.cg-payroll .am-overtime-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-commission-card,
+.cg-payroll .am-overtime-card {
+  min-width: 0;
+  padding: 13px !important;
+  gap: 9px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-commission-card > div:nth-child(2),
+.cg-payroll .am-overtime-details {
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-inner-radius) !important;
+  background: var(--pay-soft) !important;
+}
+
+.cg-payroll .payroll-commission-card button,
+.cg-payroll .am-overtime-card button {
+  min-height: 38px !important;
+  border-radius: 9px !important;
+}
+
+/* ---------- Salary setup ---------- */
+.cg-payroll .payroll-salary > div:first-child {
+  padding: 12px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-salary > div:first-child select {
+  min-height: 40px !important;
+  height: 40px !important;
+  border-radius: 9px !important;
+}
+
+.cg-payroll .payroll-salary > div:last-child {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-salary > div:last-child > div {
+  min-width: 0;
+  padding: 13px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-salary > div:last-child > div > div:nth-child(2) {
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-inner-radius) !important;
+  background: var(--pay-soft) !important;
+}
+
+.cg-payroll .payroll-salary button {
+  min-height: 38px !important;
+  border-radius: 9px !important;
+}
+
+/* ---------- Run payroll ---------- */
+.cg-payroll .payroll-run > div:first-child,
+.cg-payroll .payroll-run > div:nth-child(3) {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+}
+
+.cg-payroll .payroll-run > .rounded-2xl {
+  padding: 13px !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--pay-border)) !important;
+  border-radius: var(--pay-radius) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+/* ---------- Advances ---------- */
+.cg-payroll .advance-page-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+.cg-payroll .advance-page-header h2 {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+}
+
+.cg-payroll .advance-page-header p {
+  margin-top: 3px !important;
+  font-size: 11px !important;
+}
+
+.cg-payroll .create-advance-btn {
+  min-height: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+}
+
+.cg-payroll .payroll-advances > div:last-child {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-advance-card {
+  min-width: 0;
+  padding: 13px !important;
+  gap: 10px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-advance-card .advance-summary-grid {
+  gap: 7px !important;
+}
+
+.cg-payroll .payroll-advance-card .advance-summary-grid > div {
+  padding: 8px 9px !important;
+  border-radius: var(--pay-inner-radius) !important;
+  background: var(--pay-soft) !important;
+}
+
+/* ---------- Payslips ---------- */
+.cg-payroll .payroll-payslips > div:first-child {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+}
+
+.cg-payroll .payroll-payslips > div:last-child {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-payslips > div:last-child > div {
+  min-width: 0;
+  min-height: 76px;
+  padding: 12px !important;
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+.cg-payroll .payroll-payslips button {
+  min-height: 38px;
+  border-radius: 9px !important;
+  white-space: nowrap;
+}
+
+/* ---------- Reports ---------- */
+.cg-payroll .payroll-reports {
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-reports > div:nth-child(2) {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.cg-payroll .payroll-reports > div:nth-child(2) > div {
+  min-height: 76px;
+  padding: 10px 11px !important;
+  border: 1px solid var(--pay-border);
+  border-radius: var(--pay-inner-radius) !important;
+  background: var(--pay-soft) !important;
+}
+
+/* ---------- Legacy approval/disbursal aliases ---------- */
+.cg-payroll .payroll-approvals > div:last-child {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.cg-payroll .payroll-approvals > div:last-child > div {
+  border: 1px solid var(--pay-border) !important;
+  border-radius: var(--pay-radius) !important;
+  background: var(--pay-surface) !important;
+  box-shadow: var(--pay-shadow) !important;
+}
+
+/* ---------- Payroll sheets ---------- */
+.payroll-sheet-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.payroll-sheet-form label {
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+.payroll-sheet-form input:not([type="checkbox"]):not([type="radio"]),
+.payroll-sheet-form select,
+.payroll-sheet-form textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  outline: none;
+}
+
+.payroll-sheet-form input:not([type="checkbox"]):not([type="radio"]),
+.payroll-sheet-form select {
+  min-height: 44px !important;
+  height: 44px !important;
+}
+
+.payroll-sheet-form textarea {
+  min-height: 92px !important;
+  padding: 10px 11px !important;
+  resize: vertical;
+}
+
+.payroll-sheet-form input:focus,
+.payroll-sheet-form select:focus,
+.payroll-sheet-form textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.payroll-sheet-form .form-row-2col {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.payroll-recovery-history > div:first-child,
+.payroll-recovery-history > div:last-child > div {
+  border: 1px solid var(--border) !important;
+  border-radius: 11px !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  .cg-payroll .payroll-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .cg-payroll .payroll-card-grid,
+  .cg-payroll .payroll-run > div:last-child,
+  .cg-payroll .payroll-disbursal > div:last-child,
+  .cg-payroll .payroll-salary > div:last-child,
+  .cg-payroll .payroll-advances > div:last-child,
+  .cg-payroll .payroll-payslips > div:last-child,
+  .cg-payroll .payroll-approvals > div:last-child,
+  .cg-payroll .payroll-commission-grid,
+  .cg-payroll .am-overtime-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .cg-payroll .payroll-period-filter {
+    grid-template-columns: auto minmax(220px, 1fr);
+  }
+
+  .cg-payroll .payroll-employees > .grid,
+  .cg-payroll .payroll-attendance > .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .cg-payroll {
+    --pay-radius: 12px;
+    --pay-inner-radius: 9px;
+    gap: 12px !important;
+  }
+
+  .cg-payroll .payroll-page-header {
+    padding: 0;
+  }
+
+  .cg-payroll .payroll-page-header h1 {
+    font-size: 20px;
+  }
+
+  .cg-payroll .payroll-page-header p {
+    font-size: 12px;
+  }
+
+  .cg-payroll .payroll-tabs-shell {
+    padding: 4px !important;
+  }
+
+  .cg-payroll .payroll-subnav-item {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding-inline: 10px !important;
+  }
+
+  .cg-payroll .payroll-period-filter {
+    grid-template-columns: 1fr !important;
+    padding: 9px !important;
+  }
+
+  .cg-payroll .payroll-period-filter__label {
+    width: 100%;
+  }
+
+  .cg-payroll .payroll-period-filter__period {
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .cg-payroll .payroll-period-filter > select,
+  .cg-payroll .payroll-period-filter__period select {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-payroll .payroll-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .cg-payroll .payroll-kpi-grid > div {
+    min-height: 88px;
+    padding: 10px 11px !important;
+  }
+
+  .cg-payroll .payroll-kpi-grid > div > div:last-child {
+    font-size: 17px !important;
+  }
+
+  .cg-payroll .payroll-settlement-summary {
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+
+  .cg-payroll .payroll-settlement-summary > div {
+    min-height: 60px;
+  }
+
+  .cg-payroll .payroll-quick-filter {
+    padding: 8px;
+  }
+
+  .cg-payroll .payroll-quick-filter select {
+    width: 100%;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-payroll .payroll-card-grid,
+  .cg-payroll .payroll-run > div:last-child,
+  .cg-payroll .payroll-disbursal > div:last-child,
+  .cg-payroll .payroll-salary > div:last-child,
+  .cg-payroll .payroll-advances > div:last-child,
+  .cg-payroll .payroll-payslips > div:last-child,
+  .cg-payroll .payroll-approvals > div:last-child,
+  .cg-payroll .payroll-commission-grid,
+  .cg-payroll .am-overtime-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .cg-payroll .payroll-record-card,
+  .cg-payroll .payroll-employees > .grid > div,
+  .cg-payroll .payroll-attendance > .grid > div,
+  .cg-payroll .payroll-commission-card,
+  .cg-payroll .am-overtime-card,
+  .cg-payroll .payroll-advance-card,
+  .cg-payroll .payroll-salary > div:last-child > div,
+  .cg-payroll .payroll-reports,
+  .cg-payroll .advance-page-header,
+  .cg-payroll .payroll-module-header,
+  .cg-payroll .am-overtime-header {
+    padding: 11px !important;
+  }
+
+  .cg-payroll .payroll-record-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cg-payroll .payroll-record-actions button {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-payroll .payroll-record-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cg-payroll .payroll-record-links button {
+    justify-content: flex-start !important;
+    min-height: 34px;
+  }
+
+  .cg-payroll .payroll-module-header,
+  .cg-payroll .am-overtime-header,
+  .cg-payroll .advance-page-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .cg-payroll .payroll-module-header button,
+  .cg-payroll .am-overtime-header button,
+  .cg-payroll .create-advance-btn {
+    width: 100% !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    justify-content: center !important;
+  }
+
+  .cg-payroll .payroll-salary > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 10px !important;
+  }
+
+  .cg-payroll .payroll-salary > div:first-child select {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .cg-payroll .payroll-payslips > div:last-child > div {
+    align-items: stretch !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .cg-payroll .payroll-payslips button {
+    width: 100%;
+    min-height: 42px;
+    justify-content: center;
+  }
+
+  .payroll-sheet-form .form-row-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  .payroll-sheet-form input:not([type="checkbox"]):not([type="radio"]),
+  .payroll-sheet-form select,
+  .payroll-sheet-form textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .cg-payroll .payroll-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cg-payroll .payroll-kpi-grid > div {
+    min-height: 84px;
+    padding: 9px !important;
+  }
+
+  .cg-payroll .payroll-kpi-grid > div > div:first-child {
+    font-size: 9px !important;
+  }
+
+  .cg-payroll .payroll-kpi-grid > div > div:last-child {
+    font-size: 16px !important;
+  }
+
+  .cg-payroll .payroll-subnav-item {
+    padding-inline: 8px !important;
+    font-size: 11px !important;
+  }
+
+  .cg-payroll .payroll-record-breakdown,
+  .cg-payroll .advance-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
