@@ -62,7 +62,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
   if (!staff) return <div style={{ padding: '20px', color: 'var(--text-muted)' }}>Loading staff profile...</div>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="staff-profile" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* Toast */}
       {toastMsg && (
         <div style={{ backgroundColor: 'var(--success)', color: '#fff', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600' }}>
@@ -71,7 +71,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
       )}
 
       {/* Back & Profile Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="staff-profile-topbar" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <button
           onClick={onBack}
           style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
@@ -82,7 +82,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
       </div>
 
       {/* Compact Header Card */}
-      <div style={{
+      <div className="staff-profile-hero" style={{
         backgroundColor: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: '14px',
@@ -114,7 +114,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
       </div>
 
       {/* 7 Tab Horizontal Scroll Rail */}
-      <div style={{ width: '100%', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)' }}>
+      <div className="staff-profile-tabs" style={{ width: '100%', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)' }}>
         <div
           ref={tabsRef}
           className="scroll-hidden"
@@ -155,7 +155,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
       </div>
 
       {/* Tab Content Panels */}
-      <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}>
+      <div className="staff-profile-panel" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}>
         {activeTab === 'Overview' && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', fontSize: '13px' }}>
             <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Full Name</span> <strong>{staff.name}</strong></div>
