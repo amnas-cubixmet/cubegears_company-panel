@@ -16,65 +16,19 @@ export const routeConfig = [
   { id: 'jobs', label: 'Job Cards', path: '/jobs', icon: ClipboardList, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'jobs.view' },
   { id: 'customers', label: 'Customers', path: '/customers', icon: Users, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'customers.view' },
   {
-    id: 'stock', label: 'Stock Mgmt', path: '/stock', icon: Boxes, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'stock.view',
-    children: [
-      { id: 'stock-dashboard', label: 'All Stock', path: '/stock' },
-      { id: 'stock-items', label: 'Stock Items', path: '/stock/items' },
-      { id: 'stock-in', label: 'Stock In', path: '/stock/in' },
-      { id: 'stock-issue', label: 'Stock Issue', path: '/stock/issue' },
-      { id: 'stock-return', label: 'Stock Return', path: '/stock/return' },
-      { id: 'stock-transfer', label: 'Stock Transfer', path: '/stock/transfer' },
-      { id: 'stock-adjustments', label: 'Stock Adjustment', path: '/stock/adjustments' },
-      { id: 'stock-reservations', label: 'Reservations', path: '/stock/reservations' },
-      { id: 'stock-low-stock', label: 'Low Stock', path: '/stock/low-stock' },
-      { id: 'stock-ledger', label: 'Movement Ledger', path: '/stock/ledger' },
-      { id: 'stock-suppliers', label: 'Suppliers', path: '/stock/suppliers' },
-      { id: 'stock-purchases', label: 'Purchase Records', path: '/stock/purchases' },
-      { id: 'stock-count', label: 'Stock Count', path: '/stock/count' },
-      { id: 'stock-reports', label: 'Reports', path: '/stock/reports' }
-    ]
+    id: 'stock', label: 'Stock Mgmt', path: '/stock', icon: Boxes, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'stock.view'
   },
   {
-    id: 'my-attendance', label: 'My Attendance', path: '/my-attendance', icon: Clock, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'attendance.self',
-    children: [
-      { id: 'att-calendar', label: 'Holiday Calendar', path: '/my-attendance/calendar' },
-      { id: 'att-history', label: 'History & Logs', path: '/my-attendance/history' },
-      { id: 'att-leave', label: 'Leave Requests', path: '/my-attendance/leave' },
-      { id: 'att-summary', label: 'Summary', path: '/my-attendance/summary' }
-    ]
+    id: 'my-attendance', label: 'My Attendance', path: '/my-attendance', icon: Clock, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'attendance.self'
   },
   {
-    id: 'attendance-manager', label: 'Attendance Manager', path: '/attendance-manager', icon: UserCheck, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'attendance.manage',
-    children: [
-      { id: 'att-mgr-approvals', label: 'Approvals', path: '/attendance-manager/approvals' },
-      { id: 'att-mgr-team', label: 'Team Review', path: '/attendance-manager/team-review' },
-      { id: 'att-mgr-master', label: 'Master Records', path: '/attendance-manager/master-records' },
-      { id: 'att-mgr-leave-types', label: 'Leave Types', path: '/attendance-manager/leave-types' },
-      { id: 'att-mgr-holidays', label: 'Holidays', path: '/attendance-manager/holidays' },
-      { id: 'att-mgr-rules', label: 'Rules & Settings', path: '/attendance-manager/rules' }
-    ]
+    id: 'attendance-manager', label: 'Attendance Manager', path: '/attendance-manager', icon: UserCheck, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'attendance.manage'
   },
   {
-    id: 'staff-management', label: 'Staff Management', path: '/staff-management', icon: UserPlus, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'staff.view',
-    children: [
-      { id: 'staff-list', label: 'Staff', path: '/staff-management/staff' },
-      { id: 'staff-roles', label: 'User Roles', path: '/staff-management/roles' }
-    ]
+    id: 'staff-management', label: 'Staff Management', path: '/staff-management', icon: UserPlus, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'staff.view'
   },
   {
-    id: 'payroll', label: 'Payroll', path: '/payroll', icon: DollarSign, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'payroll.view',
-    children: [
-      { id: 'payroll-overview', label: 'Overview', path: '/payroll', permission: 'payroll.view' },
-      { id: 'payroll-employees', label: 'Employees', path: '/payroll/employees', permission: 'staff.view' },
-      { id: 'payroll-attendance', label: 'Attendance', path: '/payroll/attendance', permission: 'attendance.manage' },
-      { id: 'payroll-salary-setup', label: 'Salary Setup', path: '/payroll/salary-setup', permission: 'salary_structure.view' },
-      { id: 'payroll-incentives', label: 'Incentives', path: '/payroll/incentives', permission: 'payroll.review' },
-      { id: 'payroll-overtime', label: 'Overtime', path: '/payroll/overtime', permission: 'payroll.review' },
-      { id: 'payroll-advances', label: 'Advances', path: '/payroll/advances', permission: 'payroll.view' },
-      { id: 'payroll-run', label: 'Run Payroll', path: '/payroll/run', permission: 'payroll.view' },
-      { id: 'payroll-payslips', label: 'Payslips', path: '/payroll/payslips', permission: 'payslip.view_staff' },
-      { id: 'payroll-reports', label: 'Reports', path: '/payroll/reports', permission: 'payroll.export' }
-    ]
+    id: 'payroll', label: 'Payroll', path: '/payroll', icon: DollarSign, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'payroll.view'
   },
   { id: 'vehicles', label: 'Vehicles', path: '/vehicles', icon: Car, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'vehicles.view' },
   { id: 'services', label: 'Services Catalog', path: '/services', icon: Wrench, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'services.view' },
@@ -86,12 +40,7 @@ export const routeConfig = [
     icon: FileText,
     section: ROUTE_SECTIONS.FINANCE,
     mobilePrimary: false,
-    permission: 'invoices.view',
-    children: [
-      { id: 'billing-invoices', label: 'Invoices', path: '/invoices', matchSearch: 'invoice' },
-      { id: 'billing-estimates', label: 'Estimates', path: '/invoices?kind=estimate', matchSearch: 'estimate' },
-      { id: 'billing-eway-bills', label: 'E-Way Bills', path: '/invoices/e-way-bills' }
-    ]
+    permission: 'invoices.view'
   },
   { id: 'payments', label: 'Payments', path: '/payments', icon: CreditCard, section: ROUTE_SECTIONS.FINANCE, mobilePrimary: false, permission: 'payments.view' },
   { id: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, section: ROUTE_SECTIONS.FINANCE, mobilePrimary: false, permission: 'expenses.view' },
