@@ -126,7 +126,10 @@ export const Payroll = ({ section = 'overview' }) => {
   const approvedCount = payrolls.filter((p) => p.approvalStatus === 'Approved').length;
   const totalPaid = payrolls.reduce((acc, curr) => acc + (curr.paidAmount || 0), 0);
   const outstandingSalary = totalNet - totalPaid;
-  const totalIncentives = payrolls.reduce((acc, curr) => acc + (curr.incentives || curr.approvedCommission || 0), 0);
+  const totalIncentives = payrolls.reduce(
+    (acc, curr) => acc + (curr.fixedIncentives || 0) + (curr.approvedCommission || 0),
+    0
+  );
   const totalDeductions = payrolls.reduce((acc, curr) => acc + (curr.deductions || 0) + (curr.advanceRecovery || 0), 0);
 
   const unpaidStaff = payrolls.filter((p) => p.paymentStatus === 'Unpaid').length;
@@ -710,8 +713,10 @@ export const Payroll = ({ section = 'overview' }) => {
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Basic Salary</span><span>{formatINR(payslipTargetItem.baseSalary)}</span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Allowances</span><span>{formatINR(payslipTargetItem.allowances)}</span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--primary)' }}><span>Approved Overtime ({payslipTargetItem.overtimeHours || '0h'})</span><span>+{formatINR(payslipTargetItem.overtimePay)}</span></div>
-              {payslipTargetItem.incentives > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}><span>Fixed Incentives</span><span>+{formatINR(payslipTargetItem.incentives)}</span></div>}
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--danger)' }}><span>Advance Recovery / Deductions</span><span>-{formatINR((payslipTargetItem.deductions || 0) + (payslipTargetItem.advanceRecovery || 0))}</span></div>
+              {payslipTargetItem.fixedIncentives > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}><span>Fixed Incentive</span><span>+{formatINR(payslipTargetItem.fixedIncentives)}</span></div>}
+              {payslipTargetItem.approvedCommission > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}><span>Workshop / Job Incentive</span><span>+{formatINR(payslipTargetItem.approvedCommission)}</span></div>}
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--danger)' }}><span>Other Deductions</span><span>-{formatINR(payslipTargetItem.deductions || 0)}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--danger)' }}><span>Advance / Loan Recovery</span><span>-{formatINR(payslipTargetItem.advanceRecovery || 0)}</span></div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: '800', color: 'var(--primary)', borderTop: '1px solid var(--border)', paddingTop: '6px', marginTop: '4px' }}>
                 <span>Net Salary</span>
                 <span>{formatINR(payslipTargetItem.netSalary)}</span>
