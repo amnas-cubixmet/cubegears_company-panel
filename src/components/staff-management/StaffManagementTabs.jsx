@@ -23,8 +23,8 @@ export const StaffManagementTabs = () => {
   }, [location.pathname]);
 
   return (
-    <div className="w-full min-w-0 rounded-2xl border border-line bg-surface p-1.5 shadow-sm">
-      <div ref={tabsRef} className="scroll-hidden flex w-full min-w-0 gap-1.5 overflow-x-auto">
+    <div className="staff-management-tabs w-full min-w-0 rounded-2xl border border-line bg-surface p-1.5 shadow-sm">
+      <div ref={tabsRef} className="staff-management-tabs__rail scroll-hidden flex w-full min-w-0 gap-1.5 overflow-x-auto">
         {tabs.map((tab) => (
           <NavLink
             key={tab.path}
