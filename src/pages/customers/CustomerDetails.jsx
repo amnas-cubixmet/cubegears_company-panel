@@ -358,7 +358,7 @@ export const CustomerDetails = () => {
       )}
 
       {/* 1. CUSTOMER PROFILE HEADER */}
-      <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div className="customer-profile-header" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         
         {/* Top Header Row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
@@ -449,7 +449,7 @@ export const CustomerDetails = () => {
       </div>
 
       {/* 2. SUMMARY KPI CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '10px' }} className="customer-kpi-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '10px' }} className="customer-profile-kpis customer-kpi-grid">
         <style>{`
           @media (max-width: 1024px) {
             .customer-kpi-grid {
@@ -475,12 +475,12 @@ export const CustomerDetails = () => {
 
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
           <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Billed</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>{formatINR(totalBilled || 42500)}</div>
+          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>{formatINR(totalBilled)}</div>
         </div>
 
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
           <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Paid</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--success)', marginTop: '4px' }}>{formatINR(totalPaid || 37500)}</div>
+          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--success)', marginTop: '4px' }}>{formatINR(totalPaid)}</div>
         </div>
 
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
@@ -499,11 +499,11 @@ export const CustomerDetails = () => {
       </div>
 
       {/* 3. CUSTOMER HORIZONTAL TABS RAIL */}
-      <div style={{ width: '100%', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)', borderRadius: '12px', overflow: 'hidden' }}>
+      <div className="customer-profile-tabs" style={{ width: '100%', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)', borderRadius: '12px', overflow: 'hidden' }}>
         <div
           ref={tabRailRef}
           style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', padding: '4px 8px', whiteSpace: 'nowrap' }}
-          className="scroll-hidden"
+          className="customer-profile-tabs__rail scroll-hidden"
         >
           {tabs.map((t) => {
             const Icon = t.icon;
@@ -536,7 +536,7 @@ export const CustomerDetails = () => {
       </div>
 
       {/* TAB CONTENT PANELS */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div className="customer-profile-content" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         
         {/* 4. OVERVIEW TAB */}
         {activeTab === 'overview' && (
