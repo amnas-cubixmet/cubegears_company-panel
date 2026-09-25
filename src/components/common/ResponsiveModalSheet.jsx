@@ -53,7 +53,7 @@ export const ResponsiveModalSheet = ({ isOpen, onClose, title, children, maxWidt
         {/* Sticky Sheet Header */}
         <div style={{
           display: 'flex',
-          justify: 'space-between',
+          justifyContent: 'space-between',
           alignItems: 'center',
           padding: '12px 16px',
           borderBottom: '1px solid var(--border)',
