@@ -75,14 +75,14 @@ export const OvertimeManager = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+    <div className="am-overtime-module" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       {toastMsg && (
         <div style={{ backgroundColor: 'var(--success)', color: '#ffffff', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600' }}>
           {toastMsg}
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+      <div className="am-section-header am-overtime-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
         <div>
           <h3 style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', margin: 0 }}>
             Overtime Requests & Approvals ({periodString})
@@ -95,6 +95,7 @@ export const OvertimeManager = () => {
         <button
           type="button"
           onClick={() => setIsAddOpen(true)}
+          className="am-primary-button"
           style={{
             height: '42px',
             padding: '0 16px',
@@ -117,14 +118,15 @@ export const OvertimeManager = () => {
       {loading ? (
         <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>Loading overtime records...</div>
       ) : overtimeList.length === 0 ? (
-        <div style={{ padding: '30px', textAlign: 'center', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-muted)', fontSize: '13px' }}>
+        <div className="am-empty-state" style={{ padding: '30px', textAlign: 'center', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-muted)', fontSize: '13px' }}>
           No overtime records found for {periodString}.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+        <div className="am-overtime-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
           {overtimeList.map((ot) => (
             <div
               key={ot.id}
+              className="am-overtime-card"
               style={{
                 backgroundColor: 'var(--surface)',
                 border: '1px solid var(--border)',
@@ -153,7 +155,7 @@ export const OvertimeManager = () => {
                 </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', backgroundColor: 'var(--surface-2)', padding: '10px', borderRadius: '10px', fontSize: '12px' }}>
+              <div className="am-overtime-details" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', backgroundColor: 'var(--surface-2)', padding: '10px', borderRadius: '10px', fontSize: '12px' }}>
                 <div>Hours: <strong>{ot.overtimeHours}h</strong></div>
                 <div>Rate: <strong>₹{ot.rate}/hr</strong></div>
                 <div>Method: <strong>{ot.calculationMethod}</strong></div>
@@ -177,10 +179,11 @@ export const OvertimeManager = () => {
               )}
 
               {ot.status === 'Pending' && (
-                <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+                <div className="am-approval-actions" style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
                   <button
                     type="button"
                     onClick={() => handleApprove(ot.id)}
+                    className="am-approve-button"
                     style={{ flex: 1, height: '36px', borderRadius: '8px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                   >
                     Approve
@@ -188,6 +191,7 @@ export const OvertimeManager = () => {
                   <button
                     type="button"
                     onClick={() => handleReject(ot.id)}
+                    className="am-reject-button"
                     style={{ flex: 1, height: '36px', borderRadius: '8px', backgroundColor: 'var(--danger-soft)', color: 'var(--danger)', border: 'none', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                   >
                     Reject
