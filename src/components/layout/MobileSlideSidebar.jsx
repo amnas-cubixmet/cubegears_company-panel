@@ -171,7 +171,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
                                   to={child.path}
                                   onClick={onClose}
                                   className={[
-                                    'flex min-h-9 items-center rounded-lg px-2 py-2 text-[11.5px] leading-tight no-underline transition',
+                                    'flex min-h-9 items-center justify-center rounded-lg px-2 py-2 text-center text-[11.5px] leading-tight no-underline transition',
                                     isChildActive
                                       ? 'bg-surface-2 font-semibold text-primary'
                                       : 'font-medium text-secondary hover:bg-surface-2 hover:text-content'
