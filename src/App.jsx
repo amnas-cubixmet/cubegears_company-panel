@@ -31,6 +31,8 @@ import './styles/ui-reset.css';
 import './styles/my-attendance.css';
 // Final scoped UI contract for all Attendance Manager routes.
 import './styles/attendance-manager.css';
+// Final scoped UI contract for all Staff Management routes.
+import './styles/staff-management.css';
 
 export function App() {
   return (
