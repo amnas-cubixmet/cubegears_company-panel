@@ -37,6 +37,8 @@ import './styles/staff-management.css';
 import './styles/payroll.css';
 // Final scoped UI contract for all Job Card Management routes.
 import './styles/job-management.css';
+// Final scoped UI contract for all Customers Management routes.
+import './styles/customer-management.css';
 
 export function App() {
   return (
