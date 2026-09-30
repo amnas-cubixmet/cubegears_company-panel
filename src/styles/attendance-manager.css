@@ -1296,3 +1296,52 @@
     font-size: 11px !important;
   }
 }
+
+
+/* Clickable employee navigation */
+.cg-attendance-manager .am-employee-link-row{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.cg-attendance-manager .am-employee-link-row:hover .am-productivity-name,
+.cg-attendance-manager .am-employee-name-button:hover strong,
+.cg-attendance-manager .am-employee-table-link:hover strong{
+  color:var(--primary);
+}
+.cg-attendance-manager .am-employee-name-button,
+.cg-attendance-manager .am-employee-table-link{
+  padding:0;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+}
+.cg-attendance-manager .am-employee-name-button{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  gap:2px;
+}
+.cg-attendance-manager .am-employee-name-button strong{
+  font-size:12px;
+  color:var(--text-primary);
+}
+.cg-attendance-manager .am-employee-name-button span{
+  font-size:10px;
+  color:var(--text-muted);
+}
+.cg-attendance-manager .am-employee-table-link{
+  display:inline-flex;
+  min-width:0;
+  flex-direction:column;
+  gap:2px;
+}
+.cg-attendance-manager .am-employee-table-link strong{
+  color:var(--text-primary);
+}
