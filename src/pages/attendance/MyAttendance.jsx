@@ -1,64 +1,88 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Calendar, History, FileText, PieChart } from 'lucide-react';
-import { MobileTabRail } from '../../components/common/MobileTabRail';
+import React from 'react';
+import { CalendarDays, ClipboardList, FileText, PieChart } from 'lucide-react';
 import { HolidayCalendar } from '../my-attendance/HolidayCalendar';
 import { HistoryLogs } from '../my-attendance/HistoryLogs';
 import { LeaveRequests } from '../my-attendance/LeaveRequests';
 import { AttendanceSummary } from '../my-attendance/AttendanceSummary';
+import '../../styles/my-attendance-unified.css';
 
-const tabs = [
-  { id: 'calendar', label: 'Holiday Calendar', icon: Calendar },
-  { id: 'history', label: 'History & Logs', icon: History },
+const sections = [
+  { id: 'overview', label: 'Attendance', icon: CalendarDays },
+  { id: 'history', label: 'History & Logs', icon: ClipboardList },
   { id: 'leave', label: 'Leave Requests', icon: FileText },
-  { id: 'summary', label: 'Summary', icon: PieChart }
+  { id: 'summary', label: 'Summary', icon: PieChart },
 ];
 
 export const MyAttendance = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const getInitialTab = () => {
-    if (location.pathname.includes('/calendar')) return 'calendar';
-    if (location.pathname.includes('/leave')) return 'leave';
-    if (location.pathname.includes('/summary')) return 'summary';
-    return 'history';
-  };
-
-  const [activeTab, setActiveTab] = useState(getInitialTab());
-
-  useEffect(() => {
-    setActiveTab(getInitialTab());
-  }, [location.pathname]);
-
-  const handleTabChange = (tabId) => {
-    setActiveTab(tabId);
-    navigate(`/my-attendance/${tabId}`);
+  const scrollToSection = (id) => {
+    document.getElementById(`attendance-${id}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   };
 
   return (
-    <div className="my-attendance-page cg-attendance flex w-full min-w-0 flex-col gap-4">
-      <header className="attendance-page-header">
-        <h1 className="m-0 text-[22px] font-extrabold leading-tight text-content">
-          My Attendance
-        </h1>
-        <p className="mt-1 text-[13px] leading-5 text-muted">
-          View personal attendance history, shift logs, leave applications and workshop holidays.
-        </p>
+    <div className="my-attendance-unified cg-attendance">
+      <header className="my-attendance-unified-header">
+        <div>
+          <h1>My Attendance</h1>
+          <p>Attendance, work logs, leave requests and monthly summary in one workspace.</p>
+        </div>
       </header>
 
-      <MobileTabRail
-        className="my-attendance-tabs"
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
+      <nav className="my-attendance-section-nav" aria-label="Attendance sections">
+        {sections.map(({ id, label, icon: Icon }) => (
+          <button key={id} type="button" onClick={() => scrollToSection(id)}>
+            <Icon size={14} />
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
 
-      <div className="attendance-tab-content w-full min-w-0">
-        {activeTab === 'calendar' && <HolidayCalendar />}
-        {activeTab === 'history' && <HistoryLogs />}
-        {activeTab === 'leave' && <LeaveRequests />}
-        {activeTab === 'summary' && <AttendanceSummary />}
+      <div className="my-attendance-unified-content">
+        <section id="attendance-overview" className="my-attendance-onepage-section">
+          <div className="onepage-section-heading">
+            <span>01</span>
+            <div>
+              <h2>Attendance Overview</h2>
+              <p>Employee details, monthly attendance and daily records.</p>
+            </div>
+          </div>
+          <HolidayCalendar />
+        </section>
+
+        <section id="attendance-history" className="my-attendance-onepage-section">
+          <div className="onepage-section-heading">
+            <span>02</span>
+            <div>
+              <h2>History & Logs</h2>
+              <p>Detailed punch sessions, corrections and attendance records.</p>
+            </div>
+          </div>
+          <HistoryLogs />
+        </section>
+
+        <section id="attendance-leave" className="my-attendance-onepage-section">
+          <div className="onepage-section-heading">
+            <span>03</span>
+            <div>
+              <h2>Leave Requests</h2>
+              <p>Check leave balances and submit or review leave applications.</p>
+            </div>
+          </div>
+          <LeaveRequests />
+        </section>
+
+        <section id="attendance-summary" className="my-attendance-onepage-section">
+          <div className="onepage-section-heading">
+            <span>04</span>
+            <div>
+              <h2>Monthly Summary</h2>
+              <p>Attendance totals, worked hours, overtime and monthly flags.</p>
+            </div>
+          </div>
+          <AttendanceSummary />
+        </section>
       </div>
     </div>
   );
