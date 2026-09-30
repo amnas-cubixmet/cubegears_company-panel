@@ -17,6 +17,7 @@ import { ShiftSettings } from '../attendance-manager/Shifts';
 import { AttendanceReports } from '../attendance-manager/AttendanceReports';
 import { RulesSettings } from '../attendance-manager/RulesSettings';
 import { OvertimeManager } from '../../components/payroll/OvertimeManager';
+import '../../styles/attendance-manager.css';
 import '../../styles/attendance-manager-unified.css';
 
 const sections = [
@@ -39,7 +40,7 @@ export const AttendanceManager = () => {
   };
 
   return (
-    <div className="attendance-manager-unified">
+    <div className="attendance-manager-unified cg-attendance-manager">
       <header className="attendance-manager-unified-header">
         <div>
           <h1>Attendance Manager</h1>
