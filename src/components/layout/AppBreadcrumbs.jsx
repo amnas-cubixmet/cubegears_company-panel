@@ -1,5 +1,7 @@
 import React, { useMemo, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { ChevronRight, Home } from 'lucide-react';
+import '../../styles/breadcrumbs.css';
 
 const LABELS = {
   dashboard: 'Dashboard',
@@ -91,7 +93,7 @@ export function AppBreadcrumbs() {
     if (!segments.length || location.pathname === '/dashboard') return [];
 
     return [
-      { label: 'Home', href: '/dashboard', current: false },
+      { label: 'Home', href: '/dashboard', current: false, home: true },
       ...segments.map((segment, index) => ({
         label: prettify(segment),
         href: buildHref(segments, index),
@@ -101,9 +103,7 @@ export function AppBreadcrumbs() {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
-    }
+    if (scrollRef.current) scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
   }, [location.pathname]);
 
   if (!items.length) return null;
@@ -113,11 +113,18 @@ export function AppBreadcrumbs() {
       <div className="app-breadcrumb" ref={scrollRef}>
         {items.map((item, index) => (
           <React.Fragment key={item.href + item.label}>
-            {index > 0 && <span className="app-breadcrumb-separator" aria-hidden="true">/</span>}
+            {index > 0 && (
+              <span className="app-breadcrumb-separator" aria-hidden="true">
+                <ChevronRight size={12} />
+              </span>
+            )}
             {item.current ? (
               <span className="app-breadcrumb-current" aria-current="page">{item.label}</span>
             ) : (
-              <Link className="app-breadcrumb-link" to={item.href}>{item.label}</Link>
+              <Link className="app-breadcrumb-link" to={item.href}>
+                {item.home && <Home size={12} />}
+                <span>{item.label}</span>
+              </Link>
             )}
           </React.Fragment>
         ))}
