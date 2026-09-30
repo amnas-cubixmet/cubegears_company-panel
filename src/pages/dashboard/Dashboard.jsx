@@ -16,17 +16,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardData, toggleClockIn } from '../../services/dashboard.service';
-import { Button } from '../../components/common/Button';
-import { Select } from '../../components/common/Select';
 import { Loader } from '../../components/common/Loader';
-import { Badge } from '../../components/common/Badge';
+import '../../styles/dashboard.css';
 
-const statusVariant = (status) => {
-  const value = String(status || '').toLowerCase();
-  if (value.includes('confirm') || value.includes('complete') || value.includes('ready')) return 'success';
-  if (value.includes('pending') || value.includes('check')) return 'warning';
-  if (value.includes('delay') || value.includes('critical')) return 'danger';
-  return 'info';
+const statusClass = (status = '') => {
+  const value = String(status).toLowerCase();
+  if (value.includes('confirm') || value.includes('complete') || value.includes('ready')) return 'is-success';
+  if (value.includes('pending') || value.includes('check')) return 'is-warning';
+  if (value.includes('delay') || value.includes('critical')) return 'is-danger';
+  return 'is-info';
 };
 
 const repairStages = [
@@ -60,7 +58,9 @@ export const Dashboard = () => {
   }, [filterPeriod, filterBranch]);
 
   useEffect(() => {
-    const update = () => setCurrentTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    const update = () => setCurrentTime(
+      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    );
     update();
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
@@ -97,87 +97,102 @@ export const Dashboard = () => {
   ];
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-3.5">
-      <section className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="m-0 text-[17px] font-semibold tracking-tight text-content">Dashboard</h1>
-          <p className="mt-0.5 text-[10px] text-muted">Workshop operations, live repairs and business status.</p>
+    <div className="dashboard-page">
+      <section className="dashboard-heading">
+        <div className="dashboard-heading-copy">
+          <h1>Dashboard</h1>
+          <p>Workshop operations, live repairs and business status.</p>
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <div className="flex h-9 items-center gap-2 rounded-lg border border-line bg-surface px-2.5 text-[10px]">
-            <span className={`size-2 rounded-full ${isClockedIn ? 'bg-success' : 'bg-danger'}`} />
-            <span className="font-semibold text-content">{user?.name || 'User'}</span>
-            <span className="text-muted">{isClockedIn ? 'Working' : 'Off duty'}</span>
-            <span className="text-muted">·</span>
-            <span className="font-medium text-secondary">{currentTime}</span>
+
+        <div className="duty-controls">
+          <div className="duty-status">
+            <span className={`duty-dot ${isClockedIn ? 'is-online' : 'is-offline'}`} />
+            <strong>{user?.name || 'User'}</strong>
+            <span>{isClockedIn ? 'Working' : 'Off duty'}</span>
+            <span className="duty-separator">·</span>
+            <span>{currentTime}</span>
           </div>
-          <Button variant={isClockedIn ? 'danger' : 'primary'} size="sm" onClick={handleClockToggle} className="h-9 rounded-lg px-3 text-[10px]">
-            <Clock size={13} />
+          <button
+            type="button"
+            className={`dashboard-button duty-button ${isClockedIn ? 'is-danger' : 'is-primary'}`}
+            onClick={handleClockToggle}
+          >
+            <Clock size={14} />
             {isClockedIn ? 'Clock Out' : 'Clock In'}
-          </Button>
+          </button>
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
+      <section className="dashboard-stats">
         {stats.map(({ label, value, icon: Icon, meta }) => (
-          <article key={label} className="min-w-0 rounded-xl border border-line bg-surface p-3.5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="truncate text-[10px] font-medium text-muted">{label}</div>
-                <div className="mt-2 truncate text-[21px] font-semibold leading-none tracking-tight text-content">{value}</div>
+          <article key={label} className="dashboard-stat-card">
+            <div className="stat-top">
+              <div className="stat-copy">
+                <span className="stat-label">{label}</span>
+                <strong className="stat-value">{value}</strong>
               </div>
-              <span className="grid size-8 shrink-0 place-items-center rounded-full border border-line bg-surface-2 text-primary"><Icon size={14} /></span>
+              <span className="stat-icon"><Icon size={15} /></span>
             </div>
-            <div className="mt-2.5 text-[9px] font-medium text-muted">{meta}</div>
+            <span className="stat-meta">{meta}</span>
           </article>
         ))}
       </section>
 
-      <section className="min-w-0 overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
-        <header className="flex flex-col gap-2.5 border-b border-line px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <section className="operations-card">
+        <header className="operations-header">
           <div>
-            <h2 className="m-0 text-[12px] font-semibold text-content">Service Operations</h2>
-            <p className="mt-0.5 text-[9px] text-muted">Track today's bookings and repair progress.</p>
+            <h2>Service Operations</h2>
+            <p>Track today's bookings and repair progress.</p>
           </div>
-          <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:items-center">
-            <div className="w-full sm:w-[150px]">
-              <Select value={filterPeriod} onChange={(event) => setFilterPeriod(event.target.value)} options={[
-                { value: 'today', label: 'Today' },
-                { value: 'week', label: 'This Week' },
-                { value: 'month', label: 'This Month' },
-              ]} />
-            </div>
-            <div className="w-full sm:w-[180px]">
-              <Select value={filterBranch} onChange={(event) => setFilterBranch(event.target.value)} options={[
-                { value: 'main', label: 'Main Garage' },
-                { value: 'express', label: 'Express Bay' },
-              ]} />
-            </div>
-            <Button size="sm" onClick={() => navigate('/jobs/new')} className="col-span-2 h-9 rounded-lg px-3 text-[10px] sm:col-span-1">
-              <Plus size={13} /> New Job Card
-            </Button>
+
+          <div className="operations-tools">
+            <select value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value)}>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+
+            <select value={filterBranch} onChange={(e) => setFilterBranch(e.target.value)}>
+              <option value="main">Main Garage</option>
+              <option value="express">Express Bay</option>
+            </select>
+
+            <button type="button" className="dashboard-button is-primary" onClick={() => navigate('/jobs/new')}>
+              <Plus size={14} />
+              New Job Card
+            </button>
           </div>
         </header>
 
-        <div className="grid min-w-0 grid-cols-1 xl:grid-cols-[minmax(280px,0.95fr)_minmax(320px,1.05fr)_minmax(235px,0.72fr)]">
-          <div className="min-w-0 border-b border-line p-3 xl:border-b-0 xl:border-r">
-            <div className="relative mb-2.5">
-              <Search size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search customer, vehicle or job" className="h-9 w-full rounded-lg border border-line bg-surface-2 pl-8 pr-3 text-[10px] text-content outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/10" />
+        <div className="operations-grid">
+          <div className="booking-pane">
+            <div className="dashboard-search">
+              <Search size={14} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search customer, vehicle or job"
+              />
             </div>
-            <div className="flex max-h-[440px] flex-col gap-1.5 overflow-y-auto pr-1">
+
+            <div className="booking-list">
               {filteredBookings.map((booking) => {
                 const active = booking.id === selectedBooking?.id;
                 return (
-                  <button key={booking.id} type="button" onClick={() => setSelectedBookingId(booking.id)} className={`w-full rounded-lg border px-2.5 py-2.5 text-left transition ${active ? 'border-primary/40 bg-primary-soft' : 'border-line bg-surface hover:bg-surface-2'}`}>
-                    <div className="flex min-w-0 items-center justify-between gap-2">
-                      <div className="min-w-0 truncate text-[10px] font-semibold text-content">{booking.id} · {booking.customer}</div>
-                      <Badge variant={statusVariant(booking.status)} className="shrink-0">{booking.status}</Badge>
+                  <button
+                    key={booking.id}
+                    type="button"
+                    className={`booking-row ${active ? 'is-active' : ''}`}
+                    onClick={() => setSelectedBookingId(booking.id)}
+                  >
+                    <div className="booking-row-top">
+                      <strong>{booking.id} · {booking.customer}</strong>
+                      <span className={`status-pill ${statusClass(booking.status)}`}>{booking.status}</span>
                     </div>
-                    <div className="mt-1 truncate text-[9px] text-muted">{booking.vehicle}</div>
-                    <div className="mt-1.5 flex items-center justify-between gap-2 text-[9px]">
-                      <span className="truncate text-secondary">{booking.service}</span>
-                      <span className="shrink-0 font-medium text-muted">{booking.time}</span>
+                    <span className="booking-vehicle">{booking.vehicle}</span>
+                    <div className="booking-row-bottom">
+                      <span>{booking.service}</span>
+                      <time>{booking.time}</time>
                     </div>
                   </button>
                 );
@@ -185,122 +200,146 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          <div className="min-w-0 border-b border-line p-3.5 xl:border-b-0 xl:border-r">
+          <div className="job-detail-pane">
             {selectedBooking ? (
-              <div className="flex h-full min-h-[390px] min-w-0 flex-col">
-                <div className="flex min-w-0 items-start justify-between gap-3 border-b border-line pb-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] font-semibold text-content">{selectedBooking.id}</span>
-                      <Badge variant={statusVariant(selectedBooking.status)}>{selectedBooking.status}</Badge>
+              <div className="job-detail">
+                <div className="job-detail-head">
+                  <div>
+                    <div className="job-id-row">
+                      <strong>{selectedBooking.id}</strong>
+                      <span className={`status-pill ${statusClass(selectedBooking.status)}`}>{selectedBooking.status}</span>
                     </div>
-                    <div className="mt-1 truncate text-[10px] font-medium text-content">{selectedBooking.vehicle}</div>
+                    <span>{selectedBooking.vehicle}</span>
                   </div>
-                  <button type="button" onClick={() => navigate('/jobs')} className="shrink-0 text-[9px] font-semibold text-primary">View Job</button>
+                  <button type="button" className="text-link" onClick={() => navigate('/jobs')}>View Job</button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-5 gap-y-3 border-b border-line py-3 sm:grid-cols-3">
-                  <div><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Customer</div><div className="mt-1 truncate text-[10px] font-medium text-content">{selectedBooking.customer}</div></div>
-                  <div><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Booking Time</div><div className="mt-1 text-[10px] font-medium text-content">{selectedBooking.time}</div></div>
-                  <div><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Advisor</div><div className="mt-1 text-[10px] font-medium text-content">{user?.name || 'Alex Rivera'}</div></div>
-                  <div className="col-span-2 sm:col-span-3"><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Service Request</div><div className="mt-1 text-[10px] font-medium text-content">{selectedBooking.service}</div></div>
+                <div className="job-meta-grid">
+                  <div><small>Customer</small><strong>{selectedBooking.customer}</strong></div>
+                  <div><small>Booking Time</small><strong>{selectedBooking.time}</strong></div>
+                  <div><small>Advisor</small><strong>{user?.name || 'Alex Rivera'}</strong></div>
+                  <div className="job-meta-wide"><small>Service Request</small><strong>{selectedBooking.service}</strong></div>
                 </div>
 
-                <div className="py-3">
-                  <div className="text-[9px] font-semibold text-content">Repair Details</div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-[9px]">
-                    <div className="rounded-lg bg-surface-2 p-2.5"><span className="block text-muted">Job Status</span><span className="mt-1 block font-medium text-content">{selectedBooking.status}</span></div>
-                    <div className="rounded-lg bg-surface-2 p-2.5"><span className="block text-muted">Assigned Team</span><span className="mt-1 block font-medium text-content">Workshop A</span></div>
+                <div className="repair-details">
+                  <h3>Repair Details</h3>
+                  <div className="repair-detail-grid">
+                    <div><span>Job Status</span><strong>{selectedBooking.status}</strong></div>
+                    <div><span>Assigned Team</span><strong>Workshop A</strong></div>
                   </div>
                 </div>
 
-                <div className="mt-auto rounded-lg border border-line bg-surface-2 p-3">
-                  <div className="mb-3 flex items-center justify-between gap-3"><div className="text-[9px] font-semibold text-content">Progress</div><div className="text-[8px] font-medium text-muted">Live workshop stages</div></div>
-                  <div className="grid grid-cols-4 gap-1.5">
+                <div className="progress-card">
+                  <div className="progress-title-row">
+                    <strong>Progress</strong>
+                    <span>Live workshop stages</span>
+                  </div>
+                  <div className="progress-grid">
                     {repairStages.map((stage, index) => (
-                      <div key={stage.key} className="min-w-0 text-center">
-                        <div className={`mx-auto grid size-6 place-items-center rounded-full border ${index < 3 ? 'border-primary bg-primary text-white' : 'border-line bg-surface text-muted'}`}>
-                          {index < 3 ? <CheckCircle2 size={11} /> : <span className="text-[8px] font-bold">{index + 1}</span>}
-                        </div>
-                        <div className="mt-1 truncate text-[8px] font-medium text-muted">{stage.label}</div>
-                        <div className="mt-0.5 text-[9px] font-semibold text-content">{data?.jobProgress?.[stage.key] ?? 0}</div>
+                      <div key={stage.key} className="progress-stage">
+                        <span className={`progress-circle ${index < 3 ? 'is-done' : ''}`}>
+                          {index < 3 ? <CheckCircle2 size={12} /> : index + 1}
+                        </span>
+                        <small>{stage.label}</small>
+                        <strong>{data?.jobProgress?.[stage.key] ?? 0}</strong>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-            ) : <div className="grid min-h-[390px] place-items-center text-[10px] text-muted">No booking selected</div>}
+            ) : (
+              <div className="empty-job">No booking selected</div>
+            )}
           </div>
 
-          <aside className="min-w-0 p-3">
-            <div className="flex items-center justify-between gap-2"><h3 className="m-0 text-[10px] font-semibold text-content">Active Repair</h3><button type="button" onClick={() => navigate('/jobs')} className="text-[8px] font-semibold text-primary">View All</button></div>
-            <div className="mt-2.5 rounded-lg border border-line bg-surface-2 p-3">
-              <div className="grid min-h-[88px] place-items-center rounded-lg bg-surface"><Car size={46} strokeWidth={1.1} className="text-secondary" /></div>
-              <div className="mt-2.5 flex items-center justify-between gap-2">
-                <div className="min-w-0"><div className="truncate text-[10px] font-semibold text-content">{data?.recentJobs?.[0]?.vehicle || 'Vehicle'}</div><div className="mt-0.5 truncate text-[8px] text-muted">{data?.recentJobs?.[0]?.id}</div></div>
-                <Badge variant="success">In Progress</Badge>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <div><div className="text-[7px] uppercase tracking-wide text-muted">Customer</div><div className="mt-1 truncate text-[9px] font-medium text-content">{data?.recentJobs?.[0]?.customer}</div></div>
-                <div><div className="text-[7px] uppercase tracking-wide text-muted">Mechanic</div><div className="mt-1 truncate text-[9px] font-medium text-content">{data?.recentJobs?.[0]?.mechanic}</div></div>
-              </div>
-              <div className="mt-3"><div className="flex items-center justify-between text-[8px]"><span className="text-muted">Overall Progress</span><span className="font-semibold text-primary">70%</span></div><div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface"><div className="h-full w-[70%] rounded-full bg-primary" /></div></div>
+          <aside className="repair-pane">
+            <div className="repair-pane-title">
+              <h3>Active Repair</h3>
+              <button type="button" className="text-link" onClick={() => navigate('/jobs')}>View All</button>
             </div>
 
-            <div className="mt-3 rounded-lg border border-line p-3">
-              <div className="flex items-center gap-1.5"><Activity size={12} className="text-primary" /><span className="text-[9px] font-semibold text-content">Smart Insights</span></div>
-              <div className="mt-2.5 flex flex-col gap-2">
+            <div className="active-repair-card">
+              <div className="vehicle-visual"><Car size={52} strokeWidth={1.1} /></div>
+              <div className="active-repair-main">
+                <div>
+                  <strong>{data?.recentJobs?.[0]?.vehicle || 'Vehicle'}</strong>
+                  <small>{data?.recentJobs?.[0]?.id}</small>
+                </div>
+                <span className="status-pill is-success">In Progress</span>
+              </div>
+
+              <div className="repair-meta">
+                <div><small>Customer</small><strong>{data?.recentJobs?.[0]?.customer}</strong></div>
+                <div><small>Mechanic</small><strong>{data?.recentJobs?.[0]?.mechanic}</strong></div>
+              </div>
+
+              <div className="overall-progress">
+                <div><span>Overall Progress</span><strong>70%</strong></div>
+                <div className="progress-track"><span /></div>
+              </div>
+            </div>
+
+            <div className="insights-card">
+              <div className="insights-title"><Activity size={13} /><strong>Smart Insights</strong></div>
+              <div className="insight-list">
                 {(data?.stockAlerts || []).slice(0, 2).map((alert) => (
-                  <button key={alert.id} type="button" onClick={() => navigate('/stock')} className="rounded-lg bg-surface-2 p-2.5 text-left">
-                    <div className="flex items-start gap-2">
-                      <PackageSearch size={12} className={alert.priority === 'critical' ? 'mt-0.5 shrink-0 text-danger' : 'mt-0.5 shrink-0 text-warning'} />
-                      <div className="min-w-0"><div className="truncate text-[9px] font-semibold text-content">{alert.partName}</div><div className="mt-1 text-[8px] leading-3.5 text-muted">{alert.message}. Stock {alert.currentStock}.</div></div>
-                    </div>
+                  <button key={alert.id} type="button" className="insight-item" onClick={() => navigate('/stock')}>
+                    <PackageSearch size={13} className={alert.priority === 'critical' ? 'danger-icon' : 'warning-icon'} />
+                    <span>
+                      <strong>{alert.partName}</strong>
+                      <small>{alert.message}. Stock {alert.currentStock}.</small>
+                    </span>
                   </button>
                 ))}
               </div>
-              <Button variant="primary" size="sm" onClick={() => navigate('/stock')} className="mt-2.5 h-8 w-full rounded-lg text-[9px]">Review Stock</Button>
+              <button type="button" className="dashboard-button is-primary full-width" onClick={() => navigate('/stock')}>Review Stock</button>
             </div>
           </aside>
         </div>
       </section>
 
-      <section className="grid min-w-0 grid-cols-1 gap-2.5 lg:grid-cols-3">
-        <article className="rounded-xl border border-line bg-surface p-3.5 shadow-sm">
-          <div className="flex items-center justify-between"><h2 className="m-0 text-[11px] font-semibold text-content">Finance & Collections</h2><CircleDollarSign size={14} className="text-primary" /></div>
-          <div className="mt-2.5 divide-y divide-line">
+      <section className="dashboard-bottom-grid">
+        <article className="dashboard-panel">
+          <div className="panel-title"><h2>Finance & Collections</h2><CircleDollarSign size={15} /></div>
+          <div className="finance-list">
             {[
               ['Billed Revenue', data?.payments?.billedAmount],
               ['Collected Cash', data?.payments?.receivedPayments],
               ['Overdue Dues', data?.payments?.overdueAmount],
-            ].map(([label, value], index) => <div key={label} className="flex items-center justify-between gap-3 py-2 text-[9px]"><span className="text-muted">{label}</span><span className={`font-semibold ${index === 2 ? 'text-danger' : 'text-content'}`}>{value}</span></div>)}
+            ].map(([label, value], index) => (
+              <div key={label}><span>{label}</span><strong className={index === 2 ? 'danger-text' : ''}>{value}</strong></div>
+            ))}
           </div>
         </article>
 
-        <article className="rounded-xl border border-line bg-surface p-3.5 shadow-sm">
-          <div className="flex items-center justify-between"><h2 className="m-0 text-[11px] font-semibold text-content">Workshop Staff</h2><UserRound size={14} className="text-primary" /></div>
-          <div className="mt-2.5 flex flex-col gap-1.5">
+        <article className="dashboard-panel">
+          <div className="panel-title"><h2>Workshop Staff</h2><UserRound size={15} /></div>
+          <div className="staff-list">
             {(data?.staffAvailability || []).slice(0, 3).map((staff) => (
-              <div key={staff.name} className="flex items-center gap-2.5 rounded-lg bg-surface-2 px-2.5 py-2">
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary-soft text-primary"><UserRound size={12}/></span>
-                <div className="min-w-0 flex-1"><div className="truncate text-[9px] font-semibold text-content">{staff.name}</div><div className="mt-0.5 truncate text-[8px] text-muted">{staff.role} · {staff.activeJobs} jobs</div></div>
-                <span className={`size-1.5 shrink-0 rounded-full ${staff.status === 'Active Duty' ? 'bg-success' : 'bg-warning'}`} />
+              <div key={staff.name} className="staff-row">
+                <span className="staff-avatar"><UserRound size={13} /></span>
+                <span className="staff-copy">
+                  <strong>{staff.name}</strong>
+                  <small>{staff.role} · {staff.activeJobs} jobs</small>
+                </span>
+                <span className={`staff-dot ${staff.status === 'Active Duty' ? 'is-online' : 'is-away'}`} />
               </div>
             ))}
           </div>
         </article>
 
-        <article className="rounded-xl border border-line bg-surface p-3.5 shadow-sm">
-          <div className="flex items-center justify-between"><h2 className="m-0 text-[11px] font-semibold text-content">Quick Actions</h2><Wrench size={14} className="text-primary" /></div>
-          <div className="mt-2.5 grid grid-cols-2 gap-2">
+        <article className="dashboard-panel">
+          <div className="panel-title"><h2>Quick Actions</h2><Wrench size={15} /></div>
+          <div className="quick-actions">
             {[
               ['New Customer', '/customers/new'],
               ['New Job Card', '/jobs/new'],
               ['Create Invoice', '/invoices/new'],
               ['Stock Issue', '/stock'],
             ].map(([label, path]) => (
-              <button key={label} type="button" onClick={() => navigate(path)} className="flex min-h-9 items-center justify-between gap-2 rounded-lg border border-line bg-surface-2 px-2.5 text-left text-[9px] font-semibold text-content transition hover:border-primary/40 hover:bg-primary-soft">
-                <span className="truncate">{label}</span><ArrowRight size={11} className="shrink-0 text-primary" />
+              <button key={label} type="button" onClick={() => navigate(path)}>
+                <span>{label}</span>
+                <ArrowRight size={12} />
               </button>
             ))}
           </div>
