@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Edit3, Search } from 'lucide-react';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
@@ -23,6 +24,7 @@ const formatMinutes = (minutes) => {
 };
 
 export const DailyAttendance = () => {
+  const navigate = useNavigate();
   const [team, setTeam] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
   const [branchFilter, setBranchFilter] = useState('All');
@@ -109,10 +111,14 @@ export const DailyAttendance = () => {
         {filtered.map((item) => (
           <article key={item.id} className="am-staff-card">
             <div className="am-staff-card__head">
-              <div>
+              <button
+                type="button"
+                className="am-employee-name-button"
+                onClick={() => navigate(`/attendance-manager/team-review/${item.staffId}/2026-09-12`)}
+              >
                 <strong>{item.name}</strong>
                 <span>{item.staffId} · {item.designation}</span>
-              </div>
+              </button>
               <select value={item.status} onChange={(e) => quickMark(item, e.target.value)}>
                 {!STATUSES.includes(item.status) ? <option>{item.status}</option> : null}
                 {STATUSES.map((status) => <option key={status}>{status}</option>)}
@@ -145,7 +151,16 @@ export const DailyAttendance = () => {
           <tbody>
             {filtered.map((item) => (
               <tr key={item.id}>
-                <td><strong>{item.name}</strong><span className="am-table-subtext">{item.staffId}</span></td>
+                <td>
+                  <button
+                    type="button"
+                    className="am-employee-table-link"
+                    onClick={() => navigate(`/attendance-manager/team-review/${item.staffId}/2026-09-12`)}
+                  >
+                    <strong>{item.name}</strong>
+                    <span className="am-table-subtext">{item.staffId}</span>
+                  </button>
+                </td>
                 <td>{item.designation}<span className="am-table-subtext">{item.branch}</span></td>
                 <td>{item.clockIn || '—'}</td>
                 <td>{item.clockOut || '—'}</td>
