@@ -223,3 +223,65 @@
   .job-meta-grid{grid-template-columns:1fr}
   .progress-grid{grid-template-columns:repeat(2,1fr);row-gap:10px}
 }
+
+
+/* Active repair is a real clickable job target */
+.active-repair-clickable{
+  width:100%;
+  display:block;
+  border:1px solid var(--border);
+  color:var(--text-primary);
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .16s ease,background-color .16s ease,transform .16s ease;
+}
+.active-repair-clickable:hover{
+  border-color:color-mix(in srgb,var(--primary) 42%,var(--border));
+  background:color-mix(in srgb,var(--primary-soft) 45%,var(--surface-2));
+}
+.active-repair-clickable:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px var(--primary-soft);
+}
+.active-repair-open-hint{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:5px;
+  margin-top:10px;
+  padding-top:9px;
+  border-top:1px solid var(--border);
+  color:var(--primary);
+  font-size:8px;
+  font-weight:700;
+}
+
+/* Expanded dashboard quick actions */
+.quick-actions-expanded{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.quick-actions-expanded button{
+  min-height:40px;
+}
+.quick-action-leading{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.quick-action-leading>svg{
+  flex:0 0 auto;
+  color:var(--primary);
+}
+.quick-action-leading>span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+@media(max-width:420px){
+  .quick-actions-expanded{
+    grid-template-columns:1fr;
+  }
+}
