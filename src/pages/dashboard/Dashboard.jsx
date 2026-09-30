@@ -5,15 +5,10 @@ import {
   AlertTriangle,
   ArrowRight,
   Car,
-  CheckCircle,
   CheckCircle2,
-  ChevronRight,
   CircleDollarSign,
   Clock,
-  ClipboardList,
-  DollarSign,
   PackageSearch,
-  Phone,
   Plus,
   Search,
   UserRound,
@@ -24,6 +19,22 @@ import { getDashboardData, toggleClockIn } from '../../services/dashboard.servic
 import { Button } from '../../components/common/Button';
 import { Select } from '../../components/common/Select';
 import { Loader } from '../../components/common/Loader';
+import { Badge } from '../../components/common/Badge';
+
+const statusVariant = (status) => {
+  const value = String(status || '').toLowerCase();
+  if (value.includes('confirm') || value.includes('complete') || value.includes('ready')) return 'success';
+  if (value.includes('pending') || value.includes('check')) return 'warning';
+  if (value.includes('delay') || value.includes('critical')) return 'danger';
+  return 'info';
+};
+
+const repairStages = [
+  { key: 'inspection', label: 'Inspection' },
+  { key: 'awaitingApproval', label: 'Approval' },
+  { key: 'inProgress', label: 'Repairing' },
+  { key: 'qualityCheck', label: 'QC' },
+];
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -49,19 +60,11 @@ export const Dashboard = () => {
   }, [filterPeriod, filterBranch]);
 
   useEffect(() => {
-    const update = () => setCurrentTime(
-      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-    );
+    const update = () => setCurrentTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     update();
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
   }, []);
-
-  const handleClockToggle = async () => {
-    const nextStatus = data?.attendance?.status === 'CLOCKED_IN' ? 'CLOCKED_OUT' : 'CLOCKED_IN';
-    await toggleClockIn(nextStatus);
-    fetchDashboard();
-  };
 
   const selectedBooking = useMemo(
     () => data?.bookings?.find((booking) => booking.id === selectedBookingId) || data?.bookings?.[0],
@@ -77,505 +80,232 @@ export const Dashboard = () => {
     );
   }, [data, search]);
 
+  const handleClockToggle = async () => {
+    const nextStatus = data?.attendance?.status === 'CLOCKED_IN' ? 'CLOCKED_OUT' : 'CLOCKED_IN';
+    await toggleClockIn(nextStatus);
+    fetchDashboard();
+  };
+
   if (loading) return <Loader />;
 
   const isClockedIn = data?.attendance?.status === 'CLOCKED_IN';
-
-  // Section 3: Summary Cards
-  const summaryStats = [
-    { title: "Today's Vehicles", value: data?.stats?.todaysVehicles || 0, icon: 'Car', trend: 'up' },
-    { title: 'Ongoing Jobs', value: data?.stats?.ongoingJobs || 0, icon: 'ClipboardList', trend: 'up' },
-    { title: 'Ready for Delivery', value: data?.stats?.readyForDelivery || 0, icon: 'CheckCircle', trend: 'up' },
-    { title: "Today's Collection", value: data?.stats?.todaysCollection || '₹0', icon: 'DollarSign', trend: 'up' },
-    { title: 'Outstanding Balance', value: data?.stats?.outstandingBalance || '₹0', icon: 'AlertTriangle', trend: 'down' }
-  ];
-
-  // Recent jobs table columns
-  const recentJobsColumns = [
-    { key: 'id', label: 'Job #' },
-    { key: 'customer', label: 'Customer' },
-    { key: 'vehicle', label: 'Vehicle' },
-    { key: 'mechanic', label: 'Mechanic' },
-    { key: 'status', label: 'Status' },
-    { key: 'amount', label: 'Amount' },
-    { key: 'actions', label: 'Action' }
+  const stats = [
+    { label: "Today's Vehicles", value: data?.stats?.todaysVehicles || 0, icon: Car, meta: 'Live check-ins' },
+    { label: 'Ongoing Jobs', value: data?.stats?.ongoingJobs || 0, icon: Wrench, meta: 'Workshop active' },
+    { label: 'Ready for Delivery', value: data?.stats?.readyForDelivery || 0, icon: CheckCircle2, meta: 'Ready today' },
+    { label: 'Outstanding Balance', value: data?.stats?.outstandingBalance || '₹0', icon: AlertTriangle, meta: 'Needs follow-up' },
   ];
 
   return (
-    <div className="cg-dashboard mx-auto flex w-full max-w-[1600px] min-w-0 flex-col gap-5 p-4 sm:p-5 lg:p-6">
-      
-      {/* SECTION 1: DUTY SHIFT BAR */}
-      <section className="flex min-w-0 flex-col justify-between gap-3.5 rounded-[12px] border border-line bg-surface px-3.5 py-2.5 shadow-sm sm:flex-row sm:items-center md:h-[60px] md:px-4 md:py-2">
-        {/* LEFT SECTION */}
-        <div className="flex min-w-0 items-center gap-3">
-          <span className={`grid size-[36px] shrink-0 place-items-center rounded-lg ${isClockedIn ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
-            <Clock size={18} aria-hidden="true" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <h2 className="m-0 truncate text-[13px] font-semibold tracking-tight text-content">
-              {user?.name || 'Alex Rivera'}'s Duty Shift
-            </h2>
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs whitespace-nowrap">
-              <span className={`text-xs font-semibold ${isClockedIn ? 'text-success' : 'text-danger'}`}>
-                {isClockedIn ? 'WORKING' : 'CLOCKED OUT'}
-              </span>
-              <span className="text-muted">•</span>
-              <span className="text-xs font-normal text-secondary">{isClockedIn ? 'Clocked in' : 'Not active'}</span>
-            </div>
-          </div>
+    <div className="flex w-full min-w-0 flex-col gap-3.5">
+      <section className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="m-0 text-[17px] font-semibold tracking-tight text-content">Dashboard</h1>
+          <p className="mt-0.5 text-[10px] text-muted">Workshop operations, live repairs and business status.</p>
         </div>
-
-        {/* MIDDLE STATS & RIGHT BUTTON */}
-        <div className="flex flex-col gap-3 min-w-0 sm:flex-row sm:items-center sm:justify-end md:gap-9 lg:gap-11">
-          {/* STATS */}
-          <div className="grid grid-cols-3 gap-3 text-left sm:flex sm:items-center sm:gap-9 lg:gap-11">
-            <div className="min-w-0 whitespace-nowrap">
-              <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-muted">TODAY</span>
-              <strong className="block truncate text-xs font-semibold text-content">
-                {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-              </strong>
-            </div>
-
-            <div className="min-w-0 whitespace-nowrap">
-              <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-muted">LIVE TIME</span>
-              <strong className="block truncate text-xs font-semibold text-content">{currentTime || '--:--:--'}</strong>
-            </div>
-
-            <div className="min-w-0 whitespace-nowrap">
-              <span className="block truncate text-[10px] font-medium uppercase tracking-wider text-muted">WORKED</span>
-              <strong className="block truncate text-xs font-semibold text-content">{data?.attendance?.workedHours || '6h 45m'}</strong>
-            </div>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div className="flex h-9 items-center gap-2 rounded-lg border border-line bg-surface px-2.5 text-[10px]">
+            <span className={`size-2 rounded-full ${isClockedIn ? 'bg-success' : 'bg-danger'}`} />
+            <span className="font-semibold text-content">{user?.name || 'User'}</span>
+            <span className="text-muted">{isClockedIn ? 'Working' : 'Off duty'}</span>
+            <span className="text-muted">·</span>
+            <span className="font-medium text-secondary">{currentTime}</span>
           </div>
-
-          {/* RIGHT BUTTON */}
-          <Button
-            variant={isClockedIn ? 'danger' : 'primary'}
-            size="md"
-            onClick={handleClockToggle}
-            className={`h-[42px] w-full min-w-0 rounded-[10px] text-xs font-semibold shadow-none sm:w-[125px] sm:min-w-[125px] ${
-              isClockedIn ? 'bg-red-600/90 text-white hover:bg-red-700/90 border-0' : ''
-            }`}
-          >
-            {isClockedIn ? 'Clock Out Shift' : 'Clock In Duty'}
+          <Button variant={isClockedIn ? 'danger' : 'primary'} size="sm" onClick={handleClockToggle} className="h-9 rounded-lg px-3 text-[10px]">
+            <Clock size={13} />
+            {isClockedIn ? 'Clock Out' : 'Clock In'}
           </Button>
         </div>
       </section>
 
-      {/* SECTION 2: FILTER & QUICK ACTION TOOLBAR */}
-      <section className="flex w-full min-w-0 flex-col gap-3 p-0">
-        {/* Compact Filter controls row (Unstretched flex layout) */}
-        <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-          <Select
-            value={filterPeriod}
-            onChange={(event) => setFilterPeriod(event.target.value)}
-            options={[
-              { value: 'today', label: 'Today' },
-              { value: 'week', label: 'This Week' },
-              { value: 'month', label: 'This Month' },
-            ]}
-            className="h-[42px] w-full min-w-0 rounded-[10px] px-3 text-[13px] font-medium sm:w-[220px]"
-          />
-          <Select
-            value={filterBranch}
-            onChange={(event) => setFilterBranch(event.target.value)}
-            options={[
-              { value: 'main', label: 'Main Garage Branch' },
-              { value: 'express', label: 'Express Service Bay' },
-            ]}
-            className="h-[42px] w-full min-w-0 rounded-[10px] px-3 text-[13px] font-medium sm:w-[260px]"
-          />
-        </div>
-
-        {/* Quick actions row (4 equal columns desktop, 2 columns mobile) */}
-        <div className="mt-[12px] grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => navigate('/customers/new')}
-            className="h-[44px] w-full min-w-0 gap-2 rounded-[10px] border border-line bg-surface-2 px-3 text-[13px] font-semibold text-content transition hover:border-primary/40 hover:bg-surface-3"
-          >
-            <Plus size={17} className="shrink-0 text-primary" />
-            <span className="truncate">New Customer</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => navigate('/jobs/new')}
-            className="h-[44px] w-full min-w-0 gap-2 rounded-[10px] border border-line bg-surface-2 px-3 text-[13px] font-semibold text-content transition hover:border-primary/40 hover:bg-surface-3"
-          >
-            <Plus size={17} className="shrink-0 text-primary" />
-            <span className="truncate">New Job Card</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => navigate('/invoices/new')}
-            className="h-[44px] w-full min-w-0 gap-2 rounded-[10px] border border-line bg-surface-2 px-3 text-[13px] font-semibold text-content transition hover:border-primary/40 hover:bg-surface-3"
-          >
-            <Plus size={17} className="shrink-0 text-primary" />
-            <span className="truncate">Create Invoice</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => navigate('/stock')}
-            className="h-[44px] w-full min-w-0 gap-2 rounded-[10px] border border-line bg-surface-2 px-3 text-[13px] font-semibold text-content transition hover:border-primary/40 hover:bg-surface-3"
-          >
-            <Plus size={17} className="shrink-0 text-primary" />
-            <span className="truncate">Stock Issue</span>
-          </Button>
-        </div>
-      </section>
-
-      {/* SECTION 3: KPI CARDS GRID */}
-      <section className="mt-[20px] grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        {summaryStats.map((s, idx) => (
-          <StatCard
-            key={idx}
-            {...s}
-            isFullWidth={false}
-            className={idx === 4 ? 'col-span-2 md:col-span-1 xl:col-span-1' : ''}
-          />
+      <section className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
+        {stats.map(({ label, value, icon: Icon, meta }) => (
+          <article key={label} className="min-w-0 rounded-xl border border-line bg-surface p-3.5 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="truncate text-[10px] font-medium text-muted">{label}</div>
+                <div className="mt-2 truncate text-[21px] font-semibold leading-none tracking-tight text-content">{value}</div>
+              </div>
+              <span className="grid size-8 shrink-0 place-items-center rounded-full border border-line bg-surface-2 text-primary"><Icon size={14} /></span>
+            </div>
+            <div className="mt-2.5 text-[9px] font-medium text-muted">{meta}</div>
+          </article>
         ))}
       </section>
 
-      {/* MAIN DUAL-COLUMN LAYOUT */}
-      <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start">
-        
-        {/* LEFT MAIN CONTENT RAIL (~65% width on desktop) */}
-        <div className="flex min-w-0 flex-col gap-5 lg:col-span-7 xl:col-span-8">
-          
-          {/* TODAY'S SERVICE BOOKINGS */}
-          <SummaryCard
-            title="Today's Service Bookings"
-            action={
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/jobs')}
-                className="h-7 px-2 text-xs font-semibold text-primary hover:bg-primary-soft"
-              >
-                View All
-              </Button>
-            }
-          >
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-              {data?.bookings?.map((b) => (
-                <div
-                  key={b.id}
-                  className="flex min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface-2 p-3.5 transition hover:border-line-strong"
-                >
-                  <div className="flex w-full min-w-0 items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-primary">{b.time}</span>
-                    <Badge variant={b.status === 'Confirmed' ? 'success' : 'warning'}>
-                      {b.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <h4 className="m-0 truncate text-sm font-semibold text-content">{b.customer}</h4>
-                    <div className="mt-0.5 truncate text-xs font-medium text-secondary">{b.vehicle}</div>
-                  </div>
-                  <div className="truncate text-xs text-muted">{b.service}</div>
-                </div>
-              ))}
+      <section className="min-w-0 overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
+        <header className="flex flex-col gap-2.5 border-b border-line px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="m-0 text-[12px] font-semibold text-content">Service Operations</h2>
+            <p className="mt-0.5 text-[9px] text-muted">Track today's bookings and repair progress.</p>
+          </div>
+          <div className="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:items-center">
+            <div className="w-full sm:w-[150px]">
+              <Select value={filterPeriod} onChange={(event) => setFilterPeriod(event.target.value)} options={[
+                { value: 'today', label: 'Today' },
+                { value: 'week', label: 'This Week' },
+                { value: 'month', label: 'This Month' },
+              ]} />
             </div>
-            <Button size="sm" onClick={() => navigate('/jobs/new')} className="h-9 rounded-lg px-3 text-[11px]">
-              <Plus size={14} />
-              New Job Card
+            <div className="w-full sm:w-[180px]">
+              <Select value={filterBranch} onChange={(event) => setFilterBranch(event.target.value)} options={[
+                { value: 'main', label: 'Main Garage' },
+                { value: 'express', label: 'Express Bay' },
+              ]} />
+            </div>
+            <Button size="sm" onClick={() => navigate('/jobs/new')} className="col-span-2 h-9 rounded-lg px-3 text-[10px] sm:col-span-1">
+              <Plus size={13} /> New Job Card
             </Button>
-          </SummaryCard>
+          </div>
+        </header>
 
-          {/* LIVE JOB CARD PROGRESS BREAKDOWN */}
-          <SummaryCard title="Live Job Card Progress Breakdown">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-              <button
-                type="button"
-                onClick={() => navigate('/jobs')}
-                className="flex min-w-0 flex-col items-center justify-center rounded-xl border border-line bg-surface-2 p-3 text-center transition hover:border-primary/50"
-              >
-                <span className="truncate text-xs font-medium text-muted">Inspection</span>
-                <h3 className="my-1 text-2xl font-semibold text-info">{data?.jobProgress?.inspection}</h3>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/jobs')}
-                className="flex min-w-0 flex-col items-center justify-center rounded-xl border border-line bg-surface-2 p-3 text-center transition hover:border-primary/50"
-              >
-                <span className="truncate text-xs font-medium text-muted">Awaiting Approval</span>
-                <h3 className="my-1 text-2xl font-semibold text-warning">{data?.jobProgress?.awaitingApproval}</h3>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/jobs')}
-                className="flex min-w-0 flex-col items-center justify-center rounded-xl border border-line bg-surface-2 p-3 text-center transition hover:border-primary/50"
-              >
-                <span className="truncate text-xs font-medium text-muted">In Progress</span>
-                <h3 className="my-1 text-2xl font-semibold text-primary">{data?.jobProgress?.inProgress}</h3>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/jobs')}
-                className="flex min-w-0 flex-col items-center justify-center rounded-xl border border-line bg-surface-2 p-3 text-center transition hover:border-primary/50"
-              >
-                <span className="truncate text-xs font-medium text-muted">Waiting Parts</span>
-                <h3 className="my-1 text-2xl font-semibold text-danger">{data?.jobProgress?.waitingForParts}</h3>
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/jobs')}
-                className="col-span-2 flex min-w-0 flex-col items-center justify-center rounded-xl border border-line bg-surface-2 p-3 text-center transition hover:border-primary/50 sm:col-span-1"
-              >
-                <span className="truncate text-xs font-medium text-muted">Quality Check</span>
-                <h3 className="my-1 text-2xl font-semibold text-success">{data?.jobProgress?.qualityCheck}</h3>
-              </button>
+        <div className="grid min-w-0 grid-cols-1 xl:grid-cols-[minmax(280px,0.95fr)_minmax(320px,1.05fr)_minmax(235px,0.72fr)]">
+          <div className="min-w-0 border-b border-line p-3 xl:border-b-0 xl:border-r">
+            <div className="relative mb-2.5">
+              <Search size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search customer, vehicle or job" className="h-9 w-full rounded-lg border border-line bg-surface-2 pl-8 pr-3 text-[10px] text-content outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/10" />
             </div>
-          </SummaryCard>
-
-          {/* VEHICLE DELIVERY QUEUE */}
-          <SummaryCard title="Vehicle Delivery Queue">
-            <div className="flex w-full min-w-0 flex-col gap-3">
-              {data?.deliveries?.map((d) => (
-                <div
-                  key={d.id}
-                  className="flex min-w-0 flex-col gap-2 rounded-xl border border-line bg-surface-2 p-3.5 transition hover:border-line-strong"
-                >
-                  <div className="flex w-full min-w-0 items-center justify-between gap-2">
-                    <h4 className="m-0 truncate text-sm font-semibold text-content">{d.vehicle}</h4>
-                    <Badge variant={d.status === 'Ready' ? 'success' : d.status === 'Due Today' ? 'warning' : 'danger'}>
-                      {d.status}
-                    </Badge>
-                  </div>
-                  <div className="truncate text-xs text-secondary">
-                    Customer: <span className="font-medium text-content">{d.customer}</span> • Delivery: <strong className="font-semibold text-content">{d.expectedTime}</strong>
-                  </div>
-                  <div className="mt-1 flex min-w-0 flex-col gap-2 sm:flex-row">
-                    <a href={`tel:${d.phone}`} className="min-w-0 flex-1 no-underline">
-                      <Button size="sm" variant="outline" className="h-9 w-full min-w-0 gap-1.5 text-xs font-medium">
-                        <Phone size={14} className="shrink-0" /> Call Customer
-                      </Button>
-                    </a>
-                    <Button size="sm" variant="primary" onClick={() => navigate('/jobs')} className="h-9 min-w-0 flex-1 text-xs font-medium">
-                      Open Record →
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SummaryCard>
-
-          {/* RECENT JOB CARDS */}
-          <SummaryCard
-            title="Recent Job Cards"
-            action={
-              <button
-                type="button"
-                onClick={() => navigate('/jobs')}
-                className="flex items-center gap-1 border-0 bg-transparent text-xs font-semibold text-primary transition hover:underline"
-              >
-                All Jobs <ArrowRight size={14} />
-              </button>
-            }
-          >
-            {/* Desktop Table View */}
-            <div className="hidden min-w-0 overflow-x-auto sm:block">
-              <Table
-                columns={recentJobsColumns}
-                data={data?.recentJobs || []}
-                renderRow={(item) => (
-                  <>
-                    <td className="px-3.5 py-3 text-xs font-semibold text-primary">{item.id}</td>
-                    <td className="px-3.5 py-3 text-xs font-medium text-content">{item.customer}</td>
-                    <td className="px-3.5 py-3 text-xs text-secondary">{item.vehicle}</td>
-                    <td className="px-3.5 py-3 text-xs text-secondary">{item.mechanic}</td>
-                    <td className="px-3.5 py-3">
-                      <Badge variant={item.status === 'completed' ? 'success' : item.status === 'in_progress' ? 'warning' : 'info'}>
-                        {item.status.replace('_', ' ').toUpperCase()}
-                      </Badge>
-                    </td>
-                    <td className="px-3.5 py-3 text-xs font-semibold text-content">{item.amount}</td>
-                    <td className="px-3.5 py-3">
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/jobs/${item.id}`)} className="h-8 px-2.5 text-xs">
-                        Open
-                      </Button>
-                    </td>
-                  </>
-                )}
-              />
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="flex min-w-0 flex-col gap-3 sm:hidden">
-              {data?.recentJobs?.map((item) => (
-                <MobileCard
-                  key={item.id}
-                  title={`${item.id} - ${item.customer}`}
-                  subtitle={item.vehicle}
-                  badge={
-                    <Badge variant={item.status === 'completed' ? 'success' : item.status === 'in_progress' ? 'warning' : 'info'}>
-                      {item.status.replace('_', ' ').toUpperCase()}
-                    </Badge>
-                  }
-                  fields={[
-                    { label: 'Assigned Mechanic', value: item.mechanic },
-                    { label: 'Amount', value: item.amount }
-                  ]}
-                  actions={
-                    <Button size="sm" variant="primary" onClick={() => navigate(`/jobs/${item.id}`)} className="h-9 w-full text-xs font-medium">
-                      Open Job →
-                    </Button>
-                  }
-                />
-              ))}
-            </div>
-          </SummaryCard>
-
-          {/* REVENUE CHART */}
-          <SummaryCard title="Weekly Billed Revenue vs Collected Cash">
-            <FinancialChart data={data?.chartData || []} />
-          </SummaryCard>
-
-        </div>
-
-        {/* RIGHT RAIL (~35% width on desktop) */}
-        <div className="flex min-w-0 flex-col gap-5 lg:col-span-5 xl:col-span-4">
-          
-          {/* FINANCE & COLLECTIONS */}
-          <SummaryCard title="Finance & Collections">
-            <div className="flex w-full min-w-0 flex-col gap-3">
-              <div className="flex h-9 min-w-0 items-center justify-between gap-3 border-b border-line/60 text-xs">
-                <span className="min-w-0 truncate text-secondary">Billed Revenue</span>
-                <span className="shrink-0 font-semibold text-content">{data?.payments?.billedAmount || '₹45,280'}</span>
-              </div>
-              <div className="flex h-9 min-w-0 items-center justify-between gap-3 border-b border-line/60 text-xs">
-                <span className="min-w-0 truncate text-secondary">Collected Cash</span>
-                <span className="shrink-0 font-semibold text-success">{data?.payments?.receivedPayments || '₹32,860'}</span>
-              </div>
-              <div className="flex h-9 min-w-0 items-center justify-between gap-3 text-xs">
-                <span className="min-w-0 truncate text-secondary">Overdue Dues</span>
-                <span className="shrink-0 font-semibold text-danger">{data?.payments?.overdueAmount || '₹4,200'}</span>
-              </div>
-            </div>
-          </SummaryCard>
-
-          {/* CRITICAL STOCK ALERTS & APPROVALS */}
-          <SummaryCard title="Critical Stock Alerts & Approvals">
-            <div className="flex w-full min-w-0 flex-col gap-3">
-              {data?.stockAlerts?.map((a) => (
-                <div
-                  key={a.id}
-                  onClick={() => navigate('/stock')}
-                  className="flex min-w-0 cursor-pointer items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3.5 transition hover:border-line-strong hover:bg-surface-2/80"
-                >
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span className={`mt-1 size-2 shrink-0 rounded-full ${a.priority === 'critical' ? 'bg-danger' : 'bg-warning'}`} />
-                    <div className="min-w-0 flex-1">
-                      <h4 className="m-0 truncate text-xs font-semibold text-content">{a.partName}</h4>
-                      <p className="mt-1 truncate text-[12px] text-muted">
-                        {a.message} • Stock: {a.currentStock} Units
-                      </p>
+            <div className="flex max-h-[440px] flex-col gap-1.5 overflow-y-auto pr-1">
+              {filteredBookings.map((booking) => {
+                const active = booking.id === selectedBooking?.id;
+                return (
+                  <button key={booking.id} type="button" onClick={() => setSelectedBookingId(booking.id)} className={`w-full rounded-lg border px-2.5 py-2.5 text-left transition ${active ? 'border-primary/40 bg-primary-soft' : 'border-line bg-surface hover:bg-surface-2'}`}>
+                    <div className="flex min-w-0 items-center justify-between gap-2">
+                      <div className="min-w-0 truncate text-[10px] font-semibold text-content">{booking.id} · {booking.customer}</div>
+                      <Badge variant={statusVariant(booking.status)} className="shrink-0">{booking.status}</Badge>
                     </div>
+                    <div className="mt-1 truncate text-[9px] text-muted">{booking.vehicle}</div>
+                    <div className="mt-1.5 flex items-center justify-between gap-2 text-[9px]">
+                      <span className="truncate text-secondary">{booking.service}</span>
+                      <span className="shrink-0 font-medium text-muted">{booking.time}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="min-w-0 border-b border-line p-3.5 xl:border-b-0 xl:border-r">
+            {selectedBooking ? (
+              <div className="flex h-full min-h-[390px] min-w-0 flex-col">
+                <div className="flex min-w-0 items-start justify-between gap-3 border-b border-line pb-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] font-semibold text-content">{selectedBooking.id}</span>
+                      <Badge variant={statusVariant(selectedBooking.status)}>{selectedBooking.status}</Badge>
+                    </div>
+                    <div className="mt-1 truncate text-[10px] font-medium text-content">{selectedBooking.vehicle}</div>
                   </div>
-                  <ChevronRight size={16} className="shrink-0 text-muted" />
+                  <button type="button" onClick={() => navigate('/jobs')} className="shrink-0 text-[9px] font-semibold text-primary">View Job</button>
                 </div>
-              ))}
-            </div>
-          </SummaryCard>
 
-          {/* WORKSHOP STAFF WORKLOAD */}
-          <SummaryCard title="Workshop Staff Workload">
-            <div className="flex w-full min-w-0 flex-col gap-3">
-              {data?.staffAvailability?.map((s, idx) => (
-                <div key={idx} className="flex min-h-[52px] min-w-0 items-center justify-between gap-3 border-b border-line/60 pb-3 text-xs last:border-b-0 last:pb-0">
-                  <div className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold text-content">{s.name}</span>
-                    <span className="block truncate text-[12px] text-muted">{s.role} • {s.activeJobs} Active Jobs</span>
-                  </div>
-                  <Badge variant={s.available ? 'success' : 'warning'}>{s.status}</Badge>
+                <div className="grid grid-cols-2 gap-x-5 gap-y-3 border-b border-line py-3 sm:grid-cols-3">
+                  <div><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Customer</div><div className="mt-1 truncate text-[10px] font-medium text-content">{selectedBooking.customer}</div></div>
+                  <div><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Booking Time</div><div className="mt-1 text-[10px] font-medium text-content">{selectedBooking.time}</div></div>
+                  <div><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Advisor</div><div className="mt-1 text-[10px] font-medium text-content">{user?.name || 'Alex Rivera'}</div></div>
+                  <div className="col-span-2 sm:col-span-3"><div className="text-[8px] font-semibold uppercase tracking-wide text-muted">Service Request</div><div className="mt-1 text-[10px] font-medium text-content">{selectedBooking.service}</div></div>
                 </div>
-              ))}
-            </div>
-          </SummaryCard>
 
-          {/* PERSONAL ATTENDANCE STATS */}
-          <SummaryCard title="My Personal Attendance Stats">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex min-w-0 flex-col items-center rounded-xl border border-line bg-surface-2 p-3 text-center">
-                <span className="truncate text-[11px] font-medium text-muted">Today's Punches</span>
-                <strong className="mt-1 truncate text-sm font-semibold text-content">{data?.myAttendanceSummary?.todayPunches || '2 Sessions'}</strong>
-              </div>
-              <div className="flex min-w-0 flex-col items-center rounded-xl border border-line bg-surface-2 p-3 text-center">
-                <span className="truncate text-[11px] font-medium text-muted">Monthly Hours</span>
-                <strong className="mt-1 truncate text-sm font-semibold text-primary">{data?.myAttendanceSummary?.monthlyHours || '142h'}</strong>
-              </div>
-              <div className="flex min-w-0 flex-col items-center rounded-xl border border-line bg-surface-2 p-3 text-center">
-                <span className="truncate text-[11px] font-medium text-muted">Present Days</span>
-                <strong className="mt-1 truncate text-sm font-semibold text-success">18 Days</strong>
-              </div>
-              <div className="flex min-w-0 flex-col items-center rounded-xl border border-line bg-surface-2 p-3 text-center">
-                <span className="truncate text-[11px] font-medium text-muted">Overtime</span>
-                <strong className="mt-1 truncate text-sm font-semibold text-warning">+{data?.myAttendanceSummary?.approvedOvertime || '12h'}</strong>
-              </div>
-            </div>
-          </SummaryCard>
-
-          {/* ATTENDANCE QUICK LINKS */}
-          <SummaryCard title="Attendance Quick Links">
-            <div className="grid grid-cols-2 gap-3">
-              <Button size="sm" variant="outline" onClick={() => navigate('/my-attendance')} className="h-9 w-full text-xs font-medium">
-                History Logs
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => navigate('/my-attendance')} className="h-9 w-full text-xs font-medium">
-                Apply Leave
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => navigate('/my-attendance')} className="h-9 w-full text-xs font-medium">
-                Holidays
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => navigate('/my-attendance')} className="h-9 w-full text-xs font-medium">
-                Summary
-              </Button>
-            </div>
-          </SummaryCard>
-
-          {/* WORKSHOP ACTIVITY LOG */}
-          <SummaryCard title="Workshop Activity Log">
-            <div className="flex w-full min-w-0 flex-col gap-3">
-              {data?.recentActivity?.map((act) => (
-                <div key={act.id} className="flex min-w-0 items-start gap-2.5 text-xs">
-                  <Activity size={15} className="mt-0.5 shrink-0 text-primary" />
-                  <div className="min-w-0 flex-1">
-                    <p className="m-0 text-xs text-content leading-snug">{act.text}</p>
-                    <span className="text-[11px] text-muted">{act.time}</span>
+                <div className="py-3">
+                  <div className="text-[9px] font-semibold text-content">Repair Details</div>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-[9px]">
+                    <div className="rounded-lg bg-surface-2 p-2.5"><span className="block text-muted">Job Status</span><span className="mt-1 block font-medium text-content">{selectedBooking.status}</span></div>
+                    <div className="rounded-lg bg-surface-2 p-2.5"><span className="block text-muted">Assigned Team</span><span className="mt-1 block font-medium text-content">Workshop A</span></div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </SummaryCard>
 
-          {/* UPCOMING SERVICE FOLLOW-UPS */}
-          <SummaryCard title="Upcoming Service Follow-Ups">
-            <div className="flex w-full min-w-0 flex-col gap-3">
-              {data?.serviceFollowUps?.map((f, idx) => (
-                <div key={idx} className="flex min-w-0 flex-col gap-1 rounded-xl border border-line bg-surface-2 p-3">
-                  <div className="flex min-w-0 items-center justify-between gap-2">
-                    <h4 className="m-0 truncate text-xs font-semibold text-content">{f.customer}</h4>
-                    <a href={`tel:${f.phone}`} className="shrink-0 text-primary hover:opacity-80" title="Call Customer">
-                      <Phone size={15} />
-                    </a>
+                <div className="mt-auto rounded-lg border border-line bg-surface-2 p-3">
+                  <div className="mb-3 flex items-center justify-between gap-3"><div className="text-[9px] font-semibold text-content">Progress</div><div className="text-[8px] font-medium text-muted">Live workshop stages</div></div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {repairStages.map((stage, index) => (
+                      <div key={stage.key} className="min-w-0 text-center">
+                        <div className={`mx-auto grid size-6 place-items-center rounded-full border ${index < 3 ? 'border-primary bg-primary text-white' : 'border-line bg-surface text-muted'}`}>
+                          {index < 3 ? <CheckCircle2 size={11} /> : <span className="text-[8px] font-bold">{index + 1}</span>}
+                        </div>
+                        <div className="mt-1 truncate text-[8px] font-medium text-muted">{stage.label}</div>
+                        <div className="mt-0.5 text-[9px] font-semibold text-content">{data?.jobProgress?.[stage.key] ?? 0}</div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="m-0 truncate text-xs text-secondary">{f.vehicle} • {f.serviceDue}</p>
-                  <span className="mt-0.5 block truncate text-[11px] font-medium text-warning">Due Date: {f.dueDate}</span>
                 </div>
-              ))}
-            </div>
-          </SummaryCard>
+              </div>
+            ) : <div className="grid min-h-[390px] place-items-center text-[10px] text-muted">No booking selected</div>}
+          </div>
 
+          <aside className="min-w-0 p-3">
+            <div className="flex items-center justify-between gap-2"><h3 className="m-0 text-[10px] font-semibold text-content">Active Repair</h3><button type="button" onClick={() => navigate('/jobs')} className="text-[8px] font-semibold text-primary">View All</button></div>
+            <div className="mt-2.5 rounded-lg border border-line bg-surface-2 p-3">
+              <div className="grid min-h-[88px] place-items-center rounded-lg bg-surface"><Car size={46} strokeWidth={1.1} className="text-secondary" /></div>
+              <div className="mt-2.5 flex items-center justify-between gap-2">
+                <div className="min-w-0"><div className="truncate text-[10px] font-semibold text-content">{data?.recentJobs?.[0]?.vehicle || 'Vehicle'}</div><div className="mt-0.5 truncate text-[8px] text-muted">{data?.recentJobs?.[0]?.id}</div></div>
+                <Badge variant="success">In Progress</Badge>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div><div className="text-[7px] uppercase tracking-wide text-muted">Customer</div><div className="mt-1 truncate text-[9px] font-medium text-content">{data?.recentJobs?.[0]?.customer}</div></div>
+                <div><div className="text-[7px] uppercase tracking-wide text-muted">Mechanic</div><div className="mt-1 truncate text-[9px] font-medium text-content">{data?.recentJobs?.[0]?.mechanic}</div></div>
+              </div>
+              <div className="mt-3"><div className="flex items-center justify-between text-[8px]"><span className="text-muted">Overall Progress</span><span className="font-semibold text-primary">70%</span></div><div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface"><div className="h-full w-[70%] rounded-full bg-primary" /></div></div>
+            </div>
+
+            <div className="mt-3 rounded-lg border border-line p-3">
+              <div className="flex items-center gap-1.5"><Activity size={12} className="text-primary" /><span className="text-[9px] font-semibold text-content">Smart Insights</span></div>
+              <div className="mt-2.5 flex flex-col gap-2">
+                {(data?.stockAlerts || []).slice(0, 2).map((alert) => (
+                  <button key={alert.id} type="button" onClick={() => navigate('/stock')} className="rounded-lg bg-surface-2 p-2.5 text-left">
+                    <div className="flex items-start gap-2">
+                      <PackageSearch size={12} className={alert.priority === 'critical' ? 'mt-0.5 shrink-0 text-danger' : 'mt-0.5 shrink-0 text-warning'} />
+                      <div className="min-w-0"><div className="truncate text-[9px] font-semibold text-content">{alert.partName}</div><div className="mt-1 text-[8px] leading-3.5 text-muted">{alert.message}. Stock {alert.currentStock}.</div></div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <Button variant="primary" size="sm" onClick={() => navigate('/stock')} className="mt-2.5 h-8 w-full rounded-lg text-[9px]">Review Stock</Button>
+            </div>
+          </aside>
         </div>
+      </section>
 
-      </div>
+      <section className="grid min-w-0 grid-cols-1 gap-2.5 lg:grid-cols-3">
+        <article className="rounded-xl border border-line bg-surface p-3.5 shadow-sm">
+          <div className="flex items-center justify-between"><h2 className="m-0 text-[11px] font-semibold text-content">Finance & Collections</h2><CircleDollarSign size={14} className="text-primary" /></div>
+          <div className="mt-2.5 divide-y divide-line">
+            {[
+              ['Billed Revenue', data?.payments?.billedAmount],
+              ['Collected Cash', data?.payments?.receivedPayments],
+              ['Overdue Dues', data?.payments?.overdueAmount],
+            ].map(([label, value], index) => <div key={label} className="flex items-center justify-between gap-3 py-2 text-[9px]"><span className="text-muted">{label}</span><span className={`font-semibold ${index === 2 ? 'text-danger' : 'text-content'}`}>{value}</span></div>)}
+          </div>
+        </article>
+
+        <article className="rounded-xl border border-line bg-surface p-3.5 shadow-sm">
+          <div className="flex items-center justify-between"><h2 className="m-0 text-[11px] font-semibold text-content">Workshop Staff</h2><UserRound size={14} className="text-primary" /></div>
+          <div className="mt-2.5 flex flex-col gap-1.5">
+            {(data?.staffAvailability || []).slice(0, 3).map((staff) => (
+              <div key={staff.name} className="flex items-center gap-2.5 rounded-lg bg-surface-2 px-2.5 py-2">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary-soft text-primary"><UserRound size={12}/></span>
+                <div className="min-w-0 flex-1"><div className="truncate text-[9px] font-semibold text-content">{staff.name}</div><div className="mt-0.5 truncate text-[8px] text-muted">{staff.role} · {staff.activeJobs} jobs</div></div>
+                <span className={`size-1.5 shrink-0 rounded-full ${staff.status === 'Active Duty' ? 'bg-success' : 'bg-warning'}`} />
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="rounded-xl border border-line bg-surface p-3.5 shadow-sm">
+          <div className="flex items-center justify-between"><h2 className="m-0 text-[11px] font-semibold text-content">Quick Actions</h2><Wrench size={14} className="text-primary" /></div>
+          <div className="mt-2.5 grid grid-cols-2 gap-2">
+            {[
+              ['New Customer', '/customers/new'],
+              ['New Job Card', '/jobs/new'],
+              ['Create Invoice', '/invoices/new'],
+              ['Stock Issue', '/stock'],
+            ].map(([label, path]) => (
+              <button key={label} type="button" onClick={() => navigate(path)} className="flex min-h-9 items-center justify-between gap-2 rounded-lg border border-line bg-surface-2 px-2.5 text-left text-[9px] font-semibold text-content transition hover:border-primary/40 hover:bg-primary-soft">
+                <span className="truncate">{label}</span><ArrowRight size={11} className="shrink-0 text-primary" />
+              </button>
+            ))}
+          </div>
+        </article>
+      </section>
     </div>
   );
 };
-
