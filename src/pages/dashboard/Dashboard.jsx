@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Car,
+  CheckCircle,
+  CheckCircle2,
+  ChevronRight,
+  CircleDollarSign,
+  Clock,
+  ClipboardList,
+  DollarSign,
+  PackageSearch,
+  Phone,
+  Plus,
+  Search,
+  UserRound,
+  Wrench,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardData, toggleClockIn } from '../../services/dashboard.service';
-import { StatCard } from '../../components/cards/StatCard';
-import { SummaryCard } from '../../components/cards/SummaryCard';
-import { FinancialChart } from '../../components/cards/FinancialChart';
-import { Table } from '../../components/common/Table';
-import { MobileCard } from '../../components/common/MobileCard';
-import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { Select } from '../../components/common/Select';
 import { Loader } from '../../components/common/Loader';
-import {
-  Clock,
-  Plus,
-  ArrowRight,
-  Phone,
-  Activity,
-  Car,
-  ClipboardList,
-  CheckCircle,
-  DollarSign,
-  AlertTriangle,
-  ChevronRight
-} from 'lucide-react';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -33,11 +33,14 @@ export const Dashboard = () => {
   const [filterPeriod, setFilterPeriod] = useState('today');
   const [filterBranch, setFilterBranch] = useState('main');
   const [currentTime, setCurrentTime] = useState('');
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [search, setSearch] = useState('');
 
   const fetchDashboard = async () => {
     setLoading(true);
-    const res = await getDashboardData({ period: filterPeriod, branch: filterBranch });
-    setData(res);
+    const response = await getDashboardData({ period: filterPeriod, branch: filterBranch });
+    setData(response);
+    setSelectedBookingId((current) => current || response?.bookings?.[0]?.id || null);
     setLoading(false);
   };
 
@@ -45,21 +48,34 @@ export const Dashboard = () => {
     fetchDashboard();
   }, [filterPeriod, filterBranch]);
 
-  // Live Time Clock Tracker
   useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    }, 1000);
-    return () => clearInterval(timer);
+    const update = () => setCurrentTime(
+      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    );
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
   const handleClockToggle = async () => {
-    const currentStatus = data?.attendance?.status;
-    const nextStatus = currentStatus === 'CLOCKED_IN' ? 'CLOCKED_OUT' : 'CLOCKED_IN';
+    const nextStatus = data?.attendance?.status === 'CLOCKED_IN' ? 'CLOCKED_OUT' : 'CLOCKED_IN';
     await toggleClockIn(nextStatus);
     fetchDashboard();
   };
+
+  const selectedBooking = useMemo(
+    () => data?.bookings?.find((booking) => booking.id === selectedBookingId) || data?.bookings?.[0],
+    [data, selectedBookingId],
+  );
+
+  const filteredBookings = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return data?.bookings || [];
+    return (data?.bookings || []).filter((booking) =>
+      [booking.customer, booking.vehicle, booking.service, booking.id]
+        .some((value) => String(value || '').toLowerCase().includes(query)),
+    );
+  }, [data, search]);
 
   if (loading) return <Loader />;
 
@@ -151,20 +167,20 @@ export const Dashboard = () => {
         <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
           <Select
             value={filterPeriod}
-            onChange={(e) => setFilterPeriod(e.target.value)}
+            onChange={(event) => setFilterPeriod(event.target.value)}
             options={[
               { value: 'today', label: 'Today' },
               { value: 'week', label: 'This Week' },
-              { value: 'month', label: 'This Month' }
+              { value: 'month', label: 'This Month' },
             ]}
             className="h-[42px] w-full min-w-0 rounded-[10px] px-3 text-[13px] font-medium sm:w-[220px]"
           />
           <Select
             value={filterBranch}
-            onChange={(e) => setFilterBranch(e.target.value)}
+            onChange={(event) => setFilterBranch(event.target.value)}
             options={[
               { value: 'main', label: 'Main Garage Branch' },
-              { value: 'express', label: 'Express Service Bay' }
+              { value: 'express', label: 'Express Service Bay' },
             ]}
             className="h-[42px] w-full min-w-0 rounded-[10px] px-3 text-[13px] font-medium sm:w-[260px]"
           />
@@ -266,6 +282,10 @@ export const Dashboard = () => {
                 </div>
               ))}
             </div>
+            <Button size="sm" onClick={() => navigate('/jobs/new')} className="h-9 rounded-lg px-3 text-[11px]">
+              <Plus size={14} />
+              New Job Card
+            </Button>
           </SummaryCard>
 
           {/* LIVE JOB CARD PROGRESS BREAKDOWN */}
