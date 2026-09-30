@@ -8,9 +8,13 @@ import {
   CheckCircle2,
   CircleDollarSign,
   Clock,
+  CreditCard,
+  FileText,
   PackageSearch,
   Plus,
+  ReceiptText,
   Search,
+  UserPlus,
   UserRound,
   Wrench,
 } from 'lucide-react';
@@ -258,7 +262,15 @@ export const Dashboard = () => {
               <button type="button" className="text-link" onClick={() => navigate('/jobs')}>View All</button>
             </div>
 
-            <div className="active-repair-card">
+            <button
+              type="button"
+              className="active-repair-card active-repair-clickable"
+              onClick={() => {
+                const jobId = data?.recentJobs?.[0]?.id;
+                navigate(jobId ? `/jobs/${jobId}` : '/jobs');
+              }}
+              aria-label="Open active repair job"
+            >
               <div className="vehicle-visual"><Car size={52} strokeWidth={1.1} /></div>
               <div className="active-repair-main">
                 <div>
@@ -277,7 +289,11 @@ export const Dashboard = () => {
                 <div><span>Overall Progress</span><strong>70%</strong></div>
                 <div className="progress-track"><span /></div>
               </div>
-            </div>
+              <div className="active-repair-open-hint">
+                <span>Open Job Card</span>
+                <ArrowRight size={11} />
+              </div>
+            </button>
 
             <div className="insights-card">
               <div className="insights-title"><Activity size={13} /><strong>Smart Insights</strong></div>
@@ -330,15 +346,22 @@ export const Dashboard = () => {
 
         <article className="dashboard-panel">
           <div className="panel-title"><h2>Quick Actions</h2><Wrench size={15} /></div>
-          <div className="quick-actions">
+          <div className="quick-actions quick-actions-expanded">
             {[
-              ['New Customer', '/customers/new'],
-              ['New Job Card', '/jobs/new'],
-              ['Create Invoice', '/invoices/new'],
-              ['Stock Issue', '/stock'],
-            ].map(([label, path]) => (
+              ['New Customer', '/customers/new', UserPlus],
+              ['New Job Card', '/jobs/new', Wrench],
+              ['Create Invoice', '/invoices/new', FileText],
+              ['Record Payment', '/payments', CreditCard],
+              ['Add Expense', '/expenses', ReceiptText],
+              ['Stock Issue', '/stock', PackageSearch],
+              ['Add Vehicle', '/vehicles', Car],
+              ['Service Catalog', '/services', Plus],
+            ].map(([label, path, Icon]) => (
               <button key={label} type="button" onClick={() => navigate(path)}>
-                <span>{label}</span>
+                <span className="quick-action-leading">
+                  <Icon size={12} />
+                  <span>{label}</span>
+                </span>
                 <ArrowRight size={12} />
               </button>
             ))}
