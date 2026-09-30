@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Calendar, Shield, Plus, CheckCircle2, AlertCircle, FileText, User } from 'lucide-react';
+import { Clock, Calendar, Shield, Plus, CheckCircle2, AlertCircle, FileText, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 import { overtimeService } from '../../services/overtime.service';
 import { AddOvertimeSheet } from '../../components/payroll/AddOvertimeSheet';
+import '../../styles/staff-attendance-details.css';
 
 export const StaffAttendanceDetails = () => {
   const { staffId, date } = useParams();
@@ -16,6 +17,30 @@ export const StaffAttendanceDetails = () => {
   const [toastMsg, setToastMsg] = useState('');
 
   const selectedDateStr = date || new Date().toISOString().split('T')[0];
+  const selectedDateObj = new Date(`${selectedDateStr}T00:00:00`);
+  const selectedYear = selectedDateObj.getFullYear();
+  const selectedMonth = selectedDateObj.getMonth();
+  const selectedDay = selectedDateObj.getDate();
+  const monthLabel = selectedDateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const firstDayOffset = new Date(selectedYear, selectedMonth, 1).getDay();
+  const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+  const calendarCells = [
+    ...Array(firstDayOffset).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ];
+
+  const navigateToDate = (day) => {
+    if (!day) return;
+    const monthValue = String(selectedMonth + 1).padStart(2, '0');
+    const dayValue = String(day).padStart(2, '0');
+    navigate(`/attendance-manager/team-review/${staffId}/${selectedYear}-${monthValue}-${dayValue}`);
+  };
+
+  const moveMonth = (offset) => {
+    const next = new Date(selectedYear, selectedMonth + offset, 1);
+    const monthValue = String(next.getMonth() + 1).padStart(2, '0');
+    navigate(`/attendance-manager/team-review/${staffId}/${next.getFullYear()}-${monthValue}-01`);
+  };
 
   useEffect(() => {
     loadStaffDetails();
@@ -101,6 +126,50 @@ export const StaffAttendanceDetails = () => {
           <Plus size={16} /> Add Overtime
         </button>
       </div>
+
+      <section className="staff-history-calendar">
+        <div className="staff-history-calendar__header">
+          <div>
+            <h3>Attendance Calendar</h3>
+            <p>Select a date to view that day's attendance history.</p>
+          </div>
+          <div className="staff-history-calendar__controls">
+            <button type="button" onClick={() => moveMonth(-1)} aria-label="Previous month"><ChevronLeft size={15}/></button>
+            <strong>{monthLabel}</strong>
+            <button type="button" onClick={() => moveMonth(1)} aria-label="Next month"><ChevronRight size={15}/></button>
+          </div>
+        </div>
+
+        <div className="staff-history-calendar__weekdays">
+          {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((label) => <span key={label}>{label}</span>)}
+        </div>
+
+        <div className="staff-history-calendar__grid">
+          {calendarCells.map((day, index) => {
+            if (!day) return <span key={`empty-${index}`} className="staff-history-calendar__empty" />;
+            const dayDate = new Date(selectedYear, selectedMonth, day);
+            const isSunday = dayDate.getDay() === 0;
+            const isSelected = day === selectedDay;
+            return (
+              <button
+                key={day}
+                type="button"
+                className={`staff-history-calendar__day ${isSelected ? 'is-selected' : ''} ${isSunday ? 'is-off' : ''}`}
+                onClick={() => navigateToDate(day)}
+              >
+                <span>{day}</span>
+                <i className={isSunday ? 'is-off' : 'is-present'} />
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="staff-history-calendar__legend">
+          <span><i className="is-present" /> Present / Record</span>
+          <span><i className="is-off" /> Weekly Off</span>
+          <span><i className="is-selected" /> Selected Date</span>
+        </div>
+      </section>
 
       {/* Section 1: Staff Summary Header Card */}
       <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
