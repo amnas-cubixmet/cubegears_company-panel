@@ -1,0 +1,164 @@
+.staff-history-calendar{
+  width:100%;
+  min-width:0;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.staff-history-calendar__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px
+}
+.staff-history-calendar__header h3{
+  margin:0;
+  font-size:14px;
+  font-weight:700;
+  color:var(--text-primary)
+}
+.staff-history-calendar__header p{
+  margin:3px 0 0;
+  font-size:10px;
+  color:var(--text-muted)
+}
+.staff-history-calendar__controls{
+  display:flex;
+  align-items:center;
+  gap:7px
+}
+.staff-history-calendar__controls button{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface-2);
+  color:var(--text-secondary);
+  cursor:pointer
+}
+.staff-history-calendar__controls strong{
+  min-width:118px;
+  text-align:center;
+  font-size:10px;
+  font-weight:700;
+  color:var(--text-primary)
+}
+.staff-history-calendar__weekdays,
+.staff-history-calendar__grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:6px
+}
+.staff-history-calendar__weekdays{
+  margin-bottom:6px
+}
+.staff-history-calendar__weekdays span{
+  text-align:center;
+  font-size:8px;
+  font-weight:700;
+  text-transform:uppercase;
+  color:var(--text-muted)
+}
+.staff-history-calendar__empty{
+  min-height:46px
+}
+.staff-history-calendar__day{
+  min-height:46px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-primary);
+  cursor:pointer;
+  transition:.15s ease
+}
+.staff-history-calendar__day:hover{
+  border-color:color-mix(in srgb,var(--primary) 35%,var(--border));
+  background:var(--primary-soft)
+}
+.staff-history-calendar__day>span{
+  font-size:9px;
+  font-weight:700
+}
+.staff-history-calendar__day>i,
+.staff-history-calendar__legend i{
+  width:6px;
+  height:6px;
+  display:inline-block;
+  border-radius:999px
+}
+.staff-history-calendar__day>i.is-present,
+.staff-history-calendar__legend i.is-present{background:var(--success)}
+.staff-history-calendar__day>i.is-off,
+.staff-history-calendar__legend i.is-off{background:var(--text-muted)}
+.staff-history-calendar__day.is-selected{
+  border-color:var(--primary);
+  background:var(--primary-soft);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 12%,transparent)
+}
+.staff-history-calendar__day.is-selected>span{
+  color:var(--primary)
+}
+.staff-history-calendar__legend{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:10px;
+  font-size:8px;
+  color:var(--text-muted)
+}
+.staff-history-calendar__legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:5px
+}
+.staff-history-calendar__legend i.is-selected{
+  background:var(--primary)
+}
+@media(max-width:700px){
+  .staff-history-calendar__header{
+    align-items:flex-start;
+    flex-direction:column
+  }
+  .staff-history-calendar__controls{
+    width:100%;
+    justify-content:space-between
+  }
+  .staff-history-calendar__controls strong{
+    flex:1
+  }
+  .staff-history-calendar{
+    padding:11px
+  }
+  .staff-history-calendar__weekdays,
+  .staff-history-calendar__grid{
+    gap:4px
+  }
+  .staff-history-calendar__day,
+  .staff-history-calendar__empty{
+    min-height:40px
+  }
+}
+@media(max-width:380px){
+  .staff-history-calendar{
+    padding:9px
+  }
+  .staff-history-calendar__weekdays,
+  .staff-history-calendar__grid{
+    gap:3px
+  }
+  .staff-history-calendar__day,
+  .staff-history-calendar__empty{
+    min-height:36px
+  }
+}
