@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Users, UserCheck, UserX, Clock3, CalendarDays, Activity } from 'lucide-react';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 
 export const AttendanceOverview = () => {
+  const navigate = useNavigate();
   const [team, setTeam] = useState([]);
   const [approvals, setApprovals] = useState([]);
 
@@ -81,13 +82,18 @@ export const AttendanceOverview = () => {
               const total = Number(item.productiveHours || 0) + Number(item.idleHours || 0);
               const pct = total ? Math.round((Number(item.productiveHours || 0) / total) * 100) : 0;
               return (
-                <div key={item.id} className="am-productivity-row">
+                <button
+                  key={item.id}
+                  type="button"
+                  className="am-productivity-row am-employee-link-row"
+                  onClick={() => navigate(`/attendance-manager/team-review/${item.staffId}/2026-09-12`)}
+                >
                   <span className="am-productivity-name">{item.name}</span>
                   <div className="am-progress-track">
                     <span className="am-progress-fill" style={{ width: `${pct}%` }} />
                   </div>
                   <strong>{pct}%</strong>
-                </div>
+                </button>
               );
             })}
           </div>
