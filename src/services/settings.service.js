@@ -1,0 +1,52 @@
+import { USE_MOCK_API } from '../api/apiConfig';
+import { API_ENDPOINTS } from '../api/endpoints';
+import apiClient from '../api/apiClient';
+
+const STORAGE_KEY = 'cubixgear:settings';
+const defaults = {
+  company: { name: 'CubixGear Garage', phone: '9876543210', email: 'admin@cubixgear.com', gstNo: '', address: '', currency: 'INR', timezone: 'Asia/Kolkata', dateFormat: 'DD/MM/YYYY' },
+  operations: { workingStart: '09:00', workingEnd: '18:30', bookingSlotMinutes: 30, bookingCapacity: 4, jobPrefix: 'JOB-', deliveryCreditAllowed: false },
+  billing: { invoicePrefix: 'INV-', defaultTaxRate: 18, paymentTermsDays: 0, rounding: true },
+  inventory: { defaultMinimumStock: 5, defaultReorderQty: 10, lowStockAlerts: true, negativeStock: false },
+  attendance: { graceMinutes: 15, overtimeAfterMinutes: 540, locationRequired: false, correctionApproval: true },
+  payroll: { payrollDay: 30, overtimeMultiplier: 1.5, managerApproval: true },
+  notifications: { lowStock: true, overdueInvoice: true, jobReady: true, leaveDecision: true, email: false, whatsapp: false, browserPush: true },
+  security: { sessionHours: 12, requireStrongPassword: true, auditExports: true, twoFactor: false },
+  integrations: { razorpayEnabled: false, whatsappEnabled: false, emailEnabled: false, webhookUrl: '' }
+};
+
+const readMock = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return Object.fromEntries(Object.entries(defaults).map(([key, value]) => [key, { ...value, ...(saved[key] || {}) }]));
+  } catch {
+    return structuredClone(defaults);
+  }
+};
+
+const writeMock = (all) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  return all;
+};
+
+export const getSettings = async (category = 'company') => {
+  if (USE_MOCK_API) return readMock()[category] || {};
+  return apiClient.get(`${API_ENDPOINTS.SETTINGS}/${category}`);
+};
+
+export const getAllSettings = async () => {
+  if (USE_MOCK_API) return readMock();
+  return apiClient.get(API_ENDPOINTS.SETTINGS);
+};
+
+export const updateSettings = async (category, data) => {
+  if (USE_MOCK_API) {
+    const all = readMock();
+    all[category] = { ...(all[category] || {}), ...data };
+    writeMock(all);
+    return all[category];
+  }
+  return apiClient.put(`${API_ENDPOINTS.SETTINGS}/${category}`, data);
+};
+
+export const settingsService = { getSettings, getAllSettings, updateSettings };

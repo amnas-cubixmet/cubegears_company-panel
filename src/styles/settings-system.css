@@ -1,0 +1,37 @@
+.settings-message { margin-bottom:12px; padding:10px 12px; border:1px solid var(--crud-border); border-radius:10px; background:var(--crud-surface); color:var(--crud-text); font-size:12px; }
+.settings-layout { display:grid; grid-template-columns:230px minmax(0,1fr); gap:16px; align-items:start; }
+.settings-nav { display:flex; flex-direction:column; gap:5px; padding:7px; background:var(--crud-surface); border:1px solid var(--crud-border); border-radius:14px; position:sticky; top:8px; }
+.settings-nav button { min-height:42px; width:100%; display:flex; align-items:center; gap:9px; border:0; border-radius:9px; padding:0 11px; background:transparent; color:var(--crud-muted); font-weight:650; text-align:left; cursor:pointer; }
+.settings-nav button.active { background:rgba(22,119,255,.11); color:var(--crud-primary); }
+.settings-card { min-width:0; background:var(--crud-surface); border:1px solid var(--crud-border); border-radius:14px; overflow:hidden; }
+.settings-card-head { padding:18px 20px; border-bottom:1px solid var(--crud-border); }
+.settings-card-head h2 { margin:0 0 4px; font-size:18px; }
+.settings-card-head p { margin:0; color:var(--crud-muted); font-size:12px; }
+.settings-theme { margin:16px 20px 0; padding:13px; border:1px solid var(--crud-border); border-radius:10px; background:var(--crud-surface-2); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.settings-theme span, .settings-toggle span { min-width:0; }
+.settings-theme b, .settings-toggle b { display:block; font-size:12px; }
+.settings-theme small, .settings-toggle small { display:block; color:var(--crud-muted); margin-top:2px; font-size:10px; }
+.settings-theme select { min-width:130px; min-height:40px; border:1px solid var(--crud-border); background:var(--crud-surface); color:var(--crud-text); border-radius:9px; padding:0 9px; }
+.settings-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; padding:20px; }
+.settings-toggle { min-height:58px; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 12px; border:1px solid var(--crud-border); border-radius:10px; background:var(--crud-surface-2); }
+.settings-toggle input[type='checkbox'] { width:20px; height:20px; accent-color:var(--crud-primary); flex:0 0 auto; }
+.settings-footer { display:flex; justify-content:flex-end; gap:8px; padding:14px 20px; border-top:1px solid var(--crud-border); }
+
+@media (max-width: 760px) {
+  .settings-page .crud-heading > .crud-btn { width:100%; }
+  .settings-layout { grid-template-columns:1fr; }
+  .settings-nav { position:static; flex-direction:row; overflow-x:auto; scroll-snap-type:x proximity; padding:6px; }
+  .settings-nav button { width:auto; min-width:max-content; flex:0 0 auto; scroll-snap-align:start; padding:0 10px; }
+  .settings-form-grid { grid-template-columns:1fr; padding:14px 12px; }
+  .settings-theme { margin:12px 12px 0; align-items:flex-start; flex-direction:column; }
+  .settings-theme select { width:100%; }
+  .settings-card-head { padding:14px 12px; }
+  .settings-footer { padding:10px 12px; }
+  .settings-footer .crud-btn { flex:1; }
+}
+
+@media (max-width: 360px) {
+  .settings-nav button span { font-size:11px; }
+  .settings-footer { flex-direction:column-reverse; }
+  .settings-footer .crud-btn { width:100%; }
+}

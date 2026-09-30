@@ -1,0 +1,2 @@
+import React, { useEffect } from 'react';
+export const Toast = ({ open, message, onClose, duration = 2600, className = '' }) => { useEffect(() => { if (!open || !onClose) return undefined; const timer = setTimeout(onClose, duration); return () => clearTimeout(timer); }, [duration, onClose, open]); return open ? <div className={`ui-toast ${className}`.trim()} role="status">{message}</div> : null; };

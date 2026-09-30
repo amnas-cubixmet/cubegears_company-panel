@@ -1,0 +1,449 @@
+/* Media queries for desktop, tablet, and mobile widths */
+
+@media (max-width: 767px) {
+  .desktop-only-sidebar {
+    display: none !important;
+  }
+
+  .mobile-only-bottom-nav {
+    display: flex !important;
+  }
+
+  .main-content,
+  .dashboard-page,
+  .dashboard-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    overflow-x: hidden !important;
+  }
+
+  .app-footer {
+    display: none !important;
+  }
+
+  .main-content {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-top: 12px !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .job-progress-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .attendance-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .quick-links-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-only-sidebar {
+    display: flex !important;
+  }
+
+  .mobile-only-bottom-nav {
+    display: none !important;
+  }
+
+  .main-content-scroll {
+    padding-bottom: 24px !important;
+  }
+}
+
+/* Card view conversion for mobile tables */
+@media (max-width: 767px) {
+  .desktop-table-view {
+    display: none !important;
+  }
+
+  .mobile-card-view {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filters-select-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .desktop-table-view {
+    display: block !important;
+  }
+
+  .mobile-card-view {
+    display: none !important;
+  }
+
+  .filters-select-grid {
+    grid-template-columns: repeat(2, minmax(0, 220px)) !important;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Dashboard Grid Architecture */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.dashboard-grid > *,
+.dashboard-column,
+.dashboard-section,
+.dashboard-card {
+  min-width: 0 !important;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Quick Actions Grid overflow safety rules */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.quick-actions-grid > * {
+  min-width: 0;
+}
+
+@media (max-width: 340px) {
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Summary Grid 2x2 Layout Rules */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.summary-grid > * {
+  min-width: 0;
+}
+
+.outstanding-card {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 330px) {
+  .summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .outstanding-card {
+    grid-column: auto;
+  }
+}
+
+/* Today's Service Bookings Section & Card Rules */
+.bookings-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.booking-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 14px;
+  border-radius: 14px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+
+/* Job Progress Breakdown 2x2 Mobile Grid */
+.job-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.job-progress-grid > * {
+  min-width: 0;
+}
+
+/* Responsive Calendar Breakpoint Rules */
+.calendar-day {
+  border-radius: 10px;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  padding: 6px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+@media (min-width: 1024px) {
+  .calendar-day {
+    min-height: 96px;
+    max-height: 120px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .calendar-day {
+    min-height: 72px;
+    max-height: 90px;
+  }
+}
+
+@media (max-width: 767px) {
+  .calendar-day {
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    padding: 2px;
+    justify-content: center;
+  }
+
+  .main-content,
+  .page-content,
+  .my-attendance-summary-page {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+.month-selector-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.summary-kpi-grid {
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-kpi-grid > * {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* My Personal Attendance 2x2 Grid */
+.attendance-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.attendance-stats-grid > * {
+  min-width: 0;
+}
+
+/* Attendance Quick Links 2x2 Grid */
+.quick-links-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.quick-links-grid > * {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .leave-type-header,
+  .rules-header,
+  .user-role-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .add-leave-type-btn,
+  .save-rules-btn,
+  .add-role-btn,
+  .create-advance-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 46px !important;
+    white-space: nowrap !important;
+  }
+
+  .advance-page-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .responsive-modal-overlay,
+  .leave-type-overlay {
+    align-items: flex-end !important;
+    justify-content: center !important;
+  }
+
+  .responsive-modal-sheet,
+  .leave-type-modal-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh !important;
+    border-radius: 20px 20px 0 0 !important;
+    animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .mobile-drag-handle {
+    display: flex !important;
+  }
+
+  .form-row-2col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .leave-type-header,
+  .rules-header,
+  .user-role-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 20px !important;
+  }
+
+  .add-leave-type-btn,
+  .save-rules-btn,
+  .add-role-btn,
+  .create-advance-btn {
+    width: auto !important;
+    min-width: 120px !important;
+    height: 42px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .advance-page-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 20px !important;
+  }
+
+.advance-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+  .responsive-modal-overlay,
+  .leave-type-overlay {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+  }
+
+  .responsive-modal-sheet,
+  .leave-type-modal-sheet {
+    width: 100% !important;
+    max-width: 600px !important;
+    max-height: 90vh !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobile-drag-handle {
+    display: none !important;
+  }
+
+  .form-row-2col {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.payroll-subnav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-padding-inline: 40%;
+}
+
+.payroll-subnav::-webkit-scrollbar {
+  display: none;
+}
+
+.payroll-subnav-item {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}

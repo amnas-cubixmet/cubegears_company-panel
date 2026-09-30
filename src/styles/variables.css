@@ -1,0 +1,102 @@
+:root {
+  --sidebar-width-expanded: 220px;
+  --sidebar-width-collapsed: 72px;
+  --header-height: 64px;
+  --mobile-bottom-nav-height: 60px;
+  --touch-target-min: 44px;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 14px;
+  --space-lg: 20px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+/* Light Theme Variables */
+:root[data-theme='light'] {
+  --app-bg: #f8fafc;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --text: #0f172a;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-soft: #94a3b8;
+
+  --primary: #4f46e5;
+  --primary-soft: #eef2ff;
+  --primary-hover: #4338ca;
+
+  --success: #059669;
+  --success-soft: rgba(5, 150, 105, 0.1);
+  --warning: #d97706;
+  --warning-soft: rgba(217, 119, 6, 0.1);
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.1);
+  --info: #2563eb;
+  --info-soft: rgba(37, 99, 235, 0.1);
+
+  --sidebar-bg: #ffffff;
+  --header-bg: #ffffff;
+
+  --field-bg: #ffffff;
+  --field-border: #e2e8f0;
+  --field-hover-border: #cbd5e1;
+  --field-focus-bg: #ffffff;
+  --field-disabled-bg: #f1f5f9;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+/* Dark Theme Variables */
+:root[data-theme='dark'] {
+  --app-bg: #0f172a;
+  --bg: #0f172a;
+  --surface: #131d31;
+  --surface-2: #182338;
+  --surface-3: #1e2a42;
+
+  --border: #2a3852;
+  --border-strong: #3a4964;
+
+  --text: #f8fafc;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-soft: #64748b;
+
+  --primary: #6366f1;
+  --primary-soft: #24264d;
+  --primary-hover: #4f46e5;
+
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.15);
+  --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.15);
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.15);
+  --info: #3b82f6;
+  --info-soft: rgba(59, 130, 246, 0.15);
+
+  --sidebar-bg: #111827;
+  --header-bg: #111827;
+
+  --field-bg: #111b2d;
+  --field-border: #28364c;
+  --field-hover-border: #3b4a63;
+  --field-focus-bg: #131f34;
+  --field-disabled-bg: #182338;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.4);
+}

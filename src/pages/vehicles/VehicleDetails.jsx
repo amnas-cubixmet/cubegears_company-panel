@@ -1,0 +1,404 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  AlertTriangle,
+  CalendarClock,
+  Car,
+  ClipboardList,
+  Edit3,
+  FileText,
+  Gauge,
+  IndianRupee,
+  PackageCheck,
+  Phone,
+  ShieldCheck,
+  Trash2,
+  User,
+  Wrench
+} from 'lucide-react';
+import { vehicleService } from '../../services/vehicle.service';
+import { customerService } from '../../services/customer.service';
+import { jobService } from '../../services/job.service';
+import '../../styles/vehicle-management.css';
+
+const money = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  maximumFractionDigits: 0
+});
+
+const OPEN_JOB_STATUSES = new Set([
+  'New',
+  'Checked In',
+  'Inspection',
+  'Estimate Pending',
+  'Awaiting Approval',
+  'Approved',
+  'In Progress',
+  'Waiting for Parts',
+  'QC',
+  'Quality Check',
+  'Ready for Delivery'
+]);
+
+const tabs = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'service-history', label: 'Service History' },
+  { id: 'parts', label: 'Parts Replaced' },
+  { id: 'invoices', label: 'Invoices & Payments' },
+  { id: 'reminders', label: 'Reminders' }
+];
+
+const Info = ({ label, value }) => (
+  <div className="vehicle-info-card">
+    <span>{label}</span>
+    <strong>{value || '—'}</strong>
+  </div>
+);
+
+export const VehicleDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [vehicle, setVehicle] = useState(null);
+  const [customer, setCustomer] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const nextVehicle = await vehicleService.getVehicleById(id);
+        if (!nextVehicle) {
+          if (alive) setVehicle(null);
+          return;
+        }
+
+        const [nextCustomer, nextHistory] = await Promise.all([
+          nextVehicle.customerId
+            ? customerService.getCustomerById(nextVehicle.customerId)
+            : Promise.resolve(null),
+          jobService.getVehicleHistory(nextVehicle.registration)
+        ]);
+
+        if (alive) {
+          setVehicle(nextVehicle);
+          setCustomer(nextCustomer);
+          setHistory(nextHistory);
+        }
+      } finally {
+        if (alive) setLoading(false);
+      }
+    };
+
+    load();
+    return () => { alive = false; };
+  }, [id]);
+
+  const openJob = useMemo(
+    () => history.find((job) => OPEN_JOB_STATUSES.has(job.status)) || null,
+    [history]
+  );
+
+  const parts = useMemo(
+    () => history.flatMap((job) =>
+      (job.partsUsed || []).map((part, index) => ({
+        ...part,
+        key: `${job.id}-${part.id || index}`,
+        jobId: job.id,
+        jobNumber: job.jobNumber || job.id,
+        date: job.createdDate
+      }))
+    ),
+    [history]
+  );
+
+  const invoices = useMemo(
+    () => history
+      .filter((job) => job.billing?.invoiceNumber || job.billing?.invoiceTotal || job.estimates?.length)
+      .map((job) => ({
+        jobId: job.id,
+        jobNumber: job.jobNumber || job.id,
+        invoiceNo: job.billing?.invoiceNumber || 'Not generated',
+        date: job.createdDate,
+        total: Number(job.billing?.invoiceTotal || job.estimates?.at(-1)?.grandTotal || 0),
+        paid: Number(job.billing?.paidAmount || 0),
+        balance: Number(job.billing?.outstandingBalance || 0),
+        status: job.paymentStatus || 'Pending'
+      })),
+    [history]
+  );
+
+  const totalSpend = useMemo(
+    () => invoices.reduce((sum, invoice) => sum + invoice.total, 0),
+    [invoices]
+  );
+
+  const latestJob = history[0] || null;
+
+  const removeVehicle = async () => {
+    if (!vehicle || !window.confirm(`Delete vehicle ${vehicle.registration}?`)) return;
+    await vehicleService.deleteVehicle(vehicle.id);
+    navigate('/vehicles');
+  };
+
+  if (loading) return <div className="vehicle-empty">Loading vehicle profile...</div>;
+  if (!vehicle) return <div className="vehicle-empty">Vehicle not found.</div>;
+
+  return (
+    <div className="vehicle-management-page vehicle-profile-page cg-vehicles">
+      <header className="vehicle-profile-header">
+        <div>
+          <h1>{vehicle.registration}</h1>
+          <p>{vehicle.make} {vehicle.model}{vehicle.variant ? ` · ${vehicle.variant}` : ''} · {vehicle.year || 'Year —'}</p>
+        </div>
+
+        <div className="vehicle-profile-actions">
+          <button type="button" onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}><Edit3 size={14}/> Edit</button>
+          <button
+            type="button"
+            className="is-primary"
+            onClick={() => navigate(`/jobs/new?customerId=${vehicle.customerId || ''}&vehicle=${encodeURIComponent(vehicle.registration || '')}`)}
+          >
+            <ClipboardList size={14}/> New Job Card
+          </button>
+        </div>
+      </header>
+
+      {openJob ? (
+        <button type="button" className="vehicle-current-job" onClick={() => navigate(`/jobs/${openJob.id}/overview`)}>
+          <ClipboardList size={16}/>
+          <div>
+            <strong>{openJob.jobNumber || openJob.id}</strong>
+            <span>Current Job Card · {openJob.status}</span>
+          </div>
+          <b>Open Job</b>
+        </button>
+      ) : null}
+
+      <div className="vehicle-profile-kpis">
+        <div><Gauge size={15}/><span>Odometer</span><strong>{latestJob?.kilometre || vehicle.odometer || '—'}</strong></div>
+        <div><Wrench size={15}/><span>Service Visits</span><strong>{history.length}</strong></div>
+        <div><PackageCheck size={15}/><span>Parts Replaced</span><strong>{parts.length}</strong></div>
+        <div><IndianRupee size={15}/><span>Total Spend</span><strong>{money.format(totalSpend)}</strong></div>
+      </div>
+
+      <nav className="vehicle-profile-tabs scroll-hidden">
+        {tabs.map((tab) => (
+          <button
+            type="button"
+            key={tab.id}
+            className={activeTab === tab.id ? 'is-active' : ''}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === 'overview' ? (
+        <div className="vehicle-two-column">
+          <section className="vehicle-panel">
+            <div className="vehicle-section-header">
+              <div>
+                <h2>Vehicle Technical Profile</h2>
+                <p>Registration, engine and workshop reference information.</p>
+              </div>
+              <Car size={18}/>
+            </div>
+
+            <div className="vehicle-info-grid">
+              <Info label="Registration Number" value={vehicle.registration}/>
+              <Info label="Make / Model" value={`${vehicle.make} ${vehicle.model}`.trim()}/>
+              <Info label="Variant" value={vehicle.variant}/>
+              <Info label="Year" value={vehicle.year}/>
+              <Info label="Fuel Type" value={vehicle.fuelType}/>
+              <Info label="Transmission" value={vehicle.transmission}/>
+              <Info label="Colour" value={vehicle.color}/>
+              <Info label="VIN / Chassis" value={vehicle.vin}/>
+              <Info label="Engine Number" value={vehicle.engineNo}/>
+              <Info label="Current KM" value={latestJob?.kilometre || vehicle.odometer}/>
+            </div>
+          </section>
+
+          <section className="vehicle-panel">
+            <div className="vehicle-section-header">
+              <div>
+                <h2>Owner & Service</h2>
+                <p>Customer, service schedule and insurance status.</p>
+              </div>
+              <User size={18}/>
+            </div>
+
+            <button
+              type="button"
+              className="vehicle-owner-profile"
+              onClick={() => vehicle.customerId && navigate(`/customers/${vehicle.customerId}`)}
+              disabled={!vehicle.customerId}
+            >
+              <User size={16}/>
+              <div>
+                <strong>{customer?.name || vehicle.customerName || 'Unknown Customer'}</strong>
+                <span>{customer?.phone || vehicle.customerId || 'No contact'}</span>
+              </div>
+            </button>
+
+            <div className="vehicle-info-grid">
+              <Info label="Last Service" value={latestJob?.createdDate || vehicle.lastServiceDate}/>
+              <Info label="Next Service Due" value={vehicle.nextServiceDue}/>
+              <Info label="Insurance Expiry" value={vehicle.insuranceExpiry}/>
+              <Info label="Vehicle Status" value={vehicle.status}/>
+            </div>
+
+            {customer?.phone ? (
+              <a className="vehicle-contact-button" href={`tel:${customer.phone}`}>
+                <Phone size={14}/> Call Customer
+              </a>
+            ) : null}
+          </section>
+
+          {vehicle.notes ? (
+            <section className="vehicle-panel vehicle-wide-panel">
+              <div className="vehicle-section-header">
+                <div>
+                  <h2>Vehicle Notes</h2>
+                  <p>Condition, preferences and workshop instructions.</p>
+                </div>
+              </div>
+              <div className="vehicle-note-box">{vehicle.notes}</div>
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+
+      {activeTab === 'service-history' ? (
+        <section className="vehicle-panel">
+          <div className="vehicle-section-header">
+            <div>
+              <h2>Service & Job Card History</h2>
+              <p>Repairs, labour, mileage and completed workshop visits.</p>
+            </div>
+          </div>
+
+          <div className="vehicle-history-list">
+            {history.map((job) => (
+              <button type="button" key={job.id} className="vehicle-history-card" onClick={() => navigate(`/jobs/${job.id}/overview`)}>
+                <div className="vehicle-history-card__head">
+                  <div>
+                    <strong>{job.jobNumber || job.id}</strong>
+                    <span>{job.createdDate} · {job.status}</span>
+                  </div>
+                  <b>{job.kilometre || 'KM —'}</b>
+                </div>
+
+                <div className="vehicle-history-card__meta">
+                  <span>{(job.complaints || []).length} complaint(s)</span>
+                  <span>{(job.labourRecords || job.services || []).length} labour item(s)</span>
+                  <span>{(job.partsUsed || []).length} part(s)</span>
+                  <span>{money.format(job.billing?.invoiceTotal || job.estimates?.at(-1)?.grandTotal || 0)}</span>
+                </div>
+              </button>
+            ))}
+            {!history.length ? <div className="vehicle-empty">No Job Card history for this registration.</div> : null}
+          </div>
+        </section>
+      ) : null}
+
+      {activeTab === 'parts' ? (
+        <section className="vehicle-panel">
+          <div className="vehicle-section-header">
+            <div>
+              <h2>Parts Replaced</h2>
+              <p>Workshop stock and outside-purchase parts used on this vehicle.</p>
+            </div>
+          </div>
+
+          <div className="vehicle-parts-grid">
+            {parts.map((part) => (
+              <article key={part.key} className="vehicle-part-card">
+                <div>
+                  <strong>{part.name || part.partName || 'Part'}</strong>
+                  <span>{part.sku || 'No SKU'} · {part.date}</span>
+                </div>
+                <div className="vehicle-part-card__meta">
+                  <span>Job <b>{part.jobNumber}</b></span>
+                  <span>Qty <b>{part.qty || part.quantity || 1}</b></span>
+                  <span>Price <b>{money.format(part.total || part.unitPrice || 0)}</b></span>
+                </div>
+              </article>
+            ))}
+            {!parts.length ? <div className="vehicle-empty">No replacement parts recorded.</div> : null}
+          </div>
+        </section>
+      ) : null}
+
+      {activeTab === 'invoices' ? (
+        <section className="vehicle-panel">
+          <div className="vehicle-section-header">
+            <div>
+              <h2>Invoices & Payment Ledger</h2>
+              <p>Vehicle-level billing and outstanding balances.</p>
+            </div>
+            <FileText size={18}/>
+          </div>
+
+          <div className="vehicle-invoice-list">
+            {invoices.map((invoice) => (
+              <button type="button" key={invoice.jobId} className="vehicle-invoice-row" onClick={() => navigate(`/jobs/${invoice.jobId}/invoice`)}>
+                <div>
+                  <strong>{invoice.invoiceNo}</strong>
+                  <span>{invoice.jobNumber} · {invoice.date}</span>
+                </div>
+                <div><span>Total</span><b>{money.format(invoice.total)}</b></div>
+                <div><span>Paid</span><b>{money.format(invoice.paid)}</b></div>
+                <div><span>Balance</span><b>{money.format(invoice.balance)}</b></div>
+                <em>{invoice.status}</em>
+              </button>
+            ))}
+            {!invoices.length ? <div className="vehicle-empty">No vehicle invoices recorded.</div> : null}
+          </div>
+        </section>
+      ) : null}
+
+      {activeTab === 'reminders' ? (
+        <div className="vehicle-reminder-grid">
+          <article className="vehicle-reminder-card">
+            <CalendarClock size={18}/>
+            <div>
+              <strong>Next Service</strong>
+              <span>{vehicle.nextServiceDue || 'Not scheduled'}</span>
+              <small>Current KM: {latestJob?.kilometre || vehicle.odometer || '—'}</small>
+            </div>
+          </article>
+
+          <article className="vehicle-reminder-card">
+            <ShieldCheck size={18}/>
+            <div>
+              <strong>Insurance Expiry</strong>
+              <span>{vehicle.insuranceExpiry || 'Not recorded'}</span>
+              <small>Update policy details before expiry.</small>
+            </div>
+          </article>
+
+          <article className="vehicle-reminder-card">
+            <AlertTriangle size={18}/>
+            <div>
+              <strong>Registration / Documents</strong>
+              <span>Check RC and vehicle documents</span>
+              <small>Documents can also be stored in the Customer profile.</small>
+            </div>
+          </article>
+        </div>
+      ) : null}
+
+      <button type="button" className="vehicle-delete-button" onClick={removeVehicle}>
+        <Trash2 size={14}/> Delete Vehicle
+      </button>
+    </div>
+  );
+};
+
+export default VehicleDetails;

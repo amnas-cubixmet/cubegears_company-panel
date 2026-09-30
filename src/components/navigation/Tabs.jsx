@@ -1,0 +1,2 @@
+import React from 'react';
+export const Tabs = ({ items = [], value, onChange, className = '' }) => <div className={`ui-tabs ${className}`.trim()} role="tablist">{items.map((item) => <button key={item.value} type="button" className={`ui-tab${value === item.value ? ' ui-tab--active' : ''}`} role="tab" aria-selected={value === item.value} onClick={() => onChange?.(item.value)}>{item.label}</button>)}</div>;
