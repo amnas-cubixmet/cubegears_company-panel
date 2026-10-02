@@ -204,6 +204,7 @@ function StorageView({ storage, setStorage }) {
 }
 
 export function SaaSAccount({ section = 'billing' }) {
+  const navigate = useNavigate();
   const [billing, setBilling] = useState(null);
   const [storage, setStorage] = useState(null);
   const [error, setError] = useState('');
@@ -219,8 +220,6 @@ export function SaaSAccount({ section = 'billing' }) {
   if (!billing || !storage) return <div className="saas-page"><div className="saas-loading">Loading account…</div></div>;
 
   billing.usage.storageUsedGb = storage.usedGb;
-
-  const navigate = useNavigate();
 
   return <div className="saas-page"><header className="saas-page-head"><div><span className="saas-kicker">CUBIXGEAR SaaS</span><h1>{section === 'storage' ? 'Media Storage' : 'Billing & Plan'}</h1><p>{section === 'storage' ? 'Unlimited photo storage billed at ₹2 per GB per day with interval history and daily file snapshots.' : 'Track software billing, users, storage usage and subscription history.'}</p></div></header>{section === 'storage' ? <StorageView storage={storage} setStorage={setStorage} /> : <BillingView billing={billing} storage={storage} onSeatsChange={seats} onOpenTemplates={() => navigate('/account/templates')} />}</div>;
 }
