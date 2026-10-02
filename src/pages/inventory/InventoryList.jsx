@@ -481,9 +481,10 @@ export const InventoryList = () => {
   }
 
   return (
-    <div className="inventory-management-page cg-inventory">
-      <header className="inventory-page-header">
+    <div className="inventory-management-page cg-inventory inventory-dashboard">
+      <header className="inventory-page-header inventory-dashboard-hero">
         <div>
+          <span className="inventory-dashboard-eyebrow">Inventory Control</span>
           <h1>Inventory Catalog</h1>
           <p>Master data for spare parts, consumables, pricing, reorder levels, suppliers and storage locations.</p>
         </div>
@@ -493,7 +494,7 @@ export const InventoryList = () => {
         </button>
       </header>
 
-      <div className="inventory-metric-grid">
+      <div className="inventory-metric-grid inventory-dashboard-kpis">
         <Metric label="Total Items" value={items.length} icon={Boxes}/>
         <Metric label="Stock Value" value={money.format(stockValue)} icon={IndianRupee}/>
         <Metric label="Low Stock" value={lowStockItems.length} icon={AlertTriangle} tone="warning"/>
@@ -501,7 +502,7 @@ export const InventoryList = () => {
         <Metric label="Potential Margin" value={money.format(marginValue)} icon={Tag} tone="success"/>
       </div>
 
-      <nav className="inventory-view-tabs scroll-hidden">
+      <nav className="inventory-view-tabs inventory-dashboard-tabs scroll-hidden">
         {[
           ['overview','Overview'],
           ['items','All Items'],
@@ -566,7 +567,7 @@ export const InventoryList = () => {
 
       {activeView === 'items' ? (
         <>
-          <div className="inventory-filter-bar">
+          <div className="inventory-filter-bar inventory-dashboard-toolbar">
             <label className="inventory-search">
               <Search size={16}/>
               <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search item, SKU, barcode, brand, vehicle, supplier or rack"/>
@@ -589,7 +590,19 @@ export const InventoryList = () => {
               const status=statusFor(item);
               const margin=Number(item.price || 0)-Number(item.cost || 0);
               return (
-                <article key={item.id} className="inventory-card">
+                <article
+                  key={item.id}
+                  className="inventory-card is-clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={()=>navigate(`/inventory/${item.id}`)}
+                  onKeyDown={(event)=>{
+                    if(event.key==='Enter'||event.key===' '){
+                      event.preventDefault();
+                      navigate(`/inventory/${item.id}`);
+                    }
+                  }}
+                >
                   <div className="inventory-card__head">
                     <div><span>{item.sku}</span><strong>{item.name}</strong></div>
                     <b className={`inventory-status is-${status.tone}`}>{status.label}</b>
@@ -617,9 +630,9 @@ export const InventoryList = () => {
                   </div>
 
                   <div className="inventory-card-actions">
-                    <button onClick={()=>navigate(`/inventory/${item.id}`)}><Eye size={13}/> View</button>
-                    <button onClick={()=>navigate(`/inventory/${item.id}/edit`)}><Edit3 size={13}/> Edit</button>
-                    <button className="is-danger" onClick={()=>removeItem(item)}><Trash2 size={13}/> Delete</button>
+                    <button onClick={(event)=>{event.stopPropagation();navigate(`/inventory/${item.id}`);}}><Eye size={13}/> View</button>
+                    <button onClick={(event)=>{event.stopPropagation();navigate(`/inventory/${item.id}/edit`);}}><Edit3 size={13}/> Edit</button>
+                    <button className="is-danger" onClick={(event)=>{event.stopPropagation();removeItem(item);}}><Trash2 size={13}/> Delete</button>
                   </div>
                 </article>
               );
