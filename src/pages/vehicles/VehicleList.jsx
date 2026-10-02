@@ -7,11 +7,11 @@ import {
   ChevronRight,
   ClipboardList,
   Edit3,
-  Gauge,
   Plus,
   Search,
   ShieldCheck,
-  User
+  User,
+  Wrench
 } from 'lucide-react';
 import { vehicleService } from '../../services/vehicle.service';
 import { customerService } from '../../services/customer.service';
@@ -148,54 +148,115 @@ export const VehicleList = () => {
   }
 
   return (
-    <div className="vehicle-management-page cg-vehicles">
-      <header className="vehicle-page-header">
+    <div className="vehicle-management-page cg-vehicles vehicle-list-dashboard">
+      <header className="vehicle-list-hero">
         <div>
+          <span className="vehicle-list-eyebrow">Workshop Fleet</span>
           <h1>Vehicles</h1>
-          <p>Customer vehicles, registration details, workshop history, reminders and active Job Cards.</p>
+          <p>Manage customer vehicles, active job cards, service schedules and insurance reminders.</p>
         </div>
         <button type="button" className="vehicle-primary-button" onClick={() => navigate('/vehicles/new')}>
           <Plus size={15}/> Add Vehicle
         </button>
       </header>
 
-      <div className="vehicle-metric-grid">
-        <Metric label="Total Vehicles" value={metrics.total} icon={Car}/>
-        <Metric label="Active Vehicles" value={metrics.active} icon={ShieldCheck} tone="success"/>
-        <Metric label="Open Jobs" value={metrics.openJobs} icon={ClipboardList}/>
-        <Metric label="Service Due" value={metrics.serviceDue} icon={CalendarClock} tone="warning"/>
-        <Metric label="Insurance Due" value={metrics.insuranceDue} icon={AlertTriangle} tone="warning"/>
+      <div className="vehicle-list-kpis">
+        <Metric label="Total Vehicles" value={metrics.total} icon={Car} note="Registered vehicles"/>
+        <Metric label="Active Vehicles" value={metrics.active} icon={ShieldCheck} tone="success" note="Currently active"/>
+        <Metric label="Open Jobs" value={metrics.openJobs} icon={ClipboardList} note="Workshop jobs"/>
+        <Metric label="Service Due" value={metrics.serviceDue} icon={CalendarClock} tone="warning" note="Due within 30 days"/>
+        <Metric label="Insurance Due" value={metrics.insuranceDue} icon={AlertTriangle} tone="warning" note="Renewal attention"/>
       </div>
 
-      <label className="vehicle-search">
-        <Search size={16}/>
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search registration number, VIN, make/model, customer or phone"
-        />
-      </label>
+      <section className="vehicle-list-toolbar">
+        <label className="vehicle-search">
+          <Search size={16}/>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search registration, VIN, make/model, customer or phone"
+          />
+        </label>
+        <div className="vehicle-list-count">
+          <span>Showing</span>
+          <strong>{filtered.length}</strong>
+        </div>
+      </section>
 
-      <section className="vehicle-directory-panel">
+      <section className="vehicle-directory-panel vehicle-directory-modern">
         <div className="vehicle-section-header">
           <div>
             <h2>Vehicle Directory</h2>
-            <p>{filtered.length} vehicle(s) found.</p>
+            <p>Open a vehicle profile, edit details or create a new Job Card.</p>
           </div>
         </div>
 
-        <div className="vehicle-card-grid">
+        <div className="vehicle-table-wrap">
+          <table className="vehicle-table">
+            <thead>
+              <tr>
+                <th>Vehicle</th>
+                <th>Owner</th>
+                <th>Service</th>
+                <th>Open Job</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((vehicle) => {
+                const status = statusText(vehicle);
+                const lastService = vehicle.latestJob?.createdDate || vehicle.lastServiceDate || '—';
+                return (
+                  <tr key={vehicle.id} onClick={() => navigate(`/vehicles/${vehicle.id}`)}>
+                    <td>
+                      <strong>{vehicle.registration || 'No Registration'}</strong>
+                      <span>{vehicle.make} {vehicle.model}{vehicle.variant ? ` · ${vehicle.variant}` : ''}</span>
+                    </td>
+                    <td>
+                      <strong>{vehicle.customerName}</strong>
+                      <span>{vehicle.customerPhone || vehicle.customerId || 'No contact'}</span>
+                    </td>
+                    <td>
+                      <strong>{lastService}</strong>
+                      <span>Next: {vehicle.nextServiceDue || 'Not set'}</span>
+                    </td>
+                    <td>
+                      {vehicle.openJob ? (
+                        <button
+                          type="button"
+                          className="vehicle-table-job"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            navigate(`/jobs/${vehicle.openJob.id}/overview`);
+                          }}
+                        >
+                          <Wrench size={12}/>
+                          <span>{vehicle.openJob.jobNumber || vehicle.openJob.id}</span>
+                        </button>
+                      ) : <span className="vehicle-table-empty">No active job</span>}
+                    </td>
+                    <td><span className={`vehicle-status is-${status.tone}`}>{status.label}</span></td>
+                    <td><ChevronRight size={15}/></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="vehicle-mobile-grid">
           {filtered.map((vehicle) => {
             const status = statusText(vehicle);
             const lastService = vehicle.latestJob?.createdDate || vehicle.lastServiceDate || '—';
             const odometer = vehicle.latestJob?.kilometre || vehicle.odometer || '—';
 
             return (
-              <article key={vehicle.id} className="vehicle-directory-card">
-                <div className="vehicle-directory-card__head">
+              <article key={vehicle.id} className="vehicle-mobile-card">
+                <div className="vehicle-mobile-card-head">
                   <div>
                     <strong>{vehicle.registration || 'No Registration'}</strong>
-                    <span>{vehicle.make} {vehicle.model}{vehicle.variant ? ` · ${vehicle.variant}` : ''}</span>
+                    <span>{vehicle.make} {vehicle.model}</span>
                   </div>
                   <span className={`vehicle-status is-${status.tone}`}>{status.label}</span>
                 </div>
@@ -208,9 +269,7 @@ export const VehicleList = () => {
                   </div>
                 </div>
 
-                <div className="vehicle-detail-grid">
-                  <div><span>Year</span><strong>{vehicle.year || '—'}</strong></div>
-                  <div><span>Fuel</span><strong>{vehicle.fuelType || '—'}</strong></div>
+                <div className="vehicle-mobile-meta">
                   <div><span>Odometer</span><strong>{odometer}</strong></div>
                   <div><span>Last Service</span><strong>{lastService}</strong></div>
                   <div><span>Next Service</span><strong>{vehicle.nextServiceDue || 'Not set'}</strong></div>
@@ -232,7 +291,7 @@ export const VehicleList = () => {
 
                 <div className="vehicle-card-actions">
                   <button type="button" onClick={() => navigate(`/vehicles/${vehicle.id}`)}>
-                    <Car size={13}/> View Vehicle
+                    <Car size={13}/> View
                   </button>
                   <button type="button" onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}>
                     <Edit3 size={13}/> Edit
@@ -242,7 +301,7 @@ export const VehicleList = () => {
                     className="is-primary"
                     onClick={() => navigate(`/jobs/new?customerId=${vehicle.customerId || ''}&vehicle=${encodeURIComponent(vehicle.registration || '')}`)}
                   >
-                    <ClipboardList size={13}/> New Job Card
+                    <ClipboardList size={13}/> New Job
                   </button>
                 </div>
               </article>
@@ -255,6 +314,7 @@ export const VehicleList = () => {
         ) : null}
       </section>
     </div>
+  );
   );
 };
 
