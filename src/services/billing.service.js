@@ -8,6 +8,83 @@ const JOB_PREFILL_KEY = 'cubixgear:invoice-job-prefill';
 
 const seedDocuments = [
   {
+    id: 'INV-2026-27023',
+    number: '202627023',
+    kind: 'invoice',
+    invoiceType: 'gst',
+    status: 'Finalized',
+    date: '2026-06-03',
+    seller: {
+      name: 'Fine Polymeric Products LLP',
+      address: 'S NO 368, NIDA NO.3 ROAD, NIDA KANJIKODE INDUSTRIAL AREA, PALAKKAD, KERALA-678621',
+      phone: '8129231329',
+      email: 'finepolymericproducts22@gmail.com',
+      gstin: '32AAIFF2342J1ZO',
+      state: 'Kerala',
+      stateCode: '32'
+    },
+    customer: {
+      name: 'NATION LEATHER',
+      phone: '',
+      email: '',
+      address: '4TH, 124 FLAT 4B USTAD ENAYET KHAN AVENUE, KOLKATA, WEST BENGAL-700017',
+      gstin: '19BURPK8273K1ZN',
+      state: 'West Bengal',
+      stateCode: '19',
+      placeOfSupply: '19-West Bengal'
+    },
+    transportation: {
+      vehicleNo: 'OD07AH1556',
+      transporterName: ''
+    },
+    vehicle: { registration: 'OD07AH1556', makeModel: '', odometer: '', vin: '' },
+    jobCardNo: '',
+    staff: '',
+    notes: '',
+    items: [
+      {
+        id: 'FPP-1',
+        type: 'Custom Item',
+        description: 'Eva Pushout',
+        code: '',
+        hsnCode: '391590',
+        qty: 9000,
+        unit: 'KG',
+        purchasePrice: 0,
+        rate: 30,
+        taxRate: 18,
+        discount: 0,
+        inventoryId: ''
+      },
+      {
+        id: 'FPP-2',
+        type: 'Custom Item',
+        description: 'Chappal Grinding Sheet',
+        code: '',
+        hsnCode: '40040000',
+        qty: 14450,
+        unit: 'KG',
+        purchasePrice: 0,
+        rate: 25,
+        taxRate: 5,
+        discount: 0,
+        inventoryId: ''
+      }
+    ],
+    discount: 0,
+    adjustment: 0.5,
+    taxMode: 'igst',
+    cgstRate: 0,
+    sgstRate: 0,
+    igstRate: 18,
+    paid: 0,
+    paymentMode: 'Credit',
+    paymentType: 'Credit',
+    paymentTerms: 'Credit',
+    termsAndConditions: 'All disputes under this invoice will be settled in Palakkad Jurisdiction only',
+    finalizedAt: '2026-06-03T09:00:00.000Z'
+  },
+  {
     id: 'INV-2026-1001', number: 'INV-2026-1001', kind: 'invoice', invoiceType: 'regular', status: 'Finalized', date: '2026-09-12',
     customer: { name: 'Rahul P', phone: '+91 98765 43210', address: '', gstin: '' },
     vehicle: { registration: 'KL-08-BQ-4581', makeModel: 'Toyota Innova Crysta', odometer: '52,400 km', vin: '' },
