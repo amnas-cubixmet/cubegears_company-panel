@@ -11,7 +11,13 @@ import {
   Package,
   Wrench,
   UserCheck,
-  Clock
+  Clock,
+  CreditCard,
+  Receipt,
+  BarChart3,
+  Bell,
+  Settings,
+  LayoutDashboard
 } from 'lucide-react';
 import '../../styles/global-search.css';
 
@@ -137,6 +143,12 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
       case 'stock': return <Package size={15} />;
       case 'services': return <Wrench size={15} />;
       case 'employees': return <UserCheck size={15} />;
+      case 'payments': return <CreditCard size={15} />;
+      case 'expenses': return <Receipt size={15} />;
+      case 'reports': return <BarChart3 size={15} />;
+      case 'notifications': return <Bell size={15} />;
+      case 'pages': return <LayoutDashboard size={15} />;
+      case 'settings': return <Settings size={15} />;
       default: return <Search size={15} />;
     }
   };
@@ -159,7 +171,7 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDownInput}
-          placeholder="Search customer, vehicle, job, invoice, stock..."
+          placeholder="Search entire workspace: pages, customer, vehicle, job, invoice, stock..."
         />
         {query && (
           <button
@@ -188,7 +200,7 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
           {!loading && query.trim().length >= 2 && results.length === 0 && (
             <div className="global-search-empty">
               <strong>No matching records found</strong>
-              <span>Try customer, phone, vehicle registration or job number.</span>
+              <span>Try a page, customer, phone, vehicle, job, invoice, payment, expense or stock item.</span>
             </div>
           )}
 
