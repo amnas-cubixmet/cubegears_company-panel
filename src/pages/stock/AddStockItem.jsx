@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, PackagePlus, Save, Boxes } from 'lucide-react';
 import { stockManagementService } from '../../services/stockManagement.service';
+import { expenseService } from '../../services/expense.service';
 import { stockCategories } from '../../mock/stockManagement.mock';
 import '../../styles/stock-management.css';
 import '../../styles/stock-add-item.css';
@@ -38,7 +39,11 @@ export const AddStockItem = () => {
     quantity: '1',
     supplier: '',
     invoiceNo: '',
-    notes: ''
+    notes: '',
+    purchaseCost: '',
+    tax: '18',
+    paymentMethod: 'Bank Transfer',
+    addToExpenses: true
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -60,6 +65,28 @@ export const AddStockItem = () => {
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
 
+  const selectedExistingItem = items.find((entry) => entry.id === existingForm.itemId);
+  const existingBaseAmount = Number(existingForm.quantity || 0) * Number(existingForm.purchaseCost || 0);
+  const existingTaxAmount = existingBaseAmount * Number(existingForm.tax || 0) / 100;
+  const existingExpenseTotal = existingBaseAmount + existingTaxAmount;
+
+  const createStockExpense = async ({ title, amount, taxAmount, vendor, referenceNo, paymentMethod, notes }) => {
+    if (Number(amount || 0) <= 0) return null;
+    return expenseService.createExpense({
+      title,
+      category: 'Stock Purchase',
+      amount: Number(amount || 0),
+      taxAmount: Number(taxAmount || 0),
+      expenseDate: new Date().toISOString().split('T')[0],
+      vendor: vendor || 'Stock Supplier',
+      paymentMethod: paymentMethod || 'Bank Transfer',
+      referenceNo: referenceNo || '',
+      status: 'approved',
+      notes: notes || 'Created automatically from Stock Management.',
+      receiptName: ''
+    });
+  };
+
   const submitExisting = async (event) => {
     event.preventDefault();
     const item = items.find((entry) => entry.id === existingForm.itemId);
@@ -79,8 +106,22 @@ export const AddStockItem = () => {
         quantity: existingForm.quantity,
         supplier: existingForm.supplier,
         invoiceNo: existingForm.invoiceNo,
-        notes: existingForm.notes
+        notes: existingForm.notes,
+        unitCost: Number(existingForm.purchaseCost || 0)
       });
+
+      if (existingForm.addToExpenses && existingExpenseTotal > 0) {
+        await createStockExpense({
+          title: `Stock Purchase · ${item.partName}`,
+          amount: existingExpenseTotal,
+          taxAmount: existingTaxAmount,
+          vendor: existingForm.supplier,
+          referenceNo: existingForm.invoiceNo,
+          paymentMethod: existingForm.paymentMethod,
+          notes: `${existingForm.quantity} ${item.unit || 'unit'} × ₹${Number(existingForm.purchaseCost || 0).toFixed(2)}. ${existingForm.notes || ''}`.trim()
+        });
+      }
+
       navigate('/stock/items');
     } catch (err) {
       setError(err?.message || 'Unable to add stock quantity.');
@@ -95,7 +136,24 @@ export const AddStockItem = () => {
     setError('');
 
     try {
-      await stockManagementService.createItem(form);
+      const created = await stockManagementService.createItem(form);
+
+      const openingBase = Number(form.onHand || 0) * Number(form.costPrice || 0);
+      const openingTax = openingBase * Number(form.tax || 0) / 100;
+      const openingTotal = openingBase + openingTax;
+
+      if (openingTotal > 0) {
+        await createStockExpense({
+          title: `Opening Stock Purchase · ${created?.partName || form.partName}`,
+          amount: openingTotal,
+          taxAmount: openingTax,
+          vendor: form.supplier,
+          referenceNo: created?.sku || form.sku,
+          paymentMethod: 'Bank Transfer',
+          notes: `Opening stock: ${form.onHand} ${form.unit} × ₹${Number(form.costPrice || 0).toFixed(2)}.`
+        });
+      }
+
       navigate('/stock/items');
     } catch (err) {
       setError(err?.message || 'Unable to add stock item.');
@@ -155,7 +213,15 @@ export const AddStockItem = () => {
                 <select
                   required
                   value={existingForm.itemId}
-                  onChange={(e)=>setExistingForm({...existingForm,itemId:e.target.value})}
+                  onChange={(e)=>{
+                    const nextId=e.target.value;
+                    const nextItem=items.find((entry)=>entry.id===nextId);
+                    setExistingForm({
+                      ...existingForm,
+                      itemId:nextId,
+                      purchaseCost:nextItem?.costPrice != null ? String(nextItem.costPrice) : existingForm.purchaseCost
+                    });
+                  }}
                 >
                   <option value="">Select product</option>
                   {items.map((item)=>(
@@ -196,6 +262,55 @@ export const AddStockItem = () => {
                   placeholder="INV-2026-001"
                 />
               </label>
+
+              <label>
+                Purchase Cost / Unit *
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={existingForm.purchaseCost}
+                  onChange={(e)=>setExistingForm({...existingForm,purchaseCost:e.target.value})}
+                  placeholder="0.00"
+                />
+              </label>
+
+              <label>
+                Tax / GST %
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={existingForm.tax}
+                  onChange={(e)=>setExistingForm({...existingForm,tax:e.target.value})}
+                />
+              </label>
+
+              <label>
+                Payment Method
+                <select
+                  value={existingForm.paymentMethod}
+                  onChange={(e)=>setExistingForm({...existingForm,paymentMethod:e.target.value})}
+                >
+                  {['Cash','UPI','Bank Transfer','Company Card','Cheque'].map((method)=><option key={method}>{method}</option>)}
+                </select>
+              </label>
+
+              <label className="stock-add-expense-toggle">
+                <input
+                  type="checkbox"
+                  checked={existingForm.addToExpenses}
+                  onChange={(e)=>setExistingForm({...existingForm,addToExpenses:e.target.checked})}
+                />
+                Add purchase value to Company Expenses
+              </label>
+
+              <div className="stock-add-wide stock-purchase-summary">
+                <span>Purchase Value</span><strong>₹{existingBaseAmount.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong>
+                <span>GST</span><strong>₹{existingTaxAmount.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong>
+                <span>Total Expense</span><strong>₹{existingExpenseTotal.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong>
+              </div>
 
               <label className="stock-add-wide">
                 Notes
