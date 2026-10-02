@@ -1098,3 +1098,194 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   INVENTORY DASHBOARD POLISH
+   ========================================================= */
+.inventory-dashboard{
+  gap:12px
+}
+.inventory-dashboard-hero{
+  align-items:flex-end;
+  padding:15px;
+  border:1px solid var(--inventory-border);
+  border-radius:15px;
+  background:linear-gradient(135deg,var(--inventory-surface),color-mix(in srgb,var(--primary) 5%,var(--inventory-surface)));
+  box-shadow:var(--inventory-shadow)
+}
+.inventory-dashboard-eyebrow{
+  display:block;
+  margin-bottom:4px;
+  color:var(--primary);
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase
+}
+.inventory-dashboard-hero h1{
+  font-size:22px!important
+}
+.inventory-dashboard-hero p{
+  max-width:680px;
+  font-size:10px!important
+}
+.inventory-dashboard-kpis{
+  gap:9px
+}
+.inventory-dashboard-kpis .inventory-metric-card{
+  min-height:106px;
+  padding:12px
+}
+.inventory-dashboard-kpis .inventory-metric-card__top i{
+  width:31px;
+  height:31px;
+  border-radius:9px
+}
+.inventory-dashboard-kpis .inventory-metric-card>strong{
+  margin-top:12px;
+  font-size:20px
+}
+.inventory-dashboard-tabs{
+  align-self:flex-start;
+  width:auto;
+  min-width:420px;
+  padding:4px
+}
+.inventory-dashboard-tabs button{
+  min-width:96px
+}
+.inventory-dashboard-toolbar{
+  padding:8px;
+  border:1px solid var(--inventory-border);
+  border-radius:13px;
+  background:var(--inventory-surface);
+  box-shadow:var(--inventory-shadow)
+}
+.inventory-dashboard-toolbar .inventory-search,
+.inventory-dashboard-toolbar>select{
+  min-height:42px;
+  height:42px;
+  background:var(--inventory-soft)
+}
+.inventory-dashboard-toolbar .inventory-search{
+  box-shadow:none
+}
+.inventory-card.is-clickable{
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease
+}
+.inventory-card.is-clickable::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  background:var(--primary)
+}
+.inventory-card.is-clickable:hover{
+  transform:translateY(-1px);
+  border-color:color-mix(in srgb,var(--primary) 25%,var(--inventory-border));
+  box-shadow:0 6px 18px rgba(15,23,42,.06)
+}
+.inventory-card.is-clickable:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px
+}
+.inventory-card__head{
+  padding-left:3px
+}
+.inventory-card__head strong{
+  font-size:12px
+}
+.inventory-stock-grid{
+  gap:6px;
+  margin-top:10px
+}
+.inventory-stock-grid>div{
+  min-height:53px;
+  border-radius:9px
+}
+.inventory-price-row{
+  gap:6px;
+  margin-top:9px
+}
+.inventory-meta-row{
+  margin-top:9px
+}
+.inventory-card-actions{
+  gap:6px;
+  margin-top:11px;
+  padding-top:10px
+}
+.inventory-card-actions button{
+  min-height:38px
+}
+.inventory-two-column{
+  gap:10px
+}
+.inventory-panel{
+  border-radius:13px
+}
+.inventory-data-row{
+  transition:border-color .15s ease,background .15s ease
+}
+.inventory-data-row:hover{
+  border-color:color-mix(in srgb,var(--primary) 24%,var(--inventory-border));
+  background:color-mix(in srgb,var(--primary) 3%,var(--inventory-soft))
+}
+@media(max-width:1100px){
+  .inventory-dashboard-kpis{
+    grid-template-columns:repeat(3,minmax(0,1fr))
+  }
+  .inventory-card-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+}
+@media(max-width:767px){
+  .inventory-dashboard-hero{
+    align-items:flex-start;
+    padding:12px
+  }
+  .inventory-dashboard-hero .inventory-primary-button{
+    width:100%
+  }
+  .inventory-dashboard-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+  .inventory-dashboard-kpis .inventory-metric-card{
+    min-height:94px
+  }
+  .inventory-dashboard-tabs{
+    width:100%;
+    min-width:0
+  }
+  .inventory-dashboard-tabs button{
+    min-width:94px
+  }
+  .inventory-dashboard-toolbar{
+    grid-template-columns:1fr;
+    padding:7px
+  }
+  .inventory-card-grid{
+    grid-template-columns:1fr
+  }
+  .inventory-card{
+    padding:11px
+  }
+  .inventory-card-actions{
+    grid-template-columns:repeat(3,minmax(0,1fr))
+  }
+}
+@media(max-width:380px){
+  .inventory-dashboard-kpis{
+    grid-template-columns:1fr 1fr
+  }
+  .inventory-card-actions{
+    grid-template-columns:1fr
+  }
+  .inventory-price-row{
+    grid-template-columns:1fr
+  }
+}
