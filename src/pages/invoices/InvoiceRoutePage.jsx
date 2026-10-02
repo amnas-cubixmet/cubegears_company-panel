@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Edit3, Eye, FileText, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from 'lucide-react';
+import { CheckCircle2, Download, Edit3, Eye, FileText, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { customerService } from '../../services/customer.service';
@@ -392,7 +392,7 @@ export function InvoiceRoutePage() {
 
           {form.kind === 'estimate' && form.status !== 'Converted' && form.status !== 'Cancelled' && (
             <button className="bill-btn" disabled={saving} onClick={convertEstimate}>
-              <ReceiptText size={16}/>{saving ? 'Converting…' : 'Convert to Invoice'}
+              <ReceiptText size={16}/>{saving ? 'Converting…' : 'Convert to Sale Invoice'}
             </button>
           )}
 
@@ -409,7 +409,10 @@ export function InvoiceRoutePage() {
           )}
 
           <button className="bill-btn secondary" onClick={() => window.print()}>
-            <Printer size={16}/>Print / PDF
+            <Printer size={16}/>Print
+          </button>
+          <button className="bill-btn" onClick={() => window.print()}>
+            <Download size={16}/>Download PDF
           </button>
 
           {form.status !== 'Cancelled' && form.status !== 'Converted' && (
@@ -451,6 +454,9 @@ export function InvoiceRoutePage() {
         </div>
         <div className="billing-head-actions">
           <button className="bill-btn secondary" disabled={saving} onClick={save}>Save Draft</button>
+          <button className="bill-btn secondary" type="button" onClick={() => window.print()}>
+            <Download size={16}/>Download PDF
+          </button>
           <button className="bill-btn" disabled={saving} onClick={finalize}>
             <CheckCircle2 size={16}/>{form.kind === 'estimate' ? 'Issue Estimate' : 'Finalize Invoice'}
           </button>
