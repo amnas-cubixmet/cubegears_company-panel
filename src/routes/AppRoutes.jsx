@@ -25,7 +25,6 @@ import { JobCreatePage } from '../pages/jobs/JobCreatePage';
 import { JobDetails } from '../pages/jobs/JobDetails';
 import { JobStatus } from '../pages/jobs/JobStatus';
 import { JobReports } from '../pages/jobs/JobReports';
-import { InventoryList } from '../pages/inventory/InventoryList';
 import { StockManagement } from '../pages/stock/StockManagement';
 import { AddStockItem } from '../pages/stock/AddStockItem';
 import { InvoiceList } from '../pages/invoices/InvoiceList';
@@ -161,12 +160,6 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id/photos" element={<JobDetails />} />
       <Route path="/jobs/:id/history" element={<JobDetails />} />
       <Route path="/jobs/:id/*" element={<JobDetails />} />
-
-      <Route path="/inventory" element={<InventoryList />} />
-      <Route path="/inventory/new" element={<InventoryList />} />
-      <Route path="/inventory/:id" element={<InventoryList />} />
-      <Route path="/inventory/:id/edit" element={<InventoryList />} />
-      <Route path="/inventory/:id/delete" element={<Navigate to="/inventory" replace />} />
 
       <Route path="/stock" element={<Navigate to="/stock/overview" replace />} />
       <Route path="/stock/overview" element={<StockManagement section="overview" />} />
