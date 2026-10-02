@@ -1960,3 +1960,131 @@
     margin-top:0;
   }
 }
+
+/* =========================================================
+   BILLING LIST DASHBOARD
+   ========================================================= */
+.billing-list-dashboard{
+  gap:12px
+}
+.billing-list-hero{
+  align-items:flex-end;
+  padding:15px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--primary) 5%,var(--surface)));
+  box-shadow:0 1px 2px rgba(15,23,42,.04)
+}
+.billing-list-hero h1{
+  margin:2px 0 0;
+  font-size:22px;
+  line-height:1.2
+}
+.billing-list-hero p{
+  max-width:650px;
+  margin-top:4px;
+  font-size:10px
+}
+.billing-list-tabs{
+  padding:4px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:var(--surface);
+  box-shadow:0 1px 2px rgba(15,23,42,.04)
+}
+.billing-list-tabs button{
+  min-height:40px;
+  border-radius:9px
+}
+.billing-list-panel{
+  padding:8px;
+  border-radius:13px
+}
+.billing-list-panel .billing-doc-list{
+  gap:7px
+}
+.billing-list-panel .billing-doc-row{
+  min-height:66px;
+  padding:9px 10px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:var(--surface-2);
+  transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease
+}
+.billing-list-panel .billing-doc-row:hover{
+  transform:translateY(-1px);
+  border-color:color-mix(in srgb,var(--primary) 24%,var(--border));
+  box-shadow:0 5px 14px rgba(15,23,42,.05)
+}
+.billing-list-panel .billing-doc-main strong{
+  font-size:11px
+}
+.billing-list-panel .billing-doc-main span{
+  margin-top:3px;
+  font-size:9px
+}
+.billing-list-panel .billing-doc-meta{
+  gap:3px
+}
+.billing-list-panel .billing-doc-meta span{
+  font-size:8px
+}
+.billing-list-panel .billing-doc-meta strong{
+  font-size:10px
+}
+.billing-list-panel .billing-status{
+  min-height:26px;
+  border-radius:999px;
+  padding:0 8px;
+  font-size:8px
+}
+.billing-list-panel .billing-list-actions{
+  gap:5px
+}
+.billing-list-panel .billing-list-actions button{
+  width:34px;
+  height:34px;
+  border-radius:9px
+}
+@media(max-width:900px){
+  .billing-list-panel .billing-doc-row{
+    grid-template-columns:minmax(0,1fr) auto
+  }
+  .billing-list-panel .billing-doc-main{
+    grid-column:1/-1
+  }
+  .billing-list-panel .billing-doc-meta{
+    grid-column:1
+  }
+  .billing-list-panel .billing-status{
+    grid-column:2
+  }
+  .billing-list-panel .billing-list-actions{
+    grid-column:1/-1;
+    justify-content:flex-start
+  }
+}
+@media(max-width:700px){
+  .billing-list-hero{
+    align-items:flex-start;
+    padding:12px
+  }
+  .billing-list-hero>.bill-btn{
+    width:100%
+  }
+  .billing-list-tabs{
+    grid-template-columns:repeat(3,minmax(0,1fr))
+  }
+  .billing-list-panel{
+    padding:6px
+  }
+  .billing-list-panel .billing-doc-row{
+    padding:9px
+  }
+  .billing-list-panel .billing-list-actions button{
+    flex:1;
+    width:auto;
+    max-width:none;
+    min-height:40px
+  }
+}
