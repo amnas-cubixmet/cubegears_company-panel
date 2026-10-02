@@ -2683,3 +2683,72 @@
   .invoice-sale-table-total>*:nth-child(7){grid-row:3}
   .invoice-sale-table-total>*:nth-child(8){grid-row:4}
 }
+
+/* Invoice list action buttons */
+.billing-list-panel .billing-list-actions{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,auto));
+  gap:6px;
+  justify-content:end;
+}
+.billing-list-panel .billing-action-btn{
+  width:auto!important;
+  min-width:58px;
+  height:34px;
+  padding:0 9px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface);
+  color:var(--text-secondary);
+  font-size:8px;
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:background-color .15s ease,border-color .15s ease,color .15s ease,transform .15s ease;
+}
+.billing-list-panel .billing-action-btn:hover{
+  transform:translateY(-1px);
+  border-color:color-mix(in srgb,var(--primary) 24%,var(--border));
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+.billing-list-panel .billing-action-btn.is-delete{
+  color:var(--danger);
+}
+.billing-list-panel .billing-action-btn.is-delete:hover{
+  border-color:color-mix(in srgb,var(--danger) 24%,var(--border));
+  background:var(--danger-soft);
+  color:var(--danger);
+}
+.billing-list-panel .billing-action-btn svg{
+  flex:0 0 auto;
+}
+@media(max-width:900px){
+  .billing-list-panel .billing-list-actions{
+    justify-content:start;
+  }
+}
+@media(max-width:700px){
+  .billing-list-panel .billing-list-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+  }
+  .billing-list-panel .billing-action-btn{
+    width:100%!important;
+    min-width:0;
+    min-height:40px;
+    padding:0 10px;
+    font-size:9px;
+  }
+}
+@media(max-width:360px){
+  .billing-list-panel .billing-list-actions{
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+  }
+}
