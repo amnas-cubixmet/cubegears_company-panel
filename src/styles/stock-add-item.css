@@ -1,0 +1,139 @@
+.stock-add-page{
+  width:100%;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:14px
+}
+.stock-add-header{
+  display:flex;
+  align-items:flex-start;
+  gap:10px
+}
+.stock-add-back{
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text-primary);
+  cursor:pointer
+}
+.stock-add-header>div>span{
+  display:block;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--primary)
+}
+.stock-add-header h1{
+  margin:3px 0 0;
+  font-size:20px;
+  line-height:1.2;
+  font-weight:800;
+  color:var(--text-primary)
+}
+.stock-add-header p{
+  margin:4px 0 0;
+  font-size:10px;
+  color:var(--text-muted)
+}
+.stock-add-form{
+  display:flex;
+  flex-direction:column;
+  gap:12px
+}
+.stock-add-section{
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--surface);
+  box-shadow:0 1px 2px rgba(15,23,42,.04)
+}
+.stock-add-section-title{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin-bottom:12px
+}
+.stock-add-section-title svg{
+  color:var(--primary)
+}
+.stock-add-section-title h2{
+  margin:0;
+  font-size:13px;
+  font-weight:800;
+  color:var(--text-primary)
+}
+.stock-add-section-title p{
+  margin:3px 0 0;
+  font-size:9px;
+  color:var(--text-muted)
+}
+.stock-add-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px
+}
+.stock-add-grid label{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  font-size:9px;
+  font-weight:700;
+  color:var(--text-secondary)
+}
+.stock-add-grid input,
+.stock-add-grid select{
+  width:100%;
+  min-width:0;
+  height:42px;
+  padding:0 10px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-primary);
+  outline:none;
+  font-size:11px
+}
+.stock-add-grid input:focus,
+.stock-add-grid select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--primary-soft)
+}
+.stock-add-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px
+}
+.stock-add-actions button{
+  min-width:120px
+}
+@media(max-width:700px){
+  .stock-add-grid{
+    grid-template-columns:1fr
+  }
+  .stock-add-section{
+    padding:11px
+  }
+  .stock-add-grid input,
+  .stock-add-grid select{
+    height:44px;
+    font-size:16px
+  }
+  .stock-add-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr
+  }
+  .stock-add-actions button{
+    width:100%;
+    min-width:0;
+    min-height:44px
+  }
+}
