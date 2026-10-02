@@ -4,16 +4,41 @@ import { routeConfig, ROUTE_SECTIONS } from '../../routes/routeConfig';
 import { ChevronLeft, ChevronRight, Laptop, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
+import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 
 export const Sidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   const activeItemRef = useRef(null);
 
   useEffect(() => {
     activeItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [location.pathname]);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadNotificationCount = async () => {
+      try {
+        const rows = await resourceConfigs.notifications.service.list();
+        if (mounted) setNotificationCount((Array.isArray(rows) ? rows : []).filter((row) => row.status === 'Unread').length);
+      } catch {
+        if (mounted) setNotificationCount(0);
+      }
+    };
+
+    loadNotificationCount();
+    const onStorage = (event) => {
+      if (!event.key || event.key === 'cubixgear:notifications') loadNotificationCount();
+    };
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener('storage', onStorage);
+    };
   }, [location.pathname]);
 
   const sections = Object.values(ROUTE_SECTIONS);
@@ -69,8 +94,16 @@ export const Sidebar = () => {
                         title={collapsed ? route.label : undefined}
                         className={`sidebar-nav-item ${active ? 'is-active' : ''} ${collapsed ? 'is-icon-only' : ''}`}
                       >
-                        <span className="sidebar-nav-icon"><Icon size={15} strokeWidth={active ? 2.2 : 1.8} /></span>
+                        <span className="sidebar-nav-icon">
+                          <Icon size={15} strokeWidth={active ? 2.2 : 1.8} />
+                          {route.id === 'notifications' && notificationCount > 0 && collapsed && (
+                            <span className="sidebar-notification-count is-collapsed">{notificationCount > 99 ? '99+' : notificationCount}</span>
+                          )}
+                        </span>
                         {!collapsed && <span className="sidebar-nav-label">{route.label}</span>}
+                        {route.id === 'notifications' && notificationCount > 0 && !collapsed && (
+                          <span className="sidebar-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>
+                        )}
                       </NavLink>
                     );
                   })}
