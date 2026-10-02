@@ -361,10 +361,18 @@ export function InvoiceRoutePage() {
               <div className="billing-doc-meta"><span>{doc.date || '—'}</span><strong>{money.format(t.total)}</strong></div>
               <span className="billing-status">{doc.status}</span>
               <div className="billing-list-actions">
-                <button aria-label="View" title="View" onClick={() => navigate(`/invoices/${doc.id}`)}><Eye size={16}/></button>
-                <button aria-label="Download PDF" title="Download PDF" onClick={() => navigate(`/invoices/${doc.id}?print=1`)}><Download size={16}/></button>
-                <button aria-label="Edit" title="Edit" onClick={() => navigate(`/invoices/${doc.id}/edit`)}><Edit3 size={16}/></button>
-                <button aria-label="Delete" title="Delete" className="danger" onClick={() => navigate(`/invoices/${doc.id}/delete`)}><Trash2 size={16}/></button>
+                <button className="billing-action-btn is-view" aria-label="View" title="View" onClick={() => navigate(`/invoices/${doc.id}`)}>
+                  <Eye size={14}/><span>View</span>
+                </button>
+                <button className="billing-action-btn is-pdf" aria-label="Download PDF" title="Download PDF" onClick={() => navigate(`/invoices/${doc.id}?print=1`)}>
+                  <Download size={14}/><span>PDF</span>
+                </button>
+                <button className="billing-action-btn is-edit" aria-label="Edit" title="Edit" onClick={() => navigate(`/invoices/${doc.id}/edit`)}>
+                  <Edit3 size={14}/><span>Edit</span>
+                </button>
+                <button className="billing-action-btn is-delete danger" aria-label="Delete" title="Delete" onClick={() => navigate(`/invoices/${doc.id}/delete`)}>
+                  <Trash2 size={14}/><span>Delete</span>
+                </button>
               </div>
             </article>;
           })}
