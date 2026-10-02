@@ -1664,3 +1664,188 @@
     grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   }
 }
+
+
+/* =========================================================
+   E-WAY BILL — OFFICIAL DOCUMENT POLISH
+   ========================================================= */
+.eway-official-model{
+  border-color:#9f9f9f;
+  box-shadow:0 8px 28px rgba(15,23,42,.08);
+}
+.eway-official-top{
+  border-bottom:2px solid #111;
+  margin-bottom:6px;
+}
+.eway-official-top h2{
+  margin-top:26px;
+  font-size:19px;
+  font-weight:800;
+}
+.eway-pdf-section{
+  border-color:#9f9f9f;
+}
+.eway-pdf-section-title{
+  background:#ededed;
+  border-color:#9f9f9f;
+  font-size:9px;
+  letter-spacing:.01em;
+}
+.eway-detail-grid>div,
+.eway-goods-table .head>span,
+.eway-goods-table .row>span,
+.eway-tax-strip>div{
+  border-color:#b5b5b5;
+}
+.eway-detail-grid strong{
+  font-size:8.5px;
+}
+.eway-address-box{
+  border-color:#8f8f8f;
+}
+.eway-address-box h4{
+  font-size:9.5px;
+  text-transform:uppercase;
+}
+.eway-goods-table{
+  border-color:#8f8f8f;
+}
+.eway-goods-table .head{
+  background:#e9e9e9;
+  color:#111;
+}
+.eway-goods-table .row{
+  border-top-color:#9f9f9f;
+}
+.eway-tax-strip{
+  border-color:#8f8f8f;
+}
+.eway-tax-strip>div:last-child{
+  background:#f2f2f2;
+}
+.eway-tax-strip>div:last-child strong{
+  font-weight:800;
+}
+.eway-transport-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:7px;
+}
+.eway-transport-row>div{
+  min-height:42px;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  padding:6px;
+  border:1px solid #aaa;
+}
+.eway-transport-row span{
+  font-size:7px;
+  color:#333;
+}
+.eway-transport-row strong{
+  font-size:8px;
+}
+.eway-vehicle-table{
+  margin:5px;
+  border:1px solid #999;
+}
+.eway-vehicle-table .head,
+.eway-vehicle-table .row{
+  display:grid;
+  grid-template-columns:.65fr 1.45fr .85fr 1.1fr 1.1fr .8fr .95fr .5fr;
+}
+.eway-vehicle-table .head{
+  background:#ededed;
+  font-weight:800;
+}
+.eway-vehicle-table .row{
+  border-top:1px solid #999;
+}
+.eway-vehicle-table .head>span,
+.eway-vehicle-table .row>span{
+  min-width:0;
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  padding:5px;
+  border-right:1px solid #aaa;
+  overflow-wrap:anywhere;
+}
+.eway-vehicle-table .head>span:last-child,
+.eway-vehicle-table .row>span:last-child{
+  border-right:0;
+}
+.eway-barcode-placeholder{
+  margin-top:8px;
+  padding:8px;
+  border:1px solid #aaa;
+  text-align:center;
+}
+.eway-barcode-bars{
+  height:34px;
+  margin:0 auto 5px;
+  max-width:380px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #111 0 2px,
+      transparent 2px 4px,
+      #111 4px 5px,
+      transparent 5px 8px,
+      #111 8px 11px,
+      transparent 11px 13px
+    );
+}
+.eway-barcode-placeholder>span{
+  font-size:8px;
+  letter-spacing:.16em;
+}
+.eway-disclaimer{
+  color:#666;
+  text-align:center;
+}
+@media(max-width:700px){
+  .eway-official-model{
+    width:100%;
+    padding:8px;
+    overflow-x:auto;
+  }
+  .eway-address-grid{
+    grid-template-columns:1fr;
+  }
+  .eway-detail-grid.primary,
+  .eway-detail-grid.secondary{
+    grid-template-columns:1fr 1fr;
+  }
+  .eway-tax-strip{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .eway-tax-strip>div{
+    border-bottom:1px solid #999;
+  }
+  .eway-transport-row{
+    grid-template-columns:1fr;
+  }
+  .eway-goods-table,
+  .eway-vehicle-table{
+    overflow-x:auto;
+  }
+  .eway-goods-table .head,
+  .eway-goods-table .row{
+    min-width:680px;
+  }
+  .eway-vehicle-table .head,
+  .eway-vehicle-table .row{
+    min-width:820px;
+  }
+}
+@media print{
+  .eway-official-model{
+    box-shadow:none!important;
+  }
+  .eway-local-badge{
+    display:none!important;
+  }
+}
