@@ -1114,3 +1114,11 @@
     grid-template-columns:1fr
   }
 }
+
+.service-catalog-card.is-clickable{
+  cursor:pointer
+}
+.service-catalog-card.is-clickable:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px
+}
