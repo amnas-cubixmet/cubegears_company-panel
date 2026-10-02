@@ -1650,3 +1650,155 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* =========================================================
+   JOB WORKFLOW — SEQUENTIAL TAB GATING
+   ========================================================= */
+.cg-job-detail .job-workflow-tabs{
+  width:100%;
+  min-width:0;
+  display:flex;
+  gap:5px;
+  overflow-x:auto;
+  padding:6px;
+  border:1px solid var(--job-border);
+  border-radius:var(--job-radius);
+  background:var(--job-surface);
+  box-shadow:var(--job-shadow);
+  scrollbar-width:none;
+}
+.cg-job-detail .job-workflow-tabs::-webkit-scrollbar{display:none}
+.cg-job-detail .job-workflow-tab{
+  min-width:126px;
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  flex:0 0 auto;
+  padding:0 11px;
+  border:1px solid transparent;
+  border-radius:9px;
+  background:transparent;
+  color:var(--text-secondary);
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.15s ease;
+}
+.cg-job-detail .job-workflow-tab:hover:not(:disabled){
+  background:var(--job-soft);
+  color:var(--text-primary)
+}
+.cg-job-detail .job-workflow-tab.is-active{
+  border-color:var(--primary);
+  background:var(--primary);
+  color:#fff
+}
+.cg-job-detail .job-workflow-tab.is-complete:not(.is-active){
+  border-color:color-mix(in srgb,var(--success) 24%,var(--job-border));
+  background:var(--success-soft);
+  color:var(--success)
+}
+.cg-job-detail .job-workflow-tab.is-locked{
+  opacity:.48;
+  cursor:not-allowed;
+  background:var(--job-soft);
+  color:var(--text-muted)
+}
+.cg-job-detail .job-workflow-tab-number{
+  width:21px;
+  height:21px;
+  flex:0 0 21px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:var(--job-soft);
+  color:inherit;
+  font-size:8px;
+  font-weight:800
+}
+.cg-job-detail .job-workflow-tab.is-active .job-workflow-tab-number{
+  background:rgba(255,255,255,.18);
+  color:#fff
+}
+.cg-job-detail .job-workflow-tab.is-complete:not(.is-active) .job-workflow-tab-number{
+  background:color-mix(in srgb,var(--success) 14%,var(--job-surface));
+  color:var(--success)
+}
+.cg-job-detail .job-workflow-tab-check{
+  flex:0 0 auto
+}
+.cg-job-detail .job-workflow-gate{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:11px 12px;
+  border:1px solid var(--job-border);
+  border-radius:11px;
+  background:var(--job-surface)
+}
+.cg-job-detail .job-workflow-gate>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:3px
+}
+.cg-job-detail .job-workflow-gate strong{
+  font-size:10px;
+  font-weight:800;
+  color:var(--text-primary)
+}
+.cg-job-detail .job-workflow-gate span{
+  font-size:9px;
+  line-height:1.35;
+  color:var(--text-muted)
+}
+.cg-job-detail .job-workflow-gate.is-complete{
+  border-color:color-mix(in srgb,var(--success) 28%,var(--job-border));
+  background:color-mix(in srgb,var(--success-soft) 60%,var(--job-surface))
+}
+.cg-job-detail .job-workflow-gate.is-complete strong{
+  color:var(--success)
+}
+.cg-job-detail .job-workflow-gate button{
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex:0 0 auto;
+  padding:0 11px;
+  border:1px solid var(--primary);
+  border-radius:9px;
+  background:var(--primary);
+  color:#fff;
+  font-size:9px;
+  font-weight:800;
+  cursor:pointer
+}
+.cg-job-detail .job-workflow-gate button:disabled{
+  border-color:var(--job-border);
+  background:var(--job-soft);
+  color:var(--text-muted);
+  cursor:not-allowed;
+  opacity:.8
+}
+@media(max-width:767px){
+  .cg-job-detail .job-workflow-tab{
+    min-width:112px;
+    min-height:40px;
+    padding-inline:9px;
+    font-size:9px
+  }
+  .cg-job-detail .job-workflow-gate{
+    align-items:stretch;
+    flex-direction:column
+  }
+  .cg-job-detail .job-workflow-gate button{
+    width:100%;
+    min-height:40px
+  }
+}
