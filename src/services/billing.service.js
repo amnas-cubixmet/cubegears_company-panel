@@ -53,6 +53,7 @@ export const blankBillingDocument = (kind = 'invoice') => {
     invoiceType: 'regular',
     status: 'Draft',
     date: today(),
+    seller: { name: 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '32' },
     customer: { name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
     vehicle: { registration: '', makeModel: '', odometer: '', vin: '', ...(prefill?.vehicle || {}) },
     jobCardNo: prefill?.jobNumber || prefill?.jobId || '',
