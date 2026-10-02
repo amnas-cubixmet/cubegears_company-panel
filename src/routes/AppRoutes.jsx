@@ -27,6 +27,7 @@ import { JobStatus } from '../pages/jobs/JobStatus';
 import { JobReports } from '../pages/jobs/JobReports';
 import { InventoryList } from '../pages/inventory/InventoryList';
 import { StockManagement } from '../pages/stock/StockManagement';
+import { AddStockItem } from '../pages/stock/AddStockItem';
 import { InvoiceList } from '../pages/invoices/InvoiceList';
 import { EWayBillPage } from '../pages/invoices/EWayBillPage';
 import { PaymentList } from '../pages/payments/PaymentList';
@@ -170,6 +171,7 @@ export const AppRoutes = () => (
       <Route path="/stock" element={<Navigate to="/stock/overview" replace />} />
       <Route path="/stock/overview" element={<StockManagement section="overview" />} />
       <Route path="/stock/items" element={<StockManagement section="items" />} />
+      <Route path="/stock/add" element={<AddStockItem />} />
       <Route path="/stock/items/:itemId" element={<StockManagement section="item-detail" />} />
       <Route path="/stock/categories" element={<StockManagement section="categories" />} />
       <Route path="/stock/movements" element={<StockManagement section="movements" />} />
@@ -180,7 +182,7 @@ export const AppRoutes = () => (
       <Route path="/stock/audit" element={<StockManagement section="audit" />} />
       <Route path="/stock/reports" element={<StockManagement section="reports" />} />
 
-      <Route path="/stock/new" element={<Navigate to="/stock/items" replace />} />
+      <Route path="/stock/new" element={<Navigate to="/stock/add" replace />} />
       <Route path="/stock/in" element={<Navigate to="/stock/movements" replace />} />
       <Route path="/stock/issue" element={<Navigate to="/stock/movements" replace />} />
       <Route path="/stock/return" element={<Navigate to="/stock/movements" replace />} />
