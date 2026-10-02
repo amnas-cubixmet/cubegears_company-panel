@@ -785,21 +785,48 @@ function InvoicePrint({ doc, totals }) {
 
   const seller = doc.seller || {};
   const sellerState = seller.stateCode && seller.state ? `${seller.stateCode}-${seller.state}` : (seller.state || '');
+  const sellerName = seller.name || 'CubixGear Workshop';
+  const sellerInitials = sellerName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+  const documentTitle = doc.kind === 'estimate'
+    ? 'Estimate / Quotation'
+    : doc.invoiceType === 'gst'
+      ? 'Tax Invoice'
+      : 'Invoice';
 
-  return <section className="invoice-print-sheet invoice-sale-print invoice-reference-print">
-    <div className="invoice-original-label">ORIGINAL</div>
+  return <section className="invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template">
+    <div className="invoice-creative-topbar">
+      <span>ORIGINAL</span>
+      <span>{doc.status || 'Draft'}</span>
+    </div>
 
-    <div className="invoice-sale-company invoice-reference-company">
-      <div className="invoice-reference-company-copy">
-        <strong>{seller.name || 'CubixGear Workshop'}</strong>
-        <span>{seller.address || 'Company address'}</span>
-        {seller.phone && <span>Phone no.: {seller.phone}</span>}
-        {seller.email && <span>Email: {seller.email}</span>}
-        <span>GSTIN: {seller.gstin || 'Configure GSTIN'}{sellerState ? `, State: ${sellerState}` : ''}</span>
+    <div className="invoice-creative-head">
+      <div className="invoice-creative-brand">
+        <div className="invoice-creative-mark">{sellerInitials || 'CG'}</div>
+        <div className="invoice-reference-company-copy">
+          <strong>{sellerName}</strong>
+          <span>{seller.address || 'Company address'}</span>
+          <div className="invoice-creative-contact">
+            {seller.phone && <span>Phone: {seller.phone}</span>}
+            {seller.email && <span>Email: {seller.email}</span>}
+          </div>
+          <span>GSTIN: {seller.gstin || 'Configure GSTIN'}{sellerState ? ` · ${sellerState}` : ''}</span>
+        </div>
+      </div>
+
+      <div className="invoice-creative-docmeta">
+        <span>{documentTitle}</span>
+        <strong>{doc.number || 'DRAFT'}</strong>
+        <small>{doc.date || '—'}</small>
       </div>
     </div>
 
-    <div className="invoice-sale-title">{doc.kind === 'estimate' ? 'Estimate / Quotation' : doc.invoiceType === 'gst' ? 'Tax Invoice' : 'Invoice'}</div>
+    <div className="invoice-sale-title invoice-creative-title">{documentTitle}</div>
 
     <div className="invoice-sale-info">
       <div>
