@@ -2335,3 +2335,172 @@
     -webkit-print-color-adjust:exact;
   }
 }
+
+/* ===== Mobile PDF responsiveness + status/button text alignment ===== */
+.billing-status,
+.saas-status,
+.payment-status,
+.vehicle-status,
+.expense-status,
+.global-search-result-status{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px;
+  min-height:26px;
+  line-height:1!important;
+  text-align:center!important;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+
+.bill-btn,
+.billing-tabs button,
+.billing-list-actions button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  line-height:1.15;
+}
+
+@media(max-width:700px){
+  .invoice-print-sheet,
+  .eway-print-sheet,
+  .invoice-creative-template{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:10px!important;
+    border-radius:8px;
+    box-sizing:border-box;
+  }
+
+  .invoice-creative-template{
+    overflow:visible!important;
+  }
+
+  .invoice-creative-head{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+
+  .invoice-creative-brand{
+    grid-template-columns:42px minmax(0,1fr)!important;
+    gap:9px!important;
+  }
+
+  .invoice-creative-mark{
+    width:42px!important;
+    height:42px!important;
+    border-radius:10px!important;
+    font-size:14px!important;
+  }
+
+  .invoice-creative-docmeta{
+    min-width:0!important;
+    width:100%!important;
+    align-items:flex-start!important;
+    text-align:left!important;
+    padding:8px 9px!important;
+  }
+
+  .invoice-creative-template .invoice-sale-info{
+    grid-template-columns:1fr!important;
+    gap:6px!important;
+  }
+
+  .invoice-creative-template .invoice-sale-info>div{
+    min-height:0!important;
+    padding:8px!important;
+  }
+
+  .invoice-sale-company,
+  .invoice-print-head,
+  .eway-print-head{
+    flex-direction:column!important;
+    gap:8px!important;
+  }
+
+  .invoice-sale-company-copy,
+  .invoice-title,
+  .eway-print-meta{
+    margin-left:0!important;
+    align-items:flex-start!important;
+    text-align:left!important;
+  }
+
+  .invoice-sale-lower{
+    grid-template-columns:1fr!important;
+  }
+
+  .invoice-sale-table,
+  .eway-print-table{
+    width:100%;
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .invoice-sale-table-head,
+  .invoice-sale-table-row,
+  .invoice-sale-table-total{
+    min-width:620px;
+  }
+
+  .eway-print-table .head,
+  .eway-print-table .row{
+    min-width:560px;
+  }
+
+  .invoice-sale-tax-table{
+    overflow-x:auto!important;
+  }
+
+  .invoice-sale-tax-table .head,
+  .invoice-sale-tax-table .row{
+    min-width:420px;
+  }
+
+  .invoice-sale-sign{
+    min-height:64px!important;
+  }
+}
+
+@media(max-width:420px){
+  .invoice-print-sheet,
+  .eway-print-sheet,
+  .invoice-creative-template{
+    padding:8px!important;
+    font-size:9px!important;
+  }
+
+  .invoice-creative-title{
+    font-size:9px!important;
+    padding:5px 7px!important;
+  }
+
+  .invoice-reference-company-copy>strong{
+    font-size:13px!important;
+  }
+
+  .invoice-reference-company-copy>span,
+  .invoice-creative-contact span{
+    font-size:7.5px!important;
+  }
+
+  .billing-head-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+  }
+
+  .billing-head-actions .bill-btn{
+    width:100%!important;
+    min-height:42px!important;
+  }
+
+  .billing-status{
+    min-height:28px!important;
+    padding:0 9px!important;
+  }
+}
