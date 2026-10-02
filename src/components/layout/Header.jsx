@@ -3,6 +3,7 @@ import { Bell, CalendarDays, ChevronDown, LogOut, Search, Settings, User } from 
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearch } from '../common/GlobalSearch';
+import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -10,8 +11,30 @@ export const Header = () => {
   const location = useLocation();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   const desktopProfileRef = useRef(null);
   const mobileProfileRef = useRef(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadNotificationCount = async () => {
+      try {
+        const rows = await resourceConfigs.notifications.service.list();
+        if (mounted) setNotificationCount((Array.isArray(rows) ? rows : []).filter((row) => row.status === 'Unread').length);
+      } catch {
+        if (mounted) setNotificationCount(0);
+      }
+    };
+    loadNotificationCount();
+    const onStorage = (event) => {
+      if (!event.key || event.key === 'cubixgear:notifications') loadNotificationCount();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => {
+      mounted = false;
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     const close = (event) => {
@@ -62,9 +85,9 @@ export const Header = () => {
             <span>{dateLabel}</span>
           </div>
 
-          <button type="button" className="header-icon-button has-dot" onClick={() => navigate('/notifications')} aria-label="Notifications">
+          <button type="button" className="header-icon-button has-notification-count" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
             <Bell size={15}/>
-            <span className="header-notification-dot" />
+            {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
           </button>
 
           <button type="button" className="header-icon-button" onClick={() => navigate('/settings')} aria-label="Settings">
@@ -94,7 +117,10 @@ export const Header = () => {
 
           <div className="mobile-header-actions">
             <button type="button" onClick={() => setSearchOpen((value) => !value)}><Search size={15}/></button>
-            <button type="button" onClick={() => navigate('/notifications')}><Bell size={15}/></button>
+            <button type="button" className="mobile-notification-button" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
+              <Bell size={15}/>
+              {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
+            </button>
             <div className="header-profile-wrap" ref={mobileProfileRef}>
               <button type="button" className="mobile-profile-button" onClick={() => setProfileDropdownOpen((value) => !value)} aria-expanded={profileDropdownOpen}>
                 <img src={user?.avatar} alt="Profile" />
