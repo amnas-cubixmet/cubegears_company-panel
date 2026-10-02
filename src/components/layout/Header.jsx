@@ -72,13 +72,9 @@ export const Header = () => {
         <div className="header-page-title">{pageTitle}</div>
 
         <div className="header-actions">
-          {searchOpen ? (
-            <div className="header-search-wrap"><GlobalSearch /></div>
-          ) : (
-            <button type="button" className="header-icon-button" onClick={() => setSearchOpen(true)} aria-label="Open search">
-              <Search size={15}/>
-            </button>
-          )}
+          <div className="header-search-wrap">
+            <GlobalSearch />
+          </div>
 
           <div className="header-date">
             <CalendarDays size={13}/>
