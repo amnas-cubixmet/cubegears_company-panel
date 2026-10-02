@@ -93,6 +93,13 @@ export function InvoiceRoutePage() {
   const totals = useMemo(() => calculateDocumentTotals(form), [form]);
   const filteredDocs = documents.filter((doc) => doc.kind === activeTab);
 
+  useEffect(() => {
+    const shouldPrint = new URLSearchParams(location.search).get('print') === '1';
+    if (mode !== 'view' || loading || !shouldPrint || !form?.id) return;
+    const timer = window.setTimeout(() => window.print(), 250);
+    return () => window.clearTimeout(timer);
+  }, [mode, loading, location.search, form?.id]);
+
   const update = (path, value) => {
     setForm((old) => {
       if (!path.includes('.')) return { ...old, [path]: value };
@@ -331,18 +338,18 @@ export function InvoiceRoutePage() {
   };
 
   if (mode === 'list') return (
-    <div className="billing-page">
-      <header className="billing-page-head">
-        <div><span className="billing-kicker">BILLING</span><h1>Invoices & Estimates</h1><p>Workshop billing, estimates, payments and PDF documents.</p></div>
+    <div className="billing-page billing-list-dashboard">
+      <header className="billing-page-head billing-list-hero">
+        <div><span className="billing-kicker">BILLING & SALES</span><h1>Invoices & Estimates</h1><p>Create, manage, print and export workshop invoices and estimates.</p></div>
         <button className="bill-btn" onClick={() => navigate(`/invoices/new?kind=${activeTab}`)}><Plus size={17}/>{activeTab === 'estimate' ? 'New Estimate' : 'New Invoice'}</button>
       </header>
-      <div className="billing-tabs">
+      <div className="billing-tabs billing-list-tabs">
         <button className={activeTab === 'invoice' ? 'active' : ''} onClick={() => navigate('/invoices?kind=invoice')}><ReceiptText size={16}/>Invoices</button>
         <button className={activeTab === 'estimate' ? 'active' : ''} onClick={() => navigate('/invoices?kind=estimate')}><FileText size={16}/>Estimates</button>
         <button onClick={() => navigate('/invoices/e-way-bills')}><Truck size={16}/>E-Way Bills</button>
       </div>
       {error && <div className="billing-error">{error}</div>}
-      <section className="billing-card billing-list-card">
+      <section className="billing-card billing-list-card billing-list-panel">
         {loading ? <div className="billing-empty">Loading…</div> : <div className="billing-doc-list">
           {filteredDocs.map((doc) => {
             const t = calculateDocumentTotals(doc);
@@ -354,9 +361,10 @@ export function InvoiceRoutePage() {
               <div className="billing-doc-meta"><span>{doc.date || '—'}</span><strong>{money.format(t.total)}</strong></div>
               <span className="billing-status">{doc.status}</span>
               <div className="billing-list-actions">
-                <button aria-label="View" onClick={() => navigate(`/invoices/${doc.id}`)}><Eye size={16}/></button>
-                <button aria-label="Edit" onClick={() => navigate(`/invoices/${doc.id}/edit`)}><Edit3 size={16}/></button>
-                <button aria-label="Delete" className="danger" onClick={() => navigate(`/invoices/${doc.id}/delete`)}><Trash2 size={16}/></button>
+                <button aria-label="View" title="View" onClick={() => navigate(`/invoices/${doc.id}`)}><Eye size={16}/></button>
+                <button aria-label="Download PDF" title="Download PDF" onClick={() => navigate(`/invoices/${doc.id}?print=1`)}><Download size={16}/></button>
+                <button aria-label="Edit" title="Edit" onClick={() => navigate(`/invoices/${doc.id}/edit`)}><Edit3 size={16}/></button>
+                <button aria-label="Delete" title="Delete" className="danger" onClick={() => navigate(`/invoices/${doc.id}/delete`)}><Trash2 size={16}/></button>
               </div>
             </article>;
           })}
