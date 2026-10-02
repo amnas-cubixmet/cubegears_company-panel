@@ -101,7 +101,20 @@ const clone = (value) => JSON.parse(JSON.stringify(value));
 const read = (key, fallback = []) => {
   try {
     const raw = localStorage.getItem(key);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+
+      if (key === DOCS_KEY && Array.isArray(parsed) && Array.isArray(fallback)) {
+        const missingSeeds = fallback.filter((seed) => !parsed.some((row) => row.id === seed.id));
+        if (missingSeeds.length) {
+          const merged = [...missingSeeds, ...parsed];
+          localStorage.setItem(key, JSON.stringify(merged));
+          return clone(merged);
+        }
+      }
+
+      return parsed;
+    }
   } catch {
     localStorage.removeItem(key);
   }
