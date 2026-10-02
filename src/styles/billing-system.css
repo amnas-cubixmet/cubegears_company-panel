@@ -2752,3 +2752,116 @@
     gap:5px;
   }
 }
+
+/* Invoice list: card grid on desktop and mobile */
+.billing-list-panel .billing-doc-list{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+.billing-list-panel .billing-doc-row{
+  display:flex!important;
+  flex-direction:column;
+  align-items:stretch!important;
+  gap:10px!important;
+  min-height:190px;
+  padding:12px!important;
+}
+
+.billing-list-panel .billing-doc-main{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+
+.billing-list-panel .billing-doc-main strong{
+  font-size:13px;
+}
+
+.billing-list-panel .billing-doc-main span{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  line-height:1.35;
+}
+
+.billing-list-panel .billing-doc-meta{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+}
+
+.billing-list-panel .billing-doc-meta span,
+.billing-list-panel .billing-doc-meta strong{
+  min-width:0;
+}
+
+.billing-list-panel .billing-status{
+  align-self:flex-start;
+  justify-self:auto!important;
+}
+
+.billing-list-panel .billing-list-actions{
+  margin-top:auto;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  width:100%;
+  justify-content:stretch;
+}
+
+.billing-list-panel .billing-action-btn{
+  width:100%!important;
+  min-width:0;
+  min-height:38px;
+}
+
+@media(max-width:1200px){
+  .billing-list-panel .billing-doc-list{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:700px){
+  .billing-list-panel .billing-doc-list{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+
+  .billing-list-panel .billing-doc-row{
+    min-height:180px;
+    padding:10px!important;
+  }
+
+  .billing-list-panel .billing-doc-meta{
+    grid-template-columns:1fr;
+    gap:3px;
+  }
+
+  .billing-list-panel .billing-list-actions{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .billing-list-panel .billing-action-btn{
+    min-height:38px;
+    padding:0 7px;
+    font-size:8px;
+  }
+}
+
+@media(max-width:430px){
+  .billing-list-panel .billing-doc-list{
+    grid-template-columns:1fr;
+  }
+
+  .billing-list-panel .billing-doc-row{
+    min-height:0;
+  }
+
+  .billing-list-panel .billing-doc-meta{
+    grid-template-columns:1fr auto;
+  }
+}
