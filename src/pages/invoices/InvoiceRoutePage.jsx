@@ -461,6 +461,37 @@ export function InvoiceRoutePage() {
 
       {loading && mode === 'edit' ? <div className="billing-empty">Loading…</div> : <>
         <div className="invoice-source-grid no-print">
+          <section className="billing-card invoice-seller-card">
+            <span className="billing-kicker">SELLER / FROM</span>
+            <h3>Business Details</h3>
+
+            <label>Business Name
+              <input value={form.seller?.name || ''} onChange={(e) => update('seller.name', e.target.value)} placeholder="Business / company name"/>
+            </label>
+            <label>Address
+              <textarea value={form.seller?.address || ''} onChange={(e) => update('seller.address', e.target.value)} placeholder="Registered / dispatch address"/>
+            </label>
+            <div className="invoice-two-col">
+              <label>Phone
+                <input value={form.seller?.phone || ''} onChange={(e) => update('seller.phone', e.target.value)} placeholder="+91"/>
+              </label>
+              <label>Email
+                <input type="email" value={form.seller?.email || ''} onChange={(e) => update('seller.email', e.target.value)} placeholder="accounts@example.com"/>
+              </label>
+            </div>
+            <label>GSTIN
+              <input value={form.seller?.gstin || ''} onChange={(e) => update('seller.gstin', e.target.value.toUpperCase())} placeholder="GSTIN"/>
+            </label>
+            <div className="invoice-two-col">
+              <label>State
+                <input value={form.seller?.state || ''} onChange={(e) => update('seller.state', e.target.value)} placeholder="Kerala"/>
+              </label>
+              <label>State Code
+                <input value={form.seller?.stateCode || ''} onChange={(e) => update('seller.stateCode', e.target.value.replace(/\D/g,'').slice(0,2))} placeholder="32"/>
+              </label>
+            </div>
+          </section>
+
           <section className="billing-card invoice-customer-card">
             <span className="billing-kicker">BILL TO</span>
             <h3>Customer Details</h3>
@@ -738,18 +769,23 @@ function InvoicePrint({ doc, totals }) {
   const rows = doc.items || [];
   const taxGroups = totals.taxGroups || [];
 
-  return <section className="invoice-print-sheet invoice-sale-print">
-    <div className="invoice-sale-company">
-      <div className="invoice-sale-logo">CUBIXGEAR</div>
-      <div className="invoice-sale-company-copy">
-        <strong>CubixGear Workshop</strong>
-        <span>Workshop Management & Automotive Services</span>
-        <span>Company address · Phone · Email</span>
-        <span>GSTIN: Configure in Settings</span>
+  const seller = doc.seller || {};
+  const sellerState = seller.stateCode && seller.state ? `${seller.stateCode}-${seller.state}` : (seller.state || '');
+
+  return <section className="invoice-print-sheet invoice-sale-print invoice-reference-print">
+    <div className="invoice-original-label">ORIGINAL</div>
+
+    <div className="invoice-sale-company invoice-reference-company">
+      <div className="invoice-reference-company-copy">
+        <strong>{seller.name || 'CubixGear Workshop'}</strong>
+        <span>{seller.address || 'Company address'}</span>
+        {seller.phone && <span>Phone no.: {seller.phone}</span>}
+        {seller.email && <span>Email: {seller.email}</span>}
+        <span>GSTIN: {seller.gstin || 'Configure GSTIN'}{sellerState ? `, State: ${sellerState}` : ''}</span>
       </div>
     </div>
 
-    <div className="invoice-sale-title">{doc.kind === 'estimate' ? 'Estimate' : doc.invoiceType === 'gst' ? 'Tax Invoice' : 'Invoice'}</div>
+    <div className="invoice-sale-title">{doc.kind === 'estimate' ? 'Estimate / Quotation' : doc.invoiceType === 'gst' ? 'Tax Invoice' : 'Invoice'}</div>
 
     <div className="invoice-sale-info">
       <div>
@@ -757,7 +793,7 @@ function InvoicePrint({ doc, totals }) {
         <b>{doc.customer?.name || '—'}</b>
         <span>{doc.customer?.address || '—'}</span>
         {doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
-        {doc.customer?.state && <span>State: {doc.customer.state}</span>}
+        {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
       </div>
       <div>
         <strong>Transportation Details</strong>
@@ -765,8 +801,8 @@ function InvoicePrint({ doc, totals }) {
         {doc.transportation?.transporterName && <span>Transporter: {doc.transportation.transporterName}</span>}
       </div>
       <div className="invoice-sale-info-right">
-        <strong>Invoice Details</strong>
-        <span>Invoice No.: {doc.number || 'DRAFT'}</span>
+        <strong>{doc.kind === 'estimate' ? 'Estimate Details' : 'Invoice Details'}</strong>
+        <span>{doc.kind === 'estimate' ? 'Estimate No.' : 'Invoice No.'}: {doc.number || 'DRAFT'}</span>
         <span>Date: {doc.date || '—'}</span>
         <span>Place of Supply: {doc.customer?.placeOfSupply || doc.customer?.state || '—'}</span>
       </div>
@@ -817,7 +853,7 @@ function InvoicePrint({ doc, totals }) {
         </div>}
 
         <div className="invoice-sale-blue-box">
-          <strong>Invoice Amount In Words</strong>
+          <strong>{doc.kind === 'estimate' ? 'Estimate Amount In Words' : 'Invoice Amount In Words'}</strong>
           <span>{amountToIndianWords(totals.total)}</span>
         </div>
 
@@ -828,7 +864,7 @@ function InvoicePrint({ doc, totals }) {
 
         <div className="invoice-sale-blue-box">
           <strong>Terms and conditions</strong>
-          <span>{doc.termsAndConditions || 'Thank you for choosing CubixGear.'}</span>
+          <span>{doc.termsAndConditions || 'All disputes under this document will be subject to local jurisdiction.'}</span>
         </div>
       </div>
 
@@ -843,7 +879,7 @@ function InvoicePrint({ doc, totals }) {
     </div>
 
     <div className="invoice-sale-sign">
-      <span>For: CubixGear Workshop</span>
+      <span>For: {seller.name || 'CubixGear Workshop'}</span>
       <strong>Authorized Signatory</strong>
     </div>
   </section>;
