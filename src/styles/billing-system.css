@@ -1849,3 +1849,51 @@
     display:none!important;
   }
 }
+
+.eway-qr-placeholder.has-image{
+  background:#fff;
+}
+.eway-qr-placeholder canvas,
+.eway-qr-placeholder img{
+  width:92px;
+  height:92px;
+  display:block;
+  object-fit:contain;
+  background:#fff;
+}
+.eway-code-empty{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  color:#555;
+  background:#fff;
+  text-align:center;
+  font-size:7px;
+  line-height:1.2;
+}
+.eway-code-empty strong{
+  font-size:9px;
+  color:#111;
+}
+.eway-barcode-svg{
+  display:block;
+  width:min(100%,380px);
+  height:34px;
+  margin:0 auto 5px;
+  background:#fff;
+}
+@media print{
+  .eway-qr-placeholder canvas,
+  .eway-qr-placeholder img{
+    width:92px!important;
+    height:92px!important;
+  }
+  .eway-barcode-svg{
+    max-width:380px!important;
+    height:34px!important;
+  }
+}
