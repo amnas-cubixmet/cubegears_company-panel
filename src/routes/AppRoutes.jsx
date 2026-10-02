@@ -60,11 +60,11 @@ export const AppRoutes = () => (
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<Dashboard />} />
 
-      <Route path="/my-attendance" element={<MyAttendance />} />
-      <Route path="/my-attendance/calendar" element={<Navigate to="/my-attendance#attendance-overview" replace />} />
-      <Route path="/my-attendance/history" element={<Navigate to="/my-attendance#attendance-history" replace />} />
-      <Route path="/my-attendance/leave" element={<Navigate to="/my-attendance#attendance-leave" replace />} />
-      <Route path="/my-attendance/summary" element={<Navigate to="/my-attendance#attendance-summary" replace />} />
+      <Route path="/my-attendance" element={<Navigate to="/my-attendance/calendar" replace />} />
+      <Route path="/my-attendance/calendar" element={<MyAttendance />} />
+      <Route path="/my-attendance/history" element={<MyAttendance />} />
+      <Route path="/my-attendance/leave" element={<MyAttendance />} />
+      <Route path="/my-attendance/summary" element={<MyAttendance />} />
 
       <Route path="/attendance-manager" element={<AttendanceManager />} />
       <Route path="/attendance-manager/overview" element={<Navigate to="/attendance-manager#attendance-manager-overview" replace />} />
