@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, PackagePlus, Save } from 'lucide-react';
+import { ArrowLeft, PackagePlus, Save, Boxes } from 'lucide-react';
 import { stockManagementService } from '../../services/stockManagement.service';
 import { stockCategories } from '../../mock/stockManagement.mock';
 import '../../styles/stock-management.css';
@@ -31,16 +31,63 @@ export const AddStockItem = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
   const [suppliers, setSuppliers] = useState([]);
+  const [items, setItems] = useState([]);
+  const [mode, setMode] = useState('existing');
+  const [existingForm, setExistingForm] = useState({
+    itemId: '',
+    quantity: '1',
+    supplier: '',
+    invoiceNo: '',
+    notes: ''
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    stockManagementService.getSuppliers()
-      .then((data) => setSuppliers(Array.isArray(data) ? data : []))
-      .catch(() => setSuppliers([]));
+    Promise.all([
+      stockManagementService.getSuppliers(),
+      stockManagementService.getItems()
+    ])
+      .then(([supplierData, itemData]) => {
+        setSuppliers(Array.isArray(supplierData) ? supplierData : []);
+        setItems(Array.isArray(itemData) ? itemData : []);
+      })
+      .catch(() => {
+        setSuppliers([]);
+        setItems([]);
+      });
   }, []);
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+
+  const submitExisting = async (event) => {
+    event.preventDefault();
+    const item = items.find((entry) => entry.id === existingForm.itemId);
+    if (!item) {
+      setError('Select an existing product.');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      await stockManagementService.stockIn({
+        itemId: item.id,
+        partName: item.partName,
+        sku: item.sku,
+        quantity: existingForm.quantity,
+        supplier: existingForm.supplier,
+        invoiceNo: existingForm.invoiceNo,
+        notes: existingForm.notes
+      });
+      navigate('/stock/items');
+    } catch (err) {
+      setError(err?.message || 'Unable to add stock quantity.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const submit = async (event) => {
     event.preventDefault();
@@ -70,6 +117,107 @@ export const AddStockItem = () => {
         </div>
       </header>
 
+      <div className="stock-add-mode-switch">
+        <button
+          type="button"
+          className={mode === 'existing' ? 'is-active' : ''}
+          onClick={() => { setMode('existing'); setError(''); }}
+        >
+          <Boxes size={14} />
+          Existing Product
+        </button>
+        <button
+          type="button"
+          className={mode === 'new' ? 'is-active' : ''}
+          onClick={() => { setMode('new'); setError(''); }}
+        >
+          <PackagePlus size={14} />
+          New Product
+        </button>
+      </div>
+
+      {mode === 'existing' ? (
+        <form className="stock-add-form" onSubmit={submitExisting}>
+          {error ? <div className="stock-form-error">{error}</div> : null}
+
+          <section className="stock-add-section">
+            <div className="stock-add-section-title">
+              <Boxes size={16} />
+              <div>
+                <h2>Add Stock to Existing Product</h2>
+                <p>Select an existing inventory item and increase its current stock quantity.</p>
+              </div>
+            </div>
+
+            <div className="stock-add-grid">
+              <label className="stock-add-wide">
+                Existing Product *
+                <select
+                  required
+                  value={existingForm.itemId}
+                  onChange={(e)=>setExistingForm({...existingForm,itemId:e.target.value})}
+                >
+                  <option value="">Select product</option>
+                  {items.map((item)=>(
+                    <option key={item.id} value={item.id}>
+                      {item.partName} · {item.sku} · Current {item.onHand}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Quantity to Add *
+                <input
+                  required
+                  type="number"
+                  min="1"
+                  value={existingForm.quantity}
+                  onChange={(e)=>setExistingForm({...existingForm,quantity:e.target.value})}
+                />
+              </label>
+
+              <label>
+                Supplier
+                <select
+                  value={existingForm.supplier}
+                  onChange={(e)=>setExistingForm({...existingForm,supplier:e.target.value})}
+                >
+                  <option value="">Select supplier</option>
+                  {suppliers.map((supplier)=><option key={supplier.id}>{supplier.name}</option>)}
+                </select>
+              </label>
+
+              <label>
+                Purchase Invoice No
+                <input
+                  value={existingForm.invoiceNo}
+                  onChange={(e)=>setExistingForm({...existingForm,invoiceNo:e.target.value})}
+                  placeholder="INV-2026-001"
+                />
+              </label>
+
+              <label className="stock-add-wide">
+                Notes
+                <textarea
+                  rows="4"
+                  value={existingForm.notes}
+                  onChange={(e)=>setExistingForm({...existingForm,notes:e.target.value})}
+                  placeholder="Optional stock-in note"
+                />
+              </label>
+            </div>
+          </section>
+
+          <div className="stock-add-actions">
+            <button type="button" className="stock-link-button" onClick={() => navigate('/stock/items')}>Cancel</button>
+            <button type="submit" className="stock-primary-button" disabled={saving}>
+              <Save size={14} />
+              {saving ? 'Adding...' : 'Add Stock'}
+            </button>
+          </div>
+        </form>
+      ) : (
       <form className="stock-add-form" onSubmit={submit}>
         {error ? <div className="stock-form-error">{error}</div> : null}
 
@@ -136,6 +284,7 @@ export const AddStockItem = () => {
           </button>
         </div>
       </form>
+      )}
     </div>
   );
 };
