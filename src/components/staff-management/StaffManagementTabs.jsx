@@ -4,7 +4,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 const tabs = [
   { label: 'Overview', path: '/staff-management/overview' },
   { label: 'All Staff', path: '/staff-management/staff' },
-  { label: 'Add Staff', path: '/staff-management/add' },
   { label: 'Roles & Permissions', path: '/staff-management/roles' },
   { label: 'Teams', path: '/staff-management/teams' },
   { label: 'Shifts', path: '/staff-management/shifts' },
