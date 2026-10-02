@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, ChevronRight, FilePenLine, HardDrive, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
+import { CalendarDays, ChevronRight, FilePenLine, HardDrive, History, IndianRupee, Infinity, ReceiptText, Settings2, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { storageHistoryService } from '../../services/storageHistory.service';
 import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
+import '../../styles/account-billing.css';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -221,5 +222,34 @@ export function SaaSAccount({ section = 'billing' }) {
 
   billing.usage.storageUsedGb = storage.usedGb;
 
-  return <div className="saas-page"><header className="saas-page-head"><div><span className="saas-kicker">CUBIXGEAR SaaS</span><h1>{section === 'storage' ? 'Media Storage' : 'Billing & Plan'}</h1><p>{section === 'storage' ? 'Unlimited photo storage billed at ₹2 per GB per day with interval history and daily file snapshots.' : 'Track software billing, users, storage usage and subscription history.'}</p></div></header>{section === 'storage' ? <StorageView storage={storage} setStorage={setStorage} /> : <BillingView billing={billing} storage={storage} onSeatsChange={seats} onOpenTemplates={() => navigate('/account/templates')} />}</div>;
+  return (
+    <div className="saas-page account-billing-page">
+      <header className="saas-page-head account-billing-hero">
+        <div>
+          <span className="saas-kicker">CUBIXGEAR ACCOUNT</span>
+          <h1>{section === 'storage' ? 'Media Storage' : 'Billing & Plan'}</h1>
+          <p>{section === 'storage' ? 'Unlimited photo storage billed at ₹2 per GB per day with interval history and daily file snapshots.' : 'Manage subscription billing, account usage, storage and document templates.'}</p>
+        </div>
+
+        <div className="account-billing-nav">
+          <button className={section === 'billing' ? 'active' : ''} onClick={() => navigate('/account/billing')}>
+            <ReceiptText size={15}/>Billing
+          </button>
+          <button className={section === 'storage' ? 'active' : ''} onClick={() => navigate('/account/storage')}>
+            <HardDrive size={15}/>Storage
+          </button>
+          <button onClick={() => navigate('/account/templates')}>
+            <FilePenLine size={15}/>Templates
+          </button>
+          <button onClick={() => navigate('/settings')}>
+            <Settings2 size={15}/>Settings
+          </button>
+        </div>
+      </header>
+
+      {section === 'storage'
+        ? <StorageView storage={storage} setStorage={setStorage} />
+        : <BillingView billing={billing} storage={storage} onSeatsChange={seats} onOpenTemplates={() => navigate('/account/templates')} />}
+    </div>
+  );
 }
