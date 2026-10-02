@@ -514,7 +514,19 @@ export const ServiceList = () => {
 
           <div className="service-card-grid">
             {filtered.map((service)=>(
-              <article key={service.id} className="service-catalog-card">
+              <article
+                key={service.id}
+                className="service-catalog-card is-clickable"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/services/${service.id}`)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    navigate(`/services/${service.id}`);
+                  }
+                }}
+              >
                 <div className="service-catalog-card__head">
                   <div>
                     <span>{service.code}</span>
@@ -539,9 +551,9 @@ export const ServiceList = () => {
                 <p>{service.description || 'Workshop service with configurable labour pricing and checklist.'}</p>
 
                 <div className="service-card-actions">
-                  <button onClick={()=>navigate(`/services/${service.id}`)}><Eye size={13}/> View</button>
-                  <button onClick={()=>navigate(`/services/${service.id}/edit`)}><Edit3 size={13}/> Edit</button>
-                  <button className="is-danger" onClick={()=>deleteService(service)}><Trash2 size={13}/> Delete</button>
+                  <button onClick={(event)=>{event.stopPropagation();navigate(`/services/${service.id}`);}}><Eye size={13}/> View</button>
+                  <button onClick={(event)=>{event.stopPropagation();navigate(`/services/${service.id}/edit`);}}><Edit3 size={13}/> Edit</button>
+                  <button className="is-danger" onClick={(event)=>{event.stopPropagation();deleteService(service);}}><Trash2 size={13}/> Delete</button>
                 </div>
               </article>
             ))}
