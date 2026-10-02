@@ -315,7 +315,6 @@ export const VehicleList = () => {
       </section>
     </div>
   );
-  );
 };
 
 export const AddVehicle = VehicleList;
