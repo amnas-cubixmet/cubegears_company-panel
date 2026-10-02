@@ -14,7 +14,8 @@ import { RecoveryHistoryModal } from '../../components/staff-management/Recovery
 import { OvertimeManager } from '../../components/payroll/OvertimeManager';
 import { CommissionManager } from '../../components/payroll/CommissionManager';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
-import { FileText, Plus, Filter, Printer } from 'lucide-react';
+import { FileText, Plus, Filter, Printer, WalletCards, CircleDollarSign, BadgeCheck, AlertCircle } from 'lucide-react';
+import '../../styles/payroll-reference.css';
 
 export const Payroll = ({ section = 'overview' }) => {
   const activeSection = section;
@@ -169,78 +170,123 @@ export const Payroll = ({ section = 'overview' }) => {
 
       {/* Section 1: Overview */}
       {activeSection === 'overview' && (
-        <div className="payroll-section payroll-overview" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {/* Summary KPI Grid */}
-          <div className="payroll-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', width: '100%' }}>
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Gross Payroll</div>
-              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '2px' }}>{formatINR(totalGross)}</div>
+        <div className="payroll-reference-overview">
+          <section className="payroll-reference-hero">
+            <div>
+              <span className="payroll-reference-eyebrow">Payroll snapshot</span>
+              <h2>{periodString}</h2>
+              <p>Salary health, settlement progress and employee payroll records in one view.</p>
             </div>
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Net Payroll</div>
-              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--primary)', marginTop: '2px' }}>{formatINR(totalNet)}</div>
+            <div className="payroll-reference-hero-badge">
+              <BadgeCheck size={16} />
+              <span>{approvedCount} approved</span>
             </div>
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Approved OT Pay</div>
-              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--primary)', marginTop: '2px' }}>{formatINR(totalApprovedOtPay)}</div>
-            </div>
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Incentives</div>
-              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--success)', marginTop: '2px' }}>{formatINR(totalIncentives)}</div>
-            </div>
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Deductions</div>
-              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--danger)', marginTop: '2px' }}>{formatINR(totalDeductions)}</div>
-            </div>
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Paid Amount</div>
-              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--success)', marginTop: '2px' }}>{formatINR(totalPaid)}</div>
-            </div>
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 14px' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Outstanding Salary</div>
-              <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--danger)', marginTop: '2px' }}>{formatINR(outstandingSalary)}</div>
-            </div>
+          </section>
+
+          <div className="payroll-reference-kpis">
+            <article>
+              <span className="payroll-reference-kpi-icon"><WalletCards size={16} /></span>
+              <small>Net Payroll</small>
+              <strong>{formatINR(totalNet)}</strong>
+              <em>{payrolls.length} employees</em>
+            </article>
+            <article>
+              <span className="payroll-reference-kpi-icon"><CircleDollarSign size={16} /></span>
+              <small>Paid Amount</small>
+              <strong>{formatINR(totalPaid)}</strong>
+              <em>{paidStaff} fully paid</em>
+            </article>
+            <article>
+              <span className="payroll-reference-kpi-icon is-warning"><AlertCircle size={16} /></span>
+              <small>Outstanding</small>
+              <strong>{formatINR(outstandingSalary)}</strong>
+              <em>{unpaidStaff + partialStaff} pending staff</em>
+            </article>
+            <article>
+              <span className="payroll-reference-kpi-icon"><BadgeCheck size={16} /></span>
+              <small>Approval Status</small>
+              <strong>{approvedCount}/{payrolls.length || 0}</strong>
+              <em>{pendingApprovalCount} awaiting approval</em>
+            </article>
           </div>
 
-          {/* Settlement Staff Counts Grid */}
-          <div className="payroll-settlement-summary" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', padding: '12px', borderRadius: '14px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Unpaid Staff</div>
-              <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--danger)' }}>{unpaidStaff}</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Partially Paid</div>
-              <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--warning)' }}>{partialStaff}</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Paid Staff</div>
-              <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--success)' }}>{paidStaff}</div>
-            </div>
+          <div className="payroll-reference-main-grid">
+            <section className="payroll-reference-panel payroll-reference-breakdown">
+              <div className="payroll-reference-panel-head">
+                <div>
+                  <span>Payroll breakdown</span>
+                  <h3>Monthly salary composition</h3>
+                </div>
+                <strong>{formatINR(totalGross)}</strong>
+              </div>
+
+              <div className="payroll-reference-breakdown-list">
+                <div><span>Gross payroll</span><strong>{formatINR(totalGross)}</strong></div>
+                <div><span>Incentives</span><strong>{formatINR(totalIncentives)}</strong></div>
+                <div><span>Overtime pay</span><strong>{formatINR(totalApprovedOtPay)}</strong></div>
+                <div><span>Deductions</span><strong>- {formatINR(totalDeductions)}</strong></div>
+              </div>
+
+              <div className="payroll-reference-progress">
+                <div>
+                  <span>Settlement progress</span>
+                  <strong>{totalNet > 0 ? Math.min(100, Math.round((totalPaid / totalNet) * 100)) : 0}%</strong>
+                </div>
+                <div className="payroll-reference-progress-track">
+                  <span style={{ width: `${totalNet > 0 ? Math.min(100, (totalPaid / totalNet) * 100) : 0}%` }} />
+                </div>
+              </div>
+            </section>
+
+            <section className="payroll-reference-panel payroll-reference-status">
+              <div className="payroll-reference-panel-head">
+                <div>
+                  <span>Settlement</span>
+                  <h3>Employee payment status</h3>
+                </div>
+              </div>
+
+              <div className="payroll-reference-status-list">
+                <div className="is-paid"><span>Paid</span><strong>{paidStaff}</strong></div>
+                <div className="is-partial"><span>Partially paid</span><strong>{partialStaff}</strong></div>
+                <div className="is-unpaid"><span>Unpaid</span><strong>{unpaidStaff}</strong></div>
+              </div>
+
+              <div className="payroll-reference-note">
+                <span>Pending approvals</span>
+                <strong>{pendingApprovalCount}</strong>
+              </div>
+            </section>
           </div>
 
-          {/* Payroll Cards List */}
-          {loading ? (
-            <div className="payroll-state-card">
-              Loading records for {periodString}...
+          <section className="payroll-reference-records">
+            <div className="payroll-reference-records-head">
+              <div>
+                <span>Employee payroll</span>
+                <h3>Current payroll records</h3>
+              </div>
+              <small>{periodString}</small>
             </div>
-          ) : payrolls.length === 0 ? (
-            <div className="payroll-state-card">
-              No payroll records found for {periodString}.
-            </div>
-          ) : (
-            <div className="payroll-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px', width: '100%' }}>
-              {payrolls.map((p) => (
-                <PayrollCard
-                  key={p.id}
-                  payroll={p}
-                  onRecordPayment={(item) => setPaymentTargetItem(item)}
-                  onViewDetails={(item) => setDetailTargetItem(item)}
-                  onViewPayslip={(item) => setPayslipTargetItem(item)}
-                  onViewHistory={(item) => setHistoryTargetItem(item)}
-                />
-              ))}
-            </div>
-          )}
+
+            {loading ? (
+              <div className="payroll-state-card">Loading records for {periodString}...</div>
+            ) : payrolls.length === 0 ? (
+              <div className="payroll-state-card">No payroll records found for {periodString}.</div>
+            ) : (
+              <div className="payroll-card-grid payroll-reference-card-grid">
+                {payrolls.map((p) => (
+                  <PayrollCard
+                    key={p.id}
+                    payroll={p}
+                    onRecordPayment={(item) => setPaymentTargetItem(item)}
+                    onViewDetails={(item) => setDetailTargetItem(item)}
+                    onViewPayslip={(item) => setPayslipTargetItem(item)}
+                    onViewHistory={(item) => setHistoryTargetItem(item)}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         </div>
       )}
 
