@@ -162,7 +162,22 @@
   height:36px;display:flex;align-items:center;gap:7px;padding:0 10px;border:1px solid var(--border);border-radius:10px;
   color:var(--text-secondary);font-size:10px;font-weight:600;white-space:nowrap
 }
-.header-search-wrap{width:360px;max-width:32vw}
+.header-search-wrap{
+  width:min(430px,36vw);
+  min-width:280px;
+  max-width:430px;
+}
+.header-search-wrap .global-search-field{
+  height:38px;
+  border-radius:10px;
+  background:var(--surface-2);
+}
+.header-search-wrap .global-search-field:focus-within{
+  background:var(--surface);
+}
+@media(max-width:1180px){
+  .header-search-wrap{width:300px;min-width:240px}
+}
 .header-profile-wrap{position:relative}
 .header-profile-button{
   height:36px;max-width:170px;display:flex;align-items:center;gap:8px;padding:0 8px;
