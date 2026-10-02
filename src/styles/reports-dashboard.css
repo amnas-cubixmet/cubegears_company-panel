@@ -74,3 +74,42 @@
   .report-split{grid-template-columns:minmax(0,1fr) 62mm!important}
   .report-category-list{padding:3mm!important}
 }
+
+/* Mobile report/PDF preview safety and button alignment */
+.report-btn,
+.report-filter-bar button,
+.reports-tabs button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  line-height:1.15;
+}
+@media(max-width:520px){
+  .report-print-sheet{
+    width:100%;
+    min-width:0;
+    overflow:hidden;
+  }
+  .report-panel{
+    min-width:0;
+  }
+  .report-table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .report-table{
+    min-width:640px;
+  }
+  .report-stat{
+    align-items:center;
+  }
+  .report-stat>div:last-child{
+    width:100%;
+  }
+  .report-stat strong{
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+  }
+}
