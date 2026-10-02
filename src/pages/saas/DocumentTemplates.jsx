@@ -10,7 +10,12 @@ const defaults = {
   accent: 'teal',
   showOriginal: true,
   showSellerMark: true,
-  compactTable: false
+  compactTable: false,
+  customName: 'My Custom Template',
+  customHeader: 'Tax Invoice',
+  customFooter: 'Thank you for your business.',
+  customShowTransport: true,
+  customShowTaxTable: true
 };
 
 const templates = [
@@ -28,6 +33,11 @@ const templates = [
     id: 'minimal',
     name: 'Minimal',
     description: 'Lightweight document with reduced decoration and maximum readability.'
+  },
+  {
+    id: 'custom',
+    name: 'Custom',
+    description: 'Your own document layout settings, labels and optional sections.'
   }
 ];
 
@@ -71,11 +81,11 @@ function Preview({ kind, settings }) {
         </div>
       </div>
 
-      <div className="template-preview-title">{kind === 'invoice' ? 'Tax Invoice' : 'Estimate / Quotation'}</div>
+      <div className="template-preview-title">{selected === 'custom' ? (settings.customHeader || (kind === 'invoice' ? 'Tax Invoice' : 'Estimate / Quotation')) : (kind === 'invoice' ? 'Tax Invoice' : 'Estimate / Quotation')}</div>
 
       <div className="template-preview-info">
         <div><b>Bill To</b><strong>Customer Name</strong><span>Customer address</span></div>
-        <div><b>Transport</b><span>Vehicle: KL08AB1234</span></div>
+        {settings.customShowTransport !== false && <div><b>Transport</b><span>Vehicle: KL08AB1234</span></div>}
         <div><b>Document</b><span>Place of Supply: 32-Kerala</span></div>
       </div>
 
@@ -89,6 +99,7 @@ function Preview({ kind, settings }) {
         <div>
           <b>Amount in Words</b>
           <span>Three Thousand Two Hundred Eighty Rupees only</span>
+          {selected === 'custom' && settings.customFooter && <small>{settings.customFooter}</small>}
         </div>
         <div className="template-preview-total">
           <span>Total</span>
@@ -178,6 +189,35 @@ export function DocumentTemplates() {
           <label><input type="checkbox" checked={settings.showSellerMark} onChange={(e) => update('showSellerMark', e.target.checked)}/><span>Show seller initials mark</span></label>
           <label><input type="checkbox" checked={settings.compactTable} onChange={(e) => update('compactTable', e.target.checked)}/><span>Compact item table</span></label>
         </div>
+
+        {(settings.invoiceTemplate === 'custom' || settings.estimateTemplate === 'custom') && (
+          <div className="custom-template-maker">
+            <div className="custom-template-maker-head">
+              <div>
+                <span>CUSTOM TEMPLATE MAKER</span>
+                <h3>Build your own PDF template</h3>
+                <p>Change document labels and optional sections. Preview updates instantly.</p>
+              </div>
+            </div>
+
+            <div className="custom-template-grid">
+              <label>Template Name
+                <input value={settings.customName || ''} onChange={(e) => update('customName', e.target.value)} placeholder="My Custom Template"/>
+              </label>
+              <label>Document Heading
+                <input value={settings.customHeader || ''} onChange={(e) => update('customHeader', e.target.value)} placeholder="Tax Invoice"/>
+              </label>
+              <label className="custom-template-wide">Footer Note
+                <textarea value={settings.customFooter || ''} onChange={(e) => update('customFooter', e.target.value)} placeholder="Thank you for your business."/>
+              </label>
+            </div>
+
+            <div className="template-toggle-row">
+              <label><input type="checkbox" checked={settings.customShowTransport !== false} onChange={(e) => update('customShowTransport', e.target.checked)}/><span>Show transport section</span></label>
+              <label><input type="checkbox" checked={settings.customShowTaxTable !== false} onChange={(e) => update('customShowTaxTable', e.target.checked)}/><span>Show tax summary</span></label>
+            </div>
+          </div>
+        )}
       </section>
 
       <div className="template-preview-grid">
