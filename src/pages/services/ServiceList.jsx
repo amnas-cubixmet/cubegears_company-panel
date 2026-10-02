@@ -468,9 +468,10 @@ export const ServiceList = () => {
   }
 
   return (
-    <div className="service-management-page cg-services">
-      <header className="service-page-header">
+    <div className="service-management-page cg-services service-catalog-dashboard">
+      <header className="service-page-header service-catalog-hero">
         <div>
+          <span className="service-catalog-eyebrow">Workshop Services</span>
           <h1>Services Catalog</h1>
           <p>Workshop labour services, categories, pricing, duration and standard technician checklists.</p>
         </div>
@@ -479,21 +480,21 @@ export const ServiceList = () => {
         </button>
       </header>
 
-      <div className="service-metric-grid">
+      <div className="service-metric-grid service-catalog-kpis">
         <Metric label="Total Services" value={metrics.total} icon={Wrench}/>
         <Metric label="Active Services" value={metrics.active} icon={Activity} tone="success"/>
         <Metric label="Categories" value={metrics.categories} icon={Layers3}/>
         <Metric label="Avg Labour Charge" value={money.format(metrics.averagePrice)} icon={IndianRupee}/>
       </div>
 
-      <div className="service-view-tabs">
+      <div className="service-view-tabs service-catalog-tabs">
         <button className={activeView==='services'?'is-active':''} onClick={()=>setActiveView('services')}>Services</button>
         <button className={activeView==='categories'?'is-active':''} onClick={()=>setActiveView('categories')}>Categories</button>
       </div>
 
       {activeView === 'services' ? (
         <>
-          <div className="service-filter-bar">
+          <div className="service-filter-bar service-catalog-toolbar">
             <label className="service-search">
               <Search size={16}/>
               <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search service name, code or category"/>
