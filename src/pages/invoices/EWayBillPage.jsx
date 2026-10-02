@@ -6,6 +6,7 @@ import {
   FileText,
   Plus,
   Printer,
+  Download,
   Trash2,
   Truck
 } from 'lucide-react';
@@ -280,6 +281,7 @@ export function EWayBillPage() {
           <div className="billing-head-actions">
             <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit</button>
             <button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print</button>
+            <button className="bill-btn" onClick={() => window.print()}><Download size={16}/>Download PDF</button>
             {form.status === 'Draft' && <button className="bill-btn" disabled={saving} onClick={submit}><CheckCircle2 size={16}/>Prepare for API</button>}
           </div>
         </div>
@@ -299,7 +301,10 @@ export function EWayBillPage() {
         actions={
           <>
             <button className="bill-btn secondary" type="button" onClick={() => window.print()}>
-              <Printer size={16}/>Preview / PDF
+              <Printer size={16}/>Preview
+            </button>
+            <button className="bill-btn" type="button" onClick={() => window.print()}>
+              <Download size={16}/>Download PDF
             </button>
             <button className="bill-btn secondary" disabled={saving} onClick={save}>
               Save Draft
