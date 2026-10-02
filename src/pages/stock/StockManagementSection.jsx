@@ -622,8 +622,8 @@ export const StockManagementSection = ({ section, itemId }) => {
             <button className="stock-link-button" onClick={()=>navigate('/stock/movements')}>
               <ArrowLeftRight size={14}/> Movement
             </button>
-            <button className="stock-primary-button" onClick={()=>navigate('/stock/items')}>
-              <Package size={14}/> View Inventory
+            <button className="stock-primary-button" onClick={()=>navigate('/stock/add')}>
+              <Plus size={14}/> Add Item
             </button>
           </div>
         </section>
@@ -746,7 +746,7 @@ export const StockManagementSection = ({ section, itemId }) => {
   if (section === 'items') {
     return withModals(
       <div className="stock-management-view">
-        <SectionHeader title="Parts & Products" description="Spare parts, oils and consumables with pricing, stock level and rack location." action={<button className="stock-primary-button" onClick={()=>{setItemEditor({});setItemForm(emptyItemForm);}}><Plus size={14}/> Add Product</button>}/>
+        <SectionHeader title="Parts & Products" description="Spare parts, oils and consumables with pricing, stock level and rack location." action={<button className="stock-primary-button" onClick={()=>navigate('/stock/add')}><Plus size={14}/> Add Item</button>}/>
         <label className="stock-search"><Search size={16}/><input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Part name / SKU / barcode / brand / vehicle"/></label>
         <div className="stock-product-grid">
           {filteredItems.map((item) => (
