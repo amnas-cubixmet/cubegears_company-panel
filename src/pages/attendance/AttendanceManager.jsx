@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -18,136 +19,63 @@ import { AttendanceReports } from '../attendance-manager/AttendanceReports';
 import { RulesSettings } from '../attendance-manager/RulesSettings';
 import { OvertimeManager } from '../../components/payroll/OvertimeManager';
 import '../../styles/attendance-manager.css';
-import '../../styles/attendance-manager-unified.css';
+import '../../styles/attendance-manager-pages.css';
 
-const sections = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'daily', label: 'Daily', icon: ClipboardCheck },
-  { id: 'calendar', label: 'Calendar', icon: CalendarDays },
-  { id: 'leave-requests', label: 'Leave', icon: CalendarRange },
-  { id: 'overtime', label: 'Overtime', icon: Timer },
-  { id: 'shifts', label: 'Shifts', icon: Clock3 },
-  { id: 'reports', label: 'Reports', icon: BarChart3 },
-  { id: 'rules', label: 'Rules', icon: Settings },
+const tabs = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard, path: '/attendance-manager/overview' },
+  { id: 'daily', label: 'Daily', icon: ClipboardCheck, path: '/attendance-manager/daily' },
+  { id: 'calendar', label: 'Calendar', icon: CalendarDays, path: '/attendance-manager/calendar' },
+  { id: 'leave-requests', label: 'Leave', icon: CalendarRange, path: '/attendance-manager/leave-requests' },
+  { id: 'overtime', label: 'Overtime', icon: Timer, path: '/attendance-manager/overtime' },
+  { id: 'shifts', label: 'Shifts', icon: Clock3, path: '/attendance-manager/shifts' },
+  { id: 'reports', label: 'Reports', icon: BarChart3, path: '/attendance-manager/reports' },
+  { id: 'rules', label: 'Rules', icon: Settings, path: '/attendance-manager/rules' },
 ];
 
 export const AttendanceManager = () => {
-  const scrollToSection = (id) => {
-    document.getElementById(`attendance-manager-${id}`)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  };
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const activeTab =
+    tabs.find((tab) => location.pathname === tab.path)?.id || 'overview';
 
   return (
-    <div className="attendance-manager-unified cg-attendance-manager">
-      <header className="attendance-manager-unified-header">
+    <div className="attendance-manager-pages cg-attendance-manager">
+      <header className="attendance-manager-pages-header">
         <div>
           <h1>Attendance Manager</h1>
-          <p>Manage team attendance, leave, overtime, shifts, reports and rules from one workspace.</p>
+          <p>Manage team attendance, leave, overtime, shifts, reports and rules.</p>
         </div>
       </header>
 
-      <nav className="attendance-manager-section-nav" aria-label="Attendance Manager sections">
-        {sections.map(({ id, label, icon: Icon }) => (
-          <button key={id} type="button" onClick={() => scrollToSection(id)}>
+      <nav className="attendance-manager-pages-nav" aria-label="Attendance Manager navigation">
+        {tabs.map(({ id, label, icon: Icon, path }) => (
+          <button
+            key={id}
+            type="button"
+            className={activeTab === id ? 'is-active' : ''}
+            onClick={() => navigate(path)}
+          >
             <Icon size={14} />
             <span>{label}</span>
           </button>
         ))}
       </nav>
 
-      <div className="attendance-manager-unified-content">
-        <section id="attendance-manager-overview" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>01</span>
-            <div>
-              <h2>Overview</h2>
-              <p>Team attendance health, exceptions and quick actions.</p>
-            </div>
-          </div>
-          <AttendanceOverview />
-        </section>
-
-        <section id="attendance-manager-daily" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>02</span>
-            <div>
-              <h2>Daily Attendance</h2>
-              <p>Review staff punches, present/absent status and daily exceptions.</p>
-            </div>
-          </div>
-          <DailyAttendance />
-        </section>
-
-        <section id="attendance-manager-calendar" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>03</span>
-            <div>
-              <h2>Monthly Calendar</h2>
-              <p>Monthly staff attendance and holiday visibility.</p>
-            </div>
-          </div>
-          <MonthlyAttendanceCalendar />
-        </section>
-
-        <section id="attendance-manager-leave-requests" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>04</span>
-            <div>
-              <h2>Leave Requests</h2>
-              <p>Review, approve and track staff leave requests.</p>
-            </div>
-          </div>
-          <LeaveRequestsManager />
-        </section>
-
-        <section id="attendance-manager-overtime" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>05</span>
-            <div>
-              <h2>Overtime</h2>
-              <p>Track overtime hours and approval status.</p>
-            </div>
-          </div>
+      <main className="attendance-manager-pages-content">
+        {activeTab === 'overview' && <AttendanceOverview />}
+        {activeTab === 'daily' && <DailyAttendance />}
+        {activeTab === 'calendar' && <MonthlyAttendanceCalendar />}
+        {activeTab === 'leave-requests' && <LeaveRequestsManager />}
+        {activeTab === 'overtime' && (
           <div className="attendance-manager-overtime-shell">
             <OvertimeManager />
           </div>
-        </section>
-
-        <section id="attendance-manager-shifts" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>06</span>
-            <div>
-              <h2>Shifts</h2>
-              <p>Manage work shifts and staff scheduling rules.</p>
-            </div>
-          </div>
-          <ShiftSettings />
-        </section>
-
-        <section id="attendance-manager-reports" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>07</span>
-            <div>
-              <h2>Reports</h2>
-              <p>Attendance summaries and payroll-ready reporting.</p>
-            </div>
-          </div>
-          <AttendanceReports />
-        </section>
-
-        <section id="attendance-manager-rules" className="attendance-manager-onepage-section">
-          <div className="attendance-manager-section-heading">
-            <span>08</span>
-            <div>
-              <h2>Rules & Settings</h2>
-              <p>Configure attendance policies, grace periods and rules.</p>
-            </div>
-          </div>
-          <RulesSettings />
-        </section>
-      </div>
+        )}
+        {activeTab === 'shifts' && <ShiftSettings />}
+        {activeTab === 'reports' && <AttendanceReports />}
+        {activeTab === 'rules' && <RulesSettings />}
+      </main>
     </div>
   );
 };
