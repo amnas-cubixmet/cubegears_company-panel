@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Bell, Boxes, Building2, Clock3, CreditCard, Plug, Save, ShieldCheck, WalletCards } from 'lucide-react';
+import { Bell, Boxes, Building2, Clock3, CreditCard, FilePenLine, Plug, Save, ShieldCheck, WalletCards } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { settingsService } from '../../services/settings.service';
+import { useNavigate } from 'react-router-dom';
+import '../../styles/settings.css';
 
 const sections = [
   { id: 'company', label: 'Company & Locale', icon: Building2 },
@@ -47,6 +49,7 @@ const schemas = {
 };
 
 export const Settings = () => {
+  const navigate = useNavigate();
   const [active, setActive] = useState('company');
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -76,21 +79,44 @@ export const Settings = () => {
   if (loading) return <div className="crud-empty">Loading settings…</div>;
 
   return (
-    <div className="settings-page crud-page">
-      <div className="crud-heading">
-        <div><p className="crud-eyebrow">CUBIXGEAR</p><h1>Settings</h1><p>Company defaults, branch operations, finance, people, alerts and integrations.</p></div>
-        <button type="button" className="crud-btn crud-btn-primary" onClick={save} disabled={saving}><Save size={17} />{saving ? 'Saving…' : 'Save Settings'}</button>
-      </div>
+    <div className="settings-page">
+      <header className="settings-hero">
+        <div>
+          <span className="settings-kicker">SYSTEM CONFIGURATION</span>
+          <h1>Settings</h1>
+          <p>Company defaults, workshop operations, billing, inventory, people, alerts and integrations.</p>
+        </div>
+        <div className="settings-hero-actions">
+          <button type="button" className="settings-secondary-button" onClick={() => navigate('/account/templates')}>
+            <FilePenLine size={16}/>PDF Templates
+          </button>
+          <button type="button" className="settings-primary-button" onClick={save} disabled={saving}>
+            <Save size={16}/>{saving ? 'Saving…' : 'Save Settings'}
+          </button>
+        </div>
+      </header>
 
       {message && <div className="settings-message">{message}</div>}
 
       <div className="settings-layout">
-        <nav className="settings-nav" aria-label="Settings sections">
+        <aside className="settings-sidebar">
+          <div className="settings-sidebar-head">
+            <span>Configuration</span>
+            <strong>{sections.length} sections</strong>
+          </div>
+          <nav className="settings-nav" aria-label="Settings sections">
           {sections.map(({ id, label, icon: Icon }) => <button type="button" key={id} className={active === id ? 'active' : ''} onClick={() => { setActive(id); setMessage(''); }}><Icon size={16} /><span>{label}</span></button>)}
-        </nav>
+          </nav>
+        </aside>
 
         <section className="settings-card">
-          <div className="settings-card-head"><div><h2>{sections.find((item) => item.id === active)?.label}</h2><p>Changes apply to the company default configuration unless a branch override exists.</p></div></div>
+          <div className="settings-card-head">
+            <div>
+              <span className="settings-section-kicker">CURRENT SECTION</span>
+              <h2>{sections.find((item) => item.id === active)?.label}</h2>
+              <p>Changes apply to the company default configuration unless a branch override exists.</p>
+            </div>
+          </div>
 
           {active === 'company' && <div className="settings-theme"><span><b>Appearance</b><small>Light, dark or follow system preference.</small></span><select value={themeMode} onChange={(e) => setThemeMode(e.target.value)}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>}
 
@@ -102,7 +128,10 @@ export const Settings = () => {
             })}
           </div>
 
-          <div className="settings-footer"><button type="button" className="crud-btn" onClick={() => settingsService.getAllSettings().then(setData)}>Cancel Changes</button><button type="button" className="crud-btn crud-btn-primary" onClick={save} disabled={saving}><Save size={16} />Save</button></div>
+          <div className="settings-footer">
+            <button type="button" className="settings-secondary-button" onClick={() => settingsService.getAllSettings().then(setData)}>Reset Changes</button>
+            <button type="button" className="settings-primary-button" onClick={save} disabled={saving}><Save size={16}/>{saving ? 'Saving…' : 'Save Changes'}</button>
+          </div>
         </section>
       </div>
     </div>
