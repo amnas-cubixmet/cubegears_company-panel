@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Trash2,
   UserRound,
-  Wrench
+  Wrench,
+  LockKeyhole
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
@@ -231,6 +232,56 @@ export function JobCardWorkspace() {
 
   const latestEstimate = estimates.at(-1) || null;
   const invoiceTotal = cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0);
+
+
+  const sectionComplete = useMemo(() => ({
+    overview: Boolean(
+      job?.customerName &&
+      job?.vehicleReg &&
+      job?.assignedEmployeeId
+    ),
+    complaints: complaints.length > 0,
+    inspection: findings.length > 0,
+    work: labourRecords.length > 0,
+    parts: parts.length > 0 || outsidePurchases.length > 0,
+    estimate: estimates.some((item) => item.approvalStatus === 'Approved'),
+    updates: updates.length > 0,
+    qc: qc?.status === 'Pass',
+    invoice: invoiceTotal > 0,
+    activity: true
+  }), [
+    job?.customerName,
+    job?.vehicleReg,
+    job?.assignedEmployeeId,
+    complaints.length,
+    findings.length,
+    labourRecords.length,
+    parts.length,
+    outsidePurchases.length,
+    estimates,
+    updates.length,
+    qc?.status,
+    invoiceTotal
+  ]);
+
+  const unlockedTabIndex = useMemo(() => {
+    let unlocked = 0;
+    for (let index = 0; index < TABS.length - 1; index += 1) {
+      const [key] = TABS[index];
+      if (!sectionComplete[key]) break;
+      unlocked = index + 1;
+    }
+    return unlocked;
+  }, [sectionComplete]);
+
+  const activeTabIndex = TABS.findIndex(([key]) => key === activeTab);
+  const activeTabComplete = sectionComplete[activeTab];
+
+  useEffect(() => {
+    if (!job || activeTabIndex <= unlockedTabIndex) return;
+    const fallbackKey = TABS[unlockedTabIndex]?.[0] || 'overview';
+    navigate(`/jobs/${job.id}/${fallbackKey}`, { replace: true });
+  }, [job, activeTabIndex, unlockedTabIndex, navigate]);
 
   const addComplaint = async () => {
     const description = complaintText.trim();
@@ -541,6 +592,13 @@ export function JobCardWorkspace() {
   };
 
   const openTab = (key) => {
+    const nextIndex = TABS.findIndex(([tabKey]) => tabKey === key);
+    if (nextIndex > unlockedTabIndex) {
+      const requiredTab = TABS[unlockedTabIndex]?.[1] || 'current section';
+      setError(`Complete ${requiredTab} before moving to the next section.`);
+      return;
+    }
+    setError('');
     navigate(`/jobs/${job.id}/${key}`);
   };
 
@@ -610,20 +668,55 @@ export function JobCardWorkspace() {
         })}
       </section>
 
-      <nav className="job-detail-tabs flex w-full gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {TABS.map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => openTab(key)}
-            className={[
-              'h-10 shrink-0 rounded-xl border-0 px-3 text-xs font-semibold transition',
-              activeTab === key ? 'bg-primary text-white shadow-sm' : 'bg-transparent text-secondary hover:bg-surface-2 hover:text-content'
-            ].join(' ')}
-          >
-            {label}
-          </button>
-        ))}
+      <nav className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
+        {TABS.map(([key, label], index) => {
+          const locked = index > unlockedTabIndex;
+          const completed = index < unlockedTabIndex || (index === unlockedTabIndex && sectionComplete[key]);
+          return (
+            <button
+              type="button"
+              key={key}
+              onClick={() => openTab(key)}
+              disabled={locked}
+              aria-disabled={locked}
+              className={[
+                'job-workflow-tab',
+                activeTab === key ? 'is-active' : '',
+                completed ? 'is-complete' : '',
+                locked ? 'is-locked' : ''
+              ].join(' ')}
+              title={locked ? `Complete ${TABS[unlockedTabIndex]?.[1] || 'the previous section'} first` : label}
+            >
+              <span className="job-workflow-tab-number">
+                {locked ? <LockKeyhole size={11} /> : index + 1}
+              </span>
+              <span>{label}</span>
+              {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
+            </button>
+          );
+        })}
       </nav>
+
+      <div className={`job-workflow-gate ${activeTabComplete ? 'is-complete' : 'is-pending'}`}>
+        <div>
+          <strong>{activeTabComplete ? 'Section complete' : 'Complete this section to continue'}</strong>
+          <span>
+            {activeTabComplete
+              ? 'The next workflow section is unlocked.'
+              : 'Fill and save the required information in this section before opening the next tab.'}
+          </span>
+        </div>
+        {activeTabIndex < TABS.length - 1 ? (
+          <button
+            type="button"
+            disabled={!activeTabComplete || saving}
+            onClick={() => openTab(TABS[activeTabIndex + 1][0])}
+          >
+            Next: {TABS[activeTabIndex + 1][1]}
+            <ChevronRight size={14} />
+          </button>
+        ) : null}
+      </div>
 
       {error ? <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
