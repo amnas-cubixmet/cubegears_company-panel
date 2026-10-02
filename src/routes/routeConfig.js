@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Clock, UserCheck, Users, DollarSign, UserPlus, Car, Wrench,
-  ClipboardList, Package, Boxes, FileText, CreditCard, Receipt, BarChart3, Bell, Settings
+  ClipboardList, Boxes, FileText, CreditCard, Receipt, BarChart3, Bell, Settings
 } from 'lucide-react';
 
 export const ROUTE_SECTIONS = {
@@ -31,7 +31,6 @@ export const routeConfig = [
   },
   { id: 'vehicles', label: 'Vehicles', path: '/vehicles', icon: Car, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'vehicles.view' },
   { id: 'services', label: 'Services Catalog', path: '/services', icon: Wrench, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'services.view' },
-  { id: 'inventory', label: 'Inventory', path: '/inventory', icon: Package, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: false, permission: 'inventory.view' },
   {
     id: 'invoices',
     label: 'Invoices & Billing',
