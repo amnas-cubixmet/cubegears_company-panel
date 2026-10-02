@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
   Edit3,
@@ -19,6 +19,8 @@ import {
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
+import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const n = (value) => Number(value || 0);
@@ -711,6 +713,58 @@ function PartyCard({ title, data, onChange }) {
   );
 }
 
+
+function ScannableQRCode({ value, image }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (!value || image || !canvasRef.current) return;
+    QRCode.toCanvas(canvasRef.current, value, {
+      width: 92,
+      margin: 1,
+      errorCorrectionLevel: 'M'
+    }).catch(() => {});
+  }, [value, image]);
+
+  if (image) {
+    return <img src={image} alt="E-Way Bill QR" />;
+  }
+
+  if (!value) {
+    return (
+      <div className="eway-code-empty">
+        <strong>QR</strong>
+        <span>Available after NIC generation</span>
+      </div>
+    );
+  }
+
+  return <canvas ref={canvasRef} width="92" height="92" aria-label="Scannable E-Way Bill QR code" />;
+}
+
+function ScannableBarcode({ value }) {
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    if (!value || !svgRef.current) return;
+    try {
+      JsBarcode(svgRef.current, String(value).replace(/\s+/g, ''), {
+        format: 'CODE128',
+        displayValue: false,
+        margin: 0,
+        height: 34,
+        width: 1.5
+      });
+    } catch {}
+  }, [value]);
+
+  if (!value) {
+    return <div className="eway-code-empty">Barcode available after NIC generation</div>;
+  }
+
+  return <svg ref={svgRef} className="eway-barcode-svg" aria-label="Scannable E-Way Bill barcode" />;
+}
+
 function EWayBillPrint({ doc, totals }) {
   const plain = (value) => Number(value || 0).toFixed(2);
   const dateTime = (value) => {
@@ -728,6 +782,8 @@ function EWayBillPrint({ doc, totals }) {
   const ratePart = (value) => Number(value || 0) > 0 ? Number(value).toFixed(3) : 'NE';
   const ewbReady = Boolean(doc.ewayBillNo);
   const qrImage = doc.qrCodeDataUrl || (doc.qrCodeBase64 ? `data:image/png;base64,${doc.qrCodeBase64}` : '');
+  const qrValue = doc.qrCodeText || doc.ewayBillNo || '';
+  const barcodeValue = doc.ewayBillNo || '';
 
   return (
     <section className="eway-print-sheet eway-official-model">
@@ -736,15 +792,8 @@ function EWayBillPrint({ doc, totals }) {
           <h2>e-Way Bill</h2>
           <span className="eway-local-badge">{ewbReady ? 'API GENERATED RECORD' : 'LOCAL PREVIEW · READY FOR NIC API'}</span>
         </div>
-        <div className={`eway-qr-placeholder${qrImage ? ' has-image' : ''}`} aria-label="E-Way Bill QR">
-          {qrImage ? (
-            <img src={qrImage} alt="E-Way Bill QR" />
-          ) : (
-            <>
-              <strong>{ewbReady ? 'OFFICIAL QR' : 'QR'}</strong>
-              <span>{doc.qrCodeText || (ewbReady ? 'Waiting for QR image from NIC response' : 'Available after NIC generation')}</span>
-            </>
-          )}
+        <div className={`eway-qr-placeholder${qrImage || qrValue ? ' has-image' : ''}`} aria-label="E-Way Bill QR">
+          <ScannableQRCode value={qrValue} image={qrImage} />
         </div>
       </div>
 
@@ -858,8 +907,8 @@ function EWayBillPrint({ doc, totals }) {
       </div>
 
       <div className="eway-barcode-placeholder">
-        <div className="eway-barcode-bars" aria-hidden="true"></div>
-        <span>{formatEwbNo(doc.ewayBillNo) || doc.documentNo || 'NIC E-Way Bill barcode after generation'}</span>
+        <ScannableBarcode value={barcodeValue} />
+        <span>{formatEwbNo(doc.ewayBillNo) || 'NIC E-Way Bill barcode after generation'}</span>
       </div>
 
       <div className="eway-disclaimer">
