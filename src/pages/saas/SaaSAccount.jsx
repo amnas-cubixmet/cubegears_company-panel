@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, ChevronRight, HardDrive, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
+import { CalendarDays, ChevronRight, FilePenLine, HardDrive, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { storageHistoryService } from '../../services/storageHistory.service';
 import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
@@ -10,11 +10,21 @@ const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', 
 const dateTime = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const iso = (value) => new Date(value).toISOString().slice(0, 10);
 
-function BillingView({ billing, storage, onSeatsChange }) {
+function BillingView({ billing, storage, onSeatsChange, onOpenTemplates }) {
   const estimate = useMemo(() => saasAccountService.calculateMonthlyEstimate(billing), [billing]);
   const todayStorage = storageDayCharge(storage.usedGb);
   return (
     <div className="saas-grid">
+      <section className="saas-card saas-wide saas-template-entry">
+        <div className="saas-card-head">
+          <div><span className="saas-kicker">DOCUMENTS</span><h2>Invoice & Estimate Templates</h2></div>
+          <FilePenLine size={22}/>
+        </div>
+        <p className="saas-muted">Choose a ready-made PDF style or create your own custom invoice / estimate template.</p>
+        <button className="saas-button" onClick={onOpenTemplates}>
+          <FilePenLine size={17}/>Open Template Designer
+        </button>
+      </section>
       <section className="saas-card saas-plan-card">
         <div className="saas-card-head"><div><span className="saas-kicker">CURRENT PLAN</span><h2>{billing.plan.name}</h2></div><span className="saas-status">{billing.plan.status}</span></div>
         <div className="saas-price">{money.format(billing.plan.basePrice)}<span>/month</span></div>
@@ -210,5 +220,7 @@ export function SaaSAccount({ section = 'billing' }) {
 
   billing.usage.storageUsedGb = storage.usedGb;
 
-  return <div className="saas-page"><header className="saas-page-head"><div><span className="saas-kicker">CUBIXGEAR SaaS</span><h1>{section === 'storage' ? 'Media Storage' : 'Billing & Plan'}</h1><p>{section === 'storage' ? 'Unlimited photo storage billed at ₹2 per GB per day with interval history and daily file snapshots.' : 'Track software billing, users, storage usage and subscription history.'}</p></div></header>{section === 'storage' ? <StorageView storage={storage} setStorage={setStorage} /> : <BillingView billing={billing} storage={storage} onSeatsChange={seats} />}</div>;
+  const navigate = useNavigate();
+
+  return <div className="saas-page"><header className="saas-page-head"><div><span className="saas-kicker">CUBIXGEAR SaaS</span><h1>{section === 'storage' ? 'Media Storage' : 'Billing & Plan'}</h1><p>{section === 'storage' ? 'Unlimited photo storage billed at ₹2 per GB per day with interval history and daily file snapshots.' : 'Track software billing, users, storage usage and subscription history.'}</p></div></header>{section === 'storage' ? <StorageView storage={storage} setStorage={setStorage} /> : <BillingView billing={billing} storage={storage} onSeatsChange={seats} onOpenTemplates={() => navigate('/account/templates')} />}</div>;
 }
