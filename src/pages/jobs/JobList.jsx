@@ -1,7 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Search, ChevronRight, Wrench, Car, User, History, WalletCards } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  ChevronRight,
+  Wrench,
+  Car,
+  User,
+  History,
+  WalletCards,
+  Clock3,
+  CircleCheckBig,
+  PackageSearch,
+  ClipboardList
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
+import '../../styles/jobs-dashboard.css';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -10,6 +24,23 @@ const money = new Intl.NumberFormat('en-IN', {
 });
 
 const normalizeReg = (value) => String(value || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+
+const STATUS_OPTIONS = [
+  'All',
+  'New',
+  'Inspection',
+  'Estimate Pending',
+  'Approved',
+  'In Progress',
+  'Waiting for Parts',
+  'QC',
+  'Ready for Delivery',
+  'Delivered',
+  'Cancelled'
+];
+
+const statusClass = (status) =>
+  String(status || 'New').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
 export const JobList = () => {
   const navigate = useNavigate();
@@ -52,7 +83,12 @@ export const JobList = () => {
     const q = normalizeReg(query);
     if (q.length < 5) return null;
 
-    const candidates = jobs.filter((job) => normalizeReg(job.vehicleReg).includes(q) || q.includes(normalizeReg(job.vehicleReg)));
+    const candidates = jobs.filter(
+      (job) =>
+        normalizeReg(job.vehicleReg).includes(q) ||
+        q.includes(normalizeReg(job.vehicleReg))
+    );
+
     if (!candidates.length) return null;
 
     const registration = candidates[0].vehicleReg;
@@ -60,7 +96,9 @@ export const JobList = () => {
       .filter((job) => normalizeReg(job.vehicleReg) === normalizeReg(registration))
       .sort((a, b) => String(b.createdDate || '').localeCompare(String(a.createdDate || '')));
 
-    const currentOpen = sameVehicle.find((job) => !['Delivered', 'Cancelled'].includes(job.status));
+    const currentOpen = sameVehicle.find(
+      (job) => !['Delivered', 'Cancelled'].includes(job.status)
+    );
     const latest = sameVehicle[0];
     const lastParts = sameVehicle
       .flatMap((job) => job.partsUsed || [])
@@ -90,111 +128,218 @@ export const JobList = () => {
     ready: jobs.filter((j) => j.status === 'Ready for Delivery').length
   };
 
+  const kpis = [
+    { label: 'Total Jobs', value: counts.total, icon: ClipboardList, filter: 'All', tone: 'default' },
+    { label: 'Active Jobs', value: counts.active, icon: Clock3, filter: 'All', tone: 'primary' },
+    { label: 'Waiting Parts', value: counts.waiting, icon: PackageSearch, filter: 'Waiting for Parts', tone: 'warning' },
+    { label: 'Ready Delivery', value: counts.ready, icon: CircleCheckBig, filter: 'Ready for Delivery', tone: 'success' }
+  ];
+
   return (
-    <div className="job-management-page job-list-page flex w-full min-w-0 flex-col gap-4">
-      <header className="job-list-header flex flex-wrap items-start justify-between gap-3">
+    <div className="jobs-dashboard">
+      <header className="jobs-dashboard-header">
         <div>
-          <div className="text-[10px] font-black uppercase tracking-[0.12em] text-primary">Workshop</div>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-content">Job Cards</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Track every vehicle from check-in and customer complaint through inspection, approval, repair, QC, invoice and delivery.</p>
+          <span className="jobs-dashboard-eyebrow">Workshop Operations</span>
+          <h1>Job Cards</h1>
+          <p>Track every vehicle from check-in to repair, quality control, billing and delivery.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-xs font-bold text-content" onClick={() => navigate('/jobs/reports')}>
-            <History size={16}/>Reports
+
+        <div className="jobs-dashboard-actions">
+          <button
+            type="button"
+            className="jobs-secondary-button"
+            onClick={() => navigate('/jobs/reports')}
+          >
+            <History size={15} />
+            <span>Reports</span>
           </button>
-          <button type="button" className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white" onClick={() => navigate('/jobs/new')}>
-            <Plus size={16}/>New Job Card
+
+          <button
+            type="button"
+            className="jobs-primary-button"
+            onClick={() => navigate('/jobs/new')}
+          >
+            <Plus size={15} />
+            <span>New Job Card</span>
           </button>
         </div>
       </header>
 
-      <div className="job-list-kpis grid grid-cols-2 gap-2 md:grid-cols-4">
-        {[
-          ['Total', counts.total, 'All'],
-          ['Active', counts.active, 'All'],
-          ['Waiting Parts', counts.waiting, 'Waiting for Parts'],
-          ['Ready', counts.ready, 'Ready for Delivery']
-        ].map(([label,value,nextStatus])=>(
-          <button key={label} onClick={()=>setStatus(nextStatus)} className="rounded-2xl border border-line bg-surface p-3 text-left">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">{label}</span>
-            <strong className="mt-1 block text-xl font-black text-content">{value}</strong>
+      <section className="jobs-kpi-grid">
+        {kpis.map(({ label, value, icon: Icon, filter, tone }) => (
+          <button
+            key={label}
+            type="button"
+            className={`jobs-kpi-card is-${tone}`}
+            onClick={() => setStatus(filter)}
+          >
+            <span className="jobs-kpi-icon"><Icon size={16} /></span>
+            <span className="jobs-kpi-label">{label}</span>
+            <strong>{value}</strong>
+            <small>View records</small>
           </button>
         ))}
-      </div>
+      </section>
 
-      <div className="job-list-toolbar grid grid-cols-1 gap-2 rounded-2xl border border-line bg-surface p-3 md:grid-cols-[minmax(260px,1fr)_200px]">
-        <label className="flex h-11 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3">
-          <Search size={16} className="text-muted"/>
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search job, customer, phone or vehicle registration" className="min-w-0 flex-1 border-0 bg-transparent text-xs text-content outline-none"/>
+      <section className="jobs-toolbar">
+        <label className="jobs-search">
+          <Search size={15} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search job, customer, phone or vehicle registration"
+          />
         </label>
-        <select value={status} onChange={(e)=>setStatus(e.target.value)} className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
-          <option>All</option>
-          {['New','Inspection','Estimate Pending','Approved','In Progress','Waiting for Parts','QC','Ready for Delivery','Delivered','Cancelled'].map((item)=><option key={item}>{item}</option>)}
-        </select>
-      </div>
 
-      {vehicleLookup ? (
-        <section className="job-vehicle-lookup rounded-2xl border border-primary/20 bg-primary-soft p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          {STATUS_OPTIONS.map((item) => <option key={item}>{item}</option>)}
+        </select>
+      </section>
+
+      {vehicleLookup && (
+        <section className="jobs-vehicle-lookup">
+          <div className="jobs-vehicle-lookup-head">
             <div>
-              <div className="flex items-center gap-2 text-xs font-extrabold text-primary"><Car size={16}/>{vehicleLookup.registration}</div>
-              <div className="mt-1 text-sm font-black text-content">{vehicleLookup.latest.customerName} · {vehicleLookup.latest.vehicleInfo}</div>
-              <div className="mt-1 text-[11px] text-secondary">{vehicleLookup.latest.customerPhone}</div>
+              <span className="jobs-vehicle-reg"><Car size={15} />{vehicleLookup.registration}</span>
+              <h2>{vehicleLookup.latest.customerName} · {vehicleLookup.latest.vehicleInfo}</h2>
+              <p>{vehicleLookup.latest.customerPhone}</p>
             </div>
-            {vehicleLookup.currentOpen ? (
-              <button onClick={()=>navigate(`/jobs/${vehicleLookup.currentOpen.id}/overview`)} className="h-9 rounded-xl border-0 bg-primary px-3 text-[11px] font-bold text-white">
+
+            {vehicleLookup.currentOpen && (
+              <button
+                type="button"
+                className="jobs-primary-button"
+                onClick={() => navigate(`/jobs/${vehicleLookup.currentOpen.id}/overview`)}
+              >
                 Open Current Job
               </button>
-            ) : null}
+            )}
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
-            <LookupStat icon={History} label="Previous Visits" value={vehicleLookup.sameVehicle.length}/>
-            <LookupStat icon={Wrench} label="Last Status" value={vehicleLookup.latest.status}/>
-            <LookupStat icon={WalletCards} label="Total Spending" value={money.format(vehicleLookup.spending)}/>
-            <LookupStat icon={Car} label="Last Service" value={vehicleLookup.latest.createdDate || '—'}/>
+          <div className="jobs-vehicle-stats">
+            <LookupStat icon={History} label="Previous Visits" value={vehicleLookup.sameVehicle.length} />
+            <LookupStat icon={Wrench} label="Last Status" value={vehicleLookup.latest.status} />
+            <LookupStat icon={WalletCards} label="Total Spending" value={money.format(vehicleLookup.spending)} />
+            <LookupStat icon={Car} label="Last Service" value={vehicleLookup.latest.createdDate || '—'} />
           </div>
 
-          <div className="mt-3 rounded-xl bg-surface/80 p-3">
-            <div className="text-[10px] font-bold uppercase tracking-wide text-muted">Last Replaced / Used Parts</div>
-            <div className="mt-2 text-xs font-semibold text-content">{vehicleLookup.lastParts.length ? vehicleLookup.lastParts.join(' · ') : 'No parts history found'}</div>
+          <div className="jobs-parts-history">
+            <span>Last Replaced / Used Parts</span>
+            <strong>
+              {vehicleLookup.lastParts.length
+                ? vehicleLookup.lastParts.join(' · ')
+                : 'No parts history found'}
+            </strong>
           </div>
         </section>
-      ) : null}
-
-      {loading ? (
-        <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Loading job cards…</div>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-muted">No job cards found.</div>
-      ) : (
-        <div className="job-list-records flex flex-col gap-2">
-          {filtered.map((job) => (
-            <button type="button" className="job-list-card flex w-full items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4 text-left transition hover:border-primary/25 hover:shadow-sm" key={job.id} onClick={() => navigate(`/jobs/${job.id}/overview`)}>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <strong className="text-sm text-content">{job.jobNumber || job.id}</strong>
-                  <span className="rounded-full bg-primary-soft px-2.5 py-1 text-[9px] font-bold text-primary">{job.status || 'New'}</span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-secondary">
-                  <span className="inline-flex items-center gap-1"><Car size={13}/>{job.vehicleReg || 'No registration'} · {job.vehicleInfo || 'Vehicle'}</span>
-                  <span className="inline-flex items-center gap-1"><User size={13}/>{job.customerName || 'Walk-in customer'}</span>
-                  {job.assignedEmployeeName ? <span className="inline-flex items-center gap-1"><Wrench size={13}/>{job.assignedEmployeeName}</span> : null}
-                </div>
-              </div>
-              <ChevronRight size={18} className="shrink-0 text-muted"/>
-            </button>
-          ))}
-        </div>
       )}
+
+      <section className="jobs-records-panel">
+        <div className="jobs-records-head">
+          <div>
+            <span>Job Records</span>
+            <h2>{status === 'All' ? 'All Job Cards' : status}</h2>
+          </div>
+          <strong>{filtered.length} records</strong>
+        </div>
+
+        {loading ? (
+          <div className="jobs-state">Loading job cards…</div>
+        ) : filtered.length === 0 ? (
+          <div className="jobs-state is-empty">No job cards found.</div>
+        ) : (
+          <>
+            <div className="jobs-table-wrap">
+              <table className="jobs-table">
+                <thead>
+                  <tr>
+                    <th>Job</th>
+                    <th>Vehicle</th>
+                    <th>Customer</th>
+                    <th>Technician</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((job) => (
+                    <tr key={job.id} onClick={() => navigate(`/jobs/${job.id}/overview`)}>
+                      <td>
+                        <strong>{job.jobNumber || job.id}</strong>
+                        <span>{job.id}</span>
+                      </td>
+                      <td>
+                        <strong>{job.vehicleReg || 'No registration'}</strong>
+                        <span>{job.vehicleInfo || 'Vehicle'}</span>
+                      </td>
+                      <td>
+                        <strong>{job.customerName || 'Walk-in customer'}</strong>
+                        <span>{job.customerPhone || '—'}</span>
+                      </td>
+                      <td>
+                        <strong>{job.assignedEmployeeName || 'Unassigned'}</strong>
+                      </td>
+                      <td>
+                        <span className={`jobs-status-chip is-${statusClass(job.status)}`}>
+                          {job.status || 'New'}
+                        </span>
+                      </td>
+                      <td>
+                        <strong>{job.createdDate || '—'}</strong>
+                      </td>
+                      <td>
+                        <ChevronRight size={16} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="jobs-mobile-list">
+              {filtered.map((job) => (
+                <button
+                  key={job.id}
+                  type="button"
+                  className="jobs-mobile-card"
+                  onClick={() => navigate(`/jobs/${job.id}/overview`)}
+                >
+                  <div className="jobs-mobile-card-head">
+                    <div>
+                      <strong>{job.jobNumber || job.id}</strong>
+                      <span>{job.vehicleReg || 'No registration'}</span>
+                    </div>
+                    <span className={`jobs-status-chip is-${statusClass(job.status)}`}>
+                      {job.status || 'New'}
+                    </span>
+                  </div>
+
+                  <div className="jobs-mobile-card-meta">
+                    <span><Car size={12} />{job.vehicleInfo || 'Vehicle'}</span>
+                    <span><User size={12} />{job.customerName || 'Walk-in customer'}</span>
+                    <span><Wrench size={12} />{job.assignedEmployeeName || 'Unassigned'}</span>
+                  </div>
+
+                  <div className="jobs-mobile-card-footer">
+                    <span>{job.createdDate || '—'}</span>
+                    <ChevronRight size={15} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
     </div>
   );
 };
 
 function LookupStat({ icon: Icon, label, value }) {
   return (
-    <div className="rounded-xl bg-surface/80 p-3">
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted"><Icon size={13}/>{label}</div>
-      <div className="mt-1 truncate text-xs font-extrabold text-content">{value}</div>
+    <div className="jobs-lookup-stat">
+      <span><Icon size={13} />{label}</span>
+      <strong>{value}</strong>
     </div>
   );
 }
