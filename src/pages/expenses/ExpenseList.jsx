@@ -28,6 +28,7 @@ const money = new Intl.NumberFormat('en-IN', {
 });
 
 const expenseCategories = [
+  'Stock Purchase',
   'Utilities',
   'Equipment Maintenance',
   'Consumables & Tools',
