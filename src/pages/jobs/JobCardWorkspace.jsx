@@ -13,7 +13,8 @@ import {
   Trash2,
   UserRound,
   Wrench,
-  LockKeyhole
+  LockKeyhole,
+  ChevronRight
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
