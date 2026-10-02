@@ -1,0 +1,280 @@
+.payroll-reference-overview{
+  --reference-accent:#0a865e;
+  --reference-accent-soft:color-mix(in srgb,var(--reference-accent) 11%,var(--surface));
+  width:100%;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px
+}
+.payroll-reference-hero{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--reference-accent) 6%,var(--surface)));
+}
+.payroll-reference-eyebrow{
+  display:block;
+  margin-bottom:4px;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--reference-accent)
+}
+.payroll-reference-hero h2{
+  margin:0;
+  font-size:22px;
+  line-height:1.15;
+  font-weight:800;
+  color:var(--text-primary)
+}
+.payroll-reference-hero p{
+  margin:5px 0 0;
+  max-width:560px;
+  font-size:11px;
+  line-height:1.45;
+  color:var(--text-muted)
+}
+.payroll-reference-hero-badge{
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:0 11px;
+  border-radius:999px;
+  background:var(--reference-accent-soft);
+  color:var(--reference-accent);
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap
+}
+.payroll-reference-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px
+}
+.payroll-reference-kpis article{
+  min-width:0;
+  min-height:112px;
+  display:flex;
+  flex-direction:column;
+  padding:13px;
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:var(--surface);
+  box-shadow:0 1px 2px rgba(15,23,42,.04)
+}
+.payroll-reference-kpi-icon{
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  margin-bottom:13px;
+  border-radius:9px;
+  background:var(--reference-accent-soft);
+  color:var(--reference-accent)
+}
+.payroll-reference-kpi-icon.is-warning{
+  background:var(--warning-soft);
+  color:var(--warning)
+}
+.payroll-reference-kpis small{
+  font-size:9px;
+  font-weight:650;
+  color:var(--text-muted)
+}
+.payroll-reference-kpis strong{
+  margin-top:4px;
+  font-size:18px;
+  line-height:1.1;
+  letter-spacing:-.02em;
+  color:var(--text-primary)
+}
+.payroll-reference-kpis em{
+  margin-top:auto;
+  padding-top:8px;
+  font-size:9px;
+  font-style:normal;
+  color:var(--text-muted)
+}
+.payroll-reference-main-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.7fr) minmax(250px,.8fr);
+  gap:10px
+}
+.payroll-reference-panel,
+.payroll-reference-records{
+  border:1px solid var(--border);
+  border-radius:15px;
+  background:var(--surface);
+  box-shadow:0 1px 2px rgba(15,23,42,.04)
+}
+.payroll-reference-panel{
+  padding:14px
+}
+.payroll-reference-panel-head,
+.payroll-reference-records-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px
+}
+.payroll-reference-panel-head span,
+.payroll-reference-records-head>div>span{
+  display:block;
+  font-size:9px;
+  font-weight:700;
+  color:var(--text-muted)
+}
+.payroll-reference-panel-head h3,
+.payroll-reference-records-head h3{
+  margin:3px 0 0;
+  font-size:14px;
+  font-weight:800;
+  color:var(--text-primary)
+}
+.payroll-reference-panel-head>strong{
+  font-size:14px;
+  color:var(--reference-accent)
+}
+.payroll-reference-breakdown-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:13px
+}
+.payroll-reference-breakdown-list>div{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-height:42px;
+  padding:0 10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface-2)
+}
+.payroll-reference-breakdown-list span{
+  font-size:9px;
+  color:var(--text-muted)
+}
+.payroll-reference-breakdown-list strong{
+  font-size:10px;
+  color:var(--text-primary)
+}
+.payroll-reference-progress{
+  margin-top:13px
+}
+.payroll-reference-progress>div:first-child{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+  font-size:9px;
+  color:var(--text-muted)
+}
+.payroll-reference-progress>div:first-child strong{
+  color:var(--reference-accent)
+}
+.payroll-reference-progress-track{
+  height:7px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--surface-3)
+}
+.payroll-reference-progress-track span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:var(--reference-accent)
+}
+.payroll-reference-status-list{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  margin-top:13px
+}
+.payroll-reference-status-list>div,
+.payroll-reference-note{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:44px;
+  padding:0 11px;
+  border-radius:10px;
+  background:var(--surface-2)
+}
+.payroll-reference-status-list span,
+.payroll-reference-note span{
+  font-size:9px;
+  color:var(--text-muted)
+}
+.payroll-reference-status-list strong,
+.payroll-reference-note strong{
+  font-size:15px;
+  color:var(--text-primary)
+}
+.payroll-reference-status-list .is-paid strong{color:var(--reference-accent)}
+.payroll-reference-status-list .is-partial strong{color:var(--warning)}
+.payroll-reference-status-list .is-unpaid strong{color:var(--danger)}
+.payroll-reference-note{
+  margin-top:7px;
+  border:1px dashed var(--border);
+  background:transparent
+}
+.payroll-reference-records{
+  padding:14px
+}
+.payroll-reference-records-head{
+  margin-bottom:11px
+}
+.payroll-reference-records-head>small{
+  font-size:9px;
+  color:var(--text-muted)
+}
+.cg-payroll .payroll-reference-card-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important
+}
+.payroll-reference-overview .payroll-record-card{
+  border-radius:14px!important;
+  box-shadow:none!important
+}
+@media(max-width:1180px){
+  .payroll-reference-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+  .payroll-reference-main-grid{
+    grid-template-columns:1fr
+  }
+  .cg-payroll .payroll-reference-card-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important
+  }
+}
+@media(max-width:700px){
+  .payroll-reference-hero{
+    align-items:flex-start;
+    flex-direction:column
+  }
+  .payroll-reference-kpis{
+    grid-template-columns:1fr 1fr
+  }
+  .payroll-reference-kpis article{
+    min-height:104px
+  }
+  .payroll-reference-breakdown-list{
+    grid-template-columns:1fr
+  }
+  .cg-payroll .payroll-reference-card-grid{
+    grid-template-columns:1fr!important
+  }
+}
+@media(max-width:390px){
+  .payroll-reference-kpis{
+    grid-template-columns:1fr
+  }
+}
