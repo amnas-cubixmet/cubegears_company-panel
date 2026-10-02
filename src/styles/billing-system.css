@@ -1897,3 +1897,66 @@
     height:34px!important;
   }
 }
+
+/* ===== Invoice / Estimate reference print polish ===== */
+.invoice-reference-print{
+  position:relative;
+}
+.invoice-original-label{
+  margin-bottom:4px;
+  text-align:center;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.invoice-reference-company{
+  display:block;
+  padding:8px 4px 10px;
+  border-bottom:0;
+}
+.invoice-reference-company-copy{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  max-width:520px;
+}
+.invoice-reference-company-copy>strong{
+  font-size:15px;
+  line-height:1.25;
+}
+.invoice-reference-company-copy>span{
+  font-size:9px;
+  line-height:1.35;
+}
+.invoice-reference-print .invoice-sale-title{
+  margin-top:2px;
+  border-top:1px solid #444;
+}
+.invoice-reference-print .invoice-sale-info{
+  border-bottom:1px solid #777;
+}
+.invoice-seller-card textarea{
+  min-height:86px;
+}
+@media(max-width:1100px){
+  .invoice-source-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .invoice-source-grid>.billing-card:last-child{
+    grid-column:auto;
+  }
+}
+@media(max-width:700px){
+  .invoice-source-grid{
+    grid-template-columns:1fr;
+  }
+}
+@media print{
+  .invoice-reference-print{
+    color:#111!important;
+    background:#fff!important;
+  }
+  .invoice-original-label{
+    margin-top:0;
+  }
+}
