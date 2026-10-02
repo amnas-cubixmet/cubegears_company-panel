@@ -192,3 +192,128 @@ button:active {
 .attendance-filter-scroll > button {
   flex: 0 0 auto !important;
 }
+
+
+/* =========================================================
+   GLOBAL TEXT + BUTTON ALIGNMENT SYSTEM
+   Keep typography and controls visually consistent project-wide.
+   ========================================================= */
+:where(button,[role='button']){
+  font-family:inherit;
+  line-height:1.15;
+  text-align:center;
+}
+
+button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  vertical-align:middle;
+}
+
+button > svg,
+[role='button'] > svg{
+  flex:0 0 auto;
+}
+
+button > span,
+[role='button'] > span{
+  min-width:0;
+}
+
+:where(h1,h2,h3,h4,h5,h6){
+  color:var(--text-primary);
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+}
+
+h1{line-height:1.15}
+h2,h3{line-height:1.2}
+h4,h5,h6{line-height:1.25}
+
+:where(p,li,td,th,label,span,strong,small){
+  overflow-wrap:anywhere;
+}
+
+:where(p){
+  line-height:1.5;
+}
+
+:where(label){
+  line-height:1.3;
+}
+
+:where(input,select,textarea){
+  line-height:1.3;
+}
+
+:where(input,select,textarea,button){
+  vertical-align:middle;
+}
+
+:where(.status,.badge,[class*='status'],[class*='badge']){
+  line-height:1.1;
+}
+
+:where(
+  .billing-status,
+  .saas-status,
+  .payment-status,
+  .vehicle-status,
+  .expense-status,
+  .global-search-result-status,
+  .status-badge,
+  .badge
+){
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  vertical-align:middle;
+}
+
+:where(
+  .crud-btn,
+  .bill-btn,
+  .report-btn,
+  .settings-primary-button,
+  .settings-secondary-button,
+  .saas-button,
+  .notification-mark-all,
+  .vehicle-primary-button
+){
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px;
+  text-align:center!important;
+  line-height:1.15!important;
+}
+
+@media(max-width:767px){
+  button{
+    min-height:44px;
+  }
+
+  :where(h1){
+    line-height:1.15;
+  }
+
+  :where(p){
+    line-height:1.45;
+  }
+
+  :where(
+    .crud-btn,
+    .bill-btn,
+    .report-btn,
+    .settings-primary-button,
+    .settings-secondary-button,
+    .saas-button,
+    .notification-mark-all,
+    .vehicle-primary-button
+  ){
+    min-height:42px;
+  }
+}
