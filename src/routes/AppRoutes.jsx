@@ -36,6 +36,7 @@ import { Notifications } from '../pages/notifications/Notifications';
 import { Settings } from '../pages/settings/Settings';
 import { Profile } from '../pages/profile/Profile';
 import { SaaSAccount } from '../pages/saas/SaaSAccount';
+import { DocumentTemplates } from '../pages/saas/DocumentTemplates';
 import { StorageHistory } from '../pages/saas/StorageHistory';
 import { StorageDayDetails } from '../pages/saas/StorageDayDetails';
 
@@ -233,6 +234,7 @@ export const AppRoutes = () => (
       <Route path="/account/storage" element={<SaaSAccount section="storage" />} />
       <Route path="/account/storage/history" element={<StorageHistory />} />
       <Route path="/account/storage/history/:date" element={<StorageDayDetails />} />
+      <Route path="/account/templates" element={<DocumentTemplates />} />
     </Route>
 
     <Route path="*" element={<Navigate to="/dashboard" replace />} />
