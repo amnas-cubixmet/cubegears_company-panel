@@ -1,3 +1,5 @@
+import apiClient from '../api/apiClient';
+import { USE_MOCK_API } from '../api/apiConfig';
 import {
   stockMockItems,
   stockLedgerMock,
@@ -333,3 +335,118 @@ export const stockManagementService = {
 
 export default stockManagementService;
 
+
+
+if (!USE_MOCK_API) {
+  const resolveCategoryId = async (value) => {
+    if (!value) return null;
+    const rows = await apiClient.get('/stock/categories');
+    const match = rows.find((row) => String(row.id) === String(value) || String(row.name).toLowerCase() === String(value).toLowerCase());
+    return match?.id || null;
+  };
+
+  const resolveSupplierId = async (value) => {
+    if (!value) return null;
+    const rows = await apiClient.get('/stock/suppliers');
+    const match = rows.find((row) => String(row.id) === String(value) || String(row.name).toLowerCase() === String(value).toLowerCase());
+    return match?.id || null;
+  };
+
+  const itemPayload = async (payload = {}) => ({
+    partName: payload.partName || payload.name || '',
+    sku: payload.sku || '',
+    barcode: payload.barcode || '',
+    category: await resolveCategoryId(payload.category),
+    brand: payload.brand || '',
+    compatibleVehicle: payload.compatibleVehicle || 'Universal',
+    unit: payload.unit || 'Piece',
+    costPrice: Number(payload.costPrice ?? payload.cost ?? 0),
+    sellingPrice: Number(payload.sellingPrice ?? payload.price ?? 0),
+    onHand: Number(payload.onHand || 0),
+    reserved: Number(payload.reserved || 0),
+    minimumStock: Number(payload.minimumStock ?? payload.minimum ?? 0),
+    reorderLevel: Number(payload.reorderLevel ?? payload.minimumStock ?? payload.minimum ?? 0),
+    location: payload.location || payload.rack || '',
+    supplier: await resolveSupplierId(payload.supplier),
+    tax: Number(payload.tax || 0),
+    hsnCode: payload.hsnCode || '',
+    status: payload.status || 'Active'
+  });
+
+  Object.assign(stockManagementService, {
+    getItems: async () => apiClient.get('/stock'),
+    getItem: async (id) => apiClient.get(`/stock/${id}`),
+    createItem: async (payload) => apiClient.post('/stock', await itemPayload(payload)),
+    updateItem: async (id, payload) => apiClient.patch(`/stock/${id}`, await itemPayload(payload)),
+    deleteItem: async (id) => apiClient.delete(`/stock/${id}`),
+
+    getCategories: async () => apiClient.get('/stock/categories'),
+    createCategory: async (payload) => apiClient.post('/stock/categories', {
+      name: payload.name,
+      description: payload.description || '',
+      is_active: payload.status ? payload.status === 'Active' : true
+    }),
+    updateCategory: async (id, payload) => apiClient.patch(`/stock/categories/${id}`, {
+      name: payload.name,
+      description: payload.description,
+      is_active: payload.status ? payload.status === 'Active' : undefined
+    }),
+    deleteCategory: async (id) => apiClient.delete(`/stock/categories/${id}`),
+
+    stockIn: async (payload) => apiClient.post('/stock/in', payload),
+    stockOut: async (payload) => apiClient.post('/stock/issue', payload),
+    stockReturn: async (payload) => apiClient.post('/stock/return', payload),
+
+    getLedger: async () => apiClient.get('/stock/ledger'),
+
+    getSuppliers: async () => apiClient.get('/stock/suppliers'),
+    createSupplier: async (payload) => apiClient.post('/stock/suppliers', {
+      name: payload.name,
+      contact_person: payload.contactPerson || '',
+      phone: payload.phone || '',
+      email: payload.email || '',
+      gstNo: payload.gstNo || '',
+      address: payload.address || '',
+      is_active: payload.status ? payload.status === 'Active' : true
+    }),
+    updateSupplier: async (id, payload) => apiClient.patch(`/stock/suppliers/${id}`, {
+      name: payload.name,
+      contact_person: payload.contactPerson,
+      phone: payload.phone,
+      email: payload.email,
+      gstNo: payload.gstNo,
+      address: payload.address,
+      is_active: payload.status ? payload.status === 'Active' : undefined
+    }),
+    deleteSupplier: async (id) => apiClient.delete(`/stock/suppliers/${id}`),
+
+    getPurchaseOrders: async () => apiClient.get('/stock/purchase-orders'),
+    createPurchaseOrder: async (payload) => apiClient.post('/stock/purchase-orders', {
+      purchaseNo: payload.purchaseNo,
+      supplier: await resolveSupplierId(payload.supplier),
+      status: payload.status || 'Draft',
+      expected_date: payload.expectedDate || null,
+      items: payload.lines || payload.items || [],
+      subtotal: Number(payload.subtotal || payload.totalAmount || 0),
+      tax: Number(payload.tax || 0),
+      total: Number(payload.total || payload.totalAmount || 0)
+    }),
+    updatePurchaseStatus: async (id, nextStatus) => apiClient.patch(`/stock/purchase-orders/${id}`, { status: nextStatus }),
+    receivePurchaseOrder: async (id, received = {}) => apiClient.patch(`/stock/purchase-orders/${id}`, { status: 'Received', received }),
+
+    getTransfers: async () => apiClient.get('/stock/transfers'),
+    createTransfer: async (payload) => apiClient.post('/stock/transfer', payload),
+
+    getAdjustments: async () => apiClient.get('/stock/ledger', { params: { type: 'adjustment' } }),
+    createAdjustment: async (payload) => apiClient.post('/stock/adjustment', payload),
+
+    getCounts: async () => apiClient.get('/stock/counts'),
+    createCount: async (payload) => apiClient.post('/stock/audit', {
+      item: payload.itemId,
+      counted_qty: Number(payload.countedQty || 0),
+      expected_qty: Number(payload.expectedQty || 0),
+      difference: Number(payload.difference || 0),
+      reason: payload.reason || ''
+    })
+  });
+}
