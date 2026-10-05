@@ -1,3 +1,5 @@
+import apiClient from '../api/apiClient';
+import { USE_MOCK_API } from '../api/apiConfig';
 import { mockCommissionLedger } from '../mock/commission.mock';
 
 export const commissionService = {
@@ -64,3 +66,20 @@ export const commissionService = {
     });
   }
 };
+
+
+if (!USE_MOCK_API) {
+  Object.assign(commissionService, {
+    getCommissions: async (filters = {}) => apiClient.get('/payroll/incentives', { params: filters }),
+    getApprovedCommissionTotal: async (staffId, month) => {
+      const rows = await apiClient.get('/payroll/incentives', { params: { staffId, month, status: 'Approved' } });
+      return (Array.isArray(rows) ? rows : []).reduce((sum, row) => sum + Number(row.amount || 0), 0);
+    },
+    createCommissionRecord: async (data) => apiClient.post('/payroll/incentives', {
+      ...data,
+      incentive_type: data.incentive_type || data.type || 'Commission'
+    }),
+    updateStatus: async (id, nextStatus, approvedBy = 'Branch Manager') =>
+      apiClient.post(`/payroll/incentives/${id}/status`, { status: nextStatus, approvedBy })
+  });
+}
