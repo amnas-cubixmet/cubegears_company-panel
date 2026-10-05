@@ -1,3 +1,5 @@
+import apiClient from '../api/apiClient';
+import { USE_MOCK_API } from '../api/apiConfig';
 import { mockOvertimeList } from '../mock/overtime.mock';
 
 export const overtimeService = {
@@ -142,3 +144,15 @@ export const overtimeService = {
     });
   }
 };
+
+
+if (!USE_MOCK_API) {
+  Object.assign(overtimeService, {
+    getOvertime: async (filters = {}) => apiClient.get('/attendance/overtime', { params: filters }),
+    getOvertimeByStaff: async (staffId, month) => apiClient.get('/attendance/overtime', { params: { staffId, month } }),
+    createOvertime: async (otData) => apiClient.post('/attendance/overtime', otData),
+    approveOvertime: async (id, approvalData = {}) => apiClient.post(`/attendance/overtime/${id}/approve`, approvalData),
+    rejectOvertime: async (id, reasonData = {}) => apiClient.post(`/attendance/overtime/${id}/reject`, reasonData),
+    cancelOvertime: async (id) => apiClient.post(`/attendance/overtime/${id}/cancel`)
+  });
+}
