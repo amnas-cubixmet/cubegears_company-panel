@@ -1,3 +1,5 @@
+import apiClient from '../api/apiClient';
+import { USE_MOCK_API } from '../api/apiConfig';
 import {
   workshopDepartments,
   workshopShifts,
@@ -433,3 +435,78 @@ export const staffManagementService = {
       }, 150);
     })
 };
+
+
+if (!USE_MOCK_API) {
+  const parseShiftTime = (value = '') => {
+    const parts = String(value).split('-').map((part) => part.trim());
+    const to24 = (text, fallback) => {
+      const match = String(text).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+      if (!match) return fallback;
+      let hour = Number(match[1]);
+      const minute = match[2];
+      const suffix = (match[3] || '').toUpperCase();
+      if (suffix === 'PM' && hour < 12) hour += 12;
+      if (suffix === 'AM' && hour === 12) hour = 0;
+      return `${String(hour).padStart(2, '0')}:${minute}`;
+    };
+    return { start_time: to24(parts[0], '09:00'), end_time: to24(parts[1], '18:00') };
+  };
+
+  Object.assign(staffManagementService, {
+    getTeams: async () => apiClient.get('/employees/teams'),
+    createTeam: async (teamData) => apiClient.post('/employees/teams', {
+      name: teamData.name,
+      description: teamData.description || '',
+      is_active: true
+    }),
+    assignStaffToTeam: async (teamId, staffIds = []) => {
+      await Promise.all(staffIds.map((id) => apiClient.patch(`/employees/${id}`, { team: teamId })));
+      return { id: teamId, assignedStaffIds: staffIds };
+    },
+    addStaffToSkill: async (skillId, staffIds = []) =>
+      apiClient.post(`/employees/skills/${skillId}/assign`, { staffIds }),
+
+    getShifts: async () => apiClient.get('/employees/shifts'),
+    createShift: async (shiftData) => apiClient.post('/employees/shifts', {
+      name: shiftData.name,
+      ...parseShiftTime(shiftData.time),
+      weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : [],
+      is_active: true
+    }),
+    updateShift: async (id, shiftData) => apiClient.patch(`/employees/shifts/${id}`, {
+      name: shiftData.name,
+      ...parseShiftTime(shiftData.time),
+      weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : undefined
+    }),
+    deleteShift: async (id) => apiClient.delete(`/employees/shifts/${id}`),
+
+    getSkills: async () => apiClient.get('/employees/skills'),
+    createSkill: async (skillData) => apiClient.post('/employees/skills', {
+      name: skillData.name,
+      category: skillData.category || 'Workshop',
+      is_active: true
+    }),
+    updateSkill: async (id, skillData) => apiClient.patch(`/employees/skills/${id}`, skillData),
+    deleteSkill: async (id) => apiClient.delete(`/employees/skills/${id}`),
+
+    getDocuments: async () => apiClient.get('/employees/documents'),
+    createDocument: async (staffId, documentData) => apiClient.post('/employees/documents', {
+      employee: staffId,
+      document_type: documentData.documentType || documentData.type || 'Other',
+      title: documentData.title || documentData.name || 'Document',
+      file_url: documentData.fileUrl || documentData.url || '',
+      expiry_date: documentData.expiryDate || null,
+      notes: documentData.notes || ''
+    }),
+    updateDocument: async (_staffId, documentId, documentData) =>
+      apiClient.patch(`/employees/documents/${documentId}`, {
+        document_type: documentData.documentType || documentData.type,
+        title: documentData.title || documentData.name,
+        file_url: documentData.fileUrl || documentData.url,
+        expiry_date: documentData.expiryDate || null,
+        notes: documentData.notes
+      }),
+    deleteDocument: async (_staffId, documentId) => apiClient.delete(`/employees/documents/${documentId}`)
+  });
+}
