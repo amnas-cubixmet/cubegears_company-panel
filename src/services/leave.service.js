@@ -10,7 +10,7 @@ export const getLeaveBalances = async () => {
     await delay();
     return Promise.resolve(getMockLeaveBalances());
   }
-  return apiClient.get('/api/leave/balances');
+  return apiClient.get('/leave/balances');
 };
 
 export const getLeaveRequests = async () => {
@@ -18,7 +18,7 @@ export const getLeaveRequests = async () => {
     await delay();
     return Promise.resolve(getMockLeaveRequests());
   }
-  return apiClient.get('/api/leave/requests');
+  return apiClient.get('/leave/requests');
 };
 
 export const applyLeaveRequest = async (leaveData) => {
@@ -34,7 +34,7 @@ export const applyLeaveRequest = async (leaveData) => {
     mockLeaveRequests.unshift(newReq);
     return Promise.resolve(newReq);
   }
-  return apiClient.post('/api/leave/requests', leaveData);
+  return apiClient.post('/leave/requests', leaveData);
 };
 
 export const cancelLeaveRequest = async (requestId) => {
@@ -47,7 +47,7 @@ export const cancelLeaveRequest = async (requestId) => {
     }
     return Promise.resolve(target);
   }
-  return apiClient.post(`/api/leave/requests/${requestId}/cancel`);
+  return apiClient.post(`/leave/requests/${requestId}/cancel`);
 };
 
 export const leaveService = {
