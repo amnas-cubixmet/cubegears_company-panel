@@ -1,3 +1,5 @@
+import apiClient from '../api/apiClient';
+import { USE_MOCK_API } from '../api/apiConfig';
 import { mockPayrollList } from '../mock/payroll.mock';
 import { mockSalaryStructures, mockSalaryPayments, mockSalaryAdvances } from '../mock/salaryStructure.mock';
 import { overtimeService } from './overtime.service';
@@ -267,3 +269,62 @@ export const payrollService = {
     });
   }
 };
+
+
+if (!USE_MOCK_API) {
+  Object.assign(payrollService, {
+    getPayrolls: async (filters = {}) => {
+      const rows = await apiClient.get('/payroll/payslips', { params: filters });
+      let result = Array.isArray(rows) ? rows : [];
+      if (filters.month) result = result.filter((row) => row.month === filters.month);
+      if (filters.staffId && !['All', 'all'].includes(filters.staffId)) {
+        result = result.filter((row) => String(row.staffId) === String(filters.staffId));
+      }
+      if (filters.paymentStatus && !['All', 'all'].includes(filters.paymentStatus)) {
+        result = result.filter((row) => row.paymentStatus === filters.paymentStatus);
+      }
+      return result;
+    },
+
+    updateApprovalStatus: async (id, status, reason = '') =>
+      apiClient.patch(`/payroll/payslips/${id}`, { status, approval_reason: reason }),
+
+    recordPayment: async (payrollId, paymentData) =>
+      apiClient.post(`/payroll/payslips/${payrollId}/payment`, paymentData),
+
+    getSalaryStructures: async () => apiClient.get('/payroll/salary-setup'),
+
+    saveSalaryStructure: async (structureData) => {
+      const payload = {
+        employee: structureData.employee || structureData.staffId,
+        basicSalary: Number(structureData.basicSalary || structureData.fixedMonthlySalary || 0),
+        hra: Number(structureData.hra || 0),
+        allowances: Number(structureData.allowances || 0),
+        deductions: Number(structureData.deductions || 0),
+        overtimeRate: Number(structureData.overtimeRate || structureData.hourlyRate || 0),
+        incentive_rule: {
+          fixed: Number(structureData.fixedIncentives || 0),
+          salaryBasis: structureData.salaryBasis || 'Fixed Monthly',
+          dailyRate: Number(structureData.dailyRate || 0),
+          hourlyRate: Number(structureData.hourlyRate || 0),
+          allowanceBreakdown: structureData.allowanceBreakdown || []
+        },
+        effectiveDate: structureData.effectiveDate || new Date().toISOString().slice(0, 10)
+      };
+      if (structureData.id) return apiClient.patch(`/payroll/salary-setup/${structureData.id}`, payload);
+      return apiClient.post('/payroll/salary-setup', payload);
+    },
+
+    getSalaryAdvances: async () => apiClient.get('/payroll/advances'),
+
+    createSalaryAdvance: async (advanceData) => apiClient.post('/payroll/advances', {
+      employee: advanceData.employee || advanceData.staffId,
+      date: advanceData.date || new Date().toISOString().slice(0, 10),
+      advanceAmount: Number(advanceData.advanceAmount || advanceData.amount || 0),
+      remarks: advanceData.remarks || ''
+    }),
+
+    recordAdvanceRecovery: async (advanceId, recoveryData) =>
+      apiClient.post(`/payroll/advances/${advanceId}/recover`, recoveryData)
+  });
+}
