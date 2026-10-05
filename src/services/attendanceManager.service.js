@@ -16,7 +16,7 @@ export const getApprovals = async () => {
     await delay();
     return Promise.resolve([...mockManagerApprovals]);
   }
-  return apiClient.get('/api/attendance-manager/approvals');
+  return apiClient.get('/attendance-manager/approvals');
 };
 
 export const updateApprovalStatus = async (approvalId, decision, note) => {
@@ -29,7 +29,7 @@ export const updateApprovalStatus = async (approvalId, decision, note) => {
     }
     return Promise.resolve(item);
   }
-  return apiClient.post(`/api/attendance-manager/approvals/${approvalId}`, { decision, note });
+  return apiClient.post(`/attendance-manager/approvals/${approvalId}`, { decision, note });
 };
 
 export const getTeamAttendance = async (params = {}) => {
@@ -49,7 +49,7 @@ export const getTeamAttendance = async (params = {}) => {
 
     return Promise.resolve(result);
   }
-  return apiClient.get('/api/attendance-manager/team', { params });
+  return apiClient.get('/attendance-manager/team', { params });
 };
 
 export const updateTeamAttendance = async (attendanceId, updates, auditReason = '') => {
@@ -72,7 +72,7 @@ export const updateTeamAttendance = async (attendanceId, updates, auditReason = 
     return Promise.resolve({ ...item });
   }
 
-  return apiClient.put(`/api/attendance-manager/team/${attendanceId}`, {
+  return apiClient.put(`/attendance-manager/team/${attendanceId}`, {
     ...updates,
     auditReason
   });
@@ -83,7 +83,7 @@ export const getMasterRecords = async (params) => {
     await delay();
     return Promise.resolve([...mockMasterLedger]);
   }
-  return apiClient.get('/api/attendance-manager/master', { params });
+  return apiClient.get('/attendance-manager/master', { params });
 };
 
 export const getLeaveTypes = async () => {
@@ -91,7 +91,7 @@ export const getLeaveTypes = async () => {
     await delay();
     return Promise.resolve([...mockLeaveTypesList]);
   }
-  return apiClient.get('/api/attendance-manager/leave-types');
+  return apiClient.get('/attendance-manager/leave-types');
 };
 
 export const createLeaveType = async (payload) => {
@@ -110,7 +110,7 @@ export const createLeaveType = async (payload) => {
     mockLeaveTypesList.push(newRecord);
     return Promise.resolve(newRecord);
   }
-  return apiClient.post('/api/attendance-manager/leave-types', payload);
+  return apiClient.post('/attendance-manager/leave-types', payload);
 };
 
 export const getHolidays = async () => {
@@ -118,7 +118,7 @@ export const getHolidays = async () => {
     await delay();
     return Promise.resolve([...mockHolidaysList]);
   }
-  return apiClient.get('/api/attendance-manager/holidays');
+  return apiClient.get('/attendance-manager/holidays');
 };
 
 export const getRules = async () => {
@@ -126,7 +126,7 @@ export const getRules = async () => {
     await delay();
     return Promise.resolve({ ...mockAttendanceRulesConfig });
   }
-  return apiClient.get('/api/attendance-manager/rules');
+  return apiClient.get('/attendance-manager/rules');
 };
 
 export const saveRules = async (updatedRules) => {
@@ -135,7 +135,7 @@ export const saveRules = async (updatedRules) => {
     Object.assign(mockAttendanceRulesConfig, updatedRules);
     return Promise.resolve({ ...mockAttendanceRulesConfig });
   }
-  return apiClient.post('/api/attendance-manager/rules', updatedRules);
+  return apiClient.post('/attendance-manager/rules', updatedRules);
 };
 
 export const getStaffAttendanceDetails = async (staffId, date) => {
@@ -180,7 +180,7 @@ export const getStaffAttendanceDetails = async (staffId, date) => {
       ]
     });
   }
-  return apiClient.get(`/api/attendance-manager/staff-details/${staffId}/${date}`);
+  return apiClient.get(`/attendance-manager/staff-details/${staffId}/${date}`);
 };
 
 export const attendanceManagerService = {
