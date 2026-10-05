@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { Login } from '../pages/auth/Login';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
+import { MagicLinkVerify } from '../pages/auth/MagicLinkVerify';
 import { Dashboard } from '../pages/dashboard/Dashboard';
 import { MyAttendance } from '../pages/attendance/MyAttendance';
 import { AttendanceManager } from '../pages/attendance/AttendanceManager';
@@ -39,6 +40,7 @@ import { SaaSAccount } from '../pages/saas/SaaSAccount';
 import { DocumentTemplates } from '../pages/saas/DocumentTemplates';
 import { StorageHistory } from '../pages/saas/StorageHistory';
 import { StorageDayDetails } from '../pages/saas/StorageDayDetails';
+import { AccountSecurity } from '../pages/account/AccountSecurity';
 
 function RootRedirect() {
   const location = useLocation();
@@ -57,6 +59,7 @@ export const AppRoutes = () => (
     <Route path="/login" element={<Login />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/magic-link/verify" element={<MagicLinkVerify />} />
 
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<Dashboard />} />
@@ -235,6 +238,7 @@ export const AppRoutes = () => (
       <Route path="/account/storage/history" element={<StorageHistory />} />
       <Route path="/account/storage/history/:date" element={<StorageDayDetails />} />
       <Route path="/account/templates" element={<DocumentTemplates />} />
+      <Route path="/account/security" element={<AccountSecurity />} />
     </Route>
 
     <Route path="*" element={<Navigate to="/dashboard" replace />} />
