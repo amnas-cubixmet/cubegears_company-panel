@@ -1,29 +1,91 @@
-import React from 'react';
-import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
+import React, { useState } from 'react';
+import { ArrowLeft, Link2, Mail, RotateCcw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { authRecoveryService } from '../../services/authRecovery.service';
+import '../../styles/login-system.css';
+import '../../styles/auth-recovery.css';
 
 export const ForgotPassword = () => {
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a' }}>
-      <div style={{ backgroundColor: '#1e293b', padding: '32px', borderRadius: '12px', border: '1px solid #334155', width: '100%', maxWidth: '400px' }}>
-        <h2 style={{ color: '#f8fafc', margin: '0 0 8px 0' }}>Forgot Password</h2>
-        <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '24px' }}>Enter your email to receive recovery instructions</p>
-        <Input label="Email Address" type="email" placeholder="user@company.com" />
-        <Button variant="primary" style={{ width: '100%', marginTop: '12px' }}>Send Instructions</Button>
-      </div>
-    </div>
-  );
-};
+  const [mode, setMode] = useState('reset');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
 
-export const ResetPassword = () => {
+  const submit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setMessage('');
+    setPreviewUrl('');
+    try {
+      const result = mode === 'magic'
+        ? await authRecoveryService.requestMagicLink(email)
+        : await authRecoveryService.requestPasswordReset(email);
+      setMessage(mode === 'magic'
+        ? 'Magic sign-in link sent. Check your email.'
+        : 'Password reset instructions sent. Check your email.');
+      if (result?.previewUrl) setPreviewUrl(result.previewUrl);
+    } catch (error) {
+      setMessage(error?.message || 'Unable to send email.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a' }}>
-      <div style={{ backgroundColor: '#1e293b', padding: '32px', borderRadius: '12px', border: '1px solid #334155', width: '100%', maxWidth: '400px' }}>
-        <h2 style={{ color: '#f8fafc', margin: '0 0 8px 0' }}>Reset Password</h2>
-        <Input label="New Password" type="password" />
-        <Input label="Confirm Password" type="password" />
-        <Button variant="primary" style={{ width: '100%', marginTop: '12px' }}>Reset Password</Button>
+    <main className="login-page auth-recovery-page">
+      <div className="login-shell">
+        <section className="login-card auth-recovery-card">
+          <Link to="/login" className="auth-back"><ArrowLeft size={14}/>Back to sign in</Link>
+
+          <div className="login-brand-row">
+            <div className="login-brand-mark">CG</div>
+            <div>
+              <div className="login-brand-name">CubixGear</div>
+              <div className="login-brand-subtitle">Secure Account Access</div>
+            </div>
+          </div>
+
+          <h1 className="login-title">{mode === 'magic' ? 'Sign in with magic link' : 'Reset your password'}</h1>
+          <p className="login-description">
+            {mode === 'magic'
+              ? 'We’ll email a one-time secure sign-in link. No password required.'
+              : 'Enter your account email and we’ll send a secure password reset link.'}
+          </p>
+
+          <div className="auth-mode-tabs">
+            <button type="button" className={mode === 'reset' ? 'active' : ''} onClick={() => { setMode('reset'); setMessage(''); }}>
+              <RotateCcw size={14}/>Reset Password
+            </button>
+            <button type="button" className={mode === 'magic' ? 'active' : ''} onClick={() => { setMode('magic'); setMessage(''); }}>
+              <Link2 size={14}/>Magic Link
+            </button>
+          </div>
+
+          {message && <div className="auth-message">{message}</div>}
+
+          <form className="login-form" onSubmit={submit}>
+            <label>
+              <span className="login-field-label">Email address</span>
+              <div className="login-input-shell">
+                <span className="login-input-icon"><Mail size={16}/></span>
+                <input className="login-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" required/>
+              </div>
+            </label>
+
+            <button type="submit" className="login-submit" disabled={loading}>
+              {loading ? 'Sending…' : mode === 'magic' ? 'Send Magic Link' : 'Send Reset Link'}
+            </button>
+          </form>
+
+          {previewUrl && (
+            <div className="auth-dev-link">
+              <span>Development preview</span>
+              <Link to={previewUrl}>{mode === 'magic' ? 'Open magic link' : 'Open reset link'}</Link>
+            </div>
+          )}
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
