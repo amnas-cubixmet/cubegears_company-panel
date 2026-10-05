@@ -14,7 +14,7 @@ export const getPersonalAttendanceLogs = async (params) => {
     }
     return Promise.resolve(logs);
   }
-  return apiClient.get('/api/my-attendance/logs', { params });
+  return apiClient.get('/my-attendance/logs', { params });
 };
 
 export const getCalendarEvents = async (month, year) => {
@@ -22,7 +22,7 @@ export const getCalendarEvents = async (month, year) => {
     await delay();
     return Promise.resolve(getMockCalendarEvents());
   }
-  return apiClient.get('/api/my-attendance/calendar', { params: { month, year } });
+  return apiClient.get('/my-attendance/calendar', { params: { month, year } });
 };
 
 export const submitPunchCorrection = async (correctionData) => {
@@ -41,7 +41,7 @@ export const submitPunchCorrection = async (correctionData) => {
     }
     return Promise.resolve(log?.correction);
   }
-  return apiClient.post('/api/my-attendance/corrections', correctionData);
+  return apiClient.post('/my-attendance/corrections', correctionData);
 };
 
 export const attendanceService = {
