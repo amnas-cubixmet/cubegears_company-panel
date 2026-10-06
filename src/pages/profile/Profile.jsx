@@ -2,14 +2,12 @@ import React from 'react';
 import { Settings, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { getUserRoleLabel } from '../../utils/authDisplay';
 
 export const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const roleLabel =
-    typeof user?.role === 'string'
-      ? user.role
-      : user?.role?.name || user?.role?.code || 'ADMIN';
+  const roleLabel = getUserRoleLabel(user);
 
   return (
     <div className="profile-page-simple">
