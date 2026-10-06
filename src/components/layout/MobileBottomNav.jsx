@@ -3,17 +3,22 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { mobilePrimaryRoutes, mobileMoreRoutes } from '../../routes/routeConfig';
 import { MoreHorizontal } from 'lucide-react';
 import { MobileSlideSidebar } from './MobileSlideSidebar';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 import '../../styles/mobile-bottom-nav.css';
 
 export const MobileBottomNav = () => {
   const location = useLocation();
+  const { user } = useAuth();
+  const visiblePrimaryRoutes = mobilePrimaryRoutes.filter((route) => hasPermission(user, route.permission));
+  const visibleMoreRoutes = mobileMoreRoutes.filter((route) => hasPermission(user, route.permission));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const isMoreActive = mobileMoreRoutes.some((route) => location.pathname.startsWith(route.path));
+  const isMoreActive = visibleMoreRoutes.some((route) => location.pathname.startsWith(route.path));
 
   return (
     <>
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-        {mobilePrimaryRoutes.map((route) => {
+        {visiblePrimaryRoutes.map((route) => {
           const IconComp = route.icon;
           const isActive = location.pathname.startsWith(route.path);
 
