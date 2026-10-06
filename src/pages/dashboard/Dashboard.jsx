@@ -19,6 +19,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 import { getDashboardData, toggleClockIn } from '../../services/dashboard.service';
 import { Loader } from '../../components/common/Loader';
 import '../../styles/dashboard.css';
@@ -161,10 +162,12 @@ export const Dashboard = () => {
               <option value="express">Express Bay</option>
             </select>
 
-            <button type="button" className="dashboard-button is-primary" onClick={() => navigate('/jobs/new')}>
-              <Plus size={14} />
-              New Job Card
-            </button>
+            {hasPermission(user, 'jobs.create') && (
+              <button type="button" className="dashboard-button is-primary" onClick={() => navigate('/jobs/new')}>
+                <Plus size={14} />
+                New Job Card
+              </button>
+            )}
           </div>
         </header>
 
@@ -348,23 +351,25 @@ export const Dashboard = () => {
           <div className="panel-title"><h2>Quick Actions</h2><Wrench size={15} /></div>
           <div className="quick-actions quick-actions-expanded">
             {[
-              ['New Customer', '/customers/new', UserPlus],
-              ['New Job Card', '/jobs/new', Wrench],
-              ['Create Invoice', '/invoices/new', FileText],
-              ['Record Payment', '/payments', CreditCard],
-              ['Add Expense', '/expenses', ReceiptText],
-              ['Stock Issue', '/stock', PackageSearch],
-              ['Add Vehicle', '/vehicles', Car],
-              ['Service Catalog', '/services', Plus],
-            ].map(([label, path, Icon]) => (
-              <button key={label} type="button" onClick={() => navigate(path)}>
-                <span className="quick-action-leading">
-                  <Icon size={12} />
-                  <span>{label}</span>
-                </span>
-                <ArrowRight size={12} />
-              </button>
-            ))}
+              ['New Customer', '/customers/new', UserPlus, 'customers.create'],
+              ['New Job Card', '/jobs/new', Wrench, 'jobs.create'],
+              ['Create Invoice', '/invoices/new', FileText, 'invoices.create'],
+              ['Record Payment', '/payments/new', CreditCard, 'payments.create'],
+              ['Add Expense', '/expenses/new', ReceiptText, 'expenses.create'],
+              ['Stock Issue', '/stock/movements', PackageSearch, 'stock.create'],
+              ['Add Vehicle', '/vehicles/new', Car, 'vehicles.create'],
+              ['Service Catalog', '/services', Plus, 'services.view'],
+            ]
+              .filter(([, , , permission]) => hasPermission(user, permission))
+              .map(([label, path, Icon]) => (
+                <button key={label} type="button" onClick={() => navigate(path)}>
+                  <span className="quick-action-leading">
+                    <Icon size={12} />
+                    <span>{label}</span>
+                  </span>
+                  <ArrowRight size={12} />
+                </button>
+              ))}
           </div>
         </article>
       </section>
