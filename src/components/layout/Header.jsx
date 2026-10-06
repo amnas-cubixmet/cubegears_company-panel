@@ -12,6 +12,10 @@ export const Header = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const roleLabel =
+    typeof user?.role === 'string'
+      ? user.role
+      : user?.role?.name || user?.role?.code || 'ADMIN';
   const desktopProfileRef = useRef(null);
   const mobileProfileRef = useRef(null);
 
@@ -95,7 +99,7 @@ export const Header = () => {
               <img src={user?.avatar} alt="" />
               <span className="header-profile-copy">
                 <strong>{user?.name || 'User'}</strong>
-                <small>{user?.role || 'ADMIN'}</small>
+                <small>{roleLabel}</small>
               </span>
               <ChevronDown size={12}/>
             </button>
