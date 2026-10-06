@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 import { getUserRoleLabel } from '../../utils/authDisplay';
+import { hasPermission } from '../../utils/permissions';
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -76,7 +77,9 @@ export const Sidebar = () => {
       <nav className="sidebar-nav">
         <div className="sidebar-sections">
           {sections.map((section) => {
-            const items = routeConfig.filter((route) => route.section === section);
+            const items = routeConfig.filter(
+              (route) => route.section === section && hasPermission(user, route.permission)
+            );
             if (!items.length) return null;
 
             return (
