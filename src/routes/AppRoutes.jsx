@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { Login } from '../pages/auth/Login';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
+import { SetupPassword } from '../pages/auth/SetupPassword';
 import { MagicLinkVerify } from '../pages/auth/MagicLinkVerify';
 import { Dashboard } from '../pages/dashboard/Dashboard';
 import { MyAttendance } from '../pages/attendance/MyAttendance';
@@ -59,6 +60,7 @@ export const AppRoutes = () => (
     <Route path="/login" element={<Login />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/setup-password" element={<SetupPassword />} />
     <Route path="/magic-link/verify" element={<MagicLinkVerify />} />
 
     <Route element={<ProtectedRoute />}>
