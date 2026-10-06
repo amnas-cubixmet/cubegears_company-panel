@@ -4,12 +4,14 @@ import { routeConfig, ROUTE_SECTIONS } from '../../routes/routeConfig';
 import { Laptop, LogOut, Moon, Sun, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
+import { getUserRoleLabel } from '../../utils/authDisplay';
 import '../../styles/mobile-slide-sidebar.css';
 
 export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { themeMode, setThemeMode } = useTheme();
+  const roleLabel = getUserRoleLabel(user);
   const activeItemRef = useRef(null);
 
   useEffect(() => {
@@ -128,7 +130,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
             <img src={user?.avatar} alt="User"/>
             <span>
               <strong>{user?.name || 'User'}</strong>
-              <small>{user?.role || 'ADMIN'}</small>
+              <small>{roleLabel}</small>
             </span>
             <button type="button" onClick={logout} aria-label="Log out" title="Log out">
               <LogOut size={16}/>
