@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearch } from '../common/GlobalSearch';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
+import { getUserRoleLabel } from '../../utils/authDisplay';
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -12,10 +13,7 @@ export const Header = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
-  const roleLabel =
-    typeof user?.role === 'string'
-      ? user.role
-      : user?.role?.name || user?.role?.code || 'ADMIN';
+  const roleLabel = getUserRoleLabel(user);
   const desktopProfileRef = useRef(null);
   const mobileProfileRef = useRef(null);
 
