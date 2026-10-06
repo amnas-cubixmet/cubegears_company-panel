@@ -3,6 +3,8 @@ export const hasPermission = (user, permission) => {
   if (user?.is_superuser) return true;
 
   const role = user?.role;
+  if (typeof role === 'string' && role === 'SUPER_ADMIN') return true;
+
   const permissions =
     role && typeof role === 'object' && Array.isArray(role.permissions)
       ? role.permissions
