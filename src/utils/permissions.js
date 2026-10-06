@@ -15,27 +15,38 @@ export const hasPermission = (user, permission) => {
 
 export const getUserPermissions = (user) => {
   if (user?.is_superuser) return ['*'];
+
   const role = user?.role;
+  if (typeof role === 'string' && role === 'SUPER_ADMIN') return ['*'];
+
   return role && typeof role === 'object' && Array.isArray(role.permissions)
     ? role.permissions
     : [];
 };
 
-const PATH_PERMISSIONS = [
+const CRUD_PREFIXES = {
+  '/customers': 'customers',
+  '/vehicles': 'vehicles',
+  '/services': 'services',
+  '/jobs': 'jobs',
+  '/stock': 'stock',
+  '/invoices': 'invoices',
+  '/quotations': 'invoices',
+  '/payments': 'payments',
+  '/expenses': 'expenses',
+};
+
+const SPECIAL_PATH_PERMISSIONS = [
+  ['/staff-management/roles', 'company.manage'],
+  ['/staff-management/add', 'staff.create'],
+  ['/staff-management/teams', 'staff.edit'],
+  ['/staff-management/shifts', 'staff.edit'],
+  ['/staff-management/skills', 'staff.edit'],
   ['/dashboard', 'dashboard.view'],
   ['/my-attendance', 'attendance.self'],
   ['/attendance-manager', 'attendance.manage'],
   ['/staff-management', 'staff.view'],
   ['/payroll', 'payroll.view'],
-  ['/customers', 'customers.view'],
-  ['/vehicles', 'vehicles.view'],
-  ['/services', 'services.view'],
-  ['/jobs', 'jobs.view'],
-  ['/stock', 'stock.view'],
-  ['/invoices', 'invoices.view'],
-  ['/quotations', 'invoices.view'],
-  ['/payments', 'payments.view'],
-  ['/expenses', 'expenses.view'],
   ['/reports', 'reports.view'],
   ['/notifications', 'notifications.view'],
   ['/settings', 'settings.view'],
@@ -45,14 +56,35 @@ const PATH_PERMISSIONS = [
   ['/account/security', 'settings.view'],
 ];
 
+const actionForCrudPath = (pathname, prefix) => {
+  const suffix = pathname.slice(prefix.length);
+
+  if (/\/(new|add)$/.test(suffix)) return 'create';
+  if (/\/[^/]+\/edit$/.test(suffix)) return 'edit';
+  if (/\/[^/]+\/delete$/.test(suffix)) return 'delete';
+
+  return 'view';
+};
+
 export const getPermissionForPath = (pathname = '') => {
   if (!pathname || pathname === '/profile' || pathname === '/access-denied') {
     return null;
   }
 
-  const match = PATH_PERMISSIONS
+  const special = SPECIAL_PATH_PERMISSIONS
     .filter(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`))
     .sort((a, b) => b[0].length - a[0].length)[0];
 
-  return match?.[1] || null;
+  if (special) return special[1];
+
+  const crudEntry = Object.entries(CRUD_PREFIXES)
+    .filter(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+    .sort((a, b) => b[0].length - a[0].length)[0];
+
+  if (crudEntry) {
+    const [prefix, module] = crudEntry;
+    return `${module}.${actionForCrudPath(pathname, prefix)}`;
+  }
+
+  return null;
 };
