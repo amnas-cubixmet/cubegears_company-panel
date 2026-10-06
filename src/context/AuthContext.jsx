@@ -56,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       .catch(() => {
         if (!active) return;
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_refresh_token');
         localStorage.removeItem('auth_user');
         setUser(null);
         setIsAuthenticated(false);
@@ -82,12 +83,16 @@ export const AuthProvider = ({ children }) => {
       }
 
       const response = await apiClient.post('/auth/login', credentials);
-      const token = response?.token || response?.accessToken || response?.access_token;
+      const token = response?.access || response?.token || response?.accessToken || response?.access_token;
+      const refreshToken = response?.refresh || response?.refreshToken || response?.refresh_token;
       const resolvedUser = response?.user || response?.profile;
 
       if (!token) throw new Error('Login response did not include an access token.');
 
       localStorage.setItem('auth_token', token);
+      if (refreshToken) {
+        localStorage.setItem('auth_refresh_token', refreshToken);
+      }
       if (resolvedUser) {
         localStorage.setItem('auth_user', JSON.stringify(resolvedUser));
       }
@@ -103,11 +108,15 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (!USE_MOCK_API) await apiClient.post('/auth/logout');
+      if (!USE_MOCK_API) {
+        const refresh = localStorage.getItem('auth_refresh_token');
+        await apiClient.post('/auth/logout', refresh ? { refresh } : {});
+      }
     } catch {
       // Local logout must still succeed if the network/backend is unavailable.
     } finally {
       localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_refresh_token');
       localStorage.removeItem('auth_user');
       setUser(null);
       setIsAuthenticated(false);
