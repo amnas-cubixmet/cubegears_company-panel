@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { roleService } from '../../services/role.service';
 import { Shield, Plus, Users, Building, Check, Save } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import {
+  ROLE_PERMISSION_MODULES,
+  createPermissionMatrix,
+  permissionActionLabel
+} from '../../config/rolePermissions';
 
 export const UserRoles = () => {
   const [roles, setRoles] = useState([]);
@@ -11,33 +16,8 @@ export const UserRoles = () => {
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
-  const availableModules = [
-    { key: 'dashboard', label: 'Dashboard' },
-    { key: 'customers', label: 'Customers' },
-    { key: 'vehicles', label: 'Vehicles' },
-    { key: 'services', label: 'Services' },
-    { key: 'jobs', label: 'Job Cards' },
-    { key: 'inventory', label: 'Inventory' },
-    { key: 'stock', label: 'Stock Management' },
-    { key: 'invoices', label: 'Invoices' },
-    { key: 'payments', label: 'Payments' },
-    { key: 'expenses', label: 'Expenses' },
-    { key: 'attendance', label: 'Attendance' },
-    { key: 'staff', label: 'Staff' },
-    { key: 'payroll', label: 'Payroll' },
-    { key: 'reports', label: 'Reports' },
-    { key: 'settings', label: 'Settings' }
-  ];
-
-  const actionsList = ['view', 'create', 'edit', 'archive', 'approve', 'export'];
-
-  const initialPermissions = () => {
-    const perm = {};
-    availableModules.forEach((m) => {
-      perm[m.key] = { view: true, create: false, edit: false, archive: false, approve: false, export: false };
-    });
-    return perm;
-  };
+  const availableModules = ROLE_PERMISSION_MODULES;
+  const initialPermissions = () => createPermissionMatrix(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -104,18 +84,16 @@ export const UserRoles = () => {
   };
 
   const handleSelectAllModule = (moduleKey, enableAll) => {
+    const module = availableModules.find((item) => item.key === moduleKey);
+    const nextPermissions = Object.fromEntries(
+      (module?.actions || []).map((action) => [action, enableAll])
+    );
+
     setFormData((prev) => ({
       ...prev,
       permissions: {
         ...prev.permissions,
-        [moduleKey]: {
-          view: enableAll,
-          create: enableAll,
-          edit: enableAll,
-          archive: enableAll,
-          approve: enableAll,
-          export: enableAll
-        }
+        [moduleKey]: nextPermissions
       }
     }));
   };
@@ -274,7 +252,7 @@ export const UserRoles = () => {
                 marginTop: '4px'
               }}
             >
-              Edit Role & Permissions
+              {r.isProtected ? 'View Full Access' : 'Edit Role & Permissions'}
             </button>
           </div>
         ))}
@@ -394,7 +372,7 @@ export const UserRoles = () => {
             <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>Module Permissions</div>
             {availableModules.map((mod) => {
               const currentModPerms = formData.permissions[mod.key] || {};
-              const allChecked = actionsList.every((act) => !!currentModPerms[act]);
+              const allChecked = mod.actions.every((act) => !!currentModPerms[act]);
 
               return (
                 <div
@@ -417,6 +395,7 @@ export const UserRoles = () => {
                     <button
                       type="button"
                       onClick={() => handleSelectAllModule(mod.key, !allChecked)}
+                      disabled={editingRole?.isProtected}
                       style={{
                         padding: '4px 8px',
                         borderRadius: '6px',
@@ -433,7 +412,7 @@ export const UserRoles = () => {
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px' }}>
-                    {actionsList.map((act) => {
+                    {mod.actions.map((act) => {
                       const isChecked = !!currentModPerms[act];
                       return (
                         <label
@@ -457,9 +436,10 @@ export const UserRoles = () => {
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handlePermissionToggle(mod.key, act)}
+                            disabled={editingRole?.isProtected}
                             style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                           />
-                          {act === 'archive' ? 'Archive' : act}
+                          {permissionActionLabel(act)}
                         </label>
                       );
                     })}
@@ -499,7 +479,7 @@ export const UserRoles = () => {
             </button>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || editingRole?.isProtected}
               style={{
                 flex: 1,
                 height: '46px',
@@ -509,15 +489,15 @@ export const UserRoles = () => {
                 color: '#ffffff',
                 fontSize: '14px',
                 fontWeight: '700',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                opacity: saving ? 0.7 : 1,
+                cursor: saving || editingRole?.isProtected ? 'not-allowed' : 'pointer',
+                opacity: saving || editingRole?.isProtected ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px'
               }}
             >
-              <Save size={16} /> {saving ? 'Saving...' : 'Save Role'}
+              <Save size={16} /> {editingRole?.isProtected ? 'Protected Full Access' : saving ? 'Saving...' : 'Save Role'}
             </button>
           </div>
         </form>
