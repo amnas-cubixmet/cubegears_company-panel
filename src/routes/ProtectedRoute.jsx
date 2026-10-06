@@ -2,9 +2,10 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { getPermissionForPath, hasPermission } from '../utils/permissions';
 
 export const ProtectedRoute = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -29,6 +30,20 @@ export const ProtectedRoute = () => {
   if (!isAuthenticated) {
     const next = encodeURIComponent(`${location.pathname}${location.search}`);
     return <Navigate to={`/login?next=${next}`} replace />;
+  }
+
+  const requiredPermission = getPermissionForPath(location.pathname);
+  if (
+    location.pathname !== '/access-denied' &&
+    requiredPermission &&
+    !hasPermission(user, requiredPermission)
+  ) {
+    return (
+      <Navigate
+        to={`/access-denied?permission=${encodeURIComponent(requiredPermission)}`}
+        replace
+      />
+    );
   }
 
   return (
