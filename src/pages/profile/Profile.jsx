@@ -6,6 +6,10 @@ import { useAuth } from '../../hooks/useAuth';
 export const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const roleLabel =
+    typeof user?.role === 'string'
+      ? user.role
+      : user?.role?.name || user?.role?.code || 'ADMIN';
 
   return (
     <div className="profile-page-simple">
@@ -15,11 +19,11 @@ export const Profile = () => {
       </header>
       <section className="profile-card-simple">
         <div className="profile-avatar-large">{user?.avatar ? <img src={user.avatar} alt="Profile"/> : <User size={30}/>}</div>
-        <div className="profile-main-copy"><h2>{user?.name || 'User'}</h2><span>{user?.role || 'ADMIN'}</span></div>
+        <div className="profile-main-copy"><h2>{user?.name || 'User'}</h2><span>{roleLabel}</span></div>
         <div className="profile-info-grid">
           <div><span>Email</span><strong>{user?.email || 'Not set'}</strong></div>
           <div><span>Phone</span><strong>{user?.phone || 'Not set'}</strong></div>
-          <div><span>Role</span><strong>{user?.role || 'ADMIN'}</strong></div>
+          <div><span>Role</span><strong>{roleLabel}</strong></div>
           <div><span>Workspace</span><strong>CubeGears</strong></div>
         </div>
       </section>
