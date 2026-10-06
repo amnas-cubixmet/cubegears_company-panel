@@ -33,6 +33,18 @@ export const requestMagicLink = async (email) => {
   return apiClient.post('/auth/magic-link', { email: cleanEmail });
 };
 
+export const setupPassword = async ({ uid, token, password }) => {
+  if (!uid || !token) throw new Error('Setup link is invalid or incomplete.');
+  if (!password || password.length < 8) throw new Error('Password must be at least 8 characters.');
+
+  if (USE_MOCK_API) {
+    await wait();
+    return { ok: true };
+  }
+
+  return apiClient.post('/auth/setup-password', { uid, token, password });
+};
+
 export const resetPassword = async ({ token, email, password }) => {
   if (!password || password.length < 8) throw new Error('Password must be at least 8 characters.');
 
@@ -79,6 +91,7 @@ export const changePassword = async ({ currentPassword, newPassword }) => {
 export const authRecoveryService = {
   requestPasswordReset,
   requestMagicLink,
+  setupPassword,
   resetPassword,
   verifyMagicLink,
   changePassword
