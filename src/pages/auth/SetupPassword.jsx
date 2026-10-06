@@ -1,13 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import { CheckCircle2, Eye, EyeOff, Lock } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
 export const SetupPassword = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
   const uid = params.get('uid') || '';
