@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Laptop, LogOut, Moon, Sun } from 'lucide-rea
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
+import { getUserRoleLabel } from '../../utils/authDisplay';
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -12,10 +13,7 @@ export const Sidebar = () => {
   const { themeMode, setThemeMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
-  const roleLabel =
-    typeof user?.role === 'string'
-      ? user.role
-      : user?.role?.name || user?.role?.code || 'ADMIN';
+  const roleLabel = getUserRoleLabel(user);
   const activeItemRef = useRef(null);
 
   useEffect(() => {
