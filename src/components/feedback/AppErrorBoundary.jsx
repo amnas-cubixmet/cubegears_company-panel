@@ -44,13 +44,13 @@ export class AppErrorBoundary extends React.Component {
           padding: '24px',
           background: '#111827'
         }}>
-          <div style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '.12em', color: '#818cf8' }}>CUBIXGEAR</div>
+          <div style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '.12em', color: '#1677ff' }}>CUBIXGEAR</div>
           <h1 style={{ margin: '8px 0', fontSize: '22px' }}>Something went wrong</h1>
           <p style={{ margin: 0, color: '#94a3b8', fontSize: '14px', lineHeight: 1.6 }}>
             The page could not be displayed. Your saved data is not changed by this screen error.
           </p>
           <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
-            <button onClick={this.handleReload} style={{ flex: 1, minHeight: '42px', border: 0, borderRadius: '10px', background: '#4f46e5', color: '#fff', fontWeight: 700 }}>
+            <button onClick={this.handleReload} style={{ flex: 1, minHeight: '42px', border: 0, borderRadius: '10px', background: '#1677ff', color: '#fff', fontWeight: 700 }}>
               Reload
             </button>
             <button onClick={this.handleDashboard} style={{ flex: 1, minHeight: '42px', borderRadius: '10px', border: '1px solid #334155', background: '#1e293b', color: '#fff', fontWeight: 700 }}>
