@@ -45,7 +45,7 @@ export const routeConfig = [
   { id: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, section: ROUTE_SECTIONS.FINANCE, mobilePrimary: false, permission: 'expenses.view' },
   { id: 'reports', label: 'Reports & BI', path: '/reports', icon: BarChart3, section: ROUTE_SECTIONS.ANALYTICS_SYSTEM, mobilePrimary: false, permission: 'reports.view' },
   { id: 'notifications', label: 'Notifications', path: '/notifications', icon: Bell, section: ROUTE_SECTIONS.ANALYTICS_SYSTEM, mobilePrimary: false, permission: 'notifications.view' },
-  { id: 'settings', label: 'Settings', path: '/settings', icon: Settings, section: ROUTE_SECTIONS.ANALYTICS_SYSTEM, mobilePrimary: false, permission: 'settings.manage' }
+  { id: 'settings', label: 'Settings', path: '/settings', icon: Settings, section: ROUTE_SECTIONS.ANALYTICS_SYSTEM, mobilePrimary: false, permission: 'settings.view' }
 ];
 
 export const mobilePrimaryRoutes = routeConfig.filter((route) => route.mobilePrimary);
