@@ -43,8 +43,35 @@ export const SetupPassword = () => {
     setLoading(true);
 
     try {
-      await authRecoveryService.setupPassword({ uid, token, password });
+      const result = await authRecoveryService.setupPassword({ uid, token, password });
+
+      const accessToken =
+        result?.access ||
+        result?.token ||
+        result?.accessToken ||
+        result?.access_token;
+      const refreshToken =
+        result?.refresh ||
+        result?.refreshToken ||
+        result?.refresh_token;
+      const user = result?.user || result?.profile;
+
+      if (!accessToken) {
+        throw new Error('Account created, but automatic sign-in could not be completed.');
+      }
+
+      localStorage.setItem('auth_token', accessToken);
+      if (refreshToken) {
+        localStorage.setItem('auth_refresh_token', refreshToken);
+      }
+      if (user) {
+        localStorage.setItem('auth_user', JSON.stringify(user));
+      }
+
       setDone(true);
+      window.setTimeout(() => {
+        window.location.replace('/dashboard');
+      }, 700);
     } catch (error) {
       setMessage(error?.message || 'Unable to set password.');
     } finally {
@@ -69,14 +96,14 @@ export const SetupPassword = () => {
               <span className="auth-success-icon"><CheckCircle2 size={24} /></span>
               <h1 className="login-title">Your account is ready</h1>
               <p className="login-description">
-                Password created successfully. You can now sign in to your CubixGear workshop.
+                Password created successfully. Signing you in to your CubixGear workshop…
               </p>
               <button
                 type="button"
                 className="login-submit"
-                onClick={() => navigate('/login', { replace: true })}
+                onClick={() => window.location.replace('/dashboard')}
               >
-                Go to Sign In
+                Open Dashboard
               </button>
             </div>
           ) : (
