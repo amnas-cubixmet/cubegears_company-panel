@@ -12,6 +12,10 @@ export const Sidebar = () => {
   const { themeMode, setThemeMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const roleLabel =
+    typeof user?.role === 'string'
+      ? user.role
+      : user?.role?.name || user?.role?.code || 'ADMIN';
   const activeItemRef = useRef(null);
 
   useEffect(() => {
@@ -129,7 +133,7 @@ export const Sidebar = () => {
             <>
               <span className="sidebar-user-copy">
                 <strong>{user?.name || 'User'}</strong>
-                <small>{user?.role || 'ADMIN'}</small>
+                <small>{roleLabel}</small>
               </span>
               <button type="button" className="sidebar-logout" onClick={logout} aria-label="Log out"><LogOut size={14} /></button>
             </>
