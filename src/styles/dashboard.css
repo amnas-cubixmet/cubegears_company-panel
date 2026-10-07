@@ -84,7 +84,7 @@
 .booking-list{
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:16px;
   max-height:440px;
   overflow-y:auto;
   overflow-x:hidden;
