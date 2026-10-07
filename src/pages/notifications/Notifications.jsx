@@ -1,13 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  AlertCircle,
   Bell,
-  BellRing,
   Check,
-  CheckCheck,
   ExternalLink,
-  Filter,
-  Search,
   Trash2,
   X
 } from 'lucide-react';
