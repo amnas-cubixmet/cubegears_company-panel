@@ -1,133 +1,96 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Users, UserCheck, UserX, Clock3, CalendarDays, Activity } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  AttendanceAttentionPanel,
+  AttendanceQuickActions,
+  AttendanceStats,
+  ProductivityPanel,
+} from '../../components/attendance-manager';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 
 export const AttendanceOverview = () => {
   const navigate = useNavigate();
   const [team, setTeam] = useState([]);
   const [approvals, setApprovals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+
     Promise.all([
       attendanceManagerService.getTeamAttendance(),
-      attendanceManagerService.getApprovals()
-    ]).then(([teamData, approvalData]) => {
-      setTeam(teamData);
-      setApprovals(approvalData);
-    });
+      attendanceManagerService.getApprovals(),
+    ])
+      .then(([teamData, approvalData]) => {
+        if (!active) return;
+        setTeam(Array.isArray(teamData) ? teamData : []);
+        setApprovals(Array.isArray(approvalData) ? approvalData : []);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const stats = useMemo(() => {
     const count = (status) => team.filter((item) => item.status === status).length;
     return {
       total: team.length,
-      present: team.filter((item) => ['Present', 'Missing Clock Out'].includes(item.status)).length,
+      present: team.filter((item) =>
+        ['Present', 'Missing Clock Out'].includes(item.status),
+      ).length,
       absent: count('Absent'),
       late: team.filter((item) => Number(item.lateMinutes || 0) > 0).length,
       halfDay: count('Half Day'),
-      leave: count('On Leave')
+      leave: count('On Leave'),
     };
   }, [team]);
 
-  const productive = team.reduce((sum, item) => sum + Number(item.productiveHours || 0), 0);
-  const idle = team.reduce((sum, item) => sum + Number(item.idleHours || 0), 0);
+  const productive = team.reduce(
+    (sum, item) => sum + Number(item.productiveHours || 0),
+    0,
+  );
+  const idle = team.reduce(
+    (sum, item) => sum + Number(item.idleHours || 0),
+    0,
+  );
   const pending = approvals.filter((item) => item.status === 'Pending').length;
+  const missingPunch = team.filter(
+    (item) => item.missingPunch || item.status === 'Missing Clock Out',
+  ).length;
 
-  const cards = [
-    ['Total Staff', stats.total, Users],
-    ['Present', stats.present, UserCheck],
-    ['Absent', stats.absent, UserX],
-    ['Late', stats.late, Clock3],
-    ['Half Day', stats.halfDay, Activity],
-    ['On Leave', stats.leave, CalendarDays]
-  ];
+  if (loading) {
+    return <div className="am-dashboard-loading">Loading attendance overview…</div>;
+  }
 
   return (
     <div className="attendance-manager-module attendance-manager-overview">
-      <div className="am-stat-grid">
-        {cards.map(([label, value, Icon]) => (
-          <article key={label} className="am-stat-card">
-            <div className="am-stat-card__top">
-              <span>{label}</span>
-              <span className="am-stat-card__icon"><Icon size={16} /></span>
-            </div>
-            <strong className="am-stat-card__value">{value}</strong>
-          </article>
-        ))}
-      </div>
+      <AttendanceStats stats={stats} />
 
-      <div className="am-overview-grid">
-        <section className="am-panel">
-          <div className="am-panel__header">
-            <div>
-              <h2>Workshop Productivity</h2>
-              <p>Job Card hours compared with attendance working hours.</p>
-            </div>
-          </div>
+      <section className="am-dashboard-bottom-grid">
+        <ProductivityPanel
+          team={team}
+          productive={productive}
+          idle={idle}
+          onOpenEmployee={(item) =>
+            navigate(`/attendance-manager/team-review/${item.staffId}/${item.date || new Date().toISOString().slice(0, 10)}`)
+          }
+        />
 
-          <div className="am-mini-metrics">
-            <div className="am-mini-metric">
-              <span>Productive Hours</span>
-              <strong>{productive.toFixed(1)}h</strong>
-            </div>
-            <div className="am-mini-metric">
-              <span>Idle Hours</span>
-              <strong>{idle.toFixed(1)}h</strong>
-            </div>
-          </div>
+        <AttendanceAttentionPanel
+          halfDay={stats.halfDay}
+          leave={stats.leave}
+          pending={pending}
+          missingPunch={missingPunch}
+          onOpenDaily={() => navigate('/attendance-manager/daily')}
+          onOpenLeave={() => navigate('/attendance-manager/leave-requests')}
+        />
 
-          <div className="am-productivity-list">
-            {team.filter((item) => item.productiveHours > 0).slice(0, 5).map((item) => {
-              const total = Number(item.productiveHours || 0) + Number(item.idleHours || 0);
-              const pct = total ? Math.round((Number(item.productiveHours || 0) / total) * 100) : 0;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className="am-productivity-row am-employee-link-row"
-                  onClick={() => navigate(`/attendance-manager/team-review/${item.staffId}/2026-09-12`)}
-                >
-                  <span className="am-productivity-name">{item.name}</span>
-                  <div className="am-progress-track">
-                    <span className="am-progress-fill" style={{ width: `${pct}%` }} />
-                  </div>
-                  <strong>{pct}%</strong>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="am-panel">
-          <div className="am-panel__header">
-            <div>
-              <h2>Needs Attention</h2>
-              <p>Attendance items that need manager review.</p>
-            </div>
-          </div>
-
-          <div className="am-mini-metrics">
-            <div className="am-mini-metric">
-              <span>Pending Requests</span>
-              <strong>{pending}</strong>
-            </div>
-            <div className="am-mini-metric">
-              <span>Missing Punch</span>
-              <strong>{team.filter((item) => item.missingPunch).length}</strong>
-            </div>
-          </div>
-
-          <div className="am-action-grid">
-            <Link to="/attendance-manager/daily" className="am-action-button am-action-button--primary">
-              Open Daily Attendance
-            </Link>
-            <Link to="/attendance-manager/leave-requests" className="am-action-button">
-              Review Requests
-            </Link>
-          </div>
-        </section>
-      </div>
+        <AttendanceQuickActions onNavigate={navigate} />
+      </section>
     </div>
   );
 };
