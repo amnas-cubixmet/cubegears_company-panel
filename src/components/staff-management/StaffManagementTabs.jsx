@@ -1,32 +1,45 @@
 import React, { useEffect, useRef } from 'react';
+import {
+  BadgeCheck,
+  BarChart3,
+  FileText,
+  LayoutDashboard,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  UsersRound,
+  Clock3,
+} from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 
-const tabs = [
-  { label: 'Overview', path: '/staff-management/overview', permission: 'staff.view' },
-  { label: 'All Staff', path: '/staff-management/staff', permission: 'staff.view' },
-  { label: 'Roles & Permissions', path: '/staff-management/roles', permission: 'company.manage' },
-  { label: 'Teams', path: '/staff-management/teams', permission: 'staff.edit' },
-  { label: 'Shifts', path: '/staff-management/shifts', permission: 'staff.edit' },
-  { label: 'Skills', path: '/staff-management/skills', permission: 'staff.edit' },
-  { label: 'Performance', path: '/staff-management/performance', permission: 'staff.view' },
-  { label: 'Documents', path: '/staff-management/documents', permission: 'staff.view' },
-  { label: 'Staff Reports', path: '/staff-management/reports', permission: 'staff.view' }
+export const staffManagementTabs = [
+  { label: 'Overview', path: '/staff-management/overview', permission: 'staff.view', icon: LayoutDashboard },
+  { label: 'All Staff', path: '/staff-management/staff', permission: 'staff.view', icon: Users },
+  { label: 'Roles', path: '/staff-management/roles', permission: 'company.manage', icon: ShieldCheck },
+  { label: 'Teams', path: '/staff-management/teams', permission: 'staff.edit', icon: UsersRound },
+  { label: 'Shifts', path: '/staff-management/shifts', permission: 'staff.edit', icon: Clock3 },
+  { label: 'Skills', path: '/staff-management/skills', permission: 'staff.edit', icon: Sparkles },
+  { label: 'Performance', path: '/staff-management/performance', permission: 'staff.view', icon: BarChart3 },
+  { label: 'Documents', path: '/staff-management/documents', permission: 'staff.view', icon: FileText },
+  { label: 'Reports', path: '/staff-management/reports', permission: 'staff.view', icon: BadgeCheck },
 ];
 
 export const StaffManagementTabs = () => {
   const tabsRef = useRef(null);
   const location = useLocation();
   const { user } = useAuth();
-  const visibleTabs = tabs.filter((tab) => hasPermission(user, tab.permission));
+  const visibleTabs = staffManagementTabs.filter((tab) =>
+    hasPermission(user, tab.permission),
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      tabsRef.current?.querySelector('.staff-tab.active')?.scrollIntoView({
+      tabsRef.current?.querySelector('.staff-dashboard-tab.active')?.scrollIntoView({
         behavior: 'smooth',
         inline: 'center',
-        block: 'nearest'
+        block: 'nearest',
       });
     }, 50);
 
@@ -34,24 +47,21 @@ export const StaffManagementTabs = () => {
   }, [location.pathname]);
 
   return (
-    <div className="staff-management-tabs w-full min-w-0 rounded-2xl border border-line bg-surface p-1.5 shadow-sm">
-      <div ref={tabsRef} className="staff-management-tabs__rail scroll-hidden flex w-full min-w-0 gap-1.5 overflow-x-auto">
-        {visibleTabs.map((tab) => (
+    <nav className="staff-dashboard-tabs" aria-label="Staff Management navigation">
+      <div ref={tabsRef} className="staff-dashboard-tabs__rail">
+        {visibleTabs.map(({ label, path, icon: Icon }) => (
           <NavLink
-            key={tab.path}
-            to={tab.path}
-            className={({ isActive }) => [
-              'staff-tab inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3.5',
-              'text-[12px] font-semibold no-underline transition-all duration-150',
-              isActive
-                ? 'active bg-primary text-white shadow-sm'
-                : 'bg-transparent text-secondary hover:bg-surface-2 hover:text-content'
-            ].join(' ')}
+            key={path}
+            to={path}
+            className={({ isActive }) =>
+              `staff-dashboard-tab ${isActive ? 'active' : ''}`
+            }
           >
-            {tab.label}
+            <Icon size={13} />
+            <span>{label}</span>
           </NavLink>
         ))}
       </div>
-    </div>
+    </nav>
   );
 };
