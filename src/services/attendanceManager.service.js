@@ -146,6 +146,64 @@ export const saveRules = async (updatedRules) => {
   return apiClient.post('/attendance-manager/rules', payload);
 };
 
+export const getMonthlyCalendar = async (month, year) => {
+  if (USE_MOCK_API) {
+    await delay();
+    return { month, year, days: 30, employees: [], holidays: [] };
+  }
+  return apiClient.get('/attendance-manager/calendar', { params: { month, year } });
+};
+
+export const createHoliday = async (payload) => {
+  if (USE_MOCK_API) {
+    await delay();
+    const row = { id: `HOL-${Date.now()}`, ...payload };
+    mockHolidaysList.push(row);
+    return row;
+  }
+  return apiClient.post('/attendance-manager/holidays', payload);
+};
+
+export const deleteHoliday = async (id) => {
+  if (USE_MOCK_API) {
+    await delay();
+    const index = mockHolidaysList.findIndex((row) => row.id === id);
+    if (index >= 0) mockHolidaysList.splice(index, 1);
+    return true;
+  }
+  return apiClient.delete(`/attendance-manager/holidays/${id}`);
+};
+
+export const getShiftSetup = async () => {
+  if (USE_MOCK_API) {
+    await delay();
+    return { shifts: [], teams: [], employees: [] };
+  }
+  return apiClient.get('/attendance-manager/shifts');
+};
+
+export const saveShift = async (payload) => {
+  if (USE_MOCK_API) {
+    await delay();
+    return { id: payload.shiftId || `SHIFT-${Date.now()}`, ...payload };
+  }
+  return apiClient.post('/attendance-manager/shifts', {
+    action: 'save_shift',
+    ...payload,
+  });
+};
+
+export const assignShift = async (payload) => {
+  if (USE_MOCK_API) {
+    await delay();
+    return { assigned: payload.staffIds?.length || 0 };
+  }
+  return apiClient.post('/attendance-manager/shifts', {
+    action: 'assign',
+    ...payload,
+  });
+};
+
 export const getStaffAttendanceDetails = async (staffId, date) => {
   if (USE_MOCK_API) {
     await delay();
@@ -223,6 +281,12 @@ export const attendanceManagerService = {
   getLeaveTypes,
   createLeaveType,
   getHolidays,
+  createHoliday,
+  deleteHoliday,
+  getMonthlyCalendar,
+  getShiftSetup,
+  saveShift,
+  assignShift,
   getRules,
   saveRules,
   getStaffAttendanceDetails
