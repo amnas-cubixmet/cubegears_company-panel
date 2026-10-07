@@ -1,8 +1,11 @@
 import React from 'react';
-import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
 import { Filter } from 'lucide-react';
+import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
 
-export const PayrollPeriodFilter = ({ showStaffFilter = true, showBranchFilter = true }) => {
+export const PayrollPeriodFilter = ({
+  showStaffFilter = true,
+  showBranchFilter = true,
+}) => {
   const {
     selectedMonth,
     setSelectedMonth,
@@ -13,94 +16,43 @@ export const PayrollPeriodFilter = ({ showStaffFilter = true, showBranchFilter =
     selectedStaff,
     setSelectedStaff,
     MONTHS,
-    YEARS
+    YEARS,
   } = usePayrollPeriod();
 
   return (
-    <div
-      className="payroll-period-filter"
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '8px',
-        alignItems: 'center',
-        backgroundColor: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderRadius: '12px',
-        padding: '10px 12px',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}
-    >
-      <div className="payroll-period-filter__label" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginRight: '4px' }}>
-        <Filter size={15} style={{ color: 'var(--primary)' }} />
-        <span>Payroll Period:</span>
+    <section className="payroll-period-filter">
+      <div className="payroll-period-filter__label">
+        <Filter size={14} />
+        <span>Payroll Period</span>
       </div>
 
-      {/* Month & Year Selects */}
-      <div className="payroll-period-filter__period" style={{ display: 'flex', gap: '6px', flex: '1 1 auto', minWidth: '220px' }}>
+      <div className="payroll-period-filter__period">
         <select
           value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-          style={{
-            flex: 1,
-            height: '38px',
-            padding: '0 10px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--surface-2)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            fontSize: '13px',
-            fontWeight: '600'
-          }}
+          onChange={(event) => setSelectedMonth(event.target.value)}
+          aria-label="Payroll month"
         >
-          {MONTHS.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
+          {MONTHS.map((month) => (
+            <option key={month} value={month}>{month}</option>
           ))}
         </select>
 
         <select
           value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          style={{
-            width: '90px',
-            height: '38px',
-            padding: '0 10px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--surface-2)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            fontSize: '13px',
-            fontWeight: '600'
-          }}
+          onChange={(event) => setSelectedYear(Number(event.target.value))}
+          aria-label="Payroll year"
         >
-          {YEARS.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
+          {YEARS.map((year) => (
+            <option key={year} value={year}>{year}</option>
           ))}
         </select>
       </div>
 
-      {/* Optional Branch Filter */}
       {showBranchFilter && (
         <select
           value={selectedBranch}
-          onChange={(e) => setSelectedBranch(e.target.value)}
-          style={{
-            height: '38px',
-            padding: '0 10px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--surface-2)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            fontSize: '13px',
-            fontWeight: '500',
-            flex: '0 1 auto',
-            minWidth: '150px'
-          }}
+          onChange={(event) => setSelectedBranch(event.target.value)}
+          aria-label="Payroll branch"
         >
           <option value="All">All Branches</option>
           <option value="Main Garage Branch">Main Garage Branch</option>
@@ -108,23 +60,11 @@ export const PayrollPeriodFilter = ({ showStaffFilter = true, showBranchFilter =
         </select>
       )}
 
-      {/* Optional Staff Filter */}
       {showStaffFilter && (
         <select
           value={selectedStaff}
-          onChange={(e) => setSelectedStaff(e.target.value)}
-          style={{
-            height: '38px',
-            padding: '0 10px',
-            borderRadius: '8px',
-            backgroundColor: 'var(--surface-2)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            fontSize: '13px',
-            fontWeight: '500',
-            flex: '0 1 auto',
-            minWidth: '140px'
-          }}
+          onChange={(event) => setSelectedStaff(event.target.value)}
+          aria-label="Payroll staff"
         >
           <option value="All">All Staff</option>
           <option value="EMP-0012">Ajmal K</option>
@@ -132,6 +72,6 @@ export const PayrollPeriodFilter = ({ showStaffFilter = true, showBranchFilter =
           <option value="EMP-0015">Priya Nair</option>
         </select>
       )}
-    </div>
+    </section>
   );
 };
