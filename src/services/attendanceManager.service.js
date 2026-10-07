@@ -188,7 +188,30 @@ export const getStaffAttendanceDetails = async (staffId, date) => {
       ]
     });
   }
-  return apiClient.get(`/attendance-manager/staff-details/${staffId}/${date}`);
+  const data = await apiClient.get(`/attendance-manager/staff-details/${staffId}/${date}`);
+
+  const formatTime = (value) => {
+    if (!value) return 'Missing';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return String(value);
+    return parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatMinutes = (value) => {
+    if (typeof value === 'string' && value.includes('h')) return value;
+    const minutes = Number(value || 0);
+    return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, '0')}m`;
+  };
+
+  return {
+    ...data,
+    sessions: (data?.sessions || []).map((session) => ({
+      ...session,
+      clockIn: formatTime(session.clockIn),
+      clockOut: session.clockOut ? formatTime(session.clockOut) : 'Missing',
+      duration: formatMinutes(session.duration),
+    })),
+  };
 };
 
 export const attendanceManagerService = {
