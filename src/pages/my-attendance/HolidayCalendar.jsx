@@ -19,6 +19,7 @@ export const HolidayCalendar = () => {
   const [logs, setLogs] = useState([]);
   const [selectedDay, setSelectedDay] = useState(() => new Date().getDate());
   const [search, setSearch] = useState('');
+  const [attendanceStatus, setAttendanceStatus] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -26,14 +27,16 @@ export const HolidayCalendar = () => {
     const load = async () => {
       const month = currentDate.getMonth() + 1;
       const year = currentDate.getFullYear();
-      const [calendarEvents, attendanceLogs] = await Promise.all([
+      const [calendarEvents, attendanceLogs, currentStatus] = await Promise.all([
         attendanceService.getCalendarEvents(month, year),
         attendanceService.getPersonalAttendanceLogs({ month, year }),
+        attendanceService.getAttendanceStatus(),
       ]);
 
       if (!active) return;
       setEvents(Array.isArray(calendarEvents) ? calendarEvents : []);
       setLogs(Array.isArray(attendanceLogs) ? attendanceLogs : []);
+      setAttendanceStatus(currentStatus);
     };
 
     load();
@@ -139,7 +142,11 @@ export const HolidayCalendar = () => {
         }}
       />
 
-      <EmployeeAttendanceCard user={user} />
+      <EmployeeAttendanceCard
+        user={user}
+        employeeCode={attendanceStatus?.record?.employeeCode || monthLogs?.[0]?.employeeCode}
+        shiftName={attendanceStatus?.record?.shiftName || monthLogs?.[0]?.shiftName}
+      />
       <AttendancePunchPanel
         onChanged={() =>
           setCurrentDate((value) =>
