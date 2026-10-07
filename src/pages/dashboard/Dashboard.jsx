@@ -60,6 +60,7 @@ export const Dashboard = () => {
     try {
       await toggleClockIn(action, {
         locationRequired: Boolean(data?.attendance?.locationRequired),
+        locationTrackingEnabled: Boolean(data?.attendance?.locationTrackingEnabled),
       });
       await fetchDashboard();
     } catch (error) {
@@ -76,7 +77,7 @@ export const Dashboard = () => {
         attendance={data?.attendance}
         currentTime={currentTime}
         error={attendanceError}
-        onClockToggle={handleClockToggle}
+        onAttendanceAction={handleClockToggle}
       />
 
       <DashboardStats data={data} />
