@@ -260,11 +260,6 @@ export const Dashboard = () => {
           </div>
 
           <aside className="repair-pane">
-            <div className="repair-pane-title">
-              <h3>Active Repair</h3>
-              <button type="button" className="text-link" onClick={() => navigate('/jobs')}>View All</button>
-            </div>
-
             <button
               type="button"
               className="active-repair-card active-repair-clickable"
