@@ -26,6 +26,30 @@ const iconFor = (category) => {
   return 'OP';
 };
 
+const normalizeNotification = (row = {}) => {
+  const type = row.notification_type || row.notificationType || '';
+  const data = row.data || {};
+  const attendanceAlert = type.startsWith('attendance_');
+
+  return {
+    ...row,
+    title: row.title || 'Notification',
+    description: row.description || row.message || '',
+    category: row.category || (attendanceAlert ? 'Approvals & People' : 'Operational'),
+    priority:
+      row.priority ||
+      (['attendance_leave_request', 'attendance_overtime_request', 'attendance_missing_punch'].includes(type)
+        ? 'High'
+        : 'Normal'),
+    reference: row.reference || data.requestId || data.recordId || '',
+    status:
+      row.status ||
+      (row.is_read === true || row.isRead === true ? 'Read' : 'Unread'),
+    created: row.created || row.created_at || row.createdAt || '',
+    route: row.route || data.route || '',
+  };
+};
+
 const timeLabel = (value) => {
   if (!value) return '—';
   const date = new Date(value);
@@ -54,7 +78,7 @@ export function Notifications() {
     setError('');
     try {
       const data = await service.list();
-      setRows(Array.isArray(data) ? data : []);
+      setRows((Array.isArray(data) ? data : []).map(normalizeNotification));
     } catch (e) {
       setError(e?.message || 'Unable to load notifications.');
     } finally {
@@ -83,9 +107,17 @@ export function Notifications() {
 
   const updateStatus = async (row, nextStatus) => {
     try {
-      const updated = await service.update(row.id, { status: nextStatus });
-      setRows((old) => old.map((item) => item.id === row.id ? { ...item, ...updated } : item));
-      if (selected?.id === row.id) setSelected((old) => ({ ...old, ...updated }));
+      const payload = nextStatus === 'Archived'
+        ? { is_read: true }
+        : { is_read: nextStatus === 'Read' };
+      const updatedRaw = await service.update(row.id, payload);
+      const updated = normalizeNotification({
+        ...row,
+        ...updatedRaw,
+        status: nextStatus,
+      });
+      setRows((old) => old.map((item) => item.id === row.id ? updated : item));
+      if (selected?.id === row.id) setSelected(updated);
     } catch (e) {
       setError(e?.message || 'Unable to update notification.');
     }
@@ -99,9 +131,13 @@ export function Notifications() {
   const markAllRead = async () => {
     const unreadRows = rows.filter((row) => row.status === 'Unread');
     try {
-      const updated = await Promise.all(unreadRows.map((row) => service.update(row.id, { status: 'Read' })));
-      const map = new Map(updated.map((row) => [row.id, row]));
-      setRows((old) => old.map((row) => map.has(row.id) ? { ...row, ...map.get(row.id) } : row));
+      const updated = await Promise.all(
+        unreadRows.map((row) => service.update(row.id, { is_read: true })),
+      );
+      const updatedIds = new Set(updated.map((row) => row.id));
+      setRows((old) => old.map((row) =>
+        updatedIds.has(row.id) ? { ...row, status: 'Read', is_read: true } : row
+      ));
     } catch (e) {
       setError(e?.message || 'Unable to mark all as read.');
     }
