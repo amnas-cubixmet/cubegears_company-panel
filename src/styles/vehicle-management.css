@@ -1389,3 +1389,396 @@
     min-height:94px
   }
 }
+
+
+/* ---------- Dashboard-style Vehicles v2 ---------- */
+.cg-vehicles.vehicle-dashboard{
+  --vehicle-radius:12px;
+  --vehicle-inner:9px;
+  --vehicle-shadow:var(--shadow-sm);
+  width:100%;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.cg-vehicles .vehicle-dashboard-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+}
+.cg-vehicles .vehicle-dashboard-header>div:first-child{min-width:0}
+.cg-vehicles .vehicle-dashboard-header h1{
+  margin:0;
+  color:var(--text-primary);
+  font-size:18px;
+  line-height:1.2;
+  font-weight:700;
+  letter-spacing:-.02em;
+}
+.cg-vehicles .vehicle-dashboard-header p{
+  margin:4px 0 0;
+  color:var(--text-muted);
+  font-size:10px;
+  line-height:1.45;
+}
+.cg-vehicles .vehicle-dashboard-header-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.cg-vehicles .vehicle-dashboard-header-badge{
+  min-height:34px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:0 10px;
+  border:1px solid var(--vehicle-border);
+  border-radius:9px;
+  background:var(--vehicle-surface);
+  color:var(--text-secondary);
+  font-size:9px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.cg-vehicles .vehicle-dashboard-header-badge svg{color:var(--primary)}
+.cg-vehicles .vehicle-primary-button{
+  min-height:36px;
+  height:36px;
+  padding:0 11px;
+  border-radius:9px;
+  font-size:9.5px;
+}
+
+.cg-vehicles .vehicle-dashboard-stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.cg-vehicles .vehicle-dashboard-stat-card{
+  min-width:0;
+  padding:12px;
+  border:1px solid var(--vehicle-border);
+  border-radius:11px;
+  background:var(--vehicle-surface);
+  box-shadow:var(--vehicle-shadow);
+}
+.cg-vehicles .vehicle-dashboard-stat-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.cg-vehicles .vehicle-dashboard-stat-top>div{min-width:0}
+.cg-vehicles .vehicle-dashboard-stat-top span{
+  display:block;
+  overflow:hidden;
+  color:var(--text-muted);
+  font-size:9px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.cg-vehicles .vehicle-dashboard-stat-top strong{
+  display:block;
+  margin-top:6px;
+  color:var(--text-primary);
+  font-size:19px;
+  line-height:1;
+  font-weight:750;
+  letter-spacing:-.02em;
+}
+.cg-vehicles .vehicle-dashboard-stat-top i{
+  width:28px;
+  height:28px;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  border-radius:8px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  font-style:normal;
+}
+.cg-vehicles .vehicle-dashboard-stat-top i.is-warning{
+  background:var(--warning-soft);
+  color:var(--warning);
+}
+.cg-vehicles .vehicle-dashboard-stat-card>small{
+  display:block;
+  margin-top:7px;
+  color:var(--text-muted);
+  font-size:8px;
+}
+
+.cg-vehicles .vehicle-dashboard-toolbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  padding:8px;
+  border:1px solid var(--vehicle-border);
+  border-radius:11px;
+  background:var(--vehicle-surface);
+  box-shadow:var(--vehicle-shadow);
+}
+.cg-vehicles .vehicle-dashboard-search{
+  min-width:0;
+  height:36px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:0 9px;
+  border:1px solid var(--vehicle-border);
+  border-radius:8px;
+  background:var(--vehicle-soft);
+  color:var(--text-muted);
+}
+.cg-vehicles .vehicle-dashboard-search:focus-within{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--primary-soft);
+}
+.cg-vehicles .vehicle-dashboard-search input{
+  min-width:0;
+  width:100%;
+  height:34px;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text-primary);
+  font-size:9px;
+}
+.cg-vehicles .vehicle-dashboard-result-count{
+  min-width:88px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 10px;
+  border:1px solid var(--vehicle-border);
+  border-radius:8px;
+  background:var(--vehicle-soft);
+}
+.cg-vehicles .vehicle-dashboard-result-count span{
+  color:var(--text-muted);
+  font-size:8px;
+}
+.cg-vehicles .vehicle-dashboard-result-count strong{
+  color:var(--text-primary);
+  font-size:10px;
+}
+
+.cg-vehicles .vehicle-dashboard-directory{
+  min-width:0;
+  overflow:hidden;
+  border:1px solid var(--vehicle-border);
+  border-radius:12px;
+  background:var(--vehicle-surface);
+  box-shadow:var(--vehicle-shadow);
+}
+.cg-vehicles .vehicle-dashboard-section-title{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 14px;
+  border-bottom:1px solid var(--vehicle-border);
+}
+.cg-vehicles .vehicle-dashboard-section-title h2{
+  margin:0;
+  color:var(--text-primary);
+  font-size:11px;
+  line-height:1.2;
+  font-weight:750;
+}
+.cg-vehicles .vehicle-dashboard-section-title p{
+  margin:3px 0 0;
+  color:var(--text-muted);
+  font-size:8px;
+}
+.cg-vehicles .vehicle-dashboard-section-title>span{
+  min-height:24px;
+  display:inline-flex;
+  align-items:center;
+  padding:0 8px;
+  border-radius:999px;
+  background:var(--vehicle-soft);
+  color:var(--text-muted);
+  font-size:8px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.cg-vehicles .vehicle-table-wrap{
+  width:100%;
+  overflow-x:auto;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.cg-vehicles .vehicle-table-wrap::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+.cg-vehicles .vehicle-table{
+  width:100%;
+  min-width:900px;
+  border-collapse:collapse;
+}
+.cg-vehicles .vehicle-table th{
+  padding:9px 12px;
+  background:var(--vehicle-soft);
+  color:var(--text-muted);
+  font-size:8px;
+  font-weight:750;
+  text-align:left;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  white-space:nowrap;
+}
+.cg-vehicles .vehicle-table td{
+  padding:10px 12px;
+  border-top:1px solid var(--vehicle-border);
+  color:var(--text-secondary);
+  font-size:9px;
+  vertical-align:middle;
+}
+.cg-vehicles .vehicle-table tbody tr{
+  cursor:pointer;
+  transition:background .15s ease;
+}
+.cg-vehicles .vehicle-table tbody tr:hover{background:var(--vehicle-soft)}
+.cg-vehicles .vehicle-table td strong{
+  display:block;
+  color:var(--text-primary);
+  font-size:9px;
+}
+.cg-vehicles .vehicle-table td>span:not(.vehicle-status):not(.vehicle-table-empty){
+  display:block;
+  margin-top:2px;
+  color:var(--text-muted);
+  font-size:8px;
+}
+.cg-vehicles .vehicle-table-job{
+  min-height:28px;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:0 8px;
+  border:1px solid color-mix(in srgb,var(--primary) 24%,var(--vehicle-border));
+  border-radius:7px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  font-size:8px;
+  font-weight:700;
+  cursor:pointer;
+}
+.cg-vehicles .vehicle-table-empty{
+  color:var(--text-muted);
+  font-size:8px;
+}
+.cg-vehicles .vehicle-status{
+  min-height:20px;
+  padding:2px 7px;
+}
+.cg-vehicles .vehicle-status.is-neutral{
+  background:var(--vehicle-soft);
+  color:var(--text-muted);
+}
+.cg-vehicles .vehicle-mobile-grid{display:none}
+.cg-vehicles .vehicle-dashboard-empty,
+.cg-vehicles .vehicle-dashboard-loading{
+  padding:28px 14px;
+  color:var(--text-muted);
+  font-size:9px;
+  text-align:center;
+}
+
+@media(max-width:900px){
+  .cg-vehicles .vehicle-dashboard-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:767px){
+  .cg-vehicles .vehicle-dashboard-header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .cg-vehicles .vehicle-dashboard-header-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .cg-vehicles .vehicle-dashboard-header-badge,
+  .cg-vehicles .vehicle-primary-button{
+    width:100%;
+    justify-content:center;
+  }
+  .cg-vehicles .vehicle-dashboard-toolbar{
+    grid-template-columns:1fr;
+  }
+  .cg-vehicles .vehicle-dashboard-search{
+    height:40px;
+  }
+  .cg-vehicles .vehicle-dashboard-search input{
+    height:38px;
+    font-size:16px;
+  }
+  .cg-vehicles .vehicle-dashboard-result-count{
+    width:100%;
+  }
+  .cg-vehicles .vehicle-table-wrap{display:none}
+  .cg-vehicles .vehicle-mobile-grid{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:10px;
+  }
+  .cg-vehicles .vehicle-mobile-card{
+    padding:11px;
+    border:1px solid var(--vehicle-border);
+    border-radius:10px;
+    background:var(--vehicle-surface);
+    box-shadow:none;
+  }
+  .cg-vehicles .vehicle-mobile-meta{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+    margin-top:8px;
+  }
+  .cg-vehicles .vehicle-mobile-meta>div{
+    min-width:0;
+    min-height:46px;
+    padding:7px 8px;
+    border:1px solid var(--vehicle-border);
+    border-radius:8px;
+    background:var(--vehicle-soft);
+  }
+  .cg-vehicles .vehicle-mobile-meta span,
+  .cg-vehicles .vehicle-mobile-meta strong{
+    display:block;
+  }
+  .cg-vehicles .vehicle-mobile-meta span{
+    color:var(--text-muted);
+    font-size:7px;
+    text-transform:uppercase;
+  }
+  .cg-vehicles .vehicle-mobile-meta strong{
+    margin-top:3px;
+    overflow:hidden;
+    color:var(--text-primary);
+    font-size:8px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+@media(max-width:520px){
+  .cg-vehicles .vehicle-dashboard-stats{gap:8px}
+  .cg-vehicles .vehicle-dashboard-stat-card{padding:10px}
+  .cg-vehicles .vehicle-dashboard-stat-top strong{font-size:17px}
+  .cg-vehicles .vehicle-dashboard-header-actions{
+    grid-template-columns:1fr;
+  }
+}
