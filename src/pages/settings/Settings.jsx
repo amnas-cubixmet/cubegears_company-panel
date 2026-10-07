@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Bell, Boxes, Building2, Clock3, CreditCard, FilePenLine, Plug, Save, ShieldCheck, WalletCards } from 'lucide-react';
+import { Bell, Boxes, Building2, Clock3, CreditCard, Plug, ShieldCheck, WalletCards } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { settingsService } from '../../services/settings.service';
 import { useNavigate } from 'react-router-dom';
@@ -115,7 +115,7 @@ export const Settings = () => {
           onSave={save}
           saving={saving}
         />
-      </div>/div>
+      </div>
     </div>
   );
 };
