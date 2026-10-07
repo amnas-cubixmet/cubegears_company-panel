@@ -13,6 +13,7 @@ export const DashboardHeading = ({
   attendance,
   currentTime,
   onAttendanceAction,
+  error,
 }) => {
   const isClockedIn = attendance?.status === 'CLOCKED_IN';
   const nextAction = attendance?.nextAction;
@@ -55,6 +56,7 @@ export const DashboardHeading = ({
           </div>
         )}
       </div>
+      {error && <div className="dashboard-attendance-error">{error}</div>}
     </section>
   );
 };
