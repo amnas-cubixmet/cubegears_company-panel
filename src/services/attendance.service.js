@@ -107,7 +107,16 @@ export const getAttendanceStatus = async () => {
       rule: { attendanceMode: 'single', locationRequired: false },
     };
   }
-  return apiClient.get('/attendance/status');
+  const data = await apiClient.get('/attendance/status');
+  const record = data?.record
+    ? {
+        ...data.record,
+        sessions: (data.record.sessions || []).map((session, index) =>
+          normalizeSession(session, `${data.record.id || 'attendance'}-${index + 1}`)
+        ),
+      }
+    : null;
+  return { ...data, record };
 };
 
 export const punchAttendance = async (action, options = {}) => {
