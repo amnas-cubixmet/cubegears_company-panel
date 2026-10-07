@@ -466,45 +466,189 @@
 
 .attendance-punch-card{
   display:grid;
-  grid-template-columns:minmax(150px,.65fr) minmax(0,1.35fr) auto;
+  grid-template-columns:minmax(170px,220px) auto minmax(220px,1fr);
   align-items:center;
-  gap:12px;
-  padding:12px 13px;
+  gap:10px;
+  min-height:58px;
+  padding:9px 10px;
   border:1px solid var(--border);
   border-radius:12px;
   background:var(--surface);
   box-shadow:var(--shadow-sm);
 }
-.attendance-punch-card.is-loading{display:block;color:var(--text-muted);font-size:9px}
-.attendance-punch-status{display:flex;align-items:center;gap:9px;min-width:0}
-.attendance-live-dot{width:8px;height:8px;flex:0 0 auto;border-radius:999px;background:var(--text-muted)}
-.attendance-live-dot.is-online{background:var(--success);box-shadow:0 0 0 4px var(--success-soft)}
-.attendance-punch-status small,.attendance-punch-meta small{display:block;color:var(--text-muted);font-size:7.5px}
-.attendance-punch-status strong,.attendance-punch-meta strong{display:block;margin-top:2px;font-size:9px;font-weight:750}
-.attendance-punch-meta{display:flex;align-items:center;gap:8px;min-width:0}
-.attendance-punch-meta>div{min-width:0;display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:9px;background:var(--surface-2)}
-.attendance-punch-meta svg{flex:0 0 auto;color:var(--primary)}
+.attendance-punch-card.is-loading{
+  display:block;
+  min-height:auto;
+  padding:14px;
+  color:var(--text-muted);
+  font-size:9px;
+}
+.attendance-punch-card.is-live{
+  border-color:color-mix(in srgb,var(--success) 20%,var(--border));
+}
+.attendance-punch-card.is-complete{
+  border-color:color-mix(in srgb,var(--primary) 16%,var(--border));
+}
+.attendance-punch-status{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:3px 5px;
+}
+.attendance-live-dot{
+  width:7px;
+  height:7px;
+  flex:0 0 auto;
+  border-radius:999px;
+  background:var(--text-muted);
+}
+.attendance-live-dot.is-online{
+  background:var(--success);
+  box-shadow:0 0 0 4px var(--success-soft);
+}
+.attendance-punch-card.is-complete .attendance-live-dot{
+  background:var(--primary);
+  box-shadow:0 0 0 4px var(--primary-soft);
+}
+.attendance-punch-status small,
+.attendance-punch-meta small{
+  display:block;
+  color:var(--text-muted);
+  font-size:7px;
+  line-height:1.2;
+}
+.attendance-punch-status strong,
+.attendance-punch-meta strong{
+  display:block;
+  margin-top:2px;
+  color:var(--text-primary);
+  font-size:8.5px;
+  line-height:1.2;
+  font-weight:750;
+}
+.attendance-punch-meta{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.attendance-punch-meta>div{
+  min-width:0;
+  min-height:40px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:6px 9px;
+  border:1px solid transparent;
+  border-radius:9px;
+  background:var(--surface-2);
+}
+.attendance-punch-meta svg{
+  flex:0 0 auto;
+  color:var(--primary);
+}
 .attendance-punch-meta span{min-width:0}
-.attendance-punch-meta strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.attendance-punch-action{display:flex;justify-content:flex-end}
+.attendance-punch-meta strong{
+  max-width:120px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.attendance-punch-action{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+}
 .attendance-punch-action button{
-  min-width:100px;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:0 11px;border:0;border-radius:9px;background:var(--primary);color:#fff;font-size:9px;font-weight:750;cursor:pointer
+  min-width:102px;
+  height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:0 11px;
+  border:0;
+  border-radius:9px;
+  background:var(--primary);
+  color:#fff;
+  font-size:8.5px;
+  font-weight:750;
+  cursor:pointer;
 }
 .attendance-punch-action button.is-checkout{background:var(--danger)}
 .attendance-punch-action button:disabled{opacity:.6;cursor:not-allowed}
-.attendance-punch-action>span{max-width:220px;color:var(--text-muted);font-size:8.5px;line-height:1.45;text-align:right}
-.attendance-punch-error{grid-column:1/-1;padding:8px 9px;border:1px solid var(--danger);border-radius:8px;background:var(--danger-soft);color:var(--danger);font-size:8.5px}
+.attendance-punch-note{
+  width:min(100%,310px);
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  margin-left:auto;
+  padding:6px 9px;
+  border-radius:9px;
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+.attendance-punch-note svg{flex:0 0 auto}
+.attendance-punch-note span{
+  min-width:0;
+  color:inherit;
+  font-size:8px;
+  line-height:1.35;
+  text-align:right;
+}
+.attendance-punch-error{
+  grid-column:1/-1;
+  padding:8px 9px;
+  border:1px solid var(--danger);
+  border-radius:8px;
+  background:var(--danger-soft);
+  color:var(--danger);
+  font-size:8.5px;
+}
 
-@media(max-width:850px){
-  .attendance-punch-card{grid-template-columns:1fr auto}
-  .attendance-punch-meta{grid-column:1/-1;grid-row:2}
+@media(max-width:900px){
+  .attendance-punch-card{
+    grid-template-columns:minmax(150px,1fr) minmax(0,1.4fr);
+  }
+  .attendance-punch-action{
+    grid-column:1/-1;
+    justify-content:flex-start;
+  }
+  .attendance-punch-note{
+    width:100%;
+    max-width:none;
+    justify-content:flex-start;
+    margin-left:0;
+  }
+  .attendance-punch-note span{text-align:left}
 }
 @media(max-width:560px){
-  .attendance-punch-card{grid-template-columns:1fr}
-  .attendance-punch-meta{grid-column:auto;grid-row:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .attendance-punch-card{
+    grid-template-columns:1fr;
+    gap:8px;
+    padding:9px;
+  }
+  .attendance-punch-status{padding:2px 3px}
+  .attendance-punch-meta{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .attendance-punch-meta>div{
+    width:100%;
+    min-height:42px;
+  }
   .attendance-punch-meta>div:last-child:nth-child(3){grid-column:1/-1}
-  .attendance-punch-action{justify-content:stretch}
+  .attendance-punch-action{
+    grid-column:auto;
+    justify-content:stretch;
+  }
   .attendance-punch-action button{width:100%}
-  .attendance-punch-action>span{max-width:none;text-align:left}
+  .attendance-punch-note{
+    min-height:40px;
+    align-items:flex-start;
+  }
 }
