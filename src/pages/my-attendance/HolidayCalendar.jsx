@@ -144,8 +144,8 @@ export const HolidayCalendar = () => {
 
       <EmployeeAttendanceCard
         user={user}
-        employeeCode={attendanceStatus?.record?.employeeCode || monthLogs?.[0]?.employeeCode}
-        shiftName={attendanceStatus?.record?.shiftName || monthLogs?.[0]?.shiftName}
+        employeeCode={attendanceStatus?.employee?.employeeCode || attendanceStatus?.record?.employeeCode || monthLogs?.[0]?.employeeCode}
+        shiftName={attendanceStatus?.employee?.shiftName || attendanceStatus?.record?.shiftName || monthLogs?.[0]?.shiftName}
       />
       <AttendancePunchPanel
         onChanged={() =>
