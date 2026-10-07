@@ -52,6 +52,14 @@ export const getTeamAttendance = async (params = {}) => {
   return apiClient.get('/attendance-manager/team', { params });
 };
 
+export const createTeamAttendance = async (payload) => {
+  if (USE_MOCK_API) {
+    await delay();
+    return { id: `ATT-${Date.now()}`, ...payload };
+  }
+  return apiClient.post('/attendance-manager/team', payload);
+};
+
 export const updateTeamAttendance = async (attendanceId, updates, auditReason = '') => {
   if (USE_MOCK_API) {
     await delay();
@@ -276,6 +284,7 @@ export const attendanceManagerService = {
   getApprovals,
   updateApprovalStatus,
   getTeamAttendance,
+  createTeamAttendance,
   updateTeamAttendance,
   getMasterRecords,
   getLeaveTypes,
