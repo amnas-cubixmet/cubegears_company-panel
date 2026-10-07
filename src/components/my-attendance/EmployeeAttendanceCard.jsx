@@ -2,7 +2,7 @@ import React from 'react';
 import { Building2, Clock3, UserRound } from 'lucide-react';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 
-export const EmployeeAttendanceCard = ({ user }) => {
+export const EmployeeAttendanceCard = ({ user, employeeCode, shiftName }) => {
   const roleLabel = getUserRoleLabel(user, 'Workshop Staff');
 
   return (
@@ -22,8 +22,8 @@ export const EmployeeAttendanceCard = ({ user }) => {
         <div>
           <UserRound size={14} />
           <span>
-            <small>Email</small>
-            <strong>{user?.email || '—'}</strong>
+            <small>Employee ID</small>
+            <strong>{employeeCode || '—'}</strong>
           </span>
         </div>
         <div>
@@ -37,7 +37,7 @@ export const EmployeeAttendanceCard = ({ user }) => {
           <Clock3 size={14} />
           <span>
             <small>Shift</small>
-            <strong>09:00 AM – 06:00 PM</strong>
+            <strong>{shiftName || 'Company Default'}</strong>
           </span>
         </div>
       </div>
