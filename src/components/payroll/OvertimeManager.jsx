@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { overtimeService } from '../../services/overtime.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
 import { AddOvertimeSheet } from './AddOvertimeSheet';
-import { Plus, CheckCircle2, XCircle, Clock, FileText } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export const OvertimeManager = () => {
   const { selectedMonth, selectedYear, selectedBranch, selectedStaff, periodString } = usePayrollPeriod();
@@ -140,7 +140,7 @@ export const OvertimeManager = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-primary)' }}>{ot.staffName}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Date: {ot.date} | {ot.shift}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Date: {ot.date} | {ot.shift || 'Attendance Overtime'}</div>
                 </div>
                 <span
                   style={{
@@ -158,7 +158,7 @@ export const OvertimeManager = () => {
               <div className="am-overtime-details" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', backgroundColor: 'var(--surface-2)', padding: '10px', borderRadius: '10px', fontSize: '12px' }}>
                 <div>Hours: <strong>{ot.overtimeHours}h</strong></div>
                 <div>Rate: <strong>₹{ot.rate}/hr</strong></div>
-                <div>Method: <strong>{ot.calculationMethod}</strong></div>
+                <div>Method: <strong>{ot.calculationMethod || 'Manager Approval'}</strong></div>
                 <div>Amount: <strong style={{ color: 'var(--primary)', fontSize: '14px' }}>{formatINR(ot.amount)}</strong></div>
               </div>
 
