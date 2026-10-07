@@ -271,18 +271,20 @@ export const mockHolidaysList = [
 ];
 
 export const mockAttendanceRulesConfig = {
-  shiftName: "General Workshop Shift",
-  startTime: "09:00 AM",
-  endTime: "06:00 PM",
-  breakMinutes: 60,
+  attendanceMode: "single",
+  startTime: "09:00",
+  endTime: "18:00",
   lateGraceMinutes: 15,
-  earlyExitThreshold: 15,
-  overtimeThreshold: 60, // 1 hour
-  missingPunchPolicy: "Manager Review Required before Payroll Hold",
+  overtimeAfterMinutes: 540,
+  maxSessionsPerDay: 0,
+  autoCheckoutGraceMinutes: 0,
+  missingPunchPolicy: "request_correction",
+  locationRequired: false,
+  correctionApproval: true,
   allowSelfApproval: false,
   weekendDays: ["Sunday"],
   alternateSaturdayEnabled: false,
   alternateSaturdayPattern: "2nd & 4th Saturday",
-  weekendAttendancePolicy: "Mark as Weekly Off",
+  weekendAttendancePolicy: "weekly_off",
   weekendEffectiveFrom: "2026-09-01"
 };
