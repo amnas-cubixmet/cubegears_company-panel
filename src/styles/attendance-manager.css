@@ -1345,3 +1345,353 @@
 .cg-attendance-manager .am-employee-table-link strong{
   color:var(--text-primary);
 }
+
+
+/* ---------- Dashboard-style Attendance Overview v2 ---------- */
+.cg-attendance-manager{
+  --am-radius:12px;
+  --am-inner-radius:9px;
+  --am-shadow:var(--shadow-sm);
+  gap:12px!important;
+}
+
+.cg-attendance-manager .attendance-manager-module{
+  gap:12px!important;
+}
+
+.cg-attendance-manager .am-dashboard-stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.cg-attendance-manager .am-dashboard-stat-card{
+  min-width:0;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.cg-attendance-manager .am-dashboard-stat-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.cg-attendance-manager .am-dashboard-stat-top>div{min-width:0}
+.cg-attendance-manager .am-dashboard-stat-top span{
+  display:block;
+  color:var(--text-muted);
+  font-size:9px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.cg-attendance-manager .am-dashboard-stat-top strong{
+  display:block;
+  margin-top:6px;
+  color:var(--text-primary);
+  font-size:19px;
+  line-height:1;
+  font-weight:750;
+  letter-spacing:-.02em;
+}
+.cg-attendance-manager .am-dashboard-stat-top i{
+  width:28px;
+  height:28px;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  border-radius:8px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  font-style:normal;
+}
+.cg-attendance-manager .am-dashboard-stat-card>small{
+  display:block;
+  margin-top:7px;
+  color:var(--text-muted);
+  font-size:8px;
+}
+
+.cg-attendance-manager .am-dashboard-bottom-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.12fr) minmax(0,.94fr) minmax(0,.94fr);
+  gap:10px;
+  align-items:stretch;
+}
+.cg-attendance-manager .am-dashboard-panel{
+  min-width:0;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.cg-attendance-manager .am-dashboard-panel-title{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.cg-attendance-manager .am-dashboard-panel-title h2{
+  margin:0;
+  color:var(--text-primary);
+  font-size:11px;
+  line-height:1.2;
+  font-weight:750;
+}
+.cg-attendance-manager .am-dashboard-panel-title p{
+  margin:3px 0 0;
+  color:var(--text-muted);
+  font-size:8px;
+  line-height:1.45;
+}
+.cg-attendance-manager .am-dashboard-panel-title>svg{
+  color:var(--text-muted);
+  flex:0 0 auto;
+}
+
+.cg-attendance-manager .am-dashboard-mini-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:10px;
+}
+.cg-attendance-manager .am-dashboard-mini-grid>div{
+  min-width:0;
+  padding:9px 10px;
+  border-radius:9px;
+  background:var(--surface-2);
+}
+.cg-attendance-manager .am-dashboard-mini-grid span{
+  display:block;
+  color:var(--text-muted);
+  font-size:8px;
+}
+.cg-attendance-manager .am-dashboard-mini-grid strong{
+  display:block;
+  margin-top:4px;
+  color:var(--text-primary);
+  font-size:15px;
+  line-height:1;
+  font-weight:750;
+}
+
+.cg-attendance-manager .am-dashboard-productivity-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-top:10px;
+}
+.cg-attendance-manager .am-dashboard-productivity-row{
+  width:100%;
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(72px,105px) minmax(70px,1fr) 34px;
+  align-items:center;
+  gap:8px;
+  padding:7px 8px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:var(--text-primary);
+  cursor:pointer;
+  text-align:left;
+}
+.cg-attendance-manager .am-dashboard-productivity-row:hover{background:var(--surface-2)}
+.cg-attendance-manager .am-dashboard-productivity-row>span{
+  overflow:hidden;
+  font-size:9px;
+  font-weight:650;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.cg-attendance-manager .am-dashboard-productivity-row>strong{
+  color:var(--text-secondary);
+  font-size:8.5px;
+  text-align:right;
+}
+.cg-attendance-manager .am-dashboard-progress{
+  height:6px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--surface-2);
+}
+.cg-attendance-manager .am-dashboard-progress i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:var(--primary);
+}
+.cg-attendance-manager .am-dashboard-empty{
+  padding:18px 8px;
+  color:var(--text-muted);
+  font-size:9px;
+  text-align:center;
+}
+
+.cg-attendance-manager .am-dashboard-attention-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-top:10px;
+}
+.cg-attendance-manager .am-dashboard-attention-list>div{
+  display:grid;
+  grid-template-columns:28px minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  padding:8px 9px;
+  border-radius:9px;
+  background:var(--surface-2);
+}
+.cg-attendance-manager .am-dashboard-attention-icon{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--primary);
+}
+.cg-attendance-manager .am-dashboard-attention-list span:nth-child(2){min-width:0}
+.cg-attendance-manager .am-dashboard-attention-list strong{
+  display:block;
+  color:var(--text-primary);
+  font-size:9px;
+}
+.cg-attendance-manager .am-dashboard-attention-list small{
+  display:block;
+  margin-top:2px;
+  color:var(--text-muted);
+  font-size:7.5px;
+}
+.cg-attendance-manager .am-dashboard-attention-list b{
+  color:var(--text-primary);
+  font-size:11px;
+}
+
+.cg-attendance-manager .am-dashboard-panel-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:10px;
+}
+.cg-attendance-manager .am-dashboard-panel-actions button{
+  min-height:34px;
+  padding:0 8px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--text-secondary);
+  font-size:8.5px;
+  font-weight:700;
+  cursor:pointer;
+}
+.cg-attendance-manager .am-dashboard-panel-actions button.is-primary{
+  border-color:var(--primary);
+  background:var(--primary);
+  color:#fff;
+}
+
+.cg-attendance-manager .am-dashboard-quick-actions{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-top:10px;
+}
+.cg-attendance-manager .am-dashboard-quick-actions button{
+  width:100%;
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:0 9px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--text-secondary);
+  font-size:8.5px;
+  font-weight:700;
+  cursor:pointer;
+}
+.cg-attendance-manager .am-dashboard-quick-actions button:hover{
+  border-color:color-mix(in srgb,var(--primary) 28%,var(--border));
+  background:var(--surface-2);
+  color:var(--text-primary);
+}
+.cg-attendance-manager .am-dashboard-quick-actions button>span{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.cg-attendance-manager .am-dashboard-quick-actions button>span svg{
+  color:var(--primary);
+  flex:0 0 auto;
+}
+.cg-attendance-manager .am-dashboard-loading{
+  padding:28px 14px;
+  color:var(--text-muted);
+  font-size:10px;
+  text-align:center;
+}
+
+/* Shared manager pages: dashboard-style density + hidden scrollbars */
+.cg-attendance-manager .am-panel,
+.cg-attendance-manager .am-section-header,
+.cg-attendance-manager .am-filter-card,
+.cg-attendance-manager .am-table-card,
+.cg-attendance-manager .am-calendar-block,
+.cg-attendance-manager .am-calendar-header,
+.cg-attendance-manager .am-approval-card,
+.cg-attendance-manager .am-empty-state,
+.cg-attendance-manager .am-report-filter,
+.cg-attendance-manager .am-rule-card,
+.cg-attendance-manager .rules-header,
+.cg-attendance-manager .am-overtime-card{
+  border-radius:12px!important;
+  box-shadow:var(--shadow-sm)!important;
+}
+.cg-attendance-manager .am-table-card,
+.cg-attendance-manager .am-calendar-scroll{
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.cg-attendance-manager .am-table-card::-webkit-scrollbar,
+.cg-attendance-manager .am-calendar-scroll::-webkit-scrollbar{
+  display:none;
+  width:0;
+  height:0;
+}
+
+@media(max-width:1100px){
+  .cg-attendance-manager .am-dashboard-bottom-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .cg-attendance-manager .am-dashboard-bottom-grid>.am-dashboard-panel:last-child{
+    grid-column:1/-1;
+  }
+}
+@media(max-width:820px){
+  .cg-attendance-manager .am-dashboard-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .cg-attendance-manager .am-dashboard-bottom-grid{
+    grid-template-columns:1fr;
+  }
+  .cg-attendance-manager .am-dashboard-bottom-grid>.am-dashboard-panel:last-child{
+    grid-column:auto;
+  }
+}
+@media(max-width:480px){
+  .cg-attendance-manager .am-dashboard-stats{gap:8px}
+  .cg-attendance-manager .am-dashboard-stat-card{padding:10px}
+  .cg-attendance-manager .am-dashboard-stat-top strong{font-size:17px}
+  .cg-attendance-manager .am-dashboard-panel{padding:10px}
+  .cg-attendance-manager .am-dashboard-panel-actions{grid-template-columns:1fr}
+}
