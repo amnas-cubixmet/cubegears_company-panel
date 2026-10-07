@@ -1,17 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  BarChart3,
-  CalendarDays,
-  Download,
-  FileSpreadsheet,
-  IndianRupee,
-  Package,
-  Printer,
-  ReceiptText,
-  RefreshCw,
-  Search,
-  WalletCards
-} from 'lucide-react';
+import { Search } from 'lucide-react';
 import { billingService, calculateDocumentTotals } from '../../services/billing.service';
 import { expenseService } from '../../services/expense.service';
 import { stockManagementService } from '../../services/stockManagement.service';
@@ -44,12 +32,6 @@ const csvEscape = (value) => {
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 
-const Stat = ({ icon: Icon, label, value, note }) => (
-  <article className="report-stat">
-    <div className="report-stat-icon"><Icon size={17}/></div>
-    <div><span>{label}</span><strong>{value}</strong>{note && <small>{note}</small>}</div>
-  </article>
-);
 
 export function Reports() {
   const [tab, setTab] = useState('overview');
