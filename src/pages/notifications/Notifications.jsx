@@ -12,6 +12,11 @@ import {
   X
 } from 'lucide-react';
 import { resourceConfigs } from '../operations/resourceConfigs';
+import {
+  NotificationStats,
+  NotificationToolbar,
+  NotificationsHeader,
+} from '../../components/notifications';
 import '../../styles/notifications.css';
 
 const service = resourceConfigs.notifications.service;
@@ -120,36 +125,28 @@ export function Notifications() {
 
   return (
     <div className="notifications-page">
-      <header className="notifications-head">
-        <div>
-          <span className="notifications-kicker">INBOX & ALERTS</span>
-          <h1>Notifications</h1>
-          <p>Operational, finance, stock, people and account alerts in one place.</p>
-        </div>
-        <button className="notification-mark-all" onClick={markAllRead} disabled={!unread}>
-          <CheckCheck size={16}/>Mark all read
-        </button>
-      </header>
+      <NotificationsHeader unread={unread} onMarkAll={markAllRead} />
 
-      <section className="notification-stats">
-        <article><i><BellRing size={16}/></i><div><span>Unread</span><strong>{unread}</strong></div></article>
-        <article><i><AlertCircle size={16}/></i><div><span>High Priority</span><strong>{high}</strong></div></article>
-        <article><i><Bell size={16}/></i><div><span>Today</span><strong>{todayCount}</strong></div></article>
-        <article><i><Check size={16}/></i><div><span>Total</span><strong>{rows.length}</strong></div></article>
-      </section>
+      <NotificationStats
+        unread={unread}
+        high={high}
+        today={todayCount}
+        total={rows.length}
+      />
 
-      <section className="notifications-toolbar">
-        <label className="notifications-search">
-          <Search size={16}/>
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search title, reference or category…" />
-        </label>
-
-        <div className="notifications-filters">
-          <label><Filter size={14}/><select value={category} onChange={(e) => setCategory(e.target.value)}>{categories.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <select value={priority} onChange={(e) => setPriority(e.target.value)}>{priorities.map((item) => <option key={item}>{item}</option>)}</select>
-          <select value={status} onChange={(e) => setStatus(e.target.value)}>{['All','Unread','Read','Archived'].map((item) => <option key={item}>{item}</option>)}</select>
-        </div>
-      </section>
+      <NotificationToolbar
+        query={query}
+        onQuery={setQuery}
+        category={category}
+        onCategory={setCategory}
+        priority={priority}
+        onPriority={setPriority}
+        status={status}
+        onStatus={setStatus}
+        categories={categories}
+        priorities={priorities}
+        resultCount={filtered.length}
+      />
 
       {error && <div className="notifications-error">{error}</div>}
 
