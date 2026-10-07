@@ -15,7 +15,7 @@ const formatAutoCheckout = (value) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
-export const DashboardHeading = ({ user, attendance, currentTime, onClockToggle }) => {
+export const DashboardHeading = ({ user, attendance, currentTime, error, onClockToggle }) => {
   const isClockedIn = attendance?.status === 'CLOCKED_IN';
   const nextAction = attendance?.nextAction;
   const autoCheckoutTime = formatAutoCheckout(attendance?.autoCheckoutAt);
@@ -63,6 +63,7 @@ export const DashboardHeading = ({ user, attendance, currentTime, onClockToggle 
           </div>
         )}
       </div>
+      {error && <div className="duty-error-message">{error}</div>}
     </section>
   );
 };
