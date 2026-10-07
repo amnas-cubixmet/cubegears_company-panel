@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { attendanceService } from '../../services/attendance.service';
 import { useAuth } from '../../hooks/useAuth';
+import { getUserRoleLabel } from '../../utils/authDisplay';
 import '../../styles/attendance-calendar.css';
 
 const statusTone = (status = '') => {
@@ -30,6 +31,7 @@ const minutesToHours = (minutes = 0) => {
 
 export const HolidayCalendar = () => {
   const { user } = useAuth();
+  const roleLabel = getUserRoleLabel(user, 'Workshop Staff');
   const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 1));
   const [events, setEvents] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -137,7 +139,7 @@ export const HolidayCalendar = () => {
           <div className="employee-copy">
             <span className="eyebrow">Employee Details</span>
             <h3>{user?.name || 'Alex Rivera'}</h3>
-            <p>{user?.role || 'Workshop Staff'}</p>
+            <p>{roleLabel}</p>
           </div>
         </div>
 
