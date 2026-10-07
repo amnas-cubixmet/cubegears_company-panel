@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ChevronRight, FilePenLine, HardDrive, History, IndianRupee, Infinity, ReceiptText, Settings2, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { storageHistoryService } from '../../services/storageHistory.service';
-import { AccountHeader } from '../../components/account';
+import { AccountHeader, AccountOverview } from '../../components/account';
 import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
 import '../../styles/account-billing.css';
 import '../../styles/account-dashboard.css';
@@ -227,19 +227,42 @@ export function SaaSAccount({ section = 'billing' }) {
   return (
     <div className="saas-page account-billing-page">
       <AccountHeader
-        title={section === 'storage' ? 'Media Storage' : 'Billing & Plan'}
+        title={
+          section === 'overview'
+            ? 'Account Overview'
+            : section === 'storage'
+              ? 'Media Storage'
+              : 'Billing & Plan'
+        }
         subtitle={
-          section === 'storage'
-            ? 'Unlimited photo storage with usage history and daily billing snapshots.'
-            : 'Manage subscription billing, account usage, storage and document templates.'
+          section === 'overview'
+            ? 'Subscription, users, storage, documents and account controls in one place.'
+            : section === 'storage'
+              ? 'Unlimited photo storage with usage history and daily billing snapshots.'
+              : 'Manage subscription billing, account usage, storage and document templates.'
         }
         active={section}
         onNavigate={navigate}
       />
 
-      {section === 'storage'
-        ? <StorageView storage={storage} setStorage={setStorage} />
-        : <BillingView billing={billing} storage={storage} onSeatsChange={seats} onOpenTemplates={() => navigate('/account/templates')} />}
+      {section === 'overview' ? (
+        <AccountOverview
+          billing={billing}
+          storage={storage}
+          formatMoney={(value) => money.format(value || 0)}
+          formatDate={(value) => date.format(value)}
+          onNavigate={navigate}
+        />
+      ) : section === 'storage' ? (
+        <StorageView storage={storage} setStorage={setStorage} />
+      ) : (
+        <BillingView
+          billing={billing}
+          storage={storage}
+          onSeatsChange={seats}
+          onOpenTemplates={() => navigate('/account/templates')}
+        />
+      )}
     </div>
   );
 }
