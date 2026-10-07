@@ -1,315 +1,332 @@
-import React, { useState, useEffect } from 'react';
-import { Save, Clock, ShieldAlert, CalendarDays } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+  CalendarDays,
+  Clock3,
+  MapPin,
+  Save,
+  ShieldCheck,
+  TriangleAlert,
+} from 'lucide-react';
+import { AttendanceModeSelector } from '../../components/attendance-manager/AttendanceModeSelector';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
+
+const defaults = {
+  attendanceMode: 'single',
+  startTime: '09:00',
+  endTime: '18:00',
+  lateGraceMinutes: 15,
+  overtimeAfterMinutes: 540,
+  maxSessionsPerDay: 0,
+  autoCheckoutGraceMinutes: 0,
+  missingPunchPolicy: 'request_correction',
+  locationRequired: false,
+  correctionApproval: true,
+  allowSelfApproval: false,
+  weekendDays: ['Sunday'],
+  alternateSaturdayEnabled: false,
+  alternateSaturdayPattern: '2nd & 4th Saturday',
+  weekendAttendancePolicy: 'weekly_off',
+  weekendEffectiveFrom: '',
+};
+
+const normalizeRules = (data = {}) => ({
+  ...defaults,
+  ...data,
+  startTime: String(data.startTime || defaults.startTime).slice(0, 5),
+  endTime: String(data.endTime || defaults.endTime).slice(0, 5),
+  weekendDays: Array.isArray(data.weekendDays) ? data.weekendDays : defaults.weekendDays,
+});
 
 export const RulesSettings = () => {
   const [initialRules, setInitialRules] = useState(null);
   const [rules, setRules] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const [toastMsg, setToastMsg] = useState('');
+  const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    fetchRules();
-  }, []);
-
-  const fetchRules = async () => {
+  const loadRules = async () => {
     setLoading(true);
     try {
-      const data = await attendanceManagerService.getRules();
+      const data = normalizeRules(await attendanceManagerService.getRules());
+      setRules(data);
       setInitialRules(data);
-      setRules({ ...data });
-      setIsDirty(false);
-    } catch (e) {
-      console.error(e);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (field, value) => {
-    const updated = { ...rules, [field]: value };
-    setRules(updated);
-    const dirty = JSON.stringify(updated) !== JSON.stringify(initialRules);
-    setIsDirty(dirty);
+  useEffect(() => {
+    loadRules();
+  }, []);
+
+  const dirty = JSON.stringify(rules) !== JSON.stringify(initialRules);
+
+  const change = (field, value) => {
+    setRules((current) => ({ ...current, [field]: value }));
   };
 
-  const toggleWeekendDay = (day) => {
-    const currentDays = Array.isArray(rules.weekendDays) ? rules.weekendDays : [];
-    const nextDays = currentDays.includes(day)
-      ? currentDays.filter((item) => item !== day)
-      : [...currentDays, day];
-
-    handleChange('weekendDays', nextDays);
+  const toggleWeekend = (day) => {
+    const values = new Set(rules.weekendDays || []);
+    if (values.has(day)) values.delete(day);
+    else values.add(day);
+    change('weekendDays', Array.from(values));
   };
 
-  const handleSaveRules = async (e) => {
-    if (e) e.preventDefault();
-    if (!isDirty || saving) return;
-
+  const save = async () => {
+    if (!dirty || saving) return;
     setSaving(true);
+    setMessage('');
+
     try {
-      await attendanceManagerService.saveRules(rules);
-      setInitialRules({ ...rules });
-      setIsDirty(false);
-      setToastMsg('Attendance rules saved successfully.');
-      setTimeout(() => setToastMsg(''), 3000);
-    } catch (err) {
-      console.error(err);
+      const saved = normalizeRules(await attendanceManagerService.saveRules(rules));
+      setRules(saved);
+      setInitialRules(saved);
+      setMessage('Attendance rules saved.');
+    } catch (error) {
+      setMessage(error?.message || 'Unable to save attendance rules.');
     } finally {
       setSaving(false);
     }
   };
 
   if (loading || !rules) {
-    return <div style={{ padding: '20px', color: 'var(--text-muted)' }}>Loading attendance rules...</div>;
+    return <div className="attendance-rules-loading">Loading attendance rules…</div>;
   }
 
-  return (
-    <div className="attendance-manager-module attendance-manager-rules" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
-      {/* Toast Feedback */}
-      {toastMsg && (
-        <div style={{
-          backgroundColor: 'var(--success)',
-          color: '#ffffff',
-          padding: '10px 14px',
-          borderRadius: '10px',
-          fontSize: '13px',
-          fontWeight: '600',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-        }}>
-          {toastMsg}
-        </div>
-      )}
+  const autoMode = ['auto_checkout', 'hybrid'].includes(rules.attendanceMode);
+  const multiMode = ['multi', 'hybrid'].includes(rules.attendanceMode);
 
-      {/* Header layout */}
-      <div className="rules-header am-section-header am-rules-header" style={{
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', margin: 0, lineHeight: 1.25 }}>
-              Shift & Attendance Rules Config
-            </h3>
-            {isDirty && (
-              <span style={{ fontSize: '11px', fontWeight: '700', backgroundColor: 'var(--warning-soft)', color: 'var(--warning)', padding: '2px 6px', borderRadius: '4px' }}>
-                Unsaved changes
-              </span>
-            )}
-          </div>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '4px 0 0 0', lineHeight: 1.5, width: '100%', maxWidth: '100%' }}>
-            Grouped category configuration for shifts, grace time, and approval permissions.
-          </p>
+  return (
+    <div className="attendance-rules-page">
+      <header className="attendance-rules-header">
+        <div>
+          <h2>Attendance Rules</h2>
+          <p>Choose how employees punch attendance and how missed punches are handled.</p>
         </div>
 
         <button
           type="button"
-          disabled={!isDirty || saving}
-          onClick={handleSaveRules}
-          className="save-rules-btn"
-          style={{
-            height: '46px',
-            padding: '0 16px',
-            whiteSpace: 'nowrap',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            borderRadius: '10px',
-            backgroundColor: 'var(--primary)',
-            color: '#ffffff',
-            border: 'none',
-            fontSize: '13px',
-            fontWeight: '700',
-            cursor: isDirty && !saving ? 'pointer' : 'not-allowed',
-            opacity: isDirty && !saving ? 1 : 0.6
-          }}
+          className="attendance-rules-save"
+          disabled={!dirty || saving}
+          onClick={save}
         >
-          <Save size={16} /> {saving ? 'Saving...' : 'Save Rules'}
+          <Save size={14} />
+          {saving ? 'Saving…' : 'Save Rules'}
         </button>
-      </div>
+      </header>
 
-      {/* Grouped Settings Cards */}
-      <div className="am-rules-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', width: '100%' }}>
-        {/* Category 1: Shift & Grace */}
-        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Clock size={16} style={{ color: 'var(--primary)' }} /> Shift Timing & Grace Minutes
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px' }}>
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>Shift Start Time</label>
-              <input
-                type="text"
-                value={rules.startTime || ''}
-                onChange={(e) => handleChange('startTime', e.target.value)}
-                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>Shift End Time</label>
-              <input
-                type="text"
-                value={rules.endTime || ''}
-                onChange={(e) => handleChange('endTime', e.target.value)}
-                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>Late Grace Minutes</label>
-              <input
-                type="number"
-                value={rules.lateGraceMinutes || 15}
-                onChange={(e) => handleChange('lateGraceMinutes', Number(e.target.value))}
-                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-              />
-            </div>
+      {message && <div className="attendance-rules-message">{message}</div>}
+
+      <section className="attendance-rule-section">
+        <div className="attendance-rule-title">
+          <Clock3 size={16} />
+          <div>
+            <h3>Punch Mode</h3>
+            <p>Company-wide attendance behavior for check-in and check-out.</p>
           </div>
         </div>
 
-        {/* Category 2: Missing Punch Policy */}
-        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Clock size={16} style={{ color: 'var(--warning)' }} /> Missing Punch Rules
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px' }}>
+        <AttendanceModeSelector
+          value={rules.attendanceMode}
+          onChange={(value) => change('attendanceMode', value)}
+        />
+
+        {multiMode && (
+          <label className="attendance-rule-field">
+            <span>Maximum Sessions Per Day</span>
+            <small>Use 0 for unlimited sessions.</small>
+            <input
+              type="number"
+              min="0"
+              value={rules.maxSessionsPerDay}
+              onChange={(event) => change('maxSessionsPerDay', Math.max(0, Number(event.target.value)))}
+            />
+          </label>
+        )}
+      </section>
+
+      <div className="attendance-rules-columns">
+        <section className="attendance-rule-section">
+          <div className="attendance-rule-title">
+            <Clock3 size={16} />
             <div>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>Missing Punch Policy</label>
-              <input
-                type="text"
-                value={rules.missingPunchPolicy || ''}
-                onChange={(e) => handleChange('missingPunchPolicy', e.target.value)}
-                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-              />
+              <h3>Shift Timing</h3>
+              <p>Used for late calculation, overtime and automatic checkout.</p>
             </div>
           </div>
-        </div>
 
-        {/* Category 3: Weekend Off */}
-        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <CalendarDays size={16} style={{ color: 'var(--primary)' }} /> Weekend Off Settings
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px' }}>
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '6px' }}>
-                Weekly Off Days
+          <div className="attendance-rule-form-grid">
+            <label className="attendance-rule-field">
+              <span>Shift Start</span>
+              <input type="time" value={rules.startTime} onChange={(e) => change('startTime', e.target.value)} />
+            </label>
+            <label className="attendance-rule-field">
+              <span>Shift End</span>
+              <input type="time" value={rules.endTime} onChange={(e) => change('endTime', e.target.value)} />
+            </label>
+            <label className="attendance-rule-field">
+              <span>Late Grace Minutes</span>
+              <input type="number" min="0" value={rules.lateGraceMinutes} onChange={(e) => change('lateGraceMinutes', Number(e.target.value))} />
+            </label>
+            <label className="attendance-rule-field">
+              <span>Overtime After Minutes</span>
+              <input type="number" min="0" value={rules.overtimeAfterMinutes} onChange={(e) => change('overtimeAfterMinutes', Number(e.target.value))} />
+            </label>
+            {autoMode && (
+              <label className="attendance-rule-field attendance-rule-field-wide">
+                <span>Auto Checkout Worker Grace</span>
+                <small>System waits this many minutes before processing, but worked time closes at shift end.</small>
+                <input
+                  type="number"
+                  min="0"
+                  value={rules.autoCheckoutGraceMinutes}
+                  onChange={(e) => change('autoCheckoutGraceMinutes', Number(e.target.value))}
+                />
               </label>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '6px' }}>
-                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => {
-                  const selected = Array.isArray(rules.weekendDays) && rules.weekendDays.includes(day);
-
-                  return (
-                    <button
-                      key={day}
-                      type="button"
-                      onClick={() => toggleWeekendDay(day)}
-                      style={{
-                        minHeight: '36px',
-                        padding: '0 8px',
-                        borderRadius: '8px',
-                        border: selected ? '1px solid var(--primary)' : '1px solid var(--border)',
-                        backgroundColor: selected ? 'var(--primary-soft)' : 'var(--surface-2)',
-                        color: selected ? 'var(--primary)' : 'var(--text-secondary)',
-                        fontSize: '11px',
-                        fontWeight: selected ? '700' : '600',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {day.slice(0, 3)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: '10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)' }}>
-              <div>
-                <div style={{ color: 'var(--text-primary)', fontWeight: '700' }}>Alternate Saturday Off</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '2px' }}>
-                  Apply a recurring Saturday-off pattern.
-                </div>
-              </div>
-
-              <input
-                type="checkbox"
-                checked={Boolean(rules.alternateSaturdayEnabled)}
-                onChange={(e) => handleChange('alternateSaturdayEnabled', e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
-              />
-            </div>
-
-            {rules.alternateSaturdayEnabled && (
-              <div>
-                <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>
-                  Saturday Pattern
-                </label>
-                <select
-                  value={rules.alternateSaturdayPattern || '2nd & 4th Saturday'}
-                  onChange={(e) => handleChange('alternateSaturdayPattern', e.target.value)}
-                  style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-                >
-                  <option>1st & 3rd Saturday</option>
-                  <option>2nd & 4th Saturday</option>
-                  <option>1st, 3rd & 5th Saturday</option>
-                  <option>All Saturdays</option>
-                </select>
-              </div>
             )}
+          </div>
+        </section>
 
+        <section className="attendance-rule-section">
+          <div className="attendance-rule-title">
+            <TriangleAlert size={16} />
             <div>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>
-                Weekend Attendance Policy
-              </label>
-              <select
-                value={rules.weekendAttendancePolicy || 'Mark as Weekly Off'}
-                onChange={(e) => handleChange('weekendAttendancePolicy', e.target.value)}
-                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              <h3>Missing Punch Policy</h3>
+              <p>What happens if an employee forgets to check out.</p>
+            </div>
+          </div>
+
+          <label className="attendance-rule-field">
+            <span>Policy</span>
+            <select
+              value={rules.missingPunchPolicy}
+              onChange={(e) => change('missingPunchPolicy', e.target.value)}
+            >
+              <option value="request_correction">Request Punch Correction</option>
+              <option value="auto_close">Auto Close at Shift End</option>
+              <option value="mark_missing">Keep as Missing Clock Out</option>
+            </select>
+          </label>
+
+          <label className="attendance-rule-toggle">
+            <span>
+              <strong>Correction Requires Approval</strong>
+              <small>Manager must approve employee punch corrections.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={Boolean(rules.correctionApproval)}
+              onChange={(e) => change('correctionApproval', e.target.checked)}
+            />
+          </label>
+
+          <label className="attendance-rule-toggle">
+            <span>
+              <strong>Prevent Manager Self-Approval</strong>
+              <small>Recommended for audit safety.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={!rules.allowSelfApproval}
+              onChange={(e) => change('allowSelfApproval', !e.target.checked)}
+            />
+          </label>
+        </section>
+
+        <section className="attendance-rule-section">
+          <div className="attendance-rule-title">
+            <MapPin size={16} />
+            <div>
+              <h3>Punch Security</h3>
+              <p>Optional controls for attendance punches.</p>
+            </div>
+          </div>
+
+          <label className="attendance-rule-toggle">
+            <span>
+              <strong>Require Device Location</strong>
+              <small>Check-in/out is rejected when browser location is unavailable.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={Boolean(rules.locationRequired)}
+              onChange={(e) => change('locationRequired', e.target.checked)}
+            />
+          </label>
+        </section>
+
+        <section className="attendance-rule-section">
+          <div className="attendance-rule-title">
+            <CalendarDays size={16} />
+            <div>
+              <h3>Weekly Off</h3>
+              <p>Configure non-working days and optional attendance.</p>
+            </div>
+          </div>
+
+          <div className="attendance-weekdays">
+            {['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((day) => (
+              <button
+                key={day}
+                type="button"
+                className={(rules.weekendDays || []).includes(day) ? 'is-selected' : ''}
+                onClick={() => toggleWeekend(day)}
               >
-                <option>Mark as Weekly Off</option>
-                <option>Allow Attendance</option>
-                <option>Allow Attendance + Overtime</option>
+                {day.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+
+          <label className="attendance-rule-field">
+            <span>Weekly Off Attendance Policy</span>
+            <select value={rules.weekendAttendancePolicy} onChange={(e) => change('weekendAttendancePolicy', e.target.value)}>
+              <option value="weekly_off">Block Attendance / Weekly Off</option>
+              <option value="allow">Allow Attendance</option>
+              <option value="allow_overtime">Allow Attendance + Overtime</option>
+            </select>
+          </label>
+
+          <label className="attendance-rule-toggle">
+            <span>
+              <strong>Alternate Saturday</strong>
+              <small>Apply a recurring Saturday off pattern.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={Boolean(rules.alternateSaturdayEnabled)}
+              onChange={(e) => change('alternateSaturdayEnabled', e.target.checked)}
+            />
+          </label>
+
+          {rules.alternateSaturdayEnabled && (
+            <label className="attendance-rule-field">
+              <span>Saturday Pattern</span>
+              <select value={rules.alternateSaturdayPattern} onChange={(e) => change('alternateSaturdayPattern', e.target.value)}>
+                <option>1st & 3rd Saturday</option>
+                <option>2nd & 4th Saturday</option>
+                <option>1st, 3rd & 5th Saturday</option>
+                <option>All Saturdays</option>
               </select>
-            </div>
+            </label>
+          )}
 
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontWeight: '600', marginBottom: '4px' }}>
-                Effective From
-              </label>
-              <input
-                type="date"
-                value={rules.weekendEffectiveFrom || ''}
-                onChange={(e) => handleChange('weekendEffectiveFrom', e.target.value)}
-                style={{ width: '100%', height: '40px', padding: '0 10px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Category 4: Permissions Guard */}
-        <div className="am-rule-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShieldAlert size={16} style={{ color: 'var(--danger)' }} /> Approval Permissions Guard
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: 'var(--surface-2)', borderRadius: '8px' }}>
-              <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>Prevent Manager Self-Approval</span>
-              <input
-                type="checkbox"
-                checked={!rules.allowSelfApproval}
-                onChange={(e) => handleChange('allowSelfApproval', !e.target.checked)}
-                style={{ cursor: 'pointer' }}
-              />
-            </div>
-          </div>
-        </div>
+          <label className="attendance-rule-field">
+            <span>Effective From</span>
+            <input
+              type="date"
+              value={rules.weekendEffectiveFrom || ''}
+              onChange={(e) => change('weekendEffectiveFrom', e.target.value)}
+            />
+          </label>
+        </section>
       </div>
 
-
+      <section className="attendance-rule-note">
+        <ShieldCheck size={16} />
+        <span>
+          Rules are enforced by the backend API, not only hidden in the UI. Employees cannot bypass punch mode restrictions by calling the endpoint directly.
+        </span>
+      </section>
     </div>
   );
 };
