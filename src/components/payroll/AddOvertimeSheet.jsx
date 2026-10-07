@@ -1,51 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ResponsiveModalSheet } from '../common/ResponsiveModalSheet';
+import { staffService } from '../../services/staff.service';
+
+const localDate = () => {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 10);
+};
+
+const emptyForm = () => ({
+  staffId: '',
+  staffName: '',
+  date: localDate(),
+  payrollMonth: localDate().slice(0, 7),
+  shift: '',
+  clockIn: '',
+  clockOut: '',
+  overtimeHours: '',
+  calculationMethod: 'Hourly Rate',
+  rate: '',
+  amount: '',
+  reason: '',
+  notes: '',
+});
 
 export const AddOvertimeSheet = ({ isOpen, onClose, onSave, prefillStaff }) => {
-  const [formData, setFormData] = useState({
-    staffId: 'EMP-0012',
-    staffName: 'Ajmal K',
-    date: new Date().toISOString().split('T')[0],
-    payrollMonth: 'September 2026',
-    branch: 'Main Garage Branch',
-    shift: 'General Shift (09:00 AM - 06:00 PM)',
-    clockIn: '09:00 AM',
-    clockOut: '08:30 PM',
-    overtimeHours: '2.5',
-    calculationMethod: 'Hourly Rate', // Hourly Rate | Fixed Amount | Manual Authorized Amount
-    rate: '150',
-    amount: '375',
-    reason: 'Emergency customer vehicle repair',
-    notes: ''
-  });
-
+  const [formData, setFormData] = useState(emptyForm);
+  const [staff, setStaff] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (prefillStaff) {
-      setFormData((prev) => ({
-        ...prev,
-        staffId: prefillStaff.staffId || prefillStaff.id || 'EMP-0012',
-        staffName: prefillStaff.staffName || prefillStaff.name || 'Ajmal K'
+    if (!isOpen) return;
+    staffService.getStaff()
+      .then((rows) => setStaff(Array.isArray(rows) ? rows : []))
+      .catch(() => setStaff([]));
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setFormData((current) => ({
+      ...emptyForm(),
+      staffId:
+        prefillStaff?.staffId ||
+        prefillStaff?.employeeId ||
+        prefillStaff?.id ||
+        current.staffId ||
+        '',
+      staffName:
+        prefillStaff?.staffName ||
+        prefillStaff?.name ||
+        current.staffName ||
+        '',
+      shift: prefillStaff?.shift || current.shift || '',
+    }));
+    setError('');
+  }, [isOpen, prefillStaff]);
+
+  const staffOptions = useMemo(() => {
+    const rows = [...staff];
+    const prefillId =
+      prefillStaff?.staffId ||
+      prefillStaff?.employeeId ||
+      prefillStaff?.id;
+
+    if (
+      prefillId &&
+      !rows.some((row) =>
+        [row.employeeId, row.id].map(String).includes(String(prefillId))
+      )
+    ) {
+      rows.unshift({
+        id: prefillStaff?.id || prefillId,
+        employeeId: prefillId,
+        name: prefillStaff?.staffName || prefillStaff?.name || 'Selected Staff',
+        role: prefillStaff?.role || '',
+        shift: prefillStaff?.shift || '',
+      });
+    }
+
+    return rows;
+  }, [staff, prefillStaff]);
+
+  useEffect(() => {
+    if (!formData.staffId && staffOptions[0]) {
+      const row = staffOptions[0];
+      setFormData((current) => ({
+        ...current,
+        staffId: row.employeeId || row.id,
+        staffName: row.name || '',
+        shift: row.shift || row.shiftName || '',
       }));
     }
-  }, [prefillStaff]);
+  }, [staffOptions, formData.staffId]);
 
-  // Recalculate amount dynamically when hours, method, or rate changes
   useEffect(() => {
-    const hrs = Number(formData.overtimeHours) || 0;
-    const rateVal = Number(formData.rate) || 0;
+    const hours = Number(formData.overtimeHours) || 0;
+    const rate = Number(formData.rate) || 0;
     if (formData.calculationMethod === 'Hourly Rate') {
-      setFormData((prev) => ({ ...prev, amount: (hrs * rateVal).toString() }));
+      setFormData((current) => ({
+        ...current,
+        amount: hours && rate ? String(hours * rate) : '',
+      }));
     }
   }, [formData.overtimeHours, formData.rate, formData.calculationMethod]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const selectStaff = (staffId) => {
+    const row = staffOptions.find((item) =>
+      String(item.employeeId || item.id) === String(staffId)
+    );
+
+    setFormData((current) => ({
+      ...current,
+      staffId,
+      staffName: row?.name || '',
+      shift: row?.shift || row?.shiftName || current.shift,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError('');
 
-    const hrs = Number(formData.overtimeHours);
-    if (!hrs || hrs <= 0) {
+    const hours = Number(formData.overtimeHours);
+    if (!formData.staffId) {
+      setError('Please select a staff member.');
+      return;
+    }
+    if (!hours || hours <= 0) {
       setError('Please enter valid overtime hours.');
       return;
     }
@@ -53,18 +135,14 @@ export const AddOvertimeSheet = ({ isOpen, onClose, onSave, prefillStaff }) => {
     try {
       await onSave({
         ...formData,
-        overtimeHours: hrs,
+        overtimeHours: hours,
         rate: Number(formData.rate) || 0,
-        amount: Number(formData.amount) || 0
+        amount: Number(formData.amount) || 0,
       });
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to record overtime.');
+      setError(err?.message || 'Failed to record overtime.');
     }
-  };
-
-  const formatINR = (val) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
   };
 
   return (
@@ -74,182 +152,142 @@ export const AddOvertimeSheet = ({ isOpen, onClose, onSave, prefillStaff }) => {
       title="Add Overtime Record"
       maxWidth="580px"
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {error && (
-          <div style={{ padding: '10px 14px', borderRadius: '10px', backgroundColor: 'var(--danger-soft)', color: 'var(--danger)', fontSize: '13px', fontWeight: '600' }}>
-            {error}
-          </div>
-        )}
+      <form onSubmit={handleSubmit} className="overtime-entry-form">
+        {error && <div className="overtime-entry-error">{error}</div>}
 
-        <div className="form-row-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Staff Member *</label>
+        <div className="overtime-entry-grid">
+          <label>
+            <span>Staff Member *</span>
             <select
               value={formData.staffId}
-              onChange={(e) => {
-                const name = e.target.options[e.target.selectedIndex].text.split(' (')[0];
-                setFormData({ ...formData, staffId: e.target.value, staffName: name });
-              }}
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) => selectStaff(event.target.value)}
+              required
             >
-              <option value="EMP-0012">Ajmal K (Mechanic)</option>
-              <option value="EMP-0014">Rajesh V (Branch Manager)</option>
-              <option value="EMP-0015">Priya Nair (Receptionist)</option>
-              <option value="EMP-0016">Suresh Kumar (Technician)</option>
+              <option value="">Select staff</option>
+              {staffOptions.map((row) => (
+                <option key={row.id} value={row.employeeId || row.id}>
+                  {row.name} ({row.employeeId || row.id}{row.role ? ` · ${row.role}` : ''})
+                </option>
+              ))}
             </select>
-          </div>
+          </label>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Date *</label>
+          <label>
+            <span>Date *</span>
             <input
               type="date"
               required
               value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) =>
+                setFormData({ ...formData, date: event.target.value, payrollMonth: event.target.value.slice(0, 7) })
+              }
             />
-          </div>
-        </div>
+          </label>
 
-        <div className="form-row-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Payroll Month *</label>
-            <select
+          <label>
+            <span>Payroll Month</span>
+            <input
+              type="month"
               value={formData.payrollMonth}
-              onChange={(e) => setFormData({ ...formData, payrollMonth: e.target.value })}
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
-            >
-              <option value="August 2026">August 2026</option>
-              <option value="September 2026">September 2026</option>
-              <option value="October 2026">October 2026</option>
-            </select>
-          </div>
+              onChange={(event) => setFormData({ ...formData, payrollMonth: event.target.value })}
+            />
+          </label>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Shift *</label>
+          <label>
+            <span>Shift</span>
             <input
-              type="text"
-              required
               value={formData.shift}
-              onChange={(e) => setFormData({ ...formData, shift: e.target.value })}
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) => setFormData({ ...formData, shift: event.target.value })}
+              placeholder="Assigned shift"
             />
-          </div>
-        </div>
+          </label>
 
-        <div className="form-row-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Actual Clock In</label>
+          <label>
+            <span>Actual Clock In</span>
             <input
-              type="text"
+              type="time"
               value={formData.clockIn}
-              onChange={(e) => setFormData({ ...formData, clockIn: e.target.value })}
-              placeholder="e.g. 09:00 AM"
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) => setFormData({ ...formData, clockIn: event.target.value })}
             />
-          </div>
+          </label>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Actual Clock Out</label>
+          <label>
+            <span>Actual Clock Out</span>
             <input
-              type="text"
+              type="time"
               value={formData.clockOut}
-              onChange={(e) => setFormData({ ...formData, clockOut: e.target.value })}
-              placeholder="e.g. 08:30 PM"
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) => setFormData({ ...formData, clockOut: event.target.value })}
             />
-          </div>
-        </div>
+          </label>
 
-        <div className="form-row-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Overtime Hours *</label>
+          <label>
+            <span>Overtime Hours *</span>
             <input
               type="number"
-              step="0.5"
+              min="0.25"
+              step="0.25"
               required
-              placeholder="e.g. 2.5"
               value={formData.overtimeHours}
-              onChange={(e) => setFormData({ ...formData, overtimeHours: e.target.value })}
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) => setFormData({ ...formData, overtimeHours: event.target.value })}
+              placeholder="2.5"
             />
-          </div>
+          </label>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Calculation Method *</label>
+          <label>
+            <span>Calculation Method</span>
             <select
               value={formData.calculationMethod}
-              onChange={(e) => setFormData({ ...formData, calculationMethod: e.target.value })}
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) => setFormData({ ...formData, calculationMethod: event.target.value })}
             >
-              <option value="Hourly Rate">Hourly Rate</option>
-              <option value="Fixed Amount">Fixed Amount</option>
-              <option value="Manual Authorized Amount">Manual Authorized Amount</option>
+              <option>Hourly Rate</option>
+              <option>Fixed Amount</option>
+              <option>Manual Authorized Amount</option>
             </select>
-          </div>
-        </div>
+          </label>
 
-        <div className="form-row-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Overtime Rate (₹ / hr)</label>
+          <label>
+            <span>Overtime Rate (₹ / hr)</span>
             <input
               type="number"
+              min="0"
               value={formData.rate}
-              onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
-              placeholder="e.g. 150"
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+              onChange={(event) => setFormData({ ...formData, rate: event.target.value })}
             />
-          </div>
+          </label>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Calculated Amount (₹) *</label>
+          <label>
+            <span>Calculated Amount (₹)</span>
             <input
               type="number"
-              required
+              min="0"
               value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', fontSize: '14px', fontWeight: '700', color: 'var(--primary)' }}
+              onChange={(event) => setFormData({ ...formData, amount: event.target.value })}
             />
-          </div>
+          </label>
         </div>
 
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Overtime Reason *</label>
+        <label className="overtime-entry-wide">
+          <span>Overtime Reason *</span>
           <input
-            type="text"
             required
-            placeholder="e.g. Emergency engine overhaul for JC-8812"
             value={formData.reason}
-            onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-            style={{ width: '100%', height: '46px', padding: '0 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px' }}
+            onChange={(event) => setFormData({ ...formData, reason: event.target.value })}
+            placeholder="Emergency repair, job delivery, customer support..."
           />
-        </div>
+        </label>
 
-        <div>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>Manager Notes</label>
+        <label className="overtime-entry-wide">
+          <span>Manager Notes</span>
           <textarea
-            rows={2}
-            placeholder="Add any authorization details or internal shift remarks..."
+            rows={3}
             value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '14px', resize: 'vertical' }}
+            onChange={(event) => setFormData({ ...formData, notes: event.target.value })}
           />
-        </div>
+        </label>
 
-        <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ flex: 1, height: '46px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            style={{ flex: 1, height: '46px', borderRadius: '10px', border: 'none', backgroundColor: 'var(--primary)', color: '#ffffff', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}
-          >
-            Submit Overtime
-          </button>
+        <div className="overtime-entry-actions">
+          <button type="button" onClick={onClose}>Cancel</button>
+          <button type="submit" className="is-primary">Submit Overtime</button>
         </div>
       </form>
     </ResponsiveModalSheet>
