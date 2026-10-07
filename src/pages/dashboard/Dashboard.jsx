@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardBottomGrid } from '../../components/dashboard/DashboardBottomGrid';
-import { DashboardHeading } from '../../components/dashboard/DashboardHeading';
-import { DashboardStats } from '../../components/dashboard/DashboardStats';
-import { ServiceOperations } from '../../components/dashboard/ServiceOperations';
+import {
+  DashboardBottomGrid,
+  DashboardHeading,
+  DashboardStats,
+  ServiceOperations,
+} from '../../components/dashboard';
 import { Loader } from '../../components/common/Loader';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboardData, toggleClockIn } from '../../services/dashboard.service';
