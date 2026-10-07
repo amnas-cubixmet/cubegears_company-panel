@@ -1,6 +1,9 @@
 import React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { StockManagementTabs } from '../../components/stock/StockManagementTabs';
+import {
+  StockManagementHeader,
+  StockManagementTabs,
+} from '../../components/stock';
 import { StockManagementSection } from './StockManagementSection';
 import '../../styles/stock-management.css';
 
@@ -9,7 +12,13 @@ const resolveSection = (pathname, itemId) => {
   if (pathname.endsWith('/overview') || pathname === '/stock') return 'overview';
   if (pathname.endsWith('/items')) return 'items';
   if (pathname.endsWith('/categories')) return 'categories';
-  if (pathname.endsWith('/movements') || pathname.endsWith('/in') || pathname.endsWith('/issue') || pathname.endsWith('/return') || pathname.endsWith('/ledger')) return 'movements';
+  if (
+    pathname.endsWith('/movements') ||
+    pathname.endsWith('/in') ||
+    pathname.endsWith('/issue') ||
+    pathname.endsWith('/return') ||
+    pathname.endsWith('/ledger')
+  ) return 'movements';
   if (pathname.endsWith('/purchase-orders') || pathname.endsWith('/purchases')) return 'purchase-orders';
   if (pathname.endsWith('/suppliers')) return 'suppliers';
   if (pathname.endsWith('/transfers') || pathname.endsWith('/transfer')) return 'transfers';
@@ -28,13 +37,11 @@ export const StockManagement = ({ section }) => {
 
   return (
     <div className="stock-management-page cg-stock">
-      <header className="stock-management-header">
-        <h1>Stock Management</h1>
-        <p>Spare parts, oils, consumables, purchases, job-card issues, returns, transfers and stock audit.</p>
-      </header>
-
-      {activeSection !== 'item-detail' ? <StockManagementTabs /> : null}
-      <StockManagementSection section={activeSection} itemId={itemId} />
+      <StockManagementHeader />
+      {activeSection !== 'item-detail' && <StockManagementTabs />}
+      <main className="stock-management-content">
+        <StockManagementSection section={activeSection} itemId={itemId} />
+      </main>
     </div>
   );
 };
