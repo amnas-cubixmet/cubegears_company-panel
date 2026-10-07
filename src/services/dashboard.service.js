@@ -13,12 +13,12 @@ export const getDashboardData = async (params) => {
   return apiClient.get(API_ENDPOINTS.DASHBOARD, { params });
 };
 
-export const toggleClockIn = async (status) => {
+export const toggleClockIn = async (action) => {
   if (USE_MOCK_API) {
     await delay();
-    return Promise.resolve(toggleMockClockIn(status));
+    return Promise.resolve(toggleMockClockIn(action === 'check_in' ? 'CLOCKED_IN' : 'CLOCKED_OUT'));
   }
-  return apiClient.post('/attendance/toggle', { status });
+  return apiClient.post('/attendance/toggle', { action, source: 'web' });
 };
 
 export const dashboardService = {
