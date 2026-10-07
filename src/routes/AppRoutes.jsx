@@ -72,6 +72,7 @@ export const AppRoutes = () => (
       <Route path="/my-attendance/calendar" element={<MyAttendance />} />
       <Route path="/my-attendance/history" element={<MyAttendance />} />
       <Route path="/my-attendance/leave" element={<MyAttendance />} />
+      <Route path="/my-attendance/overtime" element={<MyAttendance />} />
       <Route path="/my-attendance/summary" element={<MyAttendance />} />
 
       <Route path="/attendance-manager" element={<Navigate to="/attendance-manager/overview" replace />} />
