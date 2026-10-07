@@ -1695,3 +1695,76 @@
   .cg-attendance-manager .am-dashboard-panel{padding:10px}
   .cg-attendance-manager .am-dashboard-panel-actions{grid-template-columns:1fr}
 }
+
+
+/* Attendance manager operations v3 */
+.cg-attendance-manager .am-daily-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cg-attendance-manager .am-daily-heading h2{margin:0;font-size:15px;font-weight:750}
+.cg-attendance-manager .am-daily-heading p{margin:3px 0 0;color:var(--text-muted);font-size:9px}
+.cg-attendance-manager .am-daily-date{height:36px;display:flex;align-items:center;gap:6px;padding:0 8px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--primary)}
+.cg-attendance-manager .am-daily-date input{height:32px;border:0;background:transparent;color:var(--text-primary);font-size:9px;outline:none}
+.cg-attendance-manager .am-filter-card{display:grid;grid-template-columns:minmax(0,1fr) 170px 170px;gap:8px}
+.cg-attendance-manager .am-filter-card select{min-width:0;height:36px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-primary);padding:0 8px;font-size:9px}
+.cg-attendance-manager .am-search-field{height:36px}
+.cg-attendance-manager .am-search-field input{font-size:9px}
+.cg-attendance-manager .am-location-cell{max-width:150px;color:var(--text-muted);font-size:7.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cg-attendance-manager .am-session-mini-list{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding:7px;border-radius:8px;background:var(--surface-2)}
+.cg-attendance-manager .am-session-mini-list>div{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:6px;align-items:center;font-size:7.5px}
+.cg-attendance-manager .am-session-mini-list span{color:var(--primary);font-weight:750}.cg-attendance-manager .am-session-mini-list strong{font-size:7.5px}.cg-attendance-manager .am-session-mini-list b{font-size:7.5px;color:var(--text-muted)}
+.cg-attendance-manager .am-location-row{display:flex;align-items:flex-start;gap:5px;margin-top:7px;padding:7px 8px;border-radius:8px;background:var(--primary-soft);color:var(--text-secondary);font-size:7.5px;overflow-wrap:anywhere}
+.cg-attendance-manager .am-location-row svg{flex:0 0 auto;color:var(--primary)}
+
+.cg-attendance-manager .am-calendar-header-v2{align-items:center}
+.cg-attendance-manager .am-calendar-month-controls{display:flex;align-items:center;gap:5px}
+.cg-attendance-manager .am-calendar-month-controls>button{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-secondary)}
+.cg-attendance-manager .am-calendar-month-controls>label{height:34px;display:flex;align-items:center;gap:5px;padding:0 7px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--primary)}
+.cg-attendance-manager .am-calendar-month-controls select{height:32px;border:0;background:transparent;color:var(--text-primary);font-size:9px;outline:none}
+.cg-attendance-manager .am-calendar-month-controls>select{height:34px;padding:0 7px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2)}
+.cg-attendance-manager .am-calendar-filter-card{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:8px;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.cg-attendance-manager .am-calendar-filter-card>select{height:36px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-primary);padding:0 8px;font-size:9px}
+.cg-attendance-manager .am-calendar-holiday-strip{display:flex;gap:6px;overflow-x:auto;padding:7px;border:1px solid var(--border);border-radius:10px;background:var(--surface);scrollbar-width:none}
+.cg-attendance-manager .am-calendar-holiday-strip::-webkit-scrollbar{display:none}
+.cg-attendance-manager .am-calendar-holiday-strip>span{min-width:max-content;padding:6px 8px;border-radius:8px;background:var(--warning-soft)}
+.cg-attendance-manager .am-calendar-holiday-strip strong{display:block;color:var(--warning);font-size:8px}.cg-attendance-manager .am-calendar-holiday-strip small{display:block;margin-top:2px;color:var(--text-muted);font-size:7px}
+.cg-attendance-manager .am-calendar-employee{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important}
+.cg-attendance-manager .am-calendar-employee strong{font-size:8px}.cg-attendance-manager .am-calendar-employee span{margin-top:2px;color:var(--text-muted);font-size:7px}
+.cg-attendance-manager .am-day--holiday{background:var(--warning-soft)!important;color:var(--warning)!important}
+.cg-attendance-manager .am-day--missing{background:var(--danger-soft)!important;color:var(--danger)!important}
+.cg-attendance-manager .am-day--empty{background:var(--surface-2)!important;color:var(--text-muted)!important}
+
+.cg-attendance-manager .am-shift-layout{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);gap:10px}
+.cg-attendance-manager .am-shift-form{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.cg-attendance-manager .am-shift-form>label,.cg-attendance-manager .am-shift-assignment-controls label{display:flex;flex-direction:column;gap:5px;color:var(--text-secondary);font-size:8px;font-weight:700}
+.cg-attendance-manager .am-shift-form input,.cg-attendance-manager .am-shift-assignment-controls select{height:36px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-primary);padding:0 8px;font-size:9px;outline:none}
+.cg-attendance-manager .am-rule-toggle-row{display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:var(--surface-2)}
+.cg-attendance-manager .am-rule-toggle-row span{min-width:0}.cg-attendance-manager .am-rule-toggle-row strong{display:block;font-size:8.5px}.cg-attendance-manager .am-rule-toggle-row small{display:block;margin-top:2px;color:var(--text-muted);font-size:7.5px}
+.cg-attendance-manager .am-rule-toggle-row input{width:16px;height:16px}
+.cg-attendance-manager .am-shift-form-actions{display:flex;justify-content:flex-end;gap:6px}.cg-attendance-manager .am-shift-form-actions>button:not(.am-primary-button){min-height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-secondary);font-size:8px;font-weight:700}
+.cg-attendance-manager .am-shift-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.cg-attendance-manager .am-shift-list>button{width:100%;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);text-align:left}
+.cg-attendance-manager .am-shift-list>button>div{min-width:0}.cg-attendance-manager .am-shift-list strong{display:block;font-size:8.5px}.cg-attendance-manager .am-shift-list span{display:block;margin-top:2px;color:var(--text-muted);font-size:7.5px}.cg-attendance-manager .am-shift-list b{font-size:8px;color:var(--primary);white-space:nowrap}
+.cg-attendance-manager .am-shift-assignment-panel{margin-top:10px}
+.cg-attendance-manager .am-shift-assignment-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.cg-attendance-manager .am-shift-staff-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
+.cg-attendance-manager .am-shift-staff-grid label{display:flex;align-items:center;gap:7px;min-width:0;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2)}
+.cg-attendance-manager .am-shift-staff-grid input{width:15px;height:15px;flex:0 0 auto}.cg-attendance-manager .am-shift-staff-grid span{min-width:0}.cg-attendance-manager .am-shift-staff-grid strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px}.cg-attendance-manager .am-shift-staff-grid small{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);font-size:7px}
+.cg-attendance-manager .am-shift-assignment-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid var(--border);color:var(--text-muted);font-size:8px}
+.cg-attendance-manager .am-approval-avatar-fallback{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--primary-soft);color:var(--primary);font-size:10px;font-weight:800}
+
+@media(max-width:900px){
+ .cg-attendance-manager .am-filter-card{grid-template-columns:1fr 1fr}.cg-attendance-manager .am-search-field{grid-column:1/-1}
+ .cg-attendance-manager .am-shift-layout{grid-template-columns:1fr}
+ .cg-attendance-manager .am-shift-staff-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+ .cg-attendance-manager .am-daily-heading,.cg-attendance-manager .am-calendar-header-v2{align-items:stretch;flex-direction:column}
+ .cg-attendance-manager .am-daily-date{width:100%}.cg-attendance-manager .am-daily-date input{flex:1}
+ .cg-attendance-manager .am-calendar-month-controls{width:100%}.cg-attendance-manager .am-calendar-month-controls>label{flex:1}
+ .cg-attendance-manager .am-calendar-filter-card{grid-template-columns:1fr}
+ .cg-attendance-manager .am-filter-card{grid-template-columns:1fr}.cg-attendance-manager .am-search-field{grid-column:auto}
+ .cg-attendance-manager .am-filter-card select,.cg-attendance-manager .am-calendar-filter-card select{height:40px;font-size:16px}
+ .cg-attendance-manager .am-search-field{height:40px}.cg-attendance-manager .am-search-field input{font-size:16px}
+ .cg-attendance-manager .am-shift-assignment-controls{grid-template-columns:1fr}
+ .cg-attendance-manager .am-shift-staff-grid{grid-template-columns:1fr}
+ .cg-attendance-manager .am-shift-assignment-footer{align-items:stretch;flex-direction:column}.cg-attendance-manager .am-shift-assignment-footer button{width:100%}
+}
