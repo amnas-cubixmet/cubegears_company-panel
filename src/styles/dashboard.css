@@ -81,7 +81,20 @@
 }
 .dashboard-search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--text-primary);font-size:10px}
 .dashboard-search input::placeholder{color:var(--text-muted)}
-.booking-list{display:flex;flex-direction:column;gap:6px;max-height:440px;overflow-y:auto;margin-top:9px;padding-right:2px}
+.booking-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:440px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  margin-top:9px;
+  padding-right:0;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  overscroll-behavior:contain;
+}
+.booking-list::-webkit-scrollbar{display:none;width:0;height:0}
 .booking-row{
   width:100%;padding:10px;border:1px solid var(--border);border-radius:9px;background:var(--surface);
   color:var(--text-primary);text-align:left;cursor:pointer;transition:.15s ease
