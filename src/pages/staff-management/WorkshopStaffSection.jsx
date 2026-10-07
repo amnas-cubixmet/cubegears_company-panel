@@ -10,6 +10,7 @@ import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalShe
 import { StaffShiftCrud } from './StaffShiftCrud';
 import { StaffSkillCrud } from './StaffSkillCrud';
 import { StaffDocumentCrud } from './StaffDocumentCrud';
+import { StaffOverview } from '../../components/staff-management/StaffOverview';
 import {
   staffJobAssignments,
   staffPerformance
@@ -196,90 +197,14 @@ export const WorkshopStaffSection = ({ section }) => {
   }
 
   if (section === 'overview') {
-    const missingDocs = activeStaff.filter((item) => !item.documents?.length).length;
-
     return (
-      <div className="staff-workshop-view">
-        <div className="staff-workshop-kpi-grid">
-          <MetricCard label="Total Staff" value={overview.total} icon={Users} />
-          <MetricCard label="Active" value={overview.active} icon={UserCheck} tone="success" />
-          <MetricCard label="On Leave" value={overview.onLeave} icon={CalendarDays} tone="warning" />
-          <MetricCard label="New Joiners" value={overview.newJoiners} icon={UserPlus} />
-          <MetricCard label="Resigned / Inactive" value={overview.inactive} icon={UserMinus} tone="danger" />
-        </div>
-
-        <div className="staff-workshop-two-column">
-          <section className="staff-workshop-panel">
-            <div className="staff-workshop-panel__header">
-              <div>
-                <h3>Department / Team</h3>
-                <p>Current workshop staff distribution.</p>
-              </div>
-              <Building2 size={17} />
-            </div>
-            <div className="staff-department-list">
-              {teams.map((department) => {
-                const members = staff.filter((item) => item.department === department.name);
-                return (
-                  <div key={department.id} className="staff-data-row">
-                    <div>
-                      <strong>{department.name}</strong>
-                      <span>{department.lead}</span>
-                    </div>
-                    <b>{members.length}</b>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="staff-workshop-panel">
-            <div className="staff-workshop-panel__header">
-              <div>
-                <h3>Workshop Attention</h3>
-                <p>Items that need staff manager follow-up.</p>
-              </div>
-              <AlertTriangle size={17} />
-            </div>
-            <div className="staff-attention-grid">
-              <div><span>Missing Documents</span><strong>{missingDocs}</strong></div>
-              <div><span>Notice Period</span><strong>{staff.filter((item) => item.employmentStatus === 'Notice Period').length}</strong></div>
-              <div><span>Suspended</span><strong>{staff.filter((item) => item.employmentStatus === 'Suspended').length}</strong></div>
-              <div><span>Open Job Assignments</span><strong>{staffJobAssignments.length}</strong></div>
-            </div>
-          </section>
-        </div>
-
-        <section className="staff-workshop-panel">
-          <div className="staff-workshop-panel__header">
-            <div>
-              <h3>Active Job Assignments</h3>
-              <p>Mechanic and supervisor workload from current job cards.</p>
-            </div>
-            <Briefcase size={17} />
-          </div>
-          <div className="staff-job-grid">
-            {staffJobAssignments.map((job) => {
-              const person = staff.find((item) => item.id === job.staffId);
-              return (
-                <article key={job.id} className="staff-job-card">
-                  <div className="staff-job-card__head">
-                    <strong>{job.id}</strong>
-                    <span>{job.status}</span>
-                  </div>
-                  <h4>{job.vehicle}</h4>
-                  <p>{job.work}</p>
-                  <div className="staff-job-card__meta">
-                    <span>{person?.name || job.staffId}</span>
-                    <span>{job.bookedHours}h</span>
-                  </div>
-                  <div className="staff-progress"><i style={{ width: `${job.progress}%` }} /></div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      </div>
+      <StaffOverview
+        overview={overview}
+        staff={staff}
+        teams={teams}
+        activeStaff={activeStaff}
+        assignments={staffJobAssignments}
+      />
     );
   }
 
