@@ -6,6 +6,7 @@ import { storageHistoryService } from '../../services/storageHistory.service';
 import { AccountHeader } from '../../components/account';
 import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
 import '../../styles/account-billing.css';
+import '../../styles/account-dashboard.css';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
