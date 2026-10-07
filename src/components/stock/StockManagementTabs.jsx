@@ -1,17 +1,29 @@
 import React, { useEffect, useRef } from 'react';
+import {
+  BarChart3,
+  Boxes,
+  ClipboardCheck,
+  FolderTree,
+  LayoutDashboard,
+  PackageSearch,
+  Repeat2,
+  Settings2,
+  ShoppingCart,
+  Truck,
+} from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 const stockTabs = [
-  { label: 'Overview', path: '/stock/overview' },
-  { label: 'Parts & Products', path: '/stock/items' },
-  { label: 'Categories', path: '/stock/categories' },
-  { label: 'Stock In/Out', path: '/stock/movements' },
-  { label: 'Purchase Orders', path: '/stock/purchase-orders' },
-  { label: 'Suppliers', path: '/stock/suppliers' },
-  { label: 'Transfers', path: '/stock/transfers' },
-  { label: 'Adjustments', path: '/stock/adjustments' },
-  { label: 'Stock Audit', path: '/stock/audit' },
-  { label: 'Reports', path: '/stock/reports' }
+  { label: 'Overview', path: '/stock/overview', icon: LayoutDashboard },
+  { label: 'Parts & Products', path: '/stock/items', icon: Boxes },
+  { label: 'Categories', path: '/stock/categories', icon: FolderTree },
+  { label: 'Stock In/Out', path: '/stock/movements', icon: Repeat2 },
+  { label: 'Purchase Orders', path: '/stock/purchase-orders', icon: ShoppingCart },
+  { label: 'Suppliers', path: '/stock/suppliers', icon: Truck },
+  { label: 'Transfers', path: '/stock/transfers', icon: PackageSearch },
+  { label: 'Adjustments', path: '/stock/adjustments', icon: Settings2 },
+  { label: 'Stock Audit', path: '/stock/audit', icon: ClipboardCheck },
+  { label: 'Reports', path: '/stock/reports', icon: BarChart3 },
 ];
 
 export const StockManagementTabs = () => {
@@ -23,25 +35,29 @@ export const StockManagementTabs = () => {
       railRef.current?.querySelector('.stock-management-tab.active')?.scrollIntoView({
         behavior: 'smooth',
         inline: 'center',
-        block: 'nearest'
+        block: 'nearest',
       });
     }, 40);
+
     return () => window.clearTimeout(timer);
   }, [location.pathname]);
 
   return (
-    <div className="stock-management-tabs">
-      <div ref={railRef} className="stock-management-tabs__rail scroll-hidden">
-        {stockTabs.map((tab) => (
+    <nav className="stock-management-tabs" aria-label="Stock Management navigation">
+      <div ref={railRef} className="stock-management-tabs__rail">
+        {stockTabs.map(({ label, path, icon: Icon }) => (
           <NavLink
-            key={tab.path}
-            to={tab.path}
-            className={({ isActive }) => `stock-management-tab ${isActive ? 'active' : ''}`}
+            key={path}
+            to={path}
+            className={({ isActive }) =>
+              `stock-management-tab ${isActive ? 'active' : ''}`
+            }
           >
-            {tab.label}
+            <Icon size={13} />
+            <span>{label}</span>
           </NavLink>
         ))}
       </div>
-    </div>
+    </nav>
   );
 };
