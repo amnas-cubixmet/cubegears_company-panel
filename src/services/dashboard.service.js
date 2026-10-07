@@ -38,7 +38,7 @@ export const toggleClockIn = async (action, options = {}) => {
   }
 
   let location = {};
-  if (options.locationRequired) {
+  if (options.locationRequired || options.locationTrackingEnabled) {
     location = await getBrowserLocation();
   }
 
