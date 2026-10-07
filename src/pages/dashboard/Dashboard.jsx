@@ -55,7 +55,9 @@ export const Dashboard = () => {
 
   const handleClockToggle = async (action) => {
     if (!action) return;
-    await toggleClockIn(action);
+    await toggleClockIn(action, {
+      locationRequired: Boolean(data?.attendance?.locationRequired),
+    });
     await fetchDashboard();
   };
 
