@@ -3,6 +3,11 @@ import { Bell, Boxes, Building2, Clock3, CreditCard, FilePenLine, Plug, Save, Sh
 import { ThemeContext } from '../../context/ThemeContext';
 import { settingsService } from '../../services/settings.service';
 import { useNavigate } from 'react-router-dom';
+import {
+  SettingsEditor,
+  SettingsHeader,
+  SettingsSectionNav,
+} from '../../components/settings';
 import '../../styles/settings.css';
 
 const sections = [
@@ -80,60 +85,37 @@ export const Settings = () => {
 
   return (
     <div className="settings-page">
-      <header className="settings-hero">
-        <div>
-          <span className="settings-kicker">SYSTEM CONFIGURATION</span>
-          <h1>Settings</h1>
-          <p>Company defaults, workshop operations, billing, inventory, people, alerts and integrations.</p>
-        </div>
-        <div className="settings-hero-actions">
-          <button type="button" className="settings-secondary-button" onClick={() => navigate('/account/templates')}>
-            <FilePenLine size={16}/>PDF Templates
-          </button>
-          <button type="button" className="settings-primary-button" onClick={save} disabled={saving}>
-            <Save size={16}/>{saving ? 'Saving…' : 'Save Settings'}
-          </button>
-        </div>
-      </header>
+      <SettingsHeader
+        saving={saving}
+        onSave={save}
+        onTemplates={() => navigate('/account/templates')}
+      />
 
       {message && <div className="settings-message">{message}</div>}
 
-      <div className="settings-layout">
-        <aside className="settings-sidebar">
-          <div className="settings-sidebar-head">
-            <span>Configuration</span>
-            <strong>{sections.length} sections</strong>
-          </div>
-          <nav className="settings-nav" aria-label="Settings sections">
-          {sections.map(({ id, label, icon: Icon }) => <button type="button" key={id} className={active === id ? 'active' : ''} onClick={() => { setActive(id); setMessage(''); }}><Icon size={16} /><span>{label}</span></button>)}
-          </nav>
-        </aside>
+      <div className="settings-dashboard-layout">
+        <SettingsSectionNav
+          sections={sections}
+          active={active}
+          onChange={(id) => {
+            setActive(id);
+            setMessage('');
+          }}
+        />
 
-        <section className="settings-card">
-          <div className="settings-card-head">
-            <div>
-              <span className="settings-section-kicker">CURRENT SECTION</span>
-              <h2>{sections.find((item) => item.id === active)?.label}</h2>
-              <p>Changes apply to the company default configuration unless a branch override exists.</p>
-            </div>
-          </div>
-
-          {active === 'company' && <div className="settings-theme"><span><b>Appearance</b><small>Light, dark or follow system preference.</small></span><select value={themeMode} onChange={(e) => setThemeMode(e.target.value)}><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>}
-
-          <div className="settings-form-grid">
-            {(schemas[active] || []).map(([key, label, type, options]) => {
-              const value = data[active]?.[key] ?? (type === 'checkbox' ? false : '');
-              if (type === 'checkbox') return <label className="settings-toggle" key={key}><span><b>{label}</b><small>Company default</small></span><input type="checkbox" checked={Boolean(value)} onChange={(e) => update(key, e.target.checked)} /></label>;
-              return <label className={type === 'textarea' ? 'crud-field full' : 'crud-field'} key={key}><span>{label}</span>{type === 'select' ? <select value={value} onChange={(e) => update(key, e.target.value)}>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select> : type === 'textarea' ? <textarea rows="4" value={value} onChange={(e) => update(key, e.target.value)} /> : <input type={type} value={value} onChange={(e) => update(key, type === 'number' ? Number(e.target.value) : e.target.value)} />}</label>;
-            })}
-          </div>
-
-          <div className="settings-footer">
-            <button type="button" className="settings-secondary-button" onClick={() => settingsService.getAllSettings().then(setData)}>Reset Changes</button>
-            <button type="button" className="settings-primary-button" onClick={save} disabled={saving}><Save size={16}/>{saving ? 'Saving…' : 'Save Changes'}</button>
-          </div>
-        </section>
-      </div>
+        <SettingsEditor
+          active={active}
+          sections={sections}
+          schema={schemas[active] || []}
+          data={data[active] || {}}
+          themeMode={themeMode}
+          setThemeMode={setThemeMode}
+          onUpdate={update}
+          onReset={() => settingsService.getAllSettings().then(setData)}
+          onSave={save}
+          saving={saving}
+        />
+      </div>/div>
     </div>
   );
 };
