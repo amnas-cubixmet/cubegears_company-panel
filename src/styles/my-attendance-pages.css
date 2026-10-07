@@ -90,3 +90,41 @@
     font-size:9px;
   }
 }
+
+
+/* My Attendance overtime v2 */
+.my-attendance-dashboard-tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+.my-overtime-page{display:flex;flex-direction:column;gap:12px;min-width:0}
+.my-overtime-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.my-overtime-header h2{margin:0;font-size:16px;font-weight:750}
+.my-overtime-header p{margin:4px 0 0;color:var(--text-muted);font-size:9px}
+.my-overtime-header>span{min-height:26px;display:inline-flex;align-items:center;padding:0 9px;border-radius:999px;background:var(--warning-soft);color:var(--warning);font-size:8px;font-weight:750}
+.my-overtime-message{padding:9px 10px;border:1px solid var(--success);border-radius:9px;background:var(--success-soft);color:var(--success);font-size:9px;font-weight:700}
+.my-overtime-layout{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.2fr);gap:10px;align-items:start}
+.my-overtime-form,.my-overtime-records{min-width:0;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.my-overtime-form>header,.my-overtime-records>header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.my-overtime-form>header{justify-content:flex-start}
+.my-overtime-form h3,.my-overtime-records h3{margin:0;font-size:11px;font-weight:750}
+.my-overtime-form p,.my-overtime-records p{margin:3px 0 0;color:var(--text-muted);font-size:8px}
+.my-overtime-records>header>span{min-width:24px;height:24px;display:grid;place-items:center;border-radius:999px;background:var(--surface-2);font-size:8px;font-weight:750}
+.my-overtime-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.my-overtime-form label{display:flex;flex-direction:column;gap:5px;margin-top:9px;color:var(--text-secondary);font-size:8.5px;font-weight:700}
+.my-overtime-form input,.my-overtime-form textarea{width:100%;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-primary);font:inherit;font-size:9px;outline:none}
+.my-overtime-form input{height:36px;padding:0 9px}.my-overtime-form textarea{padding:9px;resize:vertical}
+.my-overtime-form input:focus,.my-overtime-form textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.my-overtime-form>button{width:100%;height:36px;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;border:0;border-radius:8px;background:var(--primary);color:#fff;font-size:9px;font-weight:750}
+.my-overtime-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.my-overtime-list article{padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2)}
+.my-overtime-list-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.my-overtime-list-head strong{display:block;font-size:9px}.my-overtime-list-head span{display:block;margin-top:2px;color:var(--text-muted);font-size:8px}
+.my-overtime-list-head b{min-height:20px;display:inline-flex;align-items:center;padding:0 7px;border-radius:999px;background:var(--warning-soft);color:var(--warning);font-size:7.5px;text-transform:capitalize}
+.my-overtime-list-head b.is-approved{background:var(--success-soft);color:var(--success)}.my-overtime-list-head b.is-rejected{background:var(--danger-soft);color:var(--danger)}.my-overtime-list-head b.is-cancelled{background:var(--surface);color:var(--text-muted)}
+.my-overtime-list article>p{margin:7px 0;color:var(--text-secondary);font-size:8.5px;line-height:1.45}
+.my-overtime-list footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:7px;border-top:1px solid var(--border);color:var(--text-muted);font-size:7.5px}
+.my-overtime-list footer button{min-height:26px;display:flex;align-items:center;gap:4px;padding:0 7px;border:1px solid color-mix(in srgb,var(--danger) 25%,var(--border));border-radius:7px;background:var(--danger-soft);color:var(--danger);font-size:7.5px;font-weight:700}
+.my-overtime-empty{padding:24px 8px;color:var(--text-muted);font-size:9px;text-align:center}
+
+@media(max-width:900px){.my-overtime-layout{grid-template-columns:1fr}}
+@media(max-width:700px){.my-attendance-dashboard-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.my-overtime-grid{grid-template-columns:1fr}}
