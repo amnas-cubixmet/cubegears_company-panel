@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ChevronRight, FilePenLine, HardDrive, History, IndianRupee, Infinity, ReceiptText, Settings2, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { storageHistoryService } from '../../services/storageHistory.service';
+import { AccountHeader } from '../../components/account';
 import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
 import '../../styles/account-billing.css';
 
@@ -224,28 +225,16 @@ export function SaaSAccount({ section = 'billing' }) {
 
   return (
     <div className="saas-page account-billing-page">
-      <header className="saas-page-head account-billing-hero">
-        <div>
-          <span className="saas-kicker">CUBIXGEAR ACCOUNT</span>
-          <h1>{section === 'storage' ? 'Media Storage' : 'Billing & Plan'}</h1>
-          <p>{section === 'storage' ? 'Unlimited photo storage billed at ₹2 per GB per day with interval history and daily file snapshots.' : 'Manage subscription billing, account usage, storage and document templates.'}</p>
-        </div>
-
-        <div className="account-billing-nav">
-          <button className={section === 'billing' ? 'active' : ''} onClick={() => navigate('/account/billing')}>
-            <ReceiptText size={15}/>Billing
-          </button>
-          <button className={section === 'storage' ? 'active' : ''} onClick={() => navigate('/account/storage')}>
-            <HardDrive size={15}/>Storage
-          </button>
-          <button onClick={() => navigate('/account/templates')}>
-            <FilePenLine size={15}/>Templates
-          </button>
-          <button onClick={() => navigate('/settings')}>
-            <Settings2 size={15}/>Settings
-          </button>
-        </div>
-      </header>
+      <AccountHeader
+        title={section === 'storage' ? 'Media Storage' : 'Billing & Plan'}
+        subtitle={
+          section === 'storage'
+            ? 'Unlimited photo storage with usage history and daily billing snapshots.'
+            : 'Manage subscription billing, account usage, storage and document templates.'
+        }
+        active={section}
+        onNavigate={navigate}
+      />
 
       {section === 'storage'
         ? <StorageView storage={storage} setStorage={setStorage} />
