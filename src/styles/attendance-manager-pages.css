@@ -84,3 +84,64 @@
     font-size:9px
   }
 }
+
+
+/* Attendance punch mode rules */
+.attendance-rules-page{display:flex;flex-direction:column;gap:12px;width:100%;min-width:0}
+.attendance-rules-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.attendance-rules-header h2{margin:0;font-size:16px;font-weight:750;letter-spacing:-.02em}
+.attendance-rules-header p{margin:4px 0 0;color:var(--text-muted);font-size:10px}
+.attendance-rules-save{height:36px;padding:0 12px;border:0;border-radius:9px;background:var(--primary);color:#fff;display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:750;cursor:pointer}
+.attendance-rules-save:disabled{opacity:.5;cursor:not-allowed}
+.attendance-rules-message{padding:9px 11px;border:1px solid var(--success);border-radius:9px;background:var(--success-soft);color:var(--success);font-size:10px;font-weight:700}
+.attendance-rule-section{padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm);min-width:0}
+.attendance-rule-title{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
+.attendance-rule-title>svg{margin-top:1px;color:var(--primary);flex:0 0 auto}
+.attendance-rule-title h3{margin:0;font-size:11px;font-weight:750}
+.attendance-rule-title p{margin:3px 0 0;color:var(--text-muted);font-size:8px;line-height:1.45}
+.attendance-mode-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.attendance-mode-card{min-width:0;min-height:112px;padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;color:var(--text-primary);cursor:pointer;position:relative}
+.attendance-mode-card:hover{border-color:color-mix(in srgb,var(--primary) 35%,var(--border))}
+.attendance-mode-card.is-selected{border-color:var(--primary);background:var(--primary-soft);box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 12%,transparent)}
+.attendance-mode-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;background:var(--surface);color:var(--primary)}
+.attendance-mode-copy{display:block;min-width:0}
+.attendance-mode-copy strong{display:block;font-size:10px}
+.attendance-mode-copy small{display:block;margin-top:4px;color:var(--text-muted);font-size:8px;line-height:1.45}
+.attendance-mode-radio{position:absolute;top:10px;right:10px;width:11px;height:11px;border:1px solid var(--border);border-radius:999px;background:var(--surface)}
+.attendance-mode-card.is-selected .attendance-mode-radio{border:3px solid var(--primary)}
+.attendance-rules-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.attendance-rule-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.attendance-rule-field{display:flex;flex-direction:column;gap:5px;margin-top:9px;min-width:0}
+.attendance-rule-form-grid .attendance-rule-field{margin-top:0}
+.attendance-rule-field-wide{grid-column:1/-1}
+.attendance-rule-field>span{font-size:9px;font-weight:700;color:var(--text-secondary)}
+.attendance-rule-field>small{font-size:8px;color:var(--text-muted);line-height:1.4}
+.attendance-rule-field input,.attendance-rule-field select{width:100%;height:36px;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:var(--field-bg);color:var(--text-primary);font-size:9px;outline:none}
+.attendance-rule-field input:focus,.attendance-rule-field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.attendance-rule-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px;margin-top:8px;border-radius:9px;background:var(--surface-2);cursor:pointer}
+.attendance-rule-toggle>span{min-width:0}
+.attendance-rule-toggle strong{display:block;font-size:9px}
+.attendance-rule-toggle small{display:block;margin-top:3px;color:var(--text-muted);font-size:8px;line-height:1.4}
+.attendance-rule-toggle input{width:17px;height:17px;flex:0 0 auto}
+.attendance-weekdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.attendance-weekdays button{height:32px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-secondary);font-size:8px;font-weight:700;cursor:pointer}
+.attendance-weekdays button.is-selected{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.attendance-rule-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--primary) 25%,var(--border));border-radius:10px;background:var(--primary-soft);color:var(--text-secondary);font-size:9px;line-height:1.5}
+.attendance-rule-note>svg{color:var(--primary);flex:0 0 auto}
+.attendance-rules-loading{padding:20px;color:var(--text-muted);font-size:10px}
+
+@media(max-width:980px){
+  .attendance-mode-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .attendance-rules-header{flex-direction:column}
+  .attendance-rules-save{width:100%;justify-content:center}
+  .attendance-rules-columns{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .attendance-mode-grid{grid-template-columns:1fr}
+  .attendance-mode-card{min-height:96px}
+  .attendance-rule-form-grid{grid-template-columns:1fr}
+  .attendance-rule-field-wide{grid-column:auto}
+  .attendance-weekdays{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
