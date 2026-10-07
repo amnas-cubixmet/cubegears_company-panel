@@ -23,7 +23,7 @@ const modes = [
   {
     value: 'hybrid',
     title: 'Hybrid',
-    description: 'Manual check-out is allowed; any missed open session is auto-closed at shift end.',
+    description: 'One manual session per day; if checkout is missed, system auto-closes it at shift end.',
     icon: TimerReset,
   },
 ];
