@@ -381,3 +381,16 @@
 @media(max-width:640px){
   .duty-auto-message{width:100%;justify-content:center}
 }
+
+
+.duty-error-message{
+  width:100%;
+  margin-top:8px;
+  padding:8px 10px;
+  border:1px solid var(--danger);
+  border-radius:8px;
+  background:var(--danger-soft);
+  color:var(--danger);
+  font-size:8.5px;
+  font-weight:650;
+}
