@@ -7,6 +7,7 @@ import {
   Trash2, Truck
 } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import { StockOverview } from '../../components/stock/StockOverview';
 import { stockManagementService } from '../../services/stockManagement.service';
 import {
   stockCategories,
@@ -604,142 +605,15 @@ export const StockManagementSection = ({ section, itemId }) => {
   }
 
   if (section === 'overview') {
-    const lowItems = items.filter((item) => item.onHand > 0 && item.available <= item.minimumStock);
-    const outItems = items.filter((item) => item.onHand <= 0);
-    const pendingPOs = purchases.filter((po)=>['Draft','Ordered','Partially Received'].includes(po.status));
-    const healthyItems = Math.max(0, items.length - lowItems.length - outItems.length);
-    const stockHealth = items.length ? Math.round((healthyItems / items.length) * 100) : 100;
-
     return (
-      <div className="stock-management-view stock-overview-dashboard">
-        <section className="stock-overview-hero">
-          <div>
-            <span>Inventory Control</span>
-            <h2>Stock Overview</h2>
-            <p>Monitor workshop parts, stock value, shortages, purchase orders and recent inventory movement.</p>
-          </div>
-          <div className="stock-overview-actions">
-            <button className="stock-link-button" onClick={()=>navigate('/stock/movements')}>
-              <ArrowLeftRight size={14}/> Movement
-            </button>
-            <button className="stock-primary-button" onClick={()=>navigate('/stock/add')}>
-              <Plus size={14}/> Add Item
-            </button>
-          </div>
-        </section>
-
-        <div className="stock-overview-kpis">
-          <Metric label="Total Items" value={dashboard?.totalItems || items.length} icon={Package} note="Inventory catalogue"/>
-          <Metric label="Stock Value" value={money.format(dashboard?.totalValue || 0)} icon={IndianRupee} note="Current inventory value"/>
-          <Metric label="Low Stock" value={dashboard?.lowStock || lowItems.length} icon={AlertTriangle} tone="warning" note="Needs replenishment"/>
-          <Metric label="Out of Stock" value={dashboard?.outOfStock || outItems.length} icon={PackageMinus} tone="danger" note="Immediate attention"/>
-        </div>
-
-        <div className="stock-overview-main-grid">
-          <section className="stock-panel stock-health-panel">
-            <SectionHeader title="Inventory Health" description="Current workshop stock availability."/>
-            <div className="stock-health-score">
-              <div className="stock-health-ring" style={{ '--stock-health': `${stockHealth * 3.6}deg` }}>
-                <div>
-                  <strong>{stockHealth}%</strong>
-                  <span>Healthy</span>
-                </div>
-              </div>
-              <div className="stock-health-breakdown">
-                <div><span className="is-success"></span><p>Healthy stock</p><strong>{healthyItems}</strong></div>
-                <div><span className="is-warning"></span><p>Low stock</p><strong>{lowItems.length}</strong></div>
-                <div><span className="is-danger"></span><p>Out of stock</p><strong>{outItems.length}</strong></div>
-              </div>
-            </div>
-
-            <div className="stock-health-footer">
-              <div><span>Pending POs</span><strong>{pendingPOs.length}</strong></div>
-              <div><span>Today Stock In</span><strong>{dashboard?.receivedToday || 0}</strong></div>
-              <div><span>Today Stock Out</span><strong>{dashboard?.issuedToday || 0}</strong></div>
-            </div>
-          </section>
-
-          <section className="stock-panel stock-attention-panel">
-            <SectionHeader
-              title="Needs Attention"
-              description="Items requiring stock action."
-              action={<button className="stock-link-button" onClick={()=>navigate('/stock/items')}>View All</button>}
-            />
-
-            <div className="stock-attention-list">
-              {[...outItems.map((item)=>({...item,_attention:'Out of Stock'})), ...lowItems.map((item)=>({...item,_attention:'Low Stock'}))]
-                .slice(0,6)
-                .map((item)=>(
-                  <button key={`${item.id}-${item._attention}`} onClick={()=>navigate(`/stock/items/${item.id}`)}>
-                    <span className={item._attention === 'Out of Stock' ? 'is-danger' : 'is-warning'}>
-                      {item._attention === 'Out of Stock' ? <PackageMinus size={14}/> : <AlertTriangle size={14}/>}
-                    </span>
-                    <div>
-                      <strong>{item.partName}</strong>
-                      <small>{item.sku} · {item.location || 'No rack location'}</small>
-                    </div>
-                    <b>{item.available || 0}</b>
-                  </button>
-                ))}
-              {!outItems.length && !lowItems.length ? <Empty>All stock levels are healthy.</Empty> : null}
-            </div>
-          </section>
-        </div>
-
-        <div className="stock-overview-secondary-grid">
-          <section className="stock-panel">
-            <SectionHeader
-              title="Low Stock"
-              description="Items at or below minimum quantity."
-              action={<button className="stock-link-button" onClick={()=>navigate('/stock/items')}>Products</button>}
-            />
-            <div className="stock-row-list">
-              {lowItems.slice(0,5).map((item)=>
-                <button key={item.id} className="stock-data-row is-clickable" onClick={()=>navigate(`/stock/items/${item.id}`)}>
-                  <div><strong>{item.partName}</strong><span>{item.sku} · Min {item.minimumStock}</span></div>
-                  <b className="is-warning">{item.available}</b>
-                </button>
-              )}
-              {!lowItems.length ? <Empty>No low-stock items.</Empty> : null}
-            </div>
-          </section>
-
-          <section className="stock-panel">
-            <SectionHeader title="Purchase Orders" description="Open supplier orders waiting for completion." action={<button className="stock-link-button" onClick={()=>navigate('/stock/purchase-orders')}>View POs</button>}/>
-            <div className="stock-row-list">
-              {pendingPOs.slice(0,5).map((po)=>
-                <button key={po.id} className="stock-data-row is-clickable" onClick={()=>navigate('/stock/purchase-orders')}>
-                  <div><strong>{po.purchaseNo}</strong><span>{po.supplier} · {po.status}</span></div>
-                  <b>{money.format(po.totalAmount || 0)}</b>
-                </button>
-              )}
-              {!pendingPOs.length ? <Empty>No pending purchase orders.</Empty> : null}
-            </div>
-          </section>
-        </div>
-
-        <section className="stock-panel stock-recent-movements">
-          <SectionHeader
-            title="Recent Stock Movement"
-            description="Latest inward, issue, return and adjustment activity."
-            action={<button className="stock-link-button" onClick={()=>navigate('/stock/movements')}>Full Ledger</button>}
-          />
-          <div className="stock-overview-ledger">
-            <div className="stock-overview-ledger-head">
-              <span>Type</span><span>Part</span><span>Reference</span><span>Qty</span><span>Balance</span>
-            </div>
-            {ledger.slice(0,8).map((movement)=>(
-              <div key={movement.id} className="stock-overview-ledger-row">
-                <span className={`stock-status ${statusClass(movement.type)}`}>{movement.type}</span>
-                <div><strong>{movement.partName}</strong><small>{movement.date}</small></div>
-                <span>{movement.jobRef || '—'}</span>
-                <b>{movement.qtyIn ? `+${movement.qtyIn}` : `-${movement.qtyOut}`}</b>
-                <em>{movement.balanceAfter}</em>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+      <StockOverview
+        dashboard={dashboard}
+        items={items}
+        purchases={purchases}
+        ledger={ledger}
+        formatMoney={(value) => money.format(value || 0)}
+        onNavigate={navigate}
+      />
     );
   }
 
