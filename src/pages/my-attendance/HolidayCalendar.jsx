@@ -4,6 +4,7 @@ import {
   AttendanceKpis,
   AttendanceMonthStrip,
   AttendanceOverviewHeader,
+  AttendancePunchPanel,
   EmployeeAttendanceCard,
 } from '../../components/my-attendance';
 import { minutesToHours } from '../../components/my-attendance/attendance.utils';
@@ -123,6 +124,13 @@ export const HolidayCalendar = () => {
       />
 
       <EmployeeAttendanceCard user={user} />
+      <AttendancePunchPanel
+        onChanged={() =>
+          setCurrentDate((value) =>
+            new Date(value.getFullYear(), value.getMonth(), value.getDate())
+          )
+        }
+      />
       <AttendanceKpis logs={monthLogs} />
 
       <AttendanceMonthStrip
