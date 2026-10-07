@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   AttendanceHistoryTable,
   AttendanceKpis,
-  AttendancePunchPanel,
   AttendanceMonthStrip,
   AttendanceOverviewHeader,
   AttendancePunchPanel,
