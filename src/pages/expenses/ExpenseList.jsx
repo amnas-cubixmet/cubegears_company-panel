@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
-  AlertTriangle,
   BarChart3,
   Calendar,
   CheckCircle2,
@@ -11,9 +10,7 @@ import {
   FileText,
   IndianRupee,
   Layers3,
-  Plus,
   Receipt,
-  Search,
   Trash2,
   Upload,
   WalletCards
