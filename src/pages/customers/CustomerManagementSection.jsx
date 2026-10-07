@@ -5,6 +5,7 @@ import {
   Wrench, FileText, AlertTriangle, CalendarClock, ClipboardList, ChevronRight,
   Building2, Gauge, PackageCheck, TrendingUp, UserX
 } from 'lucide-react';
+import { CustomerOverview } from '../../components/customers/CustomerOverview';
 import { customerService } from '../../services/customer.service';
 
 const money = new Intl.NumberFormat('en-IN', {
@@ -185,110 +186,16 @@ export const CustomerManagementSection = ({ section }) => {
 
   if (section === 'overview') {
     return (
-      <div className="customer-management-view">
-        <div className="customer-metric-grid">
-          <Metric label="Total Customers" value={metrics.total} icon={Users}/>
-          <Metric label="New Customers" value={metrics.newCustomers} icon={UserPlus} tone="success" note="This month"/>
-          <Metric label="Returning" value={metrics.returning} icon={Repeat2}/>
-          <Metric label="Active Vehicles" value={metrics.activeVehicles} icon={Car}/>
-          <Metric label="Outstanding" value={money.format(metrics.outstanding)} icon={IndianRupee} tone="warning"/>
-        </div>
-
-        <section className="customer-lookup-panel">
-          <div className="customer-lookup-panel__header">
-            <div>
-              <h2>Vehicle & Customer Quick Lookup</h2>
-              <p>Search registration number, VIN, Job Card number, phone or customer name.</p>
-            </div>
-            <Search size={18}/>
-          </div>
-
-          <label className="customer-lookup-input">
-            <Search size={16}/>
-            <input
-              value={lookup}
-              onChange={(event) => setLookup(event.target.value)}
-              placeholder="e.g. KL 10 AB 1234 / VIN / JOB-00251 / phone"
-            />
-          </label>
-
-          {lookupResult?.notFound ? (
-            <Empty text="No customer, vehicle or job card matched this search."/>
-          ) : lookupResult ? (
-            <div className="customer-lookup-result">
-              <div className="customer-lookup-person">
-                <div>
-                  <strong>{lookupResult.record.customer.name}</strong>
-                  <span>{lookupResult.record.customer.customerType} · {lookupResult.record.customer.phone}</span>
-                </div>
-                <button onClick={() => navigate(`/customers/${lookupResult.record.customer.id}`)}>Open Profile <ChevronRight size={14}/></button>
-              </div>
-
-              <div className="customer-lookup-grid">
-                <div><span>Vehicle</span><strong>{lookupResult.vehicle?.regNo || lookupResult.latestJob?.vehicleReg || '—'}</strong><small>{lookupResult.vehicle?.makeModel || lookupResult.latestJob?.vehicleInfo || 'Vehicle'}</small></div>
-                <div><span>Last Service</span><strong>{lookupResult.latestJob?.createdDate || lookupResult.vehicle?.lastService || '—'}</strong><small>{lookupResult.latestJob?.kilometre || lookupResult.vehicle?.kilometres || 'KM not recorded'}</small></div>
-                <div><span>Outstanding</span><strong>{money.format(lookupResult.record.outstanding)}</strong><small>{lookupResult.record.invoices.filter((item)=>Number(item.balanceDue||0)>0).length} pending invoice(s)</small></div>
-                <div><span>Open Job</span><strong>{lookupResult.openJob?.jobNumber || lookupResult.openJob?.id || 'None'}</strong><small>{lookupResult.openJob?.status || 'No current open job'}</small></div>
-              </div>
-
-              <div className="customer-lookup-parts">
-                <span>Last Replaced Parts</span>
-                <div>
-                  {lookupResult.replacedParts.length
-                    ? lookupResult.replacedParts.map((part) => <b key={part}>{part}</b>)
-                    : <b>No replacement parts found</b>}
-                </div>
-              </div>
-
-              <div className="customer-lookup-actions">
-                <button onClick={() => navigate(`/jobs/new?customerId=${lookupResult.record.customer.id}&vehicle=${encodeURIComponent(lookupResult.vehicle?.regNo || lookupResult.latestJob?.vehicleReg || '')}`)}>
-                  <ClipboardList size={14}/> Create Job Card
-                </button>
-                {lookupResult.openJob ? (
-                  <button onClick={() => navigate(`/jobs/${lookupResult.openJob.id}/overview`)}>
-                    <Wrench size={14}/> Open Current Job
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          ) : (
-            <div className="customer-lookup-hint">Type a vehicle number to instantly show customer profile, previous repairs, last service, outstanding and current job.</div>
-          )}
-        </section>
-
-        <div className="customer-two-column">
-          <section className="customer-panel">
-            <SectionHeader title="Recent Customers" description="Latest active workshop customers."/>
-            <div className="customer-row-list">
-              {records.slice(0, 5).map(({ customer, vehicles, jobs, outstanding }) => (
-                <button key={customer.id} className="customer-data-row is-clickable" onClick={() => navigate(`/customers/${customer.id}`)}>
-                  <div>
-                    <strong>{customer.name}</strong>
-                    <span>{customer.phone} · {vehicles.length} vehicle(s) · {jobs.length} job(s)</span>
-                  </div>
-                  <b>{outstanding ? money.format(outstanding) : 'Clear'}</b>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="customer-panel">
-            <SectionHeader title="Outstanding Attention" description="Customers with pending or partial invoices."/>
-            <div className="customer-row-list">
-              {outstandingInvoices.slice(0, 5).map((invoice) => (
-                <div key={`${invoice.customer.id}-${invoice.invoiceNo}`} className="customer-data-row">
-                  <div>
-                    <strong>{invoice.customer.name}</strong>
-                    <span>{invoice.invoiceNo} · {invoice.vehicle}</span>
-                  </div>
-                  <b className="is-warning">{money.format(invoice.balanceDue)}</b>
-                </div>
-              ))}
-              {!outstandingInvoices.length ? <Empty text="No outstanding customer invoices."/> : null}
-            </div>
-          </section>
-        </div>
-      </div>
+      <CustomerOverview
+        metrics={metrics}
+        records={records}
+        outstandingInvoices={outstandingInvoices}
+        lookup={lookup}
+        setLookup={setLookup}
+        lookupResult={lookupResult}
+        formatMoney={(value) => money.format(value || 0)}
+        onNavigate={navigate}
+      />
     );
   }
 
