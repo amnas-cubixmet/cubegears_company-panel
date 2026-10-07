@@ -1,15 +1,18 @@
 import React from 'react';
-import { CustomerManagementTabs } from '../../components/customers/CustomerManagementTabs';
+import {
+  CustomerManagementHeader,
+  CustomerManagementTabs,
+} from '../../components/customers';
 import { CustomerManagementSection } from './CustomerManagementSection';
+import '../../styles/customer-management.css';
 
 export const CustomerManagement = ({ section = 'overview' }) => (
   <div className="customer-management-page cg-customers">
-    <header className="customer-management-header">
-      <h1>Customers Management</h1>
-      <p>Customers, vehicles, service history, outstanding payments, reminders and workshop relationships.</p>
-    </header>
-
+    <CustomerManagementHeader />
     <CustomerManagementTabs />
-    <CustomerManagementSection section={section} />
+
+    <main className="customer-management-content">
+      <CustomerManagementSection section={section} />
+    </main>
   </div>
 );
