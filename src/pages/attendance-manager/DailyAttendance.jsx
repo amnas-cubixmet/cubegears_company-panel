@@ -249,7 +249,7 @@ export const DailyAttendance = () => {
                     <div><span>Branch</span><strong>{item.branch || '—'}</strong></div>
                     <div><span>Check In</span><strong>{formatTime(item.clockIn)}</strong></div>
                     <div><span>Check Out</span><strong>{formatTime(item.clockOut)}</strong></div>
-                    <div><span>Worked</span><strong>{minutesLabel(item.workedMinutes)}</strong></div>
+                    <div><span>Worked</span><strong>{minutesLabel(item.liveWorkedMinutes ?? item.workedMinutes)}</strong></div>
                     <div><span>Sessions</span><strong>{item.sessionCount || 0}</strong></div>
                     <div><span>OT</span><strong>{minutesLabel(item.overtimeMinutes)}</strong></div>
                   </div>
@@ -329,7 +329,7 @@ export const DailyAttendance = () => {
                       <td>{formatTime(item.clockIn)}</td>
                       <td>{formatTime(item.clockOut)}</td>
                       <td><strong>{item.sessionCount || 0}</strong></td>
-                      <td><strong>{minutesLabel(item.workedMinutes)}</strong></td>
+                      <td><strong>{minutesLabel(item.liveWorkedMinutes ?? item.workedMinutes)}</strong></td>
                       <td>{minutesLabel(item.overtimeMinutes)}</td>
                       <td>
                         <select value={item.status} onChange={(event) => quickMark(item, event.target.value)}>
