@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import {
   CalendarDays,
   Clock3,
+  BellRing,
   MapPin,
+  Plus,
   Save,
   ShieldCheck,
+  Trash2,
   TriangleAlert,
 } from 'lucide-react';
 import { AttendanceModeSelector } from '../../components/attendance-manager/AttendanceModeSelector';
@@ -20,6 +23,11 @@ const defaults = {
   autoCheckoutGraceMinutes: 0,
   missingPunchPolicy: 'request_correction',
   locationRequired: false,
+  locationTrackingEnabled: false,
+  missingPunchReminderEnabled: false,
+  missingPunchReminderMinutes: 15,
+  leaveRequestNotifications: true,
+  overtimeRequestNotifications: true,
   correctionApproval: true,
   allowSelfApproval: false,
   weekendDays: ['Sunday'],
@@ -43,13 +51,25 @@ export const RulesSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [holidays, setHolidays] = useState([]);
+  const [holidayForm, setHolidayForm] = useState({
+    date: '',
+    name: '',
+    holiday_type: 'Company',
+    is_optional: false,
+  });
 
   const loadRules = async () => {
     setLoading(true);
     try {
-      const data = normalizeRules(await attendanceManagerService.getRules());
+      const [ruleData, holidayRows] = await Promise.all([
+        attendanceManagerService.getRules(),
+        attendanceManagerService.getHolidays(),
+      ]);
+      const data = normalizeRules(ruleData);
       setRules(data);
       setInitialRules(data);
+      setHolidays(Array.isArray(holidayRows) ? holidayRows : []);
     } finally {
       setLoading(false);
     }
@@ -87,6 +107,27 @@ export const RulesSettings = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const addHoliday = async (event) => {
+    event.preventDefault();
+    if (!holidayForm.date || !holidayForm.name.trim()) return;
+    await attendanceManagerService.createHoliday({
+      ...holidayForm,
+      name: holidayForm.name.trim(),
+    });
+    setHolidayForm({
+      date: '',
+      name: '',
+      holiday_type: 'Company',
+      is_optional: false,
+    });
+    setHolidays(await attendanceManagerService.getHolidays());
+  };
+
+  const removeHoliday = async (id) => {
+    await attendanceManagerService.deleteHoliday(id);
+    setHolidays((current) => current.filter((item) => item.id !== id));
   };
 
   if (loading || !rules) {
@@ -210,6 +251,31 @@ export const RulesSettings = () => {
 
           <label className="attendance-rule-toggle">
             <span>
+              <strong>Send Missing Punch Reminder</strong>
+              <small>Notify the employee when shift end passes with an open punch.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={Boolean(rules.missingPunchReminderEnabled)}
+              onChange={(e) => change('missingPunchReminderEnabled', e.target.checked)}
+            />
+          </label>
+
+          {rules.missingPunchReminderEnabled && (
+            <label className="attendance-rule-field">
+              <span>Reminder Delay After Shift End</span>
+              <small>Minutes after scheduled shift end.</small>
+              <input
+                type="number"
+                min="0"
+                value={rules.missingPunchReminderMinutes}
+                onChange={(e) => change('missingPunchReminderMinutes', Math.max(0, Number(e.target.value)))}
+              />
+            </label>
+          )}
+
+          <label className="attendance-rule-toggle">
+            <span>
               <strong>Correction Requires Approval</strong>
               <small>Manager must approve employee punch corrections.</small>
             </span>
@@ -237,18 +303,34 @@ export const RulesSettings = () => {
           <div className="attendance-rule-title">
             <MapPin size={16} />
             <div>
-              <h3>Punch Security</h3>
-              <p>Optional controls for attendance punches.</p>
+              <h3>Punch Location</h3>
+              <p>Store phone/browser GPS coordinates with check-in and check-out.</p>
             </div>
           </div>
 
           <label className="attendance-rule-toggle">
             <span>
-              <strong>Require Device Location</strong>
-              <small>Check-in/out is rejected when browser location is unavailable.</small>
+              <strong>Store Punch Location</strong>
+              <small>When OFF, new punches do not store or display GPS coordinates.</small>
             </span>
             <input
               type="checkbox"
+              checked={Boolean(rules.locationTrackingEnabled)}
+              onChange={(e) => {
+                change('locationTrackingEnabled', e.target.checked);
+                if (!e.target.checked) change('locationRequired', false);
+              }}
+            />
+          </label>
+
+          <label className="attendance-rule-toggle">
+            <span>
+              <strong>Require Device Location</strong>
+              <small>Reject the punch when location permission is unavailable.</small>
+            </span>
+            <input
+              type="checkbox"
+              disabled={!rules.locationTrackingEnabled}
               checked={Boolean(rules.locationRequired)}
               onChange={(e) => change('locationRequired', e.target.checked)}
             />
@@ -320,6 +402,97 @@ export const RulesSettings = () => {
           </label>
         </section>
       </div>
+
+      <section className="attendance-rule-section">
+        <div className="attendance-rule-title">
+          <BellRing size={16} />
+          <div>
+            <h3>Attendance Notifications</h3>
+            <p>Control manager alerts for employee requests.</p>
+          </div>
+        </div>
+
+        <label className="attendance-rule-toggle">
+          <span>
+            <strong>Leave Request Notifications</strong>
+            <small>Notify attendance managers when staff submits a leave request.</small>
+          </span>
+          <input
+            type="checkbox"
+            checked={Boolean(rules.leaveRequestNotifications)}
+            onChange={(e) => change('leaveRequestNotifications', e.target.checked)}
+          />
+        </label>
+
+        <label className="attendance-rule-toggle">
+          <span>
+            <strong>Overtime Request Notifications</strong>
+            <small>Notify attendance managers when staff submits overtime.</small>
+          </span>
+          <input
+            type="checkbox"
+            checked={Boolean(rules.overtimeRequestNotifications)}
+            onChange={(e) => change('overtimeRequestNotifications', e.target.checked)}
+          />
+        </label>
+      </section>
+
+      <section className="attendance-rule-section attendance-holiday-manager">
+        <div className="attendance-rule-title">
+          <CalendarDays size={16} />
+          <div>
+            <h3>Company Holidays</h3>
+            <p>Add Onam, Christmas and other non-weekend holidays to the attendance calendar.</p>
+          </div>
+        </div>
+
+        <form className="attendance-holiday-form" onSubmit={addHoliday}>
+          <input
+            type="date"
+            value={holidayForm.date}
+            onChange={(e) => setHolidayForm((old) => ({ ...old, date: e.target.value }))}
+            required
+          />
+          <input
+            value={holidayForm.name}
+            onChange={(e) => setHolidayForm((old) => ({ ...old, name: e.target.value }))}
+            placeholder="Onam / Christmas / Company Holiday"
+            required
+          />
+          <select
+            value={holidayForm.holiday_type}
+            onChange={(e) => setHolidayForm((old) => ({ ...old, holiday_type: e.target.value }))}
+          >
+            <option value="Company">Company Holiday</option>
+            <option value="Festival">Festival</option>
+            <option value="Public">Public Holiday</option>
+          </select>
+          <label>
+            <input
+              type="checkbox"
+              checked={holidayForm.is_optional}
+              onChange={(e) => setHolidayForm((old) => ({ ...old, is_optional: e.target.checked }))}
+            />
+            Optional
+          </label>
+          <button type="submit"><Plus size={13}/>Add Holiday</button>
+        </form>
+
+        <div className="attendance-holiday-list">
+          {holidays.map((holiday) => (
+            <div key={holiday.id}>
+              <span>
+                <strong>{holiday.name}</strong>
+                <small>{holiday.date} · {holiday.holiday_type || holiday.holidayType || 'Company'}</small>
+              </span>
+              <button type="button" onClick={() => removeHoliday(holiday.id)} aria-label="Delete holiday">
+                <Trash2 size={13}/>
+              </button>
+            </div>
+          ))}
+          {!holidays.length && <div className="attendance-holiday-empty">No company holidays added yet.</div>}
+        </div>
+      </section>
 
       <section className="attendance-rule-note">
         <ShieldCheck size={16} />
