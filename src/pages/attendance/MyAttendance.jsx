@@ -5,6 +5,7 @@ import { HolidayCalendar } from '../my-attendance/HolidayCalendar';
 import { HistoryLogs } from '../my-attendance/HistoryLogs';
 import { LeaveRequests } from '../my-attendance/LeaveRequests';
 import { AttendanceSummary } from '../my-attendance/AttendanceSummary';
+import { OvertimeRequests } from '../my-attendance/OvertimeRequests';
 import '../../styles/my-attendance-pages.css';
 
 export const MyAttendance = () => {
@@ -15,9 +16,11 @@ export const MyAttendance = () => {
     ? 'history'
     : location.pathname.includes('/leave')
       ? 'leave'
-      : location.pathname.includes('/summary')
-        ? 'summary'
-        : 'calendar';
+      : location.pathname.includes('/overtime')
+        ? 'overtime'
+        : location.pathname.includes('/summary')
+          ? 'summary'
+          : 'calendar';
 
   return (
     <div className="my-attendance-pages cg-attendance">
@@ -28,6 +31,7 @@ export const MyAttendance = () => {
         {activeTab === 'calendar' && <HolidayCalendar />}
         {activeTab === 'history' && <HistoryLogs />}
         {activeTab === 'leave' && <LeaveRequests />}
+        {activeTab === 'overtime' && <OvertimeRequests />}
         {activeTab === 'summary' && <AttendanceSummary />}
       </main>
     </div>
