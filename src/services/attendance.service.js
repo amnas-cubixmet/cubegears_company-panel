@@ -20,6 +20,8 @@ const normalizeSession = (session = {}, fallbackId = 'session') => ({
   workedMinutes: Number(session.workedMinutes ?? session.worked_minutes ?? 0),
   autoClosed: Boolean(session.autoClosed ?? session.auto_closed ?? false),
   source: session.source || 'web',
+  clockInLocation: session.clockInLocation ?? session.clock_in_location ?? {},
+  clockOutLocation: session.clockOutLocation ?? session.clock_out_location ?? {},
 });
 
 const normalizeAttendanceLog = (row = {}) => {
@@ -119,7 +121,7 @@ export const punchAttendance = async (action, options = {}) => {
   }
 
   let location = {};
-  if (options.locationRequired) {
+  if (options.locationRequired || options.locationTrackingEnabled) {
     location = await getBrowserLocation();
   }
 
@@ -128,6 +130,36 @@ export const punchAttendance = async (action, options = {}) => {
     source: 'web',
     location,
   });
+};
+
+export const submitOvertimeRequest = async (payload) => {
+  if (USE_MOCK_API) {
+    await delay();
+    return {
+      id: `OT-${Date.now()}`,
+      ...payload,
+      overtimeHours: Number(payload.overtimeHours || 0),
+      status: 'Pending',
+    };
+  }
+  return apiClient.post('/my-attendance/overtime', payload);
+};
+
+export const getMyOvertimeRequests = async () => {
+  if (USE_MOCK_API) {
+    await delay();
+    return [];
+  }
+  const rows = await apiClient.get('/my-attendance/overtime');
+  return Array.isArray(rows) ? rows : rows?.results || [];
+};
+
+export const cancelOvertimeRequest = async (id) => {
+  if (USE_MOCK_API) {
+    await delay();
+    return { id, status: 'Cancelled' };
+  }
+  return apiClient.post(`/my-attendance/overtime/${id}/cancel`);
 };
 
 export const submitPunchCorrection = async (correctionData) => {
@@ -156,4 +188,7 @@ export const attendanceService = {
   getAttendanceStatus,
   punchAttendance,
   submitPunchCorrection,
+  submitOvertimeRequest,
+  getMyOvertimeRequests,
+  cancelOvertimeRequest,
 };
