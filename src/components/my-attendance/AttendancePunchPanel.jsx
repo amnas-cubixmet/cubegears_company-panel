@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock3, LogIn, LogOut, Repeat2 } from 'lucide-react';
+import { CheckCircle2, Clock3, LogIn, LogOut, Repeat2 } from 'lucide-react';
 import { attendanceService } from '../../services/attendance.service';
 
 const modeLabel = {
@@ -63,7 +63,7 @@ export const AttendancePunchPanel = ({ onChanged }) => {
   const ActionIcon = state?.nextAction === 'check_out' ? LogOut : LogIn;
 
   return (
-    <section className="attendance-punch-card">
+    <section className={`attendance-punch-card ${isIn ? 'is-live' : state?.nextAction ? 'is-ready' : 'is-complete'}`}>
       <div className="attendance-punch-status">
         <span className={`attendance-live-dot ${isIn ? 'is-online' : ''}`} />
         <span>
@@ -101,7 +101,10 @@ export const AttendancePunchPanel = ({ onChanged }) => {
             {busy ? 'Please wait…' : state.nextAction === 'check_out' ? 'Check Out' : 'Check In'}
           </button>
         ) : (
-          <span>{state?.reason || (isIn ? 'Automatic checkout is active.' : 'Attendance completed for today.')}</span>
+          <div className="attendance-punch-note">
+            <CheckCircle2 size={14} />
+            <span>{state?.reason || (isIn ? 'Automatic checkout is active.' : 'Attendance completed for today.')}</span>
+          </div>
         )}
       </div>
 
