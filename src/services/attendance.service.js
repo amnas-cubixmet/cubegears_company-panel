@@ -12,28 +12,38 @@ const dayName = (dateValue) => {
     : date.toLocaleDateString('en-US', { weekday: 'long' });
 };
 
+const normalizeSession = (session = {}, fallbackId = 'session') => ({
+  ...session,
+  id: session.id || fallbackId,
+  clockIn: session.clockIn ?? session.clock_in ?? null,
+  clockOut: session.clockOut ?? session.clock_out ?? null,
+  workedMinutes: Number(session.workedMinutes ?? session.worked_minutes ?? 0),
+  autoClosed: Boolean(session.autoClosed ?? session.auto_closed ?? false),
+  source: session.source || 'web',
+});
+
 const normalizeAttendanceLog = (row = {}) => {
-  if (row.totalWorkedMinutes != null || Array.isArray(row.sessions)) {
-    return row;
-  }
+  const rawSessions = Array.isArray(row.sessions)
+    ? row.sessions
+    : (row.clock_in || row.clock_out)
+      ? [{
+          id: `${row.id || 'attendance'}-session`,
+          clock_in: row.clock_in || null,
+          clock_out: row.clock_out || null,
+          worked_minutes: Number(row.worked_minutes ?? row.workedMinutes ?? 0),
+        }]
+      : [];
 
   return {
     ...row,
     dayOfWeek: row.dayOfWeek || dayName(row.date),
     shiftName: row.shiftName || 'General Shift (09:00 AM - 06:00 PM)',
-    totalWorkedMinutes: Number(row.worked_minutes ?? row.workedMinutes ?? 0),
-    lateMinutes: Number(row.late_minutes ?? row.lateMinutes ?? 0),
-    earlyExitMinutes: Number(row.early_exit_minutes ?? row.earlyExitMinutes ?? 0),
-    overtimeMinutes: Number(row.overtime_minutes ?? row.overtimeMinutes ?? 0),
-    sessions: row.sessions || (
-      row.clock_in || row.clock_out
-        ? [{
-            id: `${row.id || 'attendance'}-session`,
-            clockIn: row.clock_in || null,
-            clockOut: row.clock_out || null,
-            duration: Number(row.worked_minutes ?? row.workedMinutes ?? 0),
-          }]
-        : []
+    totalWorkedMinutes: Number(row.totalWorkedMinutes ?? row.worked_minutes ?? row.workedMinutes ?? 0),
+    lateMinutes: Number(row.lateMinutes ?? row.late_minutes ?? 0),
+    earlyExitMinutes: Number(row.earlyExitMinutes ?? row.early_exit_minutes ?? 0),
+    overtimeMinutes: Number(row.overtimeMinutes ?? row.overtime_minutes ?? 0),
+    sessions: rawSessions.map((session, index) =>
+      normalizeSession(session, `${row.id || 'attendance'}-${index + 1}`)
     ),
   };
 };
