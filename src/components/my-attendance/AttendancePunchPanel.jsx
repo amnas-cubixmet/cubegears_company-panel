@@ -64,29 +64,31 @@ export const AttendancePunchPanel = ({ onChanged }) => {
 
   return (
     <section className={`attendance-punch-card ${isIn ? 'is-live' : state?.nextAction ? 'is-ready' : 'is-complete'}`}>
-      <div className="attendance-punch-status">
-        <span className={`attendance-live-dot ${isIn ? 'is-online' : ''}`} />
-        <span>
-          <small>Today</small>
-          <strong>{isIn ? 'Checked In' : 'Checked Out'}</strong>
-        </span>
-      </div>
+      <div className="attendance-punch-main">
+        <div className="attendance-punch-status">
+          <span className={`attendance-live-dot ${isIn ? 'is-online' : ''}`} />
+          <span>
+            <small>Today</small>
+            <strong>{isIn ? 'Checked In' : 'Checked Out'}</strong>
+          </span>
+        </div>
 
-      <div className="attendance-punch-meta">
-        <div>
-          <Clock3 size={14} />
-          <span><small>Mode</small><strong>{modeLabel[state?.attendanceMode] || 'Attendance'}</strong></span>
-        </div>
-        <div>
-          <Repeat2 size={14} />
-          <span><small>Sessions</small><strong>{state?.sessionCount || 0}</strong></span>
-        </div>
-        {autoTime && (
+        <div className="attendance-punch-meta">
           <div>
-            <Clock3 size={14} />
-            <span><small>Auto Checkout</small><strong>{autoTime}</strong></span>
+            <Clock3 size={13} />
+            <span><small>Mode</small><strong>{modeLabel[state?.attendanceMode] || 'Attendance'}</strong></span>
           </div>
-        )}
+          <div>
+            <Repeat2 size={13} />
+            <span><small>Sessions</small><strong>{state?.sessionCount || 0}</strong></span>
+          </div>
+          {autoTime && (
+            <div>
+              <Clock3 size={13} />
+              <span><small>Auto Checkout</small><strong>{autoTime}</strong></span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="attendance-punch-action">
