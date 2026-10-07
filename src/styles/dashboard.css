@@ -396,3 +396,28 @@
   font-size:8.5px;
   font-weight:650;
 }
+
+
+.dashboard-attendance-rule-note{
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:0 10px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-secondary);
+  font-size:9px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.dashboard-attendance-rule-note svg{color:var(--primary);flex:0 0 auto}
+@media(max-width:640px){
+  .dashboard-attendance-rule-note{
+    width:100%;
+    justify-content:center;
+    white-space:normal;
+    text-align:center;
+  }
+}
