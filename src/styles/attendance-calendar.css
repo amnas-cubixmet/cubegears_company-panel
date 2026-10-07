@@ -652,3 +652,147 @@
     align-items:flex-start;
   }
 }
+
+
+/* ---------- Compact Attendance Punch Card v2 ---------- */
+.attendance-punch-card{
+  grid-template-columns:minmax(0,1fr) auto;
+  min-height:56px;
+  gap:10px;
+  padding:8px 9px;
+}
+
+.attendance-punch-main{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.attendance-punch-status{
+  flex:0 0 auto;
+  min-width:120px;
+  gap:7px;
+  padding:2px 4px;
+}
+
+.attendance-punch-meta{
+  flex:0 1 auto;
+  gap:5px;
+}
+
+.attendance-punch-meta>div{
+  min-height:36px;
+  padding:5px 8px;
+  border-radius:8px;
+}
+
+.attendance-punch-meta strong{
+  max-width:108px;
+  font-size:8px;
+}
+
+.attendance-punch-action{
+  min-width:auto;
+}
+
+.attendance-punch-action button{
+  min-width:92px;
+  height:36px;
+  padding:0 10px;
+}
+
+.attendance-punch-note{
+  width:auto;
+  max-width:300px;
+  min-height:34px;
+}
+
+@media(max-width:900px){
+  .attendance-punch-card{
+    grid-template-columns:minmax(0,1fr) auto;
+  }
+
+  .attendance-punch-main{
+    gap:8px;
+  }
+
+  .attendance-punch-action{
+    grid-column:auto;
+    justify-content:flex-end;
+  }
+
+  .attendance-punch-note{
+    width:auto;
+    max-width:260px;
+    justify-content:flex-end;
+    margin-left:0;
+  }
+
+  .attendance-punch-note span{
+    text-align:right;
+  }
+}
+
+@media(max-width:680px){
+  .attendance-punch-card{
+    grid-template-columns:1fr;
+    gap:8px;
+    padding:9px;
+  }
+
+  .attendance-punch-main{
+    width:100%;
+    align-items:stretch;
+    flex-direction:column;
+    gap:7px;
+  }
+
+  .attendance-punch-status{
+    min-width:0;
+  }
+
+  .attendance-punch-meta{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+  }
+
+  .attendance-punch-meta>div{
+    width:100%;
+  }
+
+  .attendance-punch-meta>div:last-child:nth-child(3){
+    grid-column:1/-1;
+  }
+
+  .attendance-punch-action{
+    width:100%;
+    justify-content:stretch;
+  }
+
+  .attendance-punch-action button{
+    width:100%;
+    min-height:40px;
+  }
+
+  .attendance-punch-note{
+    width:100%;
+    max-width:none;
+    justify-content:flex-start;
+  }
+
+  .attendance-punch-note span{
+    text-align:left;
+  }
+}
+
+@media(max-width:380px){
+  .attendance-punch-meta{
+    grid-template-columns:1fr;
+  }
+
+  .attendance-punch-meta>div:last-child:nth-child(3){
+    grid-column:auto;
+  }
+}
