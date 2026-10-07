@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearch } from '../common/GlobalSearch';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 import { getUserRoleLabel } from '../../utils/authDisplay';
+import { hasPermission } from '../../utils/permissions';
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -14,6 +15,15 @@ export const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const roleLabel = getUserRoleLabel(user);
+  const initials = String(user?.name || user?.email || 'CG')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase() || 'CG';
+  const canViewNotifications = hasPermission(user, 'notifications.view');
+  const canViewSettings = hasPermission(user, 'settings.view');
   const desktopProfileRef = useRef(null);
   const mobileProfileRef = useRef(null);
 
@@ -62,7 +72,9 @@ export const Header = () => {
   const renderProfileMenu = () => (
     <div className="header-profile-menu">
       <button type="button" onClick={() => go('/profile')}><User size={15}/> Profile & Account</button>
-      <button type="button" onClick={() => go('/settings')}><Settings size={15}/> Settings</button>
+      {canViewSettings && (
+        <button type="button" onClick={() => go('/settings')}><Settings size={15}/> Settings</button>
+      )}
       <div className="header-menu-separator" />
       <button type="button" className="is-danger" onClick={() => { setProfileDropdownOpen(false); logout(); }}><LogOut size={15}/> Logout</button>
     </div>
@@ -83,18 +95,26 @@ export const Header = () => {
             <span>{dateLabel}</span>
           </div>
 
-          <button type="button" className="header-icon-button has-notification-count" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
-            <Bell size={15}/>
-            {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
-          </button>
+          {canViewNotifications && (
+            <button type="button" className="header-icon-button has-notification-count" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
+              <Bell size={15}/>
+              {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
+            </button>
+          )}
 
-          <button type="button" className="header-icon-button" onClick={() => navigate('/settings')} aria-label="Settings">
-            <Settings size={15}/>
-          </button>
+          {canViewSettings && (
+            <button type="button" className="header-icon-button" onClick={() => navigate('/settings')} aria-label="Settings">
+              <Settings size={15}/>
+            </button>
+          )}
 
           <div className="header-profile-wrap" ref={desktopProfileRef}>
             <button type="button" className="header-profile-button" onClick={() => setProfileDropdownOpen((value) => !value)} aria-expanded={profileDropdownOpen}>
-              <img src={user?.avatar} alt="" />
+              {user?.avatar ? (
+                <img src={user.avatar} alt="" />
+              ) : (
+                <span className="header-avatar-fallback" aria-hidden="true">{initials}</span>
+              )}
               <span className="header-profile-copy">
                 <strong>{user?.name || 'User'}</strong>
                 <small>{roleLabel}</small>
@@ -110,18 +130,27 @@ export const Header = () => {
         <div className="mobile-header-row">
           <button type="button" className="mobile-brand" onClick={() => navigate('/dashboard')} aria-label="Go to dashboard">
             <span>CG</span>
-            <strong>CubeGears</strong>
+            <span className="mobile-brand-copy">
+              <strong>CubixGear</strong>
+              <small>{pageTitle}</small>
+            </span>
           </button>
 
           <div className="mobile-header-actions">
             <button type="button" onClick={() => setSearchOpen((value) => !value)}><Search size={15}/></button>
-            <button type="button" className="mobile-notification-button" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
-              <Bell size={15}/>
-              {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
-            </button>
+            {canViewNotifications && (
+              <button type="button" className="mobile-notification-button" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
+                <Bell size={15}/>
+                {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
+              </button>
+            )}
             <div className="header-profile-wrap" ref={mobileProfileRef}>
               <button type="button" className="mobile-profile-button" onClick={() => setProfileDropdownOpen((value) => !value)} aria-expanded={profileDropdownOpen}>
-                <img src={user?.avatar} alt="Profile" />
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="Profile" />
+                ) : (
+                  <span className="mobile-avatar-fallback" aria-hidden="true">{initials}</span>
+                )}
               </button>
               {profileDropdownOpen && renderProfileMenu()}
             </div>
