@@ -3,6 +3,13 @@ import { ArrowLeft, CheckCircle2, Eye, Plus, Search } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { resourceConfigs } from '../operations/resourceConfigs';
 import { billingService, calculateDocumentTotals } from '../../services/billing.service';
+import {
+  PaymentFilterToolbar,
+  PaymentOverviewStats,
+  PaymentRecordsPanel,
+  PaymentsHeader,
+} from '../../components/payments';
+import { normalizePaymentRow } from '../../components/payments/payments.utils';
 import '../../styles/payments.css';
 
 const paymentService = resourceConfigs.payments.service;
@@ -27,6 +34,8 @@ export function PaymentList() {
   const [payments, setPayments] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [methodFilter, setMethodFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -50,7 +59,7 @@ export function PaymentList() {
         paymentService.list(),
         billingService.list()
       ]);
-      const p = Array.isArray(paymentRows) ? paymentRows : [];
+      const p = (Array.isArray(paymentRows) ? paymentRows : []).map(normalizePaymentRow);
       const inv = (Array.isArray(invoiceRows) ? invoiceRows : []).filter((row) => row.kind === 'invoice');
       setPayments(p);
       setInvoices(inv);
@@ -72,14 +81,34 @@ export function PaymentList() {
     load();
   }, [location.pathname, id]);
 
+  const statuses = useMemo(
+    () => [...new Set(payments.map((row) => row.status).filter(Boolean))],
+    [payments],
+  );
+
+  const methods = useMemo(
+    () => [...new Set(payments.map((row) => row.method).filter(Boolean))],
+    [payments],
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return payments;
-    return payments.filter((row) =>
-      [row.receiptNo, row.customer, row.invoice, row.method, row.reference, row.status]
-        .some((value) => String(value || '').toLowerCase().includes(q))
-    );
-  }, [payments, query]);
+
+    return payments.filter((row) => {
+      const matchesSearch =
+        !q ||
+        [row.receiptNo, row.customer, row.invoice, row.method, row.reference, row.status]
+          .some((value) => String(value || '').toLowerCase().includes(q));
+
+      const matchesStatus =
+        statusFilter === 'All' || row.status === statusFilter;
+
+      const matchesMethod =
+        methodFilter === 'All' || row.method === methodFilter;
+
+      return matchesSearch && matchesStatus && matchesMethod;
+    });
+  }, [payments, query, statusFilter, methodFilter]);
 
   const selectInvoice = (invoiceId) => {
     const invoice = invoices.find((row) => String(row.id) === String(invoiceId));
@@ -239,43 +268,34 @@ export function PaymentList() {
   }
 
   return (
-    <div className="payments-page">
-      <header className="payments-head">
-        <div>
-          <span className="payments-kicker">FINANCE</span>
-          <h1>Payments</h1>
-          <p>Receipts linked to existing invoices and customer collections.</p>
-        </div>
-        <button className="payments-primary-btn" onClick={() => navigate('/payments/new')}>
-          <Plus size={16}/>Record Payment
-        </button>
-      </header>
+    <div className="payments-page payments-dashboard">
+      <PaymentsHeader onRecordPayment={() => navigate('/payments/new')} />
 
-      <div className="payments-stats">
-        <div><span>Total Payments</span><strong>{payments.length}</strong></div>
-        <div><span>Collected</span><strong>{money.format(payments.filter((row) => row.status === 'Completed').reduce((sum, row) => sum + Number(row.amount || 0), 0))}</strong></div>
-      </div>
+      <PaymentOverviewStats
+        payments={payments}
+        formatMoney={(value) => money.format(value || 0)}
+      />
 
-      <div className="payments-toolbar">
-        <label><Search size={16}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search receipt, customer or invoice…" /></label>
-        <span>{filtered.length} records</span>
-      </div>
+      <PaymentFilterToolbar
+        query={query}
+        onQueryChange={setQuery}
+        status={statusFilter}
+        onStatusChange={setStatusFilter}
+        method={methodFilter}
+        onMethodChange={setMethodFilter}
+        statuses={statuses}
+        methods={methods}
+        resultCount={filtered.length}
+      />
 
       {error && <div className="payments-error">{error}</div>}
 
-      <section className="payments-list-card">
-        {loading ? <div className="payments-empty">Loading…</div> : filtered.length ? filtered.map((row) => (
-          <article className="payment-row" key={row.id}>
-            <div className="payment-main">
-              <strong>{row.receiptNo || row.id}</strong>
-              <span>{row.customer || 'Customer'} · {row.invoice || 'No invoice'}</span>
-            </div>
-            <div className="payment-meta"><span>{row.date || '—'}</span><strong>{money.format(row.amount || 0)}</strong></div>
-            <span className="payment-status">{row.status || 'Completed'}</span>
-            <button className="payment-view-btn" onClick={() => navigate(`/payments/${row.id}`)} aria-label="View payment"><Eye size={16}/></button>
-          </article>
-        )) : <div className="payments-empty">No payment records found.</div>}
-      </section>
+      <PaymentRecordsPanel
+        payments={filtered}
+        loading={loading}
+        formatMoney={(value) => money.format(value || 0)}
+        onView={(row) => navigate(`/payments/${row.id}`)}
+      />
     </div>
   );
 }
