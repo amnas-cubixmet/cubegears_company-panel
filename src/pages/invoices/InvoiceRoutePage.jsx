@@ -3,6 +3,13 @@ import { CheckCircle2, Download, Edit3, Eye, FileText, Plus, Printer, ReceiptTex
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { customerService } from '../../services/customer.service';
+import {
+  InvoiceFilterToolbar,
+  InvoiceListHeader,
+  InvoiceOverviewStats,
+  InvoiceRecordsPanel,
+  InvoiceTabs,
+} from '../../components/invoices';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const itemTypes = ['Stock Part', 'Outside Purchase', 'Labour', 'Service', 'Consumable', 'Custom Item'];
@@ -34,6 +41,8 @@ export function InvoiceRoutePage() {
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [referenceLoading, setReferenceLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(kindFromUrl);
+  const [listQuery, setListQuery] = useState('');
+  const [listStatus, setListStatus] = useState('All');
   const [form, setForm] = useState(blankBillingDocument(kindFromUrl));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -91,7 +100,41 @@ export function InvoiceRoutePage() {
   }, [location.pathname, location.search, id]);
 
   const totals = useMemo(() => calculateDocumentTotals(form), [form]);
-  const filteredDocs = documents.filter((doc) => doc.kind === activeTab);
+
+  const activeDocuments = useMemo(
+    () => documents.filter((document) => document.kind === activeTab),
+    [documents, activeTab],
+  );
+
+  const listStatuses = useMemo(
+    () => [...new Set(activeDocuments.map((document) => document.status).filter(Boolean))],
+    [activeDocuments],
+  );
+
+  const filteredDocs = useMemo(() => {
+    const search = listQuery.trim().toLowerCase();
+
+    return activeDocuments.filter((document) => {
+      const matchesStatus =
+        listStatus === 'All' || document.status === listStatus;
+
+      const matchesSearch =
+        !search ||
+        [
+          document.number,
+          document.id,
+          document.customer?.name,
+          document.customer?.phone,
+          document.vehicle?.registration,
+          document.transportation?.vehicleNo,
+          document.jobCardNo,
+        ].some((value) =>
+          String(value || '').toLowerCase().includes(search),
+        );
+
+      return matchesStatus && matchesSearch;
+    });
+  }, [activeDocuments, listQuery, listStatus]);
 
   useEffect(() => {
     const shouldPrint = new URLSearchParams(location.search).get('print') === '1';
@@ -338,47 +381,50 @@ export function InvoiceRoutePage() {
   };
 
   if (mode === 'list') return (
-    <div className="billing-page billing-list-dashboard">
-      <header className="billing-page-head billing-list-hero">
-        <div><span className="billing-kicker">BILLING & SALES</span><h1>Invoices & Estimates</h1><p>Create, manage, print and export workshop invoices and estimates.</p></div>
-        <button className="bill-btn" onClick={() => navigate(`/invoices/new?kind=${activeTab}`)}><Plus size={17}/>{activeTab === 'estimate' ? 'New Estimate' : 'New Invoice'}</button>
-      </header>
-      <div className="billing-tabs billing-list-tabs">
-        <button className={activeTab === 'invoice' ? 'active' : ''} onClick={() => navigate('/invoices?kind=invoice')}><ReceiptText size={16}/>Invoices</button>
-        <button className={activeTab === 'estimate' ? 'active' : ''} onClick={() => navigate('/invoices?kind=estimate')}><FileText size={16}/>Estimates</button>
-        <button onClick={() => navigate('/invoices/e-way-bills')}><Truck size={16}/>E-Way Bills</button>
-      </div>
+    <div className="billing-page billing-list-dashboard invoice-dashboard">
+      <InvoiceListHeader
+        activeTab={activeTab}
+        onCreate={() => navigate(`/invoices/new?kind=${activeTab}`)}
+      />
+
+      <InvoiceTabs
+        activeTab={activeTab}
+        onChange={(kind) => {
+          setListStatus('All');
+          navigate(`/invoices?kind=${kind}`);
+        }}
+        onEWayBills={() => navigate('/invoices/e-way-bills')}
+      />
+
+      <InvoiceOverviewStats
+        activeTab={activeTab}
+        documents={activeDocuments}
+        calculateTotals={calculateDocumentTotals}
+        formatMoney={(value) => money.format(value || 0)}
+      />
+
+      <InvoiceFilterToolbar
+        query={listQuery}
+        onQueryChange={setListQuery}
+        status={listStatus}
+        onStatusChange={setListStatus}
+        statuses={listStatuses}
+        resultCount={filteredDocs.length}
+      />
+
       {error && <div className="billing-error">{error}</div>}
-      <section className="billing-card billing-list-card billing-list-panel">
-        {loading ? <div className="billing-empty">Loading…</div> : <div className="billing-doc-list">
-          {filteredDocs.map((doc) => {
-            const t = calculateDocumentTotals(doc);
-            return <article className="billing-doc-row" key={doc.id}>
-              <button type="button" className="billing-doc-main" onClick={() => navigate(`/invoices/${doc.id}`)}>
-                <strong>{doc.number}</strong>
-                <span>{doc.customer?.name || 'Walk-in'}{doc.vehicle?.registration ? ` · ${doc.vehicle.registration}` : ''}</span>
-              </button>
-              <div className="billing-doc-meta"><span>{doc.date || '—'}</span><strong>{money.format(t.total)}</strong></div>
-              <span className="billing-status">{doc.status}</span>
-              <div className="billing-list-actions">
-                <button className="billing-action-btn is-view" aria-label="View" title="View" onClick={() => navigate(`/invoices/${doc.id}`)}>
-                  <Eye size={14}/><span>View</span>
-                </button>
-                <button className="billing-action-btn is-pdf" aria-label="Download PDF" title="Download PDF" onClick={() => navigate(`/invoices/${doc.id}?print=1`)}>
-                  <Download size={14}/><span>PDF</span>
-                </button>
-                <button className="billing-action-btn is-edit" aria-label="Edit" title="Edit" onClick={() => navigate(`/invoices/${doc.id}/edit`)}>
-                  <Edit3 size={14}/><span>Edit</span>
-                </button>
-                <button className="billing-action-btn is-delete danger" aria-label="Delete" title="Delete" onClick={() => navigate(`/invoices/${doc.id}/delete`)}>
-                  <Trash2 size={14}/><span>Delete</span>
-                </button>
-              </div>
-            </article>;
-          })}
-          {!filteredDocs.length && <div className="billing-empty">No {activeTab}s yet.</div>}
-        </div>}
-      </section>
+
+      <InvoiceRecordsPanel
+        documents={filteredDocs}
+        loading={loading}
+        activeTab={activeTab}
+        calculateTotals={calculateDocumentTotals}
+        formatMoney={(value) => money.format(value || 0)}
+        onView={(document) => navigate(`/invoices/${document.id}`)}
+        onPdf={(document) => navigate(`/invoices/${document.id}?print=1`)}
+        onEdit={(document) => navigate(`/invoices/${document.id}/edit`)}
+        onDelete={(document) => navigate(`/invoices/${document.id}/delete`)}
+      />
     </div>
   );
 
