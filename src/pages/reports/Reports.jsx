@@ -16,6 +16,12 @@ import { billingService, calculateDocumentTotals } from '../../services/billing.
 import { expenseService } from '../../services/expense.service';
 import { stockManagementService } from '../../services/stockManagement.service';
 import { resourceConfigs } from '../operations/resourceConfigs';
+import {
+  ReportPeriodFilter,
+  ReportStats,
+  ReportTabs,
+  ReportsHeader,
+} from '../../components/reports';
 import '../../styles/reports-dashboard.css';
 
 const paymentService = resourceConfigs.payments.service;
@@ -154,26 +160,20 @@ export function Reports() {
 
   return (
     <div className="reports-page">
-      <header className="reports-head no-print">
-        <div>
-          <span className="reports-kicker">REPORTS & ANALYTICS</span>
-          <h1>Business Reports</h1>
-          <p>Sales, collections, expenses and stock performance in one place.</p>
-        </div>
-        <div className="reports-head-actions">
-          <button className="report-btn secondary" onClick={load}><RefreshCw size={16}/>Refresh</button>
-          <button className="report-btn secondary" onClick={exportCsv}><FileSpreadsheet size={16}/>CSV</button>
-          <button className="report-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print</button>
-          <button className="report-btn" onClick={() => window.print()}><Download size={16}/>Download PDF</button>
-        </div>
-      </header>
+      <ReportsHeader
+        onRefresh={load}
+        onCsv={exportCsv}
+        onPrint={() => window.print()}
+      />
 
-      <section className="report-filter-bar no-print">
-        <label><CalendarDays size={15}/><span>From</span><input type="date" value={from} onChange={(e) => setFrom(e.target.value)}/></label>
-        <label><span>To</span><input type="date" value={to} onChange={(e) => setTo(e.target.value)}/></label>
-        <button onClick={() => { setFrom(monthStart()); setTo(today()); }}>This Month</button>
-        <button onClick={() => { setFrom(''); setTo(''); }}>All Time</button>
-      </section>
+      <ReportPeriodFilter
+        from={from}
+        to={to}
+        onFrom={setFrom}
+        onTo={setTo}
+        onThisMonth={() => { setFrom(monthStart()); setTo(today()); }}
+        onAllTime={() => { setFrom(''); setTo(''); }}
+      />
 
       {error && <div className="reports-error no-print">{error}</div>}
 
@@ -183,24 +183,8 @@ export function Reports() {
           <div><strong>Generated</strong><span>{new Date().toLocaleString('en-IN')}</span></div>
         </div>
 
-        <div className="report-stats-grid">
-          <Stat icon={ReceiptText} label="Sales" value={shortMoney.format(report.sales)} note={`${report.invoiceRows.length} invoices`}/>
-          <Stat icon={WalletCards} label="Collected" value={shortMoney.format(report.collected)} note={`${report.paymentRows.length} payments`}/>
-          <Stat icon={IndianRupee} label="Expenses" value={shortMoney.format(report.expenseTotal)} note={`${report.expenseRows.length} expenses`}/>
-          <Stat icon={BarChart3} label="Net Cash" value={shortMoney.format(report.netCash)} note="Collections − expenses"/>
-          <Stat icon={ReceiptText} label="Outstanding" value={shortMoney.format(report.outstanding)} note="Invoice balance"/>
-          <Stat icon={Package} label="Stock Value" value={shortMoney.format(report.stockValue)} note={`${report.lowStock.length} low-stock items`}/>
-        </div>
-
-        <nav className="reports-tabs no-print">
-          {[
-            ['overview','Overview'],
-            ['sales','Sales'],
-            ['payments','Payments'],
-            ['expenses','Expenses'],
-            ['stock','Stock']
-          ].map(([key,label]) => <button key={key} className={tab===key?'active':''} onClick={()=>setTab(key)}>{label}</button>)}
-        </nav>
+        <ReportStats report={report} formatMoney={(value)=>shortMoney.format(value || 0)} />
+        <ReportTabs active={tab} onChange={setTab} />
 
         {(tab === 'overview' || tab === 'sales') && (
           <section className="report-panel">
