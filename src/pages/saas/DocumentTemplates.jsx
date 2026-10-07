@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Building2, Check, FileText, ImagePlus, LayoutTemplate, ReceiptText, Save, Sparkles, Trash2 } from 'lucide-react';
 import { settingsService } from '../../services/settings.service';
+import { AccountHeader } from '../../components/account';
 import '../../styles/document-templates.css';
 
 const STORAGE_KEY = 'cubixgear:document-template-settings';
@@ -142,6 +144,7 @@ function Preview({ kind, settings }) {
 }
 
 export function DocumentTemplates() {
+  const navigate = useNavigate();
   const [settings, setSettings] = useState(readSettings);
   const [saved, setSaved] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -195,18 +198,18 @@ export function DocumentTemplates() {
 
   return (
     <div className="document-templates-page">
-      <header className="document-templates-head">
-        <div>
-          <span className="document-templates-kicker">ACCOUNT · DOCUMENTS</span>
-          <h1>PDF Templates</h1>
-          <p>Choose how invoices and estimates should look when printed or saved as PDF.</p>
-        </div>
-
-        <button className="template-save-button" onClick={save}>
-          {saved ? <Check size={17}/> : <Save size={17}/>}
-          {saved ? 'Saved' : 'Save Templates'}
-        </button>
-      </header>
+      <AccountHeader
+        title="PDF Templates"
+        subtitle="Choose how invoices and estimates look when printed or saved as PDF."
+        active="templates"
+        onNavigate={navigate}
+        actions={
+          <button className="template-save-button" onClick={save}>
+            {saved ? <Check size={15}/> : <Save size={15}/>}
+            {saved ? 'Saved' : 'Save Templates'}
+          </button>
+        }
+      />
 
       <section className="template-settings-card business-branding-card">
         <div className="template-settings-title">
