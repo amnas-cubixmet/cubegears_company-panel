@@ -14,6 +14,14 @@ import {
   Wrench
 } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import {
+  ServiceCatalogGrid,
+  ServiceCatalogTabs,
+  ServiceCategoriesPanel,
+  ServiceFilterToolbar,
+  ServiceOverviewStats,
+  ServicesHeader,
+} from '../../components/services';
 import { serviceService } from '../../services/service.service';
 import '../../styles/service-management.css';
 
@@ -468,162 +476,100 @@ export const ServiceList = () => {
   }
 
   return (
-    <div className="service-management-page cg-services service-catalog-dashboard">
-      <header className="service-page-header service-catalog-hero">
-        <div>
-          <span className="service-catalog-eyebrow">Workshop Services</span>
-          <h1>Services Catalog</h1>
-          <p>Workshop labour services, categories, pricing, duration and standard technician checklists.</p>
-        </div>
-        <button className="service-primary-button" onClick={()=>navigate('/services/new')}>
-          <Plus size={15}/> Add Service
-        </button>
-      </header>
+    <div className="service-management-page cg-services service-dashboard">
+      <ServicesHeader onAdd={()=>navigate('/services/new')} />
 
-      <div className="service-metric-grid service-catalog-kpis">
-        <Metric label="Total Services" value={metrics.total} icon={Wrench}/>
-        <Metric label="Active Services" value={metrics.active} icon={Activity} tone="success"/>
-        <Metric label="Categories" value={metrics.categories} icon={Layers3}/>
-        <Metric label="Avg Labour Charge" value={money.format(metrics.averagePrice)} icon={IndianRupee}/>
-      </div>
+      <ServiceOverviewStats
+        metrics={metrics}
+        formatMoney={(value)=>money.format(value || 0)}
+      />
 
-      <div className="service-view-tabs service-catalog-tabs">
-        <button className={activeView==='services'?'is-active':''} onClick={()=>setActiveView('services')}>Services</button>
-        <button className={activeView==='categories'?'is-active':''} onClick={()=>setActiveView('categories')}>Categories</button>
-      </div>
+      <ServiceCatalogTabs
+        activeView={activeView}
+        onChange={setActiveView}
+      />
 
       {activeView === 'services' ? (
         <>
-          <div className="service-filter-bar service-catalog-toolbar">
-            <label className="service-search">
-              <Search size={16}/>
-              <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search service name, code or category"/>
-            </label>
+          <ServiceFilterToolbar
+            query={query}
+            onQueryChange={setQuery}
+            categoryFilter={categoryFilter}
+            onCategoryChange={setCategoryFilter}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            categories={categories}
+          />
 
-            <select value={categoryFilter} onChange={(e)=>setCategoryFilter(e.target.value)}>
-              <option>All</option>
-              {categories.map((category)=><option key={category.id}>{category.name}</option>)}
-            </select>
-
-            <select value={statusFilter} onChange={(e)=>setStatusFilter(e.target.value)}>
-              <option>All</option>
-              <option>Active</option>
-              <option>Inactive</option>
-            </select>
-          </div>
-
-          <div className="service-card-grid">
-            {filtered.map((service)=>(
-              <article
-                key={service.id}
-                className="service-catalog-card is-clickable"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate(`/services/${service.id}`)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    navigate(`/services/${service.id}`);
-                  }
-                }}
-              >
-                <div className="service-catalog-card__head">
-                  <div>
-                    <span>{service.code}</span>
-                    <strong>{service.name}</strong>
-                  </div>
-                  <b className={`service-status ${statusClass(service.status)}`}>
-                    {service.status || 'active'}
-                  </b>
-                </div>
-
-                <div className="service-category-chip">
-                  <Tag size={12}/>
-                  {service.category}
-                </div>
-
-                <div className="service-card-values">
-                  <div><span>Labour Charge</span><strong>{money.format(service.price || 0)}</strong></div>
-                  <div><span>Duration</span><strong>{durationLabel(service.durationMinutes)}</strong></div>
-                  <div><span>Pricing</span><strong>{service.pricingType || 'Fixed'}</strong></div>
-                </div>
-
-                <p>{service.description || 'Workshop service with configurable labour pricing and checklist.'}</p>
-
-                <div className="service-card-actions">
-                  <button onClick={(event)=>{event.stopPropagation();navigate(`/services/${service.id}`);}}><Eye size={13}/> View</button>
-                  <button onClick={(event)=>{event.stopPropagation();navigate(`/services/${service.id}/edit`);}}><Edit3 size={13}/> Edit</button>
-                  <button className="is-danger" onClick={(event)=>{event.stopPropagation();deleteService(service);}}><Trash2 size={13}/> Delete</button>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {!filtered.length ? <div className="service-empty">No services matched your filters.</div> : null}
+          <ServiceCatalogGrid
+            services={filtered}
+            formatMoney={(value)=>money.format(value || 0)}
+            durationLabel={durationLabel}
+            onView={(service)=>navigate(`/services/${service.id}`)}
+            onEdit={(service)=>navigate(`/services/${service.id}/edit`)}
+            onDelete={deleteService}
+          />
         </>
       ) : (
-        <section className="service-category-section">
-          <div className="service-section-header">
-            <div>
-              <h2>Service Categories</h2>
-              <p>Group workshop services into practical labour departments.</p>
-            </div>
-            <button className="service-primary-button" onClick={()=>{setCategoryEditor({});setCategoryForm(emptyCategory);}}>
-              <Plus size={14}/> Add Category
-            </button>
-          </div>
-
-          <div className="service-category-grid">
-            {categories.map((category)=>{
-              const count=services.filter((service)=>service.categoryId===category.id || service.category===category.name).length;
-              return (
-                <article key={category.id} className="service-category-card">
-                  <div className="service-category-card__head">
-                    <div>
-                      <span>{category.id}</span>
-                      <strong>{category.name}</strong>
-                    </div>
-                    <b className={`service-status ${statusClass(category.status)}`}>{category.status}</b>
-                  </div>
-                  <p>{category.description || 'Workshop service category.'}</p>
-                  <div className="service-category-summary">
-                    <span>Services <b>{count}</b></span>
-                    <span>Service Types <b>{category.types?.length || 0}</b></span>
-                  </div>
-                  <div className="service-card-actions is-two">
-                    <button onClick={()=>{setCategoryEditor(category);setCategoryForm({name:category.name,description:category.description || '',status:category.status || 'active'});}}><Edit3 size={13}/> Edit</button>
-                    <button className="is-danger" onClick={()=>deleteCategory(category)}><Trash2 size={13}/> Delete</button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
+        <ServiceCategoriesPanel
+          categories={categories}
+          services={services}
+          onAdd={()=>{
+            setCategoryEditor({});
+            setCategoryForm(emptyCategory);
+          }}
+          onEdit={(category)=>{
+            setCategoryEditor(category);
+            setCategoryForm({
+              name:category.name,
+              description:category.description || '',
+              status:category.status || 'active'
+            });
+          }}
+          onDelete={deleteCategory}
+        />
       )}
 
       <ResponsiveModalSheet
         isOpen={categoryEditor !== null}
-        onClose={()=>{setCategoryEditor(null);setCategoryForm(emptyCategory);setCategoryError('');}}
+        onClose={()=>{
+          setCategoryEditor(null);
+          setCategoryForm(emptyCategory);
+          setCategoryError('');
+        }}
         title={categoryEditor?.id ? 'Edit Service Category' : 'Add Service Category'}
         maxWidth="560px"
       >
         <form className="service-category-form" onSubmit={saveCategory}>
           {categoryError ? <div className="service-form-error">{categoryError}</div> : null}
           <Field label="Category Name">
-            <input required value={categoryForm.name} onChange={(e)=>setCategoryForm({...categoryForm,name:e.target.value})}/>
+            <input
+              required
+              value={categoryForm.name}
+              onChange={(e)=>setCategoryForm({...categoryForm,name:e.target.value})}
+            />
           </Field>
           <Field label="Description">
-            <textarea rows="4" value={categoryForm.description} onChange={(e)=>setCategoryForm({...categoryForm,description:e.target.value})}/>
+            <textarea
+              rows="4"
+              value={categoryForm.description}
+              onChange={(e)=>setCategoryForm({...categoryForm,description:e.target.value})}
+            />
           </Field>
           <Field label="Status">
-            <select value={categoryForm.status} onChange={(e)=>setCategoryForm({...categoryForm,status:e.target.value})}>
+            <select
+              value={categoryForm.status}
+              onChange={(e)=>setCategoryForm({...categoryForm,status:e.target.value})}
+            >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
           </Field>
           <div className="service-form-actions">
             <button type="button" onClick={()=>setCategoryEditor(null)}>Cancel</button>
-            <button className="is-primary" disabled={submitting}>{submitting?'Saving...':'Save Category'}</button>
+            <button className="is-primary" disabled={submitting}>
+              {submitting ? 'Saving...' : 'Save Category'}
+            </button>
           </div>
         </form>
       </ResponsiveModalSheet>
