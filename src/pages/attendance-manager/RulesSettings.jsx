@@ -94,7 +94,7 @@ export const RulesSettings = () => {
   }
 
   const autoMode = ['auto_checkout', 'hybrid'].includes(rules.attendanceMode);
-  const multiMode = ['multi', 'hybrid'].includes(rules.attendanceMode);
+  const multiMode = rules.attendanceMode === 'multi';
 
   return (
     <div className="attendance-rules-page">
