@@ -73,6 +73,63 @@ export const getCalendarEvents = async (month, year) => {
   return Array.isArray(rows) ? rows : rows?.results || [];
 };
 
+const getBrowserLocation = () =>
+  new Promise((resolve, reject) => {
+    if (!navigator?.geolocation) {
+      reject(new Error('Location is not supported by this browser.'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+      }),
+      () => reject(new Error('Location permission is required for attendance.')),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  });
+
+export const getAttendanceStatus = async () => {
+  if (USE_MOCK_API) {
+    await delay();
+    return {
+      status: 'CLOCKED_OUT',
+      canCheckIn: true,
+      canCheckOut: false,
+      nextAction: 'check_in',
+      attendanceMode: 'single',
+      autoCheckoutAt: null,
+      sessionCount: 0,
+      reason: '',
+      rule: { attendanceMode: 'single', locationRequired: false },
+    };
+  }
+  return apiClient.get('/attendance/status');
+};
+
+export const punchAttendance = async (action, options = {}) => {
+  if (USE_MOCK_API) {
+    await delay();
+    return {
+      status: action === 'check_in' ? 'CLOCKED_IN' : 'CLOCKED_OUT',
+      nextAction: action === 'check_in' ? 'check_out' : null,
+      attendanceMode: options.attendanceMode || 'single',
+    };
+  }
+
+  let location = {};
+  if (options.locationRequired) {
+    location = await getBrowserLocation();
+  }
+
+  return apiClient.post('/attendance/toggle', {
+    action,
+    source: 'web',
+    location,
+  });
+};
+
 export const submitPunchCorrection = async (correctionData) => {
   if (USE_MOCK_API) {
     await delay();
@@ -96,5 +153,7 @@ export const submitPunchCorrection = async (correctionData) => {
 export const attendanceService = {
   getPersonalAttendanceLogs,
   getCalendarEvents,
+  getAttendanceStatus,
+  punchAttendance,
   submitPunchCorrection,
 };
