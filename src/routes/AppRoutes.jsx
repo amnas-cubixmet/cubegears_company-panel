@@ -236,7 +236,7 @@ export const AppRoutes = () => (
 
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/account" element={<Navigate to="/account/billing" replace />} />
+      <Route path="/account" element={<SaaSAccount section="overview" />} />
       <Route path="/account/billing" element={<SaaSAccount section="billing" />} />
       <Route path="/account/storage" element={<SaaSAccount section="storage" />} />
       <Route path="/account/storage/history" element={<StorageHistory />} />
