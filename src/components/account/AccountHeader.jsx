@@ -2,6 +2,7 @@ import React from 'react';
 import { FilePenLine, HardDrive, ReceiptText, Settings2, ShieldCheck } from 'lucide-react';
 
 const tabs=[
+ ['overview','Overview','/account',ReceiptText],
  ['billing','Billing','/account/billing',ReceiptText],
  ['storage','Storage','/account/storage',HardDrive],
  ['templates','Templates','/account/templates',FilePenLine],
