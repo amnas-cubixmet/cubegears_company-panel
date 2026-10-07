@@ -20,6 +20,7 @@ export const Dashboard = () => {
   const [filterPeriod, setFilterPeriod] = useState('today');
   const [filterBranch, setFilterBranch] = useState('main');
   const [currentTime, setCurrentTime] = useState('');
+  const [attendanceError, setAttendanceError] = useState('');
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -55,10 +56,15 @@ export const Dashboard = () => {
 
   const handleClockToggle = async (action) => {
     if (!action) return;
-    await toggleClockIn(action, {
-      locationRequired: Boolean(data?.attendance?.locationRequired),
-    });
-    await fetchDashboard();
+    setAttendanceError('');
+    try {
+      await toggleClockIn(action, {
+        locationRequired: Boolean(data?.attendance?.locationRequired),
+      });
+      await fetchDashboard();
+    } catch (error) {
+      setAttendanceError(error?.message || 'Attendance action failed.');
+    }
   };
 
   if (loading) return <Loader />;
@@ -69,6 +75,7 @@ export const Dashboard = () => {
         user={user}
         attendance={data?.attendance}
         currentTime={currentTime}
+        error={attendanceError}
         onClockToggle={handleClockToggle}
       />
 
