@@ -23,7 +23,7 @@ const normalizeSession = (session = {}, fallbackId = 'session') => ({
 });
 
 const normalizeAttendanceLog = (row = {}) => {
-  const rawSessions = Array.isArray(row.sessions)
+  const rawSessions = Array.isArray(row.sessions) && row.sessions.length
     ? row.sessions
     : (row.clock_in || row.clock_out)
       ? [{
