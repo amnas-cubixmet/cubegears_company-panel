@@ -130,12 +130,20 @@ export const getRules = async () => {
 };
 
 export const saveRules = async (updatedRules) => {
+  const payload = {
+    ...updatedRules,
+    weekendEffectiveFrom: updatedRules.weekendEffectiveFrom || null,
+    startTime: String(updatedRules.startTime || '09:00').slice(0, 5),
+    endTime: String(updatedRules.endTime || '18:00').slice(0, 5),
+  };
+
   if (USE_MOCK_API) {
     await delay();
-    Object.assign(mockAttendanceRulesConfig, updatedRules);
+    Object.assign(mockAttendanceRulesConfig, payload);
     return Promise.resolve({ ...mockAttendanceRulesConfig });
   }
-  return apiClient.post('/attendance-manager/rules', updatedRules);
+
+  return apiClient.post('/attendance-manager/rules', payload);
 };
 
 export const getStaffAttendanceDetails = async (staffId, date) => {
