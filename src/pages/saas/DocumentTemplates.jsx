@@ -4,6 +4,7 @@ import { Building2, Check, FileText, ImagePlus, LayoutTemplate, ReceiptText, Sav
 import { settingsService } from '../../services/settings.service';
 import { AccountHeader } from '../../components/account';
 import '../../styles/document-templates.css';
+import '../../styles/account-dashboard.css';
 
 const STORAGE_KEY = 'cubixgear:document-template-settings';
 
