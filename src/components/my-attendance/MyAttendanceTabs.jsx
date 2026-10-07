@@ -1,10 +1,11 @@
 import React from 'react';
-import { CalendarDays, ClipboardList, FileText, PieChart } from 'lucide-react';
+import { CalendarDays, ClipboardList, Clock3, FileText, PieChart } from 'lucide-react';
 
 const tabs = [
   { id: 'calendar', label: 'Attendance', icon: CalendarDays, path: '/my-attendance/calendar' },
   { id: 'history', label: 'History & Logs', icon: ClipboardList, path: '/my-attendance/history' },
   { id: 'leave', label: 'Leave Requests', icon: FileText, path: '/my-attendance/leave' },
+  { id: 'overtime', label: 'Overtime', icon: Clock3, path: '/my-attendance/overtime' },
   { id: 'summary', label: 'Summary', icon: PieChart, path: '/my-attendance/summary' },
 ];
 
