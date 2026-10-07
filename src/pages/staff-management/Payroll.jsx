@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { payrollService } from '../../services/payroll.service';
 import { staffService } from '../../services/staff.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
-import { PayrollPeriodFilter } from '../../components/payroll/PayrollPeriodFilter';
+import {
+  PayrollHeader,
+  PayrollOverview,
+  PayrollPeriodFilter,
+} from '../../components/payroll';
 import { PayrollTabRail } from '../../components/staff-management/PayrollTabRail';
 import { PayrollCard } from '../../components/staff-management/PayrollCard';
 import { RecordPaymentSheet } from '../../components/staff-management/RecordPaymentSheet';
@@ -149,18 +153,13 @@ export const Payroll = ({ section = 'overview' }) => {
   };
 
   return (
-    <div className="payroll-page cg-payroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+    <div className="payroll-page cg-payroll">
       {/* Toast Feedback Banner */}
       {toastMsg && (
-        <div style={{ backgroundColor: 'var(--success)', color: '#ffffff', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-          {toastMsg}
-        </div>
+        <div className="payroll-toast">{toastMsg}</div>
       )}
 
-      <header className="payroll-page-header">
-        <h1>Payroll & Salary</h1>
-        <p>Manage salary structures, attendance-linked calculations, incentives, overtime, advances, payments and payslips.</p>
-      </header>
+      <PayrollHeader />
 
       {/* Internal Horizontally Scrollable Payroll Submenu Rail */}
       <PayrollTabRail />
@@ -168,126 +167,32 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Global Shared Payroll Period Filter Toolbar */}
       <PayrollPeriodFilter />
 
-      {/* Section 1: Overview */}
+      {/* Overview */}
       {activeSection === 'overview' && (
-        <div className="payroll-reference-overview">
-          <section className="payroll-reference-hero">
-            <div>
-              <span className="payroll-reference-eyebrow">Payroll snapshot</span>
-              <h2>{periodString}</h2>
-              <p>Salary health, settlement progress and employee payroll records in one view.</p>
-            </div>
-            <div className="payroll-reference-hero-badge">
-              <BadgeCheck size={16} />
-              <span>{approvedCount} approved</span>
-            </div>
-          </section>
-
-          <div className="payroll-reference-kpis">
-            <article>
-              <span className="payroll-reference-kpi-icon"><WalletCards size={16} /></span>
-              <small>Net Payroll</small>
-              <strong>{formatINR(totalNet)}</strong>
-              <em>{payrolls.length} employees</em>
-            </article>
-            <article>
-              <span className="payroll-reference-kpi-icon"><CircleDollarSign size={16} /></span>
-              <small>Paid Amount</small>
-              <strong>{formatINR(totalPaid)}</strong>
-              <em>{paidStaff} fully paid</em>
-            </article>
-            <article>
-              <span className="payroll-reference-kpi-icon is-warning"><AlertCircle size={16} /></span>
-              <small>Outstanding</small>
-              <strong>{formatINR(outstandingSalary)}</strong>
-              <em>{unpaidStaff + partialStaff} pending staff</em>
-            </article>
-            <article>
-              <span className="payroll-reference-kpi-icon"><BadgeCheck size={16} /></span>
-              <small>Approval Status</small>
-              <strong>{approvedCount}/{payrolls.length || 0}</strong>
-              <em>{pendingApprovalCount} awaiting approval</em>
-            </article>
-          </div>
-
-          <div className="payroll-reference-main-grid">
-            <section className="payroll-reference-panel payroll-reference-breakdown">
-              <div className="payroll-reference-panel-head">
-                <div>
-                  <span>Payroll breakdown</span>
-                  <h3>Monthly salary composition</h3>
-                </div>
-                <strong>{formatINR(totalGross)}</strong>
-              </div>
-
-              <div className="payroll-reference-breakdown-list">
-                <div><span>Gross payroll</span><strong>{formatINR(totalGross)}</strong></div>
-                <div><span>Incentives</span><strong>{formatINR(totalIncentives)}</strong></div>
-                <div><span>Overtime pay</span><strong>{formatINR(totalApprovedOtPay)}</strong></div>
-                <div><span>Deductions</span><strong>- {formatINR(totalDeductions)}</strong></div>
-              </div>
-
-              <div className="payroll-reference-progress">
-                <div>
-                  <span>Settlement progress</span>
-                  <strong>{totalNet > 0 ? Math.min(100, Math.round((totalPaid / totalNet) * 100)) : 0}%</strong>
-                </div>
-                <div className="payroll-reference-progress-track">
-                  <span style={{ width: `${totalNet > 0 ? Math.min(100, (totalPaid / totalNet) * 100) : 0}%` }} />
-                </div>
-              </div>
-            </section>
-
-            <section className="payroll-reference-panel payroll-reference-status">
-              <div className="payroll-reference-panel-head">
-                <div>
-                  <span>Settlement</span>
-                  <h3>Employee payment status</h3>
-                </div>
-              </div>
-
-              <div className="payroll-reference-status-list">
-                <div className="is-paid"><span>Paid</span><strong>{paidStaff}</strong></div>
-                <div className="is-partial"><span>Partially paid</span><strong>{partialStaff}</strong></div>
-                <div className="is-unpaid"><span>Unpaid</span><strong>{unpaidStaff}</strong></div>
-              </div>
-
-              <div className="payroll-reference-note">
-                <span>Pending approvals</span>
-                <strong>{pendingApprovalCount}</strong>
-              </div>
-            </section>
-          </div>
-
-          <section className="payroll-reference-records">
-            <div className="payroll-reference-records-head">
-              <div>
-                <span>Employee payroll</span>
-                <h3>Current payroll records</h3>
-              </div>
-              <small>{periodString}</small>
-            </div>
-
-            {loading ? (
-              <div className="payroll-state-card">Loading records for {periodString}...</div>
-            ) : payrolls.length === 0 ? (
-              <div className="payroll-state-card">No payroll records found for {periodString}.</div>
-            ) : (
-              <div className="payroll-card-grid payroll-reference-card-grid">
-                {payrolls.map((p) => (
-                  <PayrollCard
-                    key={p.id}
-                    payroll={p}
-                    onRecordPayment={(item) => setPaymentTargetItem(item)}
-                    onViewDetails={(item) => setDetailTargetItem(item)}
-                    onViewPayslip={(item) => setPayslipTargetItem(item)}
-                    onViewHistory={(item) => setHistoryTargetItem(item)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
+        <PayrollOverview
+          payrolls={payrolls}
+          loading={loading}
+          periodString={periodString}
+          totals={{
+            totalGross,
+            totalNet,
+            totalApprovedOtPay,
+            pendingApprovalCount,
+            approvedCount,
+            totalPaid,
+            outstandingSalary,
+            totalIncentives,
+            totalDeductions,
+            unpaidStaff,
+            partialStaff,
+            paidStaff,
+          }}
+          formatINR={formatINR}
+          onRecordPayment={(item) => setPaymentTargetItem(item)}
+          onViewDetails={(item) => setDetailTargetItem(item)}
+          onViewPayslip={(item) => setPayslipTargetItem(item)}
+          onViewHistory={(item) => setHistoryTargetItem(item)}
+        />
       )}
 
       {/* Employees */}
