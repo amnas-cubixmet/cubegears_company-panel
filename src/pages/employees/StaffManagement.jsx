@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { StaffManagementTabs } from '../../components/staff-management/StaffManagementTabs';
+import {
+  StaffManagementHeader,
+  StaffManagementTabs,
+} from '../../components/staff-management';
 import { Staff } from '../staff-management/Staff';
+import { StaffAddPage } from '../staff-management/StaffAddPage';
 import { UserRoles } from '../staff-management/UserRoles';
 import { WorkshopStaffSection } from '../staff-management/WorkshopStaffSection';
-import { StaffAddPage } from '../staff-management/StaffAddPage';
+import '../../styles/staff-management.css';
 
 const resolveSection = (pathname) => {
   if (pathname.endsWith('/overview')) return 'overview';
@@ -43,21 +47,13 @@ export const StaffManagement = () => {
   };
 
   return (
-    <div className="staff-management-page cg-staff-management flex w-full min-w-0 flex-col gap-4">
-      <header className="staff-management-header">
-        <h1 className="m-0 text-[22px] font-extrabold leading-tight text-content">
-          Staff Management
-        </h1>
-        <p className="mt-1 text-[13px] leading-5 text-muted">
-          Workshop staff, teams, shifts, skills, job assignment, performance, documents and access control.
-        </p>
-      </header>
-
+    <div className="staff-management-page cg-staff-management">
+      <StaffManagementHeader />
       <StaffManagementTabs />
 
-      <div className="staff-management-content w-full min-w-0">
+      <main className="staff-management-content">
         {renderSection()}
-      </div>
+      </main>
     </div>
   );
 };
