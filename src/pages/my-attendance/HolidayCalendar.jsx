@@ -28,7 +28,7 @@ export const HolidayCalendar = () => {
       const year = currentDate.getFullYear();
       const [calendarEvents, attendanceLogs] = await Promise.all([
         attendanceService.getCalendarEvents(month, year),
-        attendanceService.getPersonalAttendanceLogs(),
+        attendanceService.getPersonalAttendanceLogs({ month, year }),
       ]);
 
       if (!active) return;
@@ -119,8 +119,24 @@ export const HolidayCalendar = () => {
     <div className="attendance-calendar-redesign">
       <AttendanceOverviewHeader
         monthLabel={monthLabel}
-        onPreviousMonth={() => setCurrentDate(new Date(year, month - 1, 1))}
-        onNextMonth={() => setCurrentDate(new Date(year, month + 1, 1))}
+        month={month}
+        year={year}
+        onMonthChange={(nextMonth) => {
+          setSelectedDay(1);
+          setCurrentDate(new Date(year, nextMonth, 1));
+        }}
+        onYearChange={(nextYear) => {
+          setSelectedDay(1);
+          setCurrentDate(new Date(nextYear, month, 1));
+        }}
+        onPreviousMonth={() => {
+          setSelectedDay(1);
+          setCurrentDate(new Date(year, month - 1, 1));
+        }}
+        onNextMonth={() => {
+          setSelectedDay(1);
+          setCurrentDate(new Date(year, month + 1, 1));
+        }}
       />
 
       <EmployeeAttendanceCard user={user} />
