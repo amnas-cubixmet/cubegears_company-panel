@@ -103,3 +103,31 @@
 .template-preview-logo{width:34px;height:34px;flex:0 0 34px;border-radius:7px;object-fit:contain;border:1px solid #e1e5e8;background:#fff}
 @media(max-width:900px){.business-branding-layout{grid-template-columns:1fr}.business-logo-panel{align-items:center}.business-fields-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.business-fields-grid{grid-template-columns:1fr}.business-field-wide{grid-column:auto}.business-logo-actions{width:100%}.template-upload-button,.template-remove-logo{flex:1}.template-preview{min-width:0!important;width:100%!important}.template-preview-head{grid-template-columns:1fr!important}.template-preview-meta{align-items:flex-start;text-align:left}.template-preview-info{grid-template-columns:1fr!important}.template-preview-bottom{grid-template-columns:1fr!important}.template-preview-card{overflow:visible}}
+
+
+/* ---------- Dashboard-style Document Templates v2 ---------- */
+.document-templates-page{gap:12px}
+.document-templates-page .template-save-button{min-height:36px;height:36px;padding:0 11px;border-radius:9px;font-size:9px}
+.document-templates-page .template-settings-card,.document-templates-page .template-preview-card{border-radius:12px;box-shadow:var(--shadow-sm)}
+.document-templates-page .template-settings-card{padding:12px}
+.document-templates-page .template-settings-title{margin-bottom:10px}
+.document-templates-page .template-settings-title strong{font-size:11px}
+.document-templates-page .template-settings-title span{font-size:8px}
+.document-templates-page .template-control-grid{gap:8px}
+.document-templates-page .template-control-grid label{padding:9px;border-radius:9px}
+.document-templates-page .template-control-grid label>span{font-size:8.5px}
+.document-templates-page .template-control-grid select{height:36px;font-size:9px}
+.document-templates-page .template-control-grid small{font-size:7.5px}
+.document-templates-page .business-branding-layout{grid-template-columns:190px minmax(0,1fr);gap:10px}
+.document-templates-page .business-logo-panel{padding:10px;border-radius:10px}
+.document-templates-page .business-logo-preview{width:100px;height:100px;border-radius:10px}
+.document-templates-page .business-fields-grid{gap:8px}
+.document-templates-page .business-fields-grid label{font-size:8.5px}
+.document-templates-page .business-fields-grid input{height:36px}
+.document-templates-page .business-fields-grid textarea{min-height:72px}
+.document-templates-page .template-toggle-row{gap:6px}
+.document-templates-page .template-toggle-row label{min-height:34px;font-size:8.5px}
+.document-templates-page .template-preview-grid{gap:10px}
+.document-templates-page .template-preview-card{padding:10px}
+.document-templates-page .template-preview-card-head h2{font-size:11px}
+@media(max-width:760px){.document-templates-page .business-branding-layout{grid-template-columns:1fr}.document-templates-page .business-logo-panel{align-items:center}.document-templates-page .business-fields-grid{grid-template-columns:1fr}.document-templates-page .business-field-wide{grid-column:auto}}
