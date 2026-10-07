@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Calendar, Shield, Plus, CheckCircle2, AlertCircle, FileText, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, Calendar, Shield, Plus, CheckCircle2, AlertCircle, FileText, User, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 import { overtimeService } from '../../services/overtime.service';
 import { AddOvertimeSheet } from '../../components/payroll/AddOvertimeSheet';
@@ -226,6 +226,19 @@ export const StaffAttendanceDetails = () => {
                   <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Worked</span>
                   <strong style={{ color: 'var(--primary)' }}>{sess.duration}</strong>
                 </div>
+                {details.locationEnabled && (
+                  <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '11px' }}>
+                    <MapPin size={12} />
+                    <span>
+                      In: {sess.clockInLocation?.latitude != null
+                        ? `${Number(sess.clockInLocation.latitude).toFixed(5)}, ${Number(sess.clockInLocation.longitude).toFixed(5)}`
+                        : 'No location'}
+                      {sess.clockOutLocation?.latitude != null
+                        ? ` · Out: ${Number(sess.clockOutLocation.latitude).toFixed(5)}, ${Number(sess.clockOutLocation.longitude).toFixed(5)}`
+                        : ''}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
