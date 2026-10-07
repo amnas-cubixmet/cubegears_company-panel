@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, ChevronRight, FilePenLine, HardDrive, History, IndianRupee, Infinity, ReceiptText, Settings2, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
+import { CalendarDays, ChevronRight, FilePenLine, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { storageHistoryService } from '../../services/storageHistory.service';
 import { AccountHeader, AccountOverview } from '../../components/account';
