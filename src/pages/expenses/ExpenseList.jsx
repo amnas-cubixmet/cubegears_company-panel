@@ -19,6 +19,13 @@ import {
   WalletCards
 } from 'lucide-react';
 import { expenseService } from '../../services/expense.service';
+import {
+  ExpenseListView,
+  ExpenseOverview,
+  ExpenseOverviewStats,
+  ExpensesHeader,
+  ExpenseTabs,
+} from '../../components/expenses';
 import '../../styles/expense-management.css';
 
 const money = new Intl.NumberFormat('en-IN', {
@@ -442,139 +449,42 @@ export const ExpenseList = () => {
 
   return (
     <div className="expense-management-page cg-expenses">
-      <header className="expense-page-header">
-        <div>
-          <h1>Company Expenses</h1>
-          <p>Track workshop operational costs, utilities, vendor bills, receipts and approvals.</p>
-        </div>
-        <button className="expense-primary-button" onClick={()=>navigate('/expenses/new')}>
-          <Plus size={15}/> Add Expense
-        </button>
-      </header>
+      <ExpensesHeader onAdd={()=>navigate('/expenses/new')} />
 
-      <div className="expense-metric-grid">
-        <Metric label="This Month" value={money.format(currentMonthRows.reduce((sum,item)=>sum+item.amount,0))} icon={IndianRupee}/>
-        <Metric label="Approved" value={money.format(approvedRows.reduce((sum,item)=>sum+item.amount,0))} icon={CheckCircle2} tone="success"/>
-        <Metric label="Pending Approval" value={pendingRows.length} icon={AlertTriangle} tone="warning"/>
-        <Metric label="Today" value={money.format(todayRows.reduce((sum,item)=>sum+item.amount,0))} icon={Calendar}/>
-        <Metric label="Expense Records" value={expenses.length} icon={Receipt}/>
-      </div>
+      <ExpenseOverviewStats
+        currentMonthTotal={currentMonthRows.reduce((sum,item)=>sum+item.amount,0)}
+        approvedTotal={approvedRows.reduce((sum,item)=>sum+item.amount,0)}
+        pendingCount={pendingRows.length}
+        todayTotal={todayRows.reduce((sum,item)=>sum+item.amount,0)}
+        formatMoney={(value)=>money.format(value || 0)}
+      />
 
-      <nav className="expense-view-tabs scroll-hidden">
-        {[
-          ['overview','Overview'],
-          ['expenses','All Expenses'],
-          ['categories','Categories'],
-          ['reports','Reports']
-        ].map(([key,label])=>(
-          <button key={key} className={activeView===key?'is-active':''} onClick={()=>setActiveView(key)}>{label}</button>
-        ))}
-      </nav>
+      <ExpenseTabs active={activeView} onChange={setActiveView} />
 
       {activeView === 'overview' ? (
-        <div className="expense-two-column">
-          <section className="expense-panel">
-            <div className="expense-section-header">
-              <div>
-                <h2>Recent Expenses</h2>
-                <p>Latest workshop operational spending.</p>
-              </div>
-            </div>
-            <div className="expense-row-list">
-              {expenses.slice(0,6).map((expense)=>(
-                <button key={expense.id} className="expense-data-row" onClick={()=>navigate(`/expenses/${expense.id}`)}>
-                  <div><strong>{expense.title}</strong><span>{expense.expenseDate} · {expense.vendor}</span></div>
-                  <b>{money.format(expense.amount)}</b>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="expense-panel">
-            <div className="expense-section-header">
-              <div>
-                <h2>Top Expense Categories</h2>
-                <p>Highest spending categories across recorded expenses.</p>
-              </div>
-            </div>
-            <div className="expense-row-list">
-              {categoryTotals.slice(0,6).map((row,index)=>(
-                <div key={row.category} className="expense-data-row">
-                  <div><strong>#{index+1} {row.category}</strong><span>Workshop expense category</span></div>
-                  <b>{money.format(row.total)}</b>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="expense-panel expense-wide-panel">
-            <div className="expense-section-header">
-              <div>
-                <h2>Expense Flow</h2>
-                <p>Record → receipt → approval → accounting entry.</p>
-              </div>
-            </div>
-            <div className="expense-flow">
-              <span>Record Expense</span><i>→</i><span>Attach Receipt</span><i>→</i><span>Approval</span><i>→</i><span>Payment / Accounting</span>
-            </div>
-          </section>
-        </div>
+        <ExpenseOverview
+          expenses={expenses}
+          categoryTotals={categoryTotals}
+          formatMoney={(value)=>money.format(value || 0)}
+          onOpen={(expense)=>navigate(`/expenses/${expense.id}`)}
+        />
       ) : null}
 
       {activeView === 'expenses' ? (
-        <>
-          <div className="expense-filter-bar">
-            <label className="expense-search">
-              <Search size={16}/>
-              <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search expense, vendor, ID, reference or payment method"/>
-            </label>
-
-            <select value={categoryFilter} onChange={(e)=>setCategoryFilter(e.target.value)}>
-              <option>All</option>
-              {expenseCategories.map((category)=><option key={category}>{category}</option>)}
-            </select>
-
-            <select value={statusFilter} onChange={(e)=>setStatusFilter(e.target.value)}>
-              <option>All</option>
-              <option>Approved</option>
-              <option>Pending Approval</option>
-              <option>Draft</option>
-              <option>Rejected</option>
-            </select>
-          </div>
-
-          <div className="expense-card-grid">
-            {filtered.map((expense)=>(
-              <article key={expense.id} className="expense-card">
-                <div className="expense-card__head">
-                  <div><span>{expense.id}</span><strong>{expense.title}</strong></div>
-                  <b className={`expense-status ${statusClass(expense.status)}`}>{expense.status}</b>
-                </div>
-
-                <div className="expense-category-chip"><Layers3 size={12}/>{expense.category}</div>
-
-                <div className="expense-card-values">
-                  <div><span>Amount</span><strong>{money.format(expense.amount)}</strong></div>
-                  <div><span>Date</span><strong>{expense.expenseDate}</strong></div>
-                  <div><span>Payment</span><strong>{expense.paymentMethod}</strong></div>
-                </div>
-
-                <div className="expense-vendor">
-                  <span>Vendor / Payable To</span>
-                  <strong>{expense.vendor}</strong>
-                </div>
-
-                <div className="expense-card-actions">
-                  <button onClick={()=>navigate(`/expenses/${expense.id}`)}><Eye size={13}/> View</button>
-                  <button onClick={()=>navigate(`/expenses/${expense.id}/edit`)}><Edit3 size={13}/> Edit</button>
-                  <button className="is-danger" onClick={()=>removeExpense(expense)}><Trash2 size={13}/> Delete</button>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          {!filtered.length ? <div className="expense-empty">No expenses matched your filters.</div> : null}
-        </>
+        <ExpenseListView
+          expenses={filtered}
+          query={query}
+          onQueryChange={setQuery}
+          categoryFilter={categoryFilter}
+          onCategoryChange={setCategoryFilter}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          categories={expenseCategories}
+          formatMoney={(value)=>money.format(value || 0)}
+          onView={(expense)=>navigate(`/expenses/${expense.id}`)}
+          onEdit={(expense)=>navigate(`/expenses/${expense.id}/edit`)}
+          onDelete={removeExpense}
+        />
       ) : null}
 
       {activeView === 'categories' ? (
