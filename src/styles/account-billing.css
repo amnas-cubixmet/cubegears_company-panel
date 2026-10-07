@@ -80,3 +80,19 @@
 @media(max-width:980px){.account-billing-hero{align-items:stretch;flex-direction:column}.account-billing-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.saas-grid{grid-template-columns:1fr}.saas-wide{grid-column:auto}.saas-template-entry{grid-template-columns:1fr}.saas-template-entry .saas-muted,.saas-template-entry .saas-button{grid-column:1;grid-row:auto}.storage-range-toolbar{align-items:stretch;flex-direction:column}.storage-custom-range{flex-wrap:wrap}}
 @media(max-width:640px){.account-billing-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.saas-details-grid,.saas-storage-summary,.storage-interval-summary{grid-template-columns:1fr 1fr}.saas-storage-actions{flex-direction:column}.saas-storage-actions>*{width:100%!important}.storage-history-row{grid-template-columns:minmax(0,1fr) auto}.storage-history-row>div:nth-child(2),.storage-history-row>div:nth-child(3){grid-row:2}.saas-media-row{grid-template-columns:auto 34px minmax(0,1fr) auto}.saas-file-date{grid-column:3}.saas-icon-button{grid-column:4;grid-row:1/3}}
 @media(max-width:430px){.account-billing-nav{grid-template-columns:1fr 1fr}.saas-details-grid,.saas-storage-summary,.storage-interval-summary{grid-template-columns:1fr}.account-billing-hero{padding:13px}.saas-card{padding:12px}}
+
+
+/* ---------- Dashboard-style Account Billing v2 ---------- */
+.saas-page.account-billing-page{padding:0!important;gap:12px!important}
+.account-billing-page .saas-grid{gap:10px}
+.account-billing-page .saas-card{padding:12px;border-radius:12px;box-shadow:var(--shadow-sm)}
+.account-billing-page .saas-card-head{margin-bottom:10px}
+.account-billing-page .saas-card-head h2{font-size:11px;font-weight:750}
+.account-billing-page .saas-card-head>svg{width:15px;height:15px}
+.account-billing-page .saas-price{margin:4px 0 10px;font-size:21px}
+.account-billing-page .saas-details-grid{gap:6px}
+.account-billing-page .saas-details-grid>div,.account-billing-page .saas-storage-summary>div{padding:8px;border-radius:9px}
+.account-billing-page .saas-breakdown>div{padding:7px 0}
+.account-billing-page .saas-table-wrap{scrollbar-width:none;-ms-overflow-style:none}.account-billing-page .saas-table-wrap::-webkit-scrollbar{display:none;width:0;height:0}
+.account-billing-page .saas-template-entry{border-color:color-mix(in srgb,var(--primary) 22%,var(--border))}
+@media(max-width:760px){.saas-page.account-billing-page{padding:0!important}.account-billing-page .saas-grid{grid-template-columns:1fr}.account-billing-page .saas-wide{grid-column:auto}}
