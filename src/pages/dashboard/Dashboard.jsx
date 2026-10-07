@@ -53,25 +53,19 @@ export const Dashboard = () => {
     return () => window.clearInterval(timer);
   }, []);
 
-  const handleClockToggle = async () => {
-    const nextStatus =
-      data?.attendance?.status === 'CLOCKED_IN'
-        ? 'CLOCKED_OUT'
-        : 'CLOCKED_IN';
-
-    await toggleClockIn(nextStatus);
+  const handleClockToggle = async (action) => {
+    if (!action) return;
+    await toggleClockIn(action);
     await fetchDashboard();
   };
 
   if (loading) return <Loader />;
 
-  const isClockedIn = data?.attendance?.status === 'CLOCKED_IN';
-
   return (
     <div className="dashboard-page">
       <DashboardHeading
         user={user}
-        isClockedIn={isClockedIn}
+        attendance={data?.attendance}
         currentTime={currentTime}
         onClockToggle={handleClockToggle}
       />
