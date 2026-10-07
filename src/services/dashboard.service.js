@@ -13,12 +13,40 @@ export const getDashboardData = async (params) => {
   return apiClient.get(API_ENDPOINTS.DASHBOARD, { params });
 };
 
-export const toggleClockIn = async (action) => {
+const getBrowserLocation = () =>
+  new Promise((resolve, reject) => {
+    if (!navigator?.geolocation) {
+      reject(new Error('Location is not supported by this browser.'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+      }),
+      () => reject(new Error('Location permission is required for attendance.')),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  });
+
+export const toggleClockIn = async (action, options = {}) => {
   if (USE_MOCK_API) {
     await delay();
     return Promise.resolve(toggleMockClockIn(action === 'check_in' ? 'CLOCKED_IN' : 'CLOCKED_OUT'));
   }
-  return apiClient.post('/attendance/toggle', { action, source: 'web' });
+
+  let location = {};
+  if (options.locationRequired) {
+    location = await getBrowserLocation();
+  }
+
+  return apiClient.post('/attendance/toggle', {
+    action,
+    source: 'web',
+    location,
+  });
 };
 
 export const dashboardService = {
