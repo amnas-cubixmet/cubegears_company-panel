@@ -1948,3 +1948,14 @@
     grid-template-columns:1fr;
   }
 }
+
+
+/* Overtime approval price fields */
+.attendance-overtime-approval-rate{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.7fr);gap:9px}
+.attendance-overtime-approval-rate label,.attendance-overtime-approval-rate>div{display:flex;flex-direction:column;gap:5px}
+.attendance-overtime-approval-rate label>span,.attendance-overtime-approval-rate>div>span{color:var(--text-secondary);font-size:9px;font-weight:700}
+.attendance-overtime-approval-rate input{width:100%;height:40px;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-primary);font:inherit;font-size:9px;outline:none}
+.attendance-overtime-approval-rate input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.attendance-overtime-approval-rate>div{justify-content:center;padding:8px 10px;border:1px solid color-mix(in srgb,var(--success) 25%,var(--border));border-radius:8px;background:var(--success-soft)}
+.attendance-overtime-approval-rate>div strong{color:var(--success);font-size:14px}
+@media(max-width:520px){.attendance-overtime-approval-rate{grid-template-columns:1fr}}
