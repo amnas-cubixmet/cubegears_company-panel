@@ -1,4 +1,7 @@
 import React from 'react';
+import { Plus, UsersRound } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 import { useNavigate } from 'react-router-dom';
 import { StaffAssignmentsPanel } from './StaffAssignmentsPanel';
 import { StaffAttentionPanel } from './StaffAttentionPanel';
@@ -14,10 +17,24 @@ export const StaffOverview = ({
   assignments,
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const missingDocs = activeStaff.filter((item) => !item.documents?.length).length;
 
   return (
     <div className="staff-dashboard-overview">
+      <section className="staff-overview-commandbar">
+        <div>
+          <UsersRound size={15} />
+          <span>Manage workshop employees, access, attendance and assignments.</span>
+        </div>
+        {hasPermission(user, 'staff.create') && (
+          <button type="button" onClick={() => navigate('/staff-management/add')}>
+            <Plus size={13} />
+            Add Staff
+          </button>
+        )}
+      </section>
+
       <StaffOverviewStats overview={overview} />
 
       <section className="staff-dashboard-bottom-grid">
