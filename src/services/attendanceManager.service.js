@@ -19,17 +19,27 @@ export const getApprovals = async () => {
   return apiClient.get('/attendance-manager/approvals');
 };
 
-export const updateApprovalStatus = async (approvalId, decision, note) => {
+export const updateApprovalStatus = async (approvalId, decision, note, extra = {}) => {
   if (USE_MOCK_API) {
     await delay();
     const item = mockManagerApprovals.find(a => a.id === approvalId);
     if (item) {
       item.status = decision === 'approve' ? 'Approved' : 'Rejected';
       item.managerNote = note;
+      if (item.type === 'Overtime' && decision === 'approve') {
+        const rate = Number(extra.rate || item.rate || 0);
+        if (!rate || rate <= 0) throw new Error('Overtime rate is required before approval.');
+        item.rate = rate;
+        item.amount = Number((((Number(item.minutes || 0) / 60) || Number(item.overtimeHours || 0)) * rate).toFixed(2));
+      }
     }
     return Promise.resolve(item);
   }
-  return apiClient.post(`/attendance-manager/approvals/${approvalId}`, { decision, note });
+  return apiClient.post(`/attendance-manager/approvals/${approvalId}`, {
+    decision,
+    note,
+    ...extra,
+  });
 };
 
 export const getTeamAttendance = async (params = {}) => {
