@@ -271,6 +271,33 @@ export const payrollService = {
 };
 
 
+Object.assign(payrollService, {
+  getPayrollPolicy: payrollService.getPayrollPolicy || (async () => ({
+    id: 'MOCK-PAYROLL-POLICY',
+    defaultPaymentType: 'monthly',
+    payrollCycle: 'monthly',
+    workingDayCalculation: 'attendance',
+    overtimeRules: { multiplier: 1.5 },
+    commissionRules: { autoApprove: false },
+    approvalWorkflow: { managerApproval: true, advanceRecoveryPercent: 20 },
+    paymentMethods: ['Bank Transfer', 'UPI', 'Cash', 'Cheque'],
+    unpaidLeavePolicy: { monthlyDivisor: 30 },
+  })),
+  savePayrollPolicy: payrollService.savePayrollPolicy || (async (policy) => policy),
+  getPayrollRuns: payrollService.getPayrollRuns || (async () => []),
+  createPayrollRun: payrollService.createPayrollRun || (async ({ month, year, branchId = null }) => ({
+    id: 'MOCK-RUN-' + year + '-' + month,
+    month,
+    year,
+    branchId,
+    status: 'Draft',
+    approvalStatus: 'Draft',
+  })),
+  processPayrollRun: payrollService.processPayrollRun || (async (id) => ({ id, status: 'Processed', approvalStatus: 'Draft' })),
+  submitPayrollRun: payrollService.submitPayrollRun || (async (id) => ({ id, status: 'Processed', approvalStatus: 'Submitted' })),
+  approvePayrollRun: payrollService.approvePayrollRun || (async (id) => ({ id, status: 'Approved', approvalStatus: 'Approved' })),
+});
+
 const PAYMENT_TYPE_LABELS = {
   monthly: 'Fixed Monthly Salary',
   daily: 'Daily Wage',
