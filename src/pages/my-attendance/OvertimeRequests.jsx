@@ -28,6 +28,7 @@ export const OvertimeRequests = () => {
     reason: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [detectedOvertime, setDetectedOvertime] = useState(null);
   const [message, setMessage] = useState('');
 
   const load = async () => {
@@ -38,6 +39,42 @@ export const OvertimeRequests = () => {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadDetectedOvertime = async () => {
+      if (!form.date) return;
+
+      const [year, month] = form.date.split('-').map(Number);
+      try {
+        const logs = await attendanceService.getPersonalAttendanceLogs({
+          month,
+          year,
+        });
+        if (!active) return;
+
+        const record = (logs || []).find((row) => row.date === form.date);
+        const minutes = Number(record?.overtimeMinutes || 0);
+        const hours = minutes > 0 ? Number((minutes / 60).toFixed(2)) : 0;
+
+        setDetectedOvertime(hours || null);
+        if (hours > 0) {
+          setForm((current) => ({
+            ...current,
+            overtimeHours: String(hours),
+          }));
+        }
+      } catch {
+        if (active) setDetectedOvertime(null);
+      }
+    };
+
+    loadDetectedOvertime();
+    return () => {
+      active = false;
+    };
+  }, [form.date]);
 
   const pending = useMemo(
     () => requests.filter((row) => row.status === 'Pending').length,
@@ -117,8 +154,18 @@ export const OvertimeRequests = () => {
                   setForm((current) => ({ ...current, overtimeHours: event.target.value }))
                 }
                 placeholder="2.5"
+                readOnly={Boolean(detectedOvertime)}
                 required
               />
+              {detectedOvertime ? (
+                <small className="my-overtime-auto-note">
+                  Auto-loaded from attendance: {detectedOvertime}h
+                </small>
+              ) : (
+                <small className="my-overtime-auto-note">
+                  No calculated overtime found for this date. Enter hours manually if needed.
+                </small>
+              )}
             </label>
           </div>
 
