@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   StaffManagementHeader,
   StaffManagementTabs,
 } from '../../components/staff-management';
 import { Staff } from '../staff-management/Staff';
+import { StaffProfile } from '../staff-management/staff/StaffProfile';
 import { StaffAddPage } from '../staff-management/StaffAddPage';
 import { UserRoles } from '../staff-management/UserRoles';
 import { WorkshopStaffSection } from '../staff-management/WorkshopStaffSection';
@@ -12,6 +13,7 @@ import '../../styles/staff-management.css';
 
 const resolveSection = (pathname) => {
   if (pathname.endsWith('/overview')) return 'overview';
+  if (/^\/staff-management\/staff\/[^/]+$/.test(pathname)) return 'profile';
   if (pathname.endsWith('/staff')) return 'staff';
   if (pathname.endsWith('/add')) return 'add';
   if (pathname.endsWith('/roles')) return 'roles';
@@ -27,6 +29,7 @@ const resolveSection = (pathname) => {
 export const StaffManagement = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { staffId } = useParams();
   const activeSection = resolveSection(location.pathname);
 
   useEffect(() => {
@@ -40,6 +43,14 @@ export const StaffManagement = () => {
   }, [location.pathname, navigate]);
 
   const renderSection = () => {
+    if (activeSection === 'profile') {
+      return (
+        <StaffProfile
+          staffId={staffId}
+          onBack={() => navigate('/staff-management/staff')}
+        />
+      );
+    }
     if (activeSection === 'staff') return <Staff />;
     if (activeSection === 'add') return <StaffAddPage />;
     if (activeSection === 'roles') return <UserRoles />;
