@@ -367,14 +367,38 @@ if (!USE_MOCK_API) {
         notes: plan.notes || ''
       };
 
-      if (plan.id) {
-        return normalizeCompensationPlan(
-          await apiClient.patch(`/payroll/compensation-plans/${plan.id}`, payload)
-        );
+      const saved = plan.id
+        ? await apiClient.patch(`/payroll/compensation-plans/${plan.id}`, payload)
+        : await apiClient.post('/payroll/compensation-plans', payload);
+
+      const components = Array.isArray(plan.components)
+        ? plan.components.filter((item) => item.name && Number(item.amount || item.percentage || 0) > 0)
+        : [];
+
+      for (const component of components) {
+        const componentPayload = {
+          plan: saved.id,
+          code: component.code || String(component.name).toUpperCase().replace(/[^A-Z0-9]+/g, '_'),
+          name: component.name,
+          kind: component.kind || 'earning',
+          calculationType: component.calculationType || 'fixed',
+          amount: Number(component.amount || 0),
+          percentage: Number(component.percentage || 0),
+          revenueBasis: component.revenueBasis || '',
+          taxable: component.taxable !== false,
+          is_active: component.is_active !== false,
+          metadata: component.metadata || {}
+        };
+
+        if (component.id) {
+          await apiClient.patch(`/payroll/compensation-components/${component.id}`, componentPayload);
+        } else {
+          await apiClient.post('/payroll/compensation-components', componentPayload);
+        }
       }
-      return normalizeCompensationPlan(
-        await apiClient.post('/payroll/compensation-plans', payload)
-      );
+
+      const refreshed = await apiClient.get(`/payroll/compensation-plans/${saved.id}`);
+      return normalizeCompensationPlan(refreshed);
     },
 
     approveCompensationPlan: async (id) =>
