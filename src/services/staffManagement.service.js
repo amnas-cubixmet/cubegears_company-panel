@@ -66,7 +66,7 @@ export const staffManagementService = {
         const team = {
           id: `DEP-${Date.now()}`,
           name: teamData.name.trim(),
-          lead: teamData.lead || 'Not Assigned',
+          lead: teamData.leadName || teamData.lead || 'Not Assigned',
           branch: teamData.branch || 'All Branches',
           description: teamData.description?.trim() || '',
           icon: 'Users'
@@ -464,7 +464,7 @@ if (!USE_MOCK_API) {
     },
     createTeam: async (teamData) => apiClient.post('/employees/teams', {
       name: teamData.name,
-      lead: teamData.lead || null,
+      lead: teamData.leadUserId || teamData.lead || null,
       description: teamData.description || '',
       is_active: true
     }),
