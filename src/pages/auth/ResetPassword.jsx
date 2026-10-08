@@ -9,6 +9,7 @@ export const ResetPassword = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const uid = params.get('uid') || '';
   const token = params.get('token') || '';
   const email = params.get('email') || '';
   const [password, setPassword] = useState('');
@@ -22,12 +23,15 @@ export const ResetPassword = () => {
   const submit = async (event) => {
     event.preventDefault();
     setMessage('');
+    if ((!uid && !email) || !token) {
+      return setMessage('This reset link is invalid or incomplete. Request a new reset link.');
+    }
     if (password.length < 8) return setMessage('Password must be at least 8 characters.');
     if (password !== confirm) return setMessage('Passwords do not match.');
 
     setLoading(true);
     try {
-      await authRecoveryService.resetPassword({ token, email, password });
+      await authRecoveryService.resetPassword({ uid, token, email, password });
       setDone(true);
     } catch (error) {
       setMessage(error?.message || 'Unable to reset password.');
@@ -61,7 +65,11 @@ export const ResetPassword = () => {
               <p className="login-description">{email ? `Resetting access for ${email}.` : 'Choose a strong password for your account.'}</p>
 
               {message && <div className="auth-message">{message}</div>}
-              {!token && <div className="auth-message is-warning">This reset URL does not include a valid token. Request a new reset link.</div>}
+              {(!token || (!uid && !email)) && (
+                <div className="auth-message is-warning">
+                  This reset URL is incomplete. Request a new reset link.
+                </div>
+              )}
 
               <form className="login-form" onSubmit={submit}>
                 <label>
@@ -92,7 +100,13 @@ export const ResetPassword = () => {
                   <span className={/[0-9]/.test(password) ? 'ok' : ''}>Number</span>
                 </div>
 
-                <button className="login-submit" type="submit" disabled={loading || !token}>{loading ? 'Updating…' : 'Reset Password'}</button>
+                <button
+                  className="login-submit"
+                  type="submit"
+                  disabled={loading || !token || (!uid && !email)}
+                >
+                  {loading ? 'Updating…' : 'Reset Password'}
+                </button>
               </form>
 
               <div className="auth-bottom-link"><Link to="/forgot-password">Request another reset link</Link></div>
