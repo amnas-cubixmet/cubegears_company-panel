@@ -1,5 +1,6 @@
 export const STATUS_OPTIONS = [
   'All',
+  'Active',
   'New',
   'Inspection',
   'Estimate Pending',
