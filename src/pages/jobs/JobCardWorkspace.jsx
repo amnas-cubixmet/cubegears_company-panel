@@ -50,6 +50,8 @@ const normalizeJobStatus = (status) => {
   return JOB_STATUSES.includes(status) ? status : 'New';
 };
 
+const INSPECTION_CHECKS = ['Tyres', 'Warning Lights', 'Battery', 'Engine Oil', 'Coolant', 'Brake Fluid'];
+
 const TABS = [
   ['overview', 'Overview'],
   ['complaints', 'Complaints'],
@@ -219,6 +221,7 @@ export function JobCardWorkspace() {
 
   const complaints = job?.complaints || job?.customerComplaints || [];
   const findings = job?.inspectionFindings || [];
+  const inspectionChecks = job?.inspection?.checklist || {};
   const labourRecords = job?.labourRecords || [];
   const parts = job?.partsUsed || [];
   const outsidePurchases = job?.outsidePurchases || [];
@@ -268,7 +271,7 @@ export function JobCardWorkspace() {
       job?.assignedEmployeeId
     ),
     complaints: complaints.length > 0,
-    inspection: findings.length > 0,
+    inspection: findings.length > 0 || INSPECTION_CHECKS.every((item) => inspectionChecks[item] && inspectionChecks[item] !== 'Not Checked'),
     work: labourRecords.length > 0,
     parts: parts.length > 0 || outsidePurchases.length > 0,
     estimate: estimates.some((item) => item.approvalStatus === 'Approved'),
@@ -282,6 +285,7 @@ export function JobCardWorkspace() {
     job?.assignedEmployeeId,
     complaints.length,
     findings.length,
+    inspectionChecks,
     labourRecords.length,
     parts.length,
     outsidePurchases.length,
@@ -329,6 +333,15 @@ export function JobCardWorkspace() {
   const updateComplaintStatus = async (complaintId, status) => {
     await persist({
       complaints: complaints.map((item) => item.id === complaintId ? { ...item, status } : item)
+    });
+  };
+
+  const updateInspectionCheck = async (item, status) => {
+    await persist({
+      inspection: {
+        ...(job.inspection || {}),
+        checklist: { ...inspectionChecks, [item]: status },
+      },
     });
   };
 
@@ -894,14 +907,25 @@ export function JobCardWorkspace() {
               <Info label="Vehicle Photos" value={`${job.photos?.length || 0} uploaded`}/>
             </div>
             <div className="job-inspection-checks mt-4 grid grid-cols-2 gap-2 text-[11px]">
-              {['Tyres','Warning Lights','Battery','Engine Oil','Coolant','Brake Fluid'].map((item) => (
-                <div key={item} className="job-inspection-check rounded-xl border border-line bg-surface-2 p-3">
+              {INSPECTION_CHECKS.map((item) => (
+                <label key={item} className="job-inspection-check rounded-xl border border-line bg-surface-2 p-3">
                   <strong className="text-content">{item}</strong>
-                  <div className="mt-1 text-muted">Inspect & record</div>
-                </div>
+                  <select
+                    aria-label={`${item} inspection result`}
+                    value={inspectionChecks[item] || 'Not Checked'}
+                    onChange={(event) => updateInspectionCheck(item, event.target.value)}
+                    disabled={saving}
+                  >
+                    <option value="Not Checked">Not Checked</option>
+                    <option value="Good">Good</option>
+                    <option value="Needs Attention">Needs Attention</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                </label>
               ))}
             </div>
 
+            <p className="job-inspection-guide">If no issues are found, complete all inspection checks to unlock the next stage. Add a finding for any issue requiring an estimate.</p>
             <label className="mt-4 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 text-xs font-bold text-content">
               <Camera size={15}/>Add Inspection Photo
               <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>addPhoto(e.target.files?.[0],'Inspection')}/>
