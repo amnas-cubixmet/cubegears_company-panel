@@ -19,7 +19,7 @@ const normalizeSession = (session = {}, fallbackId = 'session') => ({
   clockOut: session.clockOut ?? session.clock_out ?? null,
   workedMinutes: Number(session.workedMinutes ?? session.worked_minutes ?? 0),
   autoClosed: Boolean(session.autoClosed ?? session.auto_closed ?? false),
-  source: session.source || 'web',
+  source: session.source || '',
   clockInLocation: session.clockInLocation ?? session.clock_in_location ?? {},
   clockOutLocation: session.clockOutLocation ?? session.clock_out_location ?? {},
 });
@@ -39,7 +39,7 @@ const normalizeAttendanceLog = (row = {}) => {
   return {
     ...row,
     dayOfWeek: row.dayOfWeek || dayName(row.date),
-    shiftName: row.shiftName || 'General Shift (09:00 AM - 06:00 PM)',
+    shiftName: row.shiftName ?? row.shift_name ?? '',
     totalWorkedMinutes: Number(row.totalWorkedMinutes ?? row.worked_minutes ?? row.workedMinutes ?? 0),
     lateMinutes: Number(row.lateMinutes ?? row.late_minutes ?? 0),
     earlyExitMinutes: Number(row.earlyExitMinutes ?? row.early_exit_minutes ?? 0),
