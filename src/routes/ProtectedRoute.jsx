@@ -33,9 +33,15 @@ export const ProtectedRoute = () => {
   }
 
   const requiredPermission = getPermissionForPath(location.pathname);
+  const staffProfileMatch = location.pathname.match(/^\/staff-management\/staff\/([^/]+)$/);
+  const isOwnStaffProfile =
+    Boolean(staffProfileMatch) &&
+    Boolean(user?.employeeProfileId) &&
+    String(staffProfileMatch[1]) === String(user.employeeProfileId);
   if (
     location.pathname !== '/access-denied' &&
     requiredPermission &&
+    !isOwnStaffProfile &&
     !hasPermission(user, requiredPermission)
   ) {
     return (
