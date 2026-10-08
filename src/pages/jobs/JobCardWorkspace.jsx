@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
+import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 
@@ -184,10 +185,18 @@ export function JobCardWorkspace() {
   };
 
   const assignTechnician = async (staffId) => {
-    const selected = staff.find((item) => item.id === staffId);
+    const selected = staff.find((item) => String(item.id) === String(staffId));
+
+    if (USE_MOCK_API) {
+      await persist({
+        assignedEmployeeId: selected?.id || '',
+        assignedEmployeeName: selected?.name || ''
+      });
+      return;
+    }
+
     await persist({
-      assignedEmployeeId: selected?.id || '',
-      assignedEmployeeName: selected?.name || ''
+      technician: selected?.user || null
     });
   };
 
