@@ -10,10 +10,6 @@ const employeeLabel = (staff = {}) => {
   return match ? `Employee ${Number(match[1])}` : 'Employee';
 };
 
-const normalizeSkills = (skills = []) =>
-  (Array.isArray(skills) ? skills : []).map((skill) =>
-    typeof skill === 'string' ? skill : skill?.name,
-  ).filter(Boolean);
 
 const normalizeStaff = (staff = {}) => ({
   ...staff,
@@ -42,10 +38,6 @@ const normalizeStaff = (staff = {}) => ({
   employmentStatus: staff.employmentStatus || staff.status || 'Active',
   emergencyContact: staff.emergencyContact || staff.emergency_contact || '',
   paymentType: staff.paymentType || staff.payment_type || '',
-  skills: normalizeSkills(staff.skills),
-  skillDetails: Array.isArray(staff.skills)
-    ? staff.skills.filter((skill) => skill && typeof skill === 'object')
-    : [],
   accountStatus: staff.accountStatus || 'Active',
   loginStatus: staff.loginStatus || 'Not Invited',
 });
@@ -120,9 +112,8 @@ export const staffService = {
         ...staffData,
         teamId: staffData.teamId || null,
         shiftId: staffData.shiftId || null,
-        skillIds: staffData.skillIds || [],
+        branchId: staffData.branchId || null,
       };
-      delete payload.skills;
       const created = await apiClient.post('/employees', payload);
 
       if (staffData.setSalaryNow && staffData.salarySetup) {
@@ -153,7 +144,6 @@ export const staffService = {
           id: newId,
           employeeId: newId,
           displayEmployeeNo: `Employee ${nextNumber}`,
-          skills: staffData.skills || [],
           employmentStatus: staffData.employmentStatus || 'Active',
           accountStatus: 'Active',
           loginStatus: 'Not Invited',
@@ -204,10 +194,9 @@ export const staffService = {
       if (Object.prototype.hasOwnProperty.call(staffData, 'shiftId')) {
         payload.shiftId = staffData.shiftId || null;
       }
-      if (Object.prototype.hasOwnProperty.call(staffData, 'skillIds')) {
-        payload.skillIds = staffData.skillIds || [];
+      if (Object.prototype.hasOwnProperty.call(staffData, 'branchId')) {
+        payload.branchId = staffData.branchId || null;
       }
-      delete payload.skills;
       return normalizeStaff(await apiClient.patch(`/employees/${id}`, payload));
     }
 
@@ -219,7 +208,6 @@ export const staffService = {
           mockStaffList[idx] = {
             ...previous,
             ...staffData,
-            skills: staffData.skills ?? previous.skills,
           };
           mockStaffList[idx].activityHistory =
             mockStaffList[idx].activityHistory || [];
