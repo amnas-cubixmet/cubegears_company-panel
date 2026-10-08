@@ -1,83 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Users, UserCheck, UserMinus, UserPlus, Building2, Wrench, Clock3, Briefcase,
-  Gauge, FileText, AlertTriangle, Star, IndianRupee, Download, ShieldCheck,
-  CalendarDays, Activity, CheckCircle2, Plus, Save
-} from 'lucide-react';
 import { staffService } from '../../services/staff.service';
 import { staffManagementService } from '../../services/staffManagement.service';
 import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
-import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { StaffShiftCrud } from './StaffShiftCrud';
 import { StaffDocumentCrud } from './StaffDocumentCrud';
 import { StaffOverview } from '../../components/staff-management/StaffOverview';
 import { StaffTeamsSection } from '../../components/staff-management/StaffTeamsSection';
 import { StaffPerformanceSection } from '../../components/staff-management/StaffPerformanceSection';
 import { StaffReportsSection } from '../../components/staff-management/StaffReportsSection';
-import { getEmployeeLabel } from '../../components/staff-management/staffDisplay';
 import {
   staffJobAssignments,
-  staffPerformance
+  staffPerformance,
 } from '../../mock/staffManagement.mock';
-
-const money = (value) =>
-  new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0
-  }).format(value || 0);
 
 const safeDate = (value) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 };
-
-const downloadCsv = (filename, rows) => {
-  if (!rows.length) return;
-  const header = Object.keys(rows[0]);
-  const csv = [
-    header,
-    ...rows.map((row) => header.map((key) => row[key] ?? ''))
-  ]
-    .map((row) =>
-      row
-        .map((value) => `"${String(value).replaceAll('"', '""')}"`)
-        .join(',')
-    )
-    .join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-};
-
-const SectionHeader = ({ title, description, action }) => (
-  <section className="staff-workshop-section-header">
-    <div>
-      <h2>{title}</h2>
-      <p>{description}</p>
-    </div>
-    {action || null}
-  </section>
-);
-
-const MetricCard = ({ label, value, icon: Icon, tone = 'primary', note }) => (
-  <article className="staff-workshop-kpi-card">
-    <div className="staff-workshop-kpi-card__top">
-      <span>{label}</span>
-      <span className={`staff-workshop-kpi-card__icon is-${tone}`}>
-        <Icon size={16} />
-      </span>
-    </div>
-    <strong>{value}</strong>
-    {note ? <small>{note}</small> : null}
-  </article>
-);
 
 export const WorkshopStaffSection = ({ section }) => {
   const [staff, setStaff] = useState([]);
