@@ -469,33 +469,102 @@ if (!USE_MOCK_API) {
       is_active: true
     }),
     assignStaffToTeam: async (teamId, staffIds = []) => {
-      await Promise.all(staffIds.map((id) => apiClient.patch(`/employees/${id}`, { team: teamId })));
+      await Promise.all(
+        staffIds.map((id) =>
+          apiClient.patch(`/employees/${id}`, { teamId })
+        )
+      );
       return { id: teamId, assignedStaffIds: staffIds };
     },
     addStaffToSkill: async (skillId, staffIds = []) =>
       apiClient.post(`/employees/skills/${skillId}/assign`, { staffIds }),
 
-    getShifts: async () => apiClient.get('/employees/shifts'),
-    createShift: async (shiftData) => apiClient.post('/employees/shifts', {
-      name: shiftData.name,
-      ...parseShiftTime(shiftData.time),
-      weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : [],
-      is_active: true
-    }),
-    updateShift: async (id, shiftData) => apiClient.patch(`/employees/shifts/${id}`, {
-      name: shiftData.name,
-      ...parseShiftTime(shiftData.time),
-      weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : undefined
-    }),
+    getShifts: async () => {
+      const rows = await apiClient.get('/employees/shifts');
+      const list = Array.isArray(rows) ? rows : rows?.results || [];
+      const formatTime = (value = '') => {
+        const parts = String(value).split(':');
+        if (parts.length < 2) return value;
+        const hours = Number(parts[0]);
+        const minutes = parts[1];
+        const suffix = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours % 12 || 12;
+        return `${String(hour12).padStart(2, '0')}:${minutes} ${suffix}`;
+      };
+
+      return list.map((shift) => ({
+        ...shift,
+        time: `${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}`,
+        weeklyOff: shift.weekly_off?.[0] || 'Sunday',
+        branch: shift.branchName || 'All Branches',
+        assignedStaffIds: shift.assignedStaffIds || []
+      }));
+    },
+    createShift: async (shiftData) => {
+      const created = await apiClient.post('/employees/shifts', {
+        name: shiftData.name,
+        ...parseShiftTime(shiftData.time),
+        weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : [],
+        is_active: true
+      });
+      if (Array.isArray(shiftData.assignedStaffIds)) {
+        await apiClient.post(`/employees/shifts/${created.id}/assign`, {
+          staffIds: shiftData.assignedStaffIds
+        });
+      }
+      return created;
+    },
+    updateShift: async (id, shiftData) => {
+      const updated = await apiClient.patch(`/employees/shifts/${id}`, {
+        name: shiftData.name,
+        ...parseShiftTime(shiftData.time),
+        weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : undefined
+      });
+      if (Array.isArray(shiftData.assignedStaffIds)) {
+        await apiClient.post(`/employees/shifts/${id}/assign`, {
+          staffIds: shiftData.assignedStaffIds
+        });
+      }
+      return updated;
+    },
     deleteShift: async (id) => apiClient.delete(`/employees/shifts/${id}`),
 
-    getSkills: async () => apiClient.get('/employees/skills'),
-    createSkill: async (skillData) => apiClient.post('/employees/skills', {
-      name: skillData.name,
-      category: skillData.category || 'Workshop',
-      is_active: true
-    }),
-    updateSkill: async (id, skillData) => apiClient.patch(`/employees/skills/${id}`, skillData),
+    getSkills: async () => {
+      const rows = await apiClient.get('/employees/skills');
+      const list = Array.isArray(rows) ? rows : rows?.results || [];
+      return list.map((skill) => ({
+        ...skill,
+        assignedStaffIds: skill.assignedStaffIds || []
+      }));
+    },
+    createSkill: async (skillData) => {
+      const created = await apiClient.post('/employees/skills', {
+        name: skillData.name,
+        category: skillData.category || 'Workshop',
+        is_active: true
+      });
+      if (Array.isArray(skillData.assignedStaffIds) && skillData.assignedStaffIds.length) {
+        await apiClient.post(`/employees/skills/${created.id}/assign`, {
+          staffIds: skillData.assignedStaffIds,
+          replace: true
+        });
+      }
+      return created;
+    },
+    updateSkill: async (id, skillData) => {
+      const updated = await apiClient.patch(`/employees/skills/${id}`, {
+        name: skillData.name,
+        category: skillData.category,
+        is_active: skillData.is_active ?? true
+      });
+      if (Array.isArray(skillData.assignedStaffIds)) {
+        await apiClient.post(`/employees/skills/${id}/assign`, {
+          staffIds: skillData.assignedStaffIds,
+          replace: true
+        });
+      }
+      return updated;
+    },
     deleteSkill: async (id) => apiClient.delete(`/employees/skills/${id}`),
 
     getDocuments: async () => apiClient.get('/employees/documents'),
