@@ -6,6 +6,19 @@ import { GlobalSearch } from '../common/GlobalSearch';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 import { hasPermission } from '../../utils/permissions';
+import { staffService } from '../../services/staff.service';
+
+const resolveStaticPageTitle = (pathname) => {
+  if (pathname === '/dashboard') return 'Dashboard';
+  if (/^\/staff-management\/staff\/[^/]+$/.test(pathname)) return 'Staff Profile';
+
+  const last = pathname.split('/').filter(Boolean).slice(-1)[0] || 'Workspace';
+  const decoded = decodeURIComponent(last);
+
+  if (/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(decoded)) return 'Details';
+
+  return decoded.replace(/-/g, ' ');
+};
 
 export const Header = () => {
   const { user, logout } = useAuth();
@@ -14,6 +27,9 @@ export const Header = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [pageTitle, setPageTitle] = useState(() =>
+    resolveStaticPageTitle(location.pathname),
+  );
   const roleLabel = getUserRoleLabel(user);
   const initials = String(user?.name || user?.email || 'CG')
     .trim()
@@ -49,6 +65,31 @@ export const Header = () => {
   }, [location.pathname]);
 
   useEffect(() => {
+    let active = true;
+    const fallback = resolveStaticPageTitle(location.pathname);
+    setPageTitle(fallback);
+
+    const staffProfileMatch = location.pathname.match(
+      /^\/staff-management\/staff\/([^/]+)$/,
+    );
+
+    if (staffProfileMatch) {
+      staffService
+        .getStaffById(decodeURIComponent(staffProfileMatch[1]))
+        .then((profile) => {
+          if (active) setPageTitle(profile?.name || 'Staff Profile');
+        })
+        .catch(() => {
+          if (active) setPageTitle('Staff Profile');
+        });
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [location.pathname]);
+
+  useEffect(() => {
     const close = (event) => {
       const inDesktopProfile = desktopProfileRef.current?.contains(event.target);
       const inMobileProfile = mobileProfileRef.current?.contains(event.target);
@@ -62,10 +103,6 @@ export const Header = () => {
     setProfileDropdownOpen(false);
     navigate(path);
   };
-
-  const pageTitle = location.pathname === '/dashboard'
-    ? 'Dashboard'
-    : location.pathname.split('/').filter(Boolean).slice(-1)[0]?.replace(/-/g, ' ') || 'Workspace';
 
   const dateLabel = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
