@@ -21,6 +21,7 @@ import { RecordRecoverySheet } from '../../components/staff-management/RecordRec
 import { RecoveryHistoryModal } from '../../components/staff-management/RecoveryHistoryModal';
 import { OvertimeManager } from '../../components/payroll/OvertimeManager';
 import { CommissionManager } from '../../components/payroll/CommissionManager';
+import { PayrollAllStaffPanel } from '../../components/payroll/PayrollAllStaffPanel';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { FileText, Plus, Filter, Printer, WalletCards, CircleDollarSign, BadgeCheck, AlertCircle } from 'lucide-react';
 import '../../styles/payroll-reference.css';
@@ -163,7 +164,24 @@ export const Payroll = ({ section = 'overview' }) => {
 
       {/* Overview */}
       {activeSection === 'overview' && (
-        <PayrollOverview
+        <div className="payroll-overview-with-staff">
+          <PayrollRunControl
+            month={selectedMonth}
+            year={selectedYear}
+            branch={selectedBranch}
+            employees={employees}
+            onChanged={loadData}
+          />
+          <PayrollAllStaffPanel
+            employees={employees}
+            plans={salaryStructures}
+            payrolls={payrolls}
+            loading={loading}
+            periodString={periodString}
+            onConfigure={setStructureEditTarget}
+            onViewPayslip={setPayslipTargetItem}
+          />
+          <PayrollOverview
           payrolls={payrolls}
           loading={loading}
           periodString={periodString}
@@ -186,7 +204,8 @@ export const Payroll = ({ section = 'overview' }) => {
           onViewDetails={(item) => setDetailTargetItem(item)}
           onViewPayslip={(item) => setPayslipTargetItem(item)}
           onViewHistory={(item) => setHistoryTargetItem(item)}
-        />
+          />
+        </div>
       )}
 
       {/* Employees */}
