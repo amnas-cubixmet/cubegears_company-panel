@@ -510,3 +510,8 @@
   .leave-balance-meta b{display:inline;margin-top:0}
   .apply-leave-grid{grid-template-columns:1fr}
 }
+
+.apply-leave-balance-note{padding:8px 9px;border:1px solid color-mix(in srgb,var(--primary) 25%,var(--border));border-radius:8px;background:var(--primary-soft);color:var(--text-secondary);font-size:8.5px}
+.apply-leave-balance-note strong{color:var(--primary);font-size:9px}
+.leave-page-error{padding:9px 11px;border:1px solid color-mix(in srgb,var(--danger) 35%,var(--border));border-radius:9px;background:var(--danger-soft);color:var(--danger);font-size:9px;font-weight:700}
+.leave-apply-button:disabled{opacity:.45;cursor:not-allowed}
