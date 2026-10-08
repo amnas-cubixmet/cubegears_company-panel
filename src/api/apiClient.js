@@ -108,15 +108,27 @@ apiClient.interceptors.response.use(
     const payload = error?.response?.data;
     if (payload instanceof Error) return Promise.reject(payload);
 
-    const firstFieldError =
-      payload && typeof payload === 'object'
-        ? Object.values(payload).find((value) => Array.isArray(value))?.[0]
-        : null;
+    const fieldErrors = {};
+
+    if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+      Object.entries(payload).forEach(([key, value]) => {
+        if (['message', 'error', 'detail'].includes(key)) return;
+
+        if (Array.isArray(value)) {
+          fieldErrors[key] = value.map(String).filter(Boolean).join(' ');
+        } else if (typeof value === 'string') {
+          fieldErrors[key] = value;
+        }
+      });
+    }
+
+    const firstFieldError = Object.values(fieldErrors)[0] || null;
 
     const message =
       payload?.message ||
       payload?.error ||
       payload?.detail ||
+      fieldErrors.non_field_errors ||
       firstFieldError ||
       error?.message ||
       'Something went wrong. Please try again.';
@@ -124,6 +136,7 @@ apiClient.interceptors.response.use(
     const normalized = new Error(message);
     normalized.status = status;
     normalized.data = payload;
+    normalized.fieldErrors = fieldErrors;
 
     return Promise.reject(normalized);
   }
