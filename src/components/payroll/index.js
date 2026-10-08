@@ -9,3 +9,5 @@ export { PayrollSettlementPanel } from './PayrollSettlementPanel';
 export { EmployeeCompensationGrid } from './EmployeeCompensationGrid';
 export { EmployeePayConfigurationSheet } from './EmployeePayConfigurationSheet';
 export { PAY_TYPES, payTypeLabel } from './payTypes';
+export { PayrollPolicyPanel } from './PayrollPolicyPanel';
+export { PayrollRunControl } from './PayrollRunControl';
