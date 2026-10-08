@@ -132,16 +132,34 @@ export const staffService = {
 
       if (staffData.setSalaryNow && staffData.salarySetup) {
         const salary = staffData.salarySetup;
-        await apiClient.post('/payroll/salary-setup', {
+        await apiClient.post('/payroll/compensation-plans', {
           employee: created.id,
-          basic: Number(salary.basicSalary || salary.basic || 0),
-          hra: Number(salary.hra || 0),
-          allowances: Number(salary.totalAllowances || salary.allowances || 0),
-          deductions: Number(salary.deductions || 0),
-          overtime_rate: Number(salary.overtimeRate || 0),
-          incentive_rule: { fixed: Number(salary.fixedIncentive || 0) },
-          effective_from:
+          paymentType: salary.paymentType || staffData.paymentType || 'monthly',
+          baseSalary: Number(salary.baseSalary || salary.basicSalary || 0),
+          dailyWageRate: Number(salary.dailyWageRate || 0),
+          hourlyWageRate: Number(salary.hourlyWageRate || 0),
+          commissionType: salary.commissionType || 'none',
+          commissionPercentage: Number(salary.commissionPercentage || 0),
+          commissionFixedAmount: Number(salary.commissionFixedAmount || 0),
+          eligibleRevenueBasis: salary.eligibleRevenueBasis || 'labour_revenue',
+          overtimeEligibility: salary.overtimeEligibility !== false,
+          incentiveEligibility: salary.incentiveEligibility !== false,
+          bonusRules: {
+            fixedAmount: Number(salary.fixedIncentive || 0),
+          },
+          applicableDeductions: Number(salary.deductions || 0) > 0
+            ? [{
+                code: 'INITIAL_DEDUCTION',
+                name: 'Initial configured deduction',
+                amount: Number(salary.deductions || 0),
+              }]
+            : [],
+          effectiveDate:
             salary.effectiveDate || new Date().toISOString().slice(0, 10),
+          paymentFrequency: salary.paymentFrequency || 'monthly',
+          approvalStatus: 'Approved',
+          isActive: true,
+          notes: salary.notes || '',
         });
       }
       return normalizeStaff(created);
@@ -179,16 +197,19 @@ export const staffService = {
           await payrollService.saveSalaryStructure({
             staffId: newId,
             staffName: newStaff.name,
-            salaryBasis: staffData.salarySetup.salaryBasis || 'Monthly',
-            basicSalary: Number(staffData.salarySetup.basicSalary || 0),
-            allowances: Number(staffData.salarySetup.totalAllowances || 0),
+            paymentType: staffData.salarySetup.paymentType || staffData.paymentType || 'monthly',
+            baseSalary: Number(staffData.salarySetup.baseSalary || staffData.salarySetup.basicSalary || 0),
+            dailyWageRate: Number(staffData.salarySetup.dailyWageRate || 0),
+            hourlyWageRate: Number(staffData.salarySetup.hourlyWageRate || 0),
+            commissionType: staffData.salarySetup.commissionType || 'none',
+            commissionPercentage: Number(staffData.salarySetup.commissionPercentage || 0),
+            commissionFixedAmount: Number(staffData.salarySetup.commissionFixedAmount || 0),
+            eligibleRevenueBasis: staffData.salarySetup.eligibleRevenueBasis || 'labour_revenue',
             fixedIncentives: Number(staffData.salarySetup.fixedIncentive || 0),
             effectiveDate:
               staffData.salarySetup.effectiveDate ||
               new Date().toISOString().split('T')[0],
-            status: 'Active',
             notes: staffData.salarySetup.notes || '',
-            allowanceBreakdown: staffData.salarySetup.allowances || [],
           });
         }
 
