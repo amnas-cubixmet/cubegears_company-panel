@@ -652,3 +652,35 @@
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+
+/* Job Card – verified technician sessions */
+.job-work-timer-panel{display:flex;flex-direction:column;gap:12px;min-width:0;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.job-work-timer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.job-work-timer-head h3{display:flex;align-items:center;gap:8px;margin:0;color:var(--text-primary);font-size:15px;font-weight:800}
+.job-work-timer-head h3 svg{color:var(--primary)}
+.job-work-timer-head p,.job-work-timer-hint{margin:5px 0 0;color:var(--text-muted);font-size:11px;line-height:1.6}
+.job-work-timer-summary{text-align:right;flex:0 0 auto}
+.job-work-timer-summary strong{display:block;color:var(--primary);font-size:17px}
+.job-work-timer-summary small{display:block;color:var(--text-muted);font-size:10px}
+.job-work-timer-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:end}
+.job-work-timer-form label{display:flex;flex-direction:column;min-width:0;gap:6px;color:var(--text-secondary);font-size:11px;font-weight:700}
+.job-work-timer-form input,.job-work-timer-form select{width:100%;min-width:0;height:42px;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);font:inherit;font-size:13px}
+.job-work-timer-form button,.job-work-timer-actions button,.job-work-timer-refresh{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);font-size:11px;font-weight:750;cursor:pointer}
+.job-work-timer-form button.is-primary,.job-work-timer-actions button.is-primary{border-color:var(--primary);background:var(--primary);color:#fff}
+.job-work-timer-form button:disabled,.job-work-timer-actions button:disabled{cursor:not-allowed;opacity:.5}
+.job-work-timer-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.job-work-timer-list{display:flex;flex-direction:column;gap:8px}
+.job-work-timer-person{min-width:0}
+.job-work-timer-person strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);font-size:13px}
+.job-work-timer-person span,.job-work-timer-person small{display:block;margin-top:3px;color:var(--text-muted);font-size:11px}
+.job-work-timer-duration{min-width:90px;text-align:right}
+.job-work-timer-duration strong{font-size:15px;color:var(--text-primary);font-variant-numeric:tabular-nums}
+.job-work-timer-duration small{display:block;color:var(--text-muted);font-size:10px}
+.job-work-timer-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.job-work-timer-actions button{min-height:34px;padding:0 9px}
+.job-work-timer-message{margin:0;padding:10px 12px;border-radius:9px;border:1px solid var(--danger);color:var(--danger);font-size:12px}
+.job-work-timer-empty{padding:18px;color:var(--text-muted);font-size:12px;text-align:center}
+.job-work-timer-refresh{align-self:flex-start;min-height:34px}
+@media(max-width:960px){.job-work-timer-form{grid-template-columns:repeat(2,minmax(0,1fr))}.job-work-timer-form button{grid-column:1/-1}.job-work-timer-row{grid-template-columns:minmax(0,1fr) auto}.job-work-timer-actions{grid-column:1/-1;justify-content:flex-start}}
+@media(max-width:520px){.job-work-timer-panel{padding:12px}.job-work-timer-head{flex-direction:column}.job-work-timer-summary{text-align:left}.job-work-timer-form{grid-template-columns:1fr}.job-work-timer-form button{grid-column:1}.job-work-timer-row{grid-template-columns:1fr}.job-work-timer-duration{text-align:left}.job-work-timer-actions{grid-column:auto}.job-work-timer-actions button{flex:1 1 115px}.job-work-timer-form input,.job-work-timer-form select{font-size:16px}}
