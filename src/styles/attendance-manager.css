@@ -2016,3 +2016,283 @@
     padding-top:9px !important;
   }
 }
+
+
+/* Attendance Manager — shared date/month/search controls (Daily + Calendar) */
+.cg-attendance-manager .attendance-manager-daily .am-daily-heading,
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-header-v2 {
+  min-width: 0;
+  gap: 12px;
+}
+.cg-attendance-manager .attendance-manager-daily .am-daily-heading > div:first-child,
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-header-v2 > div:first-child {
+  min-width: 0;
+}
+
+/* Let the browser render just one functional date-picker icon. */
+.cg-attendance-manager .attendance-manager-daily .am-daily-date {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  width: 170px;
+  max-width: 100%;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+.cg-attendance-manager .attendance-manager-daily .am-daily-date input[type="date"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  color-scheme: normal;
+  font-family: inherit;
+  font-size: 13px !important;
+  font-weight: 650;
+  outline: none;
+  cursor: pointer;
+}
+.cg-attendance-manager .attendance-manager-daily .am-daily-date input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0 0 0 5px;
+  padding: 3px;
+  cursor: pointer;
+}
+.cg-attendance-manager .attendance-manager-daily .am-daily-date:focus-within,
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > label:focus-within,
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > select:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* Both search bars have exactly one border, around the entire field. */
+.cg-attendance-manager .attendance-manager-daily .am-filter-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(125px, 175px) minmax(125px, 175px);
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-filter-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 180px);
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+}
+.cg-attendance-manager .attendance-manager-daily .am-search-field,
+.cg-attendance-manager .attendance-manager-calendar .am-search-field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 42px !important;
+  min-height: 42px !important;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  box-shadow: none;
+  box-sizing: border-box;
+  cursor: text;
+}
+.cg-attendance-manager .attendance-manager-daily .am-search-field > svg,
+.cg-attendance-manager .attendance-manager-calendar .am-search-field > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: var(--text-muted);
+}
+.cg-attendance-manager .attendance-manager-daily .am-search-field input,
+.cg-attendance-manager .attendance-manager-calendar .am-search-field input {
+  display: block;
+  flex: 1 1 auto;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--text-primary) !important;
+  font-family: inherit;
+  font-size: 13px !important;
+  line-height: normal;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.cg-attendance-manager .attendance-manager-daily .am-search-field input::placeholder,
+.cg-attendance-manager .attendance-manager-calendar .am-search-field input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+  text-overflow: ellipsis;
+}
+.cg-attendance-manager .attendance-manager-daily .am-search-field:focus-within,
+.cg-attendance-manager .attendance-manager-calendar .am-search-field:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.cg-attendance-manager .attendance-manager-daily .am-filter-card > select,
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-filter-card > select {
+  width: 100%;
+  min-width: 0;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+/* Month / year controls use predictable widths and native accessible selects. */
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls {
+  display: grid;
+  grid-template-columns: 36px minmax(130px, 158px) minmax(96px, 112px) 36px;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 7px;
+  min-width: 0;
+}
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > button {
+  width: 36px;
+  min-width: 0;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  box-sizing: border-box;
+}
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > label > svg {
+  flex: 0 0 15px;
+  color: var(--primary);
+}
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls select {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 40px !important;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px !important;
+  font-weight: 650;
+  outline: none;
+  cursor: pointer;
+}
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > select {
+  width: 100%;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 10px;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  background: var(--surface-2) !important;
+}
+
+@media (max-width: 980px) {
+  .cg-attendance-manager .attendance-manager-daily .am-filter-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cg-attendance-manager .attendance-manager-daily .am-filter-card .am-search-field {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 760px) {
+  .cg-attendance-manager .attendance-manager-daily .am-daily-heading,
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-header-v2 {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .cg-attendance-manager .attendance-manager-daily .am-daily-date {
+    width: 100%;
+  }
+  .cg-attendance-manager .attendance-manager-daily .am-filter-card,
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-filter-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cg-attendance-manager .attendance-manager-daily .am-filter-card .am-search-field {
+    grid-column: auto;
+  }
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls {
+    grid-template-columns: 36px minmax(0, 1fr) minmax(90px, .7fr) 36px;
+    width: 100%;
+  }
+  .cg-attendance-manager .attendance-manager-daily .am-search-field input,
+  .cg-attendance-manager .attendance-manager-calendar .am-search-field input {
+    font-size: 16px !important; /* iOS focus must not zoom */
+  }
+  .cg-attendance-manager .attendance-manager-daily .am-filter-card > select,
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-filter-card > select,
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls select,
+  .cg-attendance-manager .attendance-manager-daily .am-daily-date input[type="date"] {
+    font-size: 16px !important;
+  }
+}
+@media (max-width: 380px) {
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls {
+    grid-template-columns: 32px minmax(0, 1fr) minmax(74px, .8fr) 32px;
+    gap: 5px;
+  }
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > button {
+    width: 32px;
+    height: 42px;
+  }
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > label {
+    gap: 0;
+    padding: 0 7px;
+  }
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls > label > svg {
+    display: none;
+  }
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls select {
+    font-size: 14px !important;
+  }
+}
