@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CalendarDays, Edit3, MapPin, Search } from 'lucide-react';
+import { Edit3, MapPin, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
@@ -185,9 +185,9 @@ export const DailyAttendance = () => {
         </div>
 
         <label className="am-daily-date">
-          <CalendarDays size={14} />
           <input
             type="date"
+            aria-label="Attendance date"
             value={selectedDate}
             onChange={(event) => setSelectedDate(event.target.value)}
           />
@@ -198,17 +198,19 @@ export const DailyAttendance = () => {
         <label className="am-search-field">
           <Search size={15} />
           <input
+            type="search"
+            aria-label="Search daily attendance employees"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search name, employee ID, role, team, phone..."
           />
         </label>
 
-        <select value={branchFilter} onChange={(event) => setBranchFilter(event.target.value)}>
+        <select aria-label="Filter by branch" value={branchFilter} onChange={(event) => setBranchFilter(event.target.value)}>
           {branches.map((branch) => <option key={branch}>{branch}</option>)}
         </select>
 
-        <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+        <select aria-label="Filter by attendance status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
           <option>All</option>
           {STATUSES.map((status) => <option key={status}>{status}</option>)}
         </select>
