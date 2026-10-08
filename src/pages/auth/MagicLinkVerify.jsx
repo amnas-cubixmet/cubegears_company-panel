@@ -24,6 +24,8 @@ export const MagicLinkVerify = () => {
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const token = params.get('token') || '';
   const email = params.get('email') || '';
+  const next = params.get('next') || '/dashboard';
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
   const [state, setState] = useState('loading');
   const [message, setMessage] = useState('Verifying your secure sign-in link…');
 
@@ -59,7 +61,7 @@ export const MagicLinkVerify = () => {
 
         setState('success');
         setMessage('Magic link verified. Redirecting to your workspace…');
-        window.setTimeout(() => navigate('/dashboard', { replace: true }), 700);
+        window.setTimeout(() => navigate(safeNext, { replace: true }), 700);
       })
       .catch((error) => {
         if (!alive) return;
@@ -70,7 +72,7 @@ export const MagicLinkVerify = () => {
     return () => {
       alive = false;
     };
-  }, [token, email, navigate]);
+  }, [token, email, safeNext, navigate]);
 
   return (
     <main className="login-page auth-recovery-page">
