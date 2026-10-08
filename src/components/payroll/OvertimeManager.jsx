@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { overtimeService } from '../../services/overtime.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
 import { AddOvertimeSheet } from './AddOvertimeSheet';
+import { ApproveOvertimeSheet } from './ApproveOvertimeSheet';
 import { Plus } from 'lucide-react';
 
 export const OvertimeManager = () => {
@@ -9,6 +10,7 @@ export const OvertimeManager = () => {
   const [overtimeList, setOvertimeList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [approvalTarget, setApprovalTarget] = useState(null);
   const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
@@ -40,9 +42,16 @@ export const OvertimeManager = () => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
   };
 
-  const handleApprove = async (id) => {
-    await overtimeService.approveOvertime(id, { approvedBy: 'Branch Manager' });
-    showToast('Overtime approved successfully.');
+  const handleApprove = async (approvalData) => {
+    if (!approvalTarget) return;
+    const approved = await overtimeService.approveOvertime(
+      approvalTarget.id,
+      approvalData,
+    );
+    setApprovalTarget(null);
+    showToast(
+      `Overtime approved: ${formatINR(approved?.amount || 0)} added to payroll.`,
+    );
     loadOvertime();
   };
 
@@ -157,9 +166,15 @@ export const OvertimeManager = () => {
 
               <div className="am-overtime-details" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', backgroundColor: 'var(--surface-2)', padding: '10px', borderRadius: '10px', fontSize: '12px' }}>
                 <div>Hours: <strong>{ot.overtimeHours}h</strong></div>
-                <div>Rate: <strong>₹{ot.rate}/hr</strong></div>
-                <div>Method: <strong>{ot.calculationMethod || 'Manager Approval'}</strong></div>
-                <div>Amount: <strong style={{ color: 'var(--primary)', fontSize: '14px' }}>{formatINR(ot.amount)}</strong></div>
+                <div>
+                  Rate: <strong>{ot.status === 'Pending' && !Number(ot.rate || 0) ? 'Set on approval' : `₹${ot.rate}/hr`}</strong>
+                </div>
+                <div>Method: <strong>Manager Approved Rate</strong></div>
+                <div>
+                  Amount: <strong style={{ color: 'var(--primary)', fontSize: '14px' }}>
+                    {ot.status === 'Pending' && !Number(ot.amount || 0) ? '—' : formatINR(ot.amount)}
+                  </strong>
+                </div>
               </div>
 
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
@@ -182,7 +197,7 @@ export const OvertimeManager = () => {
                 <div className="am-approval-actions" style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
                   <button
                     type="button"
-                    onClick={() => handleApprove(ot.id)}
+                    onClick={() => setApprovalTarget(ot)}
                     className="am-approve-button"
                     style={{ flex: 1, height: '36px', borderRadius: '8px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                   >
@@ -207,6 +222,13 @@ export const OvertimeManager = () => {
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         onSave={handleCreateSave}
+      />
+
+      <ApproveOvertimeSheet
+        isOpen={Boolean(approvalTarget)}
+        request={approvalTarget}
+        onClose={() => setApprovalTarget(null)}
+        onApprove={handleApprove}
       />
     </div>
   );
