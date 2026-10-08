@@ -9,6 +9,28 @@ import { mockStaffList } from '../mock/staff.mock';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
+const collectStaffSkills = (rows = []) => {
+  const map = new Map();
+
+  rows.forEach((staff) => {
+    (Array.isArray(staff?.skills) ? staff.skills : []).forEach((skill) => {
+      const normalized =
+        typeof skill === 'string'
+          ? { id: skill, name: skill }
+          : {
+              id: skill?.id || skill?.name || skill?.label,
+              name: skill?.name || skill?.label || String(skill?.id || ''),
+            };
+
+      if (normalized.name) {
+        map.set(String(normalized.id || normalized.name), normalized);
+      }
+    });
+  });
+
+  return [...map.values()];
+};
+
 const staffUsingShift = (shiftName) =>
   mockStaffList.filter((staff) =>
     String(staff.shift || '').toLowerCase().includes(
@@ -88,6 +110,11 @@ const mockService = {
           addedStaffIds: assigned,
         });
       }, 180);
+    }),
+
+  getSkills: async () =>
+    new Promise((resolve) => {
+      setTimeout(() => resolve(collectStaffSkills(mockStaffList)), 100);
     }),
 
   getShifts: async () =>
@@ -371,6 +398,12 @@ const parseShiftTime = (value = '') => {
 };
 
 const realService = {
+  getSkills: async () => {
+    const rows = await apiClient.get('/employees');
+    const list = Array.isArray(rows) ? rows : rows?.results || [];
+    return collectStaffSkills(list);
+  },
+
   getTeams: async () => {
     const rows = await apiClient.get('/employees/teams');
     const list = Array.isArray(rows) ? rows : rows?.results || [];
