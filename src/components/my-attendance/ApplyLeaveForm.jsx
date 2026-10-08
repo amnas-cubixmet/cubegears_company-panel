@@ -62,32 +62,21 @@ export const ApplyLeaveForm = ({
         </div>
       )}
 
-      <div className="apply-leave-grid">
-        <label>
-          <span>Start Date *</span>
-          <input
-            type="date"
-            value={form.startDate}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, startDate: event.target.value }))
-            }
-            required
-          />
-        </label>
-
-        <label>
-          <span>End Date *</span>
-          <input
-            type="date"
-            min={form.startDate || undefined}
-            value={form.endDate}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, endDate: event.target.value }))
-            }
-            required
-          />
-        </label>
-      </div>
+      <label>
+        <span>Leave Date *</span>
+        <input
+          type="date"
+          value={form.startDate}
+          onChange={(event) =>
+            setForm((current) => ({
+              ...current,
+              startDate: event.target.value,
+              endDate: event.target.value,
+            }))
+          }
+          required
+        />
+      </label>
 
       <label>
         <span>Reason *</span>
