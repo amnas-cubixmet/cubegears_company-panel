@@ -515,3 +515,24 @@ if (!USE_MOCK_API) {
       apiClient.post(`/payroll/advances/${advanceId}/recover`, recoveryData)
   });
 }
+
+
+/* Verified Job Card timers stay separate from attendance wage calculations. */
+Object.assign(payrollService, {
+  getJobWorkSessions: async (filters = {}) => {
+    if (USE_MOCK_API) return [];
+    const rows = await apiClient.get('/payroll/work-sessions', { params: filters });
+    return Array.isArray(rows) ? rows : rows?.results || [];
+  },
+  startJobWork: async (assignment, serviceName, labourCharge = 0) => {
+    if (USE_MOCK_API) throw new Error('Connect the Django API to track live Job Card work.');
+    return apiClient.post('/payroll/work-sessions/start', { assignment, serviceName, labourCharge });
+  },
+  updateJobWorkSession: async (id, action, data = {}) => {
+    if (USE_MOCK_API) throw new Error('Connect the Django API to track live Job Card work.');
+    if (!['pause', 'resume', 'complete', 'approve', 'reject', 'correct'].includes(action)) {
+      throw new Error('Invalid timer action');
+    }
+    return apiClient.post(`/payroll/work-sessions/${id}/${action}`, data);
+  },
+});
