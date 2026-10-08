@@ -12,6 +12,15 @@ import { attendanceService } from '../../services/attendance.service';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/attendance-calendar.css';
 
+const asLocalDate = (value) => {
+  if (!value) return null;
+  const date = value instanceof Date ? new Date(value) : new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+};
+
+const monthKey = (date) => date.getFullYear() * 12 + date.getMonth();
+
 export const HolidayCalendar = () => {
   const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -45,6 +54,39 @@ export const HolidayCalendar = () => {
     };
   }, [currentDate]);
 
+  const today = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }, []);
+
+  const attendanceStartDate = useMemo(() => {
+    const joiningDate = asLocalDate(
+      attendanceStatus?.employee?.joiningDate ||
+      attendanceStatus?.employee?.joining_date,
+    );
+
+    // The backend returns the real joining date. This fallback keeps older
+    // deployments usable until they are updated.
+    return joiningDate || new Date(today.getFullYear() - 4, 0, 1);
+  }, [attendanceStatus, today]);
+
+  useEffect(() => {
+    const currentKey = monthKey(currentDate);
+    const minimumKey = monthKey(attendanceStartDate);
+    const maximumKey = monthKey(today);
+
+    if (currentKey < minimumKey) {
+      setCurrentDate(
+        new Date(attendanceStartDate.getFullYear(), attendanceStartDate.getMonth(), 1),
+      );
+      return;
+    }
+
+    if (currentKey > maximumKey) {
+      setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+    }
+  }, [attendanceStartDate, currentDate, today]);
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const totalDays = new Date(year, month + 1, 0).getDate();
@@ -53,13 +95,48 @@ export const HolidayCalendar = () => {
     year: 'numeric',
   });
 
+  const currentMonthKey = year * 12 + month;
+  const startMonthKey = monthKey(attendanceStartDate);
+  const todayMonthKey = monthKey(today);
+  const visibleStartDay =
+    currentMonthKey === startMonthKey ? attendanceStartDate.getDate() : 1;
+  const visibleEndDay =
+    currentMonthKey === todayMonthKey ? today.getDate() : totalDays;
+
+  useEffect(() => {
+    setSelectedDay((day) =>
+      Math.min(Math.max(day, visibleStartDay), visibleEndDay),
+    );
+  }, [visibleStartDay, visibleEndDay]);
+
+  const setCalendarMonth = (nextYear, nextMonth) => {
+    let targetMonth = nextYear * 12 + nextMonth;
+    const minimumMonth = monthKey(attendanceStartDate);
+    const maximumMonth = monthKey(today);
+
+    targetMonth = Math.max(minimumMonth, Math.min(maximumMonth, targetMonth));
+
+    const clampedYear = Math.floor(targetMonth / 12);
+    const clampedMonth = targetMonth % 12;
+    const firstVisibleDay =
+      targetMonth === minimumMonth ? attendanceStartDate.getDate() : 1;
+
+    setSelectedDay(firstVisibleDay);
+    setCurrentDate(new Date(clampedYear, clampedMonth, 1));
+  };
+
   const monthLogs = useMemo(
     () =>
       logs.filter((log) => {
         const date = new Date(`${log.date}T00:00:00`);
-        return date.getFullYear() === year && date.getMonth() === month;
+        return (
+          date.getFullYear() === year &&
+          date.getMonth() === month &&
+          date >= attendanceStartDate &&
+          date <= today
+        );
       }),
-    [logs, month, year],
+    [logs, month, year, attendanceStartDate, today],
   );
 
   const logByDay = useMemo(() => {
@@ -75,12 +152,17 @@ export const HolidayCalendar = () => {
     const map = new Map();
     events.forEach((event) => {
       const date = new Date(`${event.date}T00:00:00`);
-      if (date.getFullYear() === year && date.getMonth() === month) {
+      if (
+        date.getFullYear() === year &&
+        date.getMonth() === month &&
+        date >= attendanceStartDate &&
+        date <= today
+      ) {
         map.set(date.getDate(), event);
       }
     });
     return map;
-  }, [events, month, year]);
+  }, [events, month, year, attendanceStartDate, today]);
 
   const filteredLogs = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -124,29 +206,28 @@ export const HolidayCalendar = () => {
         monthLabel={monthLabel}
         month={month}
         year={year}
-        onMonthChange={(nextMonth) => {
-          setSelectedDay(1);
-          setCurrentDate(new Date(year, nextMonth, 1));
-        }}
-        onYearChange={(nextYear) => {
-          setSelectedDay(1);
-          setCurrentDate(new Date(nextYear, month, 1));
-        }}
-        onPreviousMonth={() => {
-          setSelectedDay(1);
-          setCurrentDate(new Date(year, month - 1, 1));
-        }}
-        onNextMonth={() => {
-          setSelectedDay(1);
-          setCurrentDate(new Date(year, month + 1, 1));
-        }}
+        minDate={attendanceStartDate}
+        maxDate={today}
+        onMonthChange={(nextMonth) => setCalendarMonth(year, nextMonth)}
+        onYearChange={(nextYear) => setCalendarMonth(nextYear, month)}
+        onPreviousMonth={() => setCalendarMonth(year, month - 1)}
+        onNextMonth={() => setCalendarMonth(year, month + 1)}
       />
 
       <EmployeeAttendanceCard
         user={user}
-        employeeCode={attendanceStatus?.employee?.employeeCode || attendanceStatus?.record?.employeeCode || monthLogs?.[0]?.employeeCode}
-        shiftName={attendanceStatus?.employee?.shiftName || attendanceStatus?.record?.shiftName || monthLogs?.[0]?.shiftName}
+        employeeCode={
+          attendanceStatus?.employee?.employeeCode ||
+          attendanceStatus?.record?.employeeCode ||
+          monthLogs?.[0]?.employeeCode
+        }
+        shiftName={
+          attendanceStatus?.employee?.shiftName ||
+          attendanceStatus?.record?.shiftName ||
+          monthLogs?.[0]?.shiftName
+        }
       />
+
       <AttendancePunchPanel
         onChanged={() =>
           setCurrentDate((value) =>
@@ -154,11 +235,14 @@ export const HolidayCalendar = () => {
           )
         }
       />
+
       <AttendanceKpis logs={monthLogs} />
 
       <AttendanceMonthStrip
         monthLabel={monthLabel}
         totalDays={totalDays}
+        startDay={visibleStartDay}
+        endDay={visibleEndDay}
         selectedDay={selectedDay}
         onSelectDay={setSelectedDay}
         logByDay={logByDay}
