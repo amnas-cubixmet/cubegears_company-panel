@@ -4,10 +4,13 @@ import { mockStaffList } from '../mock/staff.mock';
 import { enrichWorkshopStaff } from '../mock/staffManagement.mock';
 
 const employeeLabel = (staff = {}) => {
-  if (staff.displayEmployeeNo) return staff.displayEmployeeNo;
-  const source = staff.employeeId || staff.employee_code || '';
+  const source =
+    staff.displayEmployeeNo ||
+    staff.employeeId ||
+    staff.employee_code ||
+    '';
   const match = String(source).match(/(\d+)(?!.*\d)/);
-  return match ? `Employee ${Number(match[1])}` : 'Employee';
+  return match ? `EMP${Number(match[1])}` : 'EMP';
 };
 
 
@@ -154,7 +157,7 @@ export const staffService = {
           ...staffData,
           id: newId,
           employeeId: newId,
-          displayEmployeeNo: `Employee ${nextNumber}`,
+          displayEmployeeNo: `EMP${nextNumber}`,
           employmentStatus: staffData.employmentStatus || 'Active',
           accountStatus: 'Active',
           loginStatus: 'Not Invited',
