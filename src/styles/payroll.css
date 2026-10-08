@@ -2749,3 +2749,34 @@
   .pay-config-actions{grid-template-columns:1fr}
   .pay-config-meta{grid-template-columns:1fr}
 }
+
+
+/* Mixed-compensation payroll: complete staff ledger */
+.payroll-overview-with-staff{display:flex;flex-direction:column;gap:14px;min-width:0}
+.payroll-all-staff{min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.payroll-all-staff__header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px;border-bottom:1px solid var(--border)}
+.payroll-all-staff__header h2{display:flex;align-items:center;gap:8px;margin:0;color:var(--text-primary);font-size:15px;font-weight:750}
+.payroll-all-staff__header h2 svg{color:var(--primary)}
+.payroll-all-staff__header p{margin:5px 0 0;color:var(--text-muted);font-size:12px;line-height:1.5}
+.payroll-all-staff__count{flex-shrink:0;color:var(--text-secondary);font-size:12px}
+.payroll-all-staff__toolbar{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:10px;padding:10px 14px}
+.payroll-all-staff__search{display:flex;align-items:center;gap:9px;min-width:0;height:42px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-muted)}
+.payroll-all-staff__search svg{flex:0 0 16px}
+.payroll-all-staff__search input{display:block;flex:1;width:100%;min-width:0;height:100%;padding:0;border:0;outline:0;background:transparent;color:var(--text-primary);font:inherit;font-size:13px}
+.payroll-all-staff__search:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.payroll-all-staff__toolbar select{width:100%;min-width:0;height:42px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);font:inherit;font-size:13px}
+.payroll-all-staff__scroll{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.payroll-all-staff__scroll::-webkit-scrollbar{display:none}
+.payroll-all-staff table{width:100%;min-width:1020px;border-collapse:collapse}
+.payroll-all-staff th{padding:12px;text-align:left;color:var(--text-muted);background:var(--surface-2);font-size:11px;font-weight:700;white-space:nowrap}
+.payroll-all-staff td{padding:12px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:12px;vertical-align:middle}
+.payroll-all-staff td:first-child strong{display:block;color:var(--text-primary);font-size:13px}
+.payroll-all-staff td:first-child small{display:block;margin-top:3px;color:var(--text-muted);font-size:11px}
+.payroll-all-staff td button{min-width:92px;min-height:34px;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--primary);font-size:11px;font-weight:700;cursor:pointer}
+.payroll-all-staff td button:hover{border-color:var(--primary)}
+.payroll-all-staff__empty{margin:0;padding:24px 14px;text-align:center;color:var(--text-muted);font-size:13px}
+@media(max-width:650px){
+  .payroll-all-staff__header{flex-direction:column}
+  .payroll-all-staff__toolbar{grid-template-columns:1fr}
+  .payroll-all-staff__search input,.payroll-all-staff__toolbar select{font-size:16px}
+}
