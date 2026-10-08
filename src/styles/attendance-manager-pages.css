@@ -47,7 +47,7 @@
 
 .attendance-manager-dashboard-tabs{
   display:grid;
-  grid-template-columns:repeat(8,minmax(0,1fr));
+  grid-template-columns:repeat(9,minmax(0,1fr));
   gap:5px;
   padding:5px;
   border:1px solid var(--border);
@@ -202,3 +202,61 @@
 
 @media(max-width:950px){.attendance-holiday-form{grid-template-columns:1fr 1fr}.attendance-holiday-form>button{grid-column:1/-1}}
 @media(max-width:560px){.attendance-holiday-form{grid-template-columns:1fr}.attendance-holiday-form>button{grid-column:auto}.attendance-holiday-form>input,.attendance-holiday-form>select{height:40px;font-size:16px}}
+
+
+/* Leave type policy manager */
+.am-leave-types-page{width:100%;min-width:0;display:flex;flex-direction:column;gap:12px}
+.am-leave-types-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.am-leave-types-heading h2{margin:0;font-size:16px;font-weight:750;letter-spacing:-.02em}
+.am-leave-types-heading p{margin:4px 0 0;color:var(--text-muted);font-size:10px}
+.am-primary-action{min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 11px;border:0;border-radius:9px;background:var(--primary);color:#fff;font-size:9px;font-weight:750;cursor:pointer}
+.am-inline-message{padding:9px 11px;border:1px solid var(--border);border-radius:9px;font-size:9px;font-weight:700}
+.am-inline-message.is-success{border-color:color-mix(in srgb,var(--success) 35%,var(--border));background:var(--success-soft);color:var(--success)}
+.am-inline-message.is-error{border-color:color-mix(in srgb,var(--danger) 35%,var(--border));background:var(--danger-soft);color:var(--danger)}
+.am-leave-types-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.am-leave-types-summary article{min-width:0;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.am-leave-types-summary span{display:block;color:var(--text-muted);font-size:9px}
+.am-leave-types-summary strong{display:block;margin-top:6px;font-size:19px;line-height:1;font-weight:750}
+.am-leave-types-summary small{display:block;margin-top:7px;color:var(--text-muted);font-size:8px}
+.am-leave-type-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.am-leave-type-card{min-width:0;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm)}
+.am-leave-type-card>header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.am-leave-type-card>header>div{min-width:0}
+.am-leave-type-card>header strong{display:block;overflow:hidden;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.am-leave-type-card>header span{display:block;margin-top:2px;color:var(--text-muted);font-size:8px}
+.am-leave-type-card>header b{min-height:20px;display:inline-flex;align-items:center;padding:0 7px;border-radius:999px;font-size:7.5px;font-weight:750}
+.am-leave-type-card>header b.is-active{background:var(--success-soft);color:var(--success)}
+.am-leave-type-card>header b.is-inactive{background:var(--surface-2);color:var(--text-muted)}
+.am-leave-type-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
+.am-leave-type-details>div{min-width:0;padding:8px;border-radius:8px;background:var(--surface-2)}
+.am-leave-type-details span,.am-leave-type-details strong{display:block}
+.am-leave-type-details span{color:var(--text-muted);font-size:7px;text-transform:uppercase}
+.am-leave-type-details strong{margin-top:3px;overflow:hidden;font-size:8.5px;text-overflow:ellipsis;white-space:nowrap}
+.am-leave-type-card>button{width:100%;min-height:34px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-secondary);font-size:8.5px;font-weight:700;cursor:pointer}
+.am-leave-types-empty{grid-column:1/-1;padding:24px 10px;border:1px dashed var(--border);border-radius:11px;color:var(--text-muted);font-size:9px;text-align:center}
+.am-leave-type-form{display:flex;flex-direction:column;gap:12px}
+.am-leave-type-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.am-leave-type-form-grid label{min-width:0;display:flex;flex-direction:column;gap:5px}
+.am-leave-type-form-grid label>span{color:var(--text-secondary);font-size:9px;font-weight:700}
+.am-leave-type-form-grid input,.am-leave-type-form-grid select{width:100%;height:38px;padding:0 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);font-size:9px;outline:none}
+.am-leave-type-form-grid input:focus,.am-leave-type-form-grid select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.am-leave-type-toggles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.am-leave-type-toggles>label{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2)}
+.am-leave-type-toggles strong{display:block;font-size:9px}
+.am-leave-type-toggles small{display:block;margin-top:3px;color:var(--text-muted);font-size:8px}
+.am-leave-type-toggles input{width:17px;height:17px;accent-color:var(--primary)}
+.am-leave-type-form-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.am-leave-type-form-actions button{min-height:40px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-secondary);font-size:9px;font-weight:750;cursor:pointer}
+.am-leave-type-form-actions button.is-primary{border-color:var(--primary);background:var(--primary);color:#fff}
+.am-leave-type-form-actions button:disabled{opacity:.55;cursor:not-allowed}
+
+@media(max-width:980px){
+  .am-leave-type-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .am-leave-types-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .am-leave-types-heading{align-items:stretch;flex-direction:column}
+  .am-primary-action{width:100%}
+  .am-leave-type-grid{grid-template-columns:1fr}
+  .am-leave-type-form-grid,.am-leave-type-toggles{grid-template-columns:1fr}
+}
