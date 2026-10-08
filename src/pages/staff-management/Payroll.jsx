@@ -3,6 +3,9 @@ import { payrollService } from '../../services/payroll.service';
 import { staffService } from '../../services/staff.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
 import {
+  EmployeeCompensationGrid,
+  EmployeePayConfigurationSheet,
+  PAY_TYPES,
   PayrollHeader,
   PayrollOverview,
   PayrollPeriodFilter,
@@ -10,7 +13,6 @@ import {
 import { PayrollTabRail } from '../../components/staff-management/PayrollTabRail';
 import { PayrollCard } from '../../components/staff-management/PayrollCard';
 import { RecordPaymentSheet } from '../../components/staff-management/RecordPaymentSheet';
-import { EditSalaryStructureSheet } from '../../components/staff-management/EditSalaryStructureSheet';
 import { AdvanceCard } from '../../components/staff-management/AdvanceCard';
 import { CreateAdvanceSheet } from '../../components/staff-management/CreateAdvanceSheet';
 import { RecordRecoverySheet } from '../../components/staff-management/RecordRecoverySheet';
@@ -141,16 +143,6 @@ export const Payroll = ({ section = 'overview' }) => {
   const partialStaff = payrolls.filter((p) => p.paymentStatus === 'Partially Paid').length;
   const paidStaff = payrolls.filter((p) => p.paymentStatus === 'Paid').length;
 
-  const filteredSalaryStructures = selectedSalaryBasis === 'All'
-    ? salaryStructures
-    : salaryStructures.filter((item) => item.salaryBasis === selectedSalaryBasis);
-
-  const salaryPrimaryValue = (structure) => {
-    if (structure.salaryBasis === 'Hourly') return `${formatINR(structure.hourlyRate)} / hour`;
-    if (structure.salaryBasis === 'Daily') return `${formatINR(structure.dailyRate)} / day`;
-    if (structure.salaryBasis === 'Commission Only') return 'Approved commission';
-    return `${formatINR(structure.fixedMonthlySalary ?? structure.basicSalary)} / month`;
-  };
 
   return (
     <div className="payroll-page cg-payroll">
@@ -335,99 +327,59 @@ export const Payroll = ({ section = 'overview' }) => {
         </div>
       )}
 
-      {/* Section 2: Salary Structure */}
+      {/* Employee Salary & Payment Settings */}
       {activeSection === 'salary' && (
-        <div className="payroll-section payroll-salary" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div className="payroll-section-header payroll-salary-header" style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px',
-            padding: '12px',
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '14px'
-          }}>
+        <div className="payroll-section payroll-salary flexible-payroll-setup">
+          <section className="flexible-payroll-setup-header">
             <div>
-              <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)' }}>Staff Salary Configurations</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Fixed monthly, hourly, daily or commission salary can be set per employee.</div>
+              <span>EMPLOYEE PAY CONFIGURATION</span>
+              <h2>Flexible Salary Structures</h2>
+              <p>
+                Every employee can independently use monthly salary, daily wage,
+                hourly wage, commission, salary + commission, incentive or a custom hybrid plan.
+              </p>
             </div>
-            <select
-              value={selectedSalaryBasis}
-              onChange={(e) => setSelectedSalaryBasis(e.target.value)}
-              style={{
-                minWidth: '170px',
-                height: '38px',
-                padding: '0 10px',
-                borderRadius: '9px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--surface-2)',
-                color: 'var(--text-primary)',
-                fontSize: '12px',
-                fontWeight: '600'
-              }}
-            >
-              <option value="All">All Salary Types</option>
-              <option value="Fixed Monthly">Fixed Monthly</option>
-              <option value="Hourly">Per Hour</option>
-              <option value="Daily">Per Day</option>
-              <option value="Commission Only">Commission Only</option>
-            </select>
+
+            <label>
+              <span>Filter Payment Type</span>
+              <select
+                value={selectedSalaryBasis}
+                onChange={(event) => setSelectedSalaryBasis(event.target.value)}
+              >
+                <option value="All">All Payment Types</option>
+                <option value="unconfigured">Not Configured</option>
+                {PAY_TYPES.map((item) => (
+                  <option key={item.value} value={item.value}>{item.label}</option>
+                ))}
+              </select>
+            </label>
+          </section>
+
+          <div className="flexible-payroll-guide">
+            <div>
+              <strong>Monthly</strong>
+              <span>Configured monthly pay adjusted by applicable leave rules.</span>
+            </div>
+            <div>
+              <strong>Daily / Hourly</strong>
+              <span>Verified payable days or approved worked hours × employee rate.</span>
+            </div>
+            <div>
+              <strong>Commission</strong>
+              <span>Eligible Job Card revenue × configured employee commission.</span>
+            </div>
+            <div>
+              <strong>Hybrid</strong>
+              <span>Multiple earning/deduction components without duplicate compensation.</span>
+            </div>
           </div>
 
-          {filteredSalaryStructures.length === 0 ? (
-            <div style={{
-              padding: '28px',
-              textAlign: 'center',
-              backgroundColor: 'var(--surface)',
-              border: '1px dashed var(--border)',
-              borderRadius: '14px',
-              color: 'var(--text-muted)',
-              fontSize: '13px'
-            }}>
-              No salary structures found for this salary type.
-            </div>
-          ) : (
-            <div className="payroll-payslip-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-              {filteredSalaryStructures.map((s) => (
-                <div key={s.id} className="payroll-salary-card" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '9px' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                    <div>
-                      <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-primary)' }}>{s.staffName}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{s.effectiveDate ? `Effective ${s.effectiveDate}` : 'Active salary structure'}</div>
-                    </div>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '999px',
-                      backgroundColor: 'var(--primary-soft)',
-                      color: 'var(--primary)',
-                      fontSize: '10px',
-                      fontWeight: '800',
-                      whiteSpace: 'nowrap'
-                    }}>{s.salaryBasis}</span>
-                  </div>
-
-                  <div style={{ padding: '12px', borderRadius: '11px', backgroundColor: 'var(--surface-2)' }}>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Primary Pay</div>
-                    <div style={{ marginTop: '3px', fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>{salaryPrimaryValue(s)}</div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px', fontSize: '12px' }}>
-                    <div style={{ padding: '8px', borderRadius: '9px', border: '1px solid var(--border)' }}>Allowances<br/><strong>{formatINR(s.allowances)}</strong></div>
-                    <div style={{ padding: '8px', borderRadius: '9px', border: '1px solid var(--border)' }}>Incentives<br/><strong>{formatINR(s.fixedIncentives)}</strong></div>
-                  </div>
-
-                  <button
-                    onClick={() => setStructureEditTarget(s)}
-                    style={{ width: '100%', minHeight: '38px', borderRadius: '9px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--primary)', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
-                  >
-                    Edit Salary Structure
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <EmployeeCompensationGrid
+            employees={employees}
+            plans={salaryStructures}
+            filter={selectedSalaryBasis}
+            onConfigure={setStructureEditTarget}
+          />
         </div>
       )}
 
@@ -622,8 +574,8 @@ export const Payroll = ({ section = 'overview' }) => {
         onSave={handleRecordPaymentSave}
       />
 
-      {/* Edit Salary Structure Sheet Modal */}
-      <EditSalaryStructureSheet
+      {/* Employee Salary & Payment Settings */}
+      <EmployeePayConfigurationSheet
         isOpen={!!structureEditTarget}
         onClose={() => setStructureEditTarget(null)}
         structure={structureEditTarget}
