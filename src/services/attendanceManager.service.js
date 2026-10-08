@@ -110,7 +110,7 @@ export const createLeaveType = async (payload) => {
       id: `LT-0${mockLeaveTypesList.length + 1}`,
       name: payload.name,
       code: payload.code,
-      type: payload.type || (payload.isPaid ? 'Paid' : 'Unpaid'),
+      type: 'Paid',
       allocationMethod: payload.allocationMethod || 'annual',
       annualAllocation: Number(payload.annualAllocation || 0),
       monthlyAllocation: Number(payload.monthlyAllocation || 0),
@@ -133,7 +133,7 @@ export const updateLeaveType = async (id, payload) => {
     await delay();
     const index = mockLeaveTypesList.findIndex((item) => item.id === id);
     if (index < 0) throw new Error('Leave type not found.');
-    const next = { ...mockLeaveTypesList[index], ...payload };
+    const next = { ...mockLeaveTypesList[index], ...payload, type: 'Paid' };
     next.allocation =
       next.allocationMethod === 'monthly'
         ? `${next.monthlyAllocation || 0} Days / Month`
