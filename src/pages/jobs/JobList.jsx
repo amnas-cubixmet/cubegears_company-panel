@@ -15,6 +15,8 @@ export const JobList = () => {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('All');
 
@@ -23,9 +25,12 @@ export const JobList = () => {
 
     const loadJobs = async () => {
       setLoading(true);
+      setLoadError('');
       try {
         const data = await jobService.getJobs();
-        if (active) setJobs(Array.isArray(data) ? data : []);
+        if (active) setJobs(Array.isArray(data) ? data : data?.results || []);
+      } catch (err) {
+        if (active) setLoadError(err?.message || 'Could not load Job Cards. Please try again.');
       } finally {
         if (active) setLoading(false);
       }
@@ -35,13 +40,13 @@ export const JobList = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   const filteredJobs = useMemo(() => {
     const search = query.trim().toLowerCase();
 
     return jobs.filter((job) => {
-      const matchesStatus = status === 'All' || job.status === status;
+      const matchesStatus = status === 'All' || (status === 'Active' ? !['Delivered', 'Cancelled'].includes(job.status) : job.status === status);
       const matchesSearch =
         !search ||
         [
@@ -134,6 +139,7 @@ export const JobList = () => {
 
       <JobsStats
         counts={counts}
+        selectedStatus={status}
         onFilter={setStatus}
       />
 
@@ -153,10 +159,17 @@ export const JobList = () => {
         }
       />
 
+      {loadError && (
+        <div className="jobs-load-error" role="alert">
+          <span>{loadError}</span>
+          <button type="button" onClick={() => setReloadKey((value) => value + 1)}>Retry</button>
+        </div>
+      )}
       <JobRecordsPanel
         jobs={filteredJobs}
         loading={loading}
         status={status}
+        searchTerm={query}
         onOpenJob={openJob}
       />
     </div>
