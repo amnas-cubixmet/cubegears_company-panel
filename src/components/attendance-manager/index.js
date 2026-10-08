@@ -5,4 +5,4 @@ export { AttendanceModeSelector } from './AttendanceModeSelector';
 export { AttendanceQuickActions } from './AttendanceQuickActions';
 export { AttendanceStats } from './AttendanceStats';
 export { ProductivityPanel } from './ProductivityPanel';
-export { LeaveApprovalSheet } from './LeaveApprovalSheet';\n
+export { LeaveApprovalSheet } from './LeaveApprovalSheet';
