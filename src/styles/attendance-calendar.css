@@ -961,3 +961,49 @@
     grid-column:auto;
   }
 }
+
+
+/* ---------- Attendance tenure navigation v5 ---------- */
+.attendance-month-controls>button:disabled{
+  opacity:.35;
+  cursor:not-allowed;
+  pointer-events:none;
+  background:var(--surface-2);
+  color:var(--text-muted);
+}
+
+.attendance-days-empty{
+  min-width:220px;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  color:var(--text-muted);
+  font-size:8.5px;
+}
+
+.attendance-punch-card{
+  grid-template-columns:minmax(0,1fr) auto;
+}
+
+.attendance-punch-main{
+  width:100%;
+  justify-content:flex-start;
+}
+
+.attendance-punch-status{
+  flex:0 0 auto;
+}
+
+.attendance-punch-meta{
+  flex:0 0 auto;
+}
+
+@media(max-width:620px){
+  .attendance-month-selects select{
+    min-width:0;
+  }
+
+  .attendance-month-selects select:last-of-type{
+    max-width:82px;
+  }
+}
