@@ -16,6 +16,10 @@ const normalizeBalance = (row = {}) => ({
   used: Number(row.used ?? 0),
   pending: Number(row.pending ?? 0),
   available: Number(row.available ?? row.remaining ?? 0),
+  allocationPeriod: row.allocationPeriod || row.allocation_period || 'year',
+  allocationMethod: row.allocationMethod || row.allocation_method || 'annual',
+  paidType: row.paidType || row.paid_type || 'Paid',
+  halfDayAllowed: row.halfDayAllowed ?? row.half_day_allowed ?? true,
 });
 
 const countLeaveDays = (startDate, endDate, halfDay = false) => {
