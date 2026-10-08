@@ -684,3 +684,99 @@
 .job-work-timer-refresh{align-self:flex-start;min-height:34px}
 @media(max-width:960px){.job-work-timer-form{grid-template-columns:repeat(2,minmax(0,1fr))}.job-work-timer-form button{grid-column:1/-1}.job-work-timer-row{grid-template-columns:minmax(0,1fr) auto}.job-work-timer-actions{grid-column:1/-1;justify-content:flex-start}}
 @media(max-width:520px){.job-work-timer-panel{padding:12px}.job-work-timer-head{flex-direction:column}.job-work-timer-summary{text-align:left}.job-work-timer-form{grid-template-columns:1fr}.job-work-timer-form button{grid-column:1}.job-work-timer-row{grid-template-columns:1fr}.job-work-timer-duration{text-align:left}.job-work-timer-actions{grid-column:auto}.job-work-timer-actions button{flex:1 1 115px}.job-work-timer-form input,.job-work-timer-form select{font-size:16px}}
+
+
+/* 2026 Job Cards – readable, keyboard-friendly responsive dashboard */
+.jobs-dashboard{gap:16px;width:100%;min-width:0;font-size:13px}
+.jobs-dashboard-header{align-items:flex-start;gap:14px}
+.jobs-dashboard-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11px;line-height:1.4;letter-spacing:.075em}
+.jobs-dashboard-header h1{margin-top:4px;font-size:clamp(22px,2.1vw,28px);font-weight:800;line-height:1.2;letter-spacing:-.025em}
+.jobs-dashboard-header p{max-width:630px;font-size:13px;line-height:1.55}
+.jobs-dashboard-actions{gap:9px}
+.jobs-dashboard .jobs-primary-button,
+.jobs-dashboard .jobs-secondary-button{min-height:42px;padding:0 15px;border-radius:10px;font-size:12px;font-weight:750}
+.jobs-dashboard .jobs-primary-button:focus-visible,
+.jobs-dashboard .jobs-secondary-button:focus-visible,
+.jobs-dashboard .jobs-kpi-card:focus-visible,
+.jobs-dashboard .jobs-table button:focus-visible,
+.jobs-dashboard .jobs-mobile-card:focus-visible,
+.jobs-dashboard .jobs-search-clear:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.jobs-dashboard .jobs-kpi-grid{gap:12px}
+.jobs-dashboard .jobs-kpi-card{min-height:112px;padding:14px;border-radius:13px;box-shadow:var(--shadow-sm)}
+.jobs-dashboard .jobs-kpi-card[aria-pressed="true"]{border-color:var(--primary);background:color-mix(in srgb,var(--primary-soft) 22%,var(--surface))}
+.jobs-dashboard .jobs-kpi-label{white-space:normal;overflow:visible;font-size:12px;line-height:1.35;font-weight:700}
+.jobs-dashboard .jobs-kpi-icon{width:34px;height:34px;border-radius:9px}
+.jobs-dashboard .jobs-kpi-icon svg{width:17px;height:17px}
+.jobs-dashboard .jobs-kpi-card strong{margin-top:13px;font-size:25px;line-height:1.05}
+.jobs-dashboard .jobs-kpi-card small{font-size:11px}
+.jobs-dashboard .jobs-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,220px);align-items:stretch;gap:10px;padding:10px;border-radius:13px}
+.jobs-dashboard .jobs-search,
+.jobs-dashboard .jobs-status-filter{height:44px;min-height:44px;min-width:0;display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.jobs-dashboard .jobs-search svg{flex:0 0 auto}
+.jobs-dashboard .jobs-search input{display:block;flex:1;min-width:0;height:100%;padding:0;border:0!important;box-shadow:none!important;background:transparent;font-size:13px}
+.jobs-dashboard .jobs-search input:focus{outline:0}
+.jobs-dashboard .jobs-search input::-webkit-search-cancel-button{display:none}
+.jobs-dashboard .jobs-search-clear{display:flex;align-items:center;justify-content:center;width:29px;height:29px;flex:0 0 29px;padding:0;border:0;border-radius:7px;background:transparent;color:var(--text-muted);cursor:pointer}
+.jobs-dashboard .jobs-search-clear:hover{background:var(--surface);color:var(--text-primary)}
+.jobs-dashboard .jobs-status-filter .jobs-filter-label{font-size:11px;font-weight:700;white-space:nowrap;color:var(--text-muted)}
+.jobs-dashboard .jobs-status-filter select{flex:1;min-width:0;height:42px;padding:0 22px 0 3px;border:0!important;box-shadow:none!important;background:transparent;color:var(--text-primary);font-size:13px;outline:0}
+.jobs-dashboard .jobs-status-filter:focus-within,
+.jobs-dashboard .jobs-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.jobs-dashboard .jobs-vehicle-reg{font-size:12px}
+.jobs-dashboard .jobs-vehicle-lookup h2{font-size:16px}
+.jobs-dashboard .jobs-vehicle-lookup p{font-size:12px;line-height:1.5}
+.jobs-dashboard .jobs-lookup-stat span,
+.jobs-dashboard .jobs-parts-history span{font-size:11px}
+.jobs-dashboard .jobs-lookup-stat strong,
+.jobs-dashboard .jobs-parts-history strong{font-size:13px}
+.jobs-dashboard .jobs-records-head{padding:15px 16px;align-items:center}
+.jobs-dashboard .jobs-records-head>div>span{font-size:10px}
+.jobs-dashboard .jobs-records-head h2{font-size:17px}
+.jobs-dashboard .jobs-records-head>strong{font-size:12px;white-space:nowrap}
+.jobs-dashboard .jobs-table th{padding:12px 14px;font-size:11px;line-height:1.4;letter-spacing:.02em}
+.jobs-dashboard .jobs-table td{padding:12px 14px;font-size:12px;line-height:1.45}
+.jobs-dashboard .jobs-table td strong{font-size:12px}
+.jobs-dashboard .jobs-table td span:not(.jobs-status-chip){font-size:11px}
+.jobs-dashboard .jobs-table td:nth-child(1) span{max-width:148px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jobs-dashboard .jobs-table-job-link{display:block;padding:0;border:0;background:transparent;color:var(--primary);font-size:13px;font-weight:800;text-align:left;cursor:pointer}
+.jobs-dashboard .jobs-table-job-link:hover{text-decoration:underline}
+.jobs-dashboard .jobs-table-open{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--primary);cursor:pointer}
+.jobs-dashboard .jobs-status-chip{min-height:26px;padding:3px 9px;border-radius:999px;font-size:11px;line-height:1.2}
+.jobs-dashboard .jobs-state{font-size:13px;line-height:1.6}
+.jobs-dashboard .jobs-load-error{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--danger);border-radius:11px;background:var(--surface);color:var(--danger);font-size:12px}
+.jobs-dashboard .jobs-load-error button{min-height:36px;padding:0 14px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font-weight:700;cursor:pointer}
+@media(max-width:1100px){
+ .jobs-dashboard .jobs-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:767px){
+ .jobs-dashboard{gap:12px}
+ .jobs-dashboard-header{flex-direction:column;align-items:stretch;gap:13px}
+ .jobs-dashboard-header h1{font-size:23px}
+ .jobs-dashboard-header p{font-size:12px}
+ .jobs-dashboard-actions{display:flex;flex-wrap:wrap}
+ .jobs-dashboard .jobs-dashboard-actions button{flex:1 1 145px;width:auto;min-height:44px;font-size:12px}
+ .jobs-dashboard .jobs-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .jobs-dashboard .jobs-kpi-card{min-height:104px;padding:12px}
+ .jobs-dashboard .jobs-kpi-card strong{margin-top:10px;font-size:22px}
+ .jobs-dashboard .jobs-toolbar{grid-template-columns:1fr;gap:8px}
+ .jobs-dashboard .jobs-search input,.jobs-dashboard .jobs-status-filter select{font-size:16px}
+ .jobs-dashboard .jobs-mobile-card{padding:15px 14px;min-height:120px}
+ .jobs-dashboard .jobs-mobile-card-head strong{font-size:14px}
+ .jobs-dashboard .jobs-mobile-card-head>div>span{font-size:12px}
+ .jobs-dashboard .jobs-mobile-card-meta{gap:8px}
+ .jobs-dashboard .jobs-mobile-card-meta span{font-size:12px}
+ .jobs-dashboard .jobs-mobile-card-footer{font-size:11px}
+ .jobs-dashboard .jobs-records-head{padding:14px}
+ .jobs-dashboard .jobs-lookup-stat{padding:11px}
+}
+@media(max-width:380px){
+ .jobs-dashboard .jobs-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .jobs-dashboard .jobs-kpi-card{min-height:105px;padding:10px}
+ .jobs-dashboard .jobs-kpi-label{font-size:11px}
+ .jobs-dashboard .jobs-kpi-card strong{font-size:22px}
+ .jobs-dashboard .jobs-status-chip{font-size:10px}
+ .jobs-dashboard .jobs-mobile-card-head{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ .jobs-dashboard .jobs-kpi-card{transition:none;transform:none!important}
+}
