@@ -6,6 +6,7 @@ export const JobRecordsPanel = ({
   jobs,
   loading,
   status,
+  searchTerm = '',
   onOpenJob,
 }) => (
   <section className="jobs-records-panel">
@@ -14,13 +15,15 @@ export const JobRecordsPanel = ({
         <span>Job Records</span>
         <h2>{status === 'All' ? 'All Job Cards' : status}</h2>
       </div>
-      <strong>{jobs.length} record{jobs.length === 1 ? '' : 's'}</strong>
+      <strong aria-live="polite">{jobs.length} record{jobs.length === 1 ? '' : 's'}</strong>
     </header>
 
     {loading ? (
       <div className="jobs-state">Loading job cards…</div>
     ) : jobs.length === 0 ? (
-      <div className="jobs-state is-empty">No job cards found.</div>
+      <div className="jobs-state is-empty">
+        {searchTerm || status !== 'All' ? 'No jobs match these filters. Clear search or change the status.' : 'No Job Cards yet. Create your first Job Card to begin.'}
+      </div>
     ) : (
       <>
         <div className="jobs-table-wrap">
@@ -38,9 +41,9 @@ export const JobRecordsPanel = ({
             </thead>
             <tbody>
               {jobs.map((job) => (
-                <tr key={job.id} onClick={() => onOpenJob(job.id)}>
+                <tr key={job.id}>
                   <td>
-                    <strong>{job.jobNumber || job.id}</strong>
+                    <button className="jobs-table-job-link" type="button" onClick={() => onOpenJob(job.id)}>{job.jobNumber || job.id}</button>
                     <span>{job.id}</span>
                   </td>
                   <td>
@@ -58,7 +61,7 @@ export const JobRecordsPanel = ({
                     </span>
                   </td>
                   <td><strong>{job.createdDate || '—'}</strong></td>
-                  <td><ChevronRight size={15} /></td>
+                  <td><button type="button" className="jobs-table-open" onClick={() => onOpenJob(job.id)} aria-label={`Open Job Card ${job.jobNumber || job.id}`}><ChevronRight size={17} /></button></td>
                 </tr>
               ))}
             </tbody>
