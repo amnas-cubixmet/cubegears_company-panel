@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, FileText, Pencil, Plus, Save, ShieldCheck, Trash2, Upload } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { staffManagementService } from '../../services/staffManagement.service';
+import { getEmployeeLabel } from '../../components/staff-management/staffDisplay';
 
 const today = () => new Date().toISOString().split('T')[0];
 
@@ -13,7 +14,8 @@ const EMPTY_FORM = {
   uploadedBy: 'Current Admin',
   expiryDate: '',
   status: 'Valid',
-  fileName: ''
+  fileName: '',
+  fileUrl: ''
 };
 
 export const StaffDocumentCrud = ({ staff = [] }) => {
@@ -48,7 +50,8 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
       uploadedBy: document.uploadedBy || 'Current Admin',
       expiryDate: document.expiryDate || '',
       status: document.status || 'Valid',
-      fileName: document.fileName || ''
+      fileName: document.fileName || '',
+      fileUrl: document.fileUrl || document.file_url || ''
     });
     setError('');
     setOpen(true);
@@ -119,7 +122,7 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
           Staff
           <select value={staffFilter} onChange={(e)=>setStaffFilter(e.target.value)}>
             <option value="All">All Staff</option>
-            {staff.map((person)=><option key={person.id} value={person.id}>{person.name} · {person.id}</option>)}
+            {staff.map((person,index)=><option key={person.id} value={person.id}>{person.name} · {getEmployeeLabel(person,index)}</option>)}
           </select>
         </label>
       </section>
@@ -178,7 +181,7 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
               onChange={(e)=>setForm({...form,staffId:e.target.value})}
             >
               <option value="">Select staff</option>
-              {staff.map((person)=><option key={person.id} value={person.id}>{person.name} · {person.id}</option>)}
+              {staff.map((person,index)=><option key={person.id} value={person.id}>{person.name} · {getEmployeeLabel(person,index)}</option>)}
             </select>
           </label>
 
@@ -216,8 +219,19 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
             </label>
           </div>
 
+          <label>
+            Document File URL *
+            <input
+              required
+              type="url"
+              value={form.fileUrl || ''}
+              onChange={(e)=>setForm({...form,fileUrl:e.target.value})}
+              placeholder="https://..."
+            />
+          </label>
+
           <label className="staff-document-upload-field">
-            File
+            Local File Name (optional reference)
             <input
               type="file"
               onChange={(e)=>{
@@ -225,7 +239,7 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
                 if(file) setForm((current)=>({...current,fileName:file.name,name:current.name || file.name}));
               }}
             />
-            {form.fileName ? <span>{form.fileName}</span> : <small>File selection is stored as mock metadata until backend storage is connected.</small>}
+            {form.fileName ? <span>{form.fileName}</span> : <small>Use the URL field for the actual stored document.</small>}
           </label>
 
           <div className="staff-crud-form__actions">
