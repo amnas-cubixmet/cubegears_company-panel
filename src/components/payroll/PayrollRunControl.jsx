@@ -17,6 +17,7 @@ export const PayrollRunControl = ({
   employees,
   onChanged,
 }) => {
+  const { user } = useAuth();
   const monthNumber = MONTH_NUMBERS[month] || new Date().getMonth() + 1;
   const branchId = useMemo(() => {
     if (!branch || branch === 'All') return null;
