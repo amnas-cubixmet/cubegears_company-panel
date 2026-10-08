@@ -10,6 +10,7 @@ export const Approvals = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [reviewDecision, setReviewDecision] = useState(null); // 'approve' | 'reject'
   const [managerNote, setManagerNote] = useState('');
+  const [overtimeRate, setOvertimeRate] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -32,6 +33,11 @@ export const Approvals = () => {
     setSelectedRequest(req);
     setReviewDecision(decision);
     setManagerNote('');
+    setOvertimeRate(
+      req?.type === 'Overtime' && Number(req?.rate || 0) > 0
+        ? String(req.rate)
+        : ''
+    );
   };
 
   const handleConfirmDecision = async (e) => {
@@ -40,7 +46,20 @@ export const Approvals = () => {
 
     setSubmitting(true);
     try {
-      await attendanceManagerService.updateApprovalStatus(selectedRequest.id, reviewDecision, managerNote);
+      const isOvertimeApproval =
+        selectedRequest.type === 'Overtime' && reviewDecision === 'approve';
+      const rate = Number(overtimeRate || 0);
+
+      if (isOvertimeApproval && rate <= 0) {
+        return;
+      }
+
+      await attendanceManagerService.updateApprovalStatus(
+        selectedRequest.id,
+        reviewDecision,
+        managerNote,
+        isOvertimeApproval ? { rate } : {},
+      );
       setSelectedRequest(null);
       setReviewDecision(null);
       fetchApprovals();
@@ -199,6 +218,33 @@ export const Approvals = () => {
               <br />
               Type: <strong>{selectedRequest.type}</strong> | Date: <strong>{selectedRequest.affectedDate}</strong>
             </div>
+
+            {selectedRequest.type === 'Overtime' && reviewDecision === 'approve' && (
+              <div className="attendance-overtime-approval-rate">
+                <label>
+                  <span>Overtime Rate (₹ / hour) *</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={overtimeRate}
+                    onChange={(e) => setOvertimeRate(e.target.value)}
+                    placeholder="e.g. 150"
+                    required
+                  />
+                </label>
+                <div>
+                  <span>Approved Amount</span>
+                  <strong>
+                    ₹{(
+                      (Number(selectedRequest.overtimeHours || 0) ||
+                        Number(selectedRequest.minutes || 0) / 60) *
+                      Number(overtimeRate || 0)
+                    ).toFixed(2)}
+                  </strong>
+                </div>
+              </div>
+            )}
 
             <div>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
