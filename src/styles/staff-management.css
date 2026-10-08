@@ -4793,3 +4793,80 @@
     justify-content:space-between;
   }
 }
+
+
+/* ---------- Staff directory toolbar hotfix v4 ---------- */
+.cg-staff-management .staff-directory-toolbar{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  grid-template-columns:minmax(0,1fr) minmax(150px,180px) minmax(130px,160px) max-content;
+  gap:8px;
+  overflow:hidden;
+}
+.cg-staff-management .staff-directory-search{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.cg-staff-management .staff-directory-search > svg{
+  flex:0 0 auto;
+}
+.cg-staff-management .staff-directory-search input:not([type="checkbox"]):not([type="radio"]):not([type="file"]){
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:9px!important;
+}
+.cg-staff-management .staff-directory-search input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+.cg-staff-management .staff-directory-toolbar > select{
+  width:100%!important;
+  max-width:100%;
+}
+.cg-staff-management .staff-directory-toolbar .staff-add-button{
+  width:auto!important;
+  min-width:96px;
+  white-space:nowrap;
+}
+
+@media(max-width:1100px){
+  .cg-staff-management .staff-directory-toolbar{
+    grid-template-columns:minmax(0,1fr) minmax(145px,170px) minmax(125px,150px);
+  }
+  .cg-staff-management .staff-directory-toolbar .staff-add-button{
+    grid-column:1/-1;
+    width:100%!important;
+  }
+}
+@media(max-width:760px){
+  .cg-staff-management .staff-directory-toolbar{
+    grid-template-columns:1fr 1fr!important;
+    overflow:visible;
+  }
+  .cg-staff-management .staff-directory-search{
+    grid-column:1/-1;
+  }
+}
+@media(max-width:430px){
+  .cg-staff-management .staff-directory-toolbar{
+    grid-template-columns:1fr!important;
+  }
+  .cg-staff-management .staff-directory-search,
+  .cg-staff-management .staff-directory-toolbar .staff-add-button{
+    grid-column:auto;
+  }
+}
