@@ -32,6 +32,7 @@ import {
 } from '../../../components/staff-management';
 import { getEmployeeLabel } from '../../../components/staff-management/staffDisplay';
 import { EmployeePayConfigurationSheet } from '../../../components/payroll';
+import { payTypeLabel } from '../../../components/payroll/payTypes';
 import { useAuth } from '../../../hooks/useAuth';
 import { USE_MOCK_API } from '../../../api/apiConfig';
 import { hasPermission } from '../../../utils/permissions';
@@ -495,20 +496,33 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
           </div>
         </div>
 
-        {canEdit && (
+        {(canEdit || canManagePayroll) && (
           <div className="staff360-hero-actions">
-            <button type="button" className="staff360-secondary-button" onClick={() => setEditOpen(true)}>
-              <Pencil size={14}/>
-              Edit Profile
-            </button>
-            <button type="button" onClick={handleSendInvite} className="staff360-secondary-button">
-              <Send size={14}/>
-              Send Login Invite
-            </button>
-            <button type="button" onClick={handleToggleAccount} className="staff360-secondary-button">
-              {staff.accountStatus === 'Active' ? <Lock size={14}/> : <Unlock size={14}/>}
-              {staff.accountStatus === 'Active' ? 'Deactivate' : 'Activate'}
-            </button>
+            {canManagePayroll && (
+              <button type="button" className="staff360-secondary-button" onClick={() => {
+                setActiveTab('Payroll');
+                setPayConfigOpen(true);
+              }}>
+                <WalletCards size={14}/>
+                {salaryStructure ? 'Change Pay' : 'Configure Pay'}
+              </button>
+            )}
+            {canEdit && (
+              <>
+                <button type="button" className="staff360-secondary-button" onClick={() => setEditOpen(true)}>
+                  <Pencil size={14}/>
+                  Edit Profile
+                </button>
+                <button type="button" onClick={handleSendInvite} className="staff360-secondary-button">
+                  <Send size={14}/>
+                  Send Login Invite
+                </button>
+                <button type="button" onClick={handleToggleAccount} className="staff360-secondary-button">
+                  {staff.accountStatus === 'Active' ? <Lock size={14}/> : <Unlock size={14}/>}
+                  {staff.accountStatus === 'Active' ? 'Deactivate' : 'Activate'}
+                </button>
+              </>
+            )}
           </div>
         )}
       </section>
@@ -566,7 +580,15 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
                 <InfoItem label="Team / Department" value={staff.department} icon={Building2} />
                 <InfoItem label="Branch" value={staff.branch?.name || staff.branch} icon={Building2} />
                 <InfoItem label="Shift" value={staff.shift} icon={Clock3} />
-                <InfoItem label="Payment Type" value={staff.paymentType} icon={WalletCards} />
+                {(canViewPayroll || isOwnProfile) && (
+                  <InfoItem
+                    label="Payment Type"
+                    value={salaryStructure
+                      ? payTypeLabel(salaryStructure.paymentType)
+                      : staff.paymentType ? payTypeLabel(staff.paymentType) + ' · setup pending' : 'Not configured'}
+                    icon={WalletCards}
+                  />
+                )}
                 <InfoItem label="Login Status" value={staff.loginStatus} icon={ShieldCheck} />
               </div>
             </div>
@@ -732,7 +754,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
                     <div>
                       <strong>Salary & Payment Settings</strong>
                       <span>
-                        {salaryStructure?.salaryBasis || salaryStructure?.selectedPayStructure || salaryStructure?.paymentType || 'Not configured'}
+                        {salaryStructure ? payTypeLabel(salaryStructure.paymentType) : 'Not configured'}
                       </span>
                     </div>
                   </div>
@@ -836,21 +858,24 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
         )}
       </section>
 
+      {canManagePayroll && (
+        <EmployeePayConfigurationSheet
+          isOpen={payConfigOpen}
+          onClose={() => setPayConfigOpen(false)}
+          structure={{
+            ...(salaryStructure || {}),
+            paymentType: salaryStructure?.paymentType || staff.paymentType || 'monthly',
+            staffId: staff.id,
+            staffName: staff.name,
+            employee: staff,
+          }}
+          onSave={handlePayConfiguration}
+        />
+      )}
+
       {canEdit && (
         <>
-          <EmployeePayConfigurationSheet
-        isOpen={payConfigOpen}
-        onClose={() => setPayConfigOpen(false)}
-        structure={{
-          ...(salaryStructure || {}),
-          staffId: staff.id,
-          staffName: staff.name,
-          employee: staff,
-        }}
-        onSave={handlePayConfiguration}
-      />
-
-      <StaffProfileEditSheet
+          <StaffProfileEditSheet
             open={editOpen}
             onClose={() => setEditOpen(false)}
             staff={staff}
