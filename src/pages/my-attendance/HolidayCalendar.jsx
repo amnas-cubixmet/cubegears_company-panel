@@ -65,10 +65,15 @@ export const HolidayCalendar = () => {
       attendanceStatus?.employee?.joining_date,
     );
 
-    // The backend returns the real joining date. This fallback keeps older
-    // deployments usable until they are updated.
-    return joiningDate || new Date(today.getFullYear() - 4, 0, 1);
-  }, [attendanceStatus, today]);
+    if (joiningDate) return joiningDate;
+
+    const logDates = logs
+      .map((log) => asLocalDate(log.date))
+      .filter(Boolean)
+      .sort((a, b) => a - b);
+
+    return logDates[0] || today;
+  }, [attendanceStatus, logs, today]);
 
   useEffect(() => {
     const currentKey = monthKey(currentDate);
