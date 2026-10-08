@@ -22,7 +22,7 @@ import {
   WalletCards,
   Wrench,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   StaffAttendanceCalendar,
   StaffAvatar,
@@ -31,6 +31,7 @@ import {
   StaffProfileEditSheet,
 } from '../../../components/staff-management';
 import { getEmployeeLabel } from '../../../components/staff-management/staffDisplay';
+import { EmployeePayConfigurationSheet } from '../../../components/payroll';
 import { useAuth } from '../../../hooks/useAuth';
 import { USE_MOCK_API } from '../../../api/apiConfig';
 import { hasPermission } from '../../../utils/permissions';
@@ -165,8 +166,11 @@ const normalizeActivity = (item = {}) => ({
   ),
 });
 
-export const StaffProfile = ({ staffId, onBack }) => {
+export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   const navigate = useNavigate();
+  const { staffId: routeStaffId } = useParams();
+  const staffId = staffIdProp || routeStaffId;
+  const goBack = onBack || (() => navigate('/staff-management/staff'));
   const { user } = useAuth();
 
   const [staff, setStaff] = useState(null);
@@ -191,6 +195,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
 
   const [editOpen, setEditOpen] = useState(false);
   const [documentOpen, setDocumentOpen] = useState(false);
+  const [payConfigOpen, setPayConfigOpen] = useState(false);
 
   const isOwnProfile =
     Boolean(user?.employeeProfileId) &&
@@ -199,6 +204,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
   const canEdit = hasPermission(user, 'staff.edit');
   const canManageAttendance = hasPermission(user, 'attendance.manage');
   const canViewPayroll = hasPermission(user, 'payroll.view');
+  const canManagePayroll = hasPermission(user, 'payroll.edit');
 
   const showToast = (message) => {
     setToastMsg(message);
@@ -431,6 +437,18 @@ export const StaffProfile = ({ staffId, onBack }) => {
     await refreshAll();
   };
 
+  const handlePayConfiguration = async (payload) => {
+    await payrollService.saveSalaryStructure({
+      ...payload,
+      staffId: staff.id,
+      staffName: staff.name,
+      employee: staff.id,
+    });
+    showToast('Salary & payment settings saved.');
+    setPayConfigOpen(false);
+    await refreshAll();
+  };
+
   if (loading) {
     return <div className="staff-workshop-empty">Loading staff profile…</div>;
   }
@@ -448,7 +466,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
       {toastMsg && <div className="staff360-toast">{toastMsg}</div>}
 
       <div className="staff-profile-topbar">
-        <button type="button" onClick={onBack} aria-label="Back to staff">
+        <button type="button" onClick={goBack} aria-label="Back to staff">
           <ArrowLeft size={15} />
         </button>
         <div>
@@ -707,12 +725,33 @@ export const StaffProfile = ({ staffId, onBack }) => {
         {activeTab === 'Payroll' && (
           <div className="staff360-tab-stack">
             {canViewPayroll || isOwnProfile ? (
-              <StaffPayrollHistory
-                payrolls={payrolls}
-                selectedMonth={payrollMonth}
-                onMonthChange={setPayrollMonth}
-                salaryStructure={salaryStructure}
-              />
+              <>
+                <div className="staff360-pay-config-command">
+                  <div>
+                    <WalletCards size={15}/>
+                    <div>
+                      <strong>Salary & Payment Settings</strong>
+                      <span>
+                        {salaryStructure?.salaryBasis || salaryStructure?.selectedPayStructure || salaryStructure?.paymentType || 'Not configured'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {canManagePayroll && (
+                    <button type="button" onClick={() => setPayConfigOpen(true)}>
+                      <Pencil size={13}/>
+                      {salaryStructure ? 'Change Pay Configuration' : 'Configure Payment'}
+                    </button>
+                  )}
+                </div>
+
+                <StaffPayrollHistory
+                  payrolls={payrolls}
+                  selectedMonth={payrollMonth}
+                  onMonthChange={setPayrollMonth}
+                  salaryStructure={salaryStructure}
+                />
+              </>
             ) : (
               <div className="staff-workshop-empty">
                 Payroll access is not assigned to your role.
@@ -799,7 +838,19 @@ export const StaffProfile = ({ staffId, onBack }) => {
 
       {canEdit && (
         <>
-          <StaffProfileEditSheet
+          <EmployeePayConfigurationSheet
+        isOpen={payConfigOpen}
+        onClose={() => setPayConfigOpen(false)}
+        structure={{
+          ...(salaryStructure || {}),
+          staffId: staff.id,
+          staffName: staff.name,
+          employee: staff,
+        }}
+        onSave={handlePayConfiguration}
+      />
+
+      <StaffProfileEditSheet
             open={editOpen}
             onClose={() => setEditOpen(false)}
             staff={staff}
