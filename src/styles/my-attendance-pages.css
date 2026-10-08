@@ -128,3 +128,10 @@
 @media(max-width:900px){.my-overtime-layout{grid-template-columns:1fr}}
 @media(max-width:700px){.my-attendance-dashboard-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.my-overtime-grid{grid-template-columns:1fr}}
+
+
+/* Overtime approved pay details */
+.my-overtime-approved-pay{display:grid;grid-template-columns:auto 1fr auto 1fr;align-items:center;gap:5px 8px;margin:7px 0;padding:7px 8px;border:1px solid color-mix(in srgb,var(--success) 22%,var(--border));border-radius:8px;background:var(--success-soft)}
+.my-overtime-approved-pay span{color:var(--text-muted);font-size:7px;text-transform:uppercase}
+.my-overtime-approved-pay strong{color:var(--text-primary);font-size:8.5px}
+@media(max-width:480px){.my-overtime-approved-pay{grid-template-columns:1fr 1fr}}
