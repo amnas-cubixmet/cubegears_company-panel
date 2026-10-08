@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Clock3, Pencil, Plus, Save, Trash2, Users } from 'lucide-react';
+import { Building2, Clock3, Pencil, Plus, Save, Trash2, Users } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import { BranchCreateSheet } from '../../components/staff-management/BranchCreateSheet';
 import { staffManagementService } from '../../services/staffManagement.service';
+import { branchService } from '../../services/branch.service';
 
 const EMPTY_FORM = {
   name: '',
   startTime: '09:00 AM',
   endTime: '06:00 PM',
   weeklyOff: 'Sunday',
-  branch: 'All Branches',
-  assignedStaffIds: []
+  branchId: '',
+  assignedStaffIds: [],
 };
 
 const splitShiftTime = (value = '') => {
@@ -19,20 +21,32 @@ const splitShiftTime = (value = '') => {
 
 export const StaffShiftCrud = ({ staff = [] }) => {
   const [shifts, setShifts] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editing, setEditing] = useState(null);
   const [open, setOpen] = useState(false);
+  const [branchOpen, setBranchOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const activeStaff = useMemo(
-    () => staff.filter((item) => ['Active', 'Probation', 'Notice Period'].includes(item.employmentStatus)),
-    [staff]
+    () => staff.filter((item) =>
+      ['Active', 'Probation', 'Notice Period'].includes(item.employmentStatus),
+    ),
+    [staff],
   );
 
   const load = async () => {
-    const data = await staffManagementService.getShifts();
-    setShifts(data);
+    const [shiftRows, branchRows] = await Promise.all([
+      staffManagementService.getShifts(),
+      branchService.getBranches(),
+    ]);
+    setShifts(Array.isArray(shiftRows) ? shiftRows : []);
+    setBranches(
+      (Array.isArray(branchRows) ? branchRows : []).filter(
+        (item) => item.is_active !== false,
+      ),
+    );
   };
 
   useEffect(() => {
@@ -41,7 +55,10 @@ export const StaffShiftCrud = ({ staff = [] }) => {
 
   const openCreate = () => {
     setEditing(null);
-    setForm(EMPTY_FORM);
+    setForm({
+      ...EMPTY_FORM,
+      branchId: branches[0]?.id || '',
+    });
     setError('');
     setOpen(true);
   };
@@ -54,8 +71,8 @@ export const StaffShiftCrud = ({ staff = [] }) => {
       startTime,
       endTime,
       weeklyOff: shift.weeklyOff || 'Sunday',
-      branch: shift.branch || 'All Branches',
-      assignedStaffIds: shift.assignedStaffIds || []
+      branchId: shift.branchId || '',
+      assignedStaffIds: shift.assignedStaffIds || [],
     });
     setError('');
     setOpen(true);
@@ -66,7 +83,7 @@ export const StaffShiftCrud = ({ staff = [] }) => {
       ...current,
       assignedStaffIds: current.assignedStaffIds.includes(id)
         ? current.assignedStaffIds.filter((staffId) => staffId !== id)
-        : [...current.assignedStaffIds, id]
+        : [...current.assignedStaffIds, id],
     }));
   };
 
@@ -77,16 +94,23 @@ export const StaffShiftCrud = ({ staff = [] }) => {
     setSaving(true);
     setError('');
     try {
+      const branch = branches.find(
+        (item) => String(item.id) === String(form.branchId),
+      );
       const payload = {
         name: form.name,
         time: `${form.startTime.trim()} - ${form.endTime.trim()}`,
         weeklyOff: form.weeklyOff,
-        branch: form.branch,
-        assignedStaffIds: form.assignedStaffIds
+        branchId: form.branchId || null,
+        branchName: branch?.name || 'All Branches',
+        assignedStaffIds: form.assignedStaffIds,
       };
 
-      if (editing) await staffManagementService.updateShift(editing.id, payload);
-      else await staffManagementService.createShift(payload);
+      if (editing) {
+        await staffManagementService.updateShift(editing.id, payload);
+      } else {
+        await staffManagementService.createShift(payload);
+      }
 
       await load();
       setOpen(false);
@@ -99,51 +123,76 @@ export const StaffShiftCrud = ({ staff = [] }) => {
     }
   };
 
-  const remove = async (shift) => {
-    if (!window.confirm(`Delete "${shift.name}"? Assigned staff will move to General Shift.`)) return;
+  const remove = async (shiftItem) => {
+    if (!window.confirm(`Delete "${shiftItem.name}"?`)) return;
     try {
-      await staffManagementService.deleteShift(shift.id);
+      await staffManagementService.deleteShift(shiftItem.id);
       await load();
     } catch (err) {
       window.alert(err?.message || 'Unable to delete shift.');
     }
   };
 
+  const assignedIds = new Set(
+    shifts.flatMap((shiftItem) => shiftItem.assignedStaffIds || []),
+  );
+
   return (
-    <div className="staff-crud-view">
-      <section className="staff-workshop-section-header">
+    <div className="staff-dashboard-subpage staff-crud-view">
+      <section className="staff-subpage-header">
         <div>
           <h2>Shift Assignment</h2>
-          <p>Create, edit, delete and assign workshop shifts by branch and weekly off.</p>
+          <p>Create workshop shifts, weekly offs, branch assignment and staff allocation.</p>
         </div>
-        <button type="button" className="staff-crud-add-button" onClick={openCreate}>
-          <Plus size={15}/> Add Shift
-        </button>
+
+        <div className="staff-subpage-actions">
+          <button
+            type="button"
+            className="staff-secondary-action"
+            onClick={() => setBranchOpen(true)}
+          >
+            <Building2 size={14}/>
+            Add Branch
+          </button>
+          <button
+            type="button"
+            className="staff-primary-action"
+            onClick={openCreate}
+          >
+            <Plus size={14}/>
+            Add Shift
+          </button>
+        </div>
       </section>
 
-      <div className="staff-crud-summary-grid">
-        <div><Clock3 size={16}/><span>Total Shifts</span><strong>{shifts.length}</strong></div>
-        <div><Users size={16}/><span>Assigned Staff</span><strong>{new Set(shifts.flatMap((shift) => shift.assignedStaffIds || [])).size}</strong></div>
-        <div><Users size={16}/><span>Unassigned</span><strong>{Math.max(activeStaff.length - new Set(shifts.flatMap((shift) => shift.assignedStaffIds || [])).size, 0)}</strong></div>
-      </div>
+      <section className="staff-subpage-kpis">
+        <article><Clock3 size={15}/><span>Total Shifts</span><strong>{shifts.length}</strong></article>
+        <article><Users size={15}/><span>Assigned Staff</span><strong>{assignedIds.size}</strong></article>
+        <article><Users size={15}/><span>Unassigned</span><strong>{Math.max(activeStaff.length - assignedIds.size, 0)}</strong></article>
+        <article><Building2 size={15}/><span>Active Branches</span><strong>{branches.length}</strong></article>
+      </section>
 
       <div className="staff-crud-card-grid">
-        {shifts.map((shift) => {
-          const members = activeStaff.filter((person) => shift.assignedStaffIds?.includes(person.id));
+        {shifts.map((shiftItem) => {
+          const members = activeStaff.filter((person) =>
+            shiftItem.assignedStaffIds?.includes(person.id),
+          );
           return (
-            <article key={shift.id} className="staff-crud-card">
+            <article key={shiftItem.id} className="staff-crud-card">
               <div className="staff-crud-card__head">
                 <div className="staff-crud-card__icon"><Clock3 size={17}/></div>
                 <div>
-                  <h3>{shift.name}</h3>
-                  <p>{shift.time}</p>
+                  <h3>{shiftItem.name}</h3>
+                  <p>{shiftItem.time}</p>
                 </div>
-                {shift.id === 'SHIFT-GENERAL' ? <span className="staff-crud-protected">Default</span> : null}
+                {shiftItem.id === 'SHIFT-GENERAL' ? (
+                  <span className="staff-crud-protected">Default</span>
+                ) : null}
               </div>
 
               <div className="staff-crud-detail-grid">
-                <div><span>Weekly Off</span><strong>{shift.weeklyOff}</strong></div>
-                <div><span>Branch</span><strong>{shift.branch}</strong></div>
+                <div><span>Weekly Off</span><strong>{shiftItem.weeklyOff}</strong></div>
+                <div><span>Branch</span><strong>{shiftItem.branchName || shiftItem.branch || 'All Branches'}</strong></div>
                 <div><span>Assigned Staff</span><strong>{members.length}</strong></div>
               </div>
 
@@ -154,12 +203,12 @@ export const StaffShiftCrud = ({ staff = [] }) => {
               </div>
 
               <div className="staff-crud-actions">
-                <button type="button" onClick={() => openEdit(shift)}><Pencil size={13}/> Edit</button>
+                <button type="button" onClick={() => openEdit(shiftItem)}><Pencil size={13}/> Edit</button>
                 <button
                   type="button"
                   className="is-danger"
-                  disabled={shift.id === 'SHIFT-GENERAL'}
-                  onClick={() => remove(shift)}
+                  disabled={shiftItem.id === 'SHIFT-GENERAL'}
+                  onClick={() => remove(shiftItem)}
                 >
                   <Trash2 size={13}/> Delete
                 </button>
@@ -173,32 +222,68 @@ export const StaffShiftCrud = ({ staff = [] }) => {
         isOpen={open}
         onClose={() => setOpen(false)}
         title={editing ? 'Edit Workshop Shift' : 'Add Workshop Shift'}
-        maxWidth="620px"
+        maxWidth="640px"
       >
         <form className="staff-crud-form" onSubmit={submit}>
           {error ? <div className="staff-crud-error">{error}</div> : null}
 
           <label>
             Shift Name *
-            <input required value={form.name} onChange={(e)=>setForm({...form,name:e.target.value})} placeholder="e.g. Night Shift"/>
+            <input
+              required
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="e.g. Night Shift"
+            />
           </label>
 
           <div className="staff-crud-form__grid">
-            <label>Start Time<input value={form.startTime} onChange={(e)=>setForm({...form,startTime:e.target.value})} placeholder="09:00 AM"/></label>
-            <label>End Time<input value={form.endTime} onChange={(e)=>setForm({...form,endTime:e.target.value})} placeholder="06:00 PM"/></label>
+            <label>
+              Start Time
+              <input
+                value={form.startTime}
+                onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+                placeholder="09:00 AM"
+              />
+            </label>
+            <label>
+              End Time
+              <input
+                value={form.endTime}
+                onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+                placeholder="06:00 PM"
+              />
+            </label>
             <label>
               Weekly Off
-              <select value={form.weeklyOff} onChange={(e)=>setForm({...form,weeklyOff:e.target.value})}>
-                {['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((day)=><option key={day}>{day}</option>)}
+              <select
+                value={form.weeklyOff}
+                onChange={(e) => setForm({ ...form, weeklyOff: e.target.value })}
+              >
+                {['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+                  .map((day) => <option key={day}>{day}</option>)}
               </select>
             </label>
             <label>
               Branch
-              <select value={form.branch} onChange={(e)=>setForm({...form,branch:e.target.value})}>
-                <option>All Branches</option>
-                <option>Main Garage Branch</option>
-                <option>Kochi South Branch</option>
-              </select>
+              <div className="staff-branch-select-row">
+                <select
+                  value={form.branchId}
+                  onChange={(e) => setForm({ ...form, branchId: e.target.value })}
+                >
+                  <option value="">All Branches</option>
+                  {branches.map((item) => (
+                    <option key={item.id} value={item.id}>{item.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="staff-inline-create-button"
+                  onClick={() => setBranchOpen(true)}
+                >
+                  + Branch
+                </button>
+              </div>
             </label>
           </div>
 
@@ -212,20 +297,46 @@ export const StaffShiftCrud = ({ staff = [] }) => {
                     checked={form.assignedStaffIds.includes(person.id)}
                     onChange={() => toggleStaff(person.id)}
                   />
-                  <span><strong>{person.name}</strong><small>{person.designation} · {person.branch}</small></span>
+                  <span>
+                    <strong>{person.name}</strong>
+                    <small>{person.designation} · {person.branch || 'No branch'}</small>
+                  </span>
                 </label>
               ))}
             </div>
           </fieldset>
 
           <div className="staff-crud-form__actions">
-            <button type="button" className="staff-crud-cancel-button" onClick={()=>setOpen(false)}>Cancel</button>
-            <button type="submit" className="staff-crud-save-button" disabled={saving}>
-              <Save size={14}/>{saving ? 'Saving...' : editing ? 'Update Shift' : 'Create Shift'}
+            <button
+              type="button"
+              className="staff-crud-cancel-button"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="staff-crud-save-button"
+              disabled={saving}
+            >
+              <Save size={14}/>
+              {saving ? 'Saving...' : editing ? 'Update Shift' : 'Create Shift'}
             </button>
           </div>
         </form>
       </ResponsiveModalSheet>
+
+      <BranchCreateSheet
+        isOpen={branchOpen}
+        onClose={() => setBranchOpen(false)}
+        onCreate={async (data) => {
+          const created = await branchService.createBranch(data);
+          await load();
+          if (created?.id) {
+            setForm((current) => ({ ...current, branchId: created.id }));
+          }
+        }}
+      />
     </div>
   );
 };
