@@ -6,7 +6,7 @@ export const LeaveBalanceGrid = ({ balances }) => (
     <div className="leave-section-title">
       <div>
         <h3>Personal Leave Balances</h3>
-        <p>Available leave allocation for the current year.</p>
+        <p>Available company leave allocation for the current period.</p>
       </div>
     </div>
 
@@ -21,7 +21,9 @@ export const LeaveBalanceGrid = ({ balances }) => (
             <i><CalendarCheck2 size={15} /></i>
           </div>
 
-          <small>days available</small>
+          <small>
+            days available · {balance.allocationPeriod === 'month' ? 'this month' : 'this year'}
+          </small>
 
           <div className="leave-balance-meta">
             <span>Allocated <b>{balance.allocated}</b></span>
