@@ -1,7 +1,6 @@
 export { ActiveRepairPanel } from './ActiveRepairPanel';
 export { BookingList } from './BookingList';
 export { DashboardBottomGrid } from './DashboardBottomGrid';
-export { DashboardHeading } from './DashboardHeading';
 export { DashboardStats } from './DashboardStats';
 export { FinancePanel } from './FinancePanel';
 export { JobDetailPanel } from './JobDetailPanel';
