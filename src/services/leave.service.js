@@ -48,6 +48,7 @@ const normalizeRequest = (row = {}) => {
     reason: row.reason || '—',
     attachment: row.attachment || null,
     status: row.status || 'Pending',
+    managerNote: row.managerNote || row.manager_note || '',
     submittedAt: row.submittedAt || row.created_at || row.createdAt || null,
     canCancel:
       row.canCancel !== undefined
