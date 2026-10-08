@@ -177,7 +177,8 @@ export const StaffAddPage = () => {
   };
 
   return (
-    <form className="staff-add-page" onSubmit={submit}>
+    <>
+      <form className="staff-add-page" onSubmit={submit}>
       <section className="staff-add-page__header">
         <div>
           <h2>Add Staff</h2>
@@ -556,6 +557,8 @@ export const StaffAddPage = () => {
         </aside>
       </div>
 
+      </form>
+
       <BranchCreateSheet
         isOpen={branchSheetOpen}
         onClose={() => setBranchSheetOpen(false)}
@@ -566,6 +569,6 @@ export const StaffAddPage = () => {
           if (created?.id) set('branchId', created.id);
         }}
       />
-    </form>
+    </>
   );
 };
