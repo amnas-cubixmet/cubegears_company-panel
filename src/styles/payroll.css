@@ -2154,3 +2154,15 @@
 .overtime-entry-actions button{min-height:40px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text-secondary);font-size:9px;font-weight:750}
 .overtime-entry-actions button.is-primary{border-color:var(--primary);background:var(--primary);color:#fff}
 @media(max-width:560px){.overtime-entry-grid{grid-template-columns:1fr}.overtime-entry-actions{grid-template-columns:1fr}}
+
+
+/* Overtime approval pricing v2 */
+.overtime-approval-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.overtime-approval-summary>div{min-width:0;padding:9px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2)}
+.overtime-approval-summary span,.overtime-approved-amount span{display:block;color:var(--text-muted);font-size:7.5px}
+.overtime-approval-summary strong{display:block;margin-top:3px;overflow:hidden;color:var(--text-primary);font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.overtime-approved-amount{padding:11px;border:1px solid color-mix(in srgb,var(--primary) 25%,var(--border));border-radius:9px;background:var(--primary-soft)}
+.overtime-approved-amount strong{display:block;margin-top:3px;color:var(--primary);font-size:18px;line-height:1.1}
+.overtime-approved-amount small{display:block;margin-top:4px;color:var(--text-muted);font-size:8px}
+.overtime-rate-policy-note{padding:9px 10px;border:1px solid color-mix(in srgb,var(--primary) 24%,var(--border));border-radius:8px;background:var(--primary-soft);color:var(--text-secondary);font-size:8.5px;line-height:1.45}
+@media(max-width:520px){.overtime-approval-summary{grid-template-columns:1fr 1fr}.overtime-approval-summary>div:first-child{grid-column:1/-1}}
