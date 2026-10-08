@@ -9,7 +9,6 @@ import {
 } from '../../components/my-attendance';
 import { minutesToHours } from '../../components/my-attendance/attendance.utils';
 import { attendanceService } from '../../services/attendance.service';
-import { useAuth } from '../../hooks/useAuth';
 import '../../styles/attendance-calendar.css';
 
 const asLocalDate = (value) => {
@@ -22,7 +21,6 @@ const asLocalDate = (value) => {
 const monthKey = (date) => date.getFullYear() * 12 + date.getMonth();
 
 export const HolidayCalendar = () => {
-  const { user } = useAuth();
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [events, setEvents] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -219,19 +217,7 @@ export const HolidayCalendar = () => {
         onNextMonth={() => setCalendarMonth(year, month + 1)}
       />
 
-      <EmployeeAttendanceCard
-        user={user}
-        employeeCode={
-          attendanceStatus?.employee?.employeeCode ||
-          attendanceStatus?.record?.employeeCode ||
-          monthLogs?.[0]?.employeeCode
-        }
-        shiftName={
-          attendanceStatus?.employee?.shiftName ||
-          attendanceStatus?.record?.shiftName ||
-          monthLogs?.[0]?.shiftName
-        }
-      />
+      <EmployeeAttendanceCard employee={attendanceStatus?.employee || null} />
 
       <AttendancePunchPanel
         onChanged={() =>
