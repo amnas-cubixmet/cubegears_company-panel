@@ -6,3 +6,6 @@ export { PayrollPeriodFilter } from './PayrollPeriodFilter';
 export { PayrollQuickActions } from './PayrollQuickActions';
 export { PayrollRecordsPanel } from './PayrollRecordsPanel';
 export { PayrollSettlementPanel } from './PayrollSettlementPanel';
+export { EmployeeCompensationGrid } from './EmployeeCompensationGrid';
+export { EmployeePayConfigurationSheet } from './EmployeePayConfigurationSheet';
+export { PAY_TYPES, payTypeLabel } from './payTypes';
