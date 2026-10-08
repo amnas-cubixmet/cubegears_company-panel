@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DashboardBottomGrid,
-  DashboardHeading,
   DashboardStats,
   ServiceOperations,
 } from '../../components/dashboard';
 import { Loader } from '../../components/common/Loader';
 import { useAuth } from '../../hooks/useAuth';
-import { getDashboardData, toggleClockIn } from '../../services/dashboard.service';
+import { getDashboardData } from '../../services/dashboard.service';
 import '../../styles/dashboard.css';
 
 export const Dashboard = () => {
@@ -19,8 +18,6 @@ export const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [filterPeriod, setFilterPeriod] = useState('today');
   const [filterBranch, setFilterBranch] = useState('main');
-  const [currentTime, setCurrentTime] = useState('');
-  const [attendanceError, setAttendanceError] = useState('');
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -39,47 +36,10 @@ export const Dashboard = () => {
     fetchDashboard();
   }, [filterPeriod, filterBranch]);
 
-  useEffect(() => {
-    const update = () => {
-      setCurrentTime(
-        new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-      );
-    };
-
-    update();
-    const timer = window.setInterval(update, 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const handleClockToggle = async (action) => {
-    if (!action) return;
-    setAttendanceError('');
-    try {
-      await toggleClockIn(action, {
-        locationRequired: Boolean(data?.attendance?.locationRequired),
-        locationTrackingEnabled: Boolean(data?.attendance?.locationTrackingEnabled),
-      });
-      await fetchDashboard();
-    } catch (error) {
-      setAttendanceError(error?.message || 'Attendance action failed.');
-    }
-  };
-
   if (loading) return <Loader />;
 
   return (
     <div className="dashboard-page">
-      <DashboardHeading
-        user={user}
-        attendance={data?.attendance}
-        currentTime={currentTime}
-        error={attendanceError}
-        onAttendanceAction={handleClockToggle}
-      />
-
       <DashboardStats data={data} />
 
       <ServiceOperations
