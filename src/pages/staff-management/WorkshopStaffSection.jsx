@@ -239,6 +239,7 @@ export const WorkshopStaffSection = ({ section }) => {
         staff={staff}
         teams={teams}
         setTeams={setTeams}
+        setStaff={setStaff}
       />
     );
   }
