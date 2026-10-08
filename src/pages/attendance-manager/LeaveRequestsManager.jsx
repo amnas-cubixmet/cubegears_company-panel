@@ -119,7 +119,9 @@ export const LeaveRequestsManager = () => {
         decision,
         note.trim(),
       );
-      closeDecision();
+      setSelected(null);
+      setDecision('');
+      setNote('');
       await load();
     } catch (error) {
       setApprovalError(
