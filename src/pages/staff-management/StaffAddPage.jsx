@@ -54,7 +54,6 @@ export const StaffAddPage = () => {
     branchId: '',
     joiningDate: today(),
     employmentStatus: 'Active',
-    weeklyOff: 'Sunday',
     emergencyContact: '',
     address: '',
     paymentType: 'Monthly Salary',
@@ -347,8 +346,8 @@ export const StaffAddPage = () => {
               <label>
                 Weekly Off
                 <input
-                  value={form.weeklyOff}
-                  onChange={(event) => set('weeklyOff', event.target.value)}
+                  value={selectedShift?.weeklyOff || 'Defined by shift'}
+                  readOnly
                 />
               </label>
 
