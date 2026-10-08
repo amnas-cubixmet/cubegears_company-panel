@@ -23,6 +23,7 @@ import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 import { JobPayrollAssignments } from '../../components/jobs/JobPayrollAssignments';
+import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -87,6 +88,7 @@ export function JobCardWorkspace() {
 
   const [job, setJob] = useState(null);
   const [staff, setStaff] = useState([]);
+  const [timerRefreshVersion, setTimerRefreshVersion] = useState(0);
   const [vehicleHistory, setVehicleHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -945,9 +947,17 @@ export function JobCardWorkspace() {
       {activeTab === 'work' && (
         <div className="job-work-payroll-stack">
           <JobPayrollAssignments
+            key={timerRefreshVersion}
             jobId={job.id}
             staff={staff}
             defaultLabourRevenue={labourTotal}
+          />
+
+          <JobWorkTimerPanel
+            jobId={job.id}
+            jobStatus={normalizeJobStatus(job.status)}
+            labourRecords={labourRecords}
+            onChanged={() => setTimerRefreshVersion((value) => value + 1)}
           />
 
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
