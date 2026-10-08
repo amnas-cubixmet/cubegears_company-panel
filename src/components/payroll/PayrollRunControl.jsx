@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BadgeCheck, Calculator, LockKeyhole, Send } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
+import { PayrollPolicyPanel } from './PayrollPolicyPanel';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 
 const MONTH_NUMBERS = {
   January: 1, February: 2, March: 3, April: 4, May: 5, June: 6,
