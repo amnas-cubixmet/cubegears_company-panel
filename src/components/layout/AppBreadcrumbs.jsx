@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { staffService } from '../../services/staff.service';
-import { getEmployeeLabel } from '../staff-management/staffDisplay';
 import '../../styles/breadcrumbs.css';
 
 const LABELS = {
@@ -108,7 +107,7 @@ export function AppBreadcrumbs() {
       .getStaffById(decodeURIComponent(match[1]))
       .then((profile) => {
         if (alive && profile) {
-          setStaffBreadcrumbLabel(getEmployeeLabel(profile));
+          setStaffBreadcrumbLabel(profile.name || 'Staff Profile');
         }
       })
       .catch(() => {
