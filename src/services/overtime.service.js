@@ -77,14 +77,24 @@ export const overtimeService = {
           rec.status = 'Approved';
           rec.approvedBy = approvalData.approvedBy || 'Branch Manager';
           rec.approvedAt = new Date().toLocaleString();
-          if (approvalData.rate) rec.rate = Number(approvalData.rate);
-          if (approvalData.amount) rec.amount = Number(approvalData.amount);
+          const approvedRate = Number(approvalData.rate || rec.rate || 0);
+          if (!approvedRate || approvedRate <= 0) {
+            return reject(new Error('Overtime rate is required before approval.'));
+          }
+
+          rec.rate = approvedRate;
+          rec.amount = Number(
+            ((Number(rec.overtimeHours || 0) || (Number(rec.minutes || 0) / 60)) * approvedRate)
+              .toFixed(2)
+          );
 
           rec.auditHistory = rec.auditHistory || [];
           rec.auditHistory.unshift({
             action: `Approved Overtime (₹${rec.amount})`,
             actor: rec.approvedBy,
             timestamp: rec.approvedAt,
+            rate: rec.rate,
+            amount: rec.amount,
             note: approvalData.managerNote || ''
           });
 
