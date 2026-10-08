@@ -7,20 +7,6 @@ export const workshopDepartments = [
   { id: 'DEP-ACC', name: 'Accounts', lead: 'Accounts Lead', icon: 'Receipt' }
 ];
 
-export const workshopSkills = [
-  'Engine',
-  'Transmission',
-  'AC',
-  'Electrical',
-  'Diagnostics',
-  'Painting',
-  'Body Repair',
-  'Wheel Alignment',
-  'Tyres',
-  'Quick Service',
-  'Customer Handling',
-  'Inventory'
-];
 
 export const workshopShifts = [
   { id: 'SHIFT-GENERAL', name: 'General Shift', time: '09:00 AM - 06:00 PM', weeklyOff: 'Sunday', branch: 'All Branches' },
@@ -31,7 +17,6 @@ export const workshopShifts = [
 export const staffWorkshopProfiles = {
   'EMP-0012': {
     department: 'Mechanical',
-    skills: ['Engine', 'Transmission', 'Diagnostics', 'AC'],
     emergencyContact: 'Sameer K · +91 98470 11223',
     address: 'Chalakudy, Thrissur, Kerala',
     idProof: 'Aadhaar verified',
@@ -40,7 +25,6 @@ export const staffWorkshopProfiles = {
   },
   'EMP-0013': {
     department: 'Mechanical',
-    skills: ['Engine', 'Quick Service', 'Wheel Alignment', 'Tyres'],
     emergencyContact: 'Fathima P · +91 98472 22661',
     address: 'Angamaly, Ernakulam, Kerala',
     idProof: 'Aadhaar verified',
@@ -49,7 +33,6 @@ export const staffWorkshopProfiles = {
   },
   'EMP-0014': {
     department: 'Service Desk',
-    skills: ['Customer Handling', 'Diagnostics', 'Inventory'],
     emergencyContact: 'Lakshmi V · +91 98950 22114',
     address: 'Kochi, Ernakulam, Kerala',
     idProof: 'Aadhaar + PAN verified',
@@ -58,7 +41,6 @@ export const staffWorkshopProfiles = {
   },
   'EMP-0018': {
     department: 'Service Desk',
-    skills: ['Customer Handling', 'Quick Service'],
     emergencyContact: 'Arun Nair · +91 97441 55122',
     address: 'Kakkanad, Ernakulam, Kerala',
     idProof: 'Aadhaar verified',
@@ -67,7 +49,6 @@ export const staffWorkshopProfiles = {
   },
   'EMP-0021': {
     department: 'Accounts',
-    skills: ['Inventory'],
     emergencyContact: 'Neethu Sethi · +91 98460 99122',
     address: 'Aluva, Ernakulam, Kerala',
     idProof: 'Aadhaar verified',
@@ -94,7 +75,6 @@ export const staffPerformance = {
 
 export const defaultWorkshopProfile = {
   department: 'Mechanical',
-  skills: [],
   emergencyContact: 'Not configured',
   address: 'Not configured',
   idProof: 'Not uploaded',
@@ -107,7 +87,6 @@ export const enrichWorkshopStaff = (staff) => ({
   ...staff,
   ...(staffWorkshopProfiles[staff?.id] || {}),
   department: staff?.department || staffWorkshopProfiles[staff?.id]?.department || defaultWorkshopProfile.department,
-  skills: staff?.skills || staffWorkshopProfiles[staff?.id]?.skills || [],
   emergencyContact: staff?.emergencyContact || staffWorkshopProfiles[staff?.id]?.emergencyContact || defaultWorkshopProfile.emergencyContact,
   address: staff?.address || staffWorkshopProfiles[staff?.id]?.address || defaultWorkshopProfile.address,
   idProof: staff?.idProof || staffWorkshopProfiles[staff?.id]?.idProof || defaultWorkshopProfile.idProof
