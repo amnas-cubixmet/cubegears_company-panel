@@ -454,9 +454,17 @@ if (!USE_MOCK_API) {
   };
 
   Object.assign(staffManagementService, {
-    getTeams: async () => apiClient.get('/employees/teams'),
+    getTeams: async () => {
+      const rows = await apiClient.get('/employees/teams');
+      const list = Array.isArray(rows) ? rows : rows?.results || [];
+      return list.map((team) => ({
+        ...team,
+        lead: team.leadName || (team.lead ? 'Assigned Lead' : 'Not Assigned')
+      }));
+    },
     createTeam: async (teamData) => apiClient.post('/employees/teams', {
       name: teamData.name,
+      lead: teamData.lead || null,
       description: teamData.description || '',
       is_active: true
     }),
