@@ -2780,3 +2780,18 @@
   .payroll-all-staff__toolbar{grid-template-columns:1fr}
   .payroll-all-staff__search input,.payroll-all-staff__toolbar select{font-size:16px}
 }
+
+
+/* All-employee payroll ledger improvements */
+.payroll-all-staff__toolbar{grid-template-columns:minmax(0,1fr) minmax(170px,195px) minmax(165px,195px)}
+.payroll-all-staff__actions{white-space:nowrap}
+.payroll-all-staff__actions button+button{margin-left:5px}
+@media(max-width:900px){
+  .payroll-all-staff__toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .payroll-all-staff__search{grid-column:1/-1}
+}
+@media(max-width:650px){
+  .payroll-all-staff__toolbar{grid-template-columns:1fr}
+  .payroll-all-staff__search{grid-column:auto}
+  .payroll-all-staff__actions button{min-height:38px}
+}
