@@ -6,3 +6,6 @@ export { StaffDepartmentPanel } from './StaffDepartmentPanel';
 export { StaffAttentionPanel } from './StaffAttentionPanel';
 export { StaffQuickActions } from './StaffQuickActions';
 export { StaffAssignmentsPanel } from './StaffAssignmentsPanel';
+export { StaffAvatar } from './StaffAvatar';
+export { StaffDirectoryCard } from './StaffDirectoryCard';
+export { StaffDirectoryToolbar } from './StaffDirectoryToolbar';
