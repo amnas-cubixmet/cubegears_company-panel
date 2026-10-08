@@ -109,7 +109,18 @@ export const staffService = {
   createStaff: async (staffData) => {
     if (!USE_MOCK_API) {
       const payload = {
-        ...staffData,
+        name: staffData.name || '',
+        phone: staffData.phone || '',
+        email: staffData.email || '',
+        designation: staffData.designation || '',
+        role: staffData.role || '',
+        department: staffData.department || '',
+        joiningDate: staffData.joiningDate || null,
+        employmentStatus: staffData.employmentStatus || 'Active',
+        emergencyContact: staffData.emergencyContact || '',
+        paymentType: staffData.paymentType || '',
+        address: staffData.address || '',
+        notes: staffData.notes || '',
         teamId: staffData.teamId || null,
         shiftId: staffData.shiftId || null,
         branchId: staffData.branchId || null,
@@ -185,18 +196,33 @@ export const staffService = {
 
   updateStaff: async (id, staffData) => {
     if (!USE_MOCK_API) {
-      const payload = {
-        ...staffData,
-      };
-      if (Object.prototype.hasOwnProperty.call(staffData, 'teamId')) {
-        payload.teamId = staffData.teamId || null;
-      }
-      if (Object.prototype.hasOwnProperty.call(staffData, 'shiftId')) {
-        payload.shiftId = staffData.shiftId || null;
-      }
-      if (Object.prototype.hasOwnProperty.call(staffData, 'branchId')) {
-        payload.branchId = staffData.branchId || null;
-      }
+      const allowedKeys = [
+        'name',
+        'phone',
+        'email',
+        'designation',
+        'role',
+        'department',
+        'joiningDate',
+        'employmentStatus',
+        'emergencyContact',
+        'paymentType',
+        'address',
+        'notes',
+        'teamId',
+        'shiftId',
+        'branchId',
+      ];
+      const payload = Object.fromEntries(
+        allowedKeys
+          .filter((key) => Object.prototype.hasOwnProperty.call(staffData, key))
+          .map((key) => [
+            key,
+            ['teamId', 'shiftId', 'branchId'].includes(key)
+              ? staffData[key] || null
+              : staffData[key],
+          ]),
+      );
       return normalizeStaff(await apiClient.patch(`/employees/${id}`, payload));
     }
 
