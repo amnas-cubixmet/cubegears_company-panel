@@ -86,7 +86,8 @@ export const WorkshopStaffSection = ({ section }) => {
   const [savingTeamStaff, setSavingTeamStaff] = useState(false);
   const [teamForm, setTeamForm] = useState({
     name: '',
-    lead: '',
+    leadUserId: '',
+    leadName: '',
     branch: 'Main Garage Branch',
     description: ''
   });
@@ -114,7 +115,8 @@ export const WorkshopStaffSection = ({ section }) => {
       setTeams(nextTeams);
       setTeamForm({
         name: '',
-        lead: '',
+        leadUserId: '',
+        leadName: '',
         branch: 'Main Garage Branch',
         description: ''
       });
@@ -296,12 +298,23 @@ export const WorkshopStaffSection = ({ section }) => {
             <label>
               Team Lead
               <select
-                value={teamForm.lead}
-                onChange={(event) => setTeamForm((old) => ({ ...old, lead: event.target.value }))}
+                value={teamForm.leadUserId}
+                onChange={(event) => {
+                  const person = activeStaff.find(
+                    (item) => String(item.user || '') === event.target.value,
+                  );
+                  setTeamForm((old) => ({
+                    ...old,
+                    leadUserId: event.target.value,
+                    leadName: person?.name || '',
+                  }));
+                }}
               >
                 <option value="">Not Assigned</option>
-                {activeStaff.map((person) => (
-                  <option key={person.id} value={person.name}>
+                {activeStaff
+                  .filter((person) => person.user)
+                  .map((person) => (
+                  <option key={person.id} value={person.user}>
                     {person.name} · {person.designation}
                   </option>
                 ))}
