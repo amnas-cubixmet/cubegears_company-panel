@@ -54,30 +54,32 @@ export const Payroll = ({ section = 'overview' }) => {
 
   useEffect(() => {
     loadData();
-  }, [selectedMonth, selectedYear, selectedBranch, selectedStaff, selectedApproval, selectedSettlement]);
+  }, [activeSection, selectedMonth, selectedYear, selectedBranch, selectedStaff, selectedApproval, selectedSettlement]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [pData, sData, aData, staffData] = await Promise.all([
+      // Load staff independently so that a payroll API error never hides employees.
+      const [payrollResult, plansResult, advancesResult, staffResult] = await Promise.allSettled([
         payrollService.getPayrolls({
           month: periodString,
           branch: selectedBranch,
-          staffId: selectedStaff,
+          staffId: activeSection === 'employees' ? 'All' : selectedStaff,
           approvalStatus: selectedApproval,
-          paymentStatus: selectedSettlement
+          paymentStatus: selectedSettlement,
         }),
         payrollService.getSalaryStructures(),
         payrollService.getSalaryAdvances(),
-        staffService.getStaff()
+        staffService.getStaff(),
       ]);
-
-      setPayrolls(pData);
-      setSalaryStructures(sData);
-      setAdvances(aData);
-      setEmployees(staffData);
-    } catch (e) {
-      console.error(e);
+      if (payrollResult.status === 'fulfilled') setPayrolls(payrollResult.value);
+      else { console.error('Unable to load payroll records', payrollResult.reason); setPayrolls([]); }
+      if (plansResult.status === 'fulfilled') setSalaryStructures(plansResult.value);
+      else { console.error('Unable to load compensation plans', plansResult.reason); setSalaryStructures([]); }
+      if (advancesResult.status === 'fulfilled') setAdvances(advancesResult.value);
+      else { console.error('Unable to load advances', advancesResult.reason); setAdvances([]); }
+      if (staffResult.status === 'fulfilled') setEmployees(staffResult.value);
+      else { console.error('Unable to load staff', staffResult.reason); setEmployees([]); }
     } finally {
       setLoading(false);
     }
@@ -208,75 +210,19 @@ export const Payroll = ({ section = 'overview' }) => {
         </div>
       )}
 
-      {/* Employees */}
+      {/* All company staff, including employees without compensation plans or payslips. */}
       {activeSection === 'employees' && (
-        <div className="payroll-section payroll-employees flex flex-col gap-3">
-          <div className="payroll-section-header rounded-2xl border border-line bg-surface p-4">
-            <div className="text-base font-extrabold text-content">Employee Master</div>
-            <div className="mt-1 text-xs text-muted">
-              Payroll-linked workshop staff, salary type, branch and employment status.
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-            {employees.map((employee) => {
-              const structure = salaryStructures.find((item) => item.staffId === employee.id);
-              const salaryType = structure?.salaryBasis || employee.paymentType || 'Not configured';
-              const baseSalary = structure?.fixedMonthlySalary || structure?.basicSalary || employee.salary?.basic || 0;
-
-              return (
-                <div key={employee.id} className="payroll-employee-card rounded-2xl border border-line bg-surface p-4 shadow-sm">
-                  <div className="payroll-employee-card__header flex items-start justify-between gap-3">
-                    <div className="payroll-employee-card__identity flex min-w-0 items-center gap-3">
-                      <img
-                        src={employee.photo}
-                        alt={employee.name}
-                        className="size-11 shrink-0 rounded-xl border border-line object-cover"
-                      />
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-extrabold text-content">{employee.name}</div>
-                        <div className="mt-0.5 text-[11px] text-muted">{employee.id} · {employee.designation || employee.role}</div>
-                      </div>
-                    </div>
-                    <span className={[
-                      'rounded-full px-2.5 py-1 text-[10px] font-bold',
-                      employee.employmentStatus === 'Active'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-surface-2 text-muted'
-                    ].join(' ')}>
-                      {employee.employmentStatus}
-                    </span>
-                  </div>
-
-                  <div className="payroll-employee-metrics mt-4 grid grid-cols-2 gap-2 text-xs">
-                    <div className="rounded-xl bg-surface-2 p-3">
-                      <div className="text-[10px] text-muted">Role</div>
-                      <strong className="mt-1 block text-content">{employee.role || employee.designation}</strong>
-                    </div>
-                    <div className="rounded-xl bg-surface-2 p-3">
-                      <div className="text-[10px] text-muted">Branch</div>
-                      <strong className="mt-1 block text-content">{employee.branch}</strong>
-                    </div>
-                    <div className="rounded-xl bg-surface-2 p-3">
-                      <div className="text-[10px] text-muted">Salary Type</div>
-                      <strong className="mt-1 block text-primary">{salaryType}</strong>
-                    </div>
-                    <div className="rounded-xl bg-surface-2 p-3">
-                      <div className="text-[10px] text-muted">Basic / Primary Pay</div>
-                      <strong className="mt-1 block text-content">{formatINR(baseSalary)}</strong>
-                    </div>
-                  </div>
-
-                  <div className="payroll-employee-meta mt-3 grid grid-cols-1 gap-1.5 text-[11px] text-secondary sm:grid-cols-2">
-                    <div>Joining: <strong className="text-content">{employee.joiningDate || '—'}</strong></div>
-                    <div>Weekly Off: <strong className="text-content">{employee.weeklyOff || '—'}</strong></div>
-                    <div>Phone: <strong className="text-content">{employee.phone || '—'}</strong></div>
-                    <div>Bank: <strong className="text-content">{employee.bankDetails?.bankName || 'Not configured'}</strong></div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <div className="payroll-section payroll-employees">
+          <PayrollAllStaffPanel
+            title="All Employees"
+            employees={employees}
+            plans={salaryStructures}
+            payrolls={payrolls}
+            loading={loading}
+            periodString={periodString}
+            onConfigure={setStructureEditTarget}
+            onViewPayslip={setPayslipTargetItem}
+          />
         </div>
       )}
 
