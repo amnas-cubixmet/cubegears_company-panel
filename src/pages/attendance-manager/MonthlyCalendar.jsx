@@ -86,14 +86,14 @@ export const MonthlyAttendanceCalendar = () => {
 
           <label>
             <CalendarDays size={13} />
-            <select value={month} onChange={(event) => setMonth(Number(event.target.value))}>
+            <select aria-label="Select month" value={month} onChange={(event) => setMonth(Number(event.target.value))}>
               {monthNames.map((name, index) => (
                 <option key={name} value={index + 1}>{name}</option>
               ))}
             </select>
           </label>
 
-          <select value={year} onChange={(event) => setYear(Number(event.target.value))}>
+          <select aria-label="Select year" value={year} onChange={(event) => setYear(Number(event.target.value))}>
             {Array.from({ length: 7 }, (_, index) => now.getFullYear() - 4 + index).map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
@@ -109,13 +109,15 @@ export const MonthlyAttendanceCalendar = () => {
         <label className="am-search-field">
           <Search size={14} />
           <input
+            type="search"
+            aria-label="Search monthly attendance employees"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search employee ID, name, role..."
           />
         </label>
 
-        <select value={branch} onChange={(event) => setBranch(event.target.value)}>
+        <select aria-label="Filter by branch" value={branch} onChange={(event) => setBranch(event.target.value)}>
           {branches.map((item) => <option key={item}>{item}</option>)}
         </select>
       </section>
