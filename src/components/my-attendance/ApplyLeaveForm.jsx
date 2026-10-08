@@ -45,12 +45,20 @@ export const ApplyLeaveForm = ({
       </div>
 
       {selectedBalance && (
-        <div className="apply-leave-balance-note">
-          <span>
-            Available <strong>{selectedBalance.available}</strong> day(s)
-            {' · '}
-            {selectedBalance.allocationPeriod === 'month' ? 'Monthly' : 'Annual'} allocation
-          </span>
+        <div className={`apply-leave-balance-note ${selectedBalance.isUnpaid ? 'is-unpaid' : ''}`}>
+          {selectedBalance.isUnpaid ? (
+            <span>
+              <strong>Unpaid Leave</strong> · No paid leave balance required
+            </span>
+          ) : (
+            <span>
+              <strong>Paid Leave</strong>
+              {' · '}
+              Available <strong>{selectedBalance.available}</strong> day(s)
+              {' · '}
+              {selectedBalance.allocationPeriod === 'month' ? 'Monthly' : 'Annual'} allocation
+            </span>
+          )}
         </div>
       )}
 
