@@ -9,3 +9,7 @@ export { StaffAssignmentsPanel } from './StaffAssignmentsPanel';
 export { StaffAvatar } from './StaffAvatar';
 export { StaffDirectoryCard } from './StaffDirectoryCard';
 export { StaffDirectoryToolbar } from './StaffDirectoryToolbar';
+export { StaffAttendanceCalendar } from './StaffAttendanceCalendar';
+export { StaffDocumentAddSheet } from './StaffDocumentAddSheet';
+export { StaffPayrollHistory } from './StaffPayrollHistory';
+export { StaffProfileEditSheet } from './StaffProfileEditSheet';
