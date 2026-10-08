@@ -10,6 +10,7 @@ import {
   Plus,
   ReceiptText,
   ShieldCheck,
+  Star,
   Trash2,
   UserRound,
   Wrench,
@@ -107,6 +108,8 @@ export function JobCardWorkspace() {
     amount: '',
     method: 'Cash'
   });
+  const [feedbackRating, setFeedbackRating] = useState('');
+  const [feedbackText, setFeedbackText] = useState('');
 
   const activeTab = useMemo(() => {
     const section = location.pathname.split('/').filter(Boolean).at(-1);
@@ -144,6 +147,12 @@ export function JobCardWorkspace() {
         amount: '',
         method: data?.billing?.paymentMethod || old.method || 'Cash'
       }));
+      setFeedbackRating(
+        data?.customerRating || data?.customer_rating || ''
+      );
+      setFeedbackText(
+        data?.customerFeedback || data?.customer_feedback || ''
+      );
     } catch (e) {
       setError(e?.message || 'Unable to load job card.');
     } finally {
@@ -483,6 +492,24 @@ export function JobCardWorkspace() {
     });
   };
 
+  const saveCustomerFeedback = async () => {
+    const rating = Number(feedbackRating || 0);
+    if (rating < 1 || rating > 5) {
+      setError('Customer feedback rating must be between 1 and 5.');
+      return;
+    }
+
+    const updated = await persist({
+      customerRating: rating,
+      customerFeedback: feedbackText.trim()
+    });
+
+    if (updated) {
+      setFeedbackRating(updated.customerRating || rating);
+      setFeedbackText(updated.customerFeedback || feedbackText.trim());
+    }
+  };
+
   const createInvoice = () => {
     const invoiceItems = [
       ...parts.map((item) => ({
@@ -757,6 +784,49 @@ export function JobCardWorkspace() {
             <div className="mt-3 grid grid-cols-2 gap-3">
               <Info label="Service Advisor" value={job.serviceAdvisor || '—'}/>
               <Info label="Priority" value={job.priority || 'Medium'}/>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
+            <div className="flex items-center gap-2 text-sm font-extrabold text-content">
+              <Star size={16} className="text-primary"/>
+              Customer Feedback
+            </div>
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-end">
+              <label className="text-xs font-semibold text-secondary">
+                Rating
+                <select
+                  value={feedbackRating}
+                  onChange={(e) => setFeedbackRating(e.target.value)}
+                  className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"
+                >
+                  <option value="">Select rating</option>
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Very Good</option>
+                  <option value="3">3 - Good</option>
+                  <option value="2">2 - Fair</option>
+                  <option value="1">1 - Poor</option>
+                </select>
+              </label>
+
+              <label className="text-xs font-semibold text-secondary">
+                Customer Comment
+                <input
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="Customer feedback about this job / technician"
+                  className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={saveCustomerFeedback}
+                disabled={saving || !feedbackRating}
+                className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white disabled:opacity-50"
+              >
+                Save Feedback
+              </button>
             </div>
           </section>
 
