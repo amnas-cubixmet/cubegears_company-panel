@@ -3,61 +3,40 @@ import { USE_MOCK_API } from '../api/apiConfig';
 import {
   workshopDepartments,
   workshopShifts,
-  workshopSkills,
-  staffWorkshopProfiles
+  staffWorkshopProfiles,
 } from '../mock/staffManagement.mock';
 import { mockStaffList } from '../mock/staff.mock';
-
-const skillMeta = new Map(
-  workshopSkills.map((name, index) => [
-    name,
-    {
-      id: `SKILL-${String(index + 1).padStart(2, '0')}`,
-      name,
-      category: 'Workshop',
-      description: ''
-    }
-  ])
-);
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
 const staffUsingShift = (shiftName) =>
   mockStaffList.filter((staff) =>
     String(staff.shift || '').toLowerCase().includes(
-      String(shiftName || '').replace(' Shift', '').toLowerCase()
-    )
+      String(shiftName || '').replace(' Shift', '').toLowerCase(),
+    ),
   );
 
-const getStaffSkills = (staff) =>
-  Array.isArray(staff.skills)
-    ? staff.skills
-    : [...(staffWorkshopProfiles[staff.id]?.skills || [])];
-
-const ensureStaffSkills = (staff) => {
-  if (!Array.isArray(staff.skills)) staff.skills = getStaffSkills(staff);
-  return staff.skills;
-};
-
-const assignedToSkill = (skillName) =>
-  mockStaffList.filter((staff) => getStaffSkills(staff).includes(skillName));
-
 const touchActivity = (staff, action, oldValue, newValue) => {
-  staff.activityHistory = Array.isArray(staff.activityHistory) ? staff.activityHistory : [];
+  staff.activityHistory = Array.isArray(staff.activityHistory)
+    ? staff.activityHistory
+    : [];
   staff.activityHistory.unshift({
     id: `ACT-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     action,
     oldValue,
     newValue,
     actor: 'Current Admin',
-    timestamp: new Date().toLocaleString()
+    timestamp: new Date().toLocaleString(),
   });
 };
 
-export const staffManagementService = {
+const mockService = {
   getTeams: async () =>
     new Promise((resolve) => {
-      setTimeout(() => resolve(workshopDepartments.map((team) => ({ ...team }))), 120);
+      setTimeout(
+        () => resolve(workshopDepartments.map((team) => ({ ...team }))),
+        120,
+      );
     }),
 
   createTeam: async (teamData) =>
@@ -67,9 +46,11 @@ export const staffManagementService = {
           id: `DEP-${Date.now()}`,
           name: teamData.name.trim(),
           lead: teamData.leadName || teamData.lead || 'Not Assigned',
-          branch: teamData.branch || 'All Branches',
+          branchId: teamData.branchId || '',
+          branch: teamData.branchName || teamData.branch || 'All Branches',
+          branchName: teamData.branchName || teamData.branch || 'All Branches',
           description: teamData.description?.trim() || '',
-          icon: 'Users'
+          icon: 'Users',
         };
         workshopDepartments.push(team);
         resolve({ ...team });
@@ -86,8 +67,10 @@ export const staffManagementService = {
         staffIds.forEach((staffId) => {
           const staff = mockStaffList.find((item) => item.id === staffId);
           if (!staff) return;
-
-          const oldValue = staff.department || staffWorkshopProfiles[staff.id]?.department || 'Unassigned';
+          const oldValue =
+            staff.department ||
+            staffWorkshopProfiles[staff.id]?.department ||
+            'Unassigned';
           staff.department = team.name;
           touchActivity(staff, 'Team Assigned', oldValue, team.name);
           assigned.push(staff.id);
@@ -96,36 +79,13 @@ export const staffManagementService = {
         resolve({
           ...team,
           assignedStaffIds: mockStaffList
-            .filter((staff) => (staff.department || staffWorkshopProfiles[staff.id]?.department) === team.name)
+            .filter(
+              (staff) =>
+                (staff.department ||
+                  staffWorkshopProfiles[staff.id]?.department) === team.name,
+            )
             .map((staff) => staff.id),
-          addedStaffIds: assigned
-        });
-      }, 180);
-    }),
-
-  addStaffToSkill: async (skillId, staffIds = []) =>
-    new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const skillName = workshopSkills.find((name) => skillMeta.get(name)?.id === skillId);
-        if (!skillName) return reject(new Error('Skill not found.'));
-
-        const added = [];
-        staffIds.forEach((staffId) => {
-          const staff = mockStaffList.find((item) => item.id === staffId);
-          if (!staff) return;
-
-          ensureStaffSkills(staff);
-          if (!staff.skills.includes(skillName)) {
-            staff.skills.push(skillName);
-            touchActivity(staff, 'Skill Assigned', '-', skillName);
-            added.push(staff.id);
-          }
-        });
-
-        resolve({
-          ...(skillMeta.get(skillName) || { id: skillId, name: skillName }),
-          assignedStaffIds: assignedToSkill(skillName).map((staff) => staff.id),
-          addedStaffIds: added
+          addedStaffIds: assigned,
         });
       }, 180);
     }),
@@ -136,8 +96,10 @@ export const staffManagementService = {
         resolve(
           workshopShifts.map((shift) => ({
             ...shift,
-            assignedStaffIds: staffUsingShift(shift.name).map((staff) => staff.id)
-          }))
+            assignedStaffIds: staffUsingShift(shift.name).map(
+              (staff) => staff.id,
+            ),
+          })),
         );
       }, 120);
     }),
@@ -147,7 +109,11 @@ export const staffManagementService = {
       setTimeout(() => {
         const name = shiftData.name?.trim();
         if (!name) return reject(new Error('Shift name is required.'));
-        if (workshopShifts.some((shift) => shift.name.toLowerCase() === name.toLowerCase())) {
+        if (
+          workshopShifts.some(
+            (shift) => shift.name.toLowerCase() === name.toLowerCase(),
+          )
+        ) {
           return reject(new Error('A shift with this name already exists.'));
         }
 
@@ -156,7 +122,10 @@ export const staffManagementService = {
           name,
           time: shiftData.time?.trim() || '09:00 AM - 06:00 PM',
           weeklyOff: shiftData.weeklyOff || 'Sunday',
-          branch: shiftData.branch || 'All Branches'
+          branchId: shiftData.branchId || '',
+          branch: shiftData.branchName || shiftData.branch || 'All Branches',
+          branchName:
+            shiftData.branchName || shiftData.branch || 'All Branches',
         };
         workshopShifts.push(shift);
 
@@ -182,34 +151,55 @@ export const staffManagementService = {
         const previous = { ...workshopShifts[index] };
         const name = shiftData.name?.trim() || previous.name;
         const duplicate = workshopShifts.some(
-          (shift) => shift.id !== id && shift.name.toLowerCase() === name.toLowerCase()
+          (shift) =>
+            shift.id !== id &&
+            shift.name.toLowerCase() === name.toLowerCase(),
         );
-        if (duplicate) return reject(new Error('A shift with this name already exists.'));
+        if (duplicate) {
+          return reject(new Error('A shift with this name already exists.'));
+        }
 
         const next = {
           ...previous,
           name,
           time: shiftData.time?.trim() || previous.time,
           weeklyOff: shiftData.weeklyOff || previous.weeklyOff,
-          branch: shiftData.branch || previous.branch
+          branchId: shiftData.branchId ?? previous.branchId ?? '',
+          branch:
+            shiftData.branchName ||
+            shiftData.branch ||
+            previous.branch ||
+            'All Branches',
+          branchName:
+            shiftData.branchName ||
+            shiftData.branch ||
+            previous.branchName ||
+            'All Branches',
         };
         workshopShifts[index] = next;
 
         const assignedIds = new Set(shiftData.assignedStaffIds || []);
         mockStaffList.forEach((staff) => {
-          const wasAssigned = String(staff.shift || '').toLowerCase().includes(
-            previous.name.replace(' Shift', '').toLowerCase()
-          );
+          const wasAssigned = String(staff.shift || '')
+            .toLowerCase()
+            .includes(previous.name.replace(' Shift', '').toLowerCase());
           const shouldAssign = assignedIds.has(staff.id);
 
           if (shouldAssign) {
             const oldValue = staff.shift || '';
             staff.shift = `${next.name} (${next.time})`;
-            if (oldValue !== staff.shift) touchActivity(staff, 'Shift Updated', oldValue, staff.shift);
+            if (oldValue !== staff.shift) {
+              touchActivity(staff, 'Shift Updated', oldValue, staff.shift);
+            }
           } else if (wasAssigned && previous.id !== 'SHIFT-GENERAL') {
             const oldValue = staff.shift || '';
             staff.shift = 'General Shift (09:00 AM - 06:00 PM)';
-            touchActivity(staff, 'Shift Reassigned', oldValue, staff.shift);
+            touchActivity(
+              staff,
+              'Shift Reassigned',
+              oldValue,
+              staff.shift,
+            );
           }
         });
 
@@ -223,137 +213,28 @@ export const staffManagementService = {
         const index = workshopShifts.findIndex((shift) => shift.id === id);
         if (index === -1) return reject(new Error('Shift not found.'));
         if (workshopShifts[index].id === 'SHIFT-GENERAL') {
-          return reject(new Error('General Shift is protected and cannot be deleted.'));
+          return reject(
+            new Error('General Shift is protected and cannot be deleted.'),
+          );
         }
 
         const [removed] = workshopShifts.splice(index, 1);
         mockStaffList.forEach((staff) => {
           if (
-            String(staff.shift || '').toLowerCase().includes(
-              removed.name.replace(' Shift', '').toLowerCase()
-            )
+            String(staff.shift || '')
+              .toLowerCase()
+              .includes(removed.name.replace(' Shift', '').toLowerCase())
           ) {
             const oldValue = staff.shift || '';
             staff.shift = 'General Shift (09:00 AM - 06:00 PM)';
-            touchActivity(staff, 'Shift Reassigned', oldValue, staff.shift);
+            touchActivity(
+              staff,
+              'Shift Reassigned',
+              oldValue,
+              staff.shift,
+            );
           }
         });
-        resolve({ ...removed });
-      }, 150);
-    }),
-
-  getSkills: async () =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(
-          workshopSkills.map((name) => ({
-            ...(skillMeta.get(name) || {
-              id: `SKILL-${Date.now()}`,
-              name,
-              category: 'Workshop',
-              description: ''
-            }),
-            assignedStaffIds: assignedToSkill(name).map((staff) => staff.id)
-          }))
-        );
-      }, 120);
-    }),
-
-  createSkill: async (skillData) =>
-    new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const name = skillData.name?.trim();
-        if (!name) return reject(new Error('Skill name is required.'));
-        if (workshopSkills.some((skill) => skill.toLowerCase() === name.toLowerCase())) {
-          return reject(new Error('A skill with this name already exists.'));
-        }
-
-        workshopSkills.push(name);
-        const skill = {
-          id: `SKILL-${Date.now()}`,
-          name,
-          category: skillData.category || 'Workshop',
-          description: skillData.description?.trim() || ''
-        };
-        skillMeta.set(name, skill);
-
-        const assignedIds = new Set(skillData.assignedStaffIds || []);
-        mockStaffList.forEach((staff) => {
-          ensureStaffSkills(staff);
-          if (assignedIds.has(staff.id) && !staff.skills.includes(name)) {
-            staff.skills.push(name);
-            touchActivity(staff, 'Skill Assigned', '-', name);
-          }
-        });
-
-        resolve({ ...skill, assignedStaffIds: [...assignedIds] });
-      }, 180);
-    }),
-
-  updateSkill: async (id, skillData) =>
-    new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const currentName = workshopSkills.find((name) => skillMeta.get(name)?.id === id);
-        if (!currentName) return reject(new Error('Skill not found.'));
-
-        const nextName = skillData.name?.trim() || currentName;
-        const duplicate = workshopSkills.some(
-          (name) => name !== currentName && name.toLowerCase() === nextName.toLowerCase()
-        );
-        if (duplicate) return reject(new Error('A skill with this name already exists.'));
-
-        const index = workshopSkills.indexOf(currentName);
-        workshopSkills[index] = nextName;
-
-        const previousMeta = skillMeta.get(currentName) || {};
-        skillMeta.delete(currentName);
-        const nextMeta = {
-          ...previousMeta,
-          id,
-          name: nextName,
-          category: skillData.category || previousMeta.category || 'Workshop',
-          description: skillData.description?.trim() ?? previousMeta.description ?? ''
-        };
-        skillMeta.set(nextName, nextMeta);
-
-        const assignedIds = new Set(skillData.assignedStaffIds || []);
-        mockStaffList.forEach((staff) => {
-          ensureStaffSkills(staff);
-          const hadSkill = staff.skills.includes(currentName);
-          const shouldHave = assignedIds.has(staff.id);
-
-          staff.skills = staff.skills.filter((skill) => skill !== currentName && skill !== nextName);
-          if (shouldHave) staff.skills.push(nextName);
-
-          if (hadSkill && !shouldHave) touchActivity(staff, 'Skill Removed', currentName, '-');
-          if (!hadSkill && shouldHave) touchActivity(staff, 'Skill Assigned', '-', nextName);
-          if (hadSkill && shouldHave && currentName !== nextName) {
-            touchActivity(staff, 'Skill Updated', currentName, nextName);
-          }
-        });
-
-        resolve({ ...nextMeta, assignedStaffIds: [...assignedIds] });
-      }, 180);
-    }),
-
-  deleteSkill: async (id) =>
-    new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const name = workshopSkills.find((skill) => skillMeta.get(skill)?.id === id);
-        if (!name) return reject(new Error('Skill not found.'));
-
-        const index = workshopSkills.indexOf(name);
-        workshopSkills.splice(index, 1);
-        const removed = skillMeta.get(name);
-        skillMeta.delete(name);
-
-        mockStaffList.forEach((staff) => {
-          if (Array.isArray(staff.skills) && staff.skills.includes(name)) {
-            staff.skills = staff.skills.filter((skill) => skill !== name);
-            touchActivity(staff, 'Skill Removed', name, '-');
-          }
-        });
-
         resolve({ ...removed });
       }, 150);
     }),
@@ -366,8 +247,8 @@ export const staffManagementService = {
             ...clone(document),
             staffId: staff.id,
             staffName: staff.name,
-            designation: staff.designation
-          }))
+            designation: staff.designation,
+          })),
         );
         resolve(documents);
       }, 120);
@@ -379,20 +260,33 @@ export const staffManagementService = {
         const staff = mockStaffList.find((item) => item.id === staffId);
         if (!staff) return reject(new Error('Staff member not found.'));
 
-        staff.documents = Array.isArray(staff.documents) ? staff.documents : [];
+        staff.documents = Array.isArray(staff.documents)
+          ? staff.documents
+          : [];
         const document = {
           id: `DOC-${Date.now()}`,
-          name: documentData.name?.trim() || documentData.fileName || 'Document',
+          name:
+            documentData.name?.trim() ||
+            documentData.fileName ||
+            'Document',
           type: documentData.type || 'Document',
-          uploadedDate: documentData.uploadedDate || new Date().toISOString().split('T')[0],
+          uploadedDate:
+            documentData.uploadedDate ||
+            new Date().toISOString().split('T')[0],
           uploadedBy: documentData.uploadedBy || 'Current Admin',
           expiryDate: documentData.expiryDate || '',
           status: documentData.status || 'Valid',
-          fileName: documentData.fileName || ''
+          fileName: documentData.fileName || '',
+          fileUrl: documentData.fileUrl || '',
         };
         staff.documents.push(document);
         touchActivity(staff, 'Document Added', '-', document.name);
-        resolve({ ...document, staffId: staff.id, staffName: staff.name, designation: staff.designation });
+        resolve({
+          ...document,
+          staffId: staff.id,
+          staffName: staff.name,
+          designation: staff.designation,
+        });
       }, 180);
     }),
 
@@ -401,7 +295,9 @@ export const staffManagementService = {
       setTimeout(() => {
         const staff = mockStaffList.find((item) => item.id === staffId);
         if (!staff) return reject(new Error('Staff member not found.'));
-        const index = (staff.documents || []).findIndex((document) => document.id === documentId);
+        const index = (staff.documents || []).findIndex(
+          (document) => document.id === documentId,
+        );
         if (index === -1) return reject(new Error('Document not found.'));
 
         const previous = staff.documents[index];
@@ -411,13 +307,26 @@ export const staffManagementService = {
           type: documentData.type || previous.type,
           uploadedDate: documentData.uploadedDate || previous.uploadedDate,
           uploadedBy: documentData.uploadedBy || previous.uploadedBy,
-          expiryDate: documentData.expiryDate ?? previous.expiryDate ?? '',
+          expiryDate:
+            documentData.expiryDate ?? previous.expiryDate ?? '',
           status: documentData.status || previous.status || 'Valid',
-          fileName: documentData.fileName || previous.fileName || ''
+          fileName:
+            documentData.fileName || previous.fileName || '',
+          fileUrl: documentData.fileUrl || previous.fileUrl || '',
         };
         staff.documents[index] = next;
-        touchActivity(staff, 'Document Updated', previous.name, next.name);
-        resolve({ ...next, staffId: staff.id, staffName: staff.name, designation: staff.designation });
+        touchActivity(
+          staff,
+          'Document Updated',
+          previous.name,
+          next.name,
+        );
+        resolve({
+          ...next,
+          staffId: staff.id,
+          staffName: staff.name,
+          designation: staff.designation,
+        });
       }, 180);
     }),
 
@@ -426,164 +335,165 @@ export const staffManagementService = {
       setTimeout(() => {
         const staff = mockStaffList.find((item) => item.id === staffId);
         if (!staff) return reject(new Error('Staff member not found.'));
-        const index = (staff.documents || []).findIndex((document) => document.id === documentId);
+        const index = (staff.documents || []).findIndex(
+          (document) => document.id === documentId,
+        );
         if (index === -1) return reject(new Error('Document not found.'));
 
         const [removed] = staff.documents.splice(index, 1);
-        touchActivity(staff, 'Document Deleted', removed.name, '-');
+        touchActivity(
+          staff,
+          'Document Deleted',
+          removed.name,
+          '-',
+        );
         resolve({ ...removed });
       }, 150);
-    })
+    }),
 };
 
-
-if (!USE_MOCK_API) {
-  const parseShiftTime = (value = '') => {
-    const parts = String(value).split('-').map((part) => part.trim());
-    const to24 = (text, fallback) => {
-      const match = String(text).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-      if (!match) return fallback;
-      let hour = Number(match[1]);
-      const minute = match[2];
-      const suffix = (match[3] || '').toUpperCase();
-      if (suffix === 'PM' && hour < 12) hour += 12;
-      if (suffix === 'AM' && hour === 12) hour = 0;
-      return `${String(hour).padStart(2, '0')}:${minute}`;
-    };
-    return { start_time: to24(parts[0], '09:00'), end_time: to24(parts[1], '18:00') };
+const parseShiftTime = (value = '') => {
+  const parts = String(value).split('-').map((part) => part.trim());
+  const to24 = (text, fallback) => {
+    const match = String(text).match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (!match) return fallback;
+    let hour = Number(match[1]);
+    const minute = match[2];
+    const suffix = (match[3] || '').toUpperCase();
+    if (suffix === 'PM' && hour < 12) hour += 12;
+    if (suffix === 'AM' && hour === 12) hour = 0;
+    return `${String(hour).padStart(2, '0')}:${minute}`;
   };
+  return {
+    start_time: to24(parts[0], '09:00'),
+    end_time: to24(parts[1], '18:00'),
+  };
+};
 
-  Object.assign(staffManagementService, {
-    getTeams: async () => {
-      const rows = await apiClient.get('/employees/teams');
-      const list = Array.isArray(rows) ? rows : rows?.results || [];
-      return list.map((team) => ({
-        ...team,
-        lead: team.leadName || (team.lead ? 'Assigned Lead' : 'Not Assigned')
-      }));
-    },
-    createTeam: async (teamData) => apiClient.post('/employees/teams', {
+const realService = {
+  getTeams: async () => {
+    const rows = await apiClient.get('/employees/teams');
+    const list = Array.isArray(rows) ? rows : rows?.results || [];
+    return list.map((team) => ({
+      ...team,
+      lead:
+        team.leadName ||
+        (team.lead ? 'Assigned Lead' : 'Not Assigned'),
+      branch: team.branchName || 'All Branches',
+      branchId: team.branchId || '',
+    }));
+  },
+
+  createTeam: async (teamData) =>
+    apiClient.post('/employees/teams', {
       name: teamData.name,
       lead: teamData.leadUserId || teamData.lead || null,
+      branchId: teamData.branchId || null,
       description: teamData.description || '',
-      is_active: true
+      is_active: true,
     }),
-    assignStaffToTeam: async (teamId, staffIds = []) => {
-      await Promise.all(
-        staffIds.map((id) =>
-          apiClient.patch(`/employees/${id}`, { teamId })
-        )
-      );
-      return { id: teamId, assignedStaffIds: staffIds };
-    },
-    addStaffToSkill: async (skillId, staffIds = []) =>
-      apiClient.post(`/employees/skills/${skillId}/assign`, { staffIds }),
 
-    getShifts: async () => {
-      const rows = await apiClient.get('/employees/shifts');
-      const list = Array.isArray(rows) ? rows : rows?.results || [];
-      const formatTime = (value = '') => {
-        const parts = String(value).split(':');
-        if (parts.length < 2) return value;
-        const hours = Number(parts[0]);
-        const minutes = parts[1];
-        const suffix = hours >= 12 ? 'PM' : 'AM';
-        const hour12 = hours % 12 || 12;
-        return `${String(hour12).padStart(2, '0')}:${minutes} ${suffix}`;
-      };
+  assignStaffToTeam: async (teamId, staffIds = []) => {
+    await Promise.all(
+      staffIds.map((id) =>
+        apiClient.patch(`/employees/${id}`, { teamId }),
+      ),
+    );
+    return { id: teamId, assignedStaffIds: staffIds };
+  },
 
-      return list.map((shift) => ({
-        ...shift,
-        time: `${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}`,
-        weeklyOff: shift.weekly_off?.[0] || 'Sunday',
-        branch: shift.branchName || 'All Branches',
-        assignedStaffIds: shift.assignedStaffIds || []
-      }));
-    },
-    createShift: async (shiftData) => {
-      const created = await apiClient.post('/employees/shifts', {
-        name: shiftData.name,
-        ...parseShiftTime(shiftData.time),
-        weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : [],
-        is_active: true
-      });
-      if (Array.isArray(shiftData.assignedStaffIds)) {
-        await apiClient.post(`/employees/shifts/${created.id}/assign`, {
-          staffIds: shiftData.assignedStaffIds
-        });
-      }
-      return created;
-    },
-    updateShift: async (id, shiftData) => {
-      const updated = await apiClient.patch(`/employees/shifts/${id}`, {
-        name: shiftData.name,
-        ...parseShiftTime(shiftData.time),
-        weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : undefined
-      });
-      if (Array.isArray(shiftData.assignedStaffIds)) {
-        await apiClient.post(`/employees/shifts/${id}/assign`, {
-          staffIds: shiftData.assignedStaffIds
-        });
-      }
-      return updated;
-    },
-    deleteShift: async (id) => apiClient.delete(`/employees/shifts/${id}`),
+  getShifts: async () => {
+    const rows = await apiClient.get('/employees/shifts');
+    const list = Array.isArray(rows) ? rows : rows?.results || [];
+    const formatTime = (value = '') => {
+      const parts = String(value).split(':');
+      if (parts.length < 2) return value;
+      const hours = Number(parts[0]);
+      const minutes = parts[1];
+      const suffix = hours >= 12 ? 'PM' : 'AM';
+      const hour12 = hours % 12 || 12;
+      return `${String(hour12).padStart(2, '0')}:${minutes} ${suffix}`;
+    };
 
-    getSkills: async () => {
-      const rows = await apiClient.get('/employees/skills');
-      const list = Array.isArray(rows) ? rows : rows?.results || [];
-      return list.map((skill) => ({
-        ...skill,
-        assignedStaffIds: skill.assignedStaffIds || []
-      }));
-    },
-    createSkill: async (skillData) => {
-      const created = await apiClient.post('/employees/skills', {
-        name: skillData.name,
-        category: skillData.category || 'Workshop',
-        is_active: true
-      });
-      if (Array.isArray(skillData.assignedStaffIds) && skillData.assignedStaffIds.length) {
-        await apiClient.post(`/employees/skills/${created.id}/assign`, {
-          staffIds: skillData.assignedStaffIds,
-          replace: true
-        });
-      }
-      return created;
-    },
-    updateSkill: async (id, skillData) => {
-      const updated = await apiClient.patch(`/employees/skills/${id}`, {
-        name: skillData.name,
-        category: skillData.category,
-        is_active: skillData.is_active ?? true
-      });
-      if (Array.isArray(skillData.assignedStaffIds)) {
-        await apiClient.post(`/employees/skills/${id}/assign`, {
-          staffIds: skillData.assignedStaffIds,
-          replace: true
-        });
-      }
-      return updated;
-    },
-    deleteSkill: async (id) => apiClient.delete(`/employees/skills/${id}`),
+    return list.map((shift) => ({
+      ...shift,
+      time: `${formatTime(shift.start_time)} - ${formatTime(
+        shift.end_time,
+      )}`,
+      weeklyOff: shift.weekly_off?.[0] || 'Sunday',
+      branch: shift.branchName || 'All Branches',
+      branchId: shift.branchId || '',
+      assignedStaffIds: shift.assignedStaffIds || [],
+    }));
+  },
 
-    getDocuments: async () => apiClient.get('/employees/documents'),
-    createDocument: async (staffId, documentData) => apiClient.post('/employees/documents', {
+  createShift: async (shiftData) => {
+    const created = await apiClient.post('/employees/shifts', {
+      name: shiftData.name,
+      ...parseShiftTime(shiftData.time),
+      weekly_off: shiftData.weeklyOff ? [shiftData.weeklyOff] : [],
+      branchId: shiftData.branchId || null,
+      is_active: true,
+    });
+    if (Array.isArray(shiftData.assignedStaffIds)) {
+      await apiClient.post(`/employees/shifts/${created.id}/assign`, {
+        staffIds: shiftData.assignedStaffIds,
+      });
+    }
+    return created;
+  },
+
+  updateShift: async (id, shiftData) => {
+    const updated = await apiClient.patch(`/employees/shifts/${id}`, {
+      name: shiftData.name,
+      ...parseShiftTime(shiftData.time),
+      weekly_off: shiftData.weeklyOff
+        ? [shiftData.weeklyOff]
+        : undefined,
+      branchId: shiftData.branchId || null,
+    });
+    if (Array.isArray(shiftData.assignedStaffIds)) {
+      await apiClient.post(`/employees/shifts/${id}/assign`, {
+        staffIds: shiftData.assignedStaffIds,
+      });
+    }
+    return updated;
+  },
+
+  deleteShift: async (id) => apiClient.delete(`/employees/shifts/${id}`),
+
+  getDocuments: async () => apiClient.get('/employees/documents'),
+
+  createDocument: async (staffId, documentData) =>
+    apiClient.post('/employees/documents', {
       employee: staffId,
-      document_type: documentData.documentType || documentData.type || 'Other',
-      title: documentData.title || documentData.name || 'Document',
+      document_type:
+        documentData.documentType ||
+        documentData.type ||
+        'Other',
+      title:
+        documentData.title ||
+        documentData.name ||
+        'Document',
       file_url: documentData.fileUrl || documentData.url || '',
       expiry_date: documentData.expiryDate || null,
-      notes: documentData.notes || ''
+      notes: documentData.notes || '',
     }),
-    updateDocument: async (_staffId, documentId, documentData) =>
-      apiClient.patch(`/employees/documents/${documentId}`, {
-        document_type: documentData.documentType || documentData.type,
-        title: documentData.title || documentData.name,
-        file_url: documentData.fileUrl || documentData.url,
-        expiry_date: documentData.expiryDate || null,
-        notes: documentData.notes
-      }),
-    deleteDocument: async (_staffId, documentId) => apiClient.delete(`/employees/documents/${documentId}`)
-  });
-}
+
+  updateDocument: async (_staffId, documentId, documentData) =>
+    apiClient.patch(`/employees/documents/${documentId}`, {
+      document_type:
+        documentData.documentType || documentData.type,
+      title: documentData.title || documentData.name,
+      file_url: documentData.fileUrl || documentData.url,
+      expiry_date: documentData.expiryDate || null,
+      notes: documentData.notes,
+    }),
+
+  deleteDocument: async (_staffId, documentId) =>
+    apiClient.delete(`/employees/documents/${documentId}`),
+};
+
+export const staffManagementService = USE_MOCK_API
+  ? mockService
+  : realService;
