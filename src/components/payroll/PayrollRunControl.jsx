@@ -85,7 +85,7 @@ export const PayrollRunControl = ({
   const locked = run?.approvalStatus === 'Approved' || run?.status === 'Approved';
 
   return (
-    <div className="payroll-run-with-rules">
+    <div className="payroll-run-with-rules flex min-w-0 flex-col gap-3">
       {hasPermission(user, 'payroll.edit') && (
         <details className="payroll-workshop-settings">
           <summary>Workshop Wage & Job Commission Rules</summary>
