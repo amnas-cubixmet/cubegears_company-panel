@@ -3,6 +3,28 @@ import { USE_MOCK_API } from '../api/apiConfig';
 import { mockStaffList } from '../mock/staff.mock';
 import { enrichWorkshopStaff } from '../mock/staffManagement.mock';
 
+const normalizePaymentType = (value = '') => {
+  const map = {
+    'Monthly Salary': 'monthly',
+    'Fixed Monthly': 'monthly',
+    'Daily Salary': 'daily',
+    'Daily Wage': 'daily',
+    'Hourly Salary': 'hourly',
+    'Hourly Wage': 'hourly',
+    'Commission': 'commission',
+    'Commission Only': 'commission',
+    'Salary + Commission': 'monthly_commission',
+    'Monthly Salary + Commission': 'monthly_commission',
+    'Daily Wage + Commission': 'daily_commission',
+    'Hourly Wage + Commission': 'hourly_commission',
+    'Salary + Incentive': 'salary_incentive',
+    'Fixed Salary + Job Incentive': 'salary_incentive',
+    'Custom / Mixed': 'hybrid',
+    'Custom Hybrid Compensation': 'hybrid',
+  };
+  return map[value] || value || 'monthly';
+};
+
 const employeeLabel = (staff = {}) => {
   const source =
     staff.displayEmployeeNo ||
@@ -121,7 +143,7 @@ export const staffService = {
         joiningDate: staffData.joiningDate || null,
         employmentStatus: staffData.employmentStatus || 'Active',
         emergencyContact: staffData.emergencyContact || '',
-        paymentType: staffData.paymentType || '',
+        paymentType: normalizePaymentType(staffData.paymentType),
         address: staffData.address || '',
         notes: staffData.notes || '',
         teamId: staffData.teamId || null,
@@ -134,7 +156,7 @@ export const staffService = {
         const salary = staffData.salarySetup;
         await apiClient.post('/payroll/compensation-plans', {
           employee: created.id,
-          paymentType: salary.paymentType || staffData.paymentType || 'monthly',
+          paymentType: normalizePaymentType(salary.paymentType || staffData.paymentType),
           baseSalary: Number(salary.baseSalary || salary.basicSalary || 0),
           dailyWageRate: Number(salary.dailyWageRate || 0),
           hourlyWageRate: Number(salary.hourlyWageRate || 0),
@@ -197,7 +219,7 @@ export const staffService = {
           await payrollService.saveSalaryStructure({
             staffId: newId,
             staffName: newStaff.name,
-            paymentType: staffData.salarySetup.paymentType || staffData.paymentType || 'monthly',
+            paymentType: normalizePaymentType(staffData.salarySetup.paymentType || staffData.paymentType),
             baseSalary: Number(staffData.salarySetup.baseSalary || staffData.salarySetup.basicSalary || 0),
             dailyWageRate: Number(staffData.salarySetup.dailyWageRate || 0),
             hourlyWageRate: Number(staffData.salarySetup.hourlyWageRate || 0),
@@ -244,7 +266,9 @@ export const staffService = {
             key,
             ['teamId', 'shiftId', 'branchId'].includes(key)
               ? staffData[key] || null
-              : staffData[key],
+              : key === 'paymentType'
+                ? normalizePaymentType(staffData[key])
+                : staffData[key],
           ]),
       );
       return normalizeStaff(await apiClient.patch(`/employees/${id}`, payload));
