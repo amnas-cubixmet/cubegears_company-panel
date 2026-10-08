@@ -95,6 +95,7 @@ export const AppRoutes = () => (
       <Route path="/staff-management" element={<Navigate to="/staff-management/overview" replace />} />
       <Route path="/staff-management/overview" element={<StaffManagement />} />
       <Route path="/staff-management/staff" element={<StaffManagement />} />
+      <Route path="/staff-management/staff/:staffId" element={<StaffManagement />} />
       <Route path="/staff-management/add" element={<StaffManagement />} />
       <Route path="/staff-management/roles" element={<StaffManagement />} />
       <Route path="/staff-management/teams" element={<StaffManagement />} />
