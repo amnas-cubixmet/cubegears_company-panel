@@ -428,8 +428,11 @@ if (!USE_MOCK_API) {
     updateGeneratedCommissionStatus: async (id, status) =>
       apiClient.post(`/payroll/commissions/${id}/status`, { status }),
 
-    createPayrollRun: async ({ month, year, branch = null }) =>
-      apiClient.post('/payroll/runs', { month, year, branch }),
+    getPayrollRuns: async (filters = {}) =>
+      apiClient.get('/payroll/runs', { params: filters }),
+
+    createPayrollRun: async ({ month, year, branchId = null }) =>
+      apiClient.post('/payroll/runs', { month, year, branchId }),
 
     processPayrollRun: async (id) =>
       apiClient.post(`/payroll/runs/${id}/process`, {}),
