@@ -27,6 +27,7 @@ const initialForm = (structure) => {
   return {
     id: editingExisting ? undefined : structure?.id,
     originalPlanId: structure?.id || null,
+    originalEffectiveDate: structure?.effectiveDate || structure?.effective_from || null,
     staffId: structure?.staffId || structure?.employee?.id || '',
     staffName: structure?.staffName || structure?.employee?.name || '',
     paymentType: structure?.paymentType || 'monthly',
@@ -62,10 +63,14 @@ export const EmployeePayConfigurationSheet = ({
 }) => {
   const [form, setForm] = useState(initialForm(structure));
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
-    if (isOpen) setForm(initialForm(structure));
-  }, [isOpen, structure]);
+    if (isOpen) {
+      setForm(initialForm(structure));
+      setSaveError('');
+    }
+  }, [isOpen, structure?.id, structure?.staffId, structure?.employee?.id, structure?.paymentType]);
 
   const type = form.paymentType;
   const commissionEnabled = hasCommission(type);
@@ -120,10 +125,18 @@ export const EmployeePayConfigurationSheet = ({
       : [];
 
     setSaving(true);
+    setSaveError('');
     try {
+      const updateExistingPlan = Boolean(
+        form.originalPlanId &&
+        form.originalEffectiveDate &&
+        form.effectiveDate === form.originalEffectiveDate
+      );
       await onSave({
         ...form,
-        id: undefined,
+        // A same-day change can update an unused plan. A later effective
+        // date creates a new revision; used plans are protected by the API.
+        id: updateExistingPlan ? form.originalPlanId : undefined,
         employee: form.staffId,
         baseSalary: hasMonthlyBase(type) ? Number(form.baseSalary || 0) : 0,
         dailyWageRate: hasDailyBase(type) ? Number(form.dailyWageRate || 0) : 0,
@@ -143,6 +156,10 @@ export const EmployeePayConfigurationSheet = ({
         effectiveTo: form.effectiveTo || null,
       });
       onClose();
+    } catch (error) {
+      const details = error?.response?.data;
+      const message = details?.message || details?.non_field_errors?.[0] || error?.message || 'Unable to save pay configuration.';
+      setSaveError(typeof message === 'string' ? message : 'Unable to save pay configuration. Check rate and effective date.');
     } finally {
       setSaving(false);
     }
@@ -158,7 +175,9 @@ export const EmployeePayConfigurationSheet = ({
       <form className="employee-pay-config-form" onSubmit={submit}>
         {form.originalPlanId && (
           <div className="pay-config-revision-note">
-            A new effective-dated revision will be created. Historical payroll stays unchanged.
+            {form.originalEffectiveDate === form.effectiveDate
+              ? 'Updating the existing plan for this effective date. Plans already used by payroll cannot be edited.'
+              : 'A new effective-dated revision will be created. Historical payroll stays unchanged.'}
           </div>
         )}
 
@@ -315,6 +334,8 @@ export const EmployeePayConfigurationSheet = ({
           <span>Notes</span>
           <textarea rows={3} value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Reason for salary revision, special conditions, approval note…" />
         </label>
+
+        {saveError && <div className="staff-directory-message is-error" role="alert">{saveError}</div>}
 
         <div className="pay-config-actions">
           <button type="button" onClick={onClose}>Cancel</button>
