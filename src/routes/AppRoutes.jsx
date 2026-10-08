@@ -100,7 +100,6 @@ export const AppRoutes = () => (
       <Route path="/staff-management/roles" element={<StaffManagement />} />
       <Route path="/staff-management/teams" element={<StaffManagement />} />
       <Route path="/staff-management/shifts" element={<StaffManagement />} />
-      <Route path="/staff-management/skills" element={<StaffManagement />} />
       <Route path="/staff-management/performance" element={<StaffManagement />} />
       <Route path="/staff-management/documents" element={<StaffManagement />} />
       <Route path="/staff-management/reports" element={<StaffManagement />} />
