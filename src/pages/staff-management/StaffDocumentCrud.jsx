@@ -112,8 +112,6 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
       </section>
 
       <section className="staff-subpage-kpis">
-        <div><FileText size={16}/><span>Total Documents</span><strong>{documents.length}</strong></div>
-        <div><ShieldCheck size={16}/><span>Staff With Docs</span><strong>{staffWithDocs}</strong></div>
         <article><FileText size={15}/><span>Total Documents</span><strong>{documents.length}</strong></article>
         <article><ShieldCheck size={15}/><span>Staff With Docs</span><strong>{staffWithDocs}</strong></article>
         <article><AlertTriangle size={15}/><span>Expired</span><strong>{expired}</strong></article>
