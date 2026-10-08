@@ -29,7 +29,7 @@ export const LeaveApprovalSheet = ({
   return (
     <ResponsiveModalSheet
       isOpen={Boolean(item && decision)}
-      onClose={submitting ? undefined : onClose}
+      onClose={onClose}
       title={title}
       maxWidth="560px"
     >
