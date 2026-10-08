@@ -2,6 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Clock3, Plus, X } from 'lucide-react';
 import { attendanceService } from '../../services/attendance.service';
 
+const formatMoney = (value) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0));
+
 const formatDate = (value) => {
   if (!value) return '—';
   const date = new Date(`${value}T00:00:00`);
@@ -156,6 +163,15 @@ export const OvertimeRequests = () => {
                 </div>
 
                 <p>{row.reason || 'No reason provided.'}</p>
+
+                {row.status === 'Approved' && (
+                  <div className="my-overtime-approved-pay">
+                    <span>Approved Rate</span>
+                    <strong>₹{Number(row.rate || 0).toFixed(2)}/hr</strong>
+                    <span>Payroll Amount</span>
+                    <strong>{formatMoney(row.amount)}</strong>
+                  </div>
+                )}
 
                 <footer>
                   <span>{row.rejectionReason || row.approvedBy || 'Awaiting manager review'}</span>
