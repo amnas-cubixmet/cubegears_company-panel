@@ -1802,3 +1802,271 @@
     min-height:40px
   }
 }
+
+
+/* Job Card Payroll Allocation */
+.job-work-payroll-stack{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.job-payroll-assignments{
+  padding:12px;
+  border:1px solid var(--job-border);
+  border-radius:var(--job-radius);
+  background:var(--job-surface);
+  box-shadow:var(--job-shadow);
+}
+.job-payroll-assignments__head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--job-border);
+}
+.job-payroll-assignments__head>div:first-child{
+  min-width:0;
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+.job-payroll-assignments__head>div:first-child>svg{
+  flex:0 0 auto;
+  margin-top:1px;
+  color:var(--primary);
+}
+.job-payroll-assignments__head strong{
+  display:block;
+  color:var(--text-primary);
+  font-size:10px;
+  font-weight:750;
+}
+.job-payroll-assignments__head span{
+  display:block;
+  margin-top:2px;
+  color:var(--text-muted);
+  font-size:8px;
+  line-height:1.4;
+}
+.job-payroll-allocation-summary{
+  min-width:160px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:4px 6px;
+  padding:7px 8px;
+  border:1px solid var(--job-border);
+  border-radius:9px;
+  background:var(--job-soft);
+}
+.job-payroll-allocation-summary svg{
+  grid-row:1/3;
+  color:var(--primary);
+}
+.job-payroll-allocation-summary span{
+  margin:0;
+  color:var(--text-muted);
+  font-size:7px;
+}
+.job-payroll-allocation-summary strong{
+  font-size:10px;
+}
+.job-payroll-allocation-summary small{
+  grid-column:2/4;
+  color:var(--text-muted);
+  font-size:7px;
+}
+.job-payroll-assignment-list{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:10px;
+}
+.job-payroll-assignment-card{
+  min-width:0;
+  padding:9px;
+  border:1px solid var(--job-border);
+  border-radius:9px;
+  background:var(--job-soft);
+}
+.job-payroll-assignment-card>div:first-child strong{
+  display:block;
+  overflow:hidden;
+  color:var(--text-primary);
+  font-size:9px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.job-payroll-assignment-card>div:first-child span{
+  display:block;
+  margin-top:2px;
+  color:var(--text-muted);
+  font-size:7.5px;
+}
+.job-payroll-assignment-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:5px;
+  margin-top:8px;
+}
+.job-payroll-assignment-metrics>span{
+  min-width:0;
+  padding:6px;
+  border:1px solid var(--job-border);
+  border-radius:7px;
+  background:var(--job-surface);
+}
+.job-payroll-assignment-metrics small,
+.job-payroll-assignment-metrics b{
+  display:block;
+}
+.job-payroll-assignment-metrics small{
+  color:var(--text-muted);
+  font-size:6.5px;
+}
+.job-payroll-assignment-metrics b{
+  margin-top:2px;
+  overflow:hidden;
+  color:var(--text-primary);
+  font-size:8px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.job-payroll-assignment-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px;
+  margin-top:8px;
+}
+.job-payroll-assignment-actions button{
+  min-height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  border:1px solid var(--job-border);
+  border-radius:7px;
+  background:var(--job-surface);
+  color:var(--text-secondary);
+  font-size:7.5px;
+  font-weight:700;
+}
+.job-payroll-assignment-actions button.is-danger{
+  border-color:color-mix(in srgb,var(--danger) 28%,var(--job-border));
+  background:var(--danger-soft);
+  color:var(--danger);
+}
+.job-payroll-assignment-form{
+  margin-top:10px;
+  padding:10px;
+  border:1px solid color-mix(in srgb,var(--primary) 22%,var(--job-border));
+  border-radius:10px;
+  background:color-mix(in srgb,var(--primary-soft) 24%,var(--job-surface));
+}
+.job-payroll-assignment-form__title{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.job-payroll-assignment-form__title strong{
+  display:block;
+  color:var(--text-primary);
+  font-size:9px;
+}
+.job-payroll-assignment-form__title span{
+  display:block;
+  margin-top:2px;
+  color:var(--text-muted);
+  font-size:7.5px;
+}
+.job-payroll-assignment-form__title button{
+  min-height:28px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:0 7px;
+  border:1px solid var(--job-border);
+  border-radius:7px;
+  background:var(--job-surface);
+  color:var(--primary);
+  font-size:7.5px;
+  font-weight:700;
+}
+.job-payroll-assignment-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:9px;
+}
+.job-payroll-assignment-grid label{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  color:var(--text-secondary);
+  font-size:7.5px;
+  font-weight:700;
+}
+.cg-job-detail .job-payroll-assignment-grid input,
+.cg-job-detail .job-payroll-assignment-grid select{
+  min-width:0;
+  width:100%;
+  height:36px!important;
+  min-height:36px!important;
+  padding:0 8px;
+  border-radius:8px!important;
+  font-size:8.5px!important;
+}
+.job-payroll-save{
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  margin-top:9px;
+  padding:0 10px;
+  border:1px solid var(--primary);
+  border-radius:8px;
+  background:var(--primary);
+  color:#fff;
+  font-size:8.5px;
+  font-weight:750;
+}
+.job-payroll-error{
+  margin-top:8px;
+  padding:7px 8px;
+  border:1px solid color-mix(in srgb,var(--danger) 25%,var(--job-border));
+  border-radius:8px;
+  background:var(--danger-soft);
+  color:var(--danger);
+  font-size:8px;
+}
+.job-payroll-empty{
+  grid-column:1/-1;
+  padding:18px 8px;
+  color:var(--text-muted);
+  font-size:8.5px;
+  text-align:center;
+}
+
+@media(max-width:1000px){
+  .job-payroll-assignment-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .job-payroll-assignment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:767px){
+  .job-payroll-assignments__head{
+    flex-direction:column;
+  }
+  .job-payroll-allocation-summary{width:100%;min-width:0}
+  .job-payroll-assignment-list{grid-template-columns:1fr}
+  .job-payroll-assignment-grid{grid-template-columns:1fr}
+  .cg-job-detail .job-payroll-assignment-grid input,
+  .cg-job-detail .job-payroll-assignment-grid select{
+    height:44px!important;
+    min-height:44px!important;
+    font-size:16px!important;
+  }
+  .job-payroll-save{width:100%;min-height:42px}
+}
