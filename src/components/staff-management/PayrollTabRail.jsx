@@ -6,8 +6,6 @@ import {
   Clock3,
   FileText,
   LayoutDashboard,
-  Play,
-  ReceiptText,
   Settings2,
   Users,
 } from 'lucide-react';
@@ -21,8 +19,6 @@ const tabs = [
   { label: 'Incentives', path: '/payroll/incentives', icon: BarChart3 },
   { label: 'Overtime', path: '/payroll/overtime', icon: Clock3 },
   { label: 'Advances', path: '/payroll/advances', icon: Banknote },
-  { label: 'Run Payroll', path: '/payroll/run', icon: Play },
-  { label: 'Payslips', path: '/payroll/payslips', icon: ReceiptText },
   { label: 'Reports', path: '/payroll/reports', icon: FileText },
 ];
 
