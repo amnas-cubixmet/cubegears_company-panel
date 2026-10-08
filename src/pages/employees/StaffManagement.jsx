@@ -19,7 +19,6 @@ const resolveSection = (pathname) => {
   if (pathname.endsWith('/roles')) return 'roles';
   if (pathname.endsWith('/teams')) return 'teams';
   if (pathname.endsWith('/shifts')) return 'shifts';
-  if (pathname.endsWith('/skills')) return 'skills';
   if (pathname.endsWith('/performance')) return 'performance';
   if (pathname.endsWith('/documents')) return 'documents';
   if (pathname.endsWith('/reports')) return 'reports';
