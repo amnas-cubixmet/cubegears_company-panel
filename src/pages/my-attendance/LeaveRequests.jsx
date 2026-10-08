@@ -9,7 +9,7 @@ import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalShe
 import { leaveService } from '../../services/leave.service';
 import '../../styles/attendance-leave.css';
 
-const createInitialForm = (leaveType = 'Casual Leave') => ({
+const createInitialForm = (leaveType = '') => ({
   leaveType,
   leaveMode: 'Full Day',
   halfDaySession: 'First Half',
@@ -26,6 +26,7 @@ export const LeaveRequests = () => {
   const [showApplySheet, setShowApplySheet] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(createInitialForm());
+  const [error, setError] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -58,22 +59,26 @@ export const LeaveRequests = () => {
   }, []);
 
   const openApply = () => {
-    const defaultType = balances[0]?.type || 'Casual Leave';
+    if (!balances.length) return;
+    const defaultType = balances[0]?.type || '';
+    setError('');
     setForm(createInitialForm(defaultType));
     setShowApplySheet(true);
   };
 
   const closeApply = () => {
     if (submitting) return;
+    setError('');
     setShowApplySheet(false);
   };
 
   const handleApplyLeave = async (event) => {
     event.preventDefault();
 
-    if (!form.startDate || !form.reason.trim()) return;
+    if (!form.leaveType || !form.startDate || !form.reason.trim()) return;
 
     setSubmitting(true);
+    setError('');
     try {
       await leaveService.applyLeaveRequest({
         type: form.leaveType,
@@ -88,6 +93,13 @@ export const LeaveRequests = () => {
 
       setShowApplySheet(false);
       await fetchData();
+    } catch (err) {
+      const message =
+        err?.response?.data?.message ||
+        err?.data?.message ||
+        err?.message ||
+        'Unable to submit leave request.';
+      setError(message);
     } finally {
       setSubmitting(false);
     }
@@ -100,7 +112,11 @@ export const LeaveRequests = () => {
 
   return (
     <div className="attendance-leave-dashboard">
-      <LeavePageHeader onApply={openApply} />
+      <LeavePageHeader onApply={openApply} disabled={!loading && !balances.length} />
+
+      {error && !showApplySheet && (
+        <div className="leave-page-error">{error}</div>
+      )}
 
       {loading ? (
         <div className="leave-page-loading">Loading leave information…</div>
@@ -120,6 +136,7 @@ export const LeaveRequests = () => {
         title="Apply for Leave"
         maxWidth="620px"
       >
+        {error && <div className="leave-page-error">{error}</div>}
         <ApplyLeaveForm
           balances={balances}
           form={form}
