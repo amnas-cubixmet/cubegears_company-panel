@@ -10,7 +10,6 @@ import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { StaffShiftCrud } from './StaffShiftCrud';
-import { StaffSkillCrud } from './StaffSkillCrud';
 import { StaffDocumentCrud } from './StaffDocumentCrud';
 import { StaffOverview } from '../../components/staff-management/StaffOverview';
 import { getEmployeeLabel } from '../../components/staff-management/staffDisplay';
@@ -512,9 +511,6 @@ export const WorkshopStaffSection = ({ section }) => {
     return <StaffShiftCrud staff={staff} />;
   }
 
-  if (section === 'skills') {
-    return <StaffSkillCrud staff={staff} />;
-  }
 
   if (section === 'performance') {
     const totals = performanceRows.reduce((acc, row) => ({
@@ -597,7 +593,7 @@ export const WorkshopStaffSection = ({ section }) => {
       <div className="staff-workshop-view">
         <SectionHeader
           title="Staff Reports"
-          description="Operational HR reports for staff master, skills, performance and document compliance."
+          description="Operational HR reports for staff master, performance and document compliance."
         />
 
         <div className="staff-report-grid">
@@ -606,14 +602,6 @@ export const WorkshopStaffSection = ({ section }) => {
           </button>
           <button onClick={() => downloadCsv('staff-performance.csv', perfRows)}>
             <Activity size={18}/><span><strong>Performance Report</strong><small>Jobs, revenue, hours, comeback and rating</small></span><Download size={15}/>
-          </button>
-          <button onClick={() => downloadCsv('staff-skills.csv', staff.map((person) => ({
-            employee_number: getEmployeeLabel(person),
-            name: person.name,
-            department: person.department,
-            skills: (person.skills || []).join(' | ')
-          })))}>
-            <Wrench size={18}/><span><strong>Skills Matrix</strong><small>Technician specialization coverage</small></span><Download size={15}/>
           </button>
           <button onClick={() => downloadCsv('staff-document-compliance.csv', staff.map((person) => ({
             employee_number: getEmployeeLabel(person),
