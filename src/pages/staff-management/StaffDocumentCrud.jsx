@@ -100,22 +100,25 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
   const expired = documents.filter((document) => document.status === 'Expired').length;
 
   return (
-    <div className="staff-crud-view">
-      <section className="staff-workshop-section-header">
+    <div className="staff-dashboard-subpage staff-crud-view">
+      <section className="staff-subpage-header">
         <div>
           <h2>Staff Documents</h2>
           <p>Create, edit and remove ID proof, licence, certificates, offer letters and contracts.</p>
         </div>
-        <button type="button" className="staff-crud-add-button" onClick={openCreate}>
+        <button type="button" className="staff-primary-action" onClick={openCreate}>
           <Plus size={15}/> Add Document
         </button>
       </section>
 
-      <div className="staff-crud-summary-grid">
+      <section className="staff-subpage-kpis">
         <div><FileText size={16}/><span>Total Documents</span><strong>{documents.length}</strong></div>
         <div><ShieldCheck size={16}/><span>Staff With Docs</span><strong>{staffWithDocs}</strong></div>
-        <div><AlertTriangle size={16}/><span>Expired</span><strong>{expired}</strong></div>
-      </div>
+        <article><FileText size={15}/><span>Total Documents</span><strong>{documents.length}</strong></article>
+        <article><ShieldCheck size={15}/><span>Staff With Docs</span><strong>{staffWithDocs}</strong></article>
+        <article><AlertTriangle size={15}/><span>Expired</span><strong>{expired}</strong></article>
+        <article><AlertTriangle size={15}/><span>Missing Docs</span><strong>{Math.max(staff.length - staffWithDocs, 0)}</strong></article>
+      </section>
 
       <section className="staff-crud-toolbar">
         <label>
