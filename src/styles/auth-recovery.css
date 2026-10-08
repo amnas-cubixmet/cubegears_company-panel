@@ -72,3 +72,15 @@
   .auth-mode-tabs{grid-template-columns:1fr}
   .auth-dev-link{align-items:flex-start;flex-direction:column}
 }
+
+
+.auth-message.is-error{
+  border-color:rgba(239,68,68,.30);
+  background:rgba(127,29,29,.16);
+  color:#fecaca;
+}
+.auth-message.is-success{
+  border-color:rgba(16,185,129,.25);
+  background:rgba(6,78,59,.16);
+  color:#a7f3d0;
+}
