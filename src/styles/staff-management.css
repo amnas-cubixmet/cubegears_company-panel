@@ -4870,3 +4870,73 @@
     grid-column:auto;
   }
 }
+
+
+/* Staff directory compact action fix */
+.cg-staff-management .staff-directory-card__actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:6px!important;
+  min-height:42px;
+  padding-top:8px!important;
+  border-top:1px solid var(--staff-border)!important;
+}
+
+.cg-staff-management .staff-directory-card__actions .staff-view-button{
+  width:auto!important;
+  min-width:112px!important;
+  max-width:140px;
+  height:34px!important;
+  min-height:34px!important;
+  flex:0 0 auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  padding:0 10px!important;
+  border:1px solid var(--staff-border)!important;
+  border-radius:8px!important;
+  background:var(--staff-soft)!important;
+  color:var(--text-secondary)!important;
+  font-size:8.5px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  cursor:pointer!important;
+}
+
+.cg-staff-management .staff-directory-card__actions .staff-view-button:hover{
+  border-color:color-mix(in srgb,var(--primary) 28%,var(--staff-border))!important;
+  background:var(--primary-soft)!important;
+  color:var(--primary)!important;
+}
+
+.cg-staff-management .staff-directory-card__actions .staff-status-button{
+  width:34px!important;
+  min-width:34px!important;
+  max-width:34px!important;
+  height:34px!important;
+  min-height:34px!important;
+  flex:0 0 34px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  border:1px solid var(--staff-border)!important;
+  border-radius:8px!important;
+  cursor:pointer!important;
+}
+
+.cg-staff-management .staff-directory-card__actions svg{
+  flex:0 0 auto;
+}
+
+@media(max-width:520px){
+  .cg-staff-management .staff-directory-card__actions{
+    justify-content:flex-end!important;
+  }
+
+  .cg-staff-management .staff-directory-card__actions .staff-view-button{
+    min-width:104px!important;
+  }
+}
