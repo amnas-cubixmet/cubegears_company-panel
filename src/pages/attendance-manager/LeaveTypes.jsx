@@ -1,432 +1,323 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit, X } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { CalendarRange, Edit3, Plus, Save } from 'lucide-react';
+import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
+
+const emptyForm = {
+  name: '',
+  code: '',
+  type: 'Paid',
+  allocationMethod: 'monthly',
+  annualAllocation: 0,
+  monthlyAllocation: 1,
+  halfDay: true,
+  maxCarryForward: 0,
+  status: 'Active',
+};
+
+const normalizeForm = (row = {}) => ({
+  name: row.name || '',
+  code: row.code || '',
+  type: row.type || 'Paid',
+  allocationMethod: row.allocationMethod || 'annual',
+  annualAllocation: Number(row.annualAllocation || 0),
+  monthlyAllocation: Number(row.monthlyAllocation || 0),
+  halfDay: row.halfDay !== false,
+  maxCarryForward: Number(row.maxCarryForward || 0),
+  status: row.status || 'Active',
+});
 
 export const LeaveTypes = () => {
   const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isAddLeaveTypeOpen, setIsAddLeaveTypeOpen] = useState(false);
+  const [editor, setEditor] = useState(null);
+  const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [toastMsg, setToastMsg] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  // Form fields state
-  const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    type: 'Paid',
-    allocationMethod: 'Fixed Annual Allocation',
-    annualAllocation: '12',
-    halfDay: true,
-    carryForward: '5 Days',
-    maxCarryForward: '5',
-    expiryRule: 'End of Calendar Year',
-    eligibility: 'All Permanent Staff',
-    status: 'Active'
-  });
-
-  useEffect(() => {
-    fetchLeaveTypes();
-  }, []);
-
-  // Lock background scroll when modal/bottom-sheet is open
-  useEffect(() => {
-    if (isAddLeaveTypeOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isAddLeaveTypeOpen]);
-
-  const fetchLeaveTypes = async () => {
+  const load = async () => {
     setLoading(true);
+    setError('');
     try {
       const data = await attendanceManagerService.getLeaveTypes();
-      setTypes(data);
-    } catch (e) {
-      console.error(e);
+      setTypes(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(err?.message || 'Unable to load leave types.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field, val) => {
-    setFormData(prev => ({ ...prev, [field]: val }));
+  useEffect(() => {
+    load();
+  }, []);
+
+  const activeCount = useMemo(
+    () => types.filter((item) => item.status === 'Active').length,
+    [types],
+  );
+
+  const openCreate = () => {
+    setEditor({ mode: 'create' });
+    setForm(emptyForm);
+    setError('');
   };
 
-  const handleSaveLeaveType = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.code) return;
+  const openEdit = (item) => {
+    setEditor({ mode: 'edit', id: item.id });
+    setForm(normalizeForm(item));
+    setError('');
+  };
+
+  const closeEditor = () => {
+    if (saving) return;
+    setEditor(null);
+    setError('');
+  };
+
+  const update = (key, value) => {
+    setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const save = async (event) => {
+    event.preventDefault();
+    if (!form.name.trim() || !form.code.trim()) return;
 
     setSaving(true);
+    setError('');
+
+    const payload = {
+      ...form,
+      name: form.name.trim(),
+      code: form.code.trim().toUpperCase(),
+      annualAllocation: Number(form.annualAllocation || 0),
+      monthlyAllocation: Number(form.monthlyAllocation || 0),
+      maxCarryForward: Number(form.maxCarryForward || 0),
+    };
+
     try {
-      await attendanceManagerService.createLeaveType({
-        ...formData,
-        allocation: `${formData.annualAllocation} Days / Year`
-      });
-      setIsAddLeaveTypeOpen(false);
-      setToastMsg('Leave type added successfully.');
-      setTimeout(() => setToastMsg(''), 3000);
-      fetchLeaveTypes();
-      setFormData({
-        name: '',
-        code: '',
-        type: 'Paid',
-        allocationMethod: 'Fixed Annual Allocation',
-        annualAllocation: '12',
-        halfDay: true,
-        carryForward: '5 Days',
-        maxCarryForward: '5',
-        expiryRule: 'End of Calendar Year',
-        eligibility: 'All Permanent Staff',
-        status: 'Active'
-      });
+      if (editor?.mode === 'edit') {
+        await attendanceManagerService.updateLeaveType(editor.id, payload);
+        setMessage('Leave type updated successfully.');
+      } else {
+        await attendanceManagerService.createLeaveType(payload);
+        setMessage('Leave type added successfully.');
+      }
+
+      setEditor(null);
+      await load();
+      window.setTimeout(() => setMessage(''), 2500);
     } catch (err) {
-      console.error(err);
+      setError(err?.response?.data?.message || err?.message || 'Unable to save leave type.');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
-      {/* Toast notification */}
-      {toastMsg && (
-        <div style={{
-          backgroundColor: 'var(--success)',
-          color: '#ffffff',
-          padding: '10px 14px',
-          borderRadius: '10px',
-          fontSize: '13px',
-          fontWeight: '600',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-        }}>
-          {toastMsg}
+    <div className="am-leave-types-page">
+      <section className="am-leave-types-heading">
+        <div>
+          <h2>Company Leave Types</h2>
+          <p>Configure paid, sick, casual and annual leave allocation rules.</p>
         </div>
+
+        <button type="button" className="am-primary-action" onClick={openCreate}>
+          <Plus size={14} />
+          Add Leave Type
+        </button>
+      </section>
+
+      {message && <div className="am-inline-message is-success">{message}</div>}
+      {error && !editor && <div className="am-inline-message is-error">{error}</div>}
+
+      <section className="am-leave-types-summary">
+        <article>
+          <span>Configured</span>
+          <strong>{types.length}</strong>
+          <small>company leave policies</small>
+        </article>
+        <article>
+          <span>Active</span>
+          <strong>{activeCount}</strong>
+          <small>shown to employees</small>
+        </article>
+        <article>
+          <span>Monthly Policies</span>
+          <strong>{types.filter((item) => item.allocationMethod === 'monthly').length}</strong>
+          <small>reset each month</small>
+        </article>
+        <article>
+          <span>Annual Policies</span>
+          <strong>{types.filter((item) => item.allocationMethod === 'annual').length}</strong>
+          <small>yearly allocation</small>
+        </article>
+      </section>
+
+      {loading ? (
+        <div className="am-leave-types-empty">Loading leave policies…</div>
+      ) : (
+        <section className="am-leave-type-grid">
+          {types.map((item) => (
+            <article key={item.id} className="am-leave-type-card">
+              <header>
+                <div>
+                  <strong>{item.name}</strong>
+                  <span>{item.code}</span>
+                </div>
+                <b className={item.status === 'Active' ? 'is-active' : 'is-inactive'}>
+                  {item.status}
+                </b>
+              </header>
+
+              <div className="am-leave-type-details">
+                <div><span>Type</span><strong>{item.type}</strong></div>
+                <div><span>Allocation</span><strong>{item.allocation}</strong></div>
+                <div><span>Half Day</span><strong>{item.halfDay ? 'Allowed' : 'No'}</strong></div>
+                <div><span>Carry Forward</span><strong>{item.carryForward}</strong></div>
+              </div>
+
+              <button type="button" onClick={() => openEdit(item)}>
+                <Edit3 size={13} />
+                Edit Config
+              </button>
+            </article>
+          ))}
+
+          {!types.length && (
+            <div className="am-leave-types-empty">
+              No leave policies configured. Add Paid, Sick, Casual or Annual Leave.
+            </div>
+          )}
+        </section>
       )}
 
-      {/* Header layout */}
-      <div className="leave-type-header" style={{
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ width: '100%' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', margin: 0, lineHeight: 1.25 }}>
-            Company Leave Types
-          </h3>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '4px 0 0 0', lineHeight: 1.5, width: '100%', maxWidth: '100%' }}>
-            Manage leave policies, annual accruals, carry-forward, expiry and half-day rules.
-          </p>
-        </div>
+      <ResponsiveModalSheet
+        isOpen={Boolean(editor)}
+        onClose={closeEditor}
+        title={editor?.mode === 'edit' ? 'Edit Leave Type' : 'Add Leave Type'}
+        maxWidth="620px"
+      >
+        <form className="am-leave-type-form" onSubmit={save}>
+          {error && <div className="am-inline-message is-error">{error}</div>}
 
-        <button
-          type="button"
-          className="add-leave-type-btn"
-          onClick={() => setIsAddLeaveTypeOpen(true)}
-          style={{
-            height: '46px',
-            padding: '0 16px',
-            whiteSpace: 'nowrap',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            borderRadius: '10px',
-            backgroundColor: 'var(--primary)',
-            color: '#ffffff',
-            border: 'none',
-            fontSize: '13px',
-            fontWeight: '700',
-            cursor: 'pointer'
-          }}
-        >
-          <Plus size={16} /> Add Leave Type
-        </button>
-      </div>
+          <div className="am-leave-type-form-grid">
+            <label>
+              <span>Leave Name *</span>
+              <input
+                required
+                value={form.name}
+                onChange={(event) => update('name', event.target.value)}
+                placeholder="e.g. Sick Leave"
+              />
+            </label>
 
-      {/* Grid of configured leave types */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', width: '100%' }}>
-        {types.map(t => (
-          <div key={t.id} style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>{t.name}</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '6px' }}>({t.code})</span>
-              </div>
-              <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '6px', backgroundColor: 'var(--success-soft)', color: 'var(--success)' }}>
-                {t.status.toUpperCase()}
+            <label>
+              <span>Leave Code *</span>
+              <input
+                required
+                value={form.code}
+                onChange={(event) => update('code', event.target.value)}
+                placeholder="e.g. SL"
+              />
+            </label>
+
+            <label>
+              <span>Paid / Unpaid</span>
+              <select value={form.type} onChange={(event) => update('type', event.target.value)}>
+                <option value="Paid">Paid Leave</option>
+                <option value="Unpaid">Unpaid Leave</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Allocation Period</span>
+              <select
+                value={form.allocationMethod}
+                onChange={(event) => update('allocationMethod', event.target.value)}
+              >
+                <option value="monthly">Monthly</option>
+                <option value="annual">Annual</option>
+                <option value="manual">Manual</option>
+              </select>
+            </label>
+
+            {form.allocationMethod === 'monthly' && (
+              <label>
+                <span>Days Per Month</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={form.monthlyAllocation}
+                  onChange={(event) => update('monthlyAllocation', event.target.value)}
+                />
+              </label>
+            )}
+
+            {form.allocationMethod !== 'monthly' && (
+              <label>
+                <span>Days Per Year</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={form.annualAllocation}
+                  onChange={(event) => update('annualAllocation', event.target.value)}
+                />
+              </label>
+            )}
+
+            <label>
+              <span>Max Carry Forward</span>
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                value={form.maxCarryForward}
+                onChange={(event) => update('maxCarryForward', event.target.value)}
+              />
+            </label>
+          </div>
+
+          <div className="am-leave-type-toggles">
+            <label>
+              <span>
+                <strong>Half-Day Allowed</strong>
+                <small>Employees can request a half day.</small>
               </span>
-            </div>
+              <input
+                type="checkbox"
+                checked={form.halfDay}
+                onChange={(event) => update('halfDay', event.target.checked)}
+              />
+            </label>
 
-            <div style={{ backgroundColor: 'var(--surface-2)', padding: '10px', borderRadius: '10px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px' }}>
-              <div><span style={{ color: 'var(--text-muted)' }}>Type:</span> <strong>{t.type}</strong></div>
-              <div><span style={{ color: 'var(--text-muted)' }}>Allocation:</span> <strong>{t.allocation}</strong></div>
-              <div><span style={{ color: 'var(--text-muted)' }}>Half Day:</span> <strong>{t.halfDay ? 'Allowed' : 'No'}</strong></div>
-              <div><span style={{ color: 'var(--text-muted)' }}>Carry Fwd:</span> <strong>{t.carryForward}</strong></div>
-            </div>
+            <label>
+              <span>
+                <strong>Active</strong>
+                <small>Only active policies with allocation appear for employees.</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={form.status === 'Active'}
+                onChange={(event) => update('status', event.target.checked ? 'Active' : 'Inactive')}
+              />
+            </label>
+          </div>
 
-            <button style={{ height: '34px', borderRadius: '8px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-              <Edit size={13} /> Edit Config
+          <div className="am-leave-type-form-actions">
+            <button type="button" onClick={closeEditor}>Cancel</button>
+            <button type="submit" className="is-primary" disabled={saving}>
+              <Save size={13} />
+              {saving ? 'Saving…' : 'Save Leave Type'}
             </button>
           </div>
-        ))}
-      </div>
-
-      {/* Responsive Add Leave Type Overlay (Desktop Centered Modal / Mobile Bottom Sheet) */}
-      {isAddLeaveTypeOpen && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setIsAddLeaveTypeOpen(false);
-          }}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.65)',
-            zIndex: 99999,
-            display: 'flex',
-            boxSizing: 'border-box'
-          }}
-          className="leave-type-overlay"
-        >
-          <div
-            className="leave-type-modal-sheet"
-            style={{
-              backgroundColor: 'var(--surface)',
-              border: '1px solid var(--border)',
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            {/* Drag Handle Indicator for Mobile */}
-            <div className="mobile-drag-handle" style={{ display: 'flex', justifyContent: 'center', paddingTop: '8px', paddingBottom: '4px' }}>
-              <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: 'var(--border)' }} />
-            </div>
-
-            {/* Sticky Header */}
-            <div style={{
-              display: 'flex',
-              justify: 'space-between',
-              alignItems: 'center',
-              padding: '14px 20px',
-              borderBottom: '1px solid var(--border)',
-              backgroundColor: 'var(--surface)',
-              position: 'sticky',
-              top: 0,
-              zIndex: 10
-            }}>
-              <h3 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
-                Add New Leave Type
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsAddLeaveTypeOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Scrollable Form Body */}
-            <div style={{
-              padding: '16px 20px',
-              overflowY: 'auto',
-              flex: 1
-            }} className="scroll-hidden">
-              <form id="add-leave-type-form" onSubmit={handleSaveLeaveType} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div className="form-row-2col" style={{ display: 'grid', gap: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Leave Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      placeholder="e.g. Casual Leave"
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Leave Code *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.code}
-                      onChange={(e) => handleInputChange('code', e.target.value)}
-                      placeholder="e.g. CL"
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row-2col" style={{ display: 'grid', gap: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Paid / Unpaid *
-                    </label>
-                    <select
-                      value={formData.type}
-                      onChange={(e) => handleInputChange('type', e.target.value)}
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    >
-                      <option value="Paid">Paid Leave</option>
-                      <option value="Unpaid">Unpaid Leave</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Allocation Method *
-                    </label>
-                    <select
-                      value={formData.allocationMethod}
-                      onChange={(e) => handleInputChange('allocationMethod', e.target.value)}
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    >
-                      <option value="Fixed Annual Allocation">Fixed Annual Allocation</option>
-                      <option value="Monthly Accrual">Monthly Accrual</option>
-                      <option value="Manual Adjustment Only">Manual Adjustment Only</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-row-2col" style={{ display: 'grid', gap: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Annual Allocation (Days)
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.annualAllocation}
-                      onChange={(e) => handleInputChange('annualAllocation', e.target.value)}
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Max Carry Forward (Days)
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.maxCarryForward}
-                      onChange={(e) => handleInputChange('maxCarryForward', e.target.value)}
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row-2col" style={{ display: 'grid', gap: '12px' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Expiry Rule
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.expiryRule}
-                      onChange={(e) => handleInputChange('expiryRule', e.target.value)}
-                      placeholder="e.g. End of Year"
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                      Staff Eligibility
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.eligibility}
-                      onChange={(e) => handleInputChange('eligibility', e.target.value)}
-                      placeholder="e.g. All Staff"
-                      style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '10px', backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)', boxSizing: 'border-box', fontSize: '13px' }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center', paddingTop: '4px' }}>
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.halfDay}
-                      onChange={(e) => handleInputChange('halfDay', e.target.checked)}
-                    />
-                    Half-Day Allowed
-                  </label>
-
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.status === 'Active'}
-                      onChange={(e) => handleInputChange('status', e.target.checked ? 'Active' : 'Inactive')}
-                    />
-                    Active Status
-                  </label>
-                </div>
-              </form>
-            </div>
-
-            {/* Sticky Action Footer */}
-            <div style={{
-              padding: '14px 20px',
-              paddingBottom: 'calc(14px + env(safe-area-inset-bottom))',
-              borderTop: '1px solid var(--border)',
-              backgroundColor: 'var(--surface)',
-              display: 'flex',
-              gap: '12px',
-              position: 'sticky',
-              bottom: 0,
-              zIndex: 10
-            }}>
-              <button
-                type="button"
-                onClick={() => setIsAddLeaveTypeOpen(false)}
-                style={{
-                  flex: 1,
-                  height: '46px',
-                  borderRadius: '10px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--surface-2)',
-                  color: 'var(--text-primary)',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="add-leave-type-form"
-                disabled={saving}
-                style={{
-                  flex: 1,
-                  height: '46px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  backgroundColor: 'var(--primary)',
-                  color: '#ffffff',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                {saving ? 'Saving...' : 'Save Leave Type'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        </form>
+      </ResponsiveModalSheet>
     </div>
   );
 };
+
+export default LeaveTypes;
