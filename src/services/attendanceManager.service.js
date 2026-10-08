@@ -105,20 +105,43 @@ export const getLeaveTypes = async () => {
 export const createLeaveType = async (payload) => {
   if (USE_MOCK_API) {
     await delay();
+    const monthly = payload.allocationMethod === 'monthly';
     const newRecord = {
       id: `LT-0${mockLeaveTypesList.length + 1}`,
       name: payload.name,
       code: payload.code,
       type: payload.type || (payload.isPaid ? 'Paid' : 'Unpaid'),
-      allocation: payload.allocation || `${payload.annualAllocation || 12} Days / Year`,
+      allocationMethod: payload.allocationMethod || 'annual',
+      annualAllocation: Number(payload.annualAllocation || 0),
+      monthlyAllocation: Number(payload.monthlyAllocation || 0),
+      allocation: monthly
+        ? `${payload.monthlyAllocation || 0} Days / Month`
+        : `${payload.annualAllocation || 0} Days / Year`,
       halfDay: payload.halfDay !== undefined ? payload.halfDay : true,
       carryForward: payload.carryForward || `${payload.maxCarryForward || 0} Days`,
+      maxCarryForward: Number(payload.maxCarryForward || 0),
       status: payload.status || 'Active'
     };
     mockLeaveTypesList.push(newRecord);
     return Promise.resolve(newRecord);
   }
   return apiClient.post('/attendance-manager/leave-types', payload);
+};
+
+export const updateLeaveType = async (id, payload) => {
+  if (USE_MOCK_API) {
+    await delay();
+    const index = mockLeaveTypesList.findIndex((item) => item.id === id);
+    if (index < 0) throw new Error('Leave type not found.');
+    const next = { ...mockLeaveTypesList[index], ...payload };
+    next.allocation =
+      next.allocationMethod === 'monthly'
+        ? `${next.monthlyAllocation || 0} Days / Month`
+        : `${next.annualAllocation || 0} Days / Year`;
+    mockLeaveTypesList[index] = next;
+    return Promise.resolve({ ...next });
+  }
+  return apiClient.patch(`/attendance-manager/leave-types/${id}`, payload);
 };
 
 export const getHolidays = async () => {
@@ -289,6 +312,7 @@ export const attendanceManagerService = {
   getMasterRecords,
   getLeaveTypes,
   createLeaveType,
+  updateLeaveType,
   getHolidays,
   createHoliday,
   deleteHoliday,
