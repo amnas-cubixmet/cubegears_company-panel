@@ -86,6 +86,12 @@ export const PayrollRunControl = ({
 
   return (
     <div className="payroll-run-with-rules">
+      {hasPermission(user, 'payroll.edit') && (
+        <details className="payroll-workshop-settings">
+          <summary>Workshop Wage & Job Commission Rules</summary>
+          <PayrollPolicyPanel onSaved={onChanged} />
+        </details>
+      )}
       <section className="payroll-run-control">
       <div className="payroll-run-control-copy">
         <span>PAYROLL PROCESS</span>
