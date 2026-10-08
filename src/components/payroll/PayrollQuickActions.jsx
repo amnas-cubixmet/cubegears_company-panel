@@ -1,9 +1,9 @@
 import React from 'react';
-import { ArrowRight, Banknote, FileText, Settings2 } from 'lucide-react';
+import { ArrowRight, Banknote, FileText, Settings2, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const actions = [
-  ['Salary Setup', '/payroll/salary-setup', Settings2],
+  ['Employee Pay', '/payroll/employees', Users],
   ['Advances', '/payroll/advances', Banknote],
   ['Reports', '/payroll/reports', FileText],
 ];
