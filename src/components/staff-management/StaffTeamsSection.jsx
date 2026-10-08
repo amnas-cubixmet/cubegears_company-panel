@@ -4,8 +4,12 @@ import { ResponsiveModalSheet } from '../common/ResponsiveModalSheet';
 import { BranchCreateSheet } from './BranchCreateSheet';
 import { branchService } from '../../services/branch.service';
 import { staffManagementService } from '../../services/staffManagement.service';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 
 export const StaffTeamsSection = ({ staff = [], teams = [], setTeams }) => {
+  const { user } = useAuth();
+  const canManageBranches = hasPermission(user, 'company.manage');
   const [branches, setBranches] = useState([]);
   const [teamFormOpen, setTeamFormOpen] = useState(false);
   const [branchFormOpen, setBranchFormOpen] = useState(false);
@@ -117,14 +121,16 @@ export const StaffTeamsSection = ({ staff = [], teams = [], setTeams }) => {
         </div>
 
         <div className="staff-subpage-actions">
-          <button
-            type="button"
-            className="staff-secondary-action"
-            onClick={() => setBranchFormOpen(true)}
-          >
-            <Building2 size={14} />
-            Add Branch
-          </button>
+          {canManageBranches && (
+            <button
+              type="button"
+              className="staff-secondary-action"
+              onClick={() => setBranchFormOpen(true)}
+            >
+              <Building2 size={14} />
+              Add Branch
+            </button>
+          )}
           <button
             type="button"
             className="staff-primary-action"
@@ -262,13 +268,15 @@ export const StaffTeamsSection = ({ staff = [], teams = [], setTeams }) => {
                     </option>
                   ))}
                 </select>
-                <button
-                  type="button"
-                  className="staff-inline-create-button"
-                  onClick={() => setBranchFormOpen(true)}
-                >
-                  + Branch
-                </button>
+                {canManageBranches && (
+                  <button
+                    type="button"
+                    className="staff-inline-create-button"
+                    onClick={() => setBranchFormOpen(true)}
+                  >
+                    + Branch
+                  </button>
+                )}
               </div>
             </label>
           </div>
@@ -364,7 +372,7 @@ export const StaffTeamsSection = ({ staff = [], teams = [], setTeams }) => {
       </ResponsiveModalSheet>
 
       <BranchCreateSheet
-        isOpen={branchFormOpen}
+        isOpen={canManageBranches && branchFormOpen}
         onClose={() => setBranchFormOpen(false)}
         onCreate={async (data) => {
           const created = await branchService.createBranch(data);
