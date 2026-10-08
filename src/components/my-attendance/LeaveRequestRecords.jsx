@@ -47,7 +47,7 @@ export const LeaveRequestRecords = ({ requests, onCancel }) => (
           <div className="leave-request-mobile-head">
             <div>
               <strong>{request.type}</strong>
-              <span>{request.leaveMode}</span>
+              <span>{request.leaveMode} · {request.isPaid ? 'Paid' : 'Unpaid'}</span>
             </div>
             <span className={`leave-status-pill ${statusTone(request.status)}`}>
               {request.status}
@@ -101,7 +101,7 @@ export const LeaveRequestRecords = ({ requests, onCancel }) => (
             <tr key={request.id}>
               <td>
                 <strong>{request.type}</strong>
-                <span>{request.leaveMode}</span>
+                <span>{request.leaveMode} · {request.isPaid ? 'Paid' : 'Unpaid'}</span>
               </td>
               <td>
                 {formatDate(request.startDate)}
