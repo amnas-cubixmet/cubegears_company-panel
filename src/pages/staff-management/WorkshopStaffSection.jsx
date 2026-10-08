@@ -11,6 +11,7 @@ import { StaffShiftCrud } from './StaffShiftCrud';
 import { StaffSkillCrud } from './StaffSkillCrud';
 import { StaffDocumentCrud } from './StaffDocumentCrud';
 import { StaffOverview } from '../../components/staff-management/StaffOverview';
+import { getEmployeeLabel } from '../../components/staff-management/staffDisplay';
 import {
   staffJobAssignments,
   staffPerformance
@@ -473,7 +474,7 @@ export const WorkshopStaffSection = ({ section }) => {
 
   if (section === 'reports') {
     const staffRows = staff.map((person) => ({
-      employee_id: person.id,
+      employee_number: getEmployeeLabel(person),
       name: person.name,
       role: person.role,
       department: person.department,
@@ -485,7 +486,7 @@ export const WorkshopStaffSection = ({ section }) => {
     }));
 
     const perfRows = performanceRows.map(({ person, metrics }) => ({
-      employee_id: person.id,
+      employee_number: getEmployeeLabel(person),
       name: person.name,
       jobs_completed: metrics.jobsCompleted,
       labour_revenue: metrics.labourRevenue,
@@ -510,7 +511,7 @@ export const WorkshopStaffSection = ({ section }) => {
             <Activity size={18}/><span><strong>Performance Report</strong><small>Jobs, revenue, hours, comeback and rating</small></span><Download size={15}/>
           </button>
           <button onClick={() => downloadCsv('staff-skills.csv', staff.map((person) => ({
-            employee_id: person.id,
+            employee_number: getEmployeeLabel(person),
             name: person.name,
             department: person.department,
             skills: (person.skills || []).join(' | ')
@@ -518,7 +519,7 @@ export const WorkshopStaffSection = ({ section }) => {
             <Wrench size={18}/><span><strong>Skills Matrix</strong><small>Technician specialization coverage</small></span><Download size={15}/>
           </button>
           <button onClick={() => downloadCsv('staff-document-compliance.csv', staff.map((person) => ({
-            employee_id: person.id,
+            employee_number: getEmployeeLabel(person),
             name: person.name,
             document_count: person.documents?.length || 0,
             id_proof: person.idProof,
@@ -541,7 +542,7 @@ export const WorkshopStaffSection = ({ section }) => {
               <div key={person.id} className="staff-data-row">
                 <div>
                   <strong>{person.name}</strong>
-                  <span>{person.id} · {person.department} · {person.branch}</span>
+                  <span>{getEmployeeLabel(person)} · {person.department} · {person.branch}</span>
                 </div>
                 <b>{person.employmentStatus}</b>
               </div>
