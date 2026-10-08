@@ -54,6 +54,65 @@ const money = (value) =>
 
 const currentMonthValue = () => new Date().toISOString().slice(0, 7);
 
+const displayText = (value, fallback = '—') => {
+  if (value === null || value === undefined || value === '') return fallback;
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return String(value);
+  }
+
+  if (typeof value === 'boolean') {
+    return value ? 'Yes' : 'No';
+  }
+
+  if (Array.isArray(value)) {
+    const text = value
+      .map((item) => displayText(item, ''))
+      .filter(Boolean)
+      .join(', ');
+    return text || fallback;
+  }
+
+  if (typeof value === 'object') {
+    const preferredKeys = [
+      'description',
+      'name',
+      'title',
+      'label',
+      'code',
+      'status',
+      'value',
+    ];
+
+    for (const key of preferredKeys) {
+      const candidate = value[key];
+      if (
+        candidate !== null &&
+        candidate !== undefined &&
+        candidate !== '' &&
+        (typeof candidate === 'string' || typeof candidate === 'number')
+      ) {
+        return String(candidate);
+      }
+    }
+
+    const primitiveValues = Object.values(value)
+      .filter(
+        (item) =>
+          item !== null &&
+          item !== undefined &&
+          item !== '' &&
+          (typeof item === 'string' || typeof item === 'number'),
+      )
+      .map(String);
+
+    return primitiveValues.join(' · ') || fallback;
+  }
+
+  return String(value);
+};
+
+
 const TABS = [
   ['Overview', User],
   ['Attendance', CalendarDays],
@@ -69,7 +128,7 @@ const InfoItem = ({ label, value, icon: Icon }) => (
     {Icon ? <Icon size={14} /> : null}
     <div>
       <span>{label}</span>
-      <strong>{value || '—'}</strong>
+      <strong>{displayText(value)}</strong>
     </div>
   </div>
 );
@@ -94,17 +153,16 @@ const normalizeDocument = (document = {}) => ({
 
 const normalizeActivity = (item = {}) => ({
   ...item,
-  actor:
-    item.actorName ||
-    item.actor ||
-    'System',
+  actor: displayText(item.actorName || item.actor, 'System'),
   timestamp:
     item.created_at ||
     item.timestamp ||
     '',
-  details:
+  details: displayText(
     item.details ||
-    [item.oldValue, item.newValue].filter(Boolean).join(' → '),
+      [item.oldValue, item.newValue].filter(Boolean).join(' → '),
+    '',
+  ),
 });
 
 export const StaffProfile = ({ staffId, onBack }) => {
@@ -410,7 +468,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
               </span>
             </div>
             <p>
-              {getEmployeeLabel(staff)} · {staff.designation || 'Staff'} · {staff.department || 'Unassigned Team'}
+              {getEmployeeLabel(staff)} · {displayText(staff.designation, 'Staff')} · {displayText(staff.department, 'Unassigned Team')}
             </p>
             <div className="staff360-contact-line">
               <span><Phone size={12}/>{staff.phone || 'No phone'}</span>
@@ -499,7 +557,10 @@ export const StaffProfile = ({ staffId, onBack }) => {
               <div className="staff360-section__title"><Wrench size={15}/> Skills & Specialization</div>
               <div className="staff-chip-row">
                 {staff.skills?.length
-                  ? staff.skills.map((skill) => <span key={skill}>{skill}</span>)
+                  ? staff.skills.map((skill, index) => {
+                      const label = displayText(skill, 'Skill');
+                      return <span key={String(skill?.id || skill?.name || label || index)}>{label}</span>;
+                    })
                   : <span className="is-muted">No skills assigned</span>}
               </div>
             </div>
@@ -530,7 +591,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
                   <div><span>Leave</span><strong>{attendanceSummary.leave}</strong></div>
                   <div><span>Weekly Off</span><strong>{attendanceSummary.weeklyOff}</strong></div>
                   <div><span>Holiday</span><strong>{attendanceSummary.holidays}</strong></div>
-                  <div><span>Shift</span><strong>{staff.shift || '—'}</strong></div>
+                  <div><span>Shift</span><strong>{displayText(staff.shift)}</strong></div>
                 </div>
 
                 <StaffAttendanceCalendar
@@ -567,12 +628,12 @@ export const StaffProfile = ({ staffId, onBack }) => {
                 <article key={job.id} className="staff360-job-card">
                   <div>
                     <span>{job.jobNumber || job.id}</span>
-                    <strong>{job.vehicle || job.vehicleReg || job.vehicleInfo || 'Vehicle'}</strong>
-                    <p>{job.work || job.notes || 'Assigned workshop work'}</p>
+                    <strong>{displayText(job.vehicle || job.vehicleReg || job.vehicleInfo, 'Vehicle')}</strong>
+                    <p>{displayText(job.work || job.notes, 'Assigned workshop work')}</p>
                   </div>
 
                   <div className="staff360-job-side">
-                    <b>{job.status || 'Assigned'}</b>
+                    <b>{displayText(job.status, 'Assigned')}</b>
                     <span>
                       {job.bookedHours
                         ? `${job.bookedHours}h assigned`
@@ -594,7 +655,7 @@ export const StaffProfile = ({ staffId, onBack }) => {
                         : 'No feedback'}
                     </strong>
                     {(job.customerFeedback || job.customer_feedback) && (
-                      <p>{job.customerFeedback || job.customer_feedback}</p>
+                      <p>{displayText(job.customerFeedback || job.customer_feedback, '')}</p>
                     )}
                   </div>
 
@@ -718,8 +779,8 @@ export const StaffProfile = ({ staffId, onBack }) => {
                 <div key={item.id}>
                   <span className="staff360-activity-icon"><Activity size={14}/></span>
                   <div>
-                    <strong>{item.action}</strong>
-                    {item.details && <p>{item.details}</p>}
+                    <strong>{displayText(item.action, 'Activity')}</strong>
+                    {item.details && <p>{displayText(item.details, '')}</p>}
                     <small>
                       {item.actor || 'System'}
                       {item.timestamp
