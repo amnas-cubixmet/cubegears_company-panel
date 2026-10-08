@@ -27,6 +27,7 @@ import './styles/payroll.css';
 import './styles/job-management.css';
 import './styles/customer-management.css';
 import './styles/stock-management.css';
+import './styles/jobs-dashboard-alignment.css';
 
 export function App() {
   return (
