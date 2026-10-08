@@ -135,3 +135,7 @@
 .my-overtime-approved-pay span{color:var(--text-muted);font-size:7px;text-transform:uppercase}
 .my-overtime-approved-pay strong{color:var(--text-primary);font-size:8.5px}
 @media(max-width:480px){.my-overtime-approved-pay{grid-template-columns:1fr 1fr}}
+
+
+.my-overtime-auto-note{display:block;margin-top:3px;color:var(--text-muted);font-size:7.5px;line-height:1.4;font-weight:500}
+.my-overtime-form input[readonly]{background:var(--primary-soft);color:var(--primary);font-weight:750}
