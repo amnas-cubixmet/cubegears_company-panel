@@ -2,24 +2,22 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Clock3, LogIn, LogOut, MapPin, Repeat2 } from 'lucide-react';
 import { attendanceService } from '../../services/attendance.service';
 
-const modeLabel = {
-  single: 'Single Punch',
-  multi: 'Multi Punch',
-  auto_checkout: 'Auto Checkout',
-  hybrid: 'Hybrid',
-};
+const humanize = (value = '') =>
+  String(value)
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 const formatTime = (value) => {
-  if (!value) return '—';
+  if (!value) return null;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
+  if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
 const durationLabel = (session, now) => {
-  if (!session) return '0m';
-  let minutes = Number(session.workedMinutes || 0);
+  if (!session) return null;
 
+  let minutes = Number(session.workedMinutes || 0);
   if (!session.clockOut && session.clockIn) {
     const start = new Date(session.clockIn);
     if (!Number.isNaN(start.getTime())) {
@@ -29,11 +27,11 @@ const durationLabel = (session, now) => {
 
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  return hours ? `${hours}h ${mins}m` : `${mins}m`;
+  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
 };
 
-const locationLabel = (location = {}) => {
-  if (location.latitude == null || location.longitude == null) return 'No location';
+const locationLabel = (location) => {
+  if (!location || location.latitude == null || location.longitude == null) return null;
   return `${Number(location.latitude).toFixed(5)}, ${Number(location.longitude).toFixed(5)}`;
 };
 
@@ -46,9 +44,10 @@ export const AttendancePunchPanel = ({ onChanged }) => {
   const load = async () => {
     try {
       const data = await attendanceService.getAttendanceStatus();
-      setState(data);
+      setState(data || null);
       setError('');
     } catch (err) {
+      setState(null);
       setError(err?.message || 'Unable to load attendance status.');
     }
   };
@@ -62,8 +61,14 @@ export const AttendancePunchPanel = ({ onChanged }) => {
     return () => window.clearInterval(timer);
   }, []);
 
+  const sessions = useMemo(
+    () => (Array.isArray(state?.record?.sessions) ? state.record.sessions : []),
+    [state?.record?.sessions],
+  );
+
   const punch = async () => {
     if (!state?.nextAction || busy) return;
+
     setBusy(true);
     setError('');
 
@@ -71,7 +76,6 @@ export const AttendancePunchPanel = ({ onChanged }) => {
       await attendanceService.punchAttendance(state.nextAction, {
         locationRequired: Boolean(state?.rule?.locationRequired),
         locationTrackingEnabled: Boolean(state?.rule?.locationTrackingEnabled),
-        attendanceMode: state?.attendanceMode,
       });
       await load();
       onChanged?.();
@@ -82,54 +86,83 @@ export const AttendancePunchPanel = ({ onChanged }) => {
     }
   };
 
-  const sessions = useMemo(
-    () => state?.record?.sessions || [],
-    [state?.record?.sessions],
-  );
-
   if (!state && !error) {
-    return <section className="attendance-punch-card is-loading">Loading attendance status…</section>;
+    return (
+      <section className="attendance-punch-card is-loading">
+        Loading attendance status...
+      </section>
+    );
   }
 
-  const isUnavailable = state?.status === 'UNAVAILABLE' || state?.profileLinked === false;
-  const isIn = state?.status === 'CLOCKED_IN';
-  const autoTime = formatTime(state?.autoCheckoutAt);
-  const ActionIcon = state?.nextAction === 'check_out' ? LogOut : LogIn;
+  if (!state) {
+    return <section className="attendance-punch-error">{error}</section>;
+  }
+
+  const isUnavailable = state.status === 'UNAVAILABLE' || state.profileLinked === false;
+  const isIn = state.status === 'CLOCKED_IN';
+  const mode = state.attendanceMode || state.rule?.attendanceMode || null;
+  const sessionCount = Number(state.sessionCount ?? sessions.length ?? 0);
+  const autoCheckoutTime = formatTime(state.autoCheckoutAt);
   const locationEnabled = Boolean(
-    state?.rule?.locationTrackingEnabled || state?.rule?.locationRequired,
+    state.rule?.locationTrackingEnabled || state.rule?.locationRequired,
   );
+  const ActionIcon = state.nextAction === 'check_out' ? LogOut : LogIn;
+
+  const statusLabel = isUnavailable
+    ? 'Not Linked'
+    : state.status
+      ? humanize(state.status)
+      : null;
 
   return (
-    <section className={`attendance-punch-card ${isIn ? 'is-live' : state?.nextAction ? 'is-ready' : 'is-complete'}`}>
+    <section
+      className={
+        'attendance-punch-card ' +
+        (isIn ? 'is-live' : state.nextAction ? 'is-ready' : 'is-complete')
+      }
+    >
       <div className="attendance-punch-main">
         <div className="attendance-punch-status">
-          <span className={`attendance-live-dot ${isIn ? 'is-online' : ''}`} />
+          <span className={'attendance-live-dot ' + (isIn ? 'is-online' : '')} />
           <span>
             <small>Today</small>
-            <strong>{isUnavailable ? 'Not Linked' : isIn ? 'Checked In' : 'Checked Out'}</strong>
+            <strong>{statusLabel || '-'}</strong>
           </span>
         </div>
 
         <div className="attendance-punch-meta">
-          <div>
-            <Clock3 size={13} />
-            <span><small>Mode</small><strong>{modeLabel[state?.attendanceMode] || 'Attendance'}</strong></span>
-          </div>
-          <div>
-            <Repeat2 size={13} />
-            <span><small>Sessions</small><strong>{state?.sessionCount || 0}</strong></span>
-          </div>
-          {autoTime !== '—' && (
+          {mode && (
             <div>
               <Clock3 size={13} />
-              <span><small>Auto Checkout</small><strong>{autoTime}</strong></span>
+              <span>
+                <small>Mode</small>
+                <strong>{humanize(mode)}</strong>
+              </span>
+            </div>
+          )}
+
+          <div>
+            <Repeat2 size={13} />
+            <span>
+              <small>Sessions</small>
+              <strong>{sessionCount}</strong>
+            </span>
+          </div>
+
+          {autoCheckoutTime && (
+            <div>
+              <Clock3 size={13} />
+              <span>
+                <small>Auto Checkout</small>
+                <strong>{autoCheckoutTime}</strong>
+              </span>
             </div>
           )}
         </div>
       </div>
 
       <div className="attendance-punch-action">
-        {state?.nextAction && !isUnavailable ? (
+        {state.nextAction && !isUnavailable ? (
           <button
             type="button"
             className={state.nextAction === 'check_out' ? 'is-checkout' : ''}
@@ -137,42 +170,69 @@ export const AttendancePunchPanel = ({ onChanged }) => {
             onClick={punch}
           >
             <ActionIcon size={14} />
-            {busy ? 'Please wait…' : state.nextAction === 'check_out' ? 'Check Out' : 'Check In'}
+            {busy
+              ? 'Please wait...'
+              : state.nextAction === 'check_out'
+                ? 'Check Out'
+                : 'Check In'}
           </button>
-        ) : (
+        ) : state.reason ? (
           <div className="attendance-punch-note">
             <CheckCircle2 size={14} />
-            <span>{state?.reason || (isIn ? 'Automatic checkout is active.' : 'Attendance completed for today.')}</span>
+            <span>{state.reason}</span>
           </div>
-        )}
+        ) : null}
       </div>
 
       {sessions.length > 0 && (
         <div className="attendance-session-strip">
-          {sessions.map((session, index) => (
-            <article key={session.id || index} className={session.clockOut ? '' : 'is-open'}>
-              <div className="attendance-session-title">
-                <strong>Session {index + 1}</strong>
-                <span>{session.clockOut ? durationLabel(session, now) : `Live · ${durationLabel(session, now)}`}</span>
-              </div>
-              <div className="attendance-session-times">
-                <span><small>In</small><b>{formatTime(session.clockIn)}</b></span>
-                <span><small>Out</small><b>{formatTime(session.clockOut)}</b></span>
-              </div>
-              {locationEnabled && (
-                <div className="attendance-session-location">
-                  <MapPin size={11} />
+          {sessions.map((session, index) => {
+            const inLocation = locationLabel(session.clockInLocation);
+            const outLocation = locationLabel(session.clockOutLocation);
+            const duration = durationLabel(session, now);
+
+            return (
+              <article
+                key={session.id || `session-${index}`}
+                className={session.clockOut ? '' : 'is-open'}
+              >
+                <div className="attendance-session-title">
+                  <strong>
+                    {session.sessionNumber
+                      ? `Session ${session.sessionNumber}`
+                      : `Session ${index + 1}`}
+                  </strong>
+                  {duration && (
+                    <span>{session.clockOut ? duration : `Live - ${duration}`}</span>
+                  )}
+                </div>
+
+                <div className="attendance-session-times">
                   <span>
-                    {locationLabel(session.clockInLocation)}
-                    {session.clockOutLocation?.latitude != null
-                      ? ` → ${locationLabel(session.clockOutLocation)}`
-                      : ''}
+                    <small>In</small>
+                    <b>{formatTime(session.clockIn) || '-'}</b>
+                  </span>
+                  <span>
+                    <small>Out</small>
+                    <b>{formatTime(session.clockOut) || '-'}</b>
                   </span>
                 </div>
-              )}
-              {session.autoClosed && <small className="attendance-session-auto">Auto checkout</small>}
-            </article>
-          ))}
+
+                {locationEnabled && (inLocation || outLocation) && (
+                  <div className="attendance-session-location">
+                    <MapPin size={11} />
+                    <span>
+                      {[inLocation, outLocation].filter(Boolean).join(' -> ')}
+                    </span>
+                  </div>
+                )}
+
+                {session.autoClosed && (
+                  <small className="attendance-session-auto">Auto checkout</small>
+                )}
+              </article>
+            );
+          })}
         </div>
       )}
 
