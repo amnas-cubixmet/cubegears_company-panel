@@ -42,7 +42,13 @@ export const JobCreatePage = () => {
   });
 
   useEffect(() => {
-    staffService.getStaff().then((data) => setStaff(Array.isArray(data) ? data.filter((item) => item.employmentStatus === 'Active') : []));
+    let mounted = true;
+    staffService.getStaff()
+      .then((data) => {
+        if (mounted) setStaff((Array.isArray(data) ? data : data?.results || []).filter((item) => item.employmentStatus === 'Active'));
+      })
+      .catch(() => { if (mounted) setStaff([]); });
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -68,6 +74,9 @@ export const JobCreatePage = () => {
             vin: old.vin || latest.vin || latest.vehicle?.vin || ''
           }));
         }
+      } catch (historyError) {
+        console.error('Vehicle history lookup unavailable', historyError);
+        setHistory([]);
       } finally {
         setHistoryLoading(false);
       }
@@ -164,27 +173,30 @@ export const JobCreatePage = () => {
         <div>
           <div className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-primary">New Job Card</div>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-content">Vehicle Check-In</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Create the workshop job record from vehicle arrival through inspection, approval, repair, QC, invoice and delivery.</p>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Record customer, vehicle, complaints and technician. Estimate, repair, QC and delivery are managed inside the Job Card.</p>
+          <div className="job-create-steps" aria-label="Job setup steps">
+            <span><b>01</b> Customer</span><span><b>02</b> Vehicle</span><span><b>03</b> Assignment</span>
+          </div>
         </div>
       </div>
 
-      {error ? <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
+      {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
       <form onSubmit={submit} className="job-create-form flex flex-col gap-4">
         <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
-          <h2 className="text-base font-extrabold text-content">Job & Customer</h2>
+          <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">01</span> Job & Customer</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className={labelClass}>Date / Time *
               <input type="datetime-local" required value={form.jobDateTime} onChange={(e) => set('jobDateTime', e.target.value)} className={inputClass}/>
             </label>
             <label className={labelClass}>Customer Name *
-              <input required value={form.customerName} onChange={(e) => set('customerName', e.target.value)} placeholder="Customer name" className={inputClass}/>
+              <input required autoComplete="name" value={form.customerName} onChange={(e) => set('customerName', e.target.value)} placeholder="Customer name" className={inputClass}/>
             </label>
             <label className={labelClass}>Phone *
-              <input required inputMode="tel" value={form.customerPhone} onChange={(e) => set('customerPhone', e.target.value)} placeholder="+91..." className={inputClass}/>
+              <input required type="tel" autoComplete="tel" inputMode="tel" value={form.customerPhone} onChange={(e) => set('customerPhone', e.target.value)} placeholder="+91..." className={inputClass}/>
             </label>
             <label className={labelClass}>Email
-              <input type="email" value={form.customerEmail} onChange={(e) => set('customerEmail', e.target.value)} placeholder="Optional" className={inputClass}/>
+              <input type="email" autoComplete="email" value={form.customerEmail} onChange={(e) => set('customerEmail', e.target.value)} placeholder="Optional" className={inputClass}/>
             </label>
             <label className={labelClass}>Branch
               <select value={form.branch} onChange={(e) => set('branch', e.target.value)} className={inputClass}>
@@ -202,12 +214,12 @@ export const JobCreatePage = () => {
         <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
           <div className="flex items-center gap-2">
             <Search size={17} className="text-primary"/>
-            <h2 className="text-base font-extrabold text-content">Vehicle</h2>
+            <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">02</span> Vehicle Details</h2>
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className={labelClass}>Registration Number *
-              <input required autoCapitalize="characters" value={form.vehicleReg} onChange={(e) => set('vehicleReg', e.target.value.toUpperCase())} placeholder="KL 07 AB 1234" className={inputClass}/>
+              <input required autoCapitalize="characters" autoComplete="off" value={form.vehicleReg} onChange={(e) => set('vehicleReg', e.target.value.toUpperCase())} placeholder="KL 07 AB 1234" className={inputClass}/>
             </label>
             <label className={labelClass}>Make / Model
               <input value={form.vehicleInfo} onChange={(e) => set('vehicleInfo', e.target.value)} placeholder="Toyota Innova 2.5V" className={inputClass}/>
@@ -236,7 +248,7 @@ export const JobCreatePage = () => {
         </section>
 
         <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
-          <h2 className="text-base font-extrabold text-content">Complaint & Assignment</h2>
+          <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">03</span> Complaint & Assignment</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className={labelClass + ' md:col-span-2'}>Customer Complaint
               <textarea rows={4} value={form.complaint} onChange={(e) => set('complaint', e.target.value)} placeholder="Record the customer's words separately..." className="mt-1 min-h-28 w-full rounded-xl border border-line bg-surface-2 p-3 text-sm text-content outline-none focus:border-primary"/>
