@@ -16,11 +16,34 @@ export const MagicLinkVerify = () => {
 
   useEffect(() => {
     let alive = true;
+
+    if (!token) {
+      setState('error');
+      setMessage('Magic link is invalid or incomplete.');
+      return () => {
+        alive = false;
+      };
+    }
+
     authRecoveryService.verifyMagicLink({ token, email })
       .then((result) => {
         if (!alive) return;
-        localStorage.setItem('auth_token', result.token);
-        if (result.user) localStorage.setItem('auth_user', JSON.stringify(result.user));
+
+        const accessToken = result?.access || result?.token;
+        if (!accessToken) {
+          throw new Error('Magic link verification did not return an access token.');
+        }
+
+        localStorage.setItem('auth_token', accessToken);
+
+        if (result?.refresh) {
+          localStorage.setItem('auth_refresh_token', result.refresh);
+        }
+
+        if (result?.user) {
+          localStorage.setItem('auth_user', JSON.stringify(result.user));
+        }
+
         setState('success');
         setMessage('Magic link verified. Redirecting to your workspace…');
         window.setTimeout(() => navigate('/dashboard', { replace: true }), 700);
@@ -30,7 +53,10 @@ export const MagicLinkVerify = () => {
         setState('error');
         setMessage(error?.message || 'Magic link is invalid or expired.');
       });
-    return () => { alive = false; };
+
+    return () => {
+      alive = false;
+    };
   }, [token, email, navigate]);
 
   return (
