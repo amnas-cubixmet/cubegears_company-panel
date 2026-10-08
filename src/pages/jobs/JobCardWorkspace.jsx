@@ -22,6 +22,7 @@ import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
+import { JobPayrollAssignments } from '../../components/jobs/JobPayrollAssignments';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -942,7 +943,14 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'work' && (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="job-work-payroll-stack">
+          <JobPayrollAssignments
+            jobId={job.id}
+            staff={staff}
+            defaultLabourRevenue={labourTotal}
+          />
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="text-sm font-extrabold text-content">Labour & Work Items</div>
             <div className="mt-3 flex flex-col gap-2">
@@ -980,6 +988,7 @@ export function JobCardWorkspace() {
               <button disabled={saving} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Add Labour</button>
             </form>
           </section>
+          </div>
         </div>
       )}
 
