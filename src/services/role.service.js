@@ -17,6 +17,12 @@ const normalizeRole = (role) => {
     Boolean(role?.is_system || role?.isProtected) ||
     role?.code === 'SUPER_ADMIN';
 
+  const rawUsersCount =
+    role?.usersCount ??
+    role?.users_count ??
+    (Array.isArray(role?.users) ? role.users.length : 0);
+  const parsedUsersCount = Number(rawUsersCount);
+
   return {
     ...role,
     status: role?.status || (role?.is_active === false ? 'Inactive' : 'Active'),
@@ -30,7 +36,7 @@ const normalizeRole = (role) => {
       role?.description ||
       (protectedRole ? 'Company owner with automatic full access.' : ''),
     branchScope: role?.branchScope || 'Assigned Branch Only',
-    usersCount: role?.usersCount || 0
+    usersCount: Number.isFinite(parsedUsersCount) ? parsedUsersCount : 0
   };
 };
 
