@@ -1,6 +1,6 @@
 import React from 'react';
 import { Car, ChevronRight, User, Wrench } from 'lucide-react';
-import { statusClass } from './jobs.utils';
+import { jobDisplayLabel, statusClass } from './jobs.utils';
 
 export const JobRecordsPanel = ({
   jobs,
@@ -43,8 +43,8 @@ export const JobRecordsPanel = ({
               {jobs.map((job) => (
                 <tr key={job.id}>
                   <td>
-                    <button className="jobs-table-job-link" type="button" onClick={() => onOpenJob(job.id)}>{job.jobNumber || job.id}</button>
-                    <span>{job.id}</span>
+                    <button className="jobs-table-job-link" type="button" onClick={() => onOpenJob(job.id)}>{jobDisplayLabel(job)}</button>
+                    <span>{job.serviceType || job.createdDate || 'Workshop service'}</span>
                   </td>
                   <td>
                     <strong>{job.vehicleReg || 'No registration'}</strong>
@@ -61,7 +61,7 @@ export const JobRecordsPanel = ({
                     </span>
                   </td>
                   <td><strong>{job.createdDate || '—'}</strong></td>
-                  <td><button type="button" className="jobs-table-open" onClick={() => onOpenJob(job.id)} aria-label={`Open Job Card ${job.jobNumber || job.id}`}><ChevronRight size={17} /></button></td>
+                  <td><button type="button" className="jobs-table-open" onClick={() => onOpenJob(job.id)} aria-label={`Open ${jobDisplayLabel(job)}`}><ChevronRight size={17} /></button></td>
                 </tr>
               ))}
             </tbody>
@@ -78,7 +78,7 @@ export const JobRecordsPanel = ({
             >
               <div className="jobs-mobile-card-head">
                 <div>
-                  <strong>{job.jobNumber || job.id}</strong>
+                  <strong>{jobDisplayLabel(job)}</strong>
                   <span>{job.vehicleReg || 'No registration'}</span>
                 </div>
                 <span className={`jobs-status-chip is-${statusClass(job.status)}`}>
