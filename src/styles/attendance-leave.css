@@ -515,3 +515,24 @@
 .apply-leave-balance-note strong{color:var(--primary);font-size:9px}
 .leave-page-error{padding:9px 11px;border:1px solid color-mix(in srgb,var(--danger) 35%,var(--border));border-radius:9px;background:var(--danger-soft);color:var(--danger);font-size:9px;font-weight:700}
 .leave-apply-button:disabled{opacity:.45;cursor:not-allowed}
+
+
+/* Built-in Unpaid Leave */
+.leave-balance-card.is-unpaid{
+  border-style:dashed;
+  background:color-mix(in srgb,var(--surface) 92%,var(--warning-soft));
+}
+.leave-balance-card.is-unpaid .leave-balance-top i{
+  background:var(--warning-soft);
+  color:var(--warning);
+}
+.leave-balance-card.is-unpaid .leave-balance-top strong{
+  font-size:15px;
+}
+.apply-leave-balance-note.is-unpaid{
+  border-color:color-mix(in srgb,var(--warning) 30%,var(--border));
+  background:var(--warning-soft);
+}
+.apply-leave-balance-note.is-unpaid strong{
+  color:var(--warning);
+}
