@@ -8,19 +8,57 @@ import {
 
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const normalizeBalance = (row = {}) => ({
-  ...row,
-  id: row.id || row.code || row.type,
-  type: row.type || row.name || 'Leave',
-  allocated: Number(row.allocated ?? row.annualAllocation ?? 0),
-  used: Number(row.used ?? 0),
-  pending: Number(row.pending ?? 0),
-  available: Number(row.available ?? row.remaining ?? 0),
-  allocationPeriod: row.allocationPeriod || row.allocation_period || 'year',
-  allocationMethod: row.allocationMethod || row.allocation_method || 'annual',
-  paidType: row.paidType || row.paid_type || 'Paid',
-  halfDayAllowed: row.halfDayAllowed ?? row.half_day_allowed ?? true,
-});
+const normalizeBalance = (row = {}) => {
+  const type = row.type || row.name || 'Leave';
+  const isUnpaid =
+    Boolean(row.isUnpaid ?? row.is_unpaid) ||
+    String(row.paidType || row.paid_type || '').toLowerCase() === 'unpaid' ||
+    String(type).trim().toLowerCase() === 'unpaid leave';
+
+  return {
+    ...row,
+    id: row.id || row.code || type,
+    type,
+    isPaid: row.isPaid ?? row.is_paid ?? !isUnpaid,
+    isUnpaid,
+    unlimited: Boolean(row.unlimited || isUnpaid),
+    allocated: isUnpaid ? null : Number(row.allocated ?? row.annualAllocation ?? 0),
+    used: Number(row.used ?? 0),
+    pending: Number(row.pending ?? 0),
+    available: isUnpaid ? null : Number(row.available ?? row.remaining ?? 0),
+    allocationPeriod:
+      row.allocationPeriod ||
+      row.allocation_period ||
+      (isUnpaid ? 'none' : 'year'),
+    allocationMethod:
+      row.allocationMethod ||
+      row.allocation_method ||
+      (isUnpaid ? 'system' : 'annual'),
+    paidType: isUnpaid ? 'Unpaid' : 'Paid',
+    halfDayAllowed: row.halfDayAllowed ?? row.half_day_allowed ?? true,
+  };
+};
+
+const ensureUnpaidLeave = (balances = []) => {
+  const rows = balances.map(normalizeBalance);
+  if (rows.some((row) => row.isUnpaid)) return rows;
+
+  return [
+    ...rows,
+    normalizeBalance({
+      id: 'UNPAID',
+      code: 'UNPAID',
+      type: 'Unpaid Leave',
+      paidType: 'Unpaid',
+      isPaid: false,
+      isUnpaid: true,
+      unlimited: true,
+      used: 0,
+      pending: 0,
+      halfDayAllowed: true,
+    }),
+  ];
+};
 
 const countLeaveDays = (startDate, endDate, halfDay = false) => {
   if (halfDay) return 0.5;
@@ -53,6 +91,16 @@ const normalizeRequest = (row = {}) => {
     attachment: row.attachment || null,
     status: row.status || 'Pending',
     managerNote: row.managerNote || row.manager_note || '',
+    payType:
+      row.payType ||
+      row.pay_type ||
+      (String(row.leave_type || row.leaveType || row.type || '').trim().toLowerCase() === 'unpaid leave'
+        ? 'Unpaid'
+        : 'Paid'),
+    isPaid:
+      row.isPaid ??
+      row.is_paid ??
+      (String(row.leave_type || row.leaveType || row.type || '').trim().toLowerCase() !== 'unpaid leave'),
     submittedAt: row.submittedAt || row.created_at || row.createdAt || null,
     canCancel:
       row.canCancel !== undefined
@@ -67,11 +115,11 @@ const listFromResponse = (response) =>
 export const getLeaveBalances = async () => {
   if (USE_MOCK_API) {
     await delay();
-    return getMockLeaveBalances().map(normalizeBalance);
+    return ensureUnpaidLeave(getMockLeaveBalances());
   }
 
   const response = await apiClient.get('/leave/balances');
-  return listFromResponse(response).map(normalizeBalance);
+  return ensureUnpaidLeave(listFromResponse(response));
 };
 
 export const getLeaveRequests = async () => {
