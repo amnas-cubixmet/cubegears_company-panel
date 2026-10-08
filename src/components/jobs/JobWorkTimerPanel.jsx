@@ -51,7 +51,7 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
     setLoading(true);
     try {
       const [assignmentData, sessionData] = await Promise.all([
-        payrollService.getJobAssignments({ job: jobId }),
+        payrollService.getJobTimerAssignments(jobId),
         payrollService.getJobWorkSessions({ job: jobId }),
       ]);
       setAssignments(Array.isArray(assignmentData) ? assignmentData : assignmentData?.results || []);
