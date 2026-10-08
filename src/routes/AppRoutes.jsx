@@ -112,14 +112,12 @@ export const AppRoutes = () => (
       <Route path="/payroll/incentives" element={<Payroll section="incentives" />} />
       <Route path="/payroll/overtime" element={<Payroll section="overtime" />} />
       <Route path="/payroll/advances" element={<Payroll section="advances" />} />
-      <Route path="/payroll/run" element={<Payroll section="run" />} />
-      <Route path="/payroll/payslips" element={<Payroll section="payslips" />} />
       <Route path="/payroll/reports" element={<Payroll section="reports" />} />
 
       <Route path="/payroll/salary-structure" element={<Navigate to="/payroll/salary-setup" replace />} />
-      <Route path="/payroll/monthly" element={<Navigate to="/payroll/run" replace />} />
-      <Route path="/payroll/approvals" element={<Navigate to="/payroll/run" replace />} />
-      <Route path="/payroll/disbursal" element={<Navigate to="/payroll/run" replace />} />
+      <Route path="/payroll/monthly" element={<Navigate to="/payroll" replace />} />
+      <Route path="/payroll/approvals" element={<Navigate to="/payroll" replace />} />
+      <Route path="/payroll/disbursal" element={<Navigate to="/payroll" replace />} />
 
       <Route path="/customers" element={<Navigate to="/customers/overview" replace />} />
       <Route path="/customers/overview" element={<CustomerManagement section="overview" />} />
