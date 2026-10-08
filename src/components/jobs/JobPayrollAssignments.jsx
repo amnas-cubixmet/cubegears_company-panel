@@ -9,6 +9,7 @@ const emptyDraft = {
   eligibleLabourRevenue: '',
   eligibleServiceRevenue: '',
   commissionAllocationPercent: '',
+  commissionRateOverride: '',
   status: 'Approved',
 };
 
@@ -71,6 +72,7 @@ export const JobPayrollAssignments = ({
       eligibleLabourRevenue: row.eligibleLabourRevenue ?? '',
       eligibleServiceRevenue: row.eligibleServiceRevenue ?? '',
       commissionAllocationPercent: row.commissionAllocationPercent ?? '',
+      commissionRateOverride: row.metadata?.commissionRateOverride ?? '',
       status: row.status || 'Approved',
     });
   };
@@ -83,9 +85,27 @@ export const JobPayrollAssignments = ({
       (item) => String(item.id) === String(draft.employee),
     );
 
+    const split = Number(draft.commissionAllocationPercent || 0);
+    const existingSplit = rows
+      .filter((row) => row.id !== draft.id)
+      .reduce((sum, row) => sum + Number(row.commissionAllocationPercent || 0), 0);
+    if (!Number.isFinite(split) || split < 0 || split > 100 || existingSplit + split > 100) {
+      setError('The mechanic commission splits for this Job Card cannot exceed 100%.');
+      return;
+    }
+    const rateOverride = draft.commissionRateOverride;
+    if (rateOverride !== '' && (!Number.isFinite(Number(rateOverride)) || Number(rateOverride) < 0 || Number(rateOverride) > 100)) {
+      setError('The commission rate must be between 0% and 100%.');
+      return;
+    }
+
     setSaving(true);
     setError('');
     try {
+      const existing = rows.find((row) => row.id === draft.id);
+      const metadata = { ...(existing?.metadata || {}), source: 'manual' };
+      if (rateOverride === '') delete metadata.commissionRateOverride;
+      else metadata.commissionRateOverride = Number(rateOverride);
       await payrollService.saveJobAssignment({
         ...(draft.id ? { id: draft.id } : {}),
         job: jobId,
@@ -102,9 +122,8 @@ export const JobPayrollAssignments = ({
         eligibleServiceRevenue: Number(
           draft.eligibleServiceRevenue || draft.eligibleLabourRevenue || defaultLabourRevenue || 0,
         ),
-        commissionAllocationPercent: Number(
-          draft.commissionAllocationPercent || 0,
-        ),
+        commissionAllocationPercent: split,
+        metadata,
         status: draft.status || 'Approved',
       });
 
@@ -114,6 +133,8 @@ export const JobPayrollAssignments = ({
       const responseMessage =
         requestError?.response?.data?.commissionAllocationPercent?.[0] ||
         requestError?.response?.data?.commissionAllocationPercent ||
+        requestError?.response?.data?.metadata?.[0] ||
+        requestError?.response?.data?.metadata ||
         requestError?.response?.data?.message;
       setError(
         responseMessage ||
@@ -144,7 +165,7 @@ export const JobPayrollAssignments = ({
           <div>
             <strong>Mechanic Payroll Allocation</strong>
             <span>
-              Approved hours, eligible labour revenue and commission split for this Job Card.
+              Select mechanic, set the job-specific commission rate (optional) and split eligible revenue among mechanics.
             </span>
           </div>
         </div>
@@ -181,6 +202,12 @@ export const JobPayrollAssignments = ({
                   <small>Commission Split</small>
                   <b>{Number(row.commissionAllocationPercent || 0)}%</b>
                 </span>
+                <span>
+                  <small>Commission Rate</small>
+                  <b>{row.metadata?.commissionRateOverride != null
+                    ? Number(row.metadata.commissionRateOverride) + '% (this job)'
+                    : 'Staff default'}</b>
+                </span>
               </div>
 
               <div className="job-payroll-assignment-actions">
@@ -208,7 +235,7 @@ export const JobPayrollAssignments = ({
         <div className="job-payroll-assignment-form__title">
           <div>
             <strong>{draft.id ? 'Edit Payroll Assignment' : 'Add Mechanic'}</strong>
-            <span>Commission allocation across all mechanics cannot exceed 100%.</span>
+            <span>Commission rate is the employee earning rate. Split shares the eligible Job Card revenue among mechanics (total maximum 100%).</span>
           </div>
           {draft.id && (
             <button type="button" onClick={reset}>
@@ -290,7 +317,22 @@ export const JobPayrollAssignments = ({
           </label>
 
           <label>
-            <span>Commission Allocation (%) *</span>
+            <span>Commission Rate Override (%)</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              value={draft.commissionRateOverride}
+              onChange={(event) =>
+                setDraft((old) => ({ ...old, commissionRateOverride: event.target.value }))
+              }
+              placeholder="Use staff configured rate"
+            />
+          </label>
+
+          <label>
+            <span>Revenue Split Across Mechanics (%) *</span>
             <input
               type="number"
               min="0"
