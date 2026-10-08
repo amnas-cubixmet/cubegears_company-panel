@@ -395,3 +395,32 @@
     margin-bottom:18px;
   }
 }
+
+
+/* Auth field validation */
+.login-input-shell.is-error{
+  border-color:#ef4444!important;
+  background:rgba(127,29,29,.10)!important;
+  box-shadow:0 0 0 3px rgba(239,68,68,.10)!important;
+}
+.login-input-shell.is-error .login-input-icon{
+  color:#f87171!important;
+}
+.auth-field-error{
+  display:block;
+  margin-top:6px;
+  color:#fca5a5;
+  font-size:9.5px;
+  line-height:1.4;
+  font-weight:650;
+}
+.login-success{
+  margin:-3px 0 17px;
+  padding:10px 12px;
+  border:1px solid rgba(16,185,129,.25);
+  border-radius:10px;
+  background:rgba(6,78,59,.16);
+  color:#a7f3d0;
+  font-size:11px;
+  line-height:1.5;
+}
