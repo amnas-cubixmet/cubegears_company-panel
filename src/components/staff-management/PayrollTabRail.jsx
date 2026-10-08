@@ -6,7 +6,6 @@ import {
   Clock3,
   FileText,
   LayoutDashboard,
-  Settings2,
   Users,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -15,7 +14,6 @@ const tabs = [
   { label: 'Overview', path: '/payroll', icon: LayoutDashboard },
   { label: 'Employees', path: '/payroll/employees', icon: Users },
   { label: 'Attendance', path: '/payroll/attendance', icon: CalendarCheck2 },
-  { label: 'Salary Setup', path: '/payroll/salary-setup', icon: Settings2 },
   { label: 'Incentives', path: '/payroll/incentives', icon: BarChart3 },
   { label: 'Overtime', path: '/payroll/overtime', icon: Clock3 },
   { label: 'Advances', path: '/payroll/advances', icon: Banknote },
