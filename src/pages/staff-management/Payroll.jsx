@@ -3,13 +3,10 @@ import { payrollService } from '../../services/payroll.service';
 import { staffService } from '../../services/staff.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
 import {
-  EmployeeCompensationGrid,
   EmployeePayConfigurationSheet,
-  PAY_TYPES,
   PayrollHeader,
   PayrollOverview,
   PayrollPeriodFilter,
-  PayrollPolicyPanel,
   PayrollRunControl,
 } from '../../components/payroll';
 import { PayrollTabRail } from '../../components/staff-management/PayrollTabRail';
@@ -40,7 +37,6 @@ export const Payroll = ({ section = 'overview' }) => {
   // Local Filter Overrides
   const [selectedApproval, setSelectedApproval] = useState('All');
   const [selectedSettlement, setSelectedSettlement] = useState('All');
-  const [selectedSalaryBasis, setSelectedSalaryBasis] = useState('All');
 
   // Sheet & Modal Item States
   const [paymentTargetItem, setPaymentTargetItem] = useState(null);
@@ -291,66 +287,6 @@ export const Payroll = ({ section = 'overview' }) => {
       {activeSection === 'overtime' && (
         <div className="payroll-section payroll-overtime rounded-2xl border border-line bg-surface-2 p-3 sm:p-4">
           <OvertimeManager />
-        </div>
-      )}
-
-      {/* Employee Salary & Payment Settings */}
-      {activeSection === 'salary' && (
-        <div className="payroll-section payroll-salary flexible-payroll-setup">
-          <section className="flexible-payroll-setup-header">
-            <div>
-              <span>EMPLOYEE PAY CONFIGURATION</span>
-              <h2>Flexible Salary Structures</h2>
-              <p>
-                Every employee can independently use monthly salary, daily wage,
-                hourly wage, commission, salary + commission, incentive or a custom hybrid plan.
-              </p>
-            </div>
-
-            <label>
-              <span>Filter Payment Type</span>
-              <select
-                value={selectedSalaryBasis}
-                onChange={(event) => setSelectedSalaryBasis(event.target.value)}
-              >
-                <option value="All">All Payment Types</option>
-                <option value="unconfigured">Not Configured</option>
-                {PAY_TYPES.map((item) => (
-                  <option key={item.value} value={item.value}>{item.label}</option>
-                ))}
-              </select>
-            </label>
-          </section>
-
-          <div className="flexible-payroll-guide">
-            <div>
-              <strong>Monthly</strong>
-              <span>Configured monthly pay adjusted by applicable leave rules.</span>
-            </div>
-            <div>
-              <strong>Daily / Hourly</strong>
-              <span>Verified payable days or approved worked hours × employee rate.</span>
-            </div>
-            <div>
-              <strong>Commission</strong>
-              <span>Eligible Job Card revenue × configured employee commission.</span>
-            </div>
-            <div>
-              <strong>Hybrid</strong>
-              <span>Multiple earning/deduction components without duplicate compensation.</span>
-            </div>
-          </div>
-
-          <PayrollPolicyPanel
-            onSaved={() => showToast('Company payroll defaults saved.')}
-          />
-
-          <EmployeeCompensationGrid
-            employees={employees}
-            plans={salaryStructures}
-            filter={selectedSalaryBasis}
-            onConfigure={setStructureEditTarget}
-          />
         </div>
       )}
 
