@@ -2070,3 +2070,114 @@
   }
   .job-payroll-save{width:100%;min-height:42px}
 }
+
+
+/* Unified Job Card UX: New / Overview / Complaints / Inspection / Workflow */
+.job-create-page,.cg-job-detail{--job-radius:14px;--job-inner-radius:10px;min-width:0;max-width:100%;font-size:13px;line-height:1.5}
+.job-create-page .job-create-header,.cg-job-detail .job-detail-header{gap:14px;padding:0}
+.job-create-page .job-create-header h1,.cg-job-detail .job-detail-header h1{margin-top:5px!important;font-size:clamp(22px,2vw,27px)!important;line-height:1.2!important;letter-spacing:-.025em!important}
+.job-create-page .job-create-header p,.cg-job-detail .job-detail-header p{font-size:13px!important;line-height:1.55!important}
+.job-create-page .job-create-steps{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:15px}
+.job-create-page .job-create-steps span{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font-size:11px;font-weight:750;color:var(--text-secondary)}
+.job-create-page .job-create-steps b,.job-create-page .job-create-title-step{display:inline-grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border-radius:8px;background:var(--primary-soft);font-size:11px;font-weight:800;color:var(--primary)}
+.job-create-page .job-create-section{padding:18px!important;box-shadow:var(--shadow-sm)!important}
+.job-create-page .job-create-section h2{display:flex;align-items:center;gap:10px;font-size:16px!important;line-height:1.35!important;font-weight:800!important}
+.job-create-page .job-create-form{gap:16px!important}
+.job-create-page .job-create-section > div[class*="grid"]{gap:14px!important}
+.job-create-page .job-create-form label{display:block;min-width:0;font-size:12px!important;line-height:1.4!important;font-weight:700!important}
+.job-create-page .job-create-form input:not([type="file"]),
+.job-create-page .job-create-form select{width:100%;min-width:0;min-height:44px!important;height:44px!important;padding:0 12px;font-size:13px!important;border-radius:10px!important}
+.job-create-page .job-create-form textarea{width:100%;min-width:0;min-height:104px;padding:12px!important;font-size:13px!important;line-height:1.5;resize:vertical}
+.job-create-page .job-create-form input:disabled{opacity:.6;cursor:not-allowed}
+.job-create-page .job-create-form label>span[class*="text-muted"]{font-size:11px!important;line-height:1.5}
+.job-create-page .job-create-history{padding:14px!important;border-radius:10px!important}
+.job-create-page .job-create-history div{font-size:12px}
+.job-create-page .job-create-actions{gap:10px;padding-top:12px}
+.job-create-page .job-create-actions button{min-height:44px;font-size:13px!important;font-weight:750!important}
+.cg-job-detail .job-detail-header{align-items:flex-start;flex-wrap:wrap}
+.cg-job-detail .job-detail-header > div:first-child{min-width:0;flex:1 1 260px}
+.cg-job-detail .job-detail-header > div:last-child{align-self:center}
+.cg-job-detail .job-detail-header > div:last-child button,.cg-job-detail .job-detail-header > div:last-child select{min-height:44px!important;height:44px!important;padding:0 13px!important;font-size:12px!important;border-radius:10px!important}
+.cg-job-detail .job-detail-summary{gap:11px!important}
+.cg-job-detail .job-detail-summary > div{padding:14px!important;border-radius:12px!important;min-width:0}
+.cg-job-detail .job-detail-summary > div > div:first-child{font-size:11px!important;letter-spacing:.04em!important}
+.cg-job-detail .job-detail-summary > div > div:last-child{font-size:14px!important;line-height:1.45!important;white-space:normal!important;overflow-wrap:anywhere}
+.cg-job-detail .job-status-pipeline{gap:8px!important;padding:6px 2px 12px!important;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.cg-job-detail .job-status-step{min-width:122px;min-height:58px!important;padding:9px 11px!important}
+.cg-job-detail .job-status-step strong{font-size:11px!important;line-height:1.3!important}
+.cg-job-detail .job-status-step > span{font-size:11px!important}
+.cg-job-detail .job-workflow-tabs{gap:7px!important;padding:8px!important;scrollbar-width:none;overscroll-behavior-inline:contain}
+.cg-job-detail .job-workflow-tab{min-width:138px!important;min-height:44px!important;gap:8px;padding:0 12px!important;font-size:12px!important;border-radius:10px!important;white-space:nowrap}
+.cg-job-detail .job-workflow-tab-number{font-size:11px!important;flex:0 0 23px;width:23px;height:23px}
+.cg-job-detail .job-workflow-tab.is-active{background:var(--primary)!important;color:#fff!important}
+.cg-job-detail .job-workflow-gate{gap:14px;padding:13px 16px;border-radius:11px}
+.cg-job-detail .job-workflow-gate strong{font-size:13px!important;line-height:1.4}
+.cg-job-detail .job-workflow-gate span{font-size:12px!important;line-height:1.5}
+.cg-job-detail .job-workflow-gate button{min-height:40px;font-size:12px!important;font-weight:750}
+.cg-job-detail .job-panel,.cg-job-detail .job-complaints-panel,.cg-job-detail .job-inspection-grid>section{min-width:0;padding:18px!important;box-shadow:var(--shadow-sm);border-radius:13px!important}
+.cg-job-detail .job-panel-title,.cg-job-detail .job-panel>div:first-child[class*="font-extrabold"]{font-size:16px!important;line-height:1.4!important;font-weight:800!important}
+.cg-job-detail .job-info-card{padding:13px!important;border-radius:10px!important}
+.cg-job-detail .job-info-card > div:first-child{font-size:11px!important}
+.cg-job-detail .job-info-card > div:last-child{font-size:13px!important;line-height:1.45;overflow-wrap:anywhere}
+.cg-job-detail label{min-width:0;font-size:12px!important;line-height:1.45}
+.cg-job-detail input:not([type="checkbox"]):not([type="file"]),.cg-job-detail select{min-width:0;min-height:44px!important;height:44px!important;font-size:13px!important;border-radius:10px!important}
+.cg-job-detail textarea{min-width:0;min-height:88px;font-size:13px!important;line-height:1.5!important;border-radius:10px!important}
+.cg-job-detail input:focus-visible,.cg-job-detail select:focus-visible,.cg-job-detail textarea:focus-visible,
+.cg-job-detail button:focus-visible,.job-create-page button:focus-visible,.job-create-page input:focus-visible,
+.job-create-page select:focus-visible,.job-create-page textarea:focus-visible{outline:2px solid var(--primary)!important;outline-offset:2px}
+.cg-job-detail .job-complaint-compose{gap:11px!important}
+.cg-job-detail .job-complaint-compose textarea{flex:1 1 auto;min-height:94px!important}
+.cg-job-detail .job-complaint-compose button{min-height:44px!important;padding-inline:16px!important;white-space:nowrap;font-size:12px!important}
+.cg-job-detail .job-complaint-list{gap:10px!important}
+.cg-job-detail .job-complaint-card{align-items:flex-start!important;gap:12px;padding:14px!important;border-radius:11px!important}
+.cg-job-detail .job-complaint-card > div:first-child > div:first-child{font-size:13px!important;line-height:1.5;overflow-wrap:anywhere}
+.cg-job-detail .job-complaint-card > div:first-child > div:last-child{font-size:11px!important}
+.cg-job-detail .job-complaint-card select{width:auto;min-width:140px;min-height:38px!important;height:38px!important;font-size:12px!important}
+.cg-job-detail .job-inspection-grid{gap:14px!important}
+.cg-job-detail .job-inspection-summary{gap:9px!important}
+.cg-job-detail .job-inspection-checks{gap:10px!important}
+.cg-job-detail .job-inspection-check{min-width:0;padding:14px!important;border-radius:10px!important}
+.cg-job-detail .job-inspection-check > strong{font-size:13px!important}
+.cg-job-detail .job-inspection-check > div{font-size:11px!important;line-height:1.5}
+.cg-job-detail .job-inspection-overview>label{min-height:44px!important;gap:8px;padding:0 14px;font-size:12px!important}
+.cg-job-detail .job-finding-form{gap:12px!important}
+.cg-job-detail .job-finding-form button{min-height:44px!important;font-size:12px!important}
+.cg-job-detail .job-findings-grid{gap:10px!important}
+.cg-job-detail .job-finding-card{padding:14px!important;border-radius:11px!important}
+.cg-job-detail .job-finding-card strong{font-size:13px!important;line-height:1.5;overflow-wrap:anywhere}
+.cg-job-detail .job-finding-card span{font-size:11px!important}
+.cg-job-detail .job-finding-card div{font-size:12px}
+.cg-job-detail .job-inspection-grid .job-finding-panel,.cg-job-detail .job-inspection-grid .job-findings-panel{min-width:0}
+@media(max-width:767px){
+ .job-create-page .job-create-header h1,.cg-job-detail .job-detail-header h1{font-size:23px!important}
+ .job-create-page .job-create-section,.cg-job-detail .job-panel,.cg-job-detail .job-complaints-panel,.cg-job-detail .job-inspection-grid>section{padding:14px!important}
+ .job-create-page .job-create-form input:not([type="file"]),.job-create-page .job-create-form select,
+ .job-create-page .job-create-form textarea,.cg-job-detail input:not([type="checkbox"]):not([type="file"]),
+ .cg-job-detail select,.cg-job-detail textarea{font-size:16px!important}
+ .job-create-page .job-create-actions{position:sticky;bottom:calc(66px + env(safe-area-inset-bottom));z-index:20;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 -2px 14px rgba(0,0,0,.05)}
+ .cg-job-detail .job-detail-header>div:last-child{width:100%;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .cg-job-detail .job-detail-header>div:last-child button,.cg-job-detail .job-detail-header>div:last-child select{font-size:12px!important}
+ .cg-job-detail .job-detail-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .cg-job-detail .job-detail-summary>div{padding:11px!important}
+ .cg-job-detail .job-status-step{min-width:115px!important;min-height:54px!important}
+ .cg-job-detail .job-workflow-tab{min-width:129px!important;min-height:44px!important;font-size:12px!important}
+ .cg-job-detail .job-workflow-gate{padding:12px}
+ .cg-job-detail .job-workflow-gate button{width:100%}
+ .cg-job-detail .job-complaint-compose{flex-direction:column}
+ .cg-job-detail .job-complaint-compose button{width:100%}
+ .cg-job-detail .job-complaint-card{flex-direction:column;align-items:stretch!important}
+ .cg-job-detail .job-complaint-card select{width:100%;font-size:16px!important;height:44px!important}
+ .cg-job-detail .job-inspection-checks{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .cg-job-detail .job-inspection-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:380px){
+ .job-create-page .job-create-steps{gap:5px}
+ .job-create-page .job-create-steps span{font-size:10px;padding:6px 7px}
+ .job-create-page .job-create-section h2{font-size:15px!important}
+ .cg-job-detail .job-workflow-tab{min-width:117px!important}
+ .cg-job-detail .job-inspection-checks{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .cg-job-detail .job-detail-header>div:last-child{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .cg-job-detail .job-workflow-tab,.job-create-page button{transition:none!important}
+}
