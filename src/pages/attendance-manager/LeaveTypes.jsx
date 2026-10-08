@@ -18,7 +18,7 @@ const emptyForm = {
 const normalizeForm = (row = {}) => ({
   name: row.name || '',
   code: row.code || '',
-  type: row.type || 'Paid',
+  type: 'Paid',
   allocationMethod: row.allocationMethod || 'annual',
   annualAllocation: Number(row.annualAllocation || 0),
   monthlyAllocation: Number(row.monthlyAllocation || 0),
@@ -89,6 +89,7 @@ export const LeaveTypes = () => {
 
     const payload = {
       ...form,
+      type: 'Paid',
       name: form.name.trim(),
       code: form.code.trim().toUpperCase(),
       annualAllocation: Number(form.annualAllocation || 0),
@@ -120,7 +121,7 @@ export const LeaveTypes = () => {
       <section className="am-leave-types-heading">
         <div>
           <h2>Company Leave Types</h2>
-          <p>Configure paid, sick, casual and annual leave allocation rules.</p>
+          <p>Configure paid leave allocation rules. Unpaid Leave is built in and always available to employees.</p>
         </div>
 
         <button type="button" className="am-primary-action" onClick={openCreate}>
@@ -187,7 +188,7 @@ export const LeaveTypes = () => {
 
           {!types.length && (
             <div className="am-leave-types-empty">
-              No leave policies configured. Add Paid, Sick, Casual or Annual Leave.
+              No paid leave policies configured. Employees can still apply for built-in Unpaid Leave.
             </div>
           )}
         </section>
@@ -224,11 +225,9 @@ export const LeaveTypes = () => {
             </label>
 
             <label>
-              <span>Paid / Unpaid</span>
-              <select value={form.type} onChange={(event) => update('type', event.target.value)}>
-                <option value="Paid">Paid Leave</option>
-                <option value="Unpaid">Unpaid Leave</option>
-              </select>
+              <span>Leave Type</span>
+              <input value="Paid Leave" disabled />
+              <small>Configured leave policies are always paid. Unpaid Leave is a separate built-in option.</small>
             </label>
 
             <label>
