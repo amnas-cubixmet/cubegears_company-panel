@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
+import { branchService } from '../../services/branch.service';
 
 export const StaffDirectoryToolbar = ({
   query,
@@ -13,6 +14,19 @@ export const StaffDirectoryToolbar = ({
   onAdd,
 }) => {
   const { user } = useAuth();
+  const [branches, setBranches] = useState([]);
+
+  useEffect(() => {
+    branchService.getBranches()
+      .then((rows) =>
+        setBranches(
+          (Array.isArray(rows) ? rows : []).filter(
+            (item) => item.is_active !== false,
+          ),
+        ),
+      )
+      .catch(() => setBranches([]));
+  }, []);
 
   return (
     <section className="staff-directory-toolbar">
@@ -27,8 +41,11 @@ export const StaffDirectoryToolbar = ({
 
       <select value={branch} onChange={(event) => onBranchChange(event.target.value)}>
         <option value="All">All Branches</option>
-        <option value="Main Garage Branch">Main Garage Branch</option>
-        <option value="Kochi South Branch">Kochi South Branch</option>
+        {branches.map((item) => (
+          <option key={item.id} value={item.name}>
+            {item.name}
+          </option>
+        ))}
       </select>
 
       <select value={status} onChange={(event) => onStatusChange(event.target.value)}>
