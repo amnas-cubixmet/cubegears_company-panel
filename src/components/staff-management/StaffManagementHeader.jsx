@@ -5,7 +5,7 @@ export const StaffManagementHeader = () => (
   <header className="staff-dashboard-header">
     <div>
       <h1>Staff Management</h1>
-      <p>Manage workshop staff, teams, shifts, skills, performance and access.</p>
+      <p>Manage workshop staff, teams, shifts, performance, documents and access.</p>
     </div>
 
     <div className="staff-dashboard-header-badge">
