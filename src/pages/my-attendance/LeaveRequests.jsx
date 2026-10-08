@@ -71,7 +71,7 @@ export const LeaveRequests = () => {
   const handleApplyLeave = async (event) => {
     event.preventDefault();
 
-    if (!form.startDate || !form.endDate || !form.reason.trim()) return;
+    if (!form.startDate || !form.reason.trim()) return;
 
     setSubmitting(true);
     try {
