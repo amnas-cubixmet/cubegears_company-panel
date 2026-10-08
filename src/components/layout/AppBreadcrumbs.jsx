@@ -1,6 +1,8 @@
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { staffService } from '../../services/staff.service';
+import { getEmployeeLabel } from '../staff-management/staffDisplay';
 import '../../styles/breadcrumbs.css';
 
 const LABELS = {
@@ -87,20 +89,58 @@ const buildHref = (segments, index) => '/' + segments.slice(0, index + 1).join('
 export function AppBreadcrumbs() {
   const location = useLocation();
   const scrollRef = useRef(null);
+  const [staffBreadcrumbLabel, setStaffBreadcrumbLabel] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    const match = location.pathname.match(/^\/staff-management\/staff\/([^/]+)$/);
+
+    if (!match) {
+      setStaffBreadcrumbLabel('');
+      return () => {
+        alive = false;
+      };
+    }
+
+    setStaffBreadcrumbLabel('Staff Profile');
+
+    staffService
+      .getStaffById(decodeURIComponent(match[1]))
+      .then((profile) => {
+        if (alive && profile) {
+          setStaffBreadcrumbLabel(getEmployeeLabel(profile));
+        }
+      })
+      .catch(() => {
+        if (alive) setStaffBreadcrumbLabel('Staff Profile');
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [location.pathname]);
 
   const items = useMemo(() => {
     const segments = location.pathname.split('/').filter(Boolean);
     if (!segments.length || location.pathname === '/dashboard') return [];
 
+    const isStaffProfile =
+      segments.length === 3 &&
+      segments[0] === 'staff-management' &&
+      segments[1] === 'staff';
+
     return [
       { label: 'Home', href: '/dashboard', current: false, home: true },
       ...segments.map((segment, index) => ({
-        label: prettify(segment),
+        label:
+          isStaffProfile && index === 2
+            ? staffBreadcrumbLabel || 'Staff Profile'
+            : prettify(segment),
         href: buildHref(segments, index),
         current: index === segments.length - 1
       }))
     ];
-  }, [location.pathname]);
+  }, [location.pathname, staffBreadcrumbLabel]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
