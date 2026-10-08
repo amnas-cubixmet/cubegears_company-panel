@@ -5,6 +5,19 @@ import { authRecoveryService } from '../../services/authRecovery.service';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
+const verificationRequests = new Map();
+
+const verifyMagicLinkOnce = ({ token, email }) => {
+  if (!verificationRequests.has(token)) {
+    verificationRequests.set(
+      token,
+      verifyMagicLinkOnce({ token, email }),
+    );
+  }
+
+  return verificationRequests.get(token);
+};
+
 export const MagicLinkVerify = () => {
   const location = useLocation();
   const navigate = useNavigate();
