@@ -17,9 +17,6 @@ const emptyForm = () => ({
   clockIn: '',
   clockOut: '',
   overtimeHours: '',
-  calculationMethod: 'Hourly Rate',
-  rate: '',
-  amount: '',
   reason: '',
   notes: '',
 });
@@ -94,17 +91,6 @@ export const AddOvertimeSheet = ({ isOpen, onClose, onSave, prefillStaff }) => {
     }
   }, [staffOptions, formData.staffId]);
 
-  useEffect(() => {
-    const hours = Number(formData.overtimeHours) || 0;
-    const rate = Number(formData.rate) || 0;
-    if (formData.calculationMethod === 'Hourly Rate') {
-      setFormData((current) => ({
-        ...current,
-        amount: hours && rate ? String(hours * rate) : '',
-      }));
-    }
-  }, [formData.overtimeHours, formData.rate, formData.calculationMethod]);
-
   const selectStaff = (staffId) => {
     const row = staffOptions.find((item) =>
       String(item.employeeId || item.id) === String(staffId)
@@ -136,8 +122,8 @@ export const AddOvertimeSheet = ({ isOpen, onClose, onSave, prefillStaff }) => {
       await onSave({
         ...formData,
         overtimeHours: hours,
-        rate: Number(formData.rate) || 0,
-        amount: Number(formData.amount) || 0,
+        rate: 0,
+        amount: 0,
       });
       onClose();
     } catch (err) {
@@ -233,37 +219,10 @@ export const AddOvertimeSheet = ({ isOpen, onClose, onSave, prefillStaff }) => {
             />
           </label>
 
-          <label>
-            <span>Calculation Method</span>
-            <select
-              value={formData.calculationMethod}
-              onChange={(event) => setFormData({ ...formData, calculationMethod: event.target.value })}
-            >
-              <option>Hourly Rate</option>
-              <option>Fixed Amount</option>
-              <option>Manual Authorized Amount</option>
-            </select>
-          </label>
+        </div>
 
-          <label>
-            <span>Overtime Rate (₹ / hr)</span>
-            <input
-              type="number"
-              min="0"
-              value={formData.rate}
-              onChange={(event) => setFormData({ ...formData, rate: event.target.value })}
-            />
-          </label>
-
-          <label>
-            <span>Calculated Amount (₹)</span>
-            <input
-              type="number"
-              min="0"
-              value={formData.amount}
-              onChange={(event) => setFormData({ ...formData, amount: event.target.value })}
-            />
-          </label>
+        <div className="overtime-rate-policy-note">
+          Overtime price is set by the manager when this request is approved.
         </div>
 
         <label className="overtime-entry-wide">
