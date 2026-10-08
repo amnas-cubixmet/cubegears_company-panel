@@ -24,6 +24,7 @@ import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 import { JobPayrollAssignments } from '../../components/jobs/JobPayrollAssignments';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
+import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -677,8 +678,7 @@ export function JobCardWorkspace() {
       <header className="job-detail-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="min-w-0">
-            <div className="text-[10px] font-black uppercase tracking-[0.12em] text-primary">Job Card</div>
-            <h1 className="mt-1 truncate text-2xl font-black tracking-tight text-content">{job.jobNumber || job.id}</h1>
+            <h1 className="mt-1 truncate text-2xl font-black tracking-tight text-content">{jobDisplayLabel(job)}</h1>
             <p className="mt-1 text-xs text-muted">{job.vehicleReg} · {job.vehicleInfo || 'Vehicle'} · {job.customerName}</p>
           </div>
         </div>
@@ -870,7 +870,7 @@ export function JobCardWorkspace() {
               <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                 {vehicleHistory.slice(0, 6).map((item) => (
                   <button key={item.id} onClick={() => navigate(`/jobs/${item.id}/overview`)} className="rounded-xl border border-line bg-surface-2 p-3 text-left">
-                    <div className="text-xs font-extrabold text-content">{item.jobNumber}</div>
+                    <div className="text-xs font-extrabold text-content">{jobDisplayLabel(item)}</div>
                     <div className="mt-1 text-[10px] text-muted">{item.createdDate} · {item.status}</div>
                     <div className="mt-2 line-clamp-2 text-[11px] text-secondary">{item.complaints?.[0]?.description || 'Service / repair visit'}</div>
                   </button>
