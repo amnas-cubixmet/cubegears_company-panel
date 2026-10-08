@@ -9,6 +9,8 @@ import {
   PayrollHeader,
   PayrollOverview,
   PayrollPeriodFilter,
+  PayrollPolicyPanel,
+  PayrollRunControl,
 } from '../../components/payroll';
 import { PayrollTabRail } from '../../components/staff-management/PayrollTabRail';
 import { PayrollCard } from '../../components/staff-management/PayrollCard';
@@ -374,6 +376,10 @@ export const Payroll = ({ section = 'overview' }) => {
             </div>
           </div>
 
+          <PayrollPolicyPanel
+            onSaved={() => showToast('Company payroll defaults saved.')}
+          />
+
           <EmployeeCompensationGrid
             employees={employees}
             plans={salaryStructures}
@@ -386,6 +392,14 @@ export const Payroll = ({ section = 'overview' }) => {
       {/* Run Payroll */}
       {activeSection === 'run' && (
         <div className="payroll-section payroll-run" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <PayrollRunControl
+            month={selectedMonth}
+            year={selectedYear}
+            branch={selectedBranch}
+            employees={employees}
+            onChanged={loadData}
+          />
+
           <div className="payroll-section-title">
             Monthly Payroll Calculation ({periodString})
           </div>
