@@ -12,7 +12,7 @@ export const getEmployeeSequence = (staff = {}, fallbackIndex = 0) => {
 };
 
 export const getEmployeeLabel = (staff = {}, fallbackIndex = 0) =>
-  `Employee ${getEmployeeSequence(staff, fallbackIndex)}`;
+  `EMP${getEmployeeSequence(staff, fallbackIndex)}`;
 
 export const getStaffInitials = (name = '') => {
   const words = String(name).trim().split(/\s+/).filter(Boolean);
