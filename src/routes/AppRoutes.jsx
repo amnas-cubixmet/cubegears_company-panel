@@ -12,6 +12,7 @@ import { MyAttendance } from '../pages/attendance/MyAttendance';
 import { AttendanceManager } from '../pages/attendance/AttendanceManager';
 import { StaffAttendanceDetails } from '../pages/attendance-manager/StaffAttendanceDetails';
 import { StaffManagement } from '../pages/employees/StaffManagement';
+import { StaffProfile } from '../pages/staff-management/staff/StaffProfile';
 import { Payroll } from '../pages/staff-management/Payroll';
 import { CustomerList } from '../pages/customers/CustomerList';
 import { CustomerManagement } from '../pages/customers/CustomerManagement';
