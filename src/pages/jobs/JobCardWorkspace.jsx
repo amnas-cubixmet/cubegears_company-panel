@@ -187,10 +187,15 @@ export function JobCardWorkspace() {
   };
 
   const setStatus = async (status) => {
+    if (status === normalizeJobStatus(job?.status)) return;
     setSaving(true);
+    setError('');
     try {
       const updated = await jobService.updateJobStatus(job.id, status);
       setJob(updated || { ...job, status });
+    } catch (requestError) {
+      const details = requestError?.response?.data;
+      setError(details?.status || details?.message || requestError?.message || 'Could not change Job Card status.');
     } finally {
       setSaving(false);
     }
@@ -646,7 +651,7 @@ export function JobCardWorkspace() {
   if (!job) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Job card not found.</div>;
 
   return (
-    <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-24 md:pb-4">
+    <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-4">
       <header className="job-detail-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="min-w-0">
@@ -658,6 +663,7 @@ export function JobCardWorkspace() {
 
         <div className="flex flex-wrap items-center gap-2">
           <select
+            aria-label="Change Job Card status"
             value={normalizeJobStatus(job.status)}
             onChange={(e) => setStatus(e.target.value)}
             disabled={saving}
@@ -665,7 +671,7 @@ export function JobCardWorkspace() {
           >
             {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
           </select>
-          <button onClick={createInvoice} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
+          <button type="button" onClick={createInvoice} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
             <ReceiptText size={15}/>Create Invoice
           </button>
         </div>
@@ -758,7 +764,7 @@ export function JobCardWorkspace() {
         ) : null}
       </div>
 
-      {error ? <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
+      {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -1228,12 +1234,6 @@ export function JobCardWorkspace() {
         </section>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 border-t border-line bg-surface px-2 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2 md:hidden">
-        <MobileAction icon={Wrench} label="Work" onClick={()=>openTab('work')}/>
-        <MobileAction icon={PackageSearch} label="Parts" onClick={()=>openTab('parts')}/>
-        <MobileAction icon={ShieldCheck} label="QC" onClick={()=>openTab('qc')}/>
-        <MobileAction icon={FileText} label="Invoice" onClick={()=>openTab('invoice')}/>
-      </div>
     </div>
   );
 }
@@ -1258,14 +1258,6 @@ function AmountRow({ label, value }) {
 
 function Empty({ text }) {
   return <div className="rounded-xl border border-dashed border-line p-5 text-center text-xs text-muted"><Clock3 size={16} className="mx-auto mb-2"/>{text}</div>;
-}
-
-function MobileAction({ icon: Icon, label, onClick }) {
-  return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1 border-0 bg-transparent py-1 text-[10px] font-bold text-secondary">
-      <Icon size={18}/><span>{label}</span>
-    </button>
-  );
 }
 
 export default JobCardWorkspace;
