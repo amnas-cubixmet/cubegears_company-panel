@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Camera,
   CheckCircle2,
@@ -87,6 +87,7 @@ export function JobCardWorkspace() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const workflowTabsRef = useRef(null);
 
   const [job, setJob] = useState(null);
   const [staff, setStaff] = useState([]);
@@ -120,6 +121,14 @@ export function JobCardWorkspace() {
     const section = location.pathname.split('/').filter(Boolean).at(-1);
     return TABS.some(([key]) => key === section) ? section : 'overview';
   }, [location.pathname]);
+
+  useEffect(() => {
+    const rail = workflowTabsRef.current;
+    const activeButton = rail?.querySelector('[aria-current="page"]');
+    if (!rail || !activeButton || rail.scrollWidth <= rail.clientWidth) return;
+    const left = activeButton.offsetLeft - rail.offsetLeft - (rail.clientWidth - activeButton.clientWidth) / 2;
+    rail.scrollTo({ left: Math.max(0, left), behavior: 'instant' });
+  }, [activeTab]);
 
   const load = async () => {
     setLoading(true);
@@ -727,7 +736,7 @@ export function JobCardWorkspace() {
         })}
       </section>
 
-      <nav className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
+      <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
         {TABS.map(([key, label], index) => {
           const locked = index > unlockedTabIndex;
           const completed = index < unlockedTabIndex || (index === unlockedTabIndex && sectionComplete[key]);
@@ -738,6 +747,7 @@ export function JobCardWorkspace() {
               onClick={() => openTab(key)}
               disabled={locked}
               aria-disabled={locked}
+              aria-current={activeTab === key ? "page" : undefined}
               className={[
                 'job-workflow-tab',
                 activeTab === key ? 'is-active' : '',
@@ -876,7 +886,7 @@ export function JobCardWorkspace() {
           <div className="job-panel-title text-sm font-extrabold text-content">Customer Complaints</div>
           <div className="job-complaint-compose mt-3 flex flex-col gap-2 sm:flex-row">
             <textarea value={complaintText} onChange={(e) => setComplaintText(e.target.value)} placeholder="Add complaint exactly as customer explains it..." className="min-h-20 flex-1 rounded-xl border border-line bg-surface-2 p-3 text-sm text-content"/>
-            <button onClick={addComplaint} disabled={!complaintText.trim() || saving} className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white"><Plus size={15} className="inline"/> Add Complaint</button>
+            <button type="button" onClick={addComplaint} disabled={!complaintText.trim() || saving} className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white"><Plus size={15} className="inline"/> Add Complaint</button>
           </div>
 
           <div className="job-complaint-list mt-4 flex flex-col gap-2">
@@ -886,7 +896,7 @@ export function JobCardWorkspace() {
                   <div className="text-xs font-bold text-content">{item.description}</div>
                   <div className="mt-1 text-[10px] text-muted">{item.relatedService || 'Not linked to work item'}</div>
                 </div>
-                <select value={item.status || 'Open'} onChange={(e) => updateComplaintStatus(item.id, e.target.value)} className="h-8 rounded-lg border border-line bg-surface px-2 text-[11px] font-semibold text-content">
+                <select aria-label={`Status for complaint ${item.description}`} value={item.status || 'Open'} onChange={(e) => updateComplaintStatus(item.id, e.target.value)} className="h-8 rounded-lg border border-line bg-surface px-2 text-[11px] font-semibold text-content">
                   <option>Open</option><option>In Progress</option><option>Completed</option>
                 </select>
               </div>
@@ -943,14 +953,14 @@ export function JobCardWorkspace() {
           <section className="job-panel job-finding-panel rounded-2xl border border-line bg-surface p-4">
             <div className="job-panel-title text-sm font-extrabold text-content">Add Finding</div>
             <form onSubmit={addFinding} className="job-finding-form mt-3 grid grid-cols-1 gap-3">
-              <input value={finding.description} onChange={(e)=>setFinding({...finding,description:e.target.value})} placeholder="Finding / issue" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
+              <input aria-label="Vehicle inspection finding" value={finding.description} onChange={(e)=>setFinding({...finding,description:e.target.value})} placeholder="Finding / issue" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
               <div className="grid grid-cols-2 gap-2">
-                <select value={finding.severity} onChange={(e)=>setFinding({...finding,severity:e.target.value})} className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
+                <select aria-label="Finding severity" value={finding.severity} onChange={(e)=>setFinding({...finding,severity:e.target.value})} className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
                   <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
                 </select>
-                <input inputMode="decimal" value={finding.estimatedCost} onChange={(e)=>setFinding({...finding,estimatedCost:e.target.value})} placeholder="Estimated cost ₹" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
+                <input aria-label="Estimated repair cost" inputMode="decimal" value={finding.estimatedCost} onChange={(e)=>setFinding({...finding,estimatedCost:e.target.value})} placeholder="Estimated cost ₹" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
               </div>
-              <input value={finding.recommendedAction} onChange={(e)=>setFinding({...finding,recommendedAction:e.target.value})} placeholder="Recommended action" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
+              <input aria-label="Recommended repair action" value={finding.recommendedAction} onChange={(e)=>setFinding({...finding,recommendedAction:e.target.value})} placeholder="Recommended action" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
               <button disabled={saving} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Save Finding</button>
             </form>
           </section>
