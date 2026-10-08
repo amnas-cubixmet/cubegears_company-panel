@@ -85,7 +85,8 @@ export const PayrollRunControl = ({
   const locked = run?.approvalStatus === 'Approved' || run?.status === 'Approved';
 
   return (
-    <section className="payroll-run-control">
+    <div className="payroll-run-with-rules">
+      <section className="payroll-run-control">
       <div className="payroll-run-control-copy">
         <span>PAYROLL PROCESS</span>
         <strong>{month} {year}{branch && branch !== 'All' ? ' · ' + branch : ''}</strong>
@@ -123,6 +124,7 @@ export const PayrollRunControl = ({
       </div>
 
       {message && <div className="payroll-run-control-message">{message}</div>}
-    </section>
+      </section>
+    </div>
   );
 };
