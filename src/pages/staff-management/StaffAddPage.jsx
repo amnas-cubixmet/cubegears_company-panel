@@ -34,7 +34,7 @@ export const StaffAddPage = () => {
   const [shifts, setShifts] = useState([]);
   const [branches, setBranches] = useState([]);
   const [branchSheetOpen, setBranchSheetOpen] = useState(false);
-  const [setSalaryNow, setSetSalaryNow] = useState(false);
+  const [setSalaryNow, setSetSalaryNow] = useState(true);
 
   const [form, setForm] = useState({
     name: '',
@@ -138,6 +138,26 @@ export const StaffAddPage = () => {
   const submit = async (event) => {
     event.preventDefault();
     if (!form.name.trim() || !form.phone.trim() || saving) return;
+
+    if (setSalaryNow) {
+      const type = form.paymentType;
+      const requiredRate = hasMonthlyBase(type) ? Number(salary.baseSalary)
+        : hasDailyBase(type) ? Number(salary.dailyWageRate)
+          : hasHourlyBase(type) ? Number(salary.hourlyWageRate) : null;
+      if (requiredRate !== null && (!Number.isFinite(requiredRate) || requiredRate <= 0)) {
+        setError('Enter a valid positive salary / wage rate, or switch off Configure payment now to finish later.');
+        return;
+      }
+      if (hasCommission(type)) {
+        const commission = Number(salary.commissionType === 'percentage'
+          ? salary.commissionPercentage : salary.commissionFixedAmount);
+        if (!Number.isFinite(commission) || commission <= 0 ||
+          (salary.commissionType === 'percentage' && commission > 100)) {
+          setError('Enter a valid commission rate (1–100%) or a positive fixed commission amount.');
+          return;
+        }
+      }
+    }
 
     setSaving(true);
     setError('');
@@ -407,7 +427,7 @@ export const StaffAddPage = () => {
             <label className="staff-salary-toggle">
               <span>
                 <strong>Configure payment now</strong>
-                <small>Optional. You can also configure or revise it later from the employee Payroll tab.</small>
+                <small>Set salary, daily/hourly wage or job commission during creation. Turn off to configure from this staff member's profile later.</small>
               </span>
               <input
                 type="checkbox"
