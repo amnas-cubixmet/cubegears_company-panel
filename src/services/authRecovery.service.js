@@ -45,7 +45,9 @@ export const setupPassword = async ({ uid, token, password }) => {
   return apiClient.post('/auth/setup-password', { uid, token, password });
 };
 
-export const resetPassword = async ({ token, email, password }) => {
+export const resetPassword = async ({ uid, token, email, password }) => {
+  if (!token) throw new Error('Reset link is invalid or incomplete.');
+  if (!uid && !email) throw new Error('Reset link is invalid or incomplete.');
   if (!password || password.length < 8) throw new Error('Password must be at least 8 characters.');
 
   if (USE_MOCK_API) {
@@ -53,11 +55,18 @@ export const resetPassword = async ({ token, email, password }) => {
     const saved = JSON.parse(localStorage.getItem(RESET_KEY) || '{}');
     if (!token || saved.token !== token) throw new Error('Reset link is invalid or expired.');
     localStorage.removeItem(RESET_KEY);
-    localStorage.setItem('cubixgear:mock-password-updated', JSON.stringify({ email: email || saved.email, at: new Date().toISOString() }));
+    localStorage.setItem(
+      'cubixgear:mock-password-updated',
+      JSON.stringify({ email: email || saved.email, at: new Date().toISOString() }),
+    );
     return { ok: true };
   }
 
-  return apiClient.post('/auth/reset-password', { token, email, password });
+  const payload = { token, password };
+  if (uid) payload.uid = uid;
+  else if (email) payload.email = String(email).trim().toLowerCase();
+
+  return apiClient.post('/auth/reset-password', payload);
 };
 
 export const verifyMagicLink = async ({ token, email }) => {
