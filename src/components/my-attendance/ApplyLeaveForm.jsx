@@ -9,9 +9,9 @@ export const ApplyLeaveForm = ({
   onSubmit,
   onCancel,
 }) => {
-  const leaveTypes = balances.length
-    ? balances.map((item) => item.type)
-    : ['Casual Leave', 'Sick Leave', 'Annual Leave'];
+  const leaveTypes = balances.map((item) => item.type);
+  const selectedBalance = balances.find((item) => item.type === form.leaveType) || null;
+  const halfDayAllowed = selectedBalance?.halfDayAllowed !== false;
 
   return (
     <form className="apply-leave-form" onSubmit={onSubmit}>
@@ -20,10 +20,12 @@ export const ApplyLeaveForm = ({
           <span>Leave Type *</span>
           <select
             value={form.leaveType}
+            disabled={!leaveTypes.length}
             onChange={(event) =>
               setForm((current) => ({ ...current, leaveType: event.target.value }))
             }
           >
+            {!leaveTypes.length && <option value="">No leave type configured</option>}
             {leaveTypes.map((type) => <option key={type}>{type}</option>)}
           </select>
         </label>
@@ -37,12 +39,22 @@ export const ApplyLeaveForm = ({
             }
           >
             <option>Full Day</option>
-            <option>Half Day</option>
+            {halfDayAllowed && <option>Half Day</option>}
           </select>
         </label>
       </div>
 
-      {form.leaveMode === 'Half Day' && (
+      {selectedBalance && (
+        <div className="apply-leave-balance-note">
+          <span>
+            Available <strong>{selectedBalance.available}</strong> day(s)
+            {' · '}
+            {selectedBalance.allocationPeriod === 'month' ? 'Monthly' : 'Annual'} allocation
+          </span>
+        </div>
+      )}
+
+      {form.leaveMode === 'Half Day' && halfDayAllowed && (
         <div className="apply-half-day">
           <span>Half Day Session</span>
           <div>
@@ -110,7 +122,7 @@ export const ApplyLeaveForm = ({
 
       <div className="apply-leave-actions">
         <button type="button" onClick={onCancel}>Cancel</button>
-        <button type="submit" className="is-primary" disabled={submitting}>
+        <button type="submit" className="is-primary" disabled={submitting || !leaveTypes.length}>
           {submitting ? 'Submitting…' : 'Submit Application'}
         </button>
       </div>
