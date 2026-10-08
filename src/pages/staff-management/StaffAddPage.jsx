@@ -26,6 +26,7 @@ export const StaffAddPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const canManageBranches = hasPermission(user, 'company.manage');
+  const canManagePayroll = hasPermission(user, 'payroll.edit');
   const [saving, setSaving] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [error, setError] = useState('');
@@ -34,7 +35,7 @@ export const StaffAddPage = () => {
   const [shifts, setShifts] = useState([]);
   const [branches, setBranches] = useState([]);
   const [branchSheetOpen, setBranchSheetOpen] = useState(false);
-  const [setSalaryNow, setSetSalaryNow] = useState(true);
+  const [setSalaryNow, setSetSalaryNow] = useState(canManagePayroll);
 
   const [form, setForm] = useState({
     name: '',
@@ -139,7 +140,7 @@ export const StaffAddPage = () => {
     event.preventDefault();
     if (!form.name.trim() || !form.phone.trim() || saving) return;
 
-    if (setSalaryNow) {
+    if (canManagePayroll && setSalaryNow) {
       const type = form.paymentType;
       const requiredRate = hasMonthlyBase(type) ? Number(salary.baseSalary)
         : hasDailyBase(type) ? Number(salary.dailyWageRate)
@@ -170,9 +171,9 @@ export const StaffAddPage = () => {
         teamId: form.teamId || null,
         shiftId: form.shiftId || null,
         branchId: form.branchId || null,
-        setSalaryNow,
+        setSalaryNow: canManagePayroll && setSalaryNow,
         salarySetup:
-          setSalaryNow
+          canManagePayroll && setSalaryNow
             ? {
                 ...salary,
                 paymentType: form.paymentType,
@@ -424,19 +425,25 @@ export const StaffAddPage = () => {
               Initial Salary & Payment Settings
             </div>
 
-            <label className="staff-salary-toggle">
-              <span>
-                <strong>Configure payment now</strong>
-                <small>Set salary, daily/hourly wage or job commission during creation. Turn off to configure from this staff member's profile later.</small>
-              </span>
-              <input
-                type="checkbox"
-                checked={setSalaryNow}
-                onChange={(event) => setSetSalaryNow(event.target.checked)}
-              />
-            </label>
+            {canManagePayroll ? (
+              <label className="staff-salary-toggle">
+                <span>
+                  <strong>Configure payment now</strong>
+                  <small>Set salary, daily/hourly wage or job commission during creation. Turn off to configure from this staff member's profile later.</small>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={setSalaryNow}
+                  onChange={(event) => setSetSalaryNow(event.target.checked)}
+                />
+              </label>
+            ) : (
+              <div className="staff-directory-message">
+                A payroll manager can configure this employee's wage or salary from the individual Staff Profile.
+              </div>
+            )}
 
-            {setSalaryNow && (
+            {canManagePayroll && setSalaryNow && (
               <div className="staff-form-grid staff-salary-grid">
                 {hasMonthlyBase(form.paymentType) && (
                   <label>
@@ -616,7 +623,7 @@ export const StaffAddPage = () => {
             <div><span>Branch</span><strong>{selectedBranch?.name || 'Unassigned'}</strong></div>
             <div><span>Shift</span><strong>{selectedShift?.name || 'Unassigned'}</strong></div>
             <div><span>Status</span><strong>{form.employmentStatus}</strong></div>
-            <div><span>Salary Setup</span><strong>{setSalaryNow ? 'Configured' : 'Later'}</strong></div>
+            <div><span>Salary Setup</span><strong>{canManagePayroll && setSalaryNow ? 'To configure' : 'Later'}</strong></div>
           </div>
         </aside>
       </div>
