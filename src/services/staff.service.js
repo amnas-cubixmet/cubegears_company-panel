@@ -21,6 +21,7 @@ const normalizeStaff = (staff = {}) => ({
   employeeId: staff.employeeId || staff.employee_code || '',
   displayEmployeeNo: employeeLabel(staff),
   name: staff.name || '',
+  branch: staff.branchName || staff.branch?.name || staff.branch || '',
   role: staff.role || staff.role_name || '',
   department:
     staff.department ||
