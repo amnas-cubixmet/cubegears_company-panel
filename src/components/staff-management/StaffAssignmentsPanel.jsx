@@ -23,7 +23,7 @@ export const StaffAssignmentsPanel = ({ assignments, staff }) => (
             <h3>{job.vehicle}</h3>
             <p>{job.work}</p>
             <div className="staff-dashboard-assignment-meta">
-              <span>{person?.name || job.staffId}</span>
+              <span>{person?.name || 'Assigned Staff'}</span>
               <b>{job.bookedHours}h</b>
             </div>
             <div className="staff-dashboard-progress">
