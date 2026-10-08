@@ -5,8 +5,7 @@ import {
   FileText,
   LayoutDashboard,
   ShieldCheck,
-  Sparkles,
-  Users,
+    Users,
   UsersRound,
   Clock3,
 } from 'lucide-react';
@@ -20,7 +19,6 @@ export const staffManagementTabs = [
   { label: 'Roles', path: '/staff-management/roles', permission: 'company.manage', icon: ShieldCheck },
   { label: 'Teams', path: '/staff-management/teams', permission: 'staff.edit', icon: UsersRound },
   { label: 'Shifts', path: '/staff-management/shifts', permission: 'staff.edit', icon: Clock3 },
-  { label: 'Skills', path: '/staff-management/skills', permission: 'staff.edit', icon: Sparkles },
   { label: 'Performance', path: '/staff-management/performance', permission: 'staff.view', icon: BarChart3 },
   { label: 'Documents', path: '/staff-management/documents', permission: 'staff.view', icon: FileText },
   { label: 'Reports', path: '/staff-management/reports', permission: 'staff.view', icon: BadgeCheck },
