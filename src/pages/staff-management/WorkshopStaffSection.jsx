@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { staffService } from '../../services/staff.service';
 import { staffManagementService } from '../../services/staffManagement.service';
+import { jobService } from '../../services/job.service';
+import { USE_MOCK_API } from '../../api/apiConfig';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { StaffShiftCrud } from './StaffShiftCrud';
 import { StaffSkillCrud } from './StaffSkillCrud';
@@ -78,6 +80,7 @@ const MetricCard = ({ label, value, icon: Icon, tone = 'primary', note }) => (
 export const WorkshopStaffSection = ({ section }) => {
   const [staff, setStaff] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isTeamFormOpen, setIsTeamFormOpen] = useState(false);
   const [savingTeam, setSavingTeam] = useState(false);
@@ -95,11 +98,13 @@ export const WorkshopStaffSection = ({ section }) => {
   useEffect(() => {
     Promise.all([
       staffService.getStaff(),
-      staffManagementService.getTeams()
+      staffManagementService.getTeams(),
+      jobService.getJobs()
     ])
-      .then(([staffData, teamData]) => {
-        setStaff(staffData);
-        setTeams(teamData);
+      .then(([staffData, teamData, jobData]) => {
+        setStaff(Array.isArray(staffData) ? staffData : []);
+        setTeams(Array.isArray(teamData) ? teamData : []);
+        setJobs(Array.isArray(jobData) ? jobData : []);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -181,19 +186,98 @@ export const WorkshopStaffSection = ({ section }) => {
 
   const performanceRows = useMemo(
     () =>
-      activeStaff.map((person) => ({
-        person,
-        metrics: staffPerformance[person.id] || {
-          jobsCompleted: 0,
-          labourRevenue: 0,
-          productiveHours: 0,
-          utilization: 0,
-          comebackJobs: 0,
-          customerRating: 0
+      activeStaff.map((person) => {
+        if (USE_MOCK_API) {
+          return {
+            person,
+            metrics: staffPerformance[person.id] || staffPerformance[person.employeeId] || {
+              jobsCompleted: 0,
+              labourRevenue: 0,
+              productiveHours: 0,
+              utilization: 0,
+              comebackJobs: 0,
+              customerRating: 0
+            }
+          };
         }
-      })),
-    [activeStaff]
+
+        const assigned = jobs.filter(
+          (job) => String(job.assignedEmployeeId || '') === String(person.id)
+        );
+        const completed = assigned.filter((job) => job.status === 'Delivered');
+        const labourRevenue = completed.reduce(
+          (sum, job) => sum + Number(job.labourTotal || job.labour_total || 0),
+          0
+        );
+        const productiveHours = assigned.reduce((sum, job) => {
+          const work = Array.isArray(job.work) ? job.work : [];
+          const workHours = work.reduce(
+            (hours, item) => hours + Number(item.hours || item.actualHours || 0),
+            0
+          );
+          return sum + workHours;
+        }, 0);
+        const ratings = assigned
+          .map((job) => Number(job.customerRating || job.customer_rating || 0))
+          .filter((value) => value > 0);
+
+        return {
+          person,
+          metrics: {
+            jobsCompleted: completed.length,
+            labourRevenue,
+            productiveHours,
+            utilization: productiveHours
+              ? Math.min(100, Math.round((productiveHours / 160) * 100))
+              : 0,
+            comebackJobs: assigned.filter(
+              (job) => job.isComeback || job.comeback
+            ).length,
+            customerRating: ratings.length
+              ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length
+              : 0
+          }
+        };
+      }),
+    [activeStaff, jobs]
   );
+
+  const activeAssignments = useMemo(() => {
+    if (USE_MOCK_API) return staffJobAssignments;
+
+    const progressByStatus = {
+      New: 8,
+      Inspection: 18,
+      'Estimate Pending': 28,
+      Approved: 38,
+      'In Progress': 58,
+      'Waiting for Parts': 55,
+      QC: 78,
+      'Ready for Delivery': 92,
+      Delivered: 100
+    };
+
+    return jobs
+      .filter((job) => !['Delivered', 'Cancelled'].includes(job.status))
+      .filter((job) => job.assignedEmployeeId)
+      .slice(0, 12)
+      .map((job) => ({
+        id: job.jobNumber || job.id,
+        jobId: job.id,
+        staffId: job.assignedEmployeeId,
+        vehicle: job.vehicleReg || job.vehicleInfo || 'Vehicle',
+        work:
+          (Array.isArray(job.work) && job.work[0]?.description) ||
+          job.notes ||
+          'Workshop assignment',
+        status: job.status,
+        bookedHours: (Array.isArray(job.work) ? job.work : []).reduce(
+          (sum, item) => sum + Number(item.hours || item.estimatedHours || 0),
+          0
+        ),
+        progress: progressByStatus[job.status] || 0
+      }));
+  }, [jobs]);
 
   if (loading) {
     return <div className="staff-workshop-empty">Loading staff management data...</div>;
@@ -206,7 +290,7 @@ export const WorkshopStaffSection = ({ section }) => {
         staff={staff}
         teams={teams}
         activeStaff={activeStaff}
-        assignments={staffJobAssignments}
+        assignments={activeAssignments}
       />
     );
   }
