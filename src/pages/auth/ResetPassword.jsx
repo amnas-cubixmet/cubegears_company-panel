@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { CheckCircle2, Eye, EyeOff, Lock } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
+import { getAuthErrorMessage, getAuthFieldErrors } from '../../utils/authErrors';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
@@ -17,27 +18,60 @@ export const ResetPassword = () => {
   const [show, setShow] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [formError, setFormError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [done, setDone] = useState(false);
+
+  const clearField = (field) => {
+    setFieldErrors((current) => {
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+    setFormError('');
+  };
 
   const submit = async (event) => {
     event.preventDefault();
-    setMessage('');
-    if ((!uid && !email) || !token) {
-      return setMessage('This reset link is invalid or incomplete. Request a new reset link.');
+    const nextErrors = {};
+
+    if ((!uid && !email) || !token) nextErrors.link = 'This reset link is invalid or incomplete. Request a new reset link.';
+    if (!password) nextErrors.password = 'New password is required.';
+    else if (password.length < 8) nextErrors.password = 'Password must be at least 8 characters.';
+    if (!confirm) nextErrors.confirm = 'Please confirm your new password.';
+    else if (password !== confirm) nextErrors.confirm = 'Passwords do not match.';
+
+    if (Object.keys(nextErrors).length) {
+      setFieldErrors(nextErrors);
+      setFormError(nextErrors.link || '');
+      return;
     }
-    if (password.length < 8) return setMessage('Password must be at least 8 characters.');
-    if (password !== confirm) return setMessage('Passwords do not match.');
 
     setLoading(true);
+    setFieldErrors({});
+    setFormError('');
+
     try {
       await authRecoveryService.resetPassword({ uid, token, email, password });
       setDone(true);
     } catch (error) {
-      setMessage(error?.message || 'Unable to reset password.');
+      const backend = getAuthFieldErrors(error);
+      setFieldErrors({
+        ...(backend.password ? { password: backend.password } : {}),
+        ...((backend.uid || backend.email || backend.token || backend.non_field_errors)
+          ? { link: backend.uid || backend.email || backend.token || backend.non_field_errors }
+          : {}),
+      });
+      setFormError(getAuthErrorMessage(error, 'Unable to reset password.'));
     } finally {
       setLoading(false);
     }
+  };
+
+  const goToLogin = () => {
+    const query = new URLSearchParams({ reset: 'success' });
+    if (email) query.set('email', email);
+    navigate('/login?' + query.toString(), { replace: true });
   };
 
   return (
@@ -56,42 +90,36 @@ export const ResetPassword = () => {
             <div className="auth-success-state">
               <span className="auth-success-icon"><CheckCircle2 size={24}/></span>
               <h1 className="login-title">Password updated</h1>
-              <p className="login-description">Your new password is ready. You can now sign in securely.</p>
-              <button type="button" className="login-submit" onClick={() => navigate('/login', { replace: true })}>Go to Sign In</button>
+              <p className="login-description">Your new password is ready. Sign in with the same account email and this new password.</p>
+              <button type="button" className="login-submit" onClick={goToLogin}>Go to Sign In</button>
             </div>
           ) : (
             <>
               <h1 className="login-title">Create a new password</h1>
-              <p className="login-description">{email ? `Resetting access for ${email}.` : 'Choose a strong password for your account.'}</p>
+              <p className="login-description">{email ? 'Resetting access for ' + email + '.' : 'Choose a strong password for your account.'}</p>
 
-              {message && <div className="auth-message">{message}</div>}
-              {(!token || (!uid && !email)) && (
-                <div className="auth-message is-warning">
-                  This reset URL is incomplete. Request a new reset link.
-                </div>
-              )}
+              {formError && <div className="auth-message is-error" role="alert">{formError}</div>}
+              {fieldErrors.link && <div className="auth-message is-warning">{fieldErrors.link}</div>}
 
-              <form className="login-form" onSubmit={submit}>
+              <form className="login-form" onSubmit={submit} noValidate>
                 <label>
                   <span className="login-field-label">New password</span>
-                  <div className="login-input-shell">
+                  <div className={'login-input-shell ' + (fieldErrors.password ? 'is-error' : '')}>
                     <span className="login-input-icon"><Lock size={16}/></span>
-                    <input className="login-input" type={show ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 8 characters" required/>
-                    <button type="button" className="login-password-toggle" onClick={() => setShow((value) => !value)} aria-label="Toggle password visibility">
-                      {show ? <EyeOff size={16}/> : <Eye size={16}/>}
-                    </button>
+                    <input className="login-input" type={show ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={(e) => { setPassword(e.target.value); clearField('password'); }} placeholder="Minimum 8 characters" aria-invalid={Boolean(fieldErrors.password)}/>
+                    <button type="button" className="login-password-toggle" onClick={() => setShow((value) => !value)}>{show ? <EyeOff size={16}/> : <Eye size={16}/>}</button>
                   </div>
+                  {fieldErrors.password && <span className="auth-field-error" role="alert">{fieldErrors.password}</span>}
                 </label>
 
                 <label>
                   <span className="login-field-label">Confirm password</span>
-                  <div className="login-input-shell">
+                  <div className={'login-input-shell ' + (fieldErrors.confirm ? 'is-error' : '')}>
                     <span className="login-input-icon"><Lock size={16}/></span>
-                    <input className="login-input" type={showConfirm ? 'text' : 'password'} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat new password" required/>
-                    <button type="button" className="login-password-toggle" onClick={() => setShowConfirm((value) => !value)} aria-label="Toggle confirm password visibility">
-                      {showConfirm ? <EyeOff size={16}/> : <Eye size={16}/>}
-                    </button>
+                    <input className="login-input" type={showConfirm ? 'text' : 'password'} autoComplete="new-password" value={confirm} onChange={(e) => { setConfirm(e.target.value); clearField('confirm'); }} placeholder="Repeat new password" aria-invalid={Boolean(fieldErrors.confirm)}/>
+                    <button type="button" className="login-password-toggle" onClick={() => setShowConfirm((value) => !value)}>{showConfirm ? <EyeOff size={16}/> : <Eye size={16}/>}</button>
                   </div>
+                  {fieldErrors.confirm && <span className="auth-field-error" role="alert">{fieldErrors.confirm}</span>}
                 </label>
 
                 <div className="password-rules">
@@ -100,11 +128,7 @@ export const ResetPassword = () => {
                   <span className={/[0-9]/.test(password) ? 'ok' : ''}>Number</span>
                 </div>
 
-                <button
-                  className="login-submit"
-                  type="submit"
-                  disabled={loading || !token || (!uid && !email)}
-                >
+                <button className="login-submit" type="submit" disabled={loading || !token || (!uid && !email)}>
                   {loading ? 'Updating…' : 'Reset Password'}
                 </button>
               </form>
