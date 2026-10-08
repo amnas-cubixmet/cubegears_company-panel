@@ -91,6 +91,7 @@ export const AttendancePunchPanel = ({ onChanged }) => {
     return <section className="attendance-punch-card is-loading">Loading attendance status…</section>;
   }
 
+  const isUnavailable = state?.status === 'UNAVAILABLE' || state?.profileLinked === false;
   const isIn = state?.status === 'CLOCKED_IN';
   const autoTime = formatTime(state?.autoCheckoutAt);
   const ActionIcon = state?.nextAction === 'check_out' ? LogOut : LogIn;
@@ -105,7 +106,7 @@ export const AttendancePunchPanel = ({ onChanged }) => {
           <span className={`attendance-live-dot ${isIn ? 'is-online' : ''}`} />
           <span>
             <small>Today</small>
-            <strong>{isIn ? 'Checked In' : 'Checked Out'}</strong>
+            <strong>{isUnavailable ? 'Not Linked' : isIn ? 'Checked In' : 'Checked Out'}</strong>
           </span>
         </div>
 
@@ -128,7 +129,7 @@ export const AttendancePunchPanel = ({ onChanged }) => {
       </div>
 
       <div className="attendance-punch-action">
-        {state?.nextAction ? (
+        {state?.nextAction && !isUnavailable ? (
           <button
             type="button"
             className={state.nextAction === 'check_out' ? 'is-checkout' : ''}
