@@ -29,7 +29,6 @@ export const StaffProfileEditSheet = ({
       employmentStatus: staff.employmentStatus || 'Active',
       emergencyContact: staff.emergencyContact || '',
       address: staff.address || '',
-      paymentType: staff.paymentType || 'Monthly Salary',
       notes: staff.notes || '',
     });
 
@@ -121,16 +120,14 @@ export const StaffProfileEditSheet = ({
 
           <label>Emergency Contact<input value={form.emergencyContact || ''} onChange={(e) => set('emergencyContact', e.target.value)} /></label>
 
-          <label>
-            Payment Type
-            <select value={form.paymentType || 'Monthly Salary'} onChange={(e) => set('paymentType', e.target.value)}>
-              {['Monthly Salary','Daily Salary','Hourly Salary','Commission','Salary + Commission'].map((type) => <option key={type}>{type}</option>)}
-            </select>
-          </label>
-
           <label className="is-wide">Address<textarea rows={3} value={form.address || ''} onChange={(e) => set('address', e.target.value)} /></label>
           <label className="is-wide">Notes<textarea rows={3} value={form.notes || ''} onChange={(e) => set('notes', e.target.value)} /></label>
         </div>
+
+        <p className="staff-profile-edit-pay-note">
+          Pay type and rates are managed in the staff profile's Payroll tab.
+          Use Change Pay Configuration there to preserve effective-dated payroll history.
+        </p>
 
         <div className="staff-profile-edit-skills">
           <span>Skills</span>
