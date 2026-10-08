@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { roleService } from '../../services/role.service';
 import { staffService } from '../../services/staff.service';
 import { staffManagementService } from '../../services/staffManagement.service';
+import { branchService } from '../../services/branch.service';
+import { BranchCreateSheet } from '../../components/staff-management/BranchCreateSheet';
 
 const statusOptions = [
   'Active',
@@ -33,8 +35,8 @@ export const StaffAddPage = () => {
   const [roles, setRoles] = useState([]);
   const [teams, setTeams] = useState([]);
   const [shifts, setShifts] = useState([]);
-  const [skills, setSkills] = useState([]);
-  const [selectedSkillIds, setSelectedSkillIds] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [branchSheetOpen, setBranchSheetOpen] = useState(false);
   const [setSalaryNow, setSetSalaryNow] = useState(false);
 
   const [form, setForm] = useState({
@@ -45,7 +47,7 @@ export const StaffAddPage = () => {
     role: '',
     teamId: '',
     shiftId: '',
-    branch: 'Main Garage Branch',
+    branchId: '',
     joiningDate: today(),
     employmentStatus: 'Active',
     weeklyOff: 'Sunday',
@@ -73,9 +75,9 @@ export const StaffAddPage = () => {
       roleService.getRoles(),
       staffManagementService.getTeams(),
       staffManagementService.getShifts(),
-      staffManagementService.getSkills(),
+      branchService.getBranches(),
     ])
-      .then(([roleRows, teamRows, shiftRows, skillRows]) => {
+      .then(([roleRows, teamRows, shiftRows, branchRows]) => {
         if (!alive) return;
 
         const activeRoles = (Array.isArray(roleRows) ? roleRows : []).filter(
@@ -83,18 +85,21 @@ export const StaffAddPage = () => {
         );
         const nextTeams = Array.isArray(teamRows) ? teamRows : [];
         const nextShifts = Array.isArray(shiftRows) ? shiftRows : [];
-        const nextSkills = Array.isArray(skillRows) ? skillRows : [];
+        const nextBranches = (Array.isArray(branchRows) ? branchRows : []).filter(
+          (item) => item.is_active !== false,
+        );
 
         setRoles(activeRoles);
         setTeams(nextTeams);
         setShifts(nextShifts);
-        setSkills(nextSkills);
+        setBranches(nextBranches);
 
         setForm((current) => ({
           ...current,
           role: current.role || activeRoles[0]?.name || 'Mechanic',
           teamId: current.teamId || nextTeams[0]?.id || '',
           shiftId: current.shiftId || nextShifts[0]?.id || '',
+          branchId: current.branchId || nextBranches[0]?.id || '',
         }));
       })
       .catch((requestError) => {
@@ -121,22 +126,13 @@ export const StaffAddPage = () => {
     [shifts, form.shiftId],
   );
 
-  const selectedSkills = useMemo(
-    () => skills.filter((skill) => selectedSkillIds.includes(String(skill.id))),
-    [skills, selectedSkillIds],
+  const selectedBranch = useMemo(
+    () => branches.find((item) => String(item.id) === String(form.branchId)),
+    [branches, form.branchId],
   );
 
   const set = (key, value) =>
     setForm((current) => ({ ...current, [key]: value }));
-
-  const toggleSkill = (skill) => {
-    const id = String(skill.id);
-    setSelectedSkillIds((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id],
-    );
-  };
 
   const submit = async (event) => {
     event.preventDefault();
@@ -152,8 +148,7 @@ export const StaffAddPage = () => {
         shift: '',
         teamId: form.teamId || null,
         shiftId: form.shiftId || null,
-        skillIds: selectedSkills.map((skill) => skill.id),
-        skills: selectedSkills.map((skill) => skill.name),
+        branchId: form.branchId || null,
         setSalaryNow: setSalaryNow && form.paymentType !== 'Commission',
         salarySetup:
           setSalaryNow && form.paymentType !== 'Commission'
@@ -186,7 +181,7 @@ export const StaffAddPage = () => {
       <section className="staff-add-page__header">
         <div>
           <h2>Add Staff</h2>
-          <p>Create profile, role access, team, shift, skills and payroll setup together.</p>
+          <p>Create profile, role access, branch, team, shift and payroll setup together.</p>
         </div>
         <button className="staff-save-button" type="submit" disabled={saving || loadingOptions}>
           <Save size={15} />
@@ -280,13 +275,26 @@ export const StaffAddPage = () => {
 
               <label>
                 Branch
-                <select
-                  value={form.branch}
-                  onChange={(event) => set('branch', event.target.value)}
-                >
-                  <option>Main Garage Branch</option>
-                  <option>Kochi South Branch</option>
-                </select>
+                <div className="staff-branch-select-row">
+                  <select
+                    value={form.branchId}
+                    onChange={(event) => set('branchId', event.target.value)}
+                  >
+                    <option value="">Unassigned</option>
+                    {branches.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="staff-inline-create-button"
+                    onClick={() => setBranchSheetOpen(true)}
+                  >
+                    + Branch
+                  </button>
+                </div>
               </label>
             </div>
           </section>
@@ -350,21 +358,6 @@ export const StaffAddPage = () => {
               </label>
             </div>
 
-            <div className="staff-skill-picker">
-              <span>Skills & Specialization</span>
-              <div className="staff-chip-picker">
-                {skills.map((skill) => (
-                  <button
-                    type="button"
-                    key={skill.id}
-                    className={selectedSkillIds.includes(String(skill.id)) ? 'is-selected' : ''}
-                    onClick={() => toggleSkill(skill)}
-                  >
-                    {skill.name}
-                  </button>
-                ))}
-              </div>
-            </div>
           </section>
 
           <section className="staff-form-panel">
@@ -555,14 +548,24 @@ export const StaffAddPage = () => {
 
           <div className="staff-add-summary__rows">
             <div><span>Role</span><strong>{form.role || 'Not selected'}</strong></div>
-            <div><span>Branch</span><strong>{form.branch}</strong></div>
+            <div><span>Branch</span><strong>{selectedBranch?.name || 'Unassigned'}</strong></div>
             <div><span>Shift</span><strong>{selectedShift?.name || 'Unassigned'}</strong></div>
             <div><span>Status</span><strong>{form.employmentStatus}</strong></div>
-            <div><span>Skills</span><strong>{selectedSkills.length}</strong></div>
             <div><span>Salary Setup</span><strong>{setSalaryNow ? 'Configured' : 'Later'}</strong></div>
           </div>
         </aside>
       </div>
+
+      <BranchCreateSheet
+        isOpen={branchSheetOpen}
+        onClose={() => setBranchSheetOpen(false)}
+        onCreate={async (data) => {
+          const created = await branchService.createBranch(data);
+          const next = await branchService.getBranches();
+          setBranches(next.filter((item) => item.is_active !== false));
+          if (created?.id) set('branchId', created.id);
+        }}
+      />
     </form>
   );
 };
