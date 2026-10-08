@@ -1,46 +1,48 @@
 import React from 'react';
 import { Building2, Clock3, UserRound } from 'lucide-react';
-import { getUserRoleLabel } from '../../utils/authDisplay';
 
-export const EmployeeAttendanceCard = ({ user, employeeCode, shiftName }) => {
-  const roleLabel = getUserRoleLabel(user, 'Workshop Staff');
+export const EmployeeAttendanceCard = ({ employee }) => {
+  if (!employee) return null;
+
+  const meta = [
+    employee.employeeCode
+      ? { label: 'Employee ID', value: employee.employeeCode, icon: UserRound }
+      : null,
+    employee.branchName
+      ? { label: 'Branch', value: employee.branchName, icon: Building2 }
+      : null,
+    employee.shiftName
+      ? { label: 'Shift', value: employee.shiftName, icon: Clock3 }
+      : null,
+  ].filter(Boolean);
 
   return (
     <section className="attendance-employee-card">
       <div className="attendance-employee-main">
         <div className="attendance-employee-avatar">
-          {user?.avatar ? <img src={user.avatar} alt="" /> : <UserRound size={22} />}
+          <UserRound size={22} />
         </div>
+
         <div className="attendance-employee-copy">
           <span>Employee</span>
-          <h3>{user?.name || 'Workshop User'}</h3>
-          <p>{roleLabel}</p>
+          <h3>{employee.name}</h3>
+          {employee.roleName ? <p>{employee.roleName}</p> : null}
         </div>
       </div>
 
-      <div className="attendance-employee-meta">
-        <div>
-          <UserRound size={14} />
-          <span>
-            <small>Employee ID</small>
-            <strong>{employeeCode || '—'}</strong>
-          </span>
+      {meta.length > 0 && (
+        <div className="attendance-employee-meta">
+          {meta.map(({ label, value, icon: Icon }) => (
+            <div key={label}>
+              <Icon size={14} />
+              <span>
+                <small>{label}</small>
+                <strong>{value}</strong>
+              </span>
+            </div>
+          ))}
         </div>
-        <div>
-          <Building2 size={14} />
-          <span>
-            <small>Branch</small>
-            <strong>{user?.branch?.name || 'Main Garage'}</strong>
-          </span>
-        </div>
-        <div>
-          <Clock3 size={14} />
-          <span>
-            <small>Shift</small>
-            <strong>{shiftName || 'Company Default'}</strong>
-          </span>
-        </div>
-      </div>
+      )}
     </section>
   );
 };
