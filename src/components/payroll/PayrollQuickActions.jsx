@@ -1,12 +1,10 @@
 import React from 'react';
-import { ArrowRight, Banknote, FileText, Play, ReceiptText, Settings2 } from 'lucide-react';
+import { ArrowRight, Banknote, FileText, Settings2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const actions = [
   ['Salary Setup', '/payroll/salary-setup', Settings2],
-  ['Run Payroll', '/payroll/run', Play],
   ['Advances', '/payroll/advances', Banknote],
-  ['Payslips', '/payroll/payslips', ReceiptText],
   ['Reports', '/payroll/reports', FileText],
 ];
 
