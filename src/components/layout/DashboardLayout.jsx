@@ -13,6 +13,8 @@ export const DashboardLayout = ({ children }) => {
     location.pathname.startsWith('/invoices/') ||
     location.pathname.startsWith('/quotations/');
   const isDashboard = location.pathname === '/dashboard';
+  const isJobsWorkspace = /^\/jobs(?:\/|$)/.test(location.pathname);
+  const useDashboardSpacing = isDashboard || isJobsWorkspace;
 
   return (
     <div className="app-shell">
@@ -21,8 +23,8 @@ export const DashboardLayout = ({ children }) => {
         <Header />
 
         <main className="app-scroll-area">
-          <div className={`app-content ${isDashboard ? 'is-dashboard-content' : ''}`}>
-            {!isDashboard && <AppBreadcrumbs />}
+          <div className={`app-content ${useDashboardSpacing ? 'is-dashboard-content' : ''}`}>
+            {!useDashboardSpacing && <AppBreadcrumbs />}
             {children}
           </div>
 
