@@ -271,17 +271,51 @@ export const payrollService = {
 };
 
 
+const PAYMENT_TYPE_LABELS = {
+  monthly: 'Fixed Monthly Salary',
+  daily: 'Daily Wage',
+  hourly: 'Hourly Wage',
+  commission: 'Commission Only',
+  monthly_commission: 'Monthly Salary + Commission',
+  daily_commission: 'Daily Wage + Commission',
+  hourly_commission: 'Hourly Wage + Commission',
+  salary_incentive: 'Fixed Salary + Job Incentive',
+  hybrid: 'Custom Hybrid Compensation'
+};
+
+const normalizeCompensationPlan = (plan = {}) => ({
+  ...plan,
+  staffId: plan.staffId || plan.employee,
+  salaryBasis: plan.selectedPayStructure || PAYMENT_TYPE_LABELS[plan.paymentType] || plan.paymentType || 'Not configured',
+  fixedMonthlySalary: Number(plan.baseSalary || 0),
+  basicSalary: Number(plan.baseSalary || 0),
+  dailyRate: Number(plan.dailyWageRate || 0),
+  hourlyRate: Number(plan.hourlyWageRate || 0),
+  commissionPercentage: Number(plan.commissionPercentage || 0),
+  commissionFixedAmount: Number(plan.commissionFixedAmount || 0),
+  fixedIncentives: Number(plan.bonusRules?.fixedAmount || plan.bonusRules?.fixed || 0),
+  allowances: Number(
+    (plan.components || [])
+      .filter((item) => item.kind === 'earning' && item.calculationType === 'fixed')
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0)
+  ),
+  status: plan.isActive === false ? 'Inactive' : 'Active'
+});
+
 if (!USE_MOCK_API) {
   Object.assign(payrollService, {
     getPayrolls: async (filters = {}) => {
       const rows = await apiClient.get('/payroll/payslips', { params: filters });
-      let result = Array.isArray(rows) ? rows : [];
+      let result = Array.isArray(rows) ? rows : rows?.results || [];
       if (filters.month) result = result.filter((row) => row.month === filters.month);
       if (filters.staffId && !['All', 'all'].includes(filters.staffId)) {
         result = result.filter((row) => String(row.staffId) === String(filters.staffId));
       }
       if (filters.paymentStatus && !['All', 'all'].includes(filters.paymentStatus)) {
         result = result.filter((row) => row.paymentStatus === filters.paymentStatus);
+      }
+      if (filters.approvalStatus && !['All', 'all'].includes(filters.approvalStatus)) {
+        result = result.filter((row) => row.approvalStatus === filters.approvalStatus);
       }
       return result;
     },
@@ -292,28 +326,95 @@ if (!USE_MOCK_API) {
     recordPayment: async (payrollId, paymentData) =>
       apiClient.post(`/payroll/payslips/${payrollId}/payment`, paymentData),
 
-    getSalaryStructures: async () => apiClient.get('/payroll/salary-setup'),
-
-    saveSalaryStructure: async (structureData) => {
-      const payload = {
-        employee: structureData.employee || structureData.staffId,
-        basicSalary: Number(structureData.basicSalary || structureData.fixedMonthlySalary || 0),
-        hra: Number(structureData.hra || 0),
-        allowances: Number(structureData.allowances || 0),
-        deductions: Number(structureData.deductions || 0),
-        overtimeRate: Number(structureData.overtimeRate || structureData.hourlyRate || 0),
-        incentive_rule: {
-          fixed: Number(structureData.fixedIncentives || 0),
-          salaryBasis: structureData.salaryBasis || 'Fixed Monthly',
-          dailyRate: Number(structureData.dailyRate || 0),
-          hourlyRate: Number(structureData.hourlyRate || 0),
-          allowanceBreakdown: structureData.allowanceBreakdown || []
-        },
-        effectiveDate: structureData.effectiveDate || new Date().toISOString().slice(0, 10)
-      };
-      if (structureData.id) return apiClient.patch(`/payroll/salary-setup/${structureData.id}`, payload);
-      return apiClient.post('/payroll/salary-setup', payload);
+    getPayrollPolicy: async (filters = {}) => {
+      const rows = await apiClient.get('/payroll/policy', { params: filters });
+      const list = Array.isArray(rows) ? rows : rows?.results || [];
+      return list[0] || null;
     },
+
+    savePayrollPolicy: async (policy) => {
+      if (policy.id) return apiClient.patch(`/payroll/policy/${policy.id}`, policy);
+      return apiClient.post('/payroll/policy', policy);
+    },
+
+    getCompensationPlans: async (filters = {}) => {
+      const rows = await apiClient.get('/payroll/compensation-plans', { params: filters });
+      return (Array.isArray(rows) ? rows : rows?.results || []).map(normalizeCompensationPlan);
+    },
+
+    saveCompensationPlan: async (plan) => {
+      const payload = {
+        employee: plan.employee || plan.staffId,
+        paymentType: plan.paymentType || 'monthly',
+        baseSalary: Number(plan.baseSalary || plan.fixedMonthlySalary || 0),
+        dailyWageRate: Number(plan.dailyWageRate || plan.dailyRate || 0),
+        hourlyWageRate: Number(plan.hourlyWageRate || plan.hourlyRate || 0),
+        commissionType: plan.commissionType || 'none',
+        commissionPercentage: Number(plan.commissionPercentage || 0),
+        commissionFixedAmount: Number(plan.commissionFixedAmount || 0),
+        eligibleRevenueBasis: plan.eligibleRevenueBasis || 'labour_revenue',
+        overtimeEligibility: plan.overtimeEligibility !== false,
+        incentiveEligibility: plan.incentiveEligibility !== false,
+        bonusRules: plan.bonusRules || {
+          fixedAmount: Number(plan.fixedIncentives || 0)
+        },
+        applicableDeductions: plan.applicableDeductions || [],
+        effectiveDate: plan.effectiveDate || new Date().toISOString().slice(0, 10),
+        effectiveTo: plan.effectiveTo || null,
+        paymentFrequency: plan.paymentFrequency || 'monthly',
+        approvalStatus: plan.approvalStatus || 'Approved',
+        isActive: plan.isActive !== false,
+        notes: plan.notes || ''
+      };
+
+      if (plan.id) {
+        return normalizeCompensationPlan(
+          await apiClient.patch(`/payroll/compensation-plans/${plan.id}`, payload)
+        );
+      }
+      return normalizeCompensationPlan(
+        await apiClient.post('/payroll/compensation-plans', payload)
+      );
+    },
+
+    approveCompensationPlan: async (id) =>
+      normalizeCompensationPlan(
+        await apiClient.post(`/payroll/compensation-plans/${id}/approve`, {})
+      ),
+
+    getSalaryStructures: async () =>
+      payrollService.getCompensationPlans({ active: true }),
+
+    saveSalaryStructure: async (structureData) =>
+      payrollService.saveCompensationPlan(structureData),
+
+    getJobAssignments: async (filters = {}) =>
+      apiClient.get('/payroll/job-assignments', { params: filters }),
+
+    saveJobAssignment: async (assignment) => {
+      if (assignment.id) {
+        return apiClient.patch(`/payroll/job-assignments/${assignment.id}`, assignment);
+      }
+      return apiClient.post('/payroll/job-assignments', assignment);
+    },
+
+    getGeneratedCommissions: async (filters = {}) =>
+      apiClient.get('/payroll/commissions', { params: filters }),
+
+    updateGeneratedCommissionStatus: async (id, status) =>
+      apiClient.post(`/payroll/commissions/${id}/status`, { status }),
+
+    createPayrollRun: async ({ month, year, branch = null }) =>
+      apiClient.post('/payroll/runs', { month, year, branch }),
+
+    processPayrollRun: async (id) =>
+      apiClient.post(`/payroll/runs/${id}/process`, {}),
+
+    submitPayrollRun: async (id) =>
+      apiClient.post(`/payroll/runs/${id}/submit`, {}),
+
+    approvePayrollRun: async (id) =>
+      apiClient.post(`/payroll/runs/${id}/approve`, {}),
 
     getSalaryAdvances: async () => apiClient.get('/payroll/advances'),
 
