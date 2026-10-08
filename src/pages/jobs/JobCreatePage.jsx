@@ -171,8 +171,7 @@ export const JobCreatePage = () => {
     <div className="job-management-page job-create-page flex w-full min-w-0 flex-col gap-4">
       <div className="job-create-header flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-primary">New Job Card</div>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-content">Vehicle Check-In</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-content">New Job Card</h1>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Record customer, vehicle, complaints and technician. Estimate, repair, QC and delivery are managed inside the Job Card.</p>
           <div className="job-create-steps" aria-label="Job setup steps">
             <span><b>01</b> Customer</span><span><b>02</b> Vehicle</span><span><b>03</b> Assignment</span>
