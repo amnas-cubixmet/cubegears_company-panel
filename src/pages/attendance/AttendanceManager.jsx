@@ -9,6 +9,7 @@ import { OvertimeManager } from '../../components/payroll/OvertimeManager';
 import { AttendanceReports } from '../attendance-manager/AttendanceReports';
 import { DailyAttendance } from '../attendance-manager/DailyAttendance';
 import { LeaveRequestsManager } from '../attendance-manager/LeaveRequestsManager';
+import { LeaveTypes } from '../attendance-manager/LeaveTypes';
 import { MonthlyAttendanceCalendar } from '../attendance-manager/MonthlyCalendar';
 import { AttendanceOverview } from '../attendance-manager/Overview';
 import { RulesSettings } from '../attendance-manager/RulesSettings';
@@ -34,6 +35,7 @@ export const AttendanceManager = () => {
         {activeTab === 'daily' && <DailyAttendance />}
         {activeTab === 'calendar' && <MonthlyAttendanceCalendar />}
         {activeTab === 'leave-requests' && <LeaveRequestsManager />}
+        {activeTab === 'leave-types' && <LeaveTypes />}
         {activeTab === 'overtime' && (
           <div className="attendance-manager-overtime-shell">
             <OvertimeManager />
