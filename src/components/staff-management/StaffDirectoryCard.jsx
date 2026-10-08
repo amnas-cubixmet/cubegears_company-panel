@@ -6,9 +6,12 @@ import {
   Power,
   ShieldCheck,
   UserRound,
+  WalletCards,
+  Pencil,
 } from 'lucide-react';
 import { StaffAvatar } from './StaffAvatar';
 import { getEmployeeLabel } from './staffDisplay';
+import { payTypeLabel } from '../payroll/payTypes';
 
 const tone = (status = '') => {
   if (status === 'Active') return 'success';
@@ -21,6 +24,9 @@ export const StaffDirectoryCard = ({
   index,
   onOpen,
   onToggleStatus,
+  payPlan,
+  canViewPay = false,
+  onConfigurePay,
 }) => (
   <article className="staff-directory-card" onClick={onOpen}>
     <header className="staff-directory-card__head">
@@ -42,6 +48,18 @@ export const StaffDirectoryCard = ({
       <span><UserRound size={13} />{staff.department || 'Workshop'} · {staff.role || 'No role'}</span>
       <span><ShieldCheck size={13} />{staff.shift || 'No shift assigned'}</span>
       <span><CalendarDays size={13} />Joined {staff.joiningDate || '—'}</span>
+      {canViewPay && (
+        <span className="staff-directory-paytype">
+          <WalletCards size={13} />
+          <span>
+            {payPlan
+              ? payTypeLabel(payPlan.paymentType)
+              : staff.paymentType
+                ? payTypeLabel(staff.paymentType) + ' · Set up pay'
+                : 'Pay not configured'}
+          </span>
+        </span>
+      )}
     </div>
 
     {!!staff.skills?.length && (
@@ -68,7 +86,21 @@ export const StaffDirectoryCard = ({
         View Profile
       </button>
 
-      <button
+      {onConfigurePay && (
+        <button
+          type="button"
+          className="staff-pay-config-button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onConfigurePay();
+          }}
+        >
+          <Pencil size={13} />
+          {payPlan ? 'Change Pay' : 'Set Pay'}
+        </button>
+      )}
+
+      {onToggleStatus && <button
         type="button"
         className={`staff-status-button ${staff.accountStatus === 'Active' ? 'is-danger' : 'is-success'}`}
         title={staff.accountStatus === 'Active' ? 'Deactivate Staff' : 'Activate Staff'}
@@ -78,7 +110,7 @@ export const StaffDirectoryCard = ({
         }}
       >
         <Power size={13} />
-      </button>
+      </button>}
     </footer>
   </article>
 );
