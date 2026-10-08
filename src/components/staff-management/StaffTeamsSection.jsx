@@ -4,10 +4,11 @@ import { ResponsiveModalSheet } from '../common/ResponsiveModalSheet';
 import { BranchCreateSheet } from './BranchCreateSheet';
 import { branchService } from '../../services/branch.service';
 import { staffManagementService } from '../../services/staffManagement.service';
+import { staffService } from '../../services/staff.service';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 
-export const StaffTeamsSection = ({ staff = [], teams = [], setTeams }) => {
+export const StaffTeamsSection = ({ staff = [], teams = [], setTeams, setStaff }) => {
   const { user } = useAuth();
   const canManageBranches = hasPermission(user, 'company.manage');
   const [branches, setBranches] = useState([]);
@@ -99,8 +100,12 @@ export const StaffTeamsSection = ({ staff = [], teams = [], setTeams }) => {
       );
       setTeamStaffSelection([]);
       setTeamStaffTarget(null);
-      const nextTeams = await staffManagementService.getTeams();
+      const [nextTeams, nextStaff] = await Promise.all([
+        staffManagementService.getTeams(),
+        staffService.getStaff(),
+      ]);
       setTeams(nextTeams);
+      if (setStaff) setStaff(nextStaff);
     } finally {
       setSavingTeamStaff(false);
     }
