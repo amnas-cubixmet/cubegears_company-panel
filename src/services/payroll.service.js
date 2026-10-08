@@ -298,6 +298,35 @@ Object.assign(payrollService, {
   approvePayrollRun: payrollService.approvePayrollRun || (async (id) => ({ id, status: 'Approved', approvalStatus: 'Approved' })),
 });
 
+const mockJobPayrollAssignments = [];
+
+Object.assign(payrollService, {
+  getJobAssignments: payrollService.getJobAssignments || (async (filters = {}) => {
+    let rows = [...mockJobPayrollAssignments];
+    if (filters.job) rows = rows.filter((row) => String(row.job) === String(filters.job));
+    if (filters.staffId) rows = rows.filter((row) => String(row.staffId || row.employee) === String(filters.staffId));
+    return rows;
+  }),
+  saveJobAssignment: payrollService.saveJobAssignment || (async (assignment) => {
+    const payload = {
+      ...assignment,
+      id: assignment.id || 'MOCK-ASSIGN-' + Date.now(),
+      staffId: assignment.staffId || assignment.employee,
+      staffName: assignment.staffName || '',
+      approvedWorkHours: Number(assignment.approvedWorkMinutes || 0) / 60,
+    };
+    const index = mockJobPayrollAssignments.findIndex((row) => row.id === assignment.id);
+    if (index >= 0) mockJobPayrollAssignments[index] = { ...mockJobPayrollAssignments[index], ...payload };
+    else mockJobPayrollAssignments.push(payload);
+    return payload;
+  }),
+  deleteJobAssignment: payrollService.deleteJobAssignment || (async (id) => {
+    const index = mockJobPayrollAssignments.findIndex((row) => row.id === id);
+    if (index >= 0) mockJobPayrollAssignments.splice(index, 1);
+    return true;
+  }),
+});
+
 const PAYMENT_TYPE_LABELS = {
   monthly: 'Fixed Monthly Salary',
   daily: 'Daily Wage',
@@ -448,6 +477,9 @@ if (!USE_MOCK_API) {
       }
       return apiClient.post('/payroll/job-assignments', assignment);
     },
+
+    deleteJobAssignment: async (id) =>
+      apiClient.delete(`/payroll/job-assignments/${id}`),
 
     getGeneratedCommissions: async (filters = {}) =>
       apiClient.get('/payroll/commissions', { params: filters }),
