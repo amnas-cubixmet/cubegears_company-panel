@@ -13,3 +13,8 @@ export { StaffAttendanceCalendar } from './StaffAttendanceCalendar';
 export { StaffDocumentAddSheet } from './StaffDocumentAddSheet';
 export { StaffPayrollHistory } from './StaffPayrollHistory';
 export { StaffProfileEditSheet } from './StaffProfileEditSheet';
+export { RoleCardGrid } from './RoleCardGrid';
+export { RoleEditorForm } from './RoleEditorForm';
+export { RoleOverviewStats } from './RoleOverviewStats';
+export { RolePermissionMatrix } from './RolePermissionMatrix';
+export { RolesHeader } from './RolesHeader';
