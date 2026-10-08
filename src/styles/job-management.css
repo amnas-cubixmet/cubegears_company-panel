@@ -2181,3 +2181,10 @@
 @media(prefers-reduced-motion:reduce){
  .cg-job-detail .job-workflow-tab,.job-create-page button{transition:none!important}
 }
+
+/* Inspection checks – interactive, touch-friendly */
+.cg-job-detail .job-inspection-checks .job-inspection-check{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;min-width:0;min-height:116px;gap:10px;padding:13px!important}
+.cg-job-detail .job-inspection-checks .job-inspection-check>strong{font-size:13px!important;line-height:1.4}
+.cg-job-detail .job-inspection-checks .job-inspection-check>select{width:100%;min-width:0;min-height:42px!important;height:42px!important;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:12px!important}
+.cg-job-detail .job-inspection-guide{margin:12px 0 0;padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-secondary);font-size:12px;line-height:1.5}
+@media(max-width:767px){.cg-job-detail .job-inspection-checks .job-inspection-check>select{font-size:16px!important;min-height:44px!important;height:44px!important}}
