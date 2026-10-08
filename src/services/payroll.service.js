@@ -519,6 +519,11 @@ if (!USE_MOCK_API) {
 
 /* Verified Job Card timers stay separate from attendance wage calculations. */
 Object.assign(payrollService, {
+  getJobTimerAssignments: async (job) => {
+    if (USE_MOCK_API) return [];
+    const rows = await apiClient.get('/payroll/job-timer-assignments', { params: { job } });
+    return Array.isArray(rows) ? rows : rows?.results || [];
+  },
   getJobWorkSessions: async (filters = {}) => {
     if (USE_MOCK_API) return [];
     const rows = await apiClient.get('/payroll/work-sessions', { params: filters });
