@@ -176,6 +176,20 @@ export const LeaveRequestsManager = () => {
               </div>
 
               <div className="am-approval-details am-leave-date-grid">
+                <div className="am-leave-type-cell">
+                  <span>Leave Type</span>
+                  <strong>{item.leaveType || 'Leave'}</strong>
+                </div>
+
+                <div className="am-leave-duration-cell">
+                  <span><Clock3 size={11} />Duration</span>
+                  <strong>
+                    {item.halfDay
+                      ? 'Half Day'
+                      : item.totalDays + ' Day' + (item.totalDays === 1 ? '' : 's')}
+                  </strong>
+                </div>
+
                 <div>
                   <span><CalendarDays size={11} />Start Date</span>
                   <strong>{formatDate(item.startDate)}</strong>
@@ -186,21 +200,7 @@ export const LeaveRequestsManager = () => {
                   <strong>{formatDate(item.endDate)}</strong>
                 </div>
 
-                <div>
-                  <span><Clock3 size={11} />Duration</span>
-                  <strong>
-                    {item.halfDay
-                      ? 'Half Day'
-                      : item.totalDays + ' Day' + (item.totalDays === 1 ? '' : 's')}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>Leave Type</span>
-                  <strong>{item.leaveType || 'Leave'}</strong>
-                </div>
-
-                <div className="am-approval-details__wide">
+                <div className="am-approval-details__wide am-leave-reason-cell">
                   <span>Reason</span>
                   <strong>{item.reason || 'No reason provided.'}</strong>
                 </div>
