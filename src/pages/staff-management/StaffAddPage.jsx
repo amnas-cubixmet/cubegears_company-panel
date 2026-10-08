@@ -6,6 +6,8 @@ import { staffService } from '../../services/staff.service';
 import { staffManagementService } from '../../services/staffManagement.service';
 import { branchService } from '../../services/branch.service';
 import { BranchCreateSheet } from '../../components/staff-management/BranchCreateSheet';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 
 const statusOptions = [
   'Active',
@@ -29,6 +31,8 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export const StaffAddPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canManageBranches = hasPermission(user, 'company.manage');
   const [saving, setSaving] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [error, setError] = useState('');
@@ -288,13 +292,15 @@ export const StaffAddPage = () => {
                       </option>
                     ))}
                   </select>
-                  <button
-                    type="button"
-                    className="staff-inline-create-button"
-                    onClick={() => setBranchSheetOpen(true)}
-                  >
-                    + Branch
-                  </button>
+                  {canManageBranches && (
+                    <button
+                      type="button"
+                      className="staff-inline-create-button"
+                      onClick={() => setBranchSheetOpen(true)}
+                    >
+                      + Branch
+                    </button>
+                  )}
                 </div>
               </label>
             </div>
@@ -560,7 +566,7 @@ export const StaffAddPage = () => {
       </form>
 
       <BranchCreateSheet
-        isOpen={branchSheetOpen}
+        isOpen={canManageBranches && branchSheetOpen}
         onClose={() => setBranchSheetOpen(false)}
         onCreate={async (data) => {
           const created = await branchService.createBranch(data);
