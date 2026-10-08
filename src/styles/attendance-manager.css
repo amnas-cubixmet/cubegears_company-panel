@@ -1959,3 +1959,60 @@
 .attendance-overtime-approval-rate>div{justify-content:center;padding:8px 10px;border:1px solid color-mix(in srgb,var(--success) 25%,var(--border));border-radius:8px;background:var(--success-soft)}
 .attendance-overtime-approval-rate>div strong{color:var(--success);font-size:14px}
 @media(max-width:520px){.attendance-overtime-approval-rate{grid-template-columns:1fr}}
+
+
+/* Leave approval card field order polish */
+.cg-attendance-manager .am-leave-date-grid > div > span{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.cg-attendance-manager .am-leave-type-cell{
+  border-color:color-mix(in srgb,var(--primary) 22%,var(--am-border)) !important;
+  background:color-mix(in srgb,var(--primary-soft) 40%,var(--am-soft)) !important;
+}
+
+.cg-attendance-manager .am-leave-type-cell > span{
+  color:var(--primary) !important;
+}
+
+.cg-attendance-manager .am-leave-type-cell > strong{
+  font-weight:750;
+}
+
+.cg-attendance-manager .am-leave-duration-cell > span svg,
+.cg-attendance-manager .am-leave-date-grid > div > span svg{
+  flex:0 0 auto;
+  color:var(--primary);
+}
+
+.cg-attendance-manager .am-leave-reason-cell{
+  min-height:48px;
+}
+
+.cg-attendance-manager .am-leave-reason-cell > strong{
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:560px){
+  .cg-attendance-manager .am-approval-card{
+    padding:11px !important;
+  }
+
+  .cg-attendance-manager .am-approval-details{
+    gap:6px;
+    margin-top:10px;
+  }
+
+  .cg-attendance-manager .am-approval-details > div{
+    padding:8px;
+  }
+
+  .cg-attendance-manager .am-approval-actions{
+    gap:7px !important;
+    margin-top:10px;
+    padding-top:9px !important;
+  }
+}
