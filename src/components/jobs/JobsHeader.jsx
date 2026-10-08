@@ -1,5 +1,5 @@
 import React from 'react';
-import { History, Plus, Wrench } from 'lucide-react';
+import { History, Plus } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 
@@ -9,10 +9,6 @@ export const JobsHeader = ({ onNavigate }) => {
   return (
     <header className="jobs-dashboard-header">
       <div>
-        <span className="jobs-dashboard-eyebrow">
-          <Wrench size={12} />
-          Workshop Operations
-        </span>
         <h1>Job Cards</h1>
         <p>Track every vehicle from check-in to repair, quality control, billing and delivery.</p>
       </div>
