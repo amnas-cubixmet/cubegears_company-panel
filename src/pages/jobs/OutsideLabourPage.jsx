@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, HardHat, Plus } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
@@ -31,13 +31,19 @@ export const OutsideLabourPage = () => {
     <main className="job-management-page outside-labour-page">
       <JobBreadcrumbs current="Outside Labour" />
       <header className="outside-labour-page-head">
-        <div>
-          <h1>Outside Labour</h1>
-          <p>Manual freelance and part-work charges. Workers are not created as staff.</p>
+        <div className="outside-labour-page-title">
+          <span className="outside-labour-page-icon" aria-hidden="true"><HardHat size={22}/></span>
+          <div>
+            <h1>Outside Labour</h1>
+            <p>Record outside painters, mechanics and part-work charges without creating staff profiles.</p>
+          </div>
         </div>
-        <button type="button" onClick={() => navigate('/dashboard')}>
-          <ArrowLeft size={15}/> Dashboard
-        </button>
+        <div className="outside-labour-page-actions">
+          <button type="button" onClick={() => navigate('/jobs')}><ArrowLeft size={16}/> Job Cards</button>
+          {hasPermission(user, 'jobs.create') && (
+            <button type="button" className="is-primary" onClick={() => navigate('/jobs/new')}><Plus size={16}/> New Job Card</button>
+          )}
+        </div>
       </header>
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
       <OutsideLabourPanel jobId={validJob || undefined} jobs={jobs} />
