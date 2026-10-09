@@ -1,0 +1,53 @@
+/* One validation language for all Company Panel forms (including modal sheets). */
+:root{--cg-input-error:var(--danger,#dc2626)}
+[data-cg-field-error="true"]{position:relative}
+[data-cg-field-error="true"] input:not([type="checkbox"]):not([type="radio"]),
+[data-cg-field-error="true"] select,
+[data-cg-field-error="true"] textarea,
+input[data-cg-error-active="true"],select[data-cg-error-active="true"],textarea[data-cg-error-active="true"]{
+  border-color:var(--cg-input-error)!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--cg-input-error) 14%,transparent)!important
+}
+[data-cg-field-error="true"] input:focus,
+[data-cg-field-error="true"] select:focus,
+[data-cg-field-error="true"] textarea:focus{
+  outline:2px solid var(--cg-input-error)!important;outline-offset:1px
+}
+.cg-inline-field-error{
+  display:block;
+  width:100%;
+  margin-top:5px;
+  font-family:inherit;
+  color:var(--cg-input-error);
+  font-size:12px;
+  font-weight:600;
+  line-height:1.45;
+  letter-spacing:0;
+  white-space:normal;
+  overflow-wrap:anywhere
+}
+[data-cg-field-error="true"] .cg-inline-field-error{color:var(--cg-input-error)}
+[data-cg-field-error="true"] input[type="checkbox"],
+[data-cg-field-error="true"] input[type="radio"]{accent-color:var(--cg-input-error)}
+.cg-form-error-summary{
+  display:block;
+  min-width:0;
+  border:1px solid color-mix(in srgb,var(--cg-input-error) 36%,var(--border));
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--cg-input-error);
+  padding:11px 13px;
+  font-size:12px;
+  font-weight:650;
+  line-height:1.5;
+  overflow-wrap:anywhere
+}
+@media(max-width:767px){
+  .cg-inline-field-error{font-size:12px}
+  input[data-cg-error-active="true"],select[data-cg-error-active="true"],textarea[data-cg-error-active="true"]{scroll-margin-top:92px;scroll-margin-bottom:110px}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-cg-field-error="true"] input,
+  [data-cg-field-error="true"] select,
+  [data-cg-field-error="true"] textarea{transition:none!important}
+}
