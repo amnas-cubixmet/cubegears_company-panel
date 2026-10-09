@@ -91,7 +91,7 @@ export const DailyWagePage = ({ mode = 'overview' }) => {
   }, [data, query, branch]);
 
   const branches = useMemo(() =>
-    [...new Map((data?.employees || []).filter((e) => e.branchId)
+    [...new Map((Array.isArray(data) ? data : data?.employees || []).filter((e) => e.branchId)
       .map((e) => [e.branchId, e.branchName || 'Branch'])).entries()],
     [data],
   );
@@ -138,12 +138,10 @@ export const DailyWagePage = ({ mode = 'overview' }) => {
           <label className="dw-search"><Search size={17}/>
             <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search staff or records" aria-label="Search Daily Wages"/>
           </label>
-          {mode === 'overview' && (
-            <select aria-label="Filter by branch" value={branch} onChange={(event) => setBranch(event.target.value)}>
-              <option value="All">All Branches</option>
-              {branches.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
-            </select>
-          )}
+          <select aria-label="Filter by branch" value={branch} onChange={(event) => setBranch(event.target.value)}>
+            <option value="All">All Branches</option>
+            {branches.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+          </select>
           {mode === 'history' && (
             <>
               <label>From <input type="date" value={from} onChange={(event) => setFrom(event.target.value)}/></label>
