@@ -33,7 +33,6 @@ export const JobCreatePage = () => {
     complaint: '',
     assignedEmployeeId: '',
     assignedEmployeeName: '',
-    commissionRateOverride: '',
     serviceAdvisor: '',
     priority: 'Medium',
     status: 'New',
@@ -107,9 +106,8 @@ export const JobCreatePage = () => {
     setError('');
 
     try {
-      const { commissionRateOverride, ...jobFields } = form;
       const created = await jobService.createJob({
-        ...jobFields,
+        ...form,
         checkInTime: form.jobDateTime,
         customerComplaints: form.complaint
           ? [{ id: `CMP-${Date.now()}`, description: form.complaint, wording: form.complaint, status: 'Open' }]
@@ -133,26 +131,12 @@ export const JobCreatePage = () => {
         billing: { advancePaid: 0, paidAmount: 0, outstandingBalance: 0 }
       });
 
-      if (created?.id && form.assignedEmployeeId && commissionRateOverride !== '') {
+      if (created?.id && form.assignedEmployeeId) {
         try {
-          const assignments = await payrollService.getJobAssignments({ job: created.id });
-          const existing = (Array.isArray(assignments) ? assignments : assignments?.results || [])
-            .find((item) => String(item.employee || item.staffId) === String(form.assignedEmployeeId));
-          await payrollService.saveJobAssignment({
-            ...(existing ? { id: existing.id } : {}),
-            job: created.id,
-            employee: form.assignedEmployeeId,
-            commissionAllocationPercent: Number(existing?.commissionAllocationPercent ?? 100),
-            metadata: {
-              ...(existing?.metadata || {}),
-              source: 'manual',
-              commissionRateOverride: Number(commissionRateOverride),
-            },
-            status: existing?.status || 'Assigned',
-          });
-        } catch (payrollError) {
-          console.error('Job created; commission configuration requires review.', payrollError);
-          window.alert('Job Card created, but commission setup could not be saved. Please check Mechanic Payroll Allocation on the Job Card Work tab.');
+          await payrollService.createJobTimerAssignment(created.id, form.assignedEmployeeId);
+        } catch (assignmentError) {
+          console.warn('Job created; worker assignment needs confirmation.', assignmentError);
+          window.alert('Job Card created. Please verify worker assignment in Work & Labour.');
         }
       }
 
@@ -257,17 +241,6 @@ export const JobCreatePage = () => {
                 <option value="">Unassigned</option>
                 {staff.map((item)=><option key={item.id} value={item.id}>{item.name} · {item.designation}</option>)}
               </select>
-            </label>
-            <label className={labelClass}>Commission Rate for Assigned Technician (%) · Optional
-              <input type="number" min="0" max="100" step="0.01"
-                value={form.commissionRateOverride}
-                disabled={!form.assignedEmployeeId}
-                onChange={(e) => set('commissionRateOverride', e.target.value)}
-                placeholder="Leave blank to use staff default"
-                className={inputClass}/>
-              <span className="mt-1 block text-[10px] font-normal text-muted">
-                Overrides the commission percentage for this job only. Additional mechanics and revenue splits can be set in Work & Labour.
-              </span>
             </label>
             <label className={labelClass}>Service Advisor
               <select value={form.serviceAdvisor} onChange={(e) => set('serviceAdvisor', e.target.value)} className={inputClass}>
