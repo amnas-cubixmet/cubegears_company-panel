@@ -176,11 +176,6 @@ export const LeaveRequestsManager = () => {
               </div>
 
               <div className="am-approval-details am-leave-date-grid">
-                <div className="am-leave-type-cell">
-                  <span>Leave Type</span>
-                  <strong>{item.leaveType || 'Leave'}</strong>
-                </div>
-
                 <div className="am-leave-duration-cell">
                   <span><Clock3 size={11} />Duration</span>
                   <strong>
