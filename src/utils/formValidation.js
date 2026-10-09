@@ -15,7 +15,7 @@ const normalizeKey = (key) => String(key || '')
   .replace(/[^a-z0-9]/gi, '').toLowerCase();
 
 const getFieldContainer = (field) =>
-  field.closest('label:not([class*="checkbox"]), .crud-field, .ui-field, .form-field, .form-group')
+  field.closest('[data-cg-input-wrapper], label:not([class*="checkbox"]), .crud-field, .ui-field, .form-field, .form-group')
   || field.closest('[data-field]')
   || field.parentElement;
 
