@@ -31,8 +31,6 @@ import {
   StaffProfileEditSheet,
 } from '../../../components/staff-management';
 import { getEmployeeLabel } from '../../../components/staff-management/staffDisplay';
-import { EmployeePayConfigurationSheet } from '../../../components/payroll';
-import { payTypeLabel } from '../../../components/payroll/payTypes';
 import { useAuth } from '../../../hooks/useAuth';
 import { USE_MOCK_API } from '../../../api/apiConfig';
 import { hasPermission } from '../../../utils/permissions';
@@ -196,7 +194,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
   const [editOpen, setEditOpen] = useState(false);
   const [documentOpen, setDocumentOpen] = useState(false);
-  const [payConfigOpen, setPayConfigOpen] = useState(false);
 
   const isOwnProfile =
     Boolean(user?.employeeProfileId) &&
@@ -438,18 +435,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
     await refreshAll();
   };
 
-  const handlePayConfiguration = async (payload) => {
-    await payrollService.saveSalaryStructure({
-      ...payload,
-      staffId: staff.id,
-      staffName: staff.name,
-      employee: staff.id,
-    });
-    showToast('Salary & payment settings saved.');
-    setPayConfigOpen(false);
-    await refreshAll();
-  };
-
   if (loading) {
     return <div className="staff-workshop-empty">Loading staff profile…</div>;
   }
@@ -499,12 +484,9 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
         {(canEdit || canManagePayroll) && (
           <div className="staff360-hero-actions">
             {canManagePayroll && (
-              <button type="button" className="staff360-secondary-button" onClick={() => {
-                setActiveTab('Payroll');
-                setPayConfigOpen(true);
-              }}>
+              <button type="button" className="staff360-secondary-button" onClick={() => navigate(`/staff/${staff.id}/wages`)}>
                 <WalletCards size={14}/>
-                {salaryStructure ? 'Change Pay' : 'Configure Pay'}
+                Daily Wage Account
               </button>
             )}
             {canEdit && (
@@ -580,15 +562,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
                 <InfoItem label="Team / Department" value={staff.department} icon={Building2} />
                 <InfoItem label="Branch" value={staff.branch?.name || staff.branch} icon={Building2} />
                 <InfoItem label="Shift" value={staff.shift} icon={Clock3} />
-                {(canViewPayroll || isOwnProfile) && (
-                  <InfoItem
-                    label="Payment Type"
-                    value={salaryStructure
-                      ? payTypeLabel(salaryStructure.paymentType)
-                      : staff.paymentType ? payTypeLabel(staff.paymentType) + ' · setup pending' : 'Not configured'}
-                    icon={WalletCards}
-                  />
-                )}
                 <InfoItem label="Login Status" value={staff.loginStatus} icon={ShieldCheck} />
               </div>
             </div>
@@ -746,43 +719,21 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
         {activeTab === 'Payroll' && (
           <div className="staff360-tab-stack">
-            {canViewPayroll && (
-              <button type="button" className="dw-button is-primary" onClick={() => navigate(`/staff/${staff.id}/wages`)}>
-                <WalletCards size={16} /> Open Daily Wage Account
-              </button>
-            )}
             {canViewPayroll || isOwnProfile ? (
-              <>
-                <div className="staff360-pay-config-command">
+              <div className="staff360-pay-config-command">
+                <div>
+                  <WalletCards size={17}/>
                   <div>
-                    <WalletCards size={15}/>
-                    <div>
-                      <strong>Salary & Payment Settings</strong>
-                      <span>
-                        {salaryStructure ? payTypeLabel(salaryStructure.paymentType) : 'Not configured'}
-                      </span>
-                    </div>
+                    <strong>Daily Wage Account</strong>
+                    <span>Approved attendance, extra earnings, running balance and payment history.</span>
                   </div>
-
-                  {canManagePayroll && (
-                    <button type="button" onClick={() => setPayConfigOpen(true)}>
-                      <Pencil size={13}/>
-                      {salaryStructure ? 'Change Pay Configuration' : 'Configure Payment'}
-                    </button>
-                  )}
                 </div>
-
-                <StaffPayrollHistory
-                  payrolls={payrolls}
-                  selectedMonth={payrollMonth}
-                  onMonthChange={setPayrollMonth}
-                  salaryStructure={salaryStructure}
-                />
-              </>
-            ) : (
-              <div className="staff-workshop-empty">
-                Payroll access is not assigned to your role.
+                <button type="button" onClick={() => navigate(`/staff/${staff.id}/wages`)}>
+                  <WalletCards size={14}/> Open Wage Account
+                </button>
               </div>
+            ) : (
+              <div className="staff-workshop-empty">Payroll access is not assigned to your role.</div>
             )}
           </div>
         )}
@@ -862,21 +813,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
           </div>
         )}
       </section>
-
-      {canManagePayroll && (
-        <EmployeePayConfigurationSheet
-          isOpen={payConfigOpen}
-          onClose={() => setPayConfigOpen(false)}
-          structure={{
-            ...(salaryStructure || {}),
-            paymentType: salaryStructure?.paymentType || staff.paymentType || 'monthly',
-            staffId: staff.id,
-            staffName: staff.name,
-            employee: staff,
-          }}
-          onSave={handlePayConfiguration}
-        />
-      )}
 
       {canEdit && (
         <>
