@@ -92,7 +92,7 @@ export const AppRoutes = () => (
       <Route path="/attendance-manager/team-review" element={<Navigate to="/attendance-manager/daily" replace />} />
       <Route path="/attendance-manager/team-review/:staffId/:date" element={<StaffAttendanceDetails />} />
       <Route path="/attendance-manager/master-records" element={<Navigate to="/attendance-manager/reports" replace />} />
-      <Route path="/attendance-manager/leave-types" element={<AttendanceManager />} />
+      <Route path="/attendance-manager/leave-types" element={<Navigate to="/attendance-manager/leave-requests" replace />} />
       <Route path="/attendance-manager/holidays" element={<Navigate to="/attendance-manager/calendar" replace />} />
 
       <Route path="/staff-management" element={<Navigate to="/staff-management/overview" replace />} />
