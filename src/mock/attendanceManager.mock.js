@@ -216,39 +216,6 @@ export const mockMasterLedger = [
   }
 ];
 
-export const mockLeaveTypesList = [
-  {
-    id: "LT-01",
-    name: "Casual Leave",
-    code: "CL",
-    type: "Paid",
-    allocation: "12 Days / Year",
-    halfDay: true,
-    carryForward: "5 Days",
-    status: "Active"
-  },
-  {
-    id: "LT-02",
-    name: "Sick Leave",
-    code: "SL",
-    type: "Paid",
-    allocation: "10 Days / Year",
-    halfDay: true,
-    carryForward: "3 Days",
-    status: "Active"
-  },
-  {
-    id: "LT-03",
-    name: "Annual Earned Leave",
-    code: "AL",
-    type: "Paid",
-    allocation: "15 Days / Year",
-    halfDay: false,
-    carryForward: "10 Days",
-    status: "Active"
-  }
-];
-
 export const mockHolidaysList = [
   {
     id: "HOL-01",
