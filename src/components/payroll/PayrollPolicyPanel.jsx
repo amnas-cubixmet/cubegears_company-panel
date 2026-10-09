@@ -43,7 +43,7 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
       setPolicy((old) => ({ ...old, ...saved }));
       onSaved?.();
     } catch (requestError) {
-      setError(requestError?.message || 'Unable to save commission and payroll settings.');
+      setError(requestError?.message || 'Unable to save salary and worker payment settings.');
     } finally {
       setSaving(false);
     }
@@ -129,28 +129,6 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
         </label>
 
         <label>
-          <span>Job Commission Eligibility</span>
-          <select
-            value={policy.commissionRules?.eligibility || 'job_complete'}
-            onChange={(event) => setRule('commissionRules', 'eligibility', event.target.value)}
-          >
-            <option value="job_complete">After work completed / Ready for Delivery</option>
-            <option value="invoice_paid">After invoice fully paid</option>
-          </select>
-        </label>
-
-        <label>
-          <span>Job Commission Revenue Basis</span>
-          <select
-            value={policy.commissionRules?.basisMode || 'service_wise'}
-            onChange={(event) => setRule('commissionRules', 'basisMode', event.target.value)}
-          >
-            <option value="service_wise">Service-wise verified labour</option>
-            <option value="total_labour">Total Job Card labour × mechanic share</option>
-          </select>
-        </label>
-
-        <label>
           <span>Hourly Wage Calculation Source</span>
           <select
             value={policy.commissionRules?.hourlyWageSource || 'attendance'}
@@ -161,18 +139,10 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
           </select>
         </label>
 
-        <label className="payroll-policy-toggle">
-          <span><strong>Auto-approve generated commissions</strong><small>Otherwise manager approval is required.</small></span>
-          <input
-            type="checkbox"
-            checked={Boolean(policy.commissionRules?.autoApprove)}
-            onChange={(e) => setRule('commissionRules', 'autoApprove', e.target.checked)}
-          />
-        </label>
       </div>
       <p className="payroll-policy-help">
-        Mechanic work time and attendance are tracked separately. Only the selected source determines hourly wage.
-        Reopened or cancelled jobs with already approved earnings require an auditable payroll adjustment.
+        Fixed per-work payment is entered for each Job Card work item, separately from the customer's labour charge.
+        Only manager-approved work is payable; monthly, daily and hourly workers keep their regular wage rules.
       </p>
       {error && <p className="staff-directory-message is-error" role="alert">{error}</p>}
     </section>
