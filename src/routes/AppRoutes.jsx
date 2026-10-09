@@ -26,6 +26,7 @@ import { EditVehicle } from '../pages/vehicles/EditVehicle';
 import { ServiceList } from '../pages/services/ServiceList';
 import { JobList } from '../pages/jobs/JobList';
 import { JobCreatePage } from '../pages/jobs/JobCreatePage';
+import { OutsideLabourPage } from '../pages/jobs/OutsideLabourPage';
 import { JobDetails } from '../pages/jobs/JobDetails';
 import { JobStatus } from '../pages/jobs/JobStatus';
 import { JobReports } from '../pages/jobs/JobReports';
@@ -146,6 +147,7 @@ export const AppRoutes = () => (
 
       <Route path="/jobs" element={<JobList />} />
       <Route path="/jobs/new" element={<JobCreatePage />} />
+      <Route path="/jobs/outside-labour" element={<OutsideLabourPage />} />
       <Route path="/jobs/reports" element={<JobReports />} />
       <Route path="/jobs/add" element={<Navigate to="/jobs/new" replace />} />
       <Route path="/jobs/:id" element={<JobDetails />} />
