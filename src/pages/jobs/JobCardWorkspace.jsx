@@ -68,6 +68,19 @@ const TABS = [
   ['activity', 'Activity']
 ];
 
+const TAB_ICONS = {
+  overview: Gauge,
+  complaints: FileText,
+  inspection: ShieldCheck,
+  estimate: ReceiptText,
+  work: Wrench,
+  parts: PackageSearch,
+  updates: History,
+  qc: CheckCircle2,
+  invoice: ReceiptText,
+  activity: Clock3,
+};
+
 const blankLabour = () => ({
   service: '',
   mechanicName: '',
@@ -743,6 +756,7 @@ export function JobCardWorkspace() {
         {TABS.map(([key, label], index) => {
           const locked = index > unlockedTabIndex;
           const completed = index < unlockedTabIndex || (index === unlockedTabIndex && sectionComplete[key]);
+          const TabIcon = TAB_ICONS[key];
           return (
             <button
               type="button"
@@ -762,7 +776,10 @@ export function JobCardWorkspace() {
               <span className="job-workflow-tab-number">
                 {locked ? <LockKeyhole size={11} /> : index + 1}
               </span>
-              <span>{label}</span>
+              <span className="job-workflow-tab-label">
+                <TabIcon size={14} aria-hidden="true" />
+                {label}
+              </span>
               {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
             </button>
           );
