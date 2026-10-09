@@ -1,0 +1,233 @@
+/* Outside Labour dashboard alignment — loaded after older Jobs styles. */
+.outside-labour-page,
+.outside-labour-dashboard{
+  --outside-card:var(--surface);
+  --outside-border:var(--border);
+  --outside-field:var(--surface-2);
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--text-primary);
+}
+.outside-labour-page{gap:14px}
+.outside-labour-page .outside-labour-page-head{align-items:center;gap:14px}
+.outside-labour-page .outside-labour-page-title{flex:1 1 280px;gap:12px}
+.outside-labour-page .outside-labour-page-title h1{margin:0;font-size:20px;font-weight:750;line-height:1.25;letter-spacing:-.025em}
+.outside-labour-page .outside-labour-page-title p{font-size:12px;line-height:1.5;margin:5px 0 0}
+.outside-labour-page .outside-labour-page-icon{display:grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--primary)}
+.outside-labour-page .outside-labour-page-actions{gap:8px}
+.outside-labour-page .outside-labour-page-actions button{min-height:40px;padding:0 13px;font-size:12px;border-radius:10px}
+.outside-labour-page .outside-labour-back{border:1px solid var(--border);background:var(--surface);color:var(--text-primary)}
+.outside-labour-page .outside-labour-page-actions .is-primary{background:var(--primary);color:#fff}
+.outside-labour-dashboard{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.outside-labour-dashboard .outside-labour-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:0;min-height:46px;border:0;background:transparent;
+}
+.outside-labour-dashboard .outside-labour-header-copy{gap:10px}
+.outside-labour-dashboard .outside-labour-title-icon{
+  display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;
+  border:1px solid var(--border);border-radius:10px;background:var(--surface-2);color:var(--primary)
+}
+.outside-labour-dashboard .outside-labour-header h2{font-size:15px;line-height:1.35;font-weight:750}
+.outside-labour-dashboard .outside-labour-header p{font-size:12px;line-height:1.5;margin-top:4px}
+.outside-labour-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.outside-labour-dashboard .outside-labour-refresh,.outside-labour-dashboard .outside-labour-add-trigger{
+  min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:0 13px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer
+}
+.outside-labour-dashboard .outside-labour-refresh{background:var(--surface);border:1px solid var(--border);color:var(--text-primary)}
+.outside-labour-dashboard .outside-labour-add-trigger{background:var(--primary);border:1px solid var(--primary);color:#fff}
+.outside-labour-dashboard .outside-labour-stats.dashboard-stats{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px
+}
+.outside-labour-dashboard .outside-labour-stat-card{
+  display:flex;flex-direction:column;justify-content:space-between;gap:0;
+  min-width:0;min-height:116px;padding:14px;
+  border:1px solid var(--border)!important;border-radius:12px!important;
+  background:var(--surface)!important;box-shadow:var(--shadow-sm)!important
+}
+.outside-labour-dashboard .outside-labour-stat-card .stat-top{align-items:flex-start;gap:8px}
+.outside-labour-dashboard .outside-labour-stat-card .stat-copy{min-width:0;flex:1}
+.outside-labour-dashboard .outside-labour-stat-card .stat-label{
+  display:block;color:var(--text-muted);font-size:11px;font-weight:650;
+  white-space:normal;overflow:visible;line-height:1.35
+}
+.outside-labour-dashboard .outside-labour-stat-card .stat-value{
+  display:block;margin-top:10px;overflow-wrap:anywhere;
+  color:var(--text-primary);font-size:clamp(17px,1.65vw,23px);font-weight:750;line-height:1.2;letter-spacing:-.03em
+}
+.outside-labour-dashboard .outside-labour-stat-card .stat-icon{
+  display:grid;place-items:center;flex:0 0 33px;width:33px;height:33px;
+  border:1px solid var(--border);border-radius:999px;background:var(--surface-2);color:var(--primary)
+}
+.outside-labour-dashboard .outside-labour-stat-card .stat-meta{
+  display:block;margin-top:10px;color:var(--text-muted);font-size:10px;
+  white-space:normal;line-height:1.35;overflow:visible
+}
+.outside-labour-dashboard .outside-labour-note{
+  display:block;margin-top:-5px;color:var(--text-muted);font-size:11px;line-height:1.55
+}
+.outside-labour-dashboard .outside-labour-form,
+.outside-labour-dashboard .outside-labour-records{
+  display:flex;flex-direction:column;min-width:0;gap:0;
+  border:1px solid var(--border)!important;border-radius:12px!important;
+  background:var(--surface)!important;box-shadow:var(--shadow-sm)!important;overflow:hidden
+}
+.outside-labour-dashboard .outside-labour-form{padding:0!important}
+.outside-labour-dashboard .outside-labour-form-heading{
+  min-height:64px;display:flex;align-items:center;gap:11px;
+  padding:14px 16px;border-bottom:1px solid var(--border)
+}
+.outside-labour-dashboard .outside-labour-form-icon{
+  flex:0 0 36px;width:36px;height:36px;display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--primary)
+}
+.outside-labour-dashboard .outside-labour-form h3,
+.outside-labour-dashboard .outside-labour-list-head h3{font-size:14px;font-weight:750;color:var(--text-primary)}
+.outside-labour-dashboard .outside-labour-form-heading p{font-size:12px;margin:4px 0 0;line-height:1.5;color:var(--text-muted)}
+.outside-labour-dashboard .outside-labour-form-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:16px
+}
+.outside-labour-dashboard .outside-labour-form label,
+.outside-labour-dashboard .outside-labour-pay-controls label{
+  display:flex;flex-direction:column;min-width:0;gap:7px;
+  font-size:12px;font-weight:650;color:var(--text-secondary);line-height:1.4
+}
+.outside-labour-dashboard .outside-labour-form input:not([type="checkbox"]),
+.outside-labour-dashboard .outside-labour-form select,
+.outside-labour-dashboard .outside-labour-pay-controls input,
+.outside-labour-dashboard .outside-labour-pay-controls select{
+  width:100%;min-width:0;min-height:44px;padding:0 12px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:9px;
+  color:var(--text-primary);font:inherit;font-size:13px;line-height:1.3
+}
+.outside-labour-dashboard .outside-labour-paid-check{
+  display:flex;flex-direction:row;align-items:center;gap:10px;
+  margin:0 16px 14px;padding:11px 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);font-size:12px;cursor:pointer
+}
+.outside-labour-dashboard .outside-labour-paid-check input{flex:0 0 auto;width:17px;height:17px}
+.outside-labour-dashboard .outside-labour-form-grid + .outside-labour-primary,
+.outside-labour-dashboard .outside-labour-form > .outside-labour-primary{
+  margin:0 16px 16px;min-height:42px;align-self:flex-start;
+  padding:0 16px;border-radius:9px;background:var(--primary);font-size:12px;font-weight:750;color:#fff
+}
+.outside-labour-dashboard .outside-labour-list-head{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  margin:0;padding:13px 16px;border-bottom:1px solid var(--border);background:var(--surface)
+}
+.outside-labour-dashboard .outside-labour-list-head>div:first-child{gap:3px}
+.outside-labour-dashboard .outside-labour-list-head>div:first-child span{font-size:11px}
+.outside-labour-dashboard .outside-labour-list-filters{
+  display:flex;align-items:center;gap:4px;padding:4px;border-radius:9px;
+  border:1px solid var(--border);background:var(--surface-2)
+}
+.outside-labour-dashboard .outside-labour-list-filters button{
+  min-height:33px;padding:0 12px;border-radius:7px;
+  border:0;background:transparent;color:var(--text-secondary);font-size:12px;font-weight:700;cursor:pointer
+}
+.outside-labour-dashboard .outside-labour-list-filters button.is-selected{background:var(--primary);color:#fff}
+.outside-labour-record-tools{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  min-width:0;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap
+}
+.outside-labour-search{
+  display:flex;align-items:center;gap:8px;min-width:220px;max-width:430px;flex:1 1 275px;
+  height:42px;padding:0 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);color:var(--text-muted)
+}
+.outside-labour-search:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-soft)}
+.outside-labour-search input{
+  width:100%;min-width:0;height:100%;flex:1;border:0;outline:0;
+  font:inherit;font-size:13px;color:var(--text-primary);background:transparent
+}
+.outside-labour-search input::-webkit-search-cancel-button{display:none}
+.outside-labour-search button{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border:0;border-radius:7px;background:transparent;color:var(--text-muted);cursor:pointer}
+.outside-labour-record-count{font-size:11px;color:var(--text-muted)}
+.outside-labour-dashboard .outside-labour-list{display:flex;flex-direction:column;gap:0;min-width:0}
+.outside-labour-list-columns,.outside-labour-dashboard .outside-labour-entry{
+  display:grid;grid-template-columns:minmax(0,1.25fr) minmax(185px,.95fr) minmax(185px,1fr);
+  align-items:center;column-gap:14px
+}
+.outside-labour-list-columns{
+  min-height:37px;padding:9px 16px;
+  border-bottom:1px solid var(--border);background:var(--surface-2);
+  color:var(--text-muted);font-size:11px;font-weight:750
+}
+.outside-labour-dashboard .outside-labour-entry{
+  min-height:89px;margin:0;padding:13px 16px;
+  border:0;border-bottom:1px solid var(--border);border-radius:0;
+  background:var(--surface);box-shadow:none
+}
+.outside-labour-dashboard .outside-labour-entry:last-child{border-bottom:0}
+.outside-labour-dashboard .outside-labour-entry:hover{background:var(--surface-2)}
+.outside-labour-dashboard .outside-labour-entry-main strong{font-size:13px}
+.outside-labour-dashboard .outside-labour-entry-main span,
+.outside-labour-dashboard .outside-labour-entry-main small{font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.outside-labour-dashboard .outside-labour-entry-money{align-items:flex-start}
+.outside-labour-dashboard .outside-labour-entry-money strong{font-size:14px}
+.outside-labour-dashboard .outside-labour-entry-actions{grid-column:auto;justify-content:flex-end}
+.outside-labour-dashboard .outside-labour-entry-actions>button,
+.outside-labour-dashboard .outside-labour-pay-controls>button:not(.outside-labour-primary){min-height:36px;font-size:11px}
+.outside-labour-dashboard .outside-labour-empty{margin:13px 16px;padding:26px 16px;border:1px dashed var(--border);border-radius:9px;font-size:12px;line-height:1.5}
+.outside-labour-dashboard button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.outside-labour-dashboard button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:1260px){
+  .outside-labour-dashboard .outside-labour-stats.dashboard-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .outside-labour-dashboard .outside-labour-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .outside-labour-list-columns,.outside-labour-dashboard .outside-labour-entry{grid-template-columns:minmax(0,1fr) minmax(145px,.8fr)}
+  .outside-labour-list-columns span:last-child{display:none}
+  .outside-labour-dashboard .outside-labour-entry-actions{grid-column:1/-1;justify-content:flex-start}
+}
+@media(max-width:767px){
+  .outside-labour-page{gap:12px}
+  .outside-labour-page .outside-labour-page-actions{width:100%}
+  .outside-labour-page .outside-labour-page-actions button{flex:1 1 120px}
+  .outside-labour-dashboard{gap:12px}
+  .outside-labour-dashboard .outside-labour-stats.dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .outside-labour-dashboard .outside-labour-stat-card{min-height:108px;padding:12px}
+  .outside-labour-dashboard .outside-labour-stat-card .stat-value{font-size:18px}
+  .outside-labour-dashboard .outside-labour-stat-card .stat-icon{width:31px;height:31px;flex-basis:31px}
+  .outside-labour-dashboard .outside-labour-form-grid{grid-template-columns:1fr;gap:12px;padding:13px}
+  .outside-labour-dashboard .outside-labour-form input:not([type="checkbox"]),
+  .outside-labour-dashboard .outside-labour-form select,
+  .outside-labour-dashboard .outside-labour-pay-controls input,
+  .outside-labour-dashboard .outside-labour-pay-controls select,
+  .outside-labour-search input{font-size:16px}
+  .outside-labour-dashboard .outside-labour-list-head,
+  .outside-labour-record-tools{padding:12px}
+  .outside-labour-dashboard .outside-labour-form-heading{padding:12px}
+  .outside-labour-dashboard .outside-labour-paid-check{margin:0 13px 13px}
+  .outside-labour-dashboard .outside-labour-form>.outside-labour-primary{margin:0 13px 13px;width:calc(100% - 26px)}
+  .outside-labour-list-columns{display:none}
+  .outside-labour-dashboard .outside-labour-entry{grid-template-columns:1fr;gap:12px;padding:14px}
+  .outside-labour-dashboard .outside-labour-entry-actions{grid-column:1;justify-content:flex-start}
+  .outside-labour-dashboard .outside-labour-entry-money{padding-top:9px;border-top:1px dashed var(--border)}
+}
+@media(max-width:420px){
+  .outside-labour-page .outside-labour-page-title h1{font-size:19px}
+  .outside-labour-dashboard .outside-labour-toolbar{width:100%}
+  .outside-labour-dashboard .outside-labour-toolbar button{flex:1 1 125px}
+  .outside-labour-dashboard .outside-labour-list-head{align-items:stretch;gap:10px}
+  .outside-labour-dashboard .outside-labour-list-filters{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .outside-labour-dashboard .outside-labour-list-filters button{width:100%;padding:0 4px}
+  .outside-labour-search{min-width:0;max-width:none;width:100%;flex-basis:100%}
+  .outside-labour-dashboard .outside-labour-stat-card{min-height:112px;padding:10px}
+  .outside-labour-dashboard .outside-labour-stat-card .stat-value{font-size:16px}
+  .outside-labour-dashboard .outside-labour-stat-card .stat-icon{width:28px;height:28px;flex-basis:28px}
+  .outside-labour-dashboard .outside-labour-stat-card .stat-label{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.outside-labour-dashboard *{transition:none!important}}
