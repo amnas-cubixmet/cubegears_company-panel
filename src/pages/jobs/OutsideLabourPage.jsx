@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
+import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 import { jobService } from '../../services/job.service';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
@@ -28,6 +29,7 @@ export const OutsideLabourPage = () => {
 
   return (
     <main className="job-management-page outside-labour-page">
+      <JobBreadcrumbs current="Outside Labour" />
       <header className="outside-labour-page-head">
         <div>
           <h1>Outside Labour</h1>
