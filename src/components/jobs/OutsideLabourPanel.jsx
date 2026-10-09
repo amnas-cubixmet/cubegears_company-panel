@@ -170,26 +170,52 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   }
 
   return (
-    <section className="outside-labour-panel">
+    <section className="outside-labour-panel outside-labour-dashboard">
       <header className="outside-labour-header">
         <div className="outside-labour-header-copy">
           <span className="outside-labour-title-icon" aria-hidden="true"><HardHat size={19}/></span>
           <div>
-            <h2>Outside Labour</h2>
-            <p>Freelance and part-work payments — no staff account or payroll setup required.</p>
+            <h2>{jobId ? 'Outside Labour' : 'Freelance Work Overview'}</h2>
+            <p>Manual worker charges, outstanding payments and work history.</p>
           </div>
         </div>
-        <button className="outside-labour-refresh" type="button" onClick={refresh} disabled={saving || loading}>
-          <RefreshCcw size={15}/> Refresh
-        </button>
+        <div className="outside-labour-toolbar">
+          <button className="outside-labour-refresh" type="button" onClick={refresh} disabled={saving || loading}>
+            <RefreshCcw size={16} aria-hidden="true"/> Refresh
+          </button>
+          {canCreate && (
+            <button
+              className="dashboard-button is-primary outside-labour-add-trigger"
+              type="button"
+              onClick={() => setShowForm((previous) => !previous)}
+              aria-expanded={showForm}
+            >
+              {showForm ? <X size={16} aria-hidden="true"/> : <Plus size={16} aria-hidden="true"/>}
+              {showForm ? 'Close Form' : 'Add Outside Labour'}
+            </button>
+          )}
+        </div>
       </header>
 
-      <div className="outside-labour-stats">
-        <div><span className="outside-labour-stat-head"><ClipboardList size={16}/> Customer Labour</span><strong>{formatMoney(totals.customer)}</strong></div>
-        <div><span className="outside-labour-stat-head"><HardHat size={16}/> Worker Cost</span><strong>{formatMoney(totals.worker)}</strong></div>
-        <div><span className="outside-labour-stat-head"><Wallet size={16}/> Pending Payment</span><strong>{formatMoney(totals.pending)}</strong></div>
-        <div><span className="outside-labour-stat-head"><CheckCircle2 size={16}/> Paid Expenses</span><strong>{formatMoney(totals.paid)}</strong></div>
-        <div><span className="outside-labour-stat-head"><TrendingUp size={16}/> Labour Margin</span><strong>{formatMoney(totals.customer - totals.worker)}</strong></div>
+      <div className="dashboard-stats outside-labour-stats" aria-label="Outside Labour financial summary">
+        {[
+          { label: 'Customer Labour', value: totals.customer, Icon: ClipboardList, meta: 'Reference amount' },
+          { label: 'Worker Cost', value: totals.worker, Icon: HardHat, meta: 'Total outside work' },
+          { label: 'Pending Payment', value: totals.pending, Icon: Wallet, meta: 'Outstanding worker dues' },
+          { label: 'Paid Expenses', value: totals.paid, Icon: CheckCircle2, meta: 'Recorded payments' },
+          { label: 'Labour Margin', value: totals.customer - totals.worker, Icon: TrendingUp, meta: 'Before overheads' },
+        ].map(({ label, value, Icon, meta }) => (
+          <article key={label} className="dashboard-stat-card outside-labour-stat-card">
+            <div className="stat-top">
+              <div className="stat-copy">
+                <span className="stat-label">{label}</span>
+                <strong className="stat-value">{formatMoney(value)}</strong>
+              </div>
+              <span className="stat-icon" aria-hidden="true"><Icon size={16}/></span>
+            </div>
+            <span className="stat-meta">{meta}</span>
+          </article>
+        ))}
       </div>
       <small className="outside-labour-note">Customer Labour is reference-only, not an extra invoice item. Labour Margin excludes parts, tax and overheads.</small>
 
