@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { BadgeCheck, Calculator, LockKeyhole, Send } from 'lucide-react';
+import { BadgeCheck, Calculator, ChevronDown, LockKeyhole, Send, Settings2 } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
 import { PayrollPolicyPanel } from './PayrollPolicyPanel';
 import { useAuth } from '../../hooks/useAuth';
@@ -88,8 +88,17 @@ export const PayrollRunControl = ({
     <div className="payroll-run-with-rules flex min-w-0 flex-col gap-3">
       {hasPermission(user, 'payroll.edit') && (
         <details className="payroll-workshop-settings">
-          <summary>Salary & Fixed Worker Charges</summary>
-          <PayrollPolicyPanel onSaved={onChanged} />
+          <summary className="payroll-workshop-settings-summary">
+            <span className="payroll-workshop-settings-icon" aria-hidden="true"><Settings2 size={18} /></span>
+            <span className="payroll-workshop-settings-label">
+              <strong>Salary & Fixed Worker Charges</strong>
+              <small>Company-wide payroll defaults and wage calculation rules</small>
+            </span>
+            <ChevronDown className="payroll-workshop-settings-chevron" size={18} aria-hidden="true" />
+          </summary>
+          <div className="payroll-workshop-settings-content">
+            <PayrollPolicyPanel onSaved={onChanged} />
+          </div>
         </details>
       )}
       <section className="payroll-run-control">
