@@ -258,9 +258,16 @@ export const DailyWageAccountPage = () => {
           {modal === 'attendance' && <>
             <label>Work Date<input type="date" max={todayISO()} value={form.date || ''} onChange={(e) => set('date', e.target.value)} required/></label>
             <label>Attendance Status<select value={form.status || 'Full Day'} onChange={(e) => set('status', e.target.value)}>
-              {['Full Day','Half Day','Absent','Unpaid Leave'].map((s) => <option key={s}>{s}</option>)}
+              {[
+                ['Full Day', 'Full Day Worked — 100%'],
+                ['Half Day', 'Half Day Worked — 50%'],
+                ['Leave', 'Leave (No Paid Leave) — ₹0'],
+                ['Absent', 'Absent — ₹0'],
+                ['Weekly Off', 'Weekly Off (Not Worked) — ₹0'],
+                ['Holiday', 'Holiday (Not Worked) — ₹0'],
+              ].map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select></label>
-            <p className="dw-modal-help">Full day 100%, half day 50%, absent or unpaid leave ₹0. Re-finalization adjusts unpaid wages; settled corrections are audited.</p>
+            <p className="dw-modal-help">Only worked days earn base wages: Full Day 100%, Half Day 50%. Every Leave type (including Paid Leave), Absent, Weekly Off not worked and Holiday not worked earn ₹0. Approved OT/OD/Extras are separate. Corrections remain audited.</p>
           </>}
           {modal === 'extra' && <>
             <label>Work Date<input type="date" max={todayISO()} value={form.date || ''} onChange={(e) => set('date', e.target.value)} required/></label>
