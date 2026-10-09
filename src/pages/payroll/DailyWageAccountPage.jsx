@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, CalendarCheck2, CheckCircle2, ClipboardList, Clock3, History, Pencil, Plus, Wallet, WalletCards } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
@@ -28,6 +28,7 @@ const panels = [
 export const DailyWageAccountPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const canView = hasPermission(user, 'payroll.view');
   const canEdit = hasPermission(user, 'payroll.edit');
@@ -161,6 +162,7 @@ export const DailyWageAccountPage = () => {
       </header>
       <DailyWageNav/>
       {error && <div className="dw-alert" role="alert">{error} <button type="button" onClick={() => setReload((v) => v + 1)}>Retry</button></div>}
+      {location.state?.wageSetupError && <div className="dw-alert" role="alert">{location.state.wageSetupError} Set a Daily Wage Rate to finish the setup.</div>}
       {notice && <div className="dw-notice" role="status"><CheckCircle2 size={16}/>{notice}</div>}
       {!account ? <div className="dw-empty">Wage account unavailable.</div> : <>
         <section className="dw-metrics">
