@@ -177,6 +177,8 @@ export const StaffAddPage = () => {
             ? {
                 ...salary,
                 paymentType: form.paymentType,
+                overtimeEligibility: form.paymentType !== "per_job" && salary.overtimeEligibility,
+                incentiveEligibility: form.paymentType !== "per_job" && salary.incentiveEligibility,
                 baseSalary: Number(salary.baseSalary || 0),
                 dailyWageRate: Number(salary.dailyWageRate || 0),
                 hourlyWageRate: Number(salary.hourlyWageRate || 0),
@@ -382,6 +384,7 @@ export const StaffAddPage = () => {
                     <option key={type.value} value={type.value}>{type.label}</option>
                   ))}
                 </select>
+                {form.paymentType === "per_job" && <small className="mt-1 block text-xs text-muted">For freelance mechanics and painters. Set each fixed worker charge on the Job Card; no commission or monthly basic salary.</small>}
               </label>
             </div>
 
