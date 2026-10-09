@@ -21,7 +21,8 @@ export const getJobs = async (params) => {
     }
     return Promise.resolve(result);
   }
-  return apiClient.get(API_ENDPOINTS.JOBS, { params });
+  const response = await apiClient.get(API_ENDPOINTS.JOBS, { params });
+  return Array.isArray(response) ? response : response?.results || [];
 };
 
 export const getJobById = async (id) => {
@@ -53,7 +54,8 @@ export const updateJob = async (id, data) => {
     await delay();
     return Promise.resolve(updateMockJob(id, data));
   }
-  return apiClient.put(`${API_ENDPOINTS.JOBS}/${id}`, data);
+  // Job workspace saves individual sections, not a complete replacement resource.
+  return apiClient.patch(`${API_ENDPOINTS.JOBS}/${id}`, data);
 };
 
 export const deleteJob = async (id) => {

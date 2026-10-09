@@ -14,7 +14,6 @@ import {
   Trash2,
   UserRound,
   Wrench,
-  LockKeyhole,
   ChevronRight
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -22,6 +21,7 @@ import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
+import { JobInspectionPanel } from '../../components/jobs/JobInspectionPanel';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
@@ -245,7 +245,7 @@ export function JobCardWorkspace() {
   };
 
   const complaints = job?.complaints || job?.customerComplaints || [];
-  const findings = job?.inspectionFindings || [];
+  const findings = job?.inspection?.findings || job?.vehicleInspection?.findings || job?.inspectionFindings || [];
   const inspectionChecks = job?.inspection?.checklist || {};
   const labourRecords = job?.labourRecords || [];
   const parts = job?.partsUsed || [];
@@ -296,7 +296,7 @@ export function JobCardWorkspace() {
       job?.assignedEmployeeId
     ),
     complaints: complaints.length > 0,
-    inspection: findings.length > 0 || INSPECTION_CHECKS.every((item) => inspectionChecks[item] && inspectionChecks[item] !== 'Not Checked'),
+    inspection: job?.inspection?.status === 'Completed' || job?.vehicleInspection?.status === 'Completed',
     work: labourRecords.length > 0,
     parts: parts.length > 0 || outsidePurchases.length > 0,
     estimate: estimates.some((item) => item.approvalStatus === 'Approved'),
@@ -333,11 +333,6 @@ export function JobCardWorkspace() {
   const activeTabIndex = TABS.findIndex(([key]) => key === activeTab);
   const activeTabComplete = sectionComplete[activeTab];
 
-  useEffect(() => {
-    if (!job || activeTabIndex <= unlockedTabIndex) return;
-    const fallbackKey = TABS[unlockedTabIndex]?.[0] || 'overview';
-    navigate(`/jobs/${job.id}/${fallbackKey}`, { replace: true });
-  }, [job, activeTabIndex, unlockedTabIndex, navigate]);
 
   const addComplaint = async () => {
     const description = complaintText.trim();
@@ -675,12 +670,6 @@ export function JobCardWorkspace() {
   };
 
   const openTab = (key) => {
-    const nextIndex = TABS.findIndex(([tabKey]) => tabKey === key);
-    if (nextIndex > unlockedTabIndex) {
-      const requiredTab = TABS[unlockedTabIndex]?.[1] || 'current section';
-      setError(`Complete ${requiredTab} before moving to the next section.`);
-      return;
-    }
     setError('');
     navigate(`/jobs/${job.id}/${key}`);
   };
@@ -754,32 +743,19 @@ export function JobCardWorkspace() {
 
       <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
         {TABS.map(([key, label], index) => {
-          const locked = index > unlockedTabIndex;
-          const completed = index < unlockedTabIndex || (index === unlockedTabIndex && sectionComplete[key]);
+          const completed = sectionComplete[key];
           const TabIcon = TAB_ICONS[key];
           return (
             <button
               type="button"
               key={key}
               onClick={() => openTab(key)}
-              disabled={locked}
-              aria-disabled={locked}
               aria-current={activeTab === key ? "page" : undefined}
-              className={[
-                'job-workflow-tab',
-                activeTab === key ? 'is-active' : '',
-                completed ? 'is-complete' : '',
-                locked ? 'is-locked' : ''
-              ].join(' ')}
-              title={locked ? `Complete ${TABS[unlockedTabIndex]?.[1] || 'the previous section'} first` : label}
+              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : ''].join(' ')}
+              title={label}
             >
-              <span className="job-workflow-tab-number">
-                {locked ? <LockKeyhole size={11} /> : index + 1}
-              </span>
-              <span className="job-workflow-tab-label">
-                <TabIcon size={14} aria-hidden="true" />
-                {label}
-              </span>
+              <span className="job-workflow-tab-number">{index + 1}</span>
+              <span className="job-workflow-tab-label"><TabIcon size={14} aria-hidden="true" />{label}</span>
               {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
             </button>
           );
@@ -788,19 +764,11 @@ export function JobCardWorkspace() {
 
       <div className={`job-workflow-gate ${activeTabComplete ? 'is-complete' : 'is-pending'}`}>
         <div>
-          <strong>{activeTabComplete ? 'Section complete' : 'Complete this section to continue'}</strong>
-          <span>
-            {activeTabComplete
-              ? 'The next workflow section is unlocked.'
-              : 'Fill and save the required information in this section before opening the next tab.'}
-          </span>
+          <strong>{activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
+          <span>Move freely between job stages. Save the details you record.</span>
         </div>
         {activeTabIndex < TABS.length - 1 ? (
-          <button
-            type="button"
-            disabled={!activeTabComplete || saving}
-            onClick={() => openTab(TABS[activeTabIndex + 1][0])}
-          >
+          <button type="button" disabled={saving} onClick={() => openTab(TABS[activeTabIndex + 1][0])}>
             Next: {TABS[activeTabIndex + 1][1]}
             <ChevronRight size={14} />
           </button>
@@ -927,81 +895,17 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'inspection' && (
-        <div className="job-inspection-grid grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="job-panel job-inspection-overview rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Vehicle Inspection</div>
-            <div className="job-inspection-summary mt-3 grid grid-cols-2 gap-2 text-xs">
-              <Info label="Existing Damage" value={(job.existingDamage || []).join(', ') || 'None recorded'}/>
-              <Info label="Accessories" value={(job.accessories || []).join(', ') || 'None recorded'}/>
-              <Info label="Fuel Level" value={job.fuelLevel || '—'}/>
-              <Info label="Vehicle Photos" value={`${job.photos?.length || 0} uploaded`}/>
-            </div>
-            <div className="job-inspection-checks mt-4 grid grid-cols-2 gap-2 text-[11px]">
-              {INSPECTION_CHECKS.map((item) => (
-                <label key={item} className="job-inspection-check rounded-xl border border-line bg-surface-2 p-3">
-                  <strong className="text-content">{item}</strong>
-                  <select
-                    aria-label={`${item} inspection result`}
-                    value={inspectionChecks[item] || 'Not Checked'}
-                    onChange={(event) => updateInspectionCheck(item, event.target.value)}
-                    disabled={saving}
-                  >
-                    <option value="Not Checked">Not Checked</option>
-                    <option value="Good">Good</option>
-                    <option value="Needs Attention">Needs Attention</option>
-                    <option value="Critical">Critical</option>
-                  </select>
-                </label>
-              ))}
-            </div>
-
-            <p className="job-inspection-guide">If no issues are found, complete all inspection checks to unlock the next stage. Add a finding for any issue requiring an estimate.</p>
-            <label className="mt-4 inline-flex h-10 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 text-xs font-bold text-content">
-              <Camera size={15}/>Add Inspection Photo
-              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>addPhoto(e.target.files?.[0],'Inspection')}/>
-            </label>
-
-            {job.photos?.length ? (
-              <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {job.photos.slice(0,8).map((photo)=>(
-                  <img key={photo.id} src={photo.url} alt={photo.caption || photo.stage} className="aspect-square w-full rounded-xl border border-line object-cover"/>
-                ))}
-              </div>
-            ) : null}
-          </section>
-
-          <section className="job-panel job-finding-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Add Finding</div>
-            <form onSubmit={addFinding} className="job-finding-form mt-3 grid grid-cols-1 gap-3">
-              <input aria-label="Vehicle inspection finding" value={finding.description} onChange={(e)=>setFinding({...finding,description:e.target.value})} placeholder="Finding / issue" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
-              <div className="grid grid-cols-2 gap-2">
-                <select aria-label="Finding severity" value={finding.severity} onChange={(e)=>setFinding({...finding,severity:e.target.value})} className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
-                  <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
-                </select>
-                <input aria-label="Estimated repair cost" inputMode="decimal" value={finding.estimatedCost} onChange={(e)=>setFinding({...finding,estimatedCost:e.target.value})} placeholder="Estimated cost ₹" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
-              </div>
-              <input aria-label="Recommended repair action" value={finding.recommendedAction} onChange={(e)=>setFinding({...finding,recommendedAction:e.target.value})} placeholder="Recommended action" className="h-11 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"/>
-              <button disabled={saving} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Save Finding</button>
-            </form>
-          </section>
-
-          <section className="job-panel job-findings-panel rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
-            <div className="job-panel-title text-sm font-extrabold text-content">Inspection Findings</div>
-            <div className="job-findings-grid mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-              {findings.map((item)=>(
-                <div key={item.id} className="job-finding-card rounded-xl border border-line bg-surface-2 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <strong className="text-xs text-content">{item.description}</strong>
-                    <span className="rounded-full bg-primary-soft px-2 py-1 text-[9px] font-bold text-primary">{item.severity}</span>
-                  </div>
-                  <div className="mt-2 text-[11px] text-secondary">{item.recommendedAction || 'No recommendation'}</div>
-                  <div className="mt-2 text-xs font-bold text-content">{money.format(item.estimatedCost || 0)}</div>
-                </div>
-              ))}
-              {!findings.length ? <Empty text="No inspection findings."/> : null}
-            </div>
-          </section>
-        </div>
+        <JobInspectionPanel
+          job={job}
+          onChanged={async () => {
+            try {
+              const refreshed = await jobService.getJobById(id);
+              if (refreshed) setJob(refreshed);
+            } catch (e) {
+              setError(e?.message || 'Could not refresh job details.');
+            }
+          }}
+        />
       )}
 
       {activeTab === 'work' && (
