@@ -186,7 +186,13 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
 
       {canCreate && (
         <form className="outside-labour-form" onSubmit={save}>
-          <h3>Add Outside Labour</h3>
+          <div className="outside-labour-form-heading">
+            <span className="outside-labour-form-icon" aria-hidden="true"><Plus size={17}/></span>
+            <div>
+              <h3>Add Outside Labour</h3>
+              <p>Enter the worker, vehicle job and manually agreed charges.</p>
+            </div>
+          </div>
           <div className="outside-labour-form-grid">
             {!jobId && (
               <label>Job Card *
