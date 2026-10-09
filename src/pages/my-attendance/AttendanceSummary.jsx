@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Calendar, Clock, CheckCircle2, AlertTriangle, FileText, AlertCircle, TrendingUp, Award, ShieldAlert } from 'lucide-react';
-import { mockLeaveBalances } from '../../mock/leave.mock';
+import { ChevronLeft, ChevronRight, Calendar, Clock, CheckCircle2, AlertTriangle, FileText, AlertCircle, TrendingUp, ShieldAlert } from 'lucide-react';
 
 export const AttendanceSummary = () => {
   const navigate = useNavigate();
@@ -28,8 +27,7 @@ export const AttendanceSummary = () => {
     { label: "Holidays & Off", value: "5", icon: Calendar, accent: "var(--warning)" },
     { label: "Worked Hours", value: "176h 30m", icon: Clock, accent: "var(--info)" },
     { label: "Overtime Hours", value: "6h 15m", icon: TrendingUp, accent: "var(--primary)" },
-    { label: "Late Days", value: "3", icon: AlertCircle, accent: "var(--warning)" },
-    { label: "Available Leave", value: "25 Days", icon: Award, accent: "var(--success)" }
+    { label: "Late Days", value: "3", icon: AlertCircle, accent: "var(--warning)" }
   ];
 
   const monthlyBreakdown = [
@@ -164,62 +162,6 @@ export const AttendanceSummary = () => {
             </div>
           );
         })}
-      </div>
-
-      {/* 4. Leave Balance Section */}
-      <div className="attendance-section-block" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
-          Leave Balance Breakdown
-        </div>
-
-        <div className="leave-balance-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px', width: '100%' }}>
-          {mockLeaveBalances.map((b) => (
-            <div
-              key={b.id}
-              className="attendance-card leave-balance-summary-card"
-              style={{
-                backgroundColor: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: '14px',
-                padding: '14px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px'
-              }}
-            >
-              <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                {b.type}
-              </div>
-
-              {/* 2x2 Mini-Grid Inside Leave Type */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                gap: '8px',
-                backgroundColor: 'var(--surface-2)',
-                padding: '10px',
-                borderRadius: '10px'
-              }}>
-                <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Allocated</div>
-                  <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>{b.allocated}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Used</div>
-                  <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>{b.used}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Pending</div>
-                  <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--warning)' }}>{b.pending}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Available</div>
-                  <div style={{ fontSize: '15px', fontWeight: '800', color: 'var(--success)' }}>{b.available}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* 5. Monthly Breakdown Section */}
