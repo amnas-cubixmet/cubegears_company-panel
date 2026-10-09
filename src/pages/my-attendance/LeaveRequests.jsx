@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ApplyLeaveForm,
-  LeaveBalanceGrid,
   LeavePageHeader,
   LeaveRequestRecords,
 } from '../../components/my-attendance';
@@ -9,8 +8,7 @@ import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalShe
 import { leaveService } from '../../services/leave.service';
 import '../../styles/attendance-leave.css';
 
-const createInitialForm = (leaveType = '') => ({
-  leaveType,
+const createInitialForm = () => ({
   leaveMode: 'Full Day',
   halfDaySession: 'First Half',
   startDate: '',
@@ -20,7 +18,6 @@ const createInitialForm = (leaveType = '') => ({
 });
 
 export const LeaveRequests = () => {
-  const [balances, setBalances] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showApplySheet, setShowApplySheet] = useState(false);
@@ -31,24 +28,8 @@ export const LeaveRequests = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [balanceData, requestData] = await Promise.all([
-        leaveService.getLeaveBalances(),
-        leaveService.getLeaveRequests(),
-      ]);
-
-      const nextBalances = Array.isArray(balanceData) ? balanceData : [];
-      setBalances(nextBalances);
+      const requestData = await leaveService.getLeaveRequests();
       setRequests(Array.isArray(requestData) ? requestData : []);
-
-      if (nextBalances.length) {
-        setForm((current) => ({
-          ...current,
-          leaveType:
-            nextBalances.some((item) => item.type === current.leaveType)
-              ? current.leaveType
-              : nextBalances[0].type,
-        }));
-      }
     } finally {
       setLoading(false);
     }
@@ -59,10 +40,8 @@ export const LeaveRequests = () => {
   }, []);
 
   const openApply = () => {
-    if (!balances.length) return;
-    const defaultType = balances[0]?.type || '';
     setError('');
-    setForm(createInitialForm(defaultType));
+    setForm(createInitialForm());
     setShowApplySheet(true);
   };
 
@@ -75,13 +54,12 @@ export const LeaveRequests = () => {
   const handleApplyLeave = async (event) => {
     event.preventDefault();
 
-    if (!form.leaveType || !form.startDate || !form.reason.trim()) return;
+    if (!form.startDate || !form.reason.trim()) return;
 
     setSubmitting(true);
     setError('');
     try {
       await leaveService.applyLeaveRequest({
-        type: form.leaveType,
         leaveMode: form.leaveMode,
         halfDaySession:
           form.leaveMode === 'Half Day' ? form.halfDaySession : null,
@@ -112,7 +90,7 @@ export const LeaveRequests = () => {
 
   return (
     <div className="attendance-leave-dashboard">
-      <LeavePageHeader onApply={openApply} disabled={!loading && !balances.length} />
+      <LeavePageHeader onApply={openApply} disabled={loading} />
 
       {error && !showApplySheet && (
         <div className="leave-page-error">{error}</div>
@@ -122,7 +100,6 @@ export const LeaveRequests = () => {
         <div className="leave-page-loading">Loading leave information…</div>
       ) : (
         <>
-          <LeaveBalanceGrid balances={balances} />
           <LeaveRequestRecords
             requests={requests}
             onCancel={handleCancelRequest}
@@ -138,7 +115,6 @@ export const LeaveRequests = () => {
       >
         {error && <div className="leave-page-error">{error}</div>}
         <ApplyLeaveForm
-          balances={balances}
           form={form}
           setForm={setForm}
           submitting={submitting}
