@@ -67,7 +67,7 @@ export const StaffAddPage = () => {
     deductions: '',
     fixedIncentive: '',
     effectiveDate: today(),
-    paymentFrequency: 'monthly',
+    paymentFrequency: 'daily',
     overtimeEligibility: true,
     incentiveEligibility: true,
   });
@@ -191,6 +191,7 @@ export const StaffAddPage = () => {
             ? {
                 ...salary,
                 paymentType: form.paymentType,
+                paymentFrequency: 'daily',
                 overtimeEligibility: form.paymentType !== "per_job" && salary.overtimeEligibility,
                 incentiveEligibility: form.paymentType !== "per_job" && salary.incentiveEligibility,
                 baseSalary: Number(salary.baseSalary || 0),
@@ -592,15 +593,10 @@ export const StaffAddPage = () => {
 
                 <label>
                   Payment Frequency
-                  <select
-                    value={salary.paymentFrequency}
-                    onChange={(event) => setSalary((current) => ({ ...current, paymentFrequency: event.target.value }))}
-                  >
-                    <option value="monthly">Monthly</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="biweekly">Bi-weekly</option>
-                    <option value="daily">Daily settlement</option>
+                  <select value="daily" disabled aria-label="Payment Frequency">
+                    <option value="daily">Daily</option>
                   </select>
+                  <small>Daily wage credit; payment can be settled any day.</small>
                 </label>
 
                 <label>
