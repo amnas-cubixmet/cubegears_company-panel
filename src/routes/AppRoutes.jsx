@@ -82,7 +82,6 @@ export const AppRoutes = () => (
       <Route path="/attendance-manager/daily" element={<AttendanceManager />} />
       <Route path="/attendance-manager/calendar" element={<AttendanceManager />} />
       <Route path="/attendance-manager/leave-requests" element={<AttendanceManager />} />
-      <Route path="/attendance-manager/overtime" element={<AttendanceManager />} />
       <Route path="/attendance-manager/shifts" element={<AttendanceManager />} />
       <Route path="/attendance-manager/reports" element={<AttendanceManager />} />
       <Route path="/attendance-manager/rules" element={<AttendanceManager />} />
