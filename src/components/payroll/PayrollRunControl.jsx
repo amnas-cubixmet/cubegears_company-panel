@@ -88,7 +88,7 @@ export const PayrollRunControl = ({
     <div className="payroll-run-with-rules flex min-w-0 flex-col gap-3">
       {hasPermission(user, 'payroll.edit') && (
         <details className="payroll-workshop-settings">
-          <summary>Workshop Wage & Job Commission Rules</summary>
+          <summary>Salary & Fixed Worker Charges</summary>
           <PayrollPolicyPanel onSaved={onChanged} />
         </details>
       )}
