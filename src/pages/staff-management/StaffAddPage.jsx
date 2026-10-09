@@ -58,7 +58,7 @@ export const StaffAddPage = () => {
     baseSalary: '',
     dailyWageRate: '',
     hourlyWageRate: '',
-    commissionType: 'percentage',
+    commissionType: 'none',
     commissionPercentage: '',
     commissionFixedAmount: '',
     eligibleRevenueBasis: 'labour_revenue',
