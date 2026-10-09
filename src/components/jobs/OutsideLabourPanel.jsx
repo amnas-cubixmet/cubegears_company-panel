@@ -27,7 +27,15 @@ const errorText = (error) => {
   return error?.message || 'Unable to save outside labour.';
 };
 
-export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
+export const OutsideLabourPanel = ({
+  jobId,
+  jobs = [],
+  onChanged,
+  formOpen,
+  onFormOpenChange,
+  refreshVersion = 0,
+  hideToolbar = false,
+}) => {
   const { user } = useAuth();
   const formRef = useRef(null);
   const canView = hasPermission(user, 'expenses.view');
@@ -45,6 +53,12 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(Boolean(jobId));
+  const controlledForm = typeof formOpen === 'boolean';
+  const isFormOpen = controlledForm ? formOpen : showForm;
+  const toggleForm = () => {
+    if (controlledForm) onFormOpenChange?.(!formOpen);
+    else setShowForm((previous) => !previous);
+  };
   const set = (key, value) => {
     setError('');
     setForm((previous) => ({ ...previous, [key]: value }));
@@ -64,9 +78,13 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   };
   useEffect(() => {
     setForm(blank(jobId));
-    setShowForm(Boolean(jobId));
+    if (!controlledForm) setShowForm(Boolean(jobId));
     refresh();
   }, [jobId, canView]);
+
+  useEffect(() => {
+    if (refreshVersion > 0) refresh();
+  }, [refreshVersion]);
 
   const totals = useMemo(() => rows.reduce((value, row) => {
     value.customer += Number(row.customerCharge || 0);
@@ -128,7 +146,8 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
         setNotice('Outside labour saved as Pending. Pay when money is actually given.');
       }
       setForm(blank(jobId));
-      setShowForm(Boolean(jobId));
+      if (controlledForm) onFormOpenChange?.(Boolean(jobId));
+      else setShowForm(Boolean(jobId));
       await refresh();
       onChanged?.();
     } catch (err) {
@@ -194,22 +213,24 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
             <p>Manual worker charges, outstanding payments and work history.</p>
           </div>
         </div>
-        <div className="outside-labour-toolbar">
-          <button className="outside-labour-refresh" type="button" onClick={refresh} disabled={saving || loading}>
-            <RefreshCcw size={16} aria-hidden="true"/> Refresh
-          </button>
-          {canCreate && (
-            <button
-              className="dashboard-button is-primary outside-labour-add-trigger"
-              type="button"
-              onClick={() => setShowForm((previous) => !previous)}
-              aria-expanded={showForm}
-            >
-              {showForm ? <X size={16} aria-hidden="true"/> : <Plus size={16} aria-hidden="true"/>}
-              {showForm ? 'Close Form' : 'Add Outside Labour'}
+        {!hideToolbar && (
+          <div className="outside-labour-toolbar">
+            <button className="outside-labour-refresh" type="button" onClick={refresh} disabled={saving || loading}>
+              <RefreshCcw size={16} aria-hidden="true"/> Refresh
             </button>
-          )}
-        </div>
+            {canCreate && (
+              <button
+                className="dashboard-button is-primary outside-labour-add-trigger"
+                type="button"
+                onClick={toggleForm}
+                aria-expanded={isFormOpen}
+              >
+                {isFormOpen ? <X size={16} aria-hidden="true"/> : <Plus size={16} aria-hidden="true"/>}
+                {isFormOpen ? 'Close Form' : 'Add Outside Labour'}
+              </button>
+            )}
+          </div>
+        )>
       </header>
 
       <div className="dashboard-stats outside-labour-stats" aria-label="Outside Labour financial summary">
@@ -237,7 +258,7 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
       {notice && <p className="outside-labour-notice" role="status">{notice}</p>}
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
 
-      {canCreate && showForm && (
+      {canCreate && isFormOpen && (
         <form ref={formRef} className="outside-labour-form operations-card" onSubmit={save}>
           <div className="outside-labour-form-heading">
             <span className="outside-labour-form-icon" aria-hidden="true"><Plus size={17}/></span>
