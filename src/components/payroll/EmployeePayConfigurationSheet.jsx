@@ -3,6 +3,7 @@ import { Plus, Save, Trash2 } from 'lucide-react';
 import { ResponsiveModalSheet } from '../common/ResponsiveModalSheet';
 import {
   PAY_TYPES,
+  LEGACY_PAY_TYPES,
   hasCommission,
   hasDailyBase,
   hasHourlyBase,
@@ -87,6 +88,7 @@ export const EmployeePayConfigurationSheet = ({
     if (type === 'hourly_commission') return 'Approved payable hours × hourly rate + commission';
     if (type === 'salary_incentive') return 'Monthly salary + approved incentive / bonus';
     if (type === 'hybrid') return 'Custom earning and deduction components';
+    if (type === 'per_job') return 'Fixed worker charge per approved Job Card work. Customer labour charge is set separately on the Job Card.';
     return payTypeLabel(type);
   }, [type, form.commissionType, form.commissionPercentage, form.eligibleRevenueBasis]);
 
@@ -142,6 +144,8 @@ export const EmployeePayConfigurationSheet = ({
         dailyWageRate: hasDailyBase(type) ? Number(form.dailyWageRate || 0) : 0,
         hourlyWageRate: hasHourlyBase(type) ? Number(form.hourlyWageRate || 0) : 0,
         commissionType: commissionEnabled ? form.commissionType : 'none',
+        overtimeEligibility: type !== 'per_job' && form.overtimeEligibility,
+        incentiveEligibility: type !== 'per_job' && form.incentiveEligibility,
         commissionPercentage:
           commissionEnabled && form.commissionType === 'percentage'
             ? Number(form.commissionPercentage || 0)
@@ -187,6 +191,9 @@ export const EmployeePayConfigurationSheet = ({
             {PAY_TYPES.map((item) => (
               <option key={item.value} value={item.value}>{item.label}</option>
             ))}
+            {!PAY_TYPES.some((item) => item.value === form.paymentType) && (
+              <option value={form.paymentType}>{LEGACY_PAY_TYPES.find((item) => item.value === form.paymentType)?.label || 'Previous Payment Type'}</option>
+            )}
           </select>
           <small>{selectedSummary}</small>
         </label>
