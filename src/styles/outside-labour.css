@@ -1,0 +1,49 @@
+/* Outside Labour – independent manual contractor expense ledger */
+.outside-labour-page{display:flex;flex-direction:column;gap:14px;width:100%;min-width:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+.outside-labour-page-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.outside-labour-page-head h1{margin:0;font-size:20px;line-height:1.3;font-weight:800;color:var(--text-primary)}
+.outside-labour-page-head p{margin:4px 0 0;font-size:12px;color:var(--text-muted);line-height:1.5}
+.outside-labour-page-head button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text-primary);font-size:12px;cursor:pointer}
+.outside-labour-panel{display:flex;flex-direction:column;gap:15px;padding:16px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm);min-width:0;font-size:13px}
+.outside-labour-header,.outside-labour-list-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.outside-labour-header h2{margin:0;font-size:16px;color:var(--text-primary);font-weight:800}
+.outside-labour-header p{margin:5px 0 0;max-width:690px;font-size:12px;color:var(--text-muted);line-height:1.55}
+.outside-labour-refresh{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);font-size:12px;cursor:pointer}
+.outside-labour-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.outside-labour-stats>div{display:flex;flex-direction:column;gap:7px;min-width:0;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2)}
+.outside-labour-stats span{font-size:11px;color:var(--text-muted)}
+.outside-labour-stats strong{font-size:18px;color:var(--text-primary);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.outside-labour-note{display:block;font-size:11px;color:var(--text-muted);line-height:1.55}
+.outside-labour-error,.outside-labour-notice{margin:0;padding:11px 12px;border-radius:9px;line-height:1.5;font-size:12px}
+.outside-labour-error{border:1px solid var(--danger);color:var(--danger)}
+.outside-labour-notice{border:1px solid var(--border);background:var(--surface-2);color:var(--text-primary)}
+.outside-labour-form{display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2)}
+.outside-labour-form h3,.outside-labour-list-head h3{margin:0;font-size:14px;font-weight:800;color:var(--text-primary)}
+.outside-labour-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.outside-labour-form label,.outside-labour-pay-controls label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:12px;font-weight:650;color:var(--text-secondary)}
+.outside-labour-form input:not([type="checkbox"]),.outside-labour-form select,.outside-labour-pay-controls input,.outside-labour-pay-controls select{min-height:44px;width:100%;min-width:0;padding:0 11px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text-primary);font-family:inherit;font-size:13px}
+.outside-labour-paid-check{flex-direction:row!important;align-items:center;gap:9px!important;cursor:pointer}
+.outside-labour-paid-check input{width:17px;height:17px;accent-color:var(--primary)}
+.outside-labour-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;align-self:flex-start;min-height:43px;padding:0 16px;border:0;border-radius:9px;background:var(--primary);color:#fff;font-size:12px;font-weight:750;cursor:pointer}
+.outside-labour-primary:disabled{opacity:.5;cursor:not-allowed}
+.outside-labour-list-head>span{font-size:11px;color:var(--text-muted)}
+.outside-labour-empty{margin:0;padding:18px;border:1px dashed var(--border);border-radius:10px;font-size:12px;color:var(--text-muted);text-align:center}
+.outside-labour-list{display:flex;flex-direction:column;gap:9px}
+.outside-labour-entry{display:grid;grid-template-columns:minmax(0,1fr) minmax(165px,auto) minmax(145px,auto);gap:14px;align-items:center;padding:13px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2)}
+.outside-labour-entry-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.outside-labour-entry-main strong{font-size:13px;color:var(--text-primary);overflow-wrap:anywhere}
+.outside-labour-entry-main span,.outside-labour-entry-main small{font-size:11px;color:var(--text-muted);line-height:1.4;overflow-wrap:anywhere}
+.outside-labour-entry-money{display:flex;flex-direction:column;gap:5px;min-width:0}
+.outside-labour-entry-money span,.outside-labour-entry-money small{font-size:11px;color:var(--text-muted)}
+.outside-labour-entry-money strong{font-size:13px;color:var(--text-primary)}
+.outside-labour-entry-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;min-width:0}
+.outside-labour-entry-actions>button,.outside-labour-pay-controls>button:not(.outside-labour-primary){display:inline-flex;align-items:center;gap:6px;min-height:35px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text-primary);font-size:11px;font-weight:650;cursor:pointer}
+.outside-labour-entry-actions .outside-labour-remove{color:var(--danger)}
+.outside-labour-status{padding:5px 9px;border-radius:999px;border:1px solid var(--border);font-size:11px;font-weight:750}
+.outside-labour-status.is-paid{color:var(--success)}
+.outside-labour-status.is-pending{color:var(--warning)}
+.outside-labour-pay-controls{display:flex;flex-direction:column;gap:8px;width:100%;min-width:170px}
+.outside-labour-pay-controls .outside-labour-primary{min-height:35px}
+.outside-labour-panel button:focus-visible,.outside-labour-panel select:focus-visible,.outside-labour-panel input:focus-visible,.outside-labour-page-head button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+@media(max-width:1000px){.outside-labour-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.outside-labour-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.outside-labour-entry{grid-template-columns:minmax(0,1fr) minmax(145px,auto)}.outside-labour-entry-actions{grid-column:1/-1;justify-content:flex-start}}
+@media(max-width:600px){.outside-labour-panel{padding:12px;gap:12px}.outside-labour-form{padding:12px}.outside-labour-form-grid{grid-template-columns:1fr}.outside-labour-stats{gap:8px}.outside-labour-stats>div{padding:10px}.outside-labour-stats strong{font-size:16px}.outside-labour-entry{grid-template-columns:1fr;gap:10px}.outside-labour-entry-actions{grid-column:1}.outside-labour-form input:not([type="checkbox"]),.outside-labour-form select,.outside-labour-pay-controls input,.outside-labour-pay-controls select{font-size:16px}.outside-labour-primary{width:100%}}
