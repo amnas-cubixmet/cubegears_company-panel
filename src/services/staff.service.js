@@ -194,7 +194,6 @@ export const staffService = {
         'joiningDate',
         'employmentStatus',
         'emergencyContact',
-        'paymentType',
         'address',
         'notes',
         'teamId',
@@ -208,9 +207,7 @@ export const staffService = {
             key,
             ['teamId', 'shiftId', 'branchId'].includes(key)
               ? staffData[key] || null
-              : key === 'paymentType'
-                ? normalizePaymentType(staffData[key])
-                : staffData[key],
+              : staffData[key],
           ]),
       );
       return normalizeStaff(await apiClient.patch(`/employees/${id}`, payload));
