@@ -1,25 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  BarChart3,
-  Banknote,
-  CalendarCheck2,
-  WalletCards,
-  Clock3,
-  FileText,
-  LayoutDashboard,
-  Users,
-} from 'lucide-react';
+import { WalletCards, History, CreditCard } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 const tabs = [
-  { label: 'Overview', path: '/payroll', icon: LayoutDashboard },
-  { label: 'Employees', path: '/payroll/employees', icon: Users },
   { label: 'Daily Wages', path: '/payroll/daily-wages', icon: WalletCards },
-  { label: 'Attendance', path: '/payroll/attendance', icon: CalendarCheck2 },
-  { label: 'Incentives', path: '/payroll/incentives', icon: BarChart3 },
-  { label: 'Overtime', path: '/payroll/overtime', icon: Clock3 },
-  { label: 'Advances', path: '/payroll/advances', icon: Banknote },
-  { label: 'Reports', path: '/payroll/reports', icon: FileText },
+  { label: 'Daily History', path: '/payroll/daily-wages/history', icon: History },
+  { label: 'Payments', path: '/payroll/payments', icon: CreditCard },
 ];
 
 export const PayrollTabRail = () => {
@@ -45,7 +31,7 @@ export const PayrollTabRail = () => {
           <NavLink
             key={path}
             to={path}
-            end={path === '/payroll'}
+            end
             className={({ isActive }) =>
               `payroll-subnav-item ${isActive ? 'active' : ''}`
             }
