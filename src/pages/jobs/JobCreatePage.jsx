@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Search, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { staffService } from '../../services/staff.service';
 import { payrollService } from '../../services/payroll.service';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
+import { showFormFieldError, showServerFormErrors } from '../../utils/formValidation';
 
 const nowLocal = () => {
   const date = new Date();
@@ -14,6 +15,7 @@ const nowLocal = () => {
 
 export const JobCreatePage = () => {
   const navigate = useNavigate();
+  const formRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [staff, setStaff] = useState([]);
@@ -85,7 +87,10 @@ export const JobCreatePage = () => {
     return () => window.clearTimeout(timer);
   }, [form.vehicleReg]);
 
-  const set = (key, value) => setForm((old) => ({ ...old, [key]: value }));
+  const set = (key, value) => {
+    setError('');
+    setForm((old) => ({ ...old, [key]: value }));
+  };
 
   const assignStaff = (id) => {
     const selected = staff.find((item) => item.id === id);
@@ -99,7 +104,12 @@ export const JobCreatePage = () => {
   const submit = async (event) => {
     event.preventDefault();
     if (!form.customerName.trim() || !form.customerPhone.trim() || !form.vehicleReg.trim()) {
-      setError('Customer name, phone and vehicle registration are required.');
+      const first = !form.customerName.trim() ? 'customerName'
+        : !form.customerPhone.trim() ? 'customerPhone' : 'vehicleReg';
+      const message = first === 'customerName' ? 'Enter the customer name.'
+        : first === 'customerPhone' ? 'Enter the customer phone.' : 'Enter the vehicle registration.';
+      showFormFieldError(formRef.current, first, message);
+      setError(message);
       return;
     }
 
@@ -143,6 +153,10 @@ export const JobCreatePage = () => {
 
       navigate(`/jobs/${created.id}/overview`, { replace: true });
     } catch (err) {
+      showServerFormErrors(formRef.current, err, {
+        customer_name: 'customerName', customer_phone: 'customerPhone',
+        registration: 'vehicleReg', vehicle_registration: 'vehicleReg',
+      });
       setError(err?.message || 'Unable to create job card.');
     } finally {
       setSaving(false);
@@ -167,21 +181,21 @@ export const JobCreatePage = () => {
 
       {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
-      <form onSubmit={submit} className="job-create-form flex flex-col gap-4">
+      <form ref={formRef} onSubmit={submit} className="job-create-form flex flex-col gap-4">
         <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
           <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">01</span> Job & Customer</h2>
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className={labelClass}>Date / Time *
-              <input type="datetime-local" required value={form.jobDateTime} onChange={(e) => set('jobDateTime', e.target.value)} className={inputClass}/>
+              <input name="jobDateTime" type="datetime-local" required value={form.jobDateTime} onChange={(e) => set('jobDateTime', e.target.value)} className={inputClass}/>
             </label>
             <label className={labelClass}>Customer Name *
-              <input required autoComplete="name" value={form.customerName} onChange={(e) => set('customerName', e.target.value)} placeholder="Customer name" className={inputClass}/>
+              <input name="customerName" required autoComplete="name" value={form.customerName} onChange={(e) => set('customerName', e.target.value)} placeholder="Customer name" className={inputClass}/>
             </label>
             <label className={labelClass}>Phone *
-              <input required type="tel" autoComplete="tel" inputMode="tel" value={form.customerPhone} onChange={(e) => set('customerPhone', e.target.value)} placeholder="+91..." className={inputClass}/>
+              <input name="customerPhone" required type="tel" autoComplete="tel" inputMode="tel" value={form.customerPhone} onChange={(e) => set('customerPhone', e.target.value)} placeholder="+91..." className={inputClass}/>
             </label>
             <label className={labelClass}>Email
-              <input type="email" autoComplete="email" value={form.customerEmail} onChange={(e) => set('customerEmail', e.target.value)} placeholder="Optional" className={inputClass}/>
+              <input name="customerEmail" type="email" autoComplete="email" value={form.customerEmail} onChange={(e) => set('customerEmail', e.target.value)} placeholder="Optional" className={inputClass}/>
             </label>
             <label className={labelClass}>Branch
               <select value={form.branch} onChange={(e) => set('branch', e.target.value)} className={inputClass}>
@@ -204,7 +218,7 @@ export const JobCreatePage = () => {
 
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className={labelClass}>Registration Number *
-              <input required autoCapitalize="characters" autoComplete="off" value={form.vehicleReg} onChange={(e) => set('vehicleReg', e.target.value.toUpperCase())} placeholder="KL 07 AB 1234" className={inputClass}/>
+              <input name="vehicleReg" required autoCapitalize="characters" autoComplete="off" value={form.vehicleReg} onChange={(e) => set('vehicleReg', e.target.value.toUpperCase())} placeholder="KL 07 AB 1234" className={inputClass}/>
             </label>
             <label className={labelClass}>Make / Model
               <input value={form.vehicleInfo} onChange={(e) => set('vehicleInfo', e.target.value)} placeholder="Toyota Innova 2.5V" className={inputClass}/>
