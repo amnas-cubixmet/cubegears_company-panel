@@ -30,6 +30,7 @@ import './styles/stock-management.css';
 import './styles/jobs-dashboard-alignment.css';
 import './styles/outside-labour.css';
 import './styles/jobs-ops-polish.css';
+import './styles/outside-labour-dashboard.css';
 
 export function App() {
   return (
