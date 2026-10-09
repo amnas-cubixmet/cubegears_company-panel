@@ -15,15 +15,16 @@ const rateLabel = (plan) => {
   if (['hourly', 'hourly_commission'].includes(type)) {
     return money(plan.hourlyWageRate ?? plan.hourlyRate) + ' / hour';
   }
-  if (type === 'commission') return 'Commission only';
+  if (type === 'per_job') return 'Based on approved work';
+  if (type === 'commission') return 'Legacy commission';
   if (type === 'hybrid') return 'Custom components';
   return money(plan.baseSalary ?? plan.fixedMonthlySalary ?? plan.basicSalary) + ' / month';
 };
 
-const commissionLabel = (plan) => {
-  if (!plan || !plan.commissionType || plan.commissionType === 'none') return '—';
-  if (plan.commissionType === 'fixed') return money(plan.commissionFixedAmount) + ' / job';
-  return Number(plan.commissionPercentage || 0) + '%';
+const workChargeLabel = (plan, payroll) => {
+  if (plan?.paymentType !== 'per_job') return '—';
+  if (!payroll) return 'Not calculated';
+  return money(payroll.basicSalary ?? payroll.basic ?? payroll.baseSalary ?? 0);
 };
 
 const employeeKey = (employee) => String(employee.id ?? employee.staffId ?? employee.employeeId ?? '');
@@ -97,7 +98,7 @@ export const PayrollAllStaffPanel = ({
           <table>
             <thead>
               <tr>
-                <th>Staff</th><th>Status</th><th>Pay Type</th><th>Base Rate</th><th>Job Commission</th>
+                <th>Staff</th><th>Status</th><th>Pay Type</th><th>Pay Basis</th><th>Approved Work Charges</th>
                 <th>Gross Earnings</th><th>Net Pay</th><th>Paid</th><th>Balance</th><th>Action</th>
               </tr>
             </thead>
@@ -111,7 +112,7 @@ export const PayrollAllStaffPanel = ({
                   <td>{employee.employmentStatus || 'Not set'}</td>
                   <td>{plan ? payTypeLabel(plan.paymentType) : employee.paymentType ? payTypeLabel(employee.paymentType) + ' (setup pending)' : 'Not configured'}</td>
                   <td>{rateLabel(plan)}</td>
-                  <td>{commissionLabel(plan)}</td>
+                  <td>{workChargeLabel(plan, payroll)}</td>
                   <td>{payroll ? money(payroll.grossSalary ?? payroll.gross) : 'Not calculated'}</td>
                   <td>{payroll ? money(payroll.netSalary ?? payroll.net) : '—'}</td>
                   <td>{payroll ? money(payroll.paidAmount) : '—'}</td>
