@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { staffService } from '../../services/staff.service';
 import { payrollService } from '../../services/payroll.service';
+import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 
 const nowLocal = () => {
   const date = new Date();
@@ -153,6 +154,7 @@ export const JobCreatePage = () => {
 
   return (
     <div className="job-management-page job-create-page flex w-full min-w-0 flex-col gap-4">
+      <JobBreadcrumbs current="New Job Card" />
       <div className="job-create-header flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-content">New Job Card</h1>
