@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, HardHat, Plus } from 'lucide-react';
+import { HardHat, Plus, RefreshCcw, X } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
@@ -14,6 +14,8 @@ export const OutsideLabourPage = () => {
   const canView = hasPermission(user, 'expenses.view');
   const [jobs, setJobs] = useState([]);
   const [error, setError] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   const selectedJob = params.get('job') || '';
 
   useEffect(() => {
@@ -38,15 +40,39 @@ export const OutsideLabourPage = () => {
             <p>Record outside painters, mechanics and part-work charges without creating staff profiles.</p>
           </div>
         </div>
-        <div className="outside-labour-page-actions duty-controls">
-          <button type="button" className="dashboard-button outside-labour-back" onClick={() => navigate('/jobs')}><ArrowLeft size={16}/> Job Cards</button>
+        <div className="outside-labour-page-actions outside-labour-action-wrapper" role="group" aria-label="Outside Labour actions">
           {hasPermission(user, 'jobs.create') && (
-            <button type="button" className="dashboard-button is-primary" onClick={() => navigate('/jobs/new')}><Plus size={16}/> New Job Card</button>
+            <button type="button" className="dashboard-button is-primary outside-labour-new-job" onClick={() => navigate('/jobs/new')}>
+              <Plus size={16} aria-hidden="true"/> New Job Card
+            </button>
+          )}
+          {canView && (
+            <button type="button" className="dashboard-button outside-labour-page-refresh" onClick={() => setRefreshVersion((value) => value + 1)}>
+              <RefreshCcw size={16} aria-hidden="true"/> Refresh
+            </button>
+          )}
+          {canView && hasPermission(user, 'expenses.create') && (
+            <button
+              type="button"
+              className="dashboard-button is-primary outside-labour-page-form-toggle"
+              aria-expanded={formOpen}
+              onClick={() => setFormOpen((value) => !value)}
+            >
+              {formOpen ? <X size={16} aria-hidden="true"/> : <Plus size={16} aria-hidden="true"/>}
+              {formOpen ? 'Close Form' : 'Add Outside Labour'}
+            </button>
           )}
         </div>
       </header>
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
-      <OutsideLabourPanel jobId={validJob || undefined} jobs={jobs} />
+      <OutsideLabourPanel
+        jobId={validJob || undefined}
+        jobs={jobs}
+        formOpen={formOpen}
+        onFormOpenChange={setFormOpen}
+        refreshVersion={refreshVersion}
+        hideToolbar
+      />
     </main>
   );
 };
