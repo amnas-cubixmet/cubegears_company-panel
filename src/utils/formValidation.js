@@ -24,7 +24,7 @@ export const focusField = (field) => {
   try {
     field.focus({ preventScroll: true });
     field.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
       block: 'center',
       inline: 'nearest',
     });
