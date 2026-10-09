@@ -5,7 +5,6 @@ import {
   AttendanceManagerTabs,
   attendanceManagerTabs,
 } from '../../components/attendance-manager';
-import { OvertimeManager } from '../../components/payroll/OvertimeManager';
 import { AttendanceReports } from '../attendance-manager/AttendanceReports';
 import { DailyAttendance } from '../attendance-manager/DailyAttendance';
 import { LeaveRequestsManager } from '../attendance-manager/LeaveRequestsManager';
@@ -36,11 +35,6 @@ export const AttendanceManager = () => {
         {activeTab === 'calendar' && <MonthlyAttendanceCalendar />}
         {activeTab === 'leave-requests' && <LeaveRequestsManager />}
         {activeTab === 'leave-types' && <LeaveTypes />}
-        {activeTab === 'overtime' && (
-          <div className="attendance-manager-overtime-shell">
-            <OvertimeManager />
-          </div>
-        )}
         {activeTab === 'shifts' && <ShiftSettings />}
         {activeTab === 'reports' && <AttendanceReports />}
         {activeTab === 'rules' && <RulesSettings />}
