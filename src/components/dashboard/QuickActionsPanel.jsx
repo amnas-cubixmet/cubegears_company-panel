@@ -30,7 +30,10 @@ export const QuickActionsPanel = ({ user, onNavigate }) => (
     <div className="panel-title"><h2>Quick Actions</h2><Wrench size={15} /></div>
     <div className="quick-actions quick-actions-expanded">
       {actions
-        .filter(([, , , permission]) => hasPermission(user, permission))
+        .filter(([label, , , permission]) =>
+          hasPermission(user, permission) &&
+          (label !== 'Add Outside Labour' || hasPermission(user, 'expenses.view'))
+        )
         .map(([label, path, Icon]) => (
           <button key={label} type="button" onClick={() => onNavigate(path)}>
             <span className="quick-action-leading">
