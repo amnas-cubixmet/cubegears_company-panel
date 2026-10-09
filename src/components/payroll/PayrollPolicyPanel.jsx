@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Save, Settings2 } from 'lucide-react';
+import { BadgeCheck, Save, Settings2 } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
 import { PAY_TYPES } from './payTypes';
 
@@ -23,6 +23,8 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
   const [policy, setPolicy] = useState(defaultPolicy);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -31,17 +33,21 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
         ...defaultPolicy, ...row,
         commissionRules: { ...defaultPolicy.commissionRules, ...(row.commissionRules || {}) },
       });
-    }).catch(() => {});
+    }).catch(() => {
+      if (active) setError('Unable to load company payroll defaults. Retry by reopening this section.');
+    }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
 
   const save = async () => {
     setSaving(true);
     setError('');
+    setNotice('');
     try {
       const saved = await payrollService.savePayrollPolicy(policy);
       setPolicy((old) => ({ ...old, ...saved }));
       onSaved?.();
+      setNotice('Company payroll defaults saved.');
     } catch (requestError) {
       setError(requestError?.message || 'Unable to save salary and worker payment settings.');
     } finally {
@@ -57,19 +63,23 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
 
   return (
     <section className="payroll-policy-panel">
-      <header>
-        <div>
-          <Settings2 size={15} />
+      <header className="payroll-policy-header">
+        <div className="payroll-policy-header-copy">
+          <span className="payroll-policy-header-icon" aria-hidden="true"><Settings2 size={17} /></span>
           <div>
             <strong>Company Payroll Defaults</strong>
-            <span>Employee plans can override these defaults independently.</span>
+            <span>Set the default salary, attendance and payment rules for your workshop.</span>
           </div>
         </div>
-        <button type="button" onClick={save} disabled={saving}>
-          <Save size={13} />
-          {saving ? 'Saving…' : 'Save Defaults'}
+        <button className="payroll-policy-save" type="button" onClick={save} disabled={saving || loading}>
+          <Save size={15} aria-hidden="true" />
+          {saving ? 'Saving…' : 'Save Changes'}
         </button>
       </header>
+      <div className="payroll-policy-section-heading">
+        <strong>Payment & attendance settings</strong>
+        <small>Applies as a company default; individual staff pay configurations take priority.</small>
+      </div>
 
       <div className="payroll-policy-grid">
         <label>
@@ -140,11 +150,15 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
         </label>
 
       </div>
-      <p className="payroll-policy-help">
-        Fixed per-work payment is entered for each Job Card work item, separately from the customer's labour charge.
-        Only manager-approved work is payable; monthly, daily and hourly workers keep their regular wage rules.
-      </p>
-      {error && <p className="staff-directory-message is-error" role="alert">{error}</p>}
+      <div className="payroll-policy-help">
+        <BadgeCheck size={17} aria-hidden="true" />
+        <p>
+          Outside freelancers are recorded manually under Job Cards → Outside Labour.
+          Their charges are separate from staff payroll and do not change these salary defaults.
+        </p>
+      </div>
+      {notice && <p className="payroll-policy-notice" role="status"><BadgeCheck size={15} aria-hidden="true" />{notice}</p>}
+      {error && <p className="payroll-policy-error" role="alert">{error}</p>}
     </section>
   );
 };
