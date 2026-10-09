@@ -8,6 +8,7 @@ import {
   Plus,
   ReceiptText,
   HardHat,
+  WalletCards,
   UserPlus,
   Wrench,
 } from 'lucide-react';
@@ -20,6 +21,7 @@ const actions = [
   ['Record Payment', '/payments/new', CreditCard, 'payments.create'],
   ['Add Expense', '/expenses/new', ReceiptText, 'expenses.create'],
   ['Add Outside Labour', '/jobs/outside-labour', HardHat, 'expenses.create'],
+  ['Daily Wages', '/payroll/daily-wages', WalletCards, 'payroll.view'],
   ['Stock Issue', '/stock/movements', PackageSearch, 'stock.create'],
   ['Add Vehicle', '/vehicles/new', Car, 'vehicles.create'],
   ['Service Catalog', '/services', Plus, 'services.view'],
