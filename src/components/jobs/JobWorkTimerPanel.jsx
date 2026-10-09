@@ -38,7 +38,6 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
   const [employeeAssignment, setEmployeeAssignment] = useState('');
   const [serviceName, setServiceName] = useState('');
   const [labourCharge, setLabourCharge] = useState('');
-  const [workerCharge, setWorkerCharge] = useState('');
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState('');
   const [message, setMessage] = useState('');
@@ -76,13 +75,9 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
     setMessage('');
     try {
       if (action === 'start') {
-        await payrollService.startJobWork(
-          employeeAssignment, serviceName.trim(), Number(labourCharge || 0),
-          canApprove ? Number(workerCharge || 0) : undefined,
-        );
+        await payrollService.startJobWork(employeeAssignment, serviceName.trim(), Number(labourCharge || 0));
         setServiceName('');
         setLabourCharge('');
-        setWorkerCharge('');
       } else {
         await payrollService.updateJobWorkSession(key, action, data);
       }
@@ -110,16 +105,9 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
       setMessage('Enter a valid nonnegative labour amount.');
       return;
     }
-    const workerInput = window.prompt("Worker fixed payment for this work (₹):", String(row.workerCharge || '0'));
-    if (workerInput === null) return;
-    const workerAmount = Number(workerInput);
-    if (!Number.isFinite(workerAmount) || workerAmount < 0) {
-      setMessage('Enter a valid nonnegative worker charge.');
-      return;
-    }
     const reason = window.prompt('Reason for supervisor correction:');
     if (!reason?.trim()) return;
-    await call(row.id, 'correct', { minutes, labourCharge: labourAmount, workerCharge: workerAmount, reason: reason.trim() });
+    await call(row.id, 'correct', { minutes, labourCharge: labourAmount, reason: reason.trim() });
   };
 
   const reject = async (row) => {
@@ -136,7 +124,7 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
       <header className="job-work-timer-head">
         <div>
           <h3><Clock3 size={17} /> Technician Work Timers</h3>
-          <p>Customer labour charge and worker payment are separate. Approved per-work charges enter payroll without percentage commission.</p>
+          <p>Track internal staff work time and service progress. Outside freelancers are paid manually in Outside Labour above.</p>
         </div>
         <div className="job-work-timer-summary">
           <strong>{hoursApproved.toFixed(2)}h</strong>
@@ -168,13 +156,6 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
             <input min="0" step="0.01" type="number" value={labourCharge}
               onChange={(event) => setLabourCharge(event.target.value)} placeholder="500"/>
           </label>
-          {canApprove && (
-            <label>Worker Fixed Charge (₹)
-              <input min="0" step="0.01" type="number" value={workerCharge}
-                onChange={(event) => setWorkerCharge(event.target.value)}
-                placeholder="Amount payable to worker"/>
-            </label>
-          )}
           <button type="submit" className="is-primary" disabled={Boolean(busy) || jobStatus !== 'In Progress' || !assignments.length}>
             <Play size={14}/>{busy === 'start' ? 'Starting…' : 'Start Work'}
           </button>
@@ -195,9 +176,6 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
             <div className="job-work-timer-person">
               <strong>{row.serviceName}</strong>
               <span>{row.staffName} · Customer labour: {money(row.labourCharge)}</span>
-              {canApprove && row.workerCharge !== null && (
-                <span>Worker payment: {money(row.workerCharge)} · Labour margin: {money(Number(row.labourCharge || 0) - Number(row.workerCharge || 0))}</span>
-              )}
               <small>Status: {row.status === 'PendingApproval' ? 'Awaiting Supervisor Approval' : row.status}</small>
             </div>
             <div className="job-work-timer-duration">
