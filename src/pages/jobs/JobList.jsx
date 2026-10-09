@@ -8,6 +8,7 @@ import {
   VehicleLookupPanel,
 } from '../../components/jobs';
 import { normalizeRegistration } from '../../components/jobs/jobs.utils';
+import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 import { jobService } from '../../services/job.service';
 import '../../styles/jobs-dashboard.css';
 
@@ -135,6 +136,7 @@ export const JobList = () => {
 
   return (
     <div className="jobs-dashboard">
+      <JobBreadcrumbs />
       <JobsHeader onNavigate={navigate} />
 
       <JobsStats
