@@ -9,7 +9,6 @@ import { BranchCreateSheet } from '../../components/staff-management/BranchCreat
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import { showFormFieldError, showServerFormErrors } from '../../utils/formValidation';
-import { PAY_TYPES, hasCommission, hasDailyBase, hasHourlyBase, hasMonthlyBase } from '../../components/payroll/payTypes';
 
 const statusOptions = [
   'Active',
@@ -52,25 +51,10 @@ export const StaffAddPage = () => {
     employmentStatus: 'Active',
     emergencyContact: '',
     address: '',
-    paymentType: 'monthly',
     notes: '',
   });
 
-  const [salary, setSalary] = useState({
-    baseSalary: '',
-    dailyWageRate: '',
-    hourlyWageRate: '',
-    commissionType: 'none',
-    commissionPercentage: '',
-    commissionFixedAmount: '',
-    eligibleRevenueBasis: 'labour_revenue',
-    deductions: '',
-    fixedIncentive: '',
-    effectiveDate: today(),
-    paymentFrequency: 'daily',
-    overtimeEligibility: true,
-    incentiveEligibility: true,
-  });
+  const [salary, setSalary] = useState({ dailyWageRate: '', effectiveDate: today() });
 
   useEffect(() => {
     let alive = true;
@@ -149,29 +133,11 @@ export const StaffAddPage = () => {
       return;
     }
 
-    if (canManagePayroll && setSalaryNow) {
-      const type = form.paymentType;
-      const requiredRate = hasMonthlyBase(type) ? Number(salary.baseSalary)
-        : hasDailyBase(type) ? Number(salary.dailyWageRate)
-          : hasHourlyBase(type) ? Number(salary.hourlyWageRate) : null;
-      if (requiredRate !== null && (!Number.isFinite(requiredRate) || requiredRate <= 0)) {
-        const name = hasMonthlyBase(type) ? 'baseSalary' : hasDailyBase(type) ? 'dailyWageRate' : 'hourlyWageRate';
-        showFormFieldError(formRef.current, name, 'Enter a valid wage or salary greater than zero.');
-        setError('Enter a valid positive salary / wage rate, or switch off Configure payment now to finish later.');
-        return;
-      }
-      if (hasCommission(type)) {
-        const commission = Number(salary.commissionType === 'percentage'
-          ? salary.commissionPercentage : salary.commissionFixedAmount);
-        if (!Number.isFinite(commission) || commission <= 0 ||
-          (salary.commissionType === 'percentage' && commission > 100)) {
-          showFormFieldError(formRef.current,
-            salary.commissionType === 'percentage' ? 'commissionPercentage' : 'commissionFixedAmount',
-            'Enter a valid commission amount.');
-          setError('Enter a valid commission rate (1–100%) or a positive fixed commission amount.');
-          return;
-        }
-      }
+    if (canManagePayroll && setSalaryNow &&
+        (!Number.isFinite(Number(salary.dailyWageRate)) || Number(salary.dailyWageRate) <= 0)) {
+      showFormFieldError(formRef.current, 'dailyWageRate', 'Enter a daily wage rate greater than zero.');
+      setError('A positive daily wage rate is required.');
+      return;
     }
 
     setSaving(true);
@@ -186,34 +152,21 @@ export const StaffAddPage = () => {
         shiftId: form.shiftId || null,
         branchId: form.branchId || null,
         setSalaryNow: canManagePayroll && setSalaryNow,
-        salarySetup:
-          canManagePayroll && setSalaryNow
-            ? {
-                ...salary,
-                paymentType: form.paymentType,
-                paymentFrequency: 'daily',
-                overtimeEligibility: form.paymentType !== "per_job" && salary.overtimeEligibility,
-                incentiveEligibility: form.paymentType !== "per_job" && salary.incentiveEligibility,
-                baseSalary: Number(salary.baseSalary || 0),
-                dailyWageRate: Number(salary.dailyWageRate || 0),
-                hourlyWageRate: Number(salary.hourlyWageRate || 0),
-                commissionPercentage: Number(salary.commissionPercentage || 0),
-                commissionFixedAmount: Number(salary.commissionFixedAmount || 0),
-                deductions: Number(salary.deductions || 0),
-                fixedIncentive: Number(salary.fixedIncentive || 0),
-              }
-            : null,
+        salarySetup: canManagePayroll && setSalaryNow
+          ? { dailyWageRate: Number(salary.dailyWageRate), effectiveDate: salary.effectiveDate }
+          : null,
       });
 
       navigate(
-        created?.id
-          ? `/staff-management/staff/${created.id}`
-          : '/staff-management/staff',
+        created?.wageSetupError && created?.id
+          ? `/staff/${created.id}/wages`
+          : created?.id ? `/staff-management/staff/${created.id}` : '/staff-management/staff',
+        { state: created?.wageSetupError ? { wageSetupError: created.wageSetupError } : undefined },
       );
     } catch (requestError) {
       showServerFormErrors(formRef.current, requestError, {
         employee_name: 'name', mobile: 'phone', base_salary: 'baseSalary',
-        daily_wage_rate: 'dailyWageRate', hourly_wage_rate: 'hourlyWageRate',
+        daily_wage_rate: 'dailyWageRate',
       });
       setError(requestError?.message || 'Unable to create staff.');
     } finally {
@@ -396,18 +349,7 @@ export const StaffAddPage = () => {
                 />
               </label>
 
-              <label>
-                Payment Type
-                <select
-                  value={form.paymentType}
-                  onChange={(event) => set('paymentType', event.target.value)}
-                >
-                  {PAY_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
-                </select>
-                {form.paymentType === "per_job" && <small className="mt-1 block text-xs text-muted">For freelance mechanics and painters. Set each fixed worker charge on the Job Card; no commission or monthly basic salary.</small>}
-              </label>
+
             </div>
 
           </section>
@@ -447,14 +389,14 @@ export const StaffAddPage = () => {
           <section className="staff-form-panel">
             <div className="staff-form-panel__title">
               <WalletCards size={16} />
-              Initial Salary & Payment Settings
+              Daily Wage Rate
             </div>
 
             {canManagePayroll ? (
               <label className="staff-salary-toggle">
                 <span>
-                  <strong>Configure payment now</strong>
-                  <small>Set salary, daily/hourly wage or job commission during creation. Turn off to configure from this staff member's profile later.</small>
+                  <strong>Set daily wage now</strong>
+                  <small>Set this worker's daily wage. Full day earns 100%, half day 50%, leave and weekly off ₹0.</small>
                 </span>
                 <input
                   type="checkbox"
@@ -464,173 +406,31 @@ export const StaffAddPage = () => {
               </label>
             ) : (
               <div className="staff-directory-message">
-                A payroll manager can configure this employee's wage or salary from the individual Staff Profile.
+                A payroll manager can configure the daily wage from this employee's Wage Account.
               </div>
             )}
 
             {canManagePayroll && setSalaryNow && (
               <div className="staff-form-grid staff-salary-grid">
-                {hasMonthlyBase(form.paymentType) && (
-                  <label>
-                    Monthly Base Salary
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      name="baseSalary"
-                      value={salary.baseSalary}
-                      onChange={(event) => setSalary((current) => ({ ...current, baseSalary: event.target.value }))}
-                    />
-                  </label>
-                )}
-
-                {hasDailyBase(form.paymentType) && (
-                  <label>
-                    Daily Wage Rate
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      name="dailyWageRate"
-                      value={salary.dailyWageRate}
-                      onChange={(event) => setSalary((current) => ({ ...current, dailyWageRate: event.target.value }))}
-                    />
-                  </label>
-                )}
-
-                {hasHourlyBase(form.paymentType) && (
-                  <label>
-                    Hourly Wage Rate
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      name="hourlyWageRate"
-                      value={salary.hourlyWageRate}
-                      onChange={(event) => setSalary((current) => ({ ...current, hourlyWageRate: event.target.value }))}
-                    />
-                  </label>
-                )}
-
-                {hasCommission(form.paymentType) && (
-                  <>
-                    <label>
-                      Commission Type
-                      <select
-                        value={salary.commissionType}
-                        onChange={(event) => setSalary((current) => ({ ...current, commissionType: event.target.value }))}
-                      >
-                        <option value="percentage">Percentage</option>
-                        <option value="fixed">Fixed per eligible Job Card</option>
-                      </select>
-                    </label>
-
-                    {salary.commissionType === 'percentage' ? (
-                      <label>
-                        Commission %
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.01"
-                          name="commissionPercentage"
-                      value={salary.commissionPercentage}
-                          onChange={(event) => setSalary((current) => ({ ...current, commissionPercentage: event.target.value }))}
-                        />
-                      </label>
-                    ) : (
-                      <label>
-                        Fixed Commission
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          name="commissionFixedAmount"
-                      value={salary.commissionFixedAmount}
-                          onChange={(event) => setSalary((current) => ({ ...current, commissionFixedAmount: event.target.value }))}
-                        />
-                      </label>
-                    )}
-
-                    <label>
-                      Commission Based On
-                      <select
-                        value={salary.eligibleRevenueBasis}
-                        onChange={(event) => setSalary((current) => ({ ...current, eligibleRevenueBasis: event.target.value }))}
-                      >
-                        <option value="labour_revenue">Labour Revenue</option>
-                        <option value="service_revenue">Service Revenue</option>
-                        <option value="job_card">Job Card Revenue</option>
-                        <option value="custom">Custom Eligible Revenue</option>
-                      </select>
-                    </label>
-                  </>
-                )}
-
-                {form.paymentType === 'salary_incentive' && (
-                  <label>
-                    Fixed Job Incentive / Bonus
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={salary.fixedIncentive}
-                      onChange={(event) => setSalary((current) => ({ ...current, fixedIncentive: event.target.value }))}
-                    />
-                  </label>
-                )}
-
                 <label>
-                  Fixed Deduction
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={salary.deductions}
-                    onChange={(event) => setSalary((current) => ({ ...current, deductions: event.target.value }))}
+                  Daily Wage Rate (₹) *
+                  <input name="dailyWageRate" type="number" min="0.01" step="0.01"
+                    value={salary.dailyWageRate}
+                    onChange={(event) => setSalary((current) => ({ ...current, dailyWageRate: event.target.value }))}
+                    required
                   />
                 </label>
-
                 <label>
-                  Payment Frequency
-                  <select value="daily" disabled aria-label="Payment Frequency">
-                    <option value="daily">Daily</option>
-                  </select>
-                  <small>Daily wage credit; payment can be settled any day.</small>
-                </label>
-
-                <label>
-                  Effective From
-                  <input
-                    type="date"
-                    value={salary.effectiveDate}
+                  Effective From *
+                  <input type="date" value={salary.effectiveDate}
                     onChange={(event) => setSalary((current) => ({ ...current, effectiveDate: event.target.value }))}
+                    required
                   />
                 </label>
-
-                <label className="staff-salary-toggle">
-                  <span><strong>Overtime Eligible</strong><small>Approved OT may enter payroll.</small></span>
-                  <input
-                    type="checkbox"
-                    checked={salary.overtimeEligibility}
-                    onChange={(event) => setSalary((current) => ({ ...current, overtimeEligibility: event.target.checked }))}
-                  />
-                </label>
-
-                <label className="staff-salary-toggle">
-                  <span><strong>Incentive Eligible</strong><small>Approved incentives may enter payroll.</small></span>
-                  <input
-                    type="checkbox"
-                    checked={salary.incentiveEligibility}
-                    onChange={(event) => setSalary((current) => ({ ...current, incentiveEligibility: event.target.checked }))}
-                  />
-                </label>
-
-                {form.paymentType === 'hybrid' && (
-                  <div className="staff-directory-message">
-                    Save the employee first, then open the Payroll tab to add custom hybrid earning/deduction components.
-                  </div>
-                )}
+                <p className="staff-directory-message">
+                  Daily wage is credited on approved attendance. OT, extra duty and bonuses are
+                  added through the employee Wage Account. Payment can be recorded on any date.
+                </p>
               </div>
             )}
           </section>
@@ -648,7 +448,7 @@ export const StaffAddPage = () => {
             <div><span>Branch</span><strong>{selectedBranch?.name || 'Unassigned'}</strong></div>
             <div><span>Shift</span><strong>{selectedShift?.name || 'Unassigned'}</strong></div>
             <div><span>Status</span><strong>{form.employmentStatus}</strong></div>
-            <div><span>Salary Setup</span><strong>{canManagePayroll && setSalaryNow ? 'To configure' : 'Later'}</strong></div>
+            <div><span>Daily Wage</span><strong>{canManagePayroll && setSalaryNow ? 'To configure' : 'Later'}</strong></div>
           </div>
         </aside>
       </div>
