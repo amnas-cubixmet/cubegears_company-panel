@@ -9,6 +9,7 @@ import {
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { StockOverview } from '../../components/stock/StockOverview';
 import { stockManagementService } from '../../services/stockManagement.service';
+import { formatStockMarginPercent } from '../../utils/stockMargin';
 import {
   stockCategories,
   stockAdjustmentReasons,
@@ -550,7 +551,7 @@ export const StockManagementSection = ({ section, itemId }) => {
               <div><span>Rack / Bin</span><strong>{item.location || '—'}</strong></div>
               <div><span>Purchase Cost</span><strong>{money.format(item.costPrice)}</strong></div>
               <div><span>Selling Price</span><strong>{money.format(item.sellingPrice)}</strong></div>
-              <div><span>Margin</span><strong>{money.format(item.margin)} · {item.marginPercent.toFixed(1)}%</strong></div>
+              <div><span>Margin</span><strong>{money.format(item.margin)} · {formatStockMarginPercent(item)}</strong></div>
               <div><span>Tax / Discount Limit</span><strong>{item.tax}% / {item.discountLimit}%</strong></div>
             </div>
           </section>
@@ -803,7 +804,7 @@ export const StockManagementSection = ({ section, itemId }) => {
           <section className="stock-panel"><SectionHeader title="Fast Moving" description="Highest Job Card consumption."/><div className="stock-row-list">{fastMoving.slice(0,5).map((item)=><div key={item.id} className="stock-data-row"><div><strong>{item.partName}</strong><span>{item.sku}</span></div><b>{ledger.filter((m)=>m.itemId===item.id&&m.type==='Job Issue').reduce((s,m)=>s+Number(m.qtyOut||0),0)} used</b></div>)}</div></section>
           <section className="stock-panel"><SectionHeader title="Dead / Slow Stock" description="Items without recent job-card issue."/><div className="stock-row-list">{deadStock.map((item)=><div key={item.id} className="stock-data-row"><div><strong>{item.partName}</strong><span>{item.sku} · {item.location}</span></div><b>{money.format(item.stockValue)}</b></div>)}</div></section>
         </div>
-        <section className="stock-panel"><SectionHeader title="Margin Report" description="Purchase cost, selling price and workshop margin by item."/><div className="stock-report-table"><div className="stock-report-head"><span>Part</span><span>Cost</span><span>Selling</span><span>Margin</span><span>Margin %</span></div>{items.map((item)=><div key={item.id} className="stock-report-row"><strong>{item.partName}</strong><span>{money.format(item.costPrice)}</span><span>{money.format(item.sellingPrice)}</span><span>{money.format(item.margin)}</span><span>{item.marginPercent.toFixed(1)}%</span></div>)}</div></section>
+        <section className="stock-panel"><SectionHeader title="Margin Report" description="Purchase cost, selling price and workshop margin by item."/><div className="stock-report-table"><div className="stock-report-head"><span>Part</span><span>Cost</span><span>Selling</span><span>Margin</span><span>Margin %</span></div>{items.map((item)=><div key={item.id} className="stock-report-row"><strong>{item.partName}</strong><span>{money.format(item.costPrice)}</span><span>{money.format(item.sellingPrice)}</span><span>{money.format(item.margin)}</span><span>{formatStockMarginPercent(item)}</span></div>)}</div></section>
       </div>
     );
   }
