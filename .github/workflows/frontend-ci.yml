@@ -16,5 +16,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
-      - run: node --test tests/stockMargin.test.js
+      - run: node --test tests/stockMargin.test.js tests/dailyWageOnlyUI.test.js
       - run: npm run build
