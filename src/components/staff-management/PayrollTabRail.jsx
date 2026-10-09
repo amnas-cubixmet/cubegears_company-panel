@@ -3,6 +3,7 @@ import {
   BarChart3,
   Banknote,
   CalendarCheck2,
+  WalletCards,
   Clock3,
   FileText,
   LayoutDashboard,
@@ -13,6 +14,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 const tabs = [
   { label: 'Overview', path: '/payroll', icon: LayoutDashboard },
   { label: 'Employees', path: '/payroll/employees', icon: Users },
+  { label: 'Daily Wages', path: '/payroll/daily-wages', icon: WalletCards },
   { label: 'Attendance', path: '/payroll/attendance', icon: CalendarCheck2 },
   { label: 'Incentives', path: '/payroll/incentives', icon: BarChart3 },
   { label: 'Overtime', path: '/payroll/overtime', icon: Clock3 },
