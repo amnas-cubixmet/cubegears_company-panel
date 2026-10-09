@@ -284,7 +284,7 @@ export const DailyWageAccountPage = () => {
             <label>Reference (optional)<input maxLength={150} value={form.reference || ''} onChange={(e) => set('reference', e.target.value)} placeholder="Transaction or receipt number"/></label>
             <p className="dw-modal-help">Full payment sets the current balance to ₹0. Earnings and payment history remain unchanged.</p>
           </>}
-          {modal !== 'pay' && modal !== 'extra' && (
+          {modal !== 'pay' && (
             <label>Reason<input value={form.reason || ''} required onChange={(e) => set('reason', e.target.value)} placeholder="Reason and authorizing detail"/></label>
           )}
           {error && <p className="dw-alert" role="alert">{error}</p>}
