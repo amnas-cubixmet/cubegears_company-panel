@@ -14,6 +14,8 @@ import { StaffAttendanceDetails } from '../pages/attendance-manager/StaffAttenda
 import { StaffManagement } from '../pages/employees/StaffManagement';
 import { StaffProfile } from '../pages/staff-management/staff/StaffProfile';
 import { Payroll } from '../pages/staff-management/Payroll';
+import { DailyWagePage } from '../pages/payroll/DailyWagePage';
+import { DailyWageAccountPage } from '../pages/payroll/DailyWageAccountPage';
 import { CustomerList } from '../pages/customers/CustomerList';
 import { CustomerManagement } from '../pages/customers/CustomerManagement';
 import { AddCustomer } from '../pages/customers/AddCustomer';
@@ -106,6 +108,10 @@ export const AppRoutes = () => (
       <Route path="/staff-management/reports" element={<StaffManagement />} />
       <Route path="/staff-management/payroll" element={<Navigate to="/payroll" replace />} />
       <Route path="/payroll" element={<Payroll section="overview" />} />
+      <Route path="/payroll/daily-wages" element={<DailyWagePage mode="overview" />} />
+      <Route path="/payroll/daily-wages/history" element={<DailyWagePage mode="history" />} />
+      <Route path="/payroll/payments" element={<DailyWagePage mode="payments" />} />
+      <Route path="/staff/:id/wages" element={<DailyWageAccountPage />} />
       <Route path="/payroll/employees" element={<Payroll section="employees" />} />
       <Route path="/payroll/attendance" element={<Payroll section="attendance" />} />
       <Route path="/payroll/incentives" element={<Payroll section="incentives" />} />
