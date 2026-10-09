@@ -1,13 +1,7 @@
-export const mockLeaveBalances = [
-  { id: "BAL-CL", type: "Casual Leave", allocated: 12, used: 4, pending: 1, available: 7, color: "var(--primary)" },
-  { id: "BAL-SL", type: "Sick Leave", allocated: 10, used: 2, pending: 0, available: 8, color: "var(--danger)" },
-  { id: "BAL-AL", type: "Annual Leave", allocated: 15, used: 5, pending: 0, available: 10, color: "var(--success)" }
-];
-
 export const mockLeaveRequests = [
   {
     id: "LV-2026-004",
-    type: "Casual Leave",
+    type: "Leave",
     leaveMode: "Full Day",
     startDate: "2026-09-18",
     endDate: "2026-09-19",
@@ -20,7 +14,7 @@ export const mockLeaveRequests = [
   },
   {
     id: "LV-2026-003",
-    type: "Casual Leave",
+    type: "Leave",
     leaveMode: "Full Day",
     startDate: "2026-09-08",
     endDate: "2026-09-08",
@@ -35,7 +29,7 @@ export const mockLeaveRequests = [
   },
   {
     id: "LV-2026-002",
-    type: "Sick Leave",
+    type: "Leave",
     leaveMode: "Half Day",
     halfDaySession: "Second Half",
     startDate: "2026-08-25",
@@ -51,7 +45,7 @@ export const mockLeaveRequests = [
   },
   {
     id: "LV-2026-001",
-    type: "Annual Leave",
+    type: "Leave",
     leaveMode: "Full Day",
     startDate: "2026-07-10",
     endDate: "2026-07-14",
@@ -66,5 +60,4 @@ export const mockLeaveRequests = [
   }
 ];
 
-export const getMockLeaveBalances = () => [...mockLeaveBalances];
 export const getMockLeaveRequests = () => [...mockLeaveRequests];
