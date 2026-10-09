@@ -173,12 +173,13 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
       </header>
 
       <div className="outside-labour-stats">
-        <div><span>Customer Labour*</span><strong>{formatMoney(totals.customer)}</strong></div>
-        <div><span>Worker Cost</span><strong>{formatMoney(totals.worker)}</strong></div>
-        <div><span>Pending Payment</span><strong>{formatMoney(totals.pending)}</strong></div>
-        <div><span>Paid Expenses</span><strong>{formatMoney(totals.paid)}</strong></div>
+        <div><span className="outside-labour-stat-head"><ClipboardList size={16}/> Customer Labour</span><strong>{formatMoney(totals.customer)}</strong></div>
+        <div><span className="outside-labour-stat-head"><HardHat size={16}/> Worker Cost</span><strong>{formatMoney(totals.worker)}</strong></div>
+        <div><span className="outside-labour-stat-head"><Wallet size={16}/> Pending Payment</span><strong>{formatMoney(totals.pending)}</strong></div>
+        <div><span className="outside-labour-stat-head"><CheckCircle2 size={16}/> Paid Expenses</span><strong>{formatMoney(totals.paid)}</strong></div>
+        <div><span className="outside-labour-stat-head"><TrendingUp size={16}/> Labour Margin</span><strong>{formatMoney(totals.customer - totals.worker)}</strong></div>
       </div>
-      <small className="outside-labour-note">*Customer charge is reference-only; it does not add another invoice item. The difference is a labour margin before overheads.</small>
+      <small className="outside-labour-note">Customer Labour is reference-only, not an extra invoice item. Labour Margin excludes parts, tax and overheads.</small>
 
       {notice && <p className="outside-labour-notice" role="status">{notice}</p>}
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
