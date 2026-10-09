@@ -206,7 +206,7 @@ export const DailyWageAccountPage = () => {
             <div className="dw-table-scroll">
               <table className="dw-table">
                 <thead><tr>{(section === 'history'
-                  ? ['Date','Attendance','Applied Rate','Base Wage','Extras','Adjustments','Total','Status']
+                  ? ['Date','Attendance','Applied Rate','Base Wage','Extras','Adjustments','Total','Payment']
                   : section === 'extras' ? ['Date','Category','Reason','Amount','Status','Action']
                     : section === 'payments' ? ['Date','Amount','Method','Reference','Status','Action']
                       : ['Date','Action','Reason','Original','Updated','Actor']
@@ -216,7 +216,7 @@ export const DailyWageAccountPage = () => {
                     <td data-label="Date">{row.date}</td><td data-label="Attendance">{row.attendance}</td>
                     <td data-label="Applied Rate">{rupees(row.dailyRate)}</td><td data-label="Base Wage">{rupees(row.baseWage)}</td>
                     <td data-label="Extras">{rupees(row.extras)}</td><td data-label="Adjustments">{rupees(row.adjustments)}</td>
-                    <td data-label="Total"><strong>{rupees(row.total)}</strong></td><td data-label="Status"><span className="dw-ok">{row.status}</span></td>
+                    <td data-label="Total"><strong>{rupees(row.total)}</strong></td><td data-label="Payment"><span className={row.paymentStatus === 'Paid' ? 'dw-ok' : 'dw-pending'}>{row.paymentStatus || 'Unpaid'}</span></td>
                   </tr>)}
                   {section === 'extras' && selectedRows.map((row) => <tr key={row.id}>
                     <td data-label="Date">{row.date}</td><td data-label="Category">{row.category}</td>
