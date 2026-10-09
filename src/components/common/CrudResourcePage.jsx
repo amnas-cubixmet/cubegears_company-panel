@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Edit3, Eye, Plus, Search, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { showServerFormErrors } from '../../utils/formValidation';
 
 const emptyFromFields = (fields) => Object.fromEntries(fields.map((field) => [field.name, field.defaultValue ?? '']));
 
@@ -27,6 +28,7 @@ const resolveMode = (pathname, id) => {
 
 export function CrudResourcePage({ title, subtitle, service, fields, columns, addLabel = 'Add New', searchPlaceholder = 'Search records…', statCards = [], actions = null }) {
   const location = useLocation();
+  const formRef = useRef(null);
   const navigate = useNavigate();
   const params = useParams();
   const id = params.id || params.itemId || params.recordId;
@@ -102,6 +104,7 @@ export function CrudResourcePage({ title, subtitle, service, fields, columns, ad
       const saved = mode === 'edit' ? await service.update(id, payload) : await service.create(payload);
       navigate(`${basePath}/${saved?.id || id}`, { replace: true });
     } catch (err) {
+      showServerFormErrors(formRef.current, err);
       setError(err?.message || 'Unable to save record.');
     } finally {
       setSaving(false);
@@ -133,13 +136,13 @@ export function CrudResourcePage({ title, subtitle, service, fields, columns, ad
             <p>{mode === 'edit' ? `Editing ID: ${id}` : subtitle}</p>
           </div>
         </div>
-        {error && <div className="crud-error">{error}</div>}
+        {error && <div className="crud-error" role="alert">{error}</div>}
         {loading && mode === 'edit' ? <div className="crud-empty">Loading…</div> : (
-          <form className="crud-panel" onSubmit={save}>
+          <form ref={formRef} className="crud-panel" onSubmit={save}>
             <div className="crud-form-grid" style={{ padding: 20 }}>
               {fields.map((field) => <label className={field.full ? 'crud-field full' : 'crud-field'} key={field.name}>
                 <span>{field.label}{field.required ? ' *' : ''}</span>
-                {field.type === 'select' ? <select required={field.required} value={form[field.name]} onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}><option value="">Select</option>{(field.options || []).map((option) => <option value={typeof option === 'string' ? option : option.value} key={typeof option === 'string' ? option : option.value}>{typeof option === 'string' ? option : option.label}</option>)}</select> : field.type === 'textarea' ? <textarea required={field.required} rows="4" value={form[field.name]} onChange={(e) => setForm({ ...form, [field.name]: e.target.value })} /> : field.type === 'checkbox' ? <input type="checkbox" checked={Boolean(form[field.name])} onChange={(e) => setForm({ ...form, [field.name]: e.target.checked })} /> : <input required={field.required} type={field.type === 'currency' ? 'number' : (field.type || 'text')} min={field.min} step={field.step} value={form[field.name]} onChange={(e) => setForm({ ...form, [field.name]: e.target.value })} />}
+                {field.type === 'select' ? <select name={field.name} required={field.required} value={form[field.name]} onChange={(e) => setForm({ ...form, [field.name]: e.target.value })}><option value="">Select</option>{(field.options || []).map((option) => <option value={typeof option === 'string' ? option : option.value} key={typeof option === 'string' ? option : option.value}>{typeof option === 'string' ? option : option.label}</option>)}</select> : field.type === 'textarea' ? <textarea name={field.name} required={field.required} rows="4" value={form[field.name]} onChange={(e) => setForm({ ...form, [field.name]: e.target.value })} /> : field.type === 'checkbox' ? <input name={field.name} type="checkbox" checked={Boolean(form[field.name])} onChange={(e) => setForm({ ...form, [field.name]: e.target.checked })} /> : <input name={field.name} required={field.required} type={field.type === 'currency' ? 'number' : (field.type || 'text')} min={field.min} step={field.step} value={form[field.name]} onChange={(e) => setForm({ ...form, [field.name]: e.target.value })} />}
               </label>)}
             </div>
             <div className="crud-modal-footer" style={{ padding: 20 }}><button type="button" className="crud-btn" onClick={() => navigate(mode === 'edit' ? `${basePath}/${id}` : basePath)}>Cancel</button><button type="submit" className="crud-btn crud-btn-primary" disabled={saving}>{saving ? 'Saving…' : mode === 'edit' ? 'Save Changes' : 'Create'}</button></div>
@@ -160,7 +163,7 @@ export function CrudResourcePage({ title, subtitle, service, fields, columns, ad
           </div>
           {mode === 'view' && record && <div className="crud-heading-actions"><button type="button" className="crud-btn" onClick={() => navigate(`${basePath}/${id}/edit`)}><Edit3 size={16}/> Edit</button><button type="button" className="crud-btn" onClick={() => navigate(`${basePath}/${id}/delete`)}><Trash2 size={16}/> Delete</button></div>}
         </div>
-        {error && <div className="crud-error">{error}</div>}
+        {error && <div className="crud-error" role="alert">{error}</div>}
         {loading ? <div className="crud-empty">Loading…</div> : record && mode === 'view' ? (
           <div className="crud-panel"><div className="crud-mobile-fields" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', padding: 20, gap: 16 }}>{fields.map((field) => <div key={field.name}><span>{field.label}</span><b>{formatCell(record[field.name], field.type)}</b></div>)}</div></div>
         ) : record && mode === 'delete' ? (
@@ -178,7 +181,7 @@ export function CrudResourcePage({ title, subtitle, service, fields, columns, ad
       </div>
       {resolvedStats.length > 0 && <div className="crud-stats">{resolvedStats.map((stat) => <div className="crud-stat" key={stat.label}><span>{stat.label}</span><strong>{stat.value}</strong></div>)}</div>}
       <div className="crud-toolbar"><label className="crud-search"><Search size={17}/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={searchPlaceholder}/></label><span className="crud-count">{filtered.length} records</span></div>
-      {error && <div className="crud-error">{error}</div>}
+      {error && <div className="crud-error" role="alert">{error}</div>}
       <div className="crud-panel">
         {loading ? <div className="crud-empty">Loading…</div> : filtered.length === 0 ? <div className="crud-empty">No records found.</div> : <>
           <div className="crud-table-wrap"><table className="crud-table"><thead><tr>{columns.map((column) => <th key={column.key}>{column.label}</th>)}<th>Actions</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.id}>{columns.map((column) => <td key={column.key}>{formatCell(row[column.key], column.type)}</td>)}<td><div className="crud-row-actions"><button type="button" onClick={() => navigate(`${basePath}/${row.id}`)} aria-label="View record"><Eye size={16}/></button><button type="button" onClick={() => navigate(`${basePath}/${row.id}/edit`)} aria-label="Edit record"><Edit3 size={16}/></button><button type="button" className="danger" onClick={() => navigate(`${basePath}/${row.id}/delete`)} aria-label="Delete record"><Trash2 size={16}/></button></div></td></tr>)}</tbody></table></div>
