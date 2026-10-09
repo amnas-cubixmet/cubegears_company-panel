@@ -173,13 +173,13 @@ export const DailyWagePage = ({ mode = 'overview' }) => {
               </table>
             ) : mode === 'history' ? (
               <table className="dw-table">
-                <thead><tr><th>Work Date</th><th>Employee</th><th>Attendance</th><th>Applied Rate</th><th>Base Wage</th><th>Extras</th><th>Adjustments</th><th>Total</th><th>Status</th></tr></thead>
+                <thead><tr><th>Work Date</th><th>Employee</th><th>Attendance</th><th>Applied Rate</th><th>Base Wage</th><th>Extras</th><th>Adjustments</th><th>Total</th><th>Payment</th></tr></thead>
                 <tbody>{items.map((e) => <tr key={e.id}>
                   <td data-label="Date">{e.date}</td><td data-label="Employee"><button type="button" className="dw-text-link" onClick={() => navigate(`/staff/${e.employeeId}/wages`)}>{e.employeeName}</button></td>
                   <td data-label="Attendance">{e.attendance}</td><td data-label="Applied Rate">{rupees(e.dailyRate)}</td>
                   <td data-label="Base">{rupees(e.baseWage)}</td><td data-label="Extras">{rupees(e.extras)}</td>
                   <td data-label="Adjustments">{rupees(e.adjustments)}</td><td data-label="Total"><strong>{rupees(e.total)}</strong></td>
-                  <td data-label="Status"><span className="dw-ok">{e.status}</span></td>
+                  <td data-label="Payment"><span className={e.paymentStatus === 'Paid' ? 'dw-ok' : 'dw-pending'}>{e.paymentStatus || 'Unpaid'}</span></td>
                 </tr>)}</tbody>
               </table>
             ) : (
