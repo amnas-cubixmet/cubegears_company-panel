@@ -12,7 +12,7 @@ const localDate = () => {
  * Daily Wage ONLY. Kept as a small compatibility component for older callers;
  * no legacy salary, pay type, payment frequency or commission inputs.
  */
-export const EmployeePayConfigurationSheet = ({ isOpen, onClose, structure, onSave }) => {
+export const EmployeePayConfigurationSheet = ({ isOpen, onClose, structure, onSaved }) => {
   const employeeId = structure?.employee?.id || structure?.staffId || structure?.employee;
   const [rate, setRate] = useState('');
   const [effectiveFrom, setEffectiveFrom] = useState(localDate());
@@ -44,9 +44,8 @@ export const EmployeePayConfigurationSheet = ({ isOpen, onClose, structure, onSa
         effectiveFrom,
         reason: reason.trim(),
       });
-      // Optional callback signals success only; the component writes directly
-      // to the Daily Wage Ledger to avoid creating an obsolete salary plan.
-      if (typeof onSave === 'function') await onSave({ dailyWageSaved: true, employeeId, rate: saved.rate });
+      // Never dispatch the obsolete legacy compensation-plan save callback.
+      onSaved?.(saved);
       onClose?.();
     } catch (err) {
       setError(err?.message || 'Could not save daily wage rate.');
