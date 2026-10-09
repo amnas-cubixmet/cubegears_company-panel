@@ -185,3 +185,18 @@
   .cg-job-detail .job-detail-header>div:last-child button,
   .cg-job-detail .job-detail-header>div:last-child select{min-width:0;width:100%;font-size:11px!important;padding-inline:6px!important}
 }
+
+
+/* New Job Card: input values should be regular weight, not bold like labels. */
+.job-create-page .job-create-form input:not([type="checkbox"]):not([type="radio"]),
+.job-create-page .job-create-form select,
+.job-create-page .job-create-form textarea,
+.job-create-page .job-create-form select option {
+  font-weight: 400 !important;
+}
+.job-create-page .job-create-form input::placeholder,
+.job-create-page .job-create-form textarea::placeholder,
+.job-create-page .job-create-form input::-webkit-datetime-edit,
+.job-create-page .job-create-form input::-webkit-datetime-edit-fields-wrapper {
+  font-weight: 400 !important;
+}
