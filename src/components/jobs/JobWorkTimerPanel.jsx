@@ -197,7 +197,7 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
               <span>{row.staffName} · Customer labour: {money(row.labourCharge)}</span>
               {canApprove && row.workerCharge !== null && (
                 <span>Worker payment: {money(row.workerCharge)} · Labour margin: {money(Number(row.labourCharge || 0) - Number(row.workerCharge || 0))}</span>
-              )
+              )}
               <small>Status: {row.status === 'PendingApproval' ? 'Awaiting Supervisor Approval' : row.status}</small>
             </div>
             <div className="job-work-timer-duration">
