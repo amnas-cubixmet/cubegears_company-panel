@@ -110,7 +110,7 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
       setMessage('Enter a valid nonnegative labour amount.');
       return;
     }
-    const workerInput = window.prompt('Worker's fixed payment for this work (₹):', String(row.workerCharge || '0'));
+    const workerInput = window.prompt("Worker fixed payment for this work (₹):", String(row.workerCharge || '0'));
     if (workerInput === null) return;
     const workerAmount = Number(workerInput);
     if (!Number.isFinite(workerAmount) || workerAmount < 0) {
