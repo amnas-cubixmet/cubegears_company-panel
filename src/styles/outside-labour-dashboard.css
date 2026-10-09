@@ -291,5 +291,9 @@
   }
 }
 @media(max-width:380px){
-  .outside-labour-page .outside-labour-action-wrapper .dashboard-button{padding:0 10px;font-size:11px;gap:5px}
+  .outside-labour-page .outside-labour-page-actions.outside-labour-action-wrapper{gap:5px}
+  .outside-labour-page .outside-labour-action-wrapper .dashboard-button{
+    padding:0 6px;font-size:11px;gap:4px;
+  }
+  .outside-labour-page .outside-labour-action-wrapper .dashboard-button svg{width:14px;height:14px}
 }
