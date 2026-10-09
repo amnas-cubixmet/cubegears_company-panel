@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   BarChart3,
-  CalendarCheck2,
   CalendarDays,
   CalendarRange,
   ClipboardCheck,
@@ -15,7 +14,6 @@ export const attendanceManagerTabs = [
   { id: 'daily', label: 'Daily', icon: ClipboardCheck, path: '/attendance-manager/daily' },
   { id: 'calendar', label: 'Calendar', icon: CalendarDays, path: '/attendance-manager/calendar' },
   { id: 'leave-requests', label: 'Leave', icon: CalendarRange, path: '/attendance-manager/leave-requests' },
-  { id: 'leave-types', label: 'Leave Types', icon: CalendarCheck2, path: '/attendance-manager/leave-types' },
   { id: 'shifts', label: 'Shifts', icon: Clock3, path: '/attendance-manager/shifts' },
   { id: 'reports', label: 'Reports', icon: BarChart3, path: '/attendance-manager/reports' },
   { id: 'rules', label: 'Rules', icon: Settings, path: '/attendance-manager/rules' },
