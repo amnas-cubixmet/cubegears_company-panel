@@ -163,7 +163,7 @@ export const JobCreatePage = () => {
     }
   };
 
-  const inputClass = 'mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10';
+  const inputClass = 'mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm font-normal text-content outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10';
   const labelClass = 'text-xs font-semibold text-secondary';
 
   return (
