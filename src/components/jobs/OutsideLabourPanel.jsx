@@ -238,11 +238,18 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
         </form>
       )}
 
-      <div className="outside-labour-list-head"><h3>Outside Labour Records</h3><span>{rows.length} records</span></div>
+      <div className="outside-labour-list-head">
+        <div><h3>Outside Labour Records</h3><span>{rows.length} total · {visibleRows.length} shown</span></div>
+        <div className="outside-labour-list-filters" role="group" aria-label="Payment status filter">
+          {['All', 'Pending', 'Paid'].map((value) => (
+            <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={filter === value ? 'is-selected' : ''}>{value}</button>
+          ))}
+        </div>
+      </div>
       {loading ? <p className="outside-labour-empty">Loading outside labour…</p>
-        : !rows.length ? <p className="outside-labour-empty">No outside labour records. Add a worker and manual charge above.</p>
+        : !visibleRows.length ? <p className="outside-labour-empty">{rows.length ? 'No records match the selected status.' : 'No outside labour records yet. Add a worker and manual charge above.'}</p>
         : <div className="outside-labour-list">
-          {rows.map((row) => (
+          {visibleRows.map((row) => (
             <article key={row.id} className="outside-labour-entry">
               <div className="outside-labour-entry-main">
                 <strong>{row.workerName}</strong>
