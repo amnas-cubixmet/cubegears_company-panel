@@ -5,6 +5,7 @@ import { CompanyProvider } from './context/CompanyContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PayrollPeriodProvider } from './context/PayrollPeriodContext';
 import { AppErrorBoundary } from './components/feedback/AppErrorBoundary';
+import { GlobalFormValidation } from './components/common/GlobalFormValidation';
 import './api/registerSaasEndpoints';
 import { AppRoutes } from './routes/AppRoutes';
 import './routes/saasRouteRegistration';
@@ -31,11 +32,13 @@ import './styles/jobs-dashboard-alignment.css';
 import './styles/outside-labour.css';
 import './styles/jobs-ops-polish.css';
 import './styles/outside-labour-dashboard.css';
+import './styles/form-validation.css';
 
 export function App() {
   return (
     <AppErrorBoundary>
       <BrowserRouter>
+        <GlobalFormValidation />
         <ThemeProvider>
           <AuthProvider>
             <CompanyProvider>
