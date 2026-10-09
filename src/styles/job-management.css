@@ -2188,3 +2188,27 @@
 .cg-job-detail .job-inspection-checks .job-inspection-check>select{width:100%;min-width:0;min-height:42px!important;height:42px!important;padding:0 9px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:12px!important}
 .cg-job-detail .job-inspection-guide{margin:12px 0 0;padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-secondary);font-size:12px;line-height:1.5}
 @media(max-width:767px){.cg-job-detail .job-inspection-checks .job-inspection-check>select{font-size:16px!important;min-height:44px!important;height:44px!important}}
+
+/* Direct worker assignment; charges are configured per work item, not % */
+.cg-job-detail .job-worker-assignment-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}
+.cg-job-detail .job-worker-assignment-item{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2)}
+.cg-job-detail .job-worker-assignment-item>div{min-width:0}
+.cg-job-detail .job-worker-assignment-item strong{display:block;font-size:12px;color:var(--text-primary);overflow-wrap:anywhere}
+.cg-job-detail .job-worker-assignment-item span{display:block;margin-top:3px;font-size:11px;color:var(--text-muted)}
+.cg-job-detail .job-worker-assignment-item button{display:flex;align-items:center;gap:5px;min-height:36px;padding:0 10px;flex:0 0 auto;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--danger);font-size:11px;cursor:pointer}
+.cg-job-detail .job-worker-assignment-add{display:flex;align-items:end;gap:10px;margin-top:12px;max-width:100%}
+.cg-job-detail .job-worker-assignment-add label{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;font-size:12px}
+.cg-job-detail .job-worker-assignment-add select{width:100%;min-height:44px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary)}
+.cg-job-detail .job-worker-assignment-add button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 14px;border:0;border-radius:9px;background:var(--primary);color:#fff;font-size:12px;font-weight:750}
+.job-work-timer-panel .job-work-timer-form{grid-template-columns:repeat(4,minmax(0,1fr))}
+.job-work-timer-panel .job-work-timer-form>button{grid-column:1/-1}
+@media(max-width:850px){
+ .cg-job-detail .job-worker-assignment-list{grid-template-columns:1fr}
+ .job-work-timer-panel .job-work-timer-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:520px){
+ .cg-job-detail .job-worker-assignment-add{flex-direction:column;align-items:stretch}
+ .cg-job-detail .job-worker-assignment-add button{width:100%}
+ .cg-job-detail .job-worker-assignment-item{flex-wrap:wrap}
+ .job-work-timer-panel .job-work-timer-form{grid-template-columns:1fr}
+}
