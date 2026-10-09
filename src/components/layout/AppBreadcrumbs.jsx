@@ -51,6 +51,8 @@ const LABELS = {
   employees: 'Employees',
   attendance: 'Attendance',
   'salary-setup': 'Salary Setup',
+  'daily-wages': 'Daily Wages',
+  wages: 'Wage Account',
   incentives: 'Incentives',
   run: 'Run Payroll',
   'salary-structure': 'Salary Structure',
@@ -92,7 +94,8 @@ export function AppBreadcrumbs() {
 
   useEffect(() => {
     let alive = true;
-    const match = location.pathname.match(/^\/staff-management\/staff\/([^/]+)$/);
+    const match = location.pathname.match(/^\/staff-management\/staff\/([^/]+)$/)
+      || location.pathname.match(/^\/staff\/([^/]+)\/wages$/);
 
     if (!match) {
       setStaffBreadcrumbLabel('');
@@ -127,6 +130,15 @@ export function AppBreadcrumbs() {
       segments.length === 3 &&
       segments[0] === 'staff-management' &&
       segments[1] === 'staff';
+
+    if (segments.length === 3 && segments[0] === 'staff' && segments[2] === 'wages') {
+      return [
+        { label: 'Home', href: '/dashboard', current: false, home: true },
+        { label: 'Staff Management', href: '/staff-management/staff', current: false },
+        { label: staffBreadcrumbLabel || 'Staff Profile', href: `/staff-management/staff/${segments[1]}`, current: false },
+        { label: 'Wage Account', href: location.pathname, current: true },
+      ];
+    }
 
     return [
       { label: 'Home', href: '/dashboard', current: false, home: true },
