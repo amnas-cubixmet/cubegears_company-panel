@@ -160,9 +160,12 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   return (
     <section className="outside-labour-panel">
       <header className="outside-labour-header">
-        <div>
-          <h2>Outside Labour · Freelance / Part Work</h2>
-          <p>Enter an outside worker manually. No staff profile, attendance, salary or payroll is created.</p>
+        <div className="outside-labour-header-copy">
+          <span className="outside-labour-title-icon" aria-hidden="true"><HardHat size={19}/></span>
+          <div>
+            <h2>Outside Labour</h2>
+            <p>Freelance and part-work payments — no staff account or payroll setup required.</p>
+          </div>
         </div>
         <button className="outside-labour-refresh" type="button" onClick={refresh} disabled={saving || loading}>
           <RefreshCcw size={15}/> Refresh
