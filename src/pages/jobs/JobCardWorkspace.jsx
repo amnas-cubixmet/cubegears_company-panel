@@ -22,7 +22,7 @@ import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
-import { JobPayrollAssignments } from '../../components/jobs/JobPayrollAssignments';
+import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 
@@ -986,11 +986,11 @@ export function JobCardWorkspace() {
 
       {activeTab === 'work' && (
         <div className="job-work-payroll-stack">
-          <JobPayrollAssignments
+          <JobWorkerAssignments
             key={timerRefreshVersion}
             jobId={job.id}
             staff={staff}
-            defaultLabourRevenue={labourTotal}
+            onChanged={() => setTimerRefreshVersion((value) => value + 1)}
           />
 
           <JobWorkTimerPanel
