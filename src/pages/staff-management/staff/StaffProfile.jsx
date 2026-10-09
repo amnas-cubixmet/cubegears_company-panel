@@ -746,6 +746,11 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
         {activeTab === 'Payroll' && (
           <div className="staff360-tab-stack">
+            {canViewPayroll && (
+              <button type="button" className="dw-button is-primary" onClick={() => navigate(`/staff/${staff.id}/wages`)}>
+                <WalletCards size={16} /> Open Daily Wage Account
+              </button>
+            )}
             {canViewPayroll || isOwnProfile ? (
               <>
                 <div className="staff360-pay-config-command">
