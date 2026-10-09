@@ -5,7 +5,7 @@ export const Input = forwardRef(function Input({ label, error, helper, success, 
   const generatedId = useId();
   const inputId = id || generatedId;
   const message = error || success || helper;
-  return <div className={`flex w-full min-w-0 flex-col gap-1.5 ${className}`.trim()} style={containerStyle}>
+  return <div data-cg-input-wrapper className={`flex w-full min-w-0 flex-col gap-1.5 ${className}`.trim()} style={containerStyle}>
     {label && <Label htmlFor={inputId} required={required}>{label}</Label>}
     <div className={`flex min-h-11 w-full min-w-0 items-center gap-2 rounded-xl border bg-[var(--field-bg)] px-3 transition focus-within:bg-[var(--field-focus-bg)] focus-within:ring-2 focus-within:ring-primary/15 ${error ? 'border-danger' : success ? 'border-success' : 'border-line focus-within:border-primary'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}>
       {Icon && <Icon size={17} className="shrink-0 text-muted" aria-hidden="true" />}
