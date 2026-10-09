@@ -524,14 +524,25 @@ Object.assign(payrollService, {
     const rows = await apiClient.get('/payroll/job-timer-assignments', { params: { job } });
     return Array.isArray(rows) ? rows : rows?.results || [];
   },
+  createJobTimerAssignment: async (job, employee) => {
+    if (USE_MOCK_API) throw new Error('Connect the workshop backend to assign mechanics.');
+    return apiClient.post('/payroll/job-timer-assignments', { job, employee });
+  },
+  deleteJobTimerAssignment: async (id) => {
+    if (USE_MOCK_API) throw new Error('Connect the workshop backend to remove mechanics.');
+    return apiClient.delete(`/payroll/job-timer-assignments/${id}`);
+  },
   getJobWorkSessions: async (filters = {}) => {
     if (USE_MOCK_API) return [];
     const rows = await apiClient.get('/payroll/work-sessions', { params: filters });
     return Array.isArray(rows) ? rows : rows?.results || [];
   },
-  startJobWork: async (assignment, serviceName, labourCharge = 0) => {
+  startJobWork: async (assignment, serviceName, labourCharge = 0, workerCharge) => {
     if (USE_MOCK_API) throw new Error('Connect the Django API to track live Job Card work.');
-    return apiClient.post('/payroll/work-sessions/start', { assignment, serviceName, labourCharge });
+    return apiClient.post('/payroll/work-sessions/start', {
+      assignment, serviceName, labourCharge,
+      ...(workerCharge !== undefined ? { workerCharge } : {}),
+    });
   },
   updateJobWorkSession: async (id, action, data = {}) => {
     if (USE_MOCK_API) throw new Error('Connect the Django API to track live Job Card work.');
