@@ -26,6 +26,7 @@ import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments
 import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
+import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -676,6 +677,7 @@ export function JobCardWorkspace() {
 
   return (
     <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-4">
+      <JobBreadcrumbs current={TABS.find(([key]) => key === activeTab)?.[1] || "Overview"} jobLabel={jobDisplayLabel(job)} jobId={job.id} />
       <header className="job-detail-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="min-w-0">
