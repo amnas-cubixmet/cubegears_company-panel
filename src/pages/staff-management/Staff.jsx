@@ -147,6 +147,7 @@ export const Staff = () => {
               payPlan={currentPlans.get(String(staff.id))}
               canViewPay={canViewPayroll || canManagePayroll}
               onConfigurePay={canManagePayroll ? () => setPayTarget(staff) : undefined}
+              onOpenWages={canViewPayroll ? () => navigate(`/staff/${staff.id}/wages`) : undefined}
             />
           ))}
         </div>
