@@ -143,7 +143,6 @@ export const staffService = {
         joiningDate: staffData.joiningDate || null,
         employmentStatus: staffData.employmentStatus || 'Active',
         emergencyContact: staffData.emergencyContact || '',
-        paymentType: normalizePaymentType(staffData.paymentType),
         address: staffData.address || '',
         notes: staffData.notes || '',
         teamId: staffData.teamId || null,
@@ -152,37 +151,23 @@ export const staffService = {
       };
       const created = await apiClient.post('/employees', payload);
 
-      if (staffData.setSalaryNow && staffData.salarySetup) {
-        const salary = staffData.salarySetup;
-        await apiClient.post('/payroll/compensation-plans', {
-          employee: created.id,
-          paymentType: normalizePaymentType(salary.paymentType || staffData.paymentType),
-          baseSalary: Number(salary.baseSalary || salary.basicSalary || 0),
-          dailyWageRate: Number(salary.dailyWageRate || 0),
-          hourlyWageRate: Number(salary.hourlyWageRate || 0),
-          commissionType: salary.commissionType || 'none',
-          commissionPercentage: Number(salary.commissionPercentage || 0),
-          commissionFixedAmount: Number(salary.commissionFixedAmount || 0),
-          eligibleRevenueBasis: salary.eligibleRevenueBasis || 'labour_revenue',
-          overtimeEligibility: salary.overtimeEligibility !== false,
-          incentiveEligibility: salary.incentiveEligibility !== false,
-          bonusRules: {
-            fixedAmount: Number(salary.fixedIncentive || 0),
-          },
-          applicableDeductions: Number(salary.deductions || 0) > 0
-            ? [{
-                code: 'INITIAL_DEDUCTION',
-                name: 'Initial configured deduction',
-                amount: Number(salary.deductions || 0),
-              }]
-            : [],
-          effectiveDate:
-            salary.effectiveDate || new Date().toISOString().slice(0, 10),
-          paymentFrequency: salary.paymentFrequency || 'monthly',
-          approvalStatus: 'Approved',
-          isActive: true,
-          notes: salary.notes || '',
-        });
+      const employee = normalizeStaff(created);
+      if (staffData.setSalaryNow && staffData.salarySetup?.dailyWageRate) {
+        try {
+          const { dailyWageService } = await import('./dailyWage.service');
+          await dailyWageService.addRate(created.id, {
+            rate: String(staffData.salarySetup.dailyWageRate),
+            effectiveFrom: staffData.salarySetup.effectiveDate,
+            reason: 'Initial daily wage rate on staff creation',
+          });
+        } catch (error) {
+          // Employee creation succeeded: never report it as a failed create,
+          // otherwise retrying would create a duplicate staff member.
+          return {
+            ...employee,
+            wageSetupError: error?.message || 'Daily wage rate was not saved. Configure it in the Wage Account.',
+          };
+        }
       }
       return normalizeStaff(created);
     }
@@ -214,27 +199,7 @@ export const staffService = {
         });
         mockStaffList.unshift(newStaff);
 
-        if (staffData.setSalaryNow && staffData.salarySetup) {
-          const { payrollService } = await import('./payroll.service');
-          await payrollService.saveSalaryStructure({
-            staffId: newId,
-            staffName: newStaff.name,
-            paymentType: normalizePaymentType(staffData.salarySetup.paymentType || staffData.paymentType),
-            baseSalary: Number(staffData.salarySetup.baseSalary || staffData.salarySetup.basicSalary || 0),
-            dailyWageRate: Number(staffData.salarySetup.dailyWageRate || 0),
-            hourlyWageRate: Number(staffData.salarySetup.hourlyWageRate || 0),
-            commissionType: staffData.salarySetup.commissionType || 'none',
-            commissionPercentage: Number(staffData.salarySetup.commissionPercentage || 0),
-            commissionFixedAmount: Number(staffData.salarySetup.commissionFixedAmount || 0),
-            eligibleRevenueBasis: staffData.salarySetup.eligibleRevenueBasis || 'labour_revenue',
-            fixedIncentives: Number(staffData.salarySetup.fixedIncentive || 0),
-            effectiveDate:
-              staffData.salarySetup.effectiveDate ||
-              new Date().toISOString().split('T')[0],
-            notes: staffData.salarySetup.notes || '',
-          });
-        }
-
+        // Mock staff records never create legacy monthly compensation plans.
         resolve(normalizeStaff(newStaff));
       }, 200);
     });
