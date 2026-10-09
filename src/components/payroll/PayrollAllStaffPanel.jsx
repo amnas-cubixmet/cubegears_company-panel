@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import { Search, Users } from 'lucide-react';
-import { payTypeLabel } from './payTypes';
 
 const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 0,
@@ -59,7 +58,7 @@ export const PayrollAllStaffPanel = ({
       <header className="payroll-all-staff__header">
         <div>
           <h2><Users size={17} /> {title}</h2>
-          <p>Payment structure and calculated earnings for {periodString}. Staff without a payroll run remain visible.</p>
+          <p>Staff wage details and calculated earnings for {periodString}. Staff without a payroll run remain visible.</p>
         </div>
         <strong className="payroll-all-staff__count">{rows.length} / {employees.length} staff</strong>
       </header>
@@ -98,7 +97,7 @@ export const PayrollAllStaffPanel = ({
           <table>
             <thead>
               <tr>
-                <th>Staff</th><th>Status</th><th>Pay Type</th><th>Pay Basis</th><th>Approved Work Charges</th>
+                <th>Staff</th><th>Status</th><th>Pay Basis</th><th>Approved Work Charges</th>
                 <th>Gross Earnings</th><th>Net Pay</th><th>Paid</th><th>Balance</th><th>Action</th>
               </tr>
             </thead>
@@ -110,7 +109,6 @@ export const PayrollAllStaffPanel = ({
                     <small>{employee.employeeId || employee.id} · {employee.designation || employee.role || 'Staff'}</small>
                   </td>
                   <td>{employee.employmentStatus || 'Not set'}</td>
-                  <td>{plan ? payTypeLabel(plan.paymentType) : employee.paymentType ? payTypeLabel(employee.paymentType) + ' (setup pending)' : 'Not configured'}</td>
                   <td>{rateLabel(plan)}</td>
                   <td>{workChargeLabel(plan, payroll)}</td>
                   <td>{payroll ? money(payroll.grossSalary ?? payroll.gross) : 'Not calculated'}</td>
