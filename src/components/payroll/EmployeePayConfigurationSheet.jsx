@@ -47,7 +47,7 @@ const initialForm = (structure) => {
       : '',
     effectiveDate: editingExisting ? today() : (structure?.effectiveDate || today()),
     effectiveTo: '',
-    paymentFrequency: structure?.paymentFrequency || 'monthly',
+    paymentFrequency: 'daily', // Daily wage accrual only; payouts can be settled on any date.
     approvalStatus: structure?.approvalStatus || 'Approved',
     notes: structure?.notes || '',
     components: Array.isArray(structure?.components) && structure.components.length
@@ -136,6 +136,7 @@ export const EmployeePayConfigurationSheet = ({
       );
       await onSave({
         ...form,
+        paymentFrequency: 'daily',
         // A same-day change can update an unused plan. A later effective
         // date creates a new revision; used plans are protected by the API.
         id: updateExistingPlan ? form.originalPlanId : undefined,
@@ -268,12 +269,10 @@ export const EmployeePayConfigurationSheet = ({
 
           <label className="pay-config-field">
             <span>Payment Frequency</span>
-            <select value={form.paymentFrequency} onChange={(e) => set('paymentFrequency', e.target.value)}>
-              <option value="monthly">Monthly</option>
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Bi-weekly</option>
-              <option value="daily">Daily settlement</option>
+            <select value="daily" disabled aria-label="Payment Frequency">
+              <option value="daily">Daily</option>
             </select>
+            <small>Wages accrue daily. Pay the outstanding balance whenever required.</small>
           </label>
 
           <label className="pay-config-field">
