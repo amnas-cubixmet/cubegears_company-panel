@@ -230,7 +230,7 @@ export const OutsideLabourPanel = ({
               </button>
             )}
           </div>
-        )>
+        )}
       </header>
 
       <div className="dashboard-stats outside-labour-stats" aria-label="Outside Labour financial summary">
