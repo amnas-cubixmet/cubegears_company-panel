@@ -13,7 +13,6 @@ import { AttendanceManager } from '../pages/attendance/AttendanceManager';
 import { StaffAttendanceDetails } from '../pages/attendance-manager/StaffAttendanceDetails';
 import { StaffManagement } from '../pages/employees/StaffManagement';
 import { StaffProfile } from '../pages/staff-management/staff/StaffProfile';
-import { Payroll } from '../pages/staff-management/Payroll';
 import { DailyWagePage } from '../pages/payroll/DailyWagePage';
 import { DailyWageAccountPage } from '../pages/payroll/DailyWageAccountPage';
 import { CustomerList } from '../pages/customers/CustomerList';
@@ -106,22 +105,22 @@ export const AppRoutes = () => (
       <Route path="/staff-management/performance" element={<StaffManagement />} />
       <Route path="/staff-management/documents" element={<StaffManagement />} />
       <Route path="/staff-management/reports" element={<StaffManagement />} />
-      <Route path="/staff-management/payroll" element={<Navigate to="/payroll" replace />} />
-      <Route path="/payroll" element={<Payroll section="overview" />} />
+      <Route path="/staff-management/payroll" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll" element={<Navigate to="/payroll/daily-wages" replace />} />
       <Route path="/payroll/daily-wages" element={<DailyWagePage mode="overview" />} />
       <Route path="/payroll/daily-wages/history" element={<DailyWagePage mode="history" />} />
       <Route path="/payroll/payments" element={<DailyWagePage mode="payments" />} />
       <Route path="/staff/:id/wages" element={<DailyWageAccountPage />} />
-      <Route path="/payroll/employees" element={<Payroll section="employees" />} />
-      <Route path="/payroll/attendance" element={<Payroll section="attendance" />} />
-      <Route path="/payroll/incentives" element={<Payroll section="incentives" />} />
-      <Route path="/payroll/overtime" element={<Payroll section="overtime" />} />
-      <Route path="/payroll/advances" element={<Payroll section="advances" />} />
-      <Route path="/payroll/reports" element={<Payroll section="reports" />} />
+      <Route path="/payroll/employees" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/attendance" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/incentives" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/overtime" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/advances" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/reports" element={<Navigate to="/payroll/daily-wages/history" replace />} />
 
-      <Route path="/payroll/monthly" element={<Navigate to="/payroll" replace />} />
-      <Route path="/payroll/approvals" element={<Navigate to="/payroll" replace />} />
-      <Route path="/payroll/disbursal" element={<Navigate to="/payroll" replace />} />
+      <Route path="/payroll/monthly" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/approvals" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/disbursal" element={<Navigate to="/payroll/daily-wages" replace />} />
 
       <Route path="/customers" element={<Navigate to="/customers/overview" replace />} />
       <Route path="/customers/overview" element={<CustomerManagement section="overview" />} />
