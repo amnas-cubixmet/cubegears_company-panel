@@ -5,8 +5,7 @@ import {
   StaffDirectoryToolbar,
 } from '../../components/staff-management';
 import { getEmployeeLabel } from '../../components/staff-management/staffDisplay';
-import { EmployeePayConfigurationSheet } from '../../components/payroll/EmployeePayConfigurationSheet';
-import { payrollService } from '../../services/payroll.service';
+import { dailyWageService } from '../../services/dailyWage.service';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import { staffService } from '../../services/staff.service';
@@ -19,7 +18,6 @@ export const Staff = () => {
   const canEditStaff = hasPermission(user, 'staff.edit');
   const [staffList, setStaffList] = useState([]);
   const [payPlans, setPayPlans] = useState([]);
-  const [payTarget, setPayTarget] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('All');
@@ -46,10 +44,10 @@ export const Staff = () => {
   const loadPayPlans = async () => {
     if (!canViewPayroll && !canManagePayroll) return;
     try {
-      const plans = await payrollService.getSalaryStructures();
-      setPayPlans(Array.isArray(plans) ? plans : plans?.results || []);
+      const ledger = await dailyWageService.dashboard();
+      setPayPlans(Array.isArray(ledger?.employees) ? ledger.employees : []);
     } catch (error) {
-      console.error('Unable to load staff pay types', error);
+      console.error('Unable to load staff daily wage rates', error);
       setPayPlans([]);
     }
   };
@@ -58,18 +56,9 @@ export const Staff = () => {
     loadPayPlans();
   }, [canViewPayroll, canManagePayroll]);
 
-  const currentPlans = useMemo(() => {
-    const date = new Date();
-    const today = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-    const plans = [...payPlans]
-      .filter((plan) => {
-        const from = plan.effectiveDate || plan.effective_from || '';
-        const through = plan.effectiveTo || plan.effective_to || '';
-        return (!from || from <= today) && (!through || through >= today) && plan.isActive !== false;
-      })
-      .sort((a, b) => String(b.effectiveDate || '').localeCompare(String(a.effectiveDate || '')));
-    return new Map(plans.map((plan) => [String(plan.staffId || plan.employee), plan]).reverse());
-  }, [payPlans]);
+  const currentPlans = useMemo(() => new Map(
+    payPlans.map((row) => [String(row.id), { dailyRate: row.dailyRate }]),
+  ), [payPlans]);
 
   const filteredStaff = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -98,17 +87,6 @@ export const Staff = () => {
     });
   }, [staffList, search, selectedBranch, selectedStatus]);
 
-  const handleSavePay = async (payload) => {
-    if (!canManagePayroll || !payTarget) return;
-    await payrollService.saveSalaryStructure({
-      ...payload,
-      employee: payTarget.id,
-      staffId: payTarget.id,
-      staffName: payTarget.name,
-    });
-    setPayTarget(null);
-    await loadPayPlans();
-  };
 
   const handleToggleStatus = async (id) => {
     try {
@@ -146,7 +124,7 @@ export const Staff = () => {
               onToggleStatus={canEditStaff ? () => handleToggleStatus(staff.id) : undefined}
               payPlan={currentPlans.get(String(staff.id))}
               canViewPay={canViewPayroll || canManagePayroll}
-              onConfigurePay={canManagePayroll ? () => setPayTarget(staff) : undefined}
+              onConfigurePay={undefined}
               onOpenWages={canViewPayroll ? () => navigate(`/staff/${staff.id}/wages`) : undefined}
             />
           ))}
@@ -155,20 +133,7 @@ export const Staff = () => {
         <div className="staff-workshop-empty">No staff matched your filters.</div>
       )}
 
-      {canManagePayroll && payTarget && (
-        <EmployeePayConfigurationSheet
-          isOpen={Boolean(payTarget)}
-          onClose={() => setPayTarget(null)}
-          structure={{
-            ...(currentPlans.get(String(payTarget.id)) || {}),
-            paymentType: currentPlans.get(String(payTarget.id))?.paymentType || payTarget.paymentType || 'monthly',
-            staffId: payTarget.id,
-            staffName: payTarget.name,
-            employee: payTarget,
-          }}
-          onSave={handleSavePay}
-        />
-      )}
+
     </div>
   );
 };
