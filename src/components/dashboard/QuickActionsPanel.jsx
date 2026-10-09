@@ -7,6 +7,7 @@ import {
   PackageSearch,
   Plus,
   ReceiptText,
+  HardHat,
   UserPlus,
   Wrench,
 } from 'lucide-react';
@@ -18,6 +19,7 @@ const actions = [
   ['Create Invoice', '/invoices/new', FileText, 'invoices.create'],
   ['Record Payment', '/payments/new', CreditCard, 'payments.create'],
   ['Add Expense', '/expenses/new', ReceiptText, 'expenses.create'],
+  ['Add Outside Labour', '/jobs/outside-labour', HardHat, 'expenses.create'],
   ['Stock Issue', '/stock/movements', PackageSearch, 'stock.create'],
   ['Add Vehicle', '/vehicles/new', Car, 'vehicles.create'],
   ['Service Catalog', '/services', Plus, 'services.view'],
