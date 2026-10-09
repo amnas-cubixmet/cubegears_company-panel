@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, ClipboardList, HardHat, Plus, RefreshCcw, TrendingUp, Trash2, Wallet } from 'lucide-react';
+import { CheckCircle2, ClipboardList, HardHat, Plus, RefreshCcw, Search, TrendingUp, Trash2, Wallet, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import { outsideLabourService } from '../../services/outsideLabour.service';
@@ -41,6 +41,8 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(Boolean(jobId));
   const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
   const refresh = async () => {
@@ -57,6 +59,7 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   };
   useEffect(() => {
     setForm(blank(jobId));
+    setShowForm(Boolean(jobId));
     refresh();
   }, [jobId, canView]);
 
@@ -68,7 +71,15 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
     return value;
   }, { customer: 0, worker: 0, pending: 0, paid: 0 }), [rows]);
 
-  const visibleRows = useMemo(() => rows.filter((row) => filter === 'All' || row.status === filter), [rows, filter]);
+  const visibleRows = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return rows.filter((row) => (
+      (filter === 'All' || row.status === filter)
+      && (!term || [
+        row.workerName, row.workerPhone, row.workDescription, row.jobNumber, row.vehicleReg,
+      ].some((field) => String(field || '').toLowerCase().includes(term)))
+    ));
+  }, [rows, filter, search]);
 
   const save = async (event) => {
     event.preventDefault();
@@ -107,6 +118,7 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
         setNotice('Outside labour saved as Pending. Pay when money is actually given.');
       }
       setForm(blank(jobId));
+      setShowForm(Boolean(jobId));
       await refresh();
       onChanged?.();
     } catch (err) {
