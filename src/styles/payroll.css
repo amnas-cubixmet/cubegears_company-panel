@@ -2767,7 +2767,7 @@
 .payroll-all-staff__toolbar select{width:100%;min-width:0;height:42px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);font:inherit;font-size:13px}
 .payroll-all-staff__scroll{max-width:100%;overflow-x:auto;scrollbar-width:none}
 .payroll-all-staff__scroll::-webkit-scrollbar{display:none}
-.payroll-all-staff table{width:100%;min-width:1020px;border-collapse:collapse}
+.payroll-all-staff table{width:100%;min-width:920px;border-collapse:collapse}
 .payroll-all-staff th{padding:12px;text-align:left;color:var(--text-muted);background:var(--surface-2);font-size:11px;font-weight:700;white-space:nowrap}
 .payroll-all-staff td{padding:12px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:12px;vertical-align:middle}
 .payroll-all-staff td:first-child strong{display:block;color:var(--text-primary);font-size:13px}
