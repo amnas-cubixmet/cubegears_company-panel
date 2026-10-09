@@ -27,7 +27,6 @@ import {
   StaffAttendanceCalendar,
   StaffAvatar,
   StaffDocumentAddSheet,
-  StaffPayrollHistory,
   StaffProfileEditSheet,
 } from '../../../components/staff-management';
 import { getEmployeeLabel } from '../../../components/staff-management/staffDisplay';
@@ -36,7 +35,6 @@ import { USE_MOCK_API } from '../../../api/apiConfig';
 import { hasPermission } from '../../../utils/permissions';
 import { attendanceManagerService } from '../../../services/attendanceManager.service';
 import { jobService } from '../../../services/job.service';
-import { payrollService } from '../../../services/payroll.service';
 import { roleService } from '../../../services/role.service';
 import { staffService } from '../../../services/staff.service';
 import { staffManagementService } from '../../../services/staffManagement.service';
@@ -185,12 +183,9 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   const [documents, setDocuments] = useState([]);
   const [activities, setActivities] = useState([]);
   const [jobs, setJobs] = useState([]);
-  const [payrolls, setPayrolls] = useState([]);
-  const [salaryStructure, setSalaryStructure] = useState(null);
 
   const [attendanceMonth, setAttendanceMonth] = useState(currentMonthValue());
   const [attendanceCalendar, setAttendanceCalendar] = useState(null);
-  const [payrollMonth, setPayrollMonth] = useState('All');
 
   const [editOpen, setEditOpen] = useState(false);
   const [documentOpen, setDocumentOpen] = useState(false);
@@ -226,12 +221,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
       staffManagementService.getDocuments(),
       staffService.getActivities(profile.id),
       jobService.getJobs(),
-      canViewPayroll || isOwnProfile
-        ? payrollService.getPayrolls({ staffId: profile.id })
-        : Promise.resolve([]),
-      canViewPayroll || isOwnProfile
-        ? payrollService.getSalaryStructures()
-        : Promise.resolve([]),
     ];
 
     const results = await Promise.allSettled(tasks);
@@ -291,15 +280,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
       );
     }
 
-    const payrollRows = Array.isArray(value(7)) ? value(7) : [];
-    setPayrolls(payrollRows);
-
-    const structures = Array.isArray(value(8)) ? value(8) : [];
-    setSalaryStructure(
-      structures.find((row) =>
-        String(row.staffId || row.employee) === String(profile.id),
-      ) || null,
-    );
   };
 
   const refreshAll = async () => {
