@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Plus, RefreshCcw, Trash2 } from 'lucide-react';
+import { CheckCircle2, ClipboardList, HardHat, Plus, RefreshCcw, TrendingUp, Trash2, Wallet } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import { outsideLabourService } from '../../services/outsideLabour.service';
@@ -40,6 +40,7 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [filter, setFilter] = useState('All');
   const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
 
   const refresh = async () => {
@@ -66,6 +67,8 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
     else value.pending += Number(row.workerCharge || 0);
     return value;
   }, { customer: 0, worker: 0, pending: 0, paid: 0 }), [rows]);
+
+  const visibleRows = useMemo(() => rows.filter((row) => filter === 'All' || row.status === filter), [rows, filter]);
 
   const save = async (event) => {
     event.preventDefault();
