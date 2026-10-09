@@ -7,11 +7,9 @@ import {
   ShieldCheck,
   UserRound,
   WalletCards,
-  Pencil,
 } from 'lucide-react';
 import { StaffAvatar } from './StaffAvatar';
 import { getEmployeeLabel } from './staffDisplay';
-import { payTypeLabel } from '../payroll/payTypes';
 
 const tone = (status = '') => {
   if (status === 'Active') return 'success';
@@ -26,7 +24,6 @@ export const StaffDirectoryCard = ({
   onToggleStatus,
   payPlan,
   canViewPay = false,
-  onConfigurePay,
   onOpenWages,
 }) => (
   <article className="staff-directory-card" onClick={onOpen}>
@@ -53,11 +50,9 @@ export const StaffDirectoryCard = ({
         <span className="staff-directory-paytype">
           <WalletCards size={13} />
           <span>
-            {payPlan
-              ? payTypeLabel(payPlan.paymentType)
-              : staff.paymentType
-                ? payTypeLabel(staff.paymentType) + ' · Set up pay'
-                : 'Pay not configured'}
+            {payPlan?.dailyRate
+              ? `Daily Wage · ₹${Number(payPlan.dailyRate).toLocaleString('en-IN')}/day`
+              : 'Daily wage not configured'}
           </span>
         </span>
       )}
@@ -98,20 +93,6 @@ export const StaffDirectoryCard = ({
         >
           <WalletCards size={13} />
           Daily Wages
-        </button>
-      )}
-
-      {onConfigurePay && (
-        <button
-          type="button"
-          className="staff-pay-config-button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onConfigurePay();
-          }}
-        >
-          <Pencil size={13} />
-          {payPlan ? 'Change Pay' : 'Set Pay'}
         </button>
       )}
 
