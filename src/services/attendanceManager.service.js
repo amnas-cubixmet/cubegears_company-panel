@@ -4,7 +4,6 @@ import {
   mockManagerApprovals,
   mockTeamAttendance,
   mockMasterLedger,
-  mockLeaveTypesList,
   mockHolidaysList,
   mockAttendanceRulesConfig
 } from '../mock/attendanceManager.mock';
@@ -102,56 +101,6 @@ export const getMasterRecords = async (params) => {
     return Promise.resolve([...mockMasterLedger]);
   }
   return apiClient.get('/attendance-manager/master', { params });
-};
-
-export const getLeaveTypes = async () => {
-  if (USE_MOCK_API) {
-    await delay();
-    return Promise.resolve([...mockLeaveTypesList]);
-  }
-  return apiClient.get('/attendance-manager/leave-types');
-};
-
-export const createLeaveType = async (payload) => {
-  if (USE_MOCK_API) {
-    await delay();
-    const monthly = payload.allocationMethod === 'monthly';
-    const newRecord = {
-      id: `LT-0${mockLeaveTypesList.length + 1}`,
-      name: payload.name,
-      code: payload.code,
-      type: 'Paid',
-      allocationMethod: payload.allocationMethod || 'annual',
-      annualAllocation: Number(payload.annualAllocation || 0),
-      monthlyAllocation: Number(payload.monthlyAllocation || 0),
-      allocation: monthly
-        ? `${payload.monthlyAllocation || 0} Days / Month`
-        : `${payload.annualAllocation || 0} Days / Year`,
-      halfDay: payload.halfDay !== undefined ? payload.halfDay : true,
-      carryForward: payload.carryForward || `${payload.maxCarryForward || 0} Days`,
-      maxCarryForward: Number(payload.maxCarryForward || 0),
-      status: payload.status || 'Active'
-    };
-    mockLeaveTypesList.push(newRecord);
-    return Promise.resolve(newRecord);
-  }
-  return apiClient.post('/attendance-manager/leave-types', payload);
-};
-
-export const updateLeaveType = async (id, payload) => {
-  if (USE_MOCK_API) {
-    await delay();
-    const index = mockLeaveTypesList.findIndex((item) => item.id === id);
-    if (index < 0) throw new Error('Leave type not found.');
-    const next = { ...mockLeaveTypesList[index], ...payload, type: 'Paid' };
-    next.allocation =
-      next.allocationMethod === 'monthly'
-        ? `${next.monthlyAllocation || 0} Days / Month`
-        : `${next.annualAllocation || 0} Days / Year`;
-    mockLeaveTypesList[index] = next;
-    return Promise.resolve({ ...next });
-  }
-  return apiClient.patch(`/attendance-manager/leave-types/${id}`, payload);
 };
 
 export const getHolidays = async () => {
@@ -320,9 +269,6 @@ export const attendanceManagerService = {
   createTeamAttendance,
   updateTeamAttendance,
   getMasterRecords,
-  getLeaveTypes,
-  createLeaveType,
-  updateLeaveType,
   getHolidays,
   createHoliday,
   deleteHoliday,
