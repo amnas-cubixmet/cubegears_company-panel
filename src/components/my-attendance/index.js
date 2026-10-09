@@ -7,6 +7,5 @@ export { MyAttendanceHeader } from './MyAttendanceHeader';
 export { MyAttendanceTabs } from './MyAttendanceTabs';
 export { AttendancePunchPanel } from './AttendancePunchPanel';
 export { ApplyLeaveForm } from './ApplyLeaveForm';
-export { LeaveBalanceGrid } from './LeaveBalanceGrid';
 export { LeavePageHeader } from './LeavePageHeader';
 export { LeaveRequestRecords } from './LeaveRequestRecords';
