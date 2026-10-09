@@ -91,6 +91,9 @@ export const PayrollPolicyPanel = ({ onSaved }) => {
             {PAY_TYPES.map((item) => (
               <option key={item.value} value={item.value}>{item.label}</option>
             ))}
+            {!PAY_TYPES.some((item) => item.value === policy.defaultPaymentType) && policy.defaultPaymentType && (
+              <option value={policy.defaultPaymentType}>Previous payment type (legacy setting)</option>
+            )}
           </select>
         </label>
 
