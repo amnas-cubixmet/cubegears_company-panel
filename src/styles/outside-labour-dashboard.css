@@ -231,3 +231,65 @@
   .outside-labour-dashboard .outside-labour-stat-card .stat-label{font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.outside-labour-dashboard *{transition:none!important}}
+
+
+/* Outside Labour: keep all page actions in ONE header wrapper */
+.outside-labour-page .outside-labour-page-actions.outside-labour-action-wrapper{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:nowrap;
+  gap:8px;
+  min-width:0;
+  width:auto;
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.outside-labour-page .outside-labour-page-actions.outside-labour-action-wrapper::-webkit-scrollbar{display:none}
+.outside-labour-page .outside-labour-action-wrapper .dashboard-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  min-height:42px;
+  gap:7px;
+  padding:0 13px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text-primary);
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+}
+.outside-labour-page .outside-labour-action-wrapper .dashboard-button.is-primary{
+  border-color:var(--primary);
+  background:var(--primary);
+  color:#fff;
+}
+.outside-labour-page .outside-labour-action-wrapper .dashboard-button svg{flex:0 0 auto}
+.outside-labour-page .outside-labour-action-wrapper .dashboard-button:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+@media(max-width:767px){
+  .outside-labour-page .outside-labour-page-head{align-items:flex-start}
+  .outside-labour-page .outside-labour-page-actions.outside-labour-action-wrapper{
+    width:100%;
+    justify-content:flex-start;
+    padding:2px 1px 4px;
+  }
+  .outside-labour-page .outside-labour-action-wrapper .dashboard-button{
+    flex:0 0 auto;
+    min-height:44px;
+    padding:0 11px;
+  }
+}
+@media(max-width:380px){
+  .outside-labour-page .outside-labour-action-wrapper .dashboard-button{padding:0 10px;font-size:11px;gap:5px}
+}
