@@ -3,28 +3,6 @@ import { USE_MOCK_API } from '../api/apiConfig';
 import { mockStaffList } from '../mock/staff.mock';
 import { enrichWorkshopStaff } from '../mock/staffManagement.mock';
 
-const normalizePaymentType = (value = '') => {
-  const map = {
-    'Monthly Salary': 'monthly',
-    'Fixed Monthly': 'monthly',
-    'Daily Salary': 'daily',
-    'Daily Wage': 'daily',
-    'Hourly Salary': 'hourly',
-    'Hourly Wage': 'hourly',
-    'Commission': 'commission',
-    'Commission Only': 'commission',
-    'Salary + Commission': 'monthly_commission',
-    'Monthly Salary + Commission': 'monthly_commission',
-    'Daily Wage + Commission': 'daily_commission',
-    'Hourly Wage + Commission': 'hourly_commission',
-    'Salary + Incentive': 'salary_incentive',
-    'Fixed Salary + Job Incentive': 'salary_incentive',
-    'Custom / Mixed': 'hybrid',
-    'Custom Hybrid Compensation': 'hybrid',
-  };
-  return map[value] || value || 'monthly';
-};
-
 const employeeLabel = (staff = {}) => {
   const source =
     staff.displayEmployeeNo ||
@@ -62,7 +40,6 @@ const normalizeStaff = (staff = {}) => ({
   joiningDate: staff.joiningDate || staff.joining_date || '',
   employmentStatus: staff.employmentStatus || staff.status || 'Active',
   emergencyContact: staff.emergencyContact || staff.emergency_contact || '',
-  paymentType: staff.paymentType || staff.payment_type || '',
   accountStatus: staff.accountStatus || 'Active',
   loginStatus: staff.loginStatus || 'Not Invited',
 });
