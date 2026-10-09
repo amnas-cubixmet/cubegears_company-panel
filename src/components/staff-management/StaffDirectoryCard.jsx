@@ -27,6 +27,7 @@ export const StaffDirectoryCard = ({
   payPlan,
   canViewPay = false,
   onConfigurePay,
+  onOpenWages,
 }) => (
   <article className="staff-directory-card" onClick={onOpen}>
     <header className="staff-directory-card__head">
@@ -85,6 +86,20 @@ export const StaffDirectoryCard = ({
         <Eye size={13} />
         View Profile
       </button>
+
+      {onOpenWages && (
+        <button
+          type="button"
+          className="staff-pay-config-button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenWages();
+          }}
+        >
+          <WalletCards size={13} />
+          Daily Wages
+        </button>
+      )}
 
       {onConfigurePay && (
         <button
