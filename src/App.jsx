@@ -29,6 +29,7 @@ import './styles/customer-management.css';
 import './styles/stock-management.css';
 import './styles/jobs-dashboard-alignment.css';
 import './styles/outside-labour.css';
+import './styles/jobs-ops-polish.css';
 
 export function App() {
   return (
