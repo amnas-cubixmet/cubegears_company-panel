@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Save, UserPlus, WalletCards, Wrench } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { roleService } from '../../services/role.service';
@@ -8,6 +8,7 @@ import { branchService } from '../../services/branch.service';
 import { BranchCreateSheet } from '../../components/staff-management/BranchCreateSheet';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
+import { showFormFieldError, showServerFormErrors } from '../../utils/formValidation';
 import { PAY_TYPES, hasCommission, hasDailyBase, hasHourlyBase, hasMonthlyBase } from '../../components/payroll/payTypes';
 
 const statusOptions = [
@@ -24,6 +25,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export const StaffAddPage = () => {
   const navigate = useNavigate();
+  const formRef = useRef(null);
   const { user } = useAuth();
   const canManageBranches = hasPermission(user, 'company.manage');
   const canManagePayroll = hasPermission(user, 'payroll.edit');
@@ -133,12 +135,19 @@ export const StaffAddPage = () => {
     [branches, form.branchId],
   );
 
-  const set = (key, value) =>
+  const set = (key, value) => {
+    setError('');
     setForm((current) => ({ ...current, [key]: value }));
+  };
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!form.name.trim() || !form.phone.trim() || saving) return;
+    if (saving) return;
+    if (!form.name.trim() || !form.phone.trim()) {
+      showFormFieldError(formRef.current, !form.name.trim() ? 'name' : 'phone', 'This field is required.');
+      setError('Enter the staff name and phone number.');
+      return;
+    }
 
     if (canManagePayroll && setSalaryNow) {
       const type = form.paymentType;
@@ -146,6 +155,8 @@ export const StaffAddPage = () => {
         : hasDailyBase(type) ? Number(salary.dailyWageRate)
           : hasHourlyBase(type) ? Number(salary.hourlyWageRate) : null;
       if (requiredRate !== null && (!Number.isFinite(requiredRate) || requiredRate <= 0)) {
+        const name = hasMonthlyBase(type) ? 'baseSalary' : hasDailyBase(type) ? 'dailyWageRate' : 'hourlyWageRate';
+        showFormFieldError(formRef.current, name, 'Enter a valid wage or salary greater than zero.');
         setError('Enter a valid positive salary / wage rate, or switch off Configure payment now to finish later.');
         return;
       }
@@ -154,6 +165,9 @@ export const StaffAddPage = () => {
           ? salary.commissionPercentage : salary.commissionFixedAmount);
         if (!Number.isFinite(commission) || commission <= 0 ||
           (salary.commissionType === 'percentage' && commission > 100)) {
+          showFormFieldError(formRef.current,
+            salary.commissionType === 'percentage' ? 'commissionPercentage' : 'commissionFixedAmount',
+            'Enter a valid commission amount.');
           setError('Enter a valid commission rate (1–100%) or a positive fixed commission amount.');
           return;
         }
@@ -196,6 +210,10 @@ export const StaffAddPage = () => {
           : '/staff-management/staff',
       );
     } catch (requestError) {
+      showServerFormErrors(formRef.current, requestError, {
+        employee_name: 'name', mobile: 'phone', base_salary: 'baseSalary',
+        daily_wage_rate: 'dailyWageRate', hourly_wage_rate: 'hourlyWageRate',
+      });
       setError(requestError?.message || 'Unable to create staff.');
     } finally {
       setSaving(false);
@@ -204,7 +222,7 @@ export const StaffAddPage = () => {
 
   return (
     <>
-      <form className="staff-add-page" onSubmit={submit}>
+      <form ref={formRef} className="staff-add-page" onSubmit={submit}>
       <section className="staff-add-page__header">
         <div>
           <h2>Add Staff</h2>
@@ -216,7 +234,7 @@ export const StaffAddPage = () => {
         </button>
       </section>
 
-      {error && <div className="staff-directory-message is-error">{error}</div>}
+      {error && <div className="staff-directory-message is-error" role="alert">{error}</div>}
 
       <div className="staff-add-layout">
         <div className="staff-add-main">
@@ -231,7 +249,8 @@ export const StaffAddPage = () => {
                 Full Name *
                 <input
                   required
-                  value={form.name}
+                  name="name"
+                      value={form.name}
                   onChange={(event) => set('name', event.target.value)}
                   placeholder="Staff full name"
                 />
@@ -241,7 +260,8 @@ export const StaffAddPage = () => {
                 Phone *
                 <input
                   required
-                  value={form.phone}
+                  name="phone"
+                      value={form.phone}
                   onChange={(event) => set('phone', event.target.value)}
                   placeholder="+91 ..."
                 />
@@ -251,7 +271,8 @@ export const StaffAddPage = () => {
                 Email
                 <input
                   type="email"
-                  value={form.email}
+                  name="email"
+                      value={form.email}
                   onChange={(event) => set('email', event.target.value)}
                   placeholder="name@company.com"
                 />
@@ -455,6 +476,7 @@ export const StaffAddPage = () => {
                       type="number"
                       min="0"
                       step="0.01"
+                      name="baseSalary"
                       value={salary.baseSalary}
                       onChange={(event) => setSalary((current) => ({ ...current, baseSalary: event.target.value }))}
                     />
@@ -468,6 +490,7 @@ export const StaffAddPage = () => {
                       type="number"
                       min="0"
                       step="0.01"
+                      name="dailyWageRate"
                       value={salary.dailyWageRate}
                       onChange={(event) => setSalary((current) => ({ ...current, dailyWageRate: event.target.value }))}
                     />
@@ -481,6 +504,7 @@ export const StaffAddPage = () => {
                       type="number"
                       min="0"
                       step="0.01"
+                      name="hourlyWageRate"
                       value={salary.hourlyWageRate}
                       onChange={(event) => setSalary((current) => ({ ...current, hourlyWageRate: event.target.value }))}
                     />
@@ -508,7 +532,8 @@ export const StaffAddPage = () => {
                           min="0"
                           max="100"
                           step="0.01"
-                          value={salary.commissionPercentage}
+                          name="commissionPercentage"
+                      value={salary.commissionPercentage}
                           onChange={(event) => setSalary((current) => ({ ...current, commissionPercentage: event.target.value }))}
                         />
                       </label>
@@ -519,7 +544,8 @@ export const StaffAddPage = () => {
                           type="number"
                           min="0"
                           step="0.01"
-                          value={salary.commissionFixedAmount}
+                          name="commissionFixedAmount"
+                      value={salary.commissionFixedAmount}
                           onChange={(event) => setSalary((current) => ({ ...current, commissionFixedAmount: event.target.value }))}
                         />
                       </label>
