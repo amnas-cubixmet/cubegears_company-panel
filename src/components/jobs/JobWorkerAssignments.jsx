@@ -57,8 +57,8 @@ export const JobWorkerAssignments = ({ jobId, staff = [], onChanged }) => {
         <div>
           <UsersRound size={18} />
           <div>
-            <strong>Assigned Mechanics & Workers</strong>
-            <span>Assign mechanics, painters, electricians or freelancers. Set customer and worker charges separately for each service below.</span>
+            <strong>Internal Staff Assignments</strong>
+            <span>Assign existing workshop employees here for time tracking. Freelancers and outside part-work are recorded separately in Outside Labour, without creating staff.</span>
           </div>
         </div>
         <strong>{rows.length} assigned</strong>
@@ -74,15 +74,15 @@ export const JobWorkerAssignments = ({ jobId, staff = [], onChanged }) => {
             )}
           </div>
         ))}
-        {!rows.length && <div className="job-payroll-empty">No mechanic assigned. Add a worker to begin tracking service work.</div>}
+        {!rows.length && <div className="job-payroll-empty">No internal staff assigned. Freelance labour can be added separately above.</div>}
       </div>
 
       {canEdit && (
         <form className="job-worker-assignment-add" onSubmit={add}>
           <label>
-            Add worker
+            Add staff member
             <select required value={staffId} onChange={(event) => setStaffId(event.target.value)}>
-              <option value="">Select mechanic / painter / electrician</option>
+              <option value="">Select existing staff member</option>
               {staff.filter((person) => !rows.some((row) => String(row.staffId) === String(person.id))).map((person) => (
                 <option key={person.id} value={person.id}>{person.name} · {person.designation || 'Worker'}</option>
               ))}
