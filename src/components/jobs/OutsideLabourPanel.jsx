@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ClipboardList, HardHat, Plus, RefreshCcw, Search, TrendingUp, Trash2, Wallet, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import { outsideLabourService } from '../../services/outsideLabour.service';
+import { showFormFieldError, showServerFormErrors } from '../../utils/formValidation';
 
 const formatMoney = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2,
@@ -28,6 +29,7 @@ const errorText = (error) => {
 
 export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   const { user } = useAuth();
+  const formRef = useRef(null);
   const canView = hasPermission(user, 'expenses.view');
   const canCreate = hasPermission(user, 'expenses.create');
   const canDelete = hasPermission(user, 'expenses.delete');
@@ -43,7 +45,10 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(Boolean(jobId));
-  const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }));
+  const set = (key, value) => {
+    setError('');
+    setForm((previous) => ({ ...previous, [key]: value }));
+  };
 
   const refresh = async () => {
     if (!canView) { setLoading(false); return; }
@@ -85,12 +90,17 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
     event.preventDefault();
     if (saving || !canCreate) return;
     if (!form.job || !form.workerName.trim() || !form.workDescription.trim()) {
+      const invalidField = !form.job ? 'job' : !form.workerName.trim() ? 'workerName' : 'workDescription';
+      showFormFieldError(formRef.current, invalidField, 'This field is required.');
       setError('Choose Job Card, worker name, and work description.');
       return;
     }
     const amount = Number(form.workerCharge);
     const customerAmount = Number(form.customerCharge || 0);
     if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(customerAmount) || customerAmount < 0) {
+      showFormFieldError(formRef.current,
+        !Number.isFinite(amount) || amount <= 0 ? 'workerCharge' : 'customerCharge',
+        'Enter a valid amount. Worker charge must be greater than zero.');
       setError('Enter a positive worker charge and a valid customer labour charge.');
       return;
     }
@@ -122,6 +132,11 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
       await refresh();
       onChanged?.();
     } catch (err) {
+      showServerFormErrors(formRef.current, err, {
+        worker_name: 'workerName', worker_phone: 'workerPhone',
+        work_description: 'workDescription', customer_charge: 'customerCharge',
+        worker_charge: 'workerCharge',
+      });
       setError(errorText(err));
     } finally {
       setSaving(false);
@@ -223,7 +238,7 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
 
       {canCreate && showForm && (
-        <form className="outside-labour-form operations-card" onSubmit={save}>
+        <form ref={formRef} className="outside-labour-form operations-card" onSubmit={save}>
           <div className="outside-labour-form-heading">
             <span className="outside-labour-form-icon" aria-hidden="true"><Plus size={17}/></span>
             <div>
@@ -234,7 +249,7 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
           <div className="outside-labour-form-grid">
             {!jobId && (
               <label>Job Card *
-                <select required value={form.job} onChange={(event) => set('job', event.target.value)}>
+                <select name="job" required value={form.job} onChange={(event) => set('job', event.target.value)}>
                   <option value="">Select Job Card</option>
                   {jobs.map((job) => (
                     <option key={job.id} value={job.id}>
@@ -245,19 +260,19 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
               </label>
             )}
             <label>Worker Name *
-              <input required maxLength={160} value={form.workerName} onChange={(event) => set('workerName', event.target.value)} placeholder="Outside painter / mechanic"/>
+              <input name="workerName" required maxLength={160} value={form.workerName} onChange={(event) => set('workerName', event.target.value)} placeholder="Outside painter / mechanic"/>
             </label>
             <label>Phone (optional)
-              <input type="tel" maxLength={30} value={form.workerPhone} onChange={(event) => set('workerPhone', event.target.value)} placeholder="Worker mobile"/>
+              <input name="workerPhone" type="tel" maxLength={30} value={form.workerPhone} onChange={(event) => set('workerPhone', event.target.value)} placeholder="Worker mobile"/>
             </label>
             <label>Work Description *
-              <input required maxLength={300} value={form.workDescription} onChange={(event) => set('workDescription', event.target.value)} placeholder="Bumper painting / denting"/>
+              <input name="workDescription" required maxLength={300} value={form.workDescription} onChange={(event) => set('workDescription', event.target.value)} placeholder="Bumper painting / denting"/>
             </label>
             <label>Customer Labour Charge (₹)
-              <input type="number" min="0" step="0.01" value={form.customerCharge} onChange={(event) => set('customerCharge', event.target.value)} placeholder="3500"/>
+              <input name="customerCharge" type="number" min="0" step="0.01" value={form.customerCharge} onChange={(event) => set('customerCharge', event.target.value)} placeholder="3500"/>
             </label>
             <label>Pay Worker (₹) *
-              <input required type="number" min="0.01" step="0.01" value={form.workerCharge} onChange={(event) => set('workerCharge', event.target.value)} placeholder="2000"/>
+              <input name="workerCharge" required type="number" min="0.01" step="0.01" value={form.workerCharge} onChange={(event) => set('workerCharge', event.target.value)} placeholder="2000"/>
             </label>
           </div>
           <label className="outside-labour-paid-check">
