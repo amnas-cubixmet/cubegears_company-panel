@@ -222,8 +222,8 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
       {notice && <p className="outside-labour-notice" role="status">{notice}</p>}
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
 
-      {canCreate && (
-        <form className="outside-labour-form" onSubmit={save}>
+      {canCreate && showForm && (
+        <form className="outside-labour-form operations-card" onSubmit={save}>
           <div className="outside-labour-form-heading">
             <span className="outside-labour-form-icon" aria-hidden="true"><Plus size={17}/></span>
             <div>
@@ -282,7 +282,8 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
         </form>
       )}
 
-      <div className="outside-labour-list-head">
+      <section className="outside-labour-records operations-card">
+      <div className="outside-labour-list-head operations-header">
         <div><h3>Outside Labour Records</h3><span>{rows.length} total · {visibleRows.length} shown</span></div>
         <div className="outside-labour-list-filters" role="group" aria-label="Payment status filter">
           {['All', 'Pending', 'Paid'].map((value) => (
@@ -290,9 +291,30 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
           ))}
         </div>
       </div>
+      <div className="outside-labour-record-tools">
+        <label className="outside-labour-search">
+          <Search size={17} aria-hidden="true"/>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search worker, Job Card or work"
+            aria-label="Search outside labour records"
+          />
+          {search && (
+            <button type="button" onClick={() => setSearch('')} aria-label="Clear outside labour search">
+              <X size={15}/>
+            </button>
+          )}
+        </label>
+        <div className="outside-labour-record-count" aria-live="polite">
+          {visibleRows.length} of {rows.length} records
+        </div>
+      </div>
       {loading ? <p className="outside-labour-empty">Loading outside labour…</p>
         : !visibleRows.length ? <p className="outside-labour-empty">{rows.length ? 'No records match the selected status.' : 'No outside labour records yet. Add a worker and manual charge above.'}</p>
         : <div className="outside-labour-list">
+          <div className="outside-labour-list-columns" aria-hidden="true"><span>Worker / Job</span><span>Labour Charges</span><span>Status & Actions</span></div>
           {visibleRows.map((row) => (
             <article key={row.id} className="outside-labour-entry">
               <div className="outside-labour-entry-main">
@@ -332,6 +354,7 @@ export const OutsideLabourPanel = ({ jobId, jobs = [], onChanged }) => {
             </article>
           ))}
         </div>}
+      </section>
     </section>
   );
 };
