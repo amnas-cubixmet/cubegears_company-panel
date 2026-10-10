@@ -132,7 +132,7 @@ export const JobList = () => {
     [jobs],
   );
 
-  const openJob = (id) => navigate(`/jobs/${id}/overview`);
+  const openJob = (id) => navigate(`/jobs/${id}`);
 
   return (
     <div className="jobs-dashboard">
