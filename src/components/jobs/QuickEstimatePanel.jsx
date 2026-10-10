@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, ChevronDown, ClipboardList, Pencil, Plus, ReceiptText, Trash2 } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ClipboardList, Package, Pencil, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 
-const emptyLine = () => ({
+const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
-  description: '', type: 'Service', quantity: '1', unitPrice: ''
+  description: '', type, quantity: '1', unitPrice: ''
 });
 const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2
@@ -39,7 +39,7 @@ export function QuickEstimatePanel({
   onReject, onEditInspection, onGoToWork
 }) {
   const latest = estimates.at(-1) || null;
-  const [lines, setLines] = useState([emptyLine()]);
+  const [lines, setLines] = useState([]);
   const [discount, setDiscount] = useState('0');
   const [taxPercent, setTaxPercent] = useState('0');
   const [busy, setBusy] = useState(false);
@@ -52,7 +52,7 @@ export function QuickEstimatePanel({
   useEffect(() => {
     const pricing = (latest?.items || []).find((row) => row._pricing)?._pricing;
     const previous = parseItems(latest);
-    setLines(previous.length ? previous : [emptyLine()]);
+    setLines(previous);
     setDiscount(String(pricing?.discount ?? latest?.discount ?? 0));
     setTaxPercent(String(pricing?.taxPercent ?? latest?.taxPercent ?? 0));
     setChanged(false);
@@ -60,12 +60,16 @@ export function QuickEstimatePanel({
   }, [job?.id, latest?.id, latest?.updated_at, latest?.status]);
 
   const amount = useMemo(() => {
-    const subtotal = lines.reduce((sum, line) => {
-      return sum + (Number(line.quantity) || 0) * (Number(line.unitPrice) || 0);
-    }, 0);
+    const work = lines.filter((line) => line.type !== 'Part').reduce(
+      (sum, line) => sum + (Number(line.quantity) || 0) * (Number(line.unitPrice) || 0), 0
+    );
+    const parts = lines.filter((line) => line.type === 'Part').reduce(
+      (sum, line) => sum + (Number(line.quantity) || 0) * (Number(line.unitPrice) || 0), 0
+    );
+    const subtotal = work + parts;
     const rebate = Number(discount) || 0;
     const tax = Math.max(0, subtotal - rebate) * (Number(taxPercent) || 0) / 100;
-    return { subtotal, tax, total: subtotal - rebate + tax };
+    return { work, parts, subtotal, tax, total: subtotal - rebate + tax };
   }, [lines, discount, taxPercent]);
 
   const validation = useMemo(() => {
@@ -121,6 +125,77 @@ export function QuickEstimatePanel({
       setBusy(false);
     }
   };
+  const addLine = (type) => {
+    setLines((current) => [...current, emptyLine(type)]);
+    setChanged(true);
+    setFeedback('');
+  };
+  const removeLine = (key) => {
+    setLines((current) => current.filter((line) => line.key !== key));
+    setChanged(true);
+    setFeedback('');
+  };
+  const renderItem = (line, index) => {
+    const part = line.type === 'Part';
+    return (
+      <div className="job-quick-line" key={line.key}>
+        <div className="job-quick-line-header">
+          <strong>{part ? 'Spare Part' : 'Work / Service'} {index + 1}</strong>
+          {canEdit && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => removeLine(line.key)}
+              aria-label={'Remove ' + (part ? 'part ' : 'work item ') + (index + 1)}
+              title="Remove item"
+            >
+              <Trash2 size={15} aria-hidden="true"/>
+            </button>
+          )}
+        </div>
+        <div className="job-quick-line-fields">
+          <label className="job-quick-description">
+            {part ? 'Part name' : 'Work description'}
+            <input
+              value={line.description}
+              disabled={!canEdit || busy}
+              placeholder={part ? 'e.g. Oil filter' : 'e.g. Engine oil change'}
+              onChange={(event) => edit(line.key, 'description', event.target.value)}
+            />
+          </label>
+          {part ? (
+            <span className="job-quick-type-fixed">Type <strong>Spare Part</strong></span>
+          ) : (
+            <label>Type
+              <select value={line.type} disabled={!canEdit || busy} onChange={(event) => edit(line.key, 'type', event.target.value)}>
+                <option value="Labour">Labour</option>
+                <option value="Service">Service</option>
+                <option value="Other">Other Work</option>
+              </select>
+            </label>
+          )}
+          <label>Qty
+            <input
+              type="number" min="0.01" max="10000" step="0.01" inputMode="decimal"
+              value={line.quantity} disabled={!canEdit || busy}
+              onChange={(event) => edit(line.key, 'quantity', event.target.value)}
+            />
+          </label>
+          <label>{part ? 'Unit Price (₹)' : 'Rate (₹)'}
+            <input
+              type="number" min="0" max="10000000" step="0.01" inputMode="decimal"
+              value={line.unitPrice} disabled={!canEdit || busy} placeholder="0.00"
+              onChange={(event) => edit(line.key, 'unitPrice', event.target.value)}
+            />
+          </label>
+        </div>
+        <div className="job-quick-line-total">
+          Amount <strong>{money((Number(line.quantity) || 0) * (Number(line.unitPrice) || 0))}</strong>
+        </div>
+      </div>
+    );
+  };
+
   const addInspection = () => {
     const suggestions = inspectSuggestions(findings);
     if (!suggestions.length) return;
@@ -150,54 +225,55 @@ export function QuickEstimatePanel({
       {feedback && <p className="job-quick-feedback" role="status">{feedback}</p>}
 
       <div className="job-quick-grid">
-        <section className="job-quick-panel">
+        <section className="job-quick-panel job-quick-work-parts">
           <div className="job-quick-section-head">
             <div>
               <h3>Work & Parts</h3>
-              <p>Enter the charge for each item. Changes stay unsaved until Save Draft.</p>
+              <p>Add work and spare parts separately. Enter quantity and rate to calculate the total.</p>
             </div>
-            <span className="job-quick-count">{lines.length} items</span>
+            <span className="job-quick-count">{lines.length} {lines.length === 1 ? 'item' : 'items'}</span>
           </div>
-          <div className="job-quick-items">
-            {lines.map((line, index) => (
-              <div className="job-quick-line" key={line.key}>
-                <div className="job-quick-line-header">
-                  <strong>Item {index + 1}</strong>
-                  {canEdit && <button type="button" disabled={busy || lines.length === 1}
-                    onClick={() => { setLines((all) => all.filter((item) => item.key !== line.key)); setChanged(true); }}
-                    aria-label={'Remove item ' + (index + 1)}><Trash2 size={15}/></button>}
-                </div>
-                <div className="job-quick-line-fields">
-                  <label className="job-quick-description">Description
-                    <input value={line.description} disabled={!canEdit || busy}
-                      placeholder="e.g. Engine oil change" onChange={(event) => edit(line.key, 'description', event.target.value)} />
-                  </label>
-                  <label>Type
-                    <select value={line.type} disabled={!canEdit || busy} onChange={(event) => edit(line.key, 'type', event.target.value)}>
-                      <option>Service</option><option>Labour</option><option>Part</option><option>Other</option>
-                    </select>
-                  </label>
-                  <label>Qty
-                    <input type="number" min="0.01" step="0.01" value={line.quantity}
-                      disabled={!canEdit || busy} onChange={(event) => edit(line.key, 'quantity', event.target.value)}/>
-                  </label>
-                  <label>Price (₹)
-                    <input type="number" min="0" step="0.01" value={line.unitPrice}
-                      disabled={!canEdit || busy} placeholder="0" onChange={(event) => edit(line.key, 'unitPrice', event.target.value)}/>
-                  </label>
-                </div>
-                <div className="job-quick-line-total">Amount <strong>{money((Number(line.quantity) || 0) * (Number(line.unitPrice) || 0))}</strong></div>
+
+          <section className="job-quick-item-group" aria-label="Work and labour items">
+            <div className="job-quick-group-heading">
+              <div>
+                <h4><Wrench size={16} aria-hidden="true"/> Work & Labour</h4>
+                <p>{money(amount.work)} · {lines.filter((item) => item.type !== 'Part').length} items</p>
               </div>
-            ))}
-          </div>
-          {canEdit && <div className="job-quick-add-actions">
-            <button type="button" disabled={busy} onClick={() => { setLines((all) => [...all, emptyLine()]); setChanged(true); }}>
-              <Plus size={15} aria-hidden="true"/> Add item
+              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy} onClick={() => addLine('Labour')}>
+                <Plus size={15} aria-hidden="true"/> Add Work
+              </button>}
+            </div>
+            <div className="job-quick-items">
+              {lines.filter((line) => line.type !== 'Part').map(renderItem)}
+              {!lines.some((line) => line.type !== 'Part') &&
+                <p className="job-quick-empty">No work added. Choose Add Work to enter service or labour charges.</p>}
+            </div>
+          </section>
+
+          <section className="job-quick-item-group" aria-label="Spare part items">
+            <div className="job-quick-group-heading">
+              <div>
+                <h4><Package size={16} aria-hidden="true"/> Spare Parts</h4>
+                <p>{money(amount.parts)} · {lines.filter((item) => item.type === 'Part').length} items</p>
+              </div>
+              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy} onClick={() => addLine('Part')}>
+                <Plus size={15} aria-hidden="true"/> Add Part
+              </button>}
+            </div>
+            <div className="job-quick-items">
+              {lines.filter((line) => line.type === 'Part').map(renderItem)}
+              {!lines.some((line) => line.type === 'Part') &&
+                <p className="job-quick-empty">No spare parts added. Choose Add Part to enter part prices.</p>}
+            </div>
+          </section>
+
+          {canEdit && findings.length > 0 && (
+            <button type="button" className="job-quick-import" disabled={busy} onClick={addInspection}>
+              <ClipboardList size={15} aria-hidden="true"/> Add from Inspection Findings
             </button>
-            <button type="button" disabled={busy || findings.length === 0} onClick={addInspection}>
-              <ClipboardList size={15} aria-hidden="true"/> Add from inspection
-            </button>
-          </div>}
+          )}
+          <p className="job-quick-save-note">These items are for the customer estimate. Spare parts stock is not deducted until issued through Inventory.</p>
         </section>
 
         <section className="job-quick-panel job-quick-summary">
@@ -205,6 +281,8 @@ export function QuickEstimatePanel({
             <div><h3>Estimate Total</h3><p>Final calculation</p></div>
           </div>
           <dl className="job-quick-amounts">
+            <div><dt>Work & Labour</dt><dd>{money(amount.work)}</dd></div>
+            <div><dt>Spare Parts</dt><dd>{money(amount.parts)}</dd></div>
             <div><dt>Subtotal</dt><dd>{money(amount.subtotal)}</dd></div>
             <div className="job-quick-adjustments">
               <label>Discount (₹)
