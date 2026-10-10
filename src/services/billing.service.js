@@ -263,8 +263,8 @@ const applyStockMovement = (doc, direction) => {
 };
 
 export const billingService = {
-  async list() {
-    if (!USE_MOCK_API) return apiClient.get('/billing/documents');
+  async list(params = {}) {
+    if (!USE_MOCK_API) return apiClient.get('/billing/documents', { params });
     return read(DOCS_KEY, seedDocuments);
   },
   async get(documentId) {
