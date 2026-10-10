@@ -998,7 +998,7 @@ export function JobCardWorkspace() {
         </div>
       )}
 
-      {activeTab !== 'overview' && (
+      {activeTab !== 'overview' && activeTab !== 'inspection' && (
         <>
       <section className="job-workspace-section-bar" aria-label={activeTabLabel + ' section'}>
         <div className="job-workspace-section-icon"><ActiveSectionIcon size={17} aria-hidden="true"/></div>
