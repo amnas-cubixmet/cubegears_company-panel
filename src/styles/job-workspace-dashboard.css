@@ -808,6 +808,7 @@
   border-color: var(--primary) !important;
   color: #fff !important;
 }
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-active:hover { background: var(--primary) !important; color: #fff !important; }
 .cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-complete:not(.is-active) {
   border-color: var(--border) !important;
   background: var(--surface-2) !important;
