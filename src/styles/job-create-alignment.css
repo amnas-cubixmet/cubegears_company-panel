@@ -204,7 +204,7 @@
     grid-template-columns:minmax(0,1fr)!important;
     row-gap:12px!important;
   }
-  .job-create-page .job-create-fields-grid > label.md\\:col-span-2 {
+  .job-create-page .job-create-assignment-grid > label {
     grid-column:auto!important;
   }
   .job-create-page .job-create-fields-grid > label > :is(input,select,textarea),
