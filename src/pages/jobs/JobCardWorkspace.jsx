@@ -15,8 +15,7 @@ import {
   UserRound,
   Wrench,
   ChevronRight,
-  LockKeyhole,
-  LockKeyholeOpen
+  LockKeyhole
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
@@ -58,8 +57,6 @@ const normalizeJobStatus = (status) => {
 };
 
 const INSPECTION_CHECKS = ['Tyres', 'Warning Lights', 'Battery', 'Engine Oil', 'Coolant', 'Brake Fluid'];
-
-const SIMPLE_TABS = ['overview', 'inspection', 'estimate', 'work', 'parts', 'invoice'];
 
 const TABS = [
   ['overview', 'Overview'],
@@ -126,6 +123,7 @@ export function JobCardWorkspace() {
   const workflowTabsRef = useRef(null);
 
   const [job, setJob] = useState(null);
+  const [workflow, setWorkflow] = useState(null);
   const [jobInvoices, setJobInvoices] = useState([]);
   const [jobPayments, setJobPayments] = useState([]);
   const [billingLoading, setBillingLoading] = useState(false);
@@ -136,7 +134,6 @@ export function JobCardWorkspace() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [lockSections, setLockSections] = useState(false);
   const [error, setError] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
@@ -206,12 +203,14 @@ export function JobCardWorkspace() {
     setError('');
 
     try {
-      const [data, staffData] = await Promise.all([
+      const [data, staffData, flow] = await Promise.all([
         jobService.getJobById(id),
-        staffService.getStaff()
+        staffService.getStaff(),
+        jobService.getJobWorkflow(id)
       ]);
 
       setJob(data || null);
+      setWorkflow(flow || null);
       setStaff(Array.isArray(staffData) ? staffData.filter((item) => item.employmentStatus === 'Active') : []);
 
       if (data?.vehicleReg) {
@@ -268,21 +267,6 @@ export function JobCardWorkspace() {
     }
   };
 
-  const setStatus = async (status) => {
-    if (status === normalizeJobStatus(job?.status)) return;
-    setSaving(true);
-    setError('');
-    try {
-      const updated = await jobService.updateJobStatus(job.id, status);
-      setJob(updated || { ...job, status });
-    } catch (requestError) {
-      const details = requestError?.response?.data;
-      setError(details?.status || details?.message || requestError?.message || 'Could not change Job Card status.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const assignTechnician = async (staffId) => {
     const selected = staff.find((item) => String(item.id) === String(staffId));
 
@@ -302,13 +286,21 @@ export function JobCardWorkspace() {
   const complaints = job?.complaints || job?.customerComplaints || [];
   const findings = job?.inspection?.findings || job?.vehicleInspection?.findings || job?.inspectionFindings || [];
   const inspectionChecks = job?.inspection?.checklist || {};
-  const labourRecords = job?.labourRecords || [];
+  const labourRecords = USE_MOCK_API ? (job?.labourRecords || []) : (job?.work || []);
   const parts = job?.partsUsed || [];
   const outsidePurchases = job?.outsidePurchases || [];
-  const estimates = job?.estimates || [];
+  const estimates = (job?.estimates || [])
+    .map((item) => ({
+      ...item,
+      approvalStatus: item.approvalStatus || (item.status === 'Draft' ? 'Pending' : item.status),
+      grandTotal: item.grandTotal ?? item.total,
+      taxAmount: item.taxAmount ?? item.tax,
+      version: USE_MOCK_API ? item.version : 'Estimate V' + (item.version || 1)
+    }))
+    .sort((a, b) => String(a.created_at || a.date || '').localeCompare(String(b.created_at || b.date || '')));
   const updates = job?.workUpdates || [];
   const timeline = job?.timeline || [];
-  const qc = job?.qualityCheck || {
+  const qc = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {
     inspector: 'Unassigned',
     status: 'Pending',
     checklist: [],
@@ -352,49 +344,37 @@ export function JobCardWorkspace() {
     : (USE_MOCK_API ? job?.paymentStatus || 'Pending' : 'Not invoiced');
 
 
-  const sectionComplete = useMemo(() => ({
-    overview: Boolean(
-      job?.customerName &&
-      job?.vehicleReg &&
-      job?.assignedEmployeeId
-    ),
+  // The backend workflow endpoint is the single source of truth for
+  // persisted completion; visual checks below cover auxiliary sections only.
+  const coreStages = workflow?.stages || GUIDED_STAGES;
+  const coreCompleted = workflow?.completed || [];
+  const sectionComplete = {
+    overview: coreCompleted.includes('overview'),
+    inspection: coreCompleted.includes('inspection'),
+    estimate: coreCompleted.includes('estimate'),
+    work: coreCompleted.includes('work'),
+    qc: coreCompleted.includes('qc'),
+    invoice: coreCompleted.includes('invoice'),
     complaints: complaints.length > 0,
-    inspection: job?.inspection?.status === 'Completed' || job?.vehicleInspection?.status === 'Completed',
-    work: labourRecords.length > 0,
     parts: parts.length > 0 || outsidePurchases.length > 0,
-    estimate: estimates.some((item) => item.approvalStatus === 'Approved'),
     updates: updates.length > 0,
-    qc: qc?.status === 'Pass',
-    invoice: invoiceTotal > 0,
     activity: true
-  }), [
-    job?.customerName,
-    job?.vehicleReg,
-    job?.assignedEmployeeId,
-    complaints.length,
-    findings.length,
-    inspectionChecks,
-    labourRecords.length,
-    parts.length,
-    outsidePurchases.length,
-    estimates,
-    updates.length,
-    qc?.status,
-    invoiceTotal
-  ]);
-
-  // Guided section locking is an opt-in UI workflow, not API authorization.
-  const unlockedGuidedIndex = useMemo(() => {
-    for (let index = 0; index < GUIDED_STAGES.length - 1; index += 1) {
-      if (!sectionComplete[GUIDED_STAGES[index]]) return index;
-    }
-    return GUIDED_STAGES.length - 1;
-  }, [sectionComplete]);
-  const isSectionLocked = (key) => {
-    const index = GUIDED_STAGES.indexOf(key);
-    return lockSections && index > unlockedGuidedIndex && !sectionComplete[key];
   };
-  const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
+  const currentStage = workflow?.current || 'overview';
+  const isSectionLocked = (key) => {
+    if (!workflow) return false;
+    if (coreStages.includes(key)) return workflow.locked?.includes(key) || false;
+    if (key === 'complaints') return false;
+    if (key === 'parts') {
+      // Parts can be prepared when the Estimate stage opens.
+      return ['overview', 'inspection'].includes(currentStage);
+    }
+    if (key === 'updates') {
+      return ['overview', 'inspection', 'estimate'].includes(currentStage);
+    }
+    return false;
+  };
+  const visibleTabs = TABS;
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = Boolean(sectionComplete[activeTab]);
@@ -402,6 +382,56 @@ export function JobCardWorkspace() {
   const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
   const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
+  useEffect(() => {
+    if (!job?.id || !workflow) return;
+    const pieces = location.pathname.split('/').filter(Boolean);
+    const requested = pieces.length > 2 ? pieces[2] : null;
+    const supported = TABS.some(([key]) => key === requested);
+    if (!supported || isSectionLocked(requested)) {
+      navigate('/jobs/' + job.id + '/' + currentStage, { replace: true });
+    }
+  }, [job?.id, workflow, location.pathname, currentStage, navigate]);
+
+  const refreshJobWorkflow = async (advanceFrom = null) => {
+    const [updated, flow] = await Promise.all([
+      jobService.getJobById(id),
+      jobService.getJobWorkflow(id)
+    ]);
+    setJob(updated);
+    setWorkflow(flow);
+    if (advanceFrom && flow.current !== advanceFrom) {
+      navigate('/jobs/' + id + '/' + flow.current, { replace: true });
+    }
+    return flow;
+  };
+
+  const completeStage = async (stage) => {
+    if (!workflow || saving) return;
+    const options = {};
+    if (stage === 'estimate') {
+      if (!window.confirm('Confirm that the customer approved the latest estimate?')) return;
+      options.approveEstimate = true;
+    }
+    if (stage === 'work') {
+      if (!window.confirm('Confirm all work is finished and mechanic timers are stopped?')) return;
+      options.confirmWorkDone = true;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      const result = await jobService.completeJobStage(job.id, stage, options);
+      if (result.job) setJob(result.job);
+      setWorkflow(result);
+      if (result.current && result.current !== stage) {
+        navigate('/jobs/' + job.id + '/' + result.current, { replace: true });
+      }
+    } catch (e) {
+      const details = e?.response?.data;
+      setError(details?.stage || details?.message || e?.message || 'Unable to complete this stage.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const addComplaint = async () => {
     const description = complaintText.trim();
@@ -469,12 +499,34 @@ export function JobCardWorkspace() {
       startedAt: new Date().toISOString()
     };
 
-    await persist({ labourRecords: [...labourRecords, record] });
-    setLabour(blankLabour());
+    const updated = await persist(USE_MOCK_API
+      ? { labourRecords: [...labourRecords, record] }
+      : { work: [...labourRecords, record] });
+    if (updated) setLabour(blankLabour());
   };
 
   const createEstimate = async (kind = 'Estimate') => {
     const nextVersion = estimates.length + 1;
+    if (!USE_MOCK_API) {
+      setSaving(true);
+      setError('');
+      try {
+        await jobService.createJobEstimate(job.id, {
+          version: nextVersion,
+          status: 'Draft',
+          items: [{ description: kind, quantity: 1 }],
+          subtotal: estimateSubtotal.toFixed(2),
+          tax: estimateTaxAmount.toFixed(2),
+          total: estimateGrandTotal.toFixed(2)
+        });
+        await refreshJobWorkflow();
+      } catch (e) {
+        setError(e?.response?.data?.detail || e?.message || 'Estimate could not be created.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const record = {
       id: `EST-${Date.now()}`,
       version: kind === 'Additional Work' ? `Additional Work V${nextVersion}` : `Estimate V${nextVersion}`,
@@ -501,6 +553,20 @@ export function JobCardWorkspace() {
   };
 
   const setEstimateApproval = async (estimateKey, approvalStatus) => {
+    if (!USE_MOCK_API) {
+      if (approvalStatus === 'Approved') return completeStage('estimate');
+      setSaving(true);
+      setError('');
+      try {
+        await jobService.rejectJobEstimate(job.id, estimateKey);
+        await refreshJobWorkflow();
+      } catch (e) {
+        setError(e?.response?.data?.detail || e?.message || 'Estimate decision could not be saved.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const nextEstimates = estimates.map((item) => (item.id || item.version) === estimateKey
       ? {
           ...item,
@@ -580,26 +646,30 @@ export function JobCardWorkspace() {
       }));
 
   const updateQcItem = async (itemId, status) => {
-    await persist({
-      qualityCheck: {
-        ...qc,
-        checklist: qcChecklist.map((item) => item.id === itemId ? { ...item, status } : item)
-      }
-    });
+    const update = {
+      ...qc,
+      checklist: qcChecklist.map((item) => item.id === itemId ? { ...item, status } : item)
+    };
+    await persist(USE_MOCK_API ? { qualityCheck: update } : { qc: update });
   };
 
   const completeQc = async (status) => {
-    await persist({
-      qualityCheck: {
-        ...qc,
-        inspector: qc.inspector === 'Unassigned' ? (job.serviceAdvisor || 'Workshop Supervisor') : qc.inspector,
-        checkDate: new Date().toISOString().split('T')[0],
-        checklist: qcChecklist,
-        testDriveNotes: qcRoadTest,
-        status
-      },
-      status: status === 'Pass' ? 'Ready for Delivery' : 'QC'
-    });
+    if (status === 'Pass' && qcChecklist.some((item) => item.status !== 'Pass')) {
+      setError('Mark every Quality Check item as Pass before completing this stage.');
+      return;
+    }
+    const result = {
+      ...qc,
+      inspector: qc.inspector === 'Unassigned' ? (job.serviceAdvisor || 'Workshop Supervisor') : qc.inspector,
+      checkDate: new Date().toISOString().split('T')[0],
+      checklist: qcChecklist,
+      testDriveNotes: qcRoadTest,
+      status
+    };
+    const updated = await persist(USE_MOCK_API
+      ? { qualityCheck: result, status: status === 'Pass' ? 'Ready for Delivery' : 'QC' }
+      : { qc: result });
+    if (updated && status === 'Pass') await completeStage('qc');
   };
 
   const saveCustomerFeedback = async () => {
@@ -756,7 +826,7 @@ export function JobCardWorkspace() {
 
   const saveDelivery = async () => {
     if (!USE_MOCK_API) {
-      await setStatus('Delivered');
+      await completeStage('invoice');
       return;
     }
     const nextDelivery = {
@@ -776,7 +846,7 @@ export function JobCardWorkspace() {
 
   const openTab = (key) => {
     if (isSectionLocked(key)) {
-      setError('This step is locked in guided mode. Complete earlier steps or turn off Lock steps.');
+      setError('Complete the current Job Card stage to unlock this section.');
       return;
     }
     setError('');
@@ -806,8 +876,8 @@ export function JobCardWorkspace() {
           <select
             aria-label="Change Job Card status"
             value={normalizeJobStatus(job.status)}
-            onChange={(e) => setStatus(e.target.value)}
-            disabled={saving}
+            disabled
+            title="Status advances only when the current workflow stage is completed"
             className="h-10 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"
           >
             {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
@@ -821,10 +891,7 @@ export function JobCardWorkspace() {
       <div className="job-workspace-toolbar">
         <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
         <div className="job-workspace-toolbar-actions">
-          <button type="button" onClick={() => { setLockSections((value) => !value); setError(''); }} aria-pressed={lockSections} title="Optional guided step lock – does not replace backend permissions">
-            {lockSections ? <LockKeyhole size={14} aria-hidden="true"/> : <LockKeyholeOpen size={14} aria-hidden="true"/>}
-            {lockSections ? 'Unlock steps' : 'Lock steps'}
-          </button>
+          <span className="job-workspace-lock-note"><LockKeyhole size={14} aria-hidden="true"/> Next stage unlocks on completion</span>
           <button type="button" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
             {showAdvanced ? 'Simple view' : 'Show all details'}
           </button>
@@ -857,9 +924,8 @@ export function JobCardWorkspace() {
               type="button"
               key={status}
               className={`job-status-step ${state}`}
-              onClick={() => setStatus(status)}
-              disabled={saving}
-              title={`Set status to ${status}`}
+              disabled
+              title={`Workflow status: ${status}`}
             >
               <span>{index + 1}</span>
               <strong>{status}</strong>
@@ -901,12 +967,18 @@ export function JobCardWorkspace() {
           {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
           {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
         </span>
+        {!activeTabLocked && !activeTabComplete && activeTab === currentStage && (
+          <button type="button" className="job-stage-complete-button" disabled={saving} onClick={() => completeStage(activeTab)}>
+            <CheckCircle2 size={15} aria-hidden="true" />
+            {saving ? 'Saving…' : activeTab === 'estimate' ? 'Approve & Continue' : activeTab === 'work' ? 'Finish Work & Continue' : activeTab === 'invoice' ? 'Finish Job Card' : 'Complete & Continue'}
+          </button>
+        )}
       </section>
 
       <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
         <div>
-          <strong>{activeTabLocked ? 'Step locked in guided mode' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
-          <span>{lockSections ? 'Guided mode follows essential stages; optional sections stay available.' : 'Move freely between sections and save changes before continuing.'}</span>
+          <strong>{activeTabLocked ? 'Stage locked' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
+          <span>{'Complete each stage to unlock the next. Finished stages remain accessible.'}</span>
         </div>
         {nextVisibleTab && !activeTabLocked ? (
           <button type="button" disabled={saving || isSectionLocked(nextVisibleTab[0])} onClick={() => openTab(nextVisibleTab[0])}>
@@ -922,8 +994,8 @@ export function JobCardWorkspace() {
         <section className="job-workspace-locked-panel">
           <LockKeyhole size={24} aria-hidden="true" />
           <h3>{activeTabLabel} is locked</h3>
-          <p>Complete the previous guided step, or turn off Lock steps to continue in any order.</p>
-          <button type="button" onClick={() => setLockSections(false)}>Unlock steps</button>
+          <p>Complete the current required stage to unlock this section.</p>
+          <button type="button" onClick={() => navigate('/jobs/' + job.id + '/' + currentStage, { replace: true })}>Go to current stage</button>
         </section>
       ) : (
         <>
@@ -1016,7 +1088,7 @@ export function JobCardWorkspace() {
             ) : (
               <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                 {vehicleHistory.slice(0, 6).map((item) => (
-                  <button key={item.id} onClick={() => navigate(`/jobs/${item.id}/overview`)} className="rounded-xl border border-line bg-surface-2 p-3 text-left">
+                  <button key={item.id} onClick={() => navigate(`/jobs/${item.id}`)} className="rounded-xl border border-line bg-surface-2 p-3 text-left">
                     <div className="text-xs font-extrabold text-content">{jobDisplayLabel(item)}</div>
                     <div className="mt-1 text-[10px] text-muted">{item.createdDate} · {item.status}</div>
                     <div className="mt-2 line-clamp-2 text-[11px] text-secondary">{item.complaints?.[0]?.description || 'Service / repair visit'}</div>
@@ -1058,8 +1130,7 @@ export function JobCardWorkspace() {
           job={job}
           onChanged={async () => {
             try {
-              const refreshed = await jobService.getJobById(id);
-              if (refreshed) setJob(refreshed);
+              await refreshJobWorkflow('inspection');
             } catch (e) {
               setError(e?.message || 'Could not refresh job details.');
             }
@@ -1152,7 +1223,7 @@ export function JobCardWorkspace() {
                   </div>
                   <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
                     <strong className="text-sm text-content">{money.format(item.grandTotal || 0)}</strong>
-                    {item.approvalStatus === 'Pending' ? (
+                    {item.approvalStatus === 'Pending' && (USE_MOCK_API || item.id === estimates.at(-1)?.id) ? (
                       <div className="flex gap-2">
                         <button onClick={()=>setEstimateApproval(item.id || item.version,'Approved')} className="h-8 rounded-lg border-0 bg-emerald-600 px-3 text-[10px] font-bold text-white">Approve</button>
                         <button onClick={()=>setEstimateApproval(item.id || item.version,'Rejected')} className="h-8 rounded-lg border-0 bg-red-500 px-3 text-[10px] font-bold text-white">Reject</button>

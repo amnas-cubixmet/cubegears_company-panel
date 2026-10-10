@@ -58,6 +58,53 @@ export const updateJob = async (id, data) => {
   return apiClient.patch(`${API_ENDPOINTS.JOBS}/${id}`, data);
 };
 
+const WORKFLOW_STAGES = ['overview', 'inspection', 'estimate', 'work', 'qc', 'invoice'];
+const STATUS_PROGRESS = {
+  New: 0, Inspection: 1, 'Estimate Pending': 2,
+  Approved: 3, 'In Progress': 3, 'Waiting for Parts': 3,
+  QC: 4, 'Ready for Delivery': 5, Delivered: 6
+};
+const NEXT_STATUS = {
+  overview: 'Inspection', inspection: 'Estimate Pending',
+  estimate: 'In Progress', work: 'QC',
+  qc: 'Ready for Delivery', invoice: 'Delivered'
+};
+
+const mockWorkflow = (job) => {
+  const completed = WORKFLOW_STAGES.slice(0, STATUS_PROGRESS[job?.status] || 0);
+  const current = WORKFLOW_STAGES.find((stage) => !completed.includes(stage)) || 'invoice';
+  return {
+    current,
+    completed,
+    locked: WORKFLOW_STAGES.slice(WORKFLOW_STAGES.indexOf(current) + 1),
+    stages: WORKFLOW_STAGES,
+    finished: completed.length === WORKFLOW_STAGES.length
+  };
+};
+
+export const getJobWorkflow = async (id) => {
+  if (USE_MOCK_API) return mockWorkflow(await getJobById(id));
+  return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/workflow`);
+};
+
+export const completeJobStage = async (id, stage, options = {}) => {
+  if (USE_MOCK_API) {
+    const updated = await updateJobStatus(id, NEXT_STATUS[stage]);
+    return { ...mockWorkflow(updated), job: updated };
+  }
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/workflow`, { stage, ...options });
+};
+
+export const createJobEstimate = async (id, payload) => {
+  if (USE_MOCK_API) throw new Error('Use existing mock estimate workflow in demo mode.');
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/estimates`, payload);
+};
+
+export const rejectJobEstimate = async (id, estimateId) => {
+  if (USE_MOCK_API) throw new Error('Use existing mock estimate workflow in demo mode.');
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/estimates/${estimateId}/decision`, { decision: 'Rejected' });
+};
+
 export const deleteJob = async (id) => {
   if (USE_MOCK_API) {
     await delay();
@@ -82,6 +129,10 @@ export const jobService = {
   createJob,
   updateJobStatus,
   updateJob,
+  getJobWorkflow,
+  completeJobStage,
+  createJobEstimate,
+  rejectJobEstimate,
   deleteJob,
   getVehicleHistory,
   getAll: getJobs,

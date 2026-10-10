@@ -151,7 +151,7 @@ export const JobCreatePage = () => {
         }
       }
 
-      navigate(`/jobs/${created.id}/overview`, { replace: true });
+      navigate(`/jobs/${created.id}`, { replace: true });
     } catch (err) {
       showServerFormErrors(formRef.current, err, {
         customer_name: 'customerName', customer_phone: 'customerPhone',
