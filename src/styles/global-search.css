@@ -208,7 +208,7 @@
   padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--surface-2);
+  background: transparent !important;
   box-shadow: none;
 }
 .header-search-wrap .global-search-field:hover,
@@ -218,7 +218,7 @@
 .header-search-wrap .global-search-field:focus-within,
 .mobile-search-wrap .global-search-field:focus-within {
   border-color: var(--primary);
-  background: var(--surface);
+  background: transparent !important;
   box-shadow: 0 0 0 3px var(--primary-soft);
 }
 .header-search-wrap .global-search-leading-icon,
