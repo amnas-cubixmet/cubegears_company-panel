@@ -1085,7 +1085,7 @@ export function JobCardWorkspace() {
             ) : (
               <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                 {vehicleHistory.slice(0, 6).map((item) => (
-                  <button key={item.id} onClick={() => navigate(`/jobs/${item.id}/overview`)} className="rounded-xl border border-line bg-surface-2 p-3 text-left">
+                  <button key={item.id} onClick={() => navigate(`/jobs/${item.id}`)} className="rounded-xl border border-line bg-surface-2 p-3 text-left">
                     <div className="text-xs font-extrabold text-content">{jobDisplayLabel(item)}</div>
                     <div className="mt-1 text-[10px] text-muted">{item.createdDate} · {item.status}</div>
                     <div className="mt-2 line-clamp-2 text-[11px] text-secondary">{item.complaints?.[0]?.description || 'Service / repair visit'}</div>
