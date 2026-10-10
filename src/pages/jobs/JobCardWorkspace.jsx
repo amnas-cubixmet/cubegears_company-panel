@@ -315,7 +315,7 @@ export function JobCardWorkspace() {
   }));
   const updates = job?.workUpdates || [];
   const timeline = job?.timeline || [];
-  const qc = job?.qualityCheck || {
+  const qc = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {
     inspector: 'Unassigned',
     status: 'Pending',
     checklist: [],
@@ -666,17 +666,18 @@ export function JobCardWorkspace() {
   };
 
   const completeQc = async (status) => {
-    await persist({
-      qualityCheck: {
-        ...qc,
-        inspector: qc.inspector === 'Unassigned' ? (job.serviceAdvisor || 'Workshop Supervisor') : qc.inspector,
-        checkDate: new Date().toISOString().split('T')[0],
-        checklist: qcChecklist,
-        testDriveNotes: qcRoadTest,
-        status
-      },
-      status: status === 'Pass' ? 'Ready for Delivery' : 'QC'
-    });
+    const result = {
+      ...qc,
+      inspector: qc.inspector === 'Unassigned' ? (job.serviceAdvisor || 'Workshop Supervisor') : qc.inspector,
+      checkDate: new Date().toISOString().split('T')[0],
+      checklist: qcChecklist,
+      testDriveNotes: qcRoadTest,
+      status
+    };
+    const updated = await persist(USE_MOCK_API
+      ? { qualityCheck: result, status: status === 'Pass' ? 'Ready for Delivery' : 'QC' }
+      : { qc: result });
+    if (updated && status === 'Pass') await completeStage('qc');
   };
 
   const saveCustomerFeedback = async () => {
@@ -833,7 +834,7 @@ export function JobCardWorkspace() {
 
   const saveDelivery = async () => {
     if (!USE_MOCK_API) {
-      await setStatus('Delivered');
+      await completeStage('invoice');
       return;
     }
     const nextDelivery = {
@@ -1137,8 +1138,7 @@ export function JobCardWorkspace() {
           job={job}
           onChanged={async () => {
             try {
-              const refreshed = await jobService.getJobById(id);
-              if (refreshed) setJob(refreshed);
+              await refreshJobWorkflow('inspection');
             } catch (e) {
               setError(e?.message || 'Could not refresh job details.');
             }
