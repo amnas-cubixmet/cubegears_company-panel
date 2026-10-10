@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { HardHat, History, MoreHorizontal, Plus } from 'lucide-react';
+import React from 'react';
+import { HardHat, History, Plus } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 
 export const JobsHeader = ({ onNavigate }) => {
   const { user } = useAuth();
-  const [showMore, setShowMore] = useState(false);
 
   return (
     <header className="jobs-dashboard-header">
@@ -15,24 +14,18 @@ export const JobsHeader = ({ onNavigate }) => {
       </div>
 
       <div className="jobs-dashboard-actions">
-        {(hasPermission(user, 'reports.view') || hasPermission(user, 'expenses.view')) && (
-          <button type="button" className="jobs-secondary-button" aria-expanded={showMore} onClick={() => setShowMore((v) => !v)}>
-            <MoreHorizontal size={16} aria-hidden="true" />
-            <span>{showMore ? 'Less' : 'More'}</span>
-          </button>
-        )}
-        {showMore && hasPermission(user, 'reports.view') && (
+        {hasPermission(user, 'reports.view') && (
           <button
             type="button"
             className="jobs-secondary-button"
             onClick={() => onNavigate('/jobs/reports')}
           >
-            <History size={14} />
+            <History size={14} aria-hidden="true" />
             <span>Reports</span>
           </button>
         )}
 
-        {showMore && hasPermission(user, 'expenses.view') && (
+        {hasPermission(user, 'expenses.view') && (
           <button
             type="button"
             className="jobs-secondary-button jobs-outside-labour-button"
