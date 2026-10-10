@@ -165,7 +165,7 @@ export function JobCardWorkspace() {
 
   useEffect(() => {
     const rail = workflowTabsRef.current;
-    const activeButton = rail?.querySelector('[aria-current="page"]');
+    const activeButton = rail?.querySelector('[aria-current="step"]');
     if (!rail || !activeButton || rail.scrollWidth <= rail.clientWidth) return;
     const left = activeButton.offsetLeft - rail.offsetLeft - (rail.clientWidth - activeButton.clientWidth) / 2;
     rail.scrollTo({ left: Math.max(0, left), behavior: 'instant' });
