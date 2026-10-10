@@ -100,6 +100,43 @@ export const createJobEstimate = async (id, payload) => {
   return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/estimates`, payload);
 };
 
+export const saveQuickJobEstimate = async (id, payload, draftId = null) => {
+  if (USE_MOCK_API) {
+    await delay();
+    const job = getMockJobById(id);
+    const existing = [...(job?.estimates || [])];
+    const now = new Date().toISOString();
+    const subtotal = payload.lines.reduce(
+      (sum, item) => sum + Number(item.quantity) * Number(item.unitPrice), 0
+    );
+    const discount = Number(payload.discount) || 0;
+    const taxPercent = Number(payload.taxPercent) || 0;
+    const tax = (subtotal - discount) * taxPercent / 100;
+    const entry = {
+      id: draftId || `EST-${Date.now()}`,
+      version: draftId
+        ? existing.find((item) => String(item.id) === String(draftId))?.version || existing.length
+        : existing.length + 1,
+      status: 'Draft',
+      approvalStatus: 'Pending',
+      items: [...payload.lines.map((item) => ({ ...item })), {
+        _pricing: { taxPercent: String(taxPercent), discount: String(discount) }
+      }],
+      subtotal, tax, total: subtotal - discount + tax,
+      created_at: now, date: now
+    };
+    const next = draftId
+      ? existing.map((item) => String(item.id) === String(draftId) ? entry : item)
+      : [...existing, entry];
+    updateMockJob(id, { estimates: next, approvalStatus: 'Pending' });
+    return entry;
+  }
+  const base = `${API_ENDPOINTS.JOBS}/${id}/estimates/quick`;
+  return draftId
+    ? apiClient.patch(`${base}/${draftId}`, payload)
+    : apiClient.post(base, payload);
+};
+
 export const rejectJobEstimate = async (id, estimateId) => {
   if (USE_MOCK_API) throw new Error('Use existing mock estimate workflow in demo mode.');
   return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/estimates/${estimateId}/decision`, { decision: 'Rejected' });
@@ -132,6 +169,7 @@ export const jobService = {
   getJobWorkflow,
   completeJobStage,
   createJobEstimate,
+  saveQuickJobEstimate,
   rejectJobEstimate,
   deleteJob,
   getVehicleHistory,

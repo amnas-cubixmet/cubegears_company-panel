@@ -15,13 +15,14 @@ const readImage = (file) => new Promise((resolve, reject) => {
   reader.readAsDataURL(file);
 });
 
-export function JobInspectionPanel({ job, onChanged }) {
+export function JobInspectionPanel({ job, onChanged, canCorrect = false, startEditing = false, onDoneEditing }) {
   const [inspection, setInspection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState(DEFAULT_INSPECTION_CATEGORIES[0].id);
+  const [editing, setEditing] = useState(startEditing);
   const [finding, setFinding] = useState(newFinding());
   const [diagnostic, setDiagnostic] = useState({ code: '', description: '' });
 
@@ -51,7 +52,7 @@ export function JobInspectionPanel({ job, onChanged }) {
     try {
       await operation();
       await reload();
-      await onChanged?.();
+      await onChanged?.(label);
       return true;
     } catch (e) {
       setError(e?.message || 'Unable to save inspection.');
@@ -72,6 +73,7 @@ export function JobInspectionPanel({ job, onChanged }) {
   const codes = inspection?.diagnosticScan?.codes || [];
   const isCompleted = inspection?.status === 'Completed';
   const isStarted = inspection?.status === 'In Progress' || isCompleted;
+  const editable = isStarted && (!isCompleted || (canCorrect && editing));
   const progress = total ? Math.round((completed / total) * 100) : 0;
   const activeGroups = DEFAULT_INSPECTION_CATEGORIES.map((group) => ({
     ...group,
@@ -142,6 +144,15 @@ export function JobInspectionPanel({ job, onChanged }) {
                 {busy === 'start' ? 'Starting…' : 'Start inspection'}
               </button>
             )}
+            {isCompleted && canCorrect && (
+              <button type="button" className="cg-inspection-primary" disabled={!!busy}
+                onClick={() => {
+                  if (editing) onDoneEditing?.();
+                  else setEditing(true);
+                }}>
+                {editing ? 'Done editing · Back to Estimate' : 'Edit Inspection'}
+              </button>
+            )}
           </div>
         </div>
         <div className="cg-inspection-stats" aria-label="Inspection summary">
@@ -204,7 +215,7 @@ export function JobInspectionPanel({ job, onChanged }) {
                       <button
                         type="button"
                         key={status}
-                        disabled={!isStarted || !!busy || isCompleted}
+                        disabled={!editable || !!busy}
                         aria-pressed={selected === status}
                         className={['cg-inspection-condition', status === 'Good' ? 'is-good' : status === 'Critical' ? 'is-critical' : 'is-attention', selected === status ? 'is-selected' : ''].join(' ')}
                         onClick={() => perform('check', () => jobInspectionService.updateChecklistItem(job.id, item, status))}
@@ -212,7 +223,7 @@ export function JobInspectionPanel({ job, onChanged }) {
                         {status === 'Needs Attention' ? 'Attention' : status}
                       </button>
                     ))}
-                    {selected !== 'Not Checked' && !isCompleted && (
+                    {selected !== 'Not Checked' && editable && (
                       <button type="button" className="cg-inspection-reset" aria-label={'Clear ' + item} title="Clear check" disabled={!!busy} onClick={() => perform('check', () => jobInspectionService.updateChecklistItem(job.id, item, 'Not Checked'))}>×</button>
                     )}
                   </div>
@@ -250,7 +261,7 @@ export function JobInspectionPanel({ job, onChanged }) {
                 </div>
                 <div className="cg-inspection-finding-actions">
                   <button type="button" disabled={!!busy || item.addedToEstimate} onClick={() => perform('estimate', () => jobInspectionService.addFindingToEstimate(job.id, item.id))}>{item.addedToEstimate ? 'For estimate' : 'Mark for estimate'}</button>
-                  {!isCompleted && <button type="button" disabled={!!busy} onClick={() => perform('delete', () => jobInspectionService.deleteFinding(job.id, item.id))} aria-label={'Delete finding ' + (item.description || item.title)}><Trash2 size={14}/></button>}
+                  {editable && <button type="button" disabled={!!busy} onClick={() => perform('delete', () => jobInspectionService.deleteFinding(job.id, item.id))} aria-label={'Delete finding ' + (item.description || item.title)}><Trash2 size={14}/></button>}
                 </div>
               </article>
             ))}
@@ -275,7 +286,7 @@ export function JobInspectionPanel({ job, onChanged }) {
             <label>Recommended action
               <input placeholder="Repair, replace, inspect" value={finding.recommendedAction} onChange={(e) => setFinding({ ...finding, recommendedAction: e.target.value })}/>
             </label>
-            <button type="submit" className="cg-inspection-primary" disabled={!isStarted || isCompleted || !!busy || !finding.description.trim()}>{busy === 'finding' ? 'Saving…' : 'Save finding'}</button>
+            <button type="submit" className="cg-inspection-primary" disabled={!editable || !!busy || !finding.description.trim()}>{busy === 'finding' ? 'Saving…' : 'Save finding'}</button>
           </form>
         </details>
       </section>
@@ -286,9 +297,9 @@ export function JobInspectionPanel({ job, onChanged }) {
           <section>
             <h4>Inspection photos</h4>
             <p>Use your camera or upload an image (max 2 MB).</p>
-            <label className={'cg-inspection-upload ' + (!isStarted || isCompleted || busy ? 'is-disabled' : '')}>
+            <label className={'cg-inspection-upload ' + (!editable || busy ? 'is-disabled' : '')}>
               <Camera size={16}/> Take / upload photo
-              <input type="file" accept="image/*" capture="environment" disabled={!isStarted || isCompleted || !!busy} onChange={savePhoto}/>
+              <input type="file" accept="image/*" capture="environment" disabled={!editable || !!busy} onChange={savePhoto}/>
             </label>
             {!!photos.length && <div className="cg-inspection-photo-grid">{photos.map((photo) => <a key={photo.id} href={photo.url} target="_blank" rel="noreferrer" title={photo.caption || 'Inspection photo'}><img src={photo.url} alt={photo.caption || 'Inspection photo'}/></a>)}</div>}
           </section>
@@ -301,7 +312,7 @@ export function JobInspectionPanel({ job, onChanged }) {
               <label>Description
                 <input value={diagnostic.description} onChange={(e) => setDiagnostic({ ...diagnostic, description: e.target.value })} placeholder="Fault description"/>
               </label>
-              <button type="submit" disabled={!isStarted || isCompleted || !!busy || !diagnostic.code.trim()}>Add diagnostic code</button>
+              <button type="submit" disabled={!editable || !!busy || !diagnostic.code.trim()}>Add diagnostic code</button>
             </form>
             {!!codes.length && <div className="cg-inspection-code-list">{codes.map((code) => <div key={code.id}><strong>{code.code}</strong><span>{code.description || 'No description'}</span></div>)}</div>}
           </section>
@@ -311,10 +322,12 @@ export function JobInspectionPanel({ job, onChanged }) {
       <footer className="cg-inspection-footer">
         <div>
           <strong>{isCompleted ? 'Inspection completed' : !isStarted ? 'Start the inspection' : completed ? 'Ready to finish inspection' : 'Check the vehicle to continue'}</strong>
-          <p>{isCompleted ? 'Inspection is saved. The next stage is Estimate.' : 'Save at least one checklist result before completing.'}</p>
+          <p>{isCompleted
+            ? canCorrect ? 'Use Edit Inspection to correct checks before estimate approval.' : 'Inspection is approved and read-only.'
+            : 'Save at least one checklist result before completing.'}</p>
         </div>
         {isCompleted ? (
-          <span className="cg-inspection-done"><CheckCircle2 size={16}/> Completed</span>
+          <span className="cg-inspection-done"><CheckCircle2 size={16}/> {editing ? 'Editing' : 'Completed'}</span>
         ) : (
           <button type="button" className="cg-inspection-primary" disabled={!isStarted || completed === 0 || !!busy} onClick={() => perform('complete', () => jobInspectionService.completeInspection(job.id, true))}>
             <CheckCircle2 size={16}/> {busy === 'complete' ? 'Finishing…' : 'Complete inspection'}
