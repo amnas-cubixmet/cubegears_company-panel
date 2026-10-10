@@ -15,6 +15,7 @@ import {
   UserRound,
   Wrench,
   ChevronRight,
+  ChevronDown,
   LockKeyhole
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -121,6 +122,7 @@ export function JobCardWorkspace() {
   const location = useLocation();
   const navigate = useNavigate();
   const workflowTabsRef = useRef(null);
+  const moreStepsRef = useRef(null);
 
   const [job, setJob] = useState(null);
   const [workflow, setWorkflow] = useState(null);
@@ -374,7 +376,11 @@ export function JobCardWorkspace() {
     }
     return false;
   };
-  const visibleTabs = activeTab === 'overview' ? TABS.filter(([key]) => GUIDED_STAGES.includes(key)) : TABS;
+  // One compact main workflow for every Job Card route. Supporting sections
+  // remain accessible from More without becoming required approval stages.
+  const visibleTabs = TABS.filter(([key]) => GUIDED_STAGES.includes(key));
+  const extraTabs = TABS.filter(([key]) => !GUIDED_STAGES.includes(key));
+  const activeExtraTab = extraTabs.some(([key]) => key === activeTab);
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = Boolean(sectionComplete[activeTab]);
@@ -850,6 +856,7 @@ export function JobCardWorkspace() {
       return;
     }
     setError('');
+    moreStepsRef.current?.removeAttribute('open');
     navigate(`/jobs/${job.id}/${key}`);
   };
 
@@ -922,51 +929,67 @@ export function JobCardWorkspace() {
         ))}
       </section>
 
-      {showAdvanced && <section className="job-status-pipeline" aria-label="Job status progress">
-        {JOB_STATUSES.map((status, index) => {
-          const currentIndex = JOB_STATUSES.indexOf(normalizeJobStatus(job.status));
-          const state = index < currentIndex ? 'is-done' : index === currentIndex ? 'is-current' : 'is-next';
 
-          return (
-            <button
-              type="button"
-              key={status}
-              className={`job-status-step ${state}`}
-              disabled
-              title={`Workflow status: ${status}`}
-            >
-              <span>{index + 1}</span>
-              <strong>{status}</strong>
-            </button>
-          );
-        })}
-      </section>}
 
         </>
       )}
 
-      <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
-        {visibleTabs.map(([key, label], index) => {
-          const completed = sectionComplete[key];
-          const locked = isSectionLocked(key);
-          const TabIcon = TAB_ICONS[key];
-          return (
-            <button
-              type="button"
-              key={key}
-              onClick={() => openTab(key)}
-              disabled={locked}
-              aria-current={activeTab === key ? "page" : undefined}
-              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : '', locked ? 'is-locked' : ''].join(' ')}
-              title={locked ? label + ' – complete earlier steps to unlock' : label}
-            >
-              <span className="job-workflow-tab-number">{index + 1}</span>
-              <span className="job-workflow-tab-label"><TabIcon size={14} aria-hidden="true" />{label}</span>
-              {locked ? <LockKeyhole size={12} className="job-workflow-tab-lock" aria-label="Locked" /> : completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
-            </button>
-          );
-        })}
-      </nav>
+
+      <div className="job-simple-step-nav" aria-label="Job Card sections">
+        <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Main Job Card workflow">
+          {visibleTabs.map(([key, label], index) => {
+            const complete = Boolean(sectionComplete[key]);
+            const locked = isSectionLocked(key);
+            const isActive = activeTab === key;
+            return (
+              <button
+                type="button"
+                key={key}
+                onClick={() => openTab(key)}
+                disabled={locked}
+                aria-current={isActive ? 'step' : undefined}
+                className={['job-workflow-tab', isActive ? 'is-active' : '', complete ? 'is-complete' : '', locked ? 'is-locked' : ''].join(' ')}
+                title={locked ? label + ' – complete the previous stage first' : label}
+              >
+                <span className="job-workflow-tab-number" aria-hidden="true">{index + 1}</span>
+                <span className="job-workflow-tab-label">{label}</span>
+                {locked ? (
+                  <LockKeyhole size={13} className="job-workflow-tab-lock" aria-label="Locked" />
+                ) : complete && !isActive ? (
+                  <CheckCircle2 size={14} className="job-workflow-tab-check" aria-label="Completed" />
+                ) : null}
+              </button>
+            );
+          })}
+        </nav>
+        <details ref={moreStepsRef} className={['job-workflow-more', activeExtraTab ? 'has-active-step' : ''].join(' ')}>
+          <summary aria-label={activeExtraTab ? 'More sections, current: ' + activeTabLabel : 'More Job Card sections'}>
+            <span>More</span>
+            <ChevronDown size={14} aria-hidden="true" />
+          </summary>
+          <div className="job-workflow-more-menu" aria-label="Additional Job Card sections">
+            {extraTabs.map(([key, label]) => {
+              const locked = isSectionLocked(key);
+              const completed = Boolean(sectionComplete[key]);
+              const ExtraIcon = TAB_ICONS[key];
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={locked}
+                  onClick={() => openTab(key)}
+                  aria-current={activeTab === key ? 'page' : undefined}
+                  className={activeTab === key ? 'is-current' : ''}
+                >
+                  <ExtraIcon size={15} aria-hidden="true" />
+                  <span>{label}</span>
+                  {locked ? <LockKeyhole size={13} aria-label="Locked" /> : completed ? <CheckCircle2 size={13} aria-label="Completed" /> : null}
+                </button>
+              );
+            })}
+          </div>
+        </details>
+      </div>
 
       {activeTab !== 'overview' && (
         <>
