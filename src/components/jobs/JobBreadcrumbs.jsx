@@ -9,13 +9,13 @@ export const JobBreadcrumbs = ({ current = 'Job Cards', jobLabel, jobId }) => {
     { label: 'Job Cards', href: current === 'Job Cards' ? null : '/jobs' },
   ];
   if (jobLabel && jobId) {
-    steps.push({ label: jobLabel, href: current === 'Overview' ? null : `/jobs/${jobId}/overview` });
+    steps.push({ label: jobLabel, href: current === 'Overview' ? null : `/jobs/${jobId}` });
   }
   if (current !== 'Job Cards' && (current !== 'Overview' || !jobLabel)) {
     steps.push({ label: current, href: null });
   } else if (current === 'Overview' && jobLabel) {
     steps.push({ label: current, href: null });
-    steps[steps.length - 2].href = `/jobs/${jobId}/overview`;
+    steps[steps.length - 2].href = `/jobs/${jobId}`;
   }
   return (
     <nav className="job-page-breadcrumb" aria-label="Breadcrumb">
