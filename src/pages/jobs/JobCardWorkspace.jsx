@@ -380,7 +380,11 @@ export function JobCardWorkspace() {
     if (!workflow) return false;
     if (coreStages.includes(key)) return workflow.locked?.includes(key) || false;
     if (key === 'complaints') return false;
-    if (key === 'parts' || key === 'updates') {
+    if (key === 'parts') {
+      // Parts can be prepared when the Estimate stage opens.
+      return ['overview', 'inspection'].includes(currentStage);
+    }
+    if (key === 'updates') {
       return ['overview', 'inspection', 'estimate'].includes(currentStage);
     }
     return false;
