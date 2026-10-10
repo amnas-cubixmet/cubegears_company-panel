@@ -35,6 +35,7 @@ import './styles/outside-labour-dashboard.css';
 import './styles/form-validation.css';
 import './styles/job-invoice-dashboard.css';
 import './styles/job-workspace-dashboard.css';
+import './styles/job-inspection-simple.css';
 
 export function App() {
   return (
