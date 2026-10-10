@@ -842,88 +842,6 @@
 .cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-active .job-workflow-tab-check {
   color: inherit;
 }
-.cg-job-detail.job-workspace-dashboard .job-workflow-more {
-  position: relative;
-  flex: 0 0 auto;
-  min-width: 0;
-  align-self: stretch;
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more > summary {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  gap: 7px;
-  min-height: 40px;
-  height: 100%;
-  padding: 0 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-2);
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  user-select: none;
-  list-style: none;
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more > summary::-webkit-details-marker { display: none; }
-.cg-job-detail.job-workspace-dashboard .job-workflow-more[open] > summary,
-.cg-job-detail.job-workspace-dashboard .job-workflow-more.has-active-step > summary {
-  color: var(--primary);
-  background: var(--primary-soft);
-  border-color: var(--primary);
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more[open] > summary svg {
-  transform: rotate(180deg);
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 20;
-  width: min(260px, calc(100vw - 28px));
-  padding: 7px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, .14);
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  width: 100%;
-  min-height: 42px;
-  padding: 8px 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button > span {
-  flex: 1 1 auto;
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button:hover:not(:disabled),
-.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button.is-current {
-  background: var(--primary-soft);
-  color: var(--primary);
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-.cg-job-detail.job-workspace-dashboard .job-workflow-more > summary:focus-visible,
-.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
 @media (max-width: 600px) {
   .cg-job-detail.job-workspace-dashboard .job-simple-step-nav { gap: 5px; padding: 5px; }
   .cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab {
@@ -931,14 +849,10 @@
     padding: 0 9px !important;
     font-size: 12px !important;
   }
-  .cg-job-detail.job-workspace-dashboard .job-workflow-more > summary {
-    padding: 0 10px;
-    font-size: 12px;
-  }
 }
 
 
-/* Work & Labour — focused tools, with supporting sections in a local More menu. */
+/* Work & Labour — focused tools with all supporting sections visible as tabs. */
 .cg-job-detail.job-workspace-dashboard .job-work-tools {
   display: flex;
   align-items: center;
@@ -969,10 +883,24 @@
 .cg-job-detail.job-workspace-dashboard .job-work-tools-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex: 1 1 530px;
   min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-tools-actions::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 .cg-job-detail.job-workspace-dashboard .job-work-tools-actions > button {
+  flex: 0 0 auto;
+  gap: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -996,19 +924,6 @@
 .cg-job-detail.job-workspace-dashboard .job-work-tools-actions > button:disabled {
   opacity: .5;
   cursor: not-allowed;
-}
-.cg-job-detail.job-workspace-dashboard .job-work-tools .job-workflow-more > summary {
-  min-height: 39px;
-  padding-inline: 13px;
-  border-radius: 9px;
-}
-.cg-job-detail.job-workspace-dashboard .job-work-tools .job-workflow-more-menu {
-  z-index: 30;
-}
-.cg-job-detail.job-workspace-dashboard .job-work-tools .job-workflow-more-menu button > span {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  line-height: 1.4;
 }
 .cg-job-detail.job-workspace-dashboard .job-work-simple {
   display: flex;
@@ -1061,7 +976,7 @@
   min-width: 0;
   max-width: 100%;
 }
-.cg-job-detail.job-workspace-dashboard .job-work-tools :is(button, summary):focus-visible,
+.cg-job-detail.job-workspace-dashboard .job-work-tools button:focus-visible,
 .cg-job-detail.job-workspace-dashboard .job-work-extra-panel > summary:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -1070,8 +985,7 @@
   .cg-job-detail.job-workspace-dashboard .job-work-tools { padding: 9px; }
   .cg-job-detail.job-workspace-dashboard .job-work-tools-copy { font-size: 12px; }
   .cg-job-detail.job-workspace-dashboard .job-work-tools-actions { gap: 5px; }
-  .cg-job-detail.job-workspace-dashboard .job-work-tools-actions > button,
-  .cg-job-detail.job-workspace-dashboard .job-work-tools .job-workflow-more > summary {
+  .cg-job-detail.job-workspace-dashboard .job-work-tools-actions > button {
     padding-inline: 9px;
     font-size: 12px;
     min-height: 40px;
@@ -1083,8 +997,6 @@
   .cg-job-detail.job-workspace-dashboard .job-work-tools-copy { width: 100%; }
   .cg-job-detail.job-workspace-dashboard .job-work-tools-actions {
     width: 100%;
-  }
-  .cg-job-detail.job-workspace-dashboard .job-work-tools-actions > button {
-    flex: 1 1 auto;
+    flex-basis: 100%;
   }
 }
