@@ -106,8 +106,8 @@ export function JobCustomerPicker({ selectedCustomer, onSelect, onCreated, disab
     try {
       const dupe = await customerService.checkDuplicateCustomer({ phone });
       if (dupe?.duplicate && dupe.customer) {
-        setError('This customer already exists. Their record has been selected instead.');
         pick(dupe.customer);
+        setError('Existing customer found and selected. No duplicate was created.');
         return;
       }
       const customer = await customerService.createCustomer({
@@ -188,7 +188,7 @@ export function JobCustomerPicker({ selectedCustomer, onSelect, onCreated, disab
       )}
 
       {adding && (
-        <form className="job-customer-create-form" onSubmit={create}>
+        <div className="job-customer-create-form" onKeyDown={event => { if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") { event.preventDefault(); create(event); } }}>
           <div className="job-customer-create-head">
             <h4>New Customer</h4>
             <button type="button" aria-label="Close customer form" onClick={() => { setAdding(false); setError(''); }} disabled={saving}><X size={16}/></button>
@@ -213,9 +213,9 @@ export function JobCustomerPicker({ selectedCustomer, onSelect, onCreated, disab
           </div>
           <div className="job-customer-create-actions">
             <button type="button" onClick={() => setAdding(false)} disabled={saving}>Cancel</button>
-            <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save & Select Customer'}</button>
+            <button type="button" onClick={create} disabled={saving}>{saving ? 'Saving…' : 'Save & Select Customer'}</button>
           </div>
-        </form>
+        </div>
       )}
       {error && <p className="job-customer-error" role="alert">{error}</p>}
     </div>
