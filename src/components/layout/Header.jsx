@@ -174,7 +174,7 @@ export const Header = () => {
           </button>
 
           <div className="mobile-header-actions">
-            <button type="button" onClick={() => setSearchOpen((value) => !value)}><Search size={15}/></button>
+            <button type="button" onClick={() => setSearchOpen((value) => !value)} aria-label={searchOpen ? "Close workspace search" : "Open workspace search"} aria-expanded={searchOpen}><Search size={15}/></button>
             {canViewNotifications && (
               <button type="button" className="mobile-notification-button" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
                 <Bell size={15}/>
@@ -194,7 +194,7 @@ export const Header = () => {
           </div>
         </div>
 
-        {searchOpen && <div className="mobile-search-wrap"><GlobalSearch isMobileView /></div>}
+        {searchOpen && <div className="mobile-search-wrap"><GlobalSearch isMobileView onMobileClose={() => setSearchOpen(false)} /></div>}
       </div>
     </header>
   );

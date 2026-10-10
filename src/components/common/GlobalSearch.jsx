@@ -171,7 +171,10 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDownInput}
-          placeholder="Search entire workspace: pages, customer, vehicle, job, invoice, stock..."
+          placeholder="Search customers, vehicles, jobs..."
+          aria-label="Search the CubixGear workspace"
+          autoComplete="off"
+          spellCheck={false}
         />
         {query && (
           <button
