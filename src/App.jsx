@@ -38,6 +38,7 @@ import './styles/job-workspace-dashboard.css';
 import './styles/job-inspection-simple.css';
 import './styles/job-estimate-quick.css';
 import './styles/job-create-customer.css';
+import './styles/job-create-alignment.css';
 
 export function App() {
   return (
