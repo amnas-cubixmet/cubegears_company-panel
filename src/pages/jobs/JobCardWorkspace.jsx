@@ -918,6 +918,15 @@ export function JobCardWorkspace() {
 
       {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
+      {activeTabLocked ? (
+        <section className="job-workspace-locked-panel">
+          <LockKeyhole size={24} aria-hidden="true" />
+          <h3>{activeTabLabel} is locked</h3>
+          <p>Complete the previous guided step, or turn off Lock steps to continue in any order.</p>
+          <button type="button" onClick={() => setLockSections(false)}>Unlock steps</button>
+        </section>
+      ) : (
+        <>
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 xl:col-span-2">
@@ -1422,6 +1431,8 @@ export function JobCardWorkspace() {
             ))}
           </div>
         </section>
+      )}
+        </>
       )}
 
     </div>
