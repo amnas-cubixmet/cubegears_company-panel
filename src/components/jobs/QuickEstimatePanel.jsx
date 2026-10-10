@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, ChevronDown, ClipboardList, Package, Pencil, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
 import { jobService } from '../../services/job.service';
+import { EstimateCatalogPicker } from './EstimateCatalogPicker';
 
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
-  description: '', type, quantity: '1', unitPrice: ''
+  description: '', type, quantity: '1', unitPrice: '', catalogId: '', catalogCode: ''
 });
 const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2
@@ -16,7 +17,9 @@ const parseItems = (estimate) => (estimate?.items || [])
     description: row.description,
     type: row.type || 'Service',
     quantity: String(row.quantity || 1),
-    unitPrice: String(row.unitPrice ?? row.price ?? 0)
+    unitPrice: String(row.unitPrice ?? row.price ?? 0),
+    catalogId: row.catalogId || '',
+    catalogCode: row.catalogCode || ''
   }));
 const inspectSuggestions = (findings) => findings.flatMap((item) => {
   const title = item.description || item.title || 'Inspection finding';
@@ -90,7 +93,18 @@ export function QuickEstimatePanel({
   }, [lines, amount.subtotal, taxPercent, discount]);
 
   const edit = (key, field, value) => {
-    setLines((current) => current.map((line) => line.key === key ? { ...line, [field]: value } : line));
+    setLines((current) => current.map((line) => line.key === key
+      ? {
+        ...line, [field]: value,
+        ...(field === 'description' || field === 'type'
+          ? { catalogId: '', catalogCode: '' }
+          : {})
+      } : line));
+    setChanged(true);
+    setFeedback('');
+  };
+  const selectCatalog = (key, item) => {
+    setLines((current) => current.map((line) => line.key === key ? { ...line, ...item } : line));
     setChanged(true);
     setFeedback('');
   };
@@ -101,8 +115,9 @@ export function QuickEstimatePanel({
     try {
       const draftId = latest?.status === 'Draft' && !stale ? latest.id : null;
       await jobService.saveQuickJobEstimate(job.id, {
-        lines: lines.map(({ description, type, quantity, unitPrice }) => ({
-          description: description.trim(), type, quantity, unitPrice
+        lines: lines.map(({ description, type, quantity, unitPrice, catalogId }) => ({
+          description: description.trim(), type, quantity, unitPrice,
+          ...(catalogId ? { catalogId } : {})
         })),
         taxPercent, discount
       }, draftId);
@@ -156,15 +171,21 @@ export function QuickEstimatePanel({
           )}
         </div>
         <div className="job-quick-line-fields">
-          <label className="job-quick-description">
-            {part ? 'Part name' : 'Work description'}
-            <input
+          <div className="job-quick-description job-quick-name-field">
+            <span>{part ? 'Part name' : 'Work description'}</span>
+            <EstimateCatalogPicker
+              kind={part ? 'part' : 'service'}
               value={line.description}
               disabled={!canEdit || busy}
-              placeholder={part ? 'e.g. Oil filter' : 'e.g. Engine oil change'}
-              onChange={(event) => edit(line.key, 'description', event.target.value)}
+              onChange={(value) => edit(line.key, 'description', value)}
+              onSelect={(item) => selectCatalog(line.key, item)}
             />
-          </label>
+            {line.catalogId && (
+              <small className="job-quick-catalog-selected">
+                Selected from {part ? 'stock' : 'services'}{line.catalogCode ? ' · ' + line.catalogCode : ''}
+              </small>
+            )}
+          </div>
           {part ? (
             <span className="job-quick-type-fixed">Type <strong>Spare Part</strong></span>
           ) : (
