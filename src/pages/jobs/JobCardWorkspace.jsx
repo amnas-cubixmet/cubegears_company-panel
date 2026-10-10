@@ -374,7 +374,7 @@ export function JobCardWorkspace() {
     }
     return false;
   };
-  const visibleTabs = TABS;
+  const visibleTabs = activeTab === 'overview' ? TABS.filter(([key]) => GUIDED_STAGES.includes(key)) : TABS;
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = Boolean(sectionComplete[activeTab]);
@@ -873,21 +873,29 @@ export function JobCardWorkspace() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            aria-label="Change Job Card status"
-            value={normalizeJobStatus(job.status)}
-            disabled
-            title="Status advances only when the current workflow stage is completed"
-            className="h-10 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"
-          >
-            {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
-          </select>
-          <button type="button" onClick={() => openTab('invoice')} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
-            <ReceiptText size={15}/>{linkedInvoice ? 'View Invoice' : 'Create Invoice'}
-          </button>
+          {activeTab === 'overview' ? (
+            <span className="job-overview-status-badge">{normalizeJobStatus(job.status)}</span>
+          ) : (
+            <>
+              <select
+                aria-label="Job Card status"
+                value={normalizeJobStatus(job.status)}
+                disabled
+                title="Status advances only when the current workflow stage is completed"
+                className="h-10 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"
+              >
+                {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
+              </select>
+              <button type="button" onClick={() => openTab('invoice')} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
+                <ReceiptText size={15}/>{linkedInvoice ? 'View Invoice' : 'Create Invoice'}
+              </button>
+            </>
+          )}
         </div>
       </header>
 
+      {activeTab !== 'overview' && (
+        <>
       <div className="job-workspace-toolbar">
         <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
         <div className="job-workspace-toolbar-actions">
@@ -934,6 +942,9 @@ export function JobCardWorkspace() {
         })}
       </section>}
 
+        </>
+      )}
+
       <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
         {visibleTabs.map(([key, label], index) => {
           const completed = sectionComplete[key];
@@ -957,6 +968,8 @@ export function JobCardWorkspace() {
         })}
       </nav>
 
+      {activeTab !== 'overview' && (
+        <>
       <section className="job-workspace-section-bar" aria-label={activeTabLabel + ' section'}>
         <div className="job-workspace-section-icon"><ActiveSectionIcon size={17} aria-hidden="true"/></div>
         <div className="job-workspace-section-title">
@@ -988,6 +1001,9 @@ export function JobCardWorkspace() {
         ) : null}
       </div>
 
+        </>
+      )}
+
       {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
       {activeTabLocked ? (
@@ -1000,103 +1016,139 @@ export function JobCardWorkspace() {
       ) : (
         <>
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 xl:col-span-2">
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-semibold text-secondary">Customer complaint</div>
-              <p className="mt-1 break-words text-sm text-content">{complaints[0]?.description || complaints[0]?.wording || 'No complaint recorded yet.'}</p>
+        <div className="job-overview-simple">
+          <section className="job-overview-intro" aria-label="Job Card overview">
+            <div className="job-overview-intro-copy">
+              <span className="job-overview-eyebrow">Job Card · Step 1 of 6</span>
+              <h2>Job Overview</h2>
+              <p>Check the customer and vehicle details before starting inspection.</p>
             </div>
-            <button type="button" onClick={() => openTab('complaints')} className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-content">
-              {complaints.length ? 'View complaints' : 'Add complaint'}
+            <div className="job-overview-intro-actions">
+              <button type="button" className="job-overview-secondary-action" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+                {showAdvanced ? 'Hide details' : 'More details'}
+              </button>
+              {sectionComplete.overview ? (
+                <button type="button" className="job-overview-main-action" onClick={() => openTab(currentStage)}>
+                  <CheckCircle2 size={16} aria-hidden="true" /> {currentStage === 'overview' ? 'Overview complete' : 'Go to current stage'}
+                  <ChevronRight size={15} aria-hidden="true" />
+                </button>
+              ) : (
+                <button type="button" className="job-overview-main-action" onClick={() => completeStage('overview')} disabled={saving || activeTabLocked}>
+                  <CheckCircle2 size={16} aria-hidden="true" /> {saving ? 'Saving…' : 'Complete & Continue'}
+                  <ChevronRight size={15} aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          </section>
+
+          <div className="job-overview-primary-grid">
+            <section className="job-overview-card" aria-labelledby="job-overview-customer-heading">
+              <div className="job-overview-card-header">
+                <span className="job-overview-card-icon"><UserRound size={18} aria-hidden="true"/></span>
+                <div>
+                  <h3 id="job-overview-customer-heading">Customer & Vehicle</h3>
+                  <p>Basic job information</p>
+                </div>
+              </div>
+              <dl className="job-overview-detail-grid">
+                <div><dt>Customer name</dt><dd>{job.customerName || 'Not added'}</dd></div>
+                <div><dt>Phone number</dt><dd>{job.customerPhone || 'Not added'}</dd></div>
+                <div><dt>Vehicle number</dt><dd>{job.vehicleReg || 'Not added'}</dd></div>
+                <div><dt>Make / Model</dt><dd>{job.vehicleInfo || 'Not added'}</dd></div>
+                <div><dt>Service type</dt><dd>{job.serviceType || 'General Service'}</dd></div>
+                <div><dt>Odometer (KM)</dt><dd>{job.kilometre ?? '—'}</dd></div>
+              </dl>
+            </section>
+
+            <section className="job-overview-card" aria-labelledby="job-overview-assignment-heading">
+              <div className="job-overview-card-header">
+                <span className="job-overview-card-icon"><Wrench size={18} aria-hidden="true"/></span>
+                <div>
+                  <h3 id="job-overview-assignment-heading">Mechanic Assignment</h3>
+                  <p>Select who will handle this job</p>
+                </div>
+              </div>
+              <label className="job-overview-assignment-label" htmlFor="job-overview-technician">
+                Assigned mechanic
+              </label>
+              <select
+                id="job-overview-technician"
+                value={job.assignedEmployeeId || ''}
+                onChange={(event) => assignTechnician(event.target.value)}
+                disabled={saving}
+                className="job-overview-mechanic-select"
+              >
+                <option value="">Choose a mechanic (optional)</option>
+                {staff.map((item) => (
+                  <option key={item.id} value={item.id}>{item.name} · {item.designation || 'Workshop staff'}</option>
+                ))}
+              </select>
+              <div className="job-overview-assignment-foot">
+                <div><span>Service advisor</span><strong>{job.serviceAdvisor || 'Not assigned'}</strong></div>
+                <div><span>Priority</span><strong>{job.priority || 'Medium'}</strong></div>
+              </div>
+              <p className="job-overview-supporting-note">You can assign or change the mechanic later.</p>
+            </section>
+          </div>
+
+          <section className="job-overview-complaint" aria-label="Customer complaint">
+            <div>
+              <h3><FileText size={17} aria-hidden="true"/> Customer complaint</h3>
+              <p>{complaints[0]?.description || complaints[0]?.wording || 'No customer complaint added yet.'}</p>
+              {complaints.length > 1 && <span>{complaints.length} complaints recorded</span>}
+            </div>
+            <button type="button" onClick={() => openTab('complaints')}>
+              {complaints.length ? 'View complaints' : 'Add complaint'} <ChevronRight size={15} aria-hidden="true"/>
             </button>
           </section>
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><UserRound size={16} className="text-primary"/>Customer & Vehicle</div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-              <Info label="Customer" value={job.customerName}/>
-              <Info label="Phone" value={job.customerPhone}/>
-              <Info label="Registration" value={job.vehicleReg}/>
-              <Info label="Make / Model" value={job.vehicleInfo}/>
-              <Info label="VIN / Chassis" value={job.vin || job.vehicle?.vin || '—'}/>
-              <Info label="Service Type" value={job.serviceType || '—'}/>
-              <Info label="Check-In" value={job.checkInTime || job.createdDate}/>
-              <Info label="Branch" value={job.branch}/>
-            </div>
-          </section>
 
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><Wrench size={16} className="text-primary"/>Assignment</div>
-            <label className="mt-4 block text-xs font-semibold text-secondary">Assigned Technician
-              <select value={job.assignedEmployeeId || ''} onChange={(e) => assignTechnician(e.target.value)} className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
-                <option value="">Unassigned</option>
-                {staff.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.designation}</option>)}
-              </select>
-            </label>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <Info label="Service Advisor" value={job.serviceAdvisor || '—'}/>
-              <Info label="Priority" value={job.priority || 'Medium'}/>
-            </div>
-          </section>
-
-          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
-            <div className="flex items-center gap-2 text-sm font-extrabold text-content">
-              <Star size={16} className="text-primary"/>
-              Customer Feedback
-            </div>
-            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-end">
-              <label className="text-xs font-semibold text-secondary">
-                Rating
-                <select
-                  value={feedbackRating}
-                  onChange={(e) => setFeedbackRating(e.target.value)}
-                  className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"
-                >
-                  <option value="">Select rating</option>
-                  <option value="5">5 - Excellent</option>
-                  <option value="4">4 - Very Good</option>
-                  <option value="3">3 - Good</option>
-                  <option value="2">2 - Fair</option>
-                  <option value="1">1 - Poor</option>
-                </select>
-              </label>
-
-              <label className="text-xs font-semibold text-secondary">
-                Customer Comment
-                <input
-                  value={feedbackText}
-                  onChange={(e) => setFeedbackText(e.target.value)}
-                  placeholder="Customer feedback about this job / technician"
-                  className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"
-                />
-              </label>
-
-              <button
-                type="button"
-                onClick={saveCustomerFeedback}
-                disabled={saving || !feedbackRating}
-                className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white disabled:opacity-50"
-              >
-                Save Feedback
-              </button>
-            </div>
-          </section>
-
-          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
-            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><History size={16} className="text-primary"/>Vehicle Service History</div>
-            {!vehicleHistory.length ? (
-              <div className="mt-3 rounded-xl border border-dashed border-line p-5 text-center text-xs text-muted">No previous job cards for this registration.</div>
-            ) : (
-              <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-                {vehicleHistory.slice(0, 6).map((item) => (
-                  <button key={item.id} onClick={() => navigate(`/jobs/${item.id}`)} className="rounded-xl border border-line bg-surface-2 p-3 text-left">
-                    <div className="text-xs font-extrabold text-content">{jobDisplayLabel(item)}</div>
-                    <div className="mt-1 text-[10px] text-muted">{item.createdDate} · {item.status}</div>
-                    <div className="mt-2 line-clamp-2 text-[11px] text-secondary">{item.complaints?.[0]?.description || 'Service / repair visit'}</div>
-                  </button>
-                ))}
+          {showAdvanced && (
+            <section className="job-overview-more" aria-label="Additional job details">
+              <h3>Additional details</h3>
+              <dl className="job-overview-detail-grid">
+                <div><dt>VIN / Chassis</dt><dd>{job.vin || job.vehicle?.vin || '—'}</dd></div>
+                <div><dt>Fuel level</dt><dd>{job.fuelLevel || '—'}</dd></div>
+                <div><dt>Check-in</dt><dd>{job.checkInTime || job.createdDate || '—'}</dd></div>
+                <div><dt>Branch</dt><dd>{job.branch || '—'}</dd></div>
+                <div><dt>Estimate</dt><dd>{latestEstimate ? money.format(latestEstimate.grandTotal || 0) : 'Not created'}</dd></div>
+                <div><dt>Payment</dt><dd>{job.paymentStatus || 'Pending'}</dd></div>
+              </dl>
+              <div className="job-overview-more-grid">
+                <div className="job-overview-feedback">
+                  <h4><Star size={16} aria-hidden="true"/> Customer Feedback</h4>
+                  <div className="job-overview-feedback-fields">
+                    <label>Rating
+                      <select value={feedbackRating} onChange={(event) => setFeedbackRating(event.target.value)}>
+                        <option value="">Select rating</option>
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="3">3 - Good</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="1">1 - Poor</option>
+                      </select>
+                    </label>
+                    <label>Customer comment
+                      <input value={feedbackText} onChange={(event) => setFeedbackText(event.target.value)} placeholder="Customer feedback"/>
+                    </label>
+                    <button type="button" onClick={saveCustomerFeedback} disabled={saving || !feedbackRating}>Save Feedback</button>
+                  </div>
+                </div>
+                <div className="job-overview-history">
+                  <h4><History size={16} aria-hidden="true"/> Vehicle Service History</h4>
+                  {vehicleHistory.length === 0 ? (
+                    <p>No previous service records for this vehicle.</p>
+                  ) : (
+                    vehicleHistory.slice(0, 5).map((item) => (
+                      <button key={item.id} type="button" onClick={() => navigate(`/jobs/${item.id}`)}>
+                        <span><strong>{jobDisplayLabel(item)}</strong><small>{item.createdDate || 'Previous visit'}</small></span>
+                        <ChevronRight size={15} aria-hidden="true"/>
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
-            )}
-          </section>
+            </section>
+          )}
         </div>
       )}
 
