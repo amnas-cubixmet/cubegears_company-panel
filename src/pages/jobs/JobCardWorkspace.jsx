@@ -1089,7 +1089,9 @@ export function JobCardWorkspace() {
                 <div><dt>Vehicle number</dt><dd>{job.vehicleReg || 'Not added'}</dd></div>
                 <div><dt>Make / Model</dt><dd>{job.vehicleInfo || 'Not added'}</dd></div>
                 <div><dt>Service type</dt><dd>{job.serviceType || 'General Service'}</dd></div>
-                <div><dt>Odometer (KM)</dt><dd>{job.kilometre ?? '—'}</dd></div>
+                <div><dt>KM Reading</dt><dd>{job.kilometre === 0 || job.kilometre ? new Intl.NumberFormat('en-IN').format(Number(job.kilometre)) + ' km' : 'Not added'}</dd></div>
+                <div><dt>Fuel Level</dt><dd>{job.fuelLevel || 'Not added'}</dd></div>
+                <div><dt>VIN / Chassis</dt><dd>{job.vin || job.vehicle?.vin || 'Not added'}</dd></div>
               </dl>
             </section>
 
@@ -1139,8 +1141,6 @@ export function JobCardWorkspace() {
             <section className="job-overview-more" aria-label="Additional job details">
               <h3>Additional details</h3>
               <dl className="job-overview-detail-grid">
-                <div><dt>VIN / Chassis</dt><dd>{job.vin || job.vehicle?.vin || '—'}</dd></div>
-                <div><dt>Fuel level</dt><dd>{job.fuelLevel || '—'}</dd></div>
                 <div><dt>Check-in</dt><dd>{job.checkInTime || job.createdDate || '—'}</dd></div>
                 <div><dt>Branch</dt><dd>{job.branch || '—'}</dd></div>
                 <div><dt>Estimate</dt><dd>{latestEstimate ? money.format(latestEstimate.grandTotal || 0) : 'Not created'}</dd></div>
