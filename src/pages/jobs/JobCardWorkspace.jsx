@@ -1376,7 +1376,10 @@ export function JobCardWorkspace() {
                 <span className="text-xs font-bold text-primary">Estimated Total</span>
                 <strong className="text-lg text-content">{money.format(estimateGrandTotal)}</strong>
               </div>
-              <button onClick={()=>createEstimate('Estimate')} className="mt-2 h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Create Estimate</button>
+              <button type="button" onClick={() => openTab('parts')} disabled={isSectionLocked('parts')} className="mt-2 h-10 rounded-xl border border-line bg-surface-2 text-xs font-bold text-content">
+                <PackageSearch size={14} className="mr-1 inline" aria-hidden="true" /> Manage Parts
+              </button>
+              <button onClick={()=>createEstimate('Estimate')} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Create Estimate</button>
               <button onClick={()=>createEstimate('Additional Work')} className="h-10 rounded-xl border border-line bg-surface text-xs font-bold text-content">Additional Work Approval</button>
             </div>
           </section>
