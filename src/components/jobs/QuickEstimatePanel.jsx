@@ -171,8 +171,8 @@ export function QuickEstimatePanel({
           )}
         </div>
         <div className="job-quick-line-fields">
-          <label className="job-quick-description">
-            {part ? 'Part name' : 'Work description'}
+          <div className="job-quick-description job-quick-name-field">
+            <span>{part ? 'Part name' : 'Work description'}</span>
             <EstimateCatalogPicker
               kind={part ? 'part' : 'service'}
               value={line.description}
@@ -185,7 +185,7 @@ export function QuickEstimatePanel({
                 Selected from {part ? 'stock' : 'services'}{line.catalogCode ? ' · ' + line.catalogCode : ''}
               </small>
             )}
-          </label>
+          </div>
           {part ? (
             <span className="job-quick-type-fixed">Type <strong>Spare Part</strong></span>
           ) : (
