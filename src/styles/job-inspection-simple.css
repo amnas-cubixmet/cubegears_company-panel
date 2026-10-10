@@ -18,7 +18,7 @@
 .cg-job-detail .cg-inspection-findings {padding:18px}
 .cg-job-detail .cg-inspection-overview-top,
 .cg-job-detail .cg-inspection-section-heading {
-  display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
 }
 .cg-job-detail .cg-inspection-overview-copy {flex:1 1 240px;min-width:0}
 .cg-job-detail .cg-inspection-kicker {
@@ -94,16 +94,42 @@
   font-size:14px;font-weight:750;line-height:1.4;
 }
 .cg-job-detail .cg-inspection-section-heading h3 svg {color:var(--primary)}
+/* Single outlined Search control. The global Job Card input rules use
+   !important, so the nested input must explicitly reset them here. */
 .cg-job-detail .cg-inspection-search {
-  display:flex;align-items:center;gap:8px;
-  min-height:42px;flex:0 1 240px;max-width:100%;
-  padding:0 11px;border:1px solid var(--border);
-  border-radius:9px;background:var(--surface-2);
+  display:flex;align-items:center;gap:9px;
+  width:260px;height:44px;min-height:44px;
+  flex:0 1 260px;min-width:0;max-width:100%;
+  margin:0;padding:0 12px;
+  border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
   color:var(--text-muted);
+  transition:border-color .15s ease,box-shadow .15s ease;
 }
-.cg-job-detail .cg-inspection-search input {
-  background:transparent;flex:1;min-width:0;min-height:39px;
-  border:0;outline:0;color:var(--text-primary);font:inherit;font-size:13px;
+.cg-job-detail .cg-inspection-search > svg {
+  flex:0 0 16px;width:16px;height:16px;pointer-events:none;
+}
+.cg-job-detail .cg-inspection-search:focus-within {
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--primary-soft);
+}
+.cg-job-detail .cg-inspection .cg-inspection-search input:not([type="checkbox"]):not([type="file"]) {
+  display:block;flex:1 1 auto;
+  width:100%;min-width:0;max-width:100%;
+  height:100%!important;min-height:0!important;
+  margin:0!important;padding:0!important;
+  border:0!important;border-radius:0!important;
+  outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+  color:var(--text-primary)!important;
+  font-size:13px!important;font-weight:500!important;line-height:1.4;
+}
+.cg-job-detail .cg-inspection .cg-inspection-search input:not([type="checkbox"]):not([type="file"]):is(:focus,:focus-visible) {
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
+.cg-job-detail .cg-inspection-search input::placeholder {
+  color:var(--text-muted);opacity:1;
 }
 .cg-job-detail .cg-inspection-hint {
   margin:15px 0 0;padding:11px 12px;border-radius:8px;
@@ -283,7 +309,7 @@
   .cg-job-detail .cg-inspection-findings {padding:13px}
   .cg-job-detail .cg-inspection-stats {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .cg-job-detail .cg-inspection-section-heading {flex-direction:column;align-items:stretch}
-  .cg-job-detail .cg-inspection-search {flex:1 1 auto;width:100%;max-width:none}
+  .cg-job-detail .cg-inspection-search {flex:1 1 100%;width:100%;max-width:100%}
   .cg-job-detail .cg-inspection-check-row {align-items:stretch}
   .cg-job-detail .cg-inspection-condition-actions {width:100%}
   .cg-job-detail .cg-inspection-condition {flex:1 1 0;padding-inline:5px}
