@@ -818,11 +818,17 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2">
-        <span className="text-xs text-secondary">Current status: <strong className="text-content">{normalizeJobStatus(job.status)}</strong></span>
-        <button type="button" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-content" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
-          {showAdvanced ? 'Simple view' : 'Show all details'}
-        </button>
+      <div className="job-workspace-toolbar">
+        <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
+        <div className="job-workspace-toolbar-actions">
+          <button type="button" onClick={() => { setLockSections((value) => !value); setError(''); }} aria-pressed={lockSections} title="Optional guided step lock – does not replace backend permissions">
+            {lockSections ? <LockKeyhole size={14} aria-hidden="true"/> : <LockKeyholeOpen size={14} aria-hidden="true"/>}
+            {lockSections ? 'Unlock steps' : 'Lock steps'}
+          </button>
+          <button type="button" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+            {showAdvanced ? 'Simple view' : 'Show all details'}
+          </button>
+        </div>
       </div>
 
       <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-3">
@@ -865,19 +871,21 @@ export function JobCardWorkspace() {
       <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
         {visibleTabs.map(([key, label], index) => {
           const completed = sectionComplete[key];
+          const locked = isSectionLocked(key);
           const TabIcon = TAB_ICONS[key];
           return (
             <button
               type="button"
               key={key}
               onClick={() => openTab(key)}
+              disabled={locked}
               aria-current={activeTab === key ? "page" : undefined}
-              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : ''].join(' ')}
-              title={label}
+              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : '', locked ? 'is-locked' : ''].join(' ')}
+              title={locked ? label + ' – complete earlier steps to unlock' : label}
             >
               <span className="job-workflow-tab-number">{index + 1}</span>
               <span className="job-workflow-tab-label"><TabIcon size={14} aria-hidden="true" />{label}</span>
-              {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
+              {locked ? <LockKeyhole size={12} className="job-workflow-tab-lock" aria-label="Locked" /> : completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
             </button>
           );
         })}
