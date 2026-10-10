@@ -152,3 +152,94 @@
   .cg-job-detail .job-quick-add-actions button {width:100%}
   .cg-job-detail .job-quick-adjustments {gap:7px}
 }
+
+
+/* Separate, quickly editable Work and Part sections in the customer estimate. */
+.cg-job-detail .job-quick-work-parts {
+  gap:14px;
+}
+.cg-job-detail .job-quick-item-group {
+  display:flex;flex-direction:column;gap:11px;
+  min-width:0;padding:14px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:var(--surface);
+}
+.cg-job-detail .job-quick-group-heading {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:10px;min-width:0;
+}
+.cg-job-detail .job-quick-group-heading>div {
+  flex:1 1 170px;min-width:0;
+}
+.cg-job-detail .job-quick-group-heading h4 {
+  display:flex;align-items:center;gap:8px;
+  margin:0;font-size:13px;font-weight:750;
+  color:var(--text-primary);line-height:1.45;
+}
+.cg-job-detail .job-quick-group-heading h4 svg {
+  flex:0 0 16px;color:var(--primary);
+}
+.cg-job-detail .job-quick-group-heading p {
+  margin:4px 0 0;color:var(--text-muted);
+  font-size:11px;line-height:1.4;
+}
+.cg-job-detail .job-quick-group-heading .job-quick-add-button,
+.cg-job-detail .job-quick-import {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:40px;padding:8px 13px;
+  border:1px solid var(--primary);border-radius:9px;
+  background:var(--primary-soft);color:var(--primary);
+  font-family:inherit;font-size:12px;font-weight:750;
+  line-height:1.4;cursor:pointer;white-space:nowrap;
+}
+.cg-job-detail .job-quick-group-heading .job-quick-add-button:hover:not(:disabled),
+.cg-job-detail .job-quick-import:hover:not(:disabled) {
+  border-color:var(--primary);
+  filter:brightness(.98);
+}
+.cg-job-detail .job-quick-empty {
+  margin:0;padding:17px 12px;
+  border:1px dashed var(--border);border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-muted);font-size:12px;line-height:1.55;
+}
+.cg-job-detail .job-quick-type-fixed {
+  display:flex;flex-direction:column;justify-content:flex-end;
+  gap:6px;min-width:0;
+  color:var(--text-secondary);font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-quick-type-fixed strong {
+  display:flex;align-items:center;
+  min-height:40px;padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);
+  color:var(--text-secondary);
+  font-size:12px;font-weight:650;
+}
+.cg-job-detail .job-quick-import {
+  align-self:flex-start;
+  border-color:var(--border);
+  background:var(--surface-2);
+  color:var(--text-primary);
+}
+.cg-job-detail .job-quick-save-note {
+  margin:-2px 0 0;
+  color:var(--text-muted);font-size:11px;line-height:1.5;
+}
+@media(max-width:650px){
+  .cg-job-detail .job-quick-item-group {padding:11px;gap:10px}
+  .cg-job-detail .job-quick-group-heading .job-quick-add-button {
+    min-height:42px;
+  }
+  .cg-job-detail .job-quick-type-fixed strong {min-height:43px}
+  .cg-job-detail .job-quick-import {
+    align-self:stretch;
+    white-space:normal;
+  }
+}
+@media(max-width:380px){
+  .cg-job-detail .job-quick-group-heading .job-quick-add-button {
+    width:100%;
+  }
+}
