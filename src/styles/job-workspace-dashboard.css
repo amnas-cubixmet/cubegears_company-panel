@@ -743,3 +743,196 @@
   .job-workspace-dashboard .job-overview-detail-grid { grid-template-columns: 1fr; }
   .job-workspace-dashboard .job-overview-assignment-foot { grid-template-columns: 1fr; }
 }
+
+
+/* One simple stage navigator on every Job Card route. The 6 important
+   stages stay visible; supporting actions live in More. */
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  min-height: 40px;
+  gap: 5px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background: transparent !important;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tabs::-webkit-scrollbar {
+  display: none;
+  height: 0;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab {
+  flex: 0 0 auto;
+  min-width: max-content !important;
+  min-height: 40px !important;
+  height: 40px;
+  gap: 7px !important;
+  padding: 0 11px !important;
+  border: 1px solid transparent !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+  line-height: 1.3;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab:hover:not(:disabled) {
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-active {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-active:hover { background: var(--primary) !important; color: #fff !important; }
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-complete:not(.is-active) {
+  border-color: var(--border) !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-locked {
+  opacity: .48;
+  color: var(--text-muted) !important;
+  cursor: not-allowed;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab-number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 21px;
+  width: 21px !important;
+  height: 21px !important;
+  border-radius: 50%;
+  font-size: 11px !important;
+  font-weight: 750;
+  background: var(--surface-2) !important;
+  color: var(--text-secondary) !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-active .job-workflow-tab-number {
+  background: rgba(255, 255, 255, .18) !important;
+  color: #fff !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab-check {
+  color: var(--success);
+  flex: 0 0 auto;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab.is-active .job-workflow-tab-check {
+  color: inherit;
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 0;
+  align-self: stretch;
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more > summary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  height: 100%;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more > summary::-webkit-details-marker { display: none; }
+.cg-job-detail.job-workspace-dashboard .job-workflow-more[open] > summary,
+.cg-job-detail.job-workspace-dashboard .job-workflow-more.has-active-step > summary {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more[open] > summary svg {
+  transform: rotate(180deg);
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(260px, calc(100vw - 28px));
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .14);
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button > span {
+  flex: 1 1 auto;
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button:hover:not(:disabled),
+.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button.is-current {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.cg-job-detail.job-workspace-dashboard .job-workflow-more > summary:focus-visible,
+.cg-job-detail.job-workspace-dashboard .job-workflow-more-menu button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .cg-job-detail.job-workspace-dashboard .job-simple-step-nav { gap: 5px; padding: 5px; }
+  .cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-workflow-tab {
+    min-height: 40px !important;
+    padding: 0 9px !important;
+    font-size: 12px !important;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-workflow-more > summary {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+}
