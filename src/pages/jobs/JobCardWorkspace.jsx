@@ -126,6 +126,7 @@ export function JobCardWorkspace() {
   const workflowTabsRef = useRef(null);
 
   const [job, setJob] = useState(null);
+  const [workflow, setWorkflow] = useState(null);
   const [jobInvoices, setJobInvoices] = useState([]);
   const [jobPayments, setJobPayments] = useState([]);
   const [billingLoading, setBillingLoading] = useState(false);
@@ -136,7 +137,6 @@ export function JobCardWorkspace() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [lockSections, setLockSections] = useState(false);
   const [error, setError] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
@@ -206,12 +206,14 @@ export function JobCardWorkspace() {
     setError('');
 
     try {
-      const [data, staffData] = await Promise.all([
+      const [data, staffData, flow] = await Promise.all([
         jobService.getJobById(id),
-        staffService.getStaff()
+        staffService.getStaff(),
+        jobService.getJobWorkflow(id)
       ]);
 
       setJob(data || null);
+      setWorkflow(flow || null);
       setStaff(Array.isArray(staffData) ? staffData.filter((item) => item.employmentStatus === 'Active') : []);
 
       if (data?.vehicleReg) {
@@ -352,49 +354,33 @@ export function JobCardWorkspace() {
     : (USE_MOCK_API ? job?.paymentStatus || 'Pending' : 'Not invoiced');
 
 
-  const sectionComplete = useMemo(() => ({
-    overview: Boolean(
-      job?.customerName &&
-      job?.vehicleReg &&
-      job?.assignedEmployeeId
-    ),
+  // The backend workflow endpoint is the single source of truth for
+  // persisted completion; visual checks below cover auxiliary sections only.
+  const coreStages = workflow?.stages || GUIDED_STAGES;
+  const coreCompleted = workflow?.completed || [];
+  const sectionComplete = {
+    overview: coreCompleted.includes('overview'),
+    inspection: coreCompleted.includes('inspection'),
+    estimate: coreCompleted.includes('estimate'),
+    work: coreCompleted.includes('work'),
+    qc: coreCompleted.includes('qc'),
+    invoice: coreCompleted.includes('invoice'),
     complaints: complaints.length > 0,
-    inspection: job?.inspection?.status === 'Completed' || job?.vehicleInspection?.status === 'Completed',
-    work: labourRecords.length > 0,
     parts: parts.length > 0 || outsidePurchases.length > 0,
-    estimate: estimates.some((item) => item.approvalStatus === 'Approved'),
     updates: updates.length > 0,
-    qc: qc?.status === 'Pass',
-    invoice: invoiceTotal > 0,
     activity: true
-  }), [
-    job?.customerName,
-    job?.vehicleReg,
-    job?.assignedEmployeeId,
-    complaints.length,
-    findings.length,
-    inspectionChecks,
-    labourRecords.length,
-    parts.length,
-    outsidePurchases.length,
-    estimates,
-    updates.length,
-    qc?.status,
-    invoiceTotal
-  ]);
-
-  // Guided section locking is an opt-in UI workflow, not API authorization.
-  const unlockedGuidedIndex = useMemo(() => {
-    for (let index = 0; index < GUIDED_STAGES.length - 1; index += 1) {
-      if (!sectionComplete[GUIDED_STAGES[index]]) return index;
-    }
-    return GUIDED_STAGES.length - 1;
-  }, [sectionComplete]);
-  const isSectionLocked = (key) => {
-    const index = GUIDED_STAGES.indexOf(key);
-    return lockSections && index > unlockedGuidedIndex && !sectionComplete[key];
   };
-  const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
+  const currentStage = workflow?.current || 'overview';
+  const isSectionLocked = (key) => {
+    if (!workflow) return false;
+    if (coreStages.includes(key)) return workflow.locked?.includes(key) || false;
+    if (key === 'complaints') return false;
+    if (key === 'parts' || key === 'updates') {
+      return ['overview', 'inspection', 'estimate'].includes(currentStage);
+    }
+    return false;
+  };
+  const visibleTabs = TABS;
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = Boolean(sectionComplete[activeTab]);
@@ -402,6 +388,56 @@ export function JobCardWorkspace() {
   const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
   const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
+  useEffect(() => {
+    if (!job?.id || !workflow) return;
+    const pieces = location.pathname.split('/').filter(Boolean);
+    const requested = pieces.length > 2 ? pieces[2] : null;
+    const supported = TABS.some(([key]) => key === requested);
+    if (!supported || isSectionLocked(requested)) {
+      navigate('/jobs/' + job.id + '/' + currentStage, { replace: true });
+    }
+  }, [job?.id, workflow, location.pathname, currentStage, navigate]);
+
+  const refreshJobWorkflow = async (advanceFrom = null) => {
+    const [updated, flow] = await Promise.all([
+      jobService.getJobById(id),
+      jobService.getJobWorkflow(id)
+    ]);
+    setJob(updated);
+    setWorkflow(flow);
+    if (advanceFrom && flow.current !== advanceFrom) {
+      navigate('/jobs/' + id + '/' + flow.current, { replace: true });
+    }
+    return flow;
+  };
+
+  const completeStage = async (stage) => {
+    if (!workflow || saving) return;
+    const options = {};
+    if (stage === 'estimate') {
+      if (!window.confirm('Confirm that the customer approved the latest estimate?')) return;
+      options.approveEstimate = true;
+    }
+    if (stage === 'work') {
+      if (!window.confirm('Confirm all work is finished and mechanic timers are stopped?')) return;
+      options.confirmWorkDone = true;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      const result = await jobService.completeJobStage(job.id, stage, options);
+      if (result.job) setJob(result.job);
+      setWorkflow(result);
+      if (result.current && result.current !== stage) {
+        navigate('/jobs/' + job.id + '/' + result.current, { replace: true });
+      }
+    } catch (e) {
+      const details = e?.response?.data;
+      setError(details?.stage || details?.message || e?.message || 'Unable to complete this stage.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const addComplaint = async () => {
     const description = complaintText.trim();
