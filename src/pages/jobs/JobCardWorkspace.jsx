@@ -812,7 +812,7 @@ export function JobCardWorkspace() {
 
   const openTab = (key) => {
     if (isSectionLocked(key)) {
-      setError('This step is locked in guided mode. Complete earlier steps or turn off Lock steps.');
+      setError('Complete the current Job Card stage to unlock this section.');
       return;
     }
     setError('');
@@ -842,8 +842,8 @@ export function JobCardWorkspace() {
           <select
             aria-label="Change Job Card status"
             value={normalizeJobStatus(job.status)}
-            onChange={(e) => setStatus(e.target.value)}
-            disabled={saving}
+            disabled
+            title="Status advances only when the current workflow stage is completed"
             className="h-10 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"
           >
             {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
@@ -890,9 +890,8 @@ export function JobCardWorkspace() {
               type="button"
               key={status}
               className={`job-status-step ${state}`}
-              onClick={() => setStatus(status)}
-              disabled={saving}
-              title={`Set status to ${status}`}
+              disabled
+              title={`Workflow status: ${status}`}
             >
               <span>{index + 1}</span>
               <strong>{status}</strong>
@@ -934,6 +933,12 @@ export function JobCardWorkspace() {
           {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
           {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
         </span>
+        {!activeTabLocked && !activeTabComplete && activeTab === currentStage && (
+          <button type="button" className="job-stage-complete-button" disabled={saving} onClick={() => completeStage(activeTab)}>
+            <CheckCircle2 size={15} aria-hidden="true" />
+            {saving ? 'Saving…' : activeTab === 'estimate' ? 'Approve & Continue' : activeTab === 'work' ? 'Finish Work & Continue' : activeTab === 'invoice' ? 'Finish Job Card' : 'Complete & Continue'}
+          </button>
+        )}
       </section>
 
       <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
