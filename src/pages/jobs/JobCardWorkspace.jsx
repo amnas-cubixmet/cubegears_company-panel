@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
+import { billingService } from '../../services/billing.service';
+import { paymentService } from '../../services/payment.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
@@ -108,6 +110,10 @@ export function JobCardWorkspace() {
   const workflowTabsRef = useRef(null);
 
   const [job, setJob] = useState(null);
+  const [jobInvoices, setJobInvoices] = useState([]);
+  const [jobPayments, setJobPayments] = useState([]);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState('');
   const [staff, setStaff] = useState([]);
   const [timerRefreshVersion, setTimerRefreshVersion] = useState(0);
   const [vehicleHistory, setVehicleHistory] = useState([]);
@@ -148,6 +154,37 @@ export function JobCardWorkspace() {
     const left = activeButton.offsetLeft - rail.offsetLeft - (rail.clientWidth - activeButton.clientWidth) / 2;
     rail.scrollTo({ left: Math.max(0, left), behavior: 'instant' });
   }, [activeTab]);
+
+  const loadBilling = async () => {
+    if (!id) return;
+    setBillingLoading(true);
+    setBillingError('');
+    try {
+      const [invoiceResponse, paymentResponse] = await Promise.all([
+        billingService.list(),
+        paymentService.getPayments()
+      ]);
+      const allInvoices = Array.isArray(invoiceResponse) ? invoiceResponse : invoiceResponse?.results || [];
+      const related = allInvoices.filter((row) =>
+        (row.kind || 'invoice') === 'invoice' &&
+        (String(row.sourceJobId || '') === String(id) ||
+         (job?.jobNumber && String(row.jobCardNo || '') === String(job.jobNumber)))
+      ).sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
+      const relatedIds = new Set(related.map((row) => String(row.id)));
+      const allPayments = Array.isArray(paymentResponse) ? paymentResponse : paymentResponse?.results || [];
+      setJobInvoices(related);
+      setJobPayments(allPayments.filter((row) => relatedIds.has(String(row.invoice || '')))
+        .sort((a, b) => String(b.created_at || b.date || '').localeCompare(String(a.created_at || a.date || ''))));
+    } catch (requestError) {
+      setBillingError(requestError?.message || 'Unable to load invoice and payment records.');
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'invoice' && job?.id) loadBilling();
+  }, [activeTab, job?.id, job?.jobNumber]);
 
   const load = async () => {
     setLoading(true);
@@ -289,7 +326,15 @@ export function JobCardWorkspace() {
   const estimateGrandTotal = taxable + estimateTaxAmount;
 
   const latestEstimate = estimates.at(-1) || null;
-  const invoiceTotal = cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0);
+  const linkedInvoice = jobInvoices.find((row) => row.status !== 'Cancelled') || null;
+  const invoiceTotal = linkedInvoice
+    ? cleanNumber(linkedInvoice.total)
+    : (USE_MOCK_API ? cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0) : 0);
+  const invoicePaid = linkedInvoice ? cleanNumber(linkedInvoice.paid) : cleanNumber(job?.billing?.paidAmount || 0);
+  const invoiceBalance = Math.max(0, linkedInvoice ? cleanNumber(linkedInvoice.balance ?? (invoiceTotal - invoicePaid)) : invoiceTotal - invoicePaid);
+  const invoicePaymentStatus = linkedInvoice
+    ? (invoiceBalance <= 0 ? 'Paid' : invoicePaid > 0 ? 'Partial' : 'Pending')
+    : (USE_MOCK_API ? job?.paymentStatus || 'Pending' : 'Not invoiced');
 
 
   const sectionComplete = useMemo(() => ({
@@ -624,6 +669,38 @@ export function JobCardWorkspace() {
 
     if (invoiceTotal <= 0) {
       setError('Create an estimate or invoice before recording payment.');
+      return;
+    }
+
+    if (paymentAmount > invoiceBalance) {
+      setError('Payment cannot exceed the outstanding invoice balance.');
+      return;
+    }
+
+    if (!USE_MOCK_API) {
+      if (!linkedInvoice?.id || !job?.customerId) {
+        setError('Create an invoice linked to this Job Card before recording payment.');
+        return;
+      }
+      setSaving(true);
+      setError('');
+      try {
+        const today = new Date();
+        const date = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+        await paymentService.createPayment({
+          invoice: linkedInvoice.id,
+          customer: job.customerId,
+          date,
+          amount: paymentAmount.toFixed(2),
+          method: paymentForm.method
+        });
+        setPaymentForm((old) => ({ ...old, amount: '' }));
+        await loadBilling();
+      } catch (requestError) {
+        setError(requestError?.message || 'Payment could not be recorded.');
+      } finally {
+        setSaving(false);
+      }
       return;
     }
 
