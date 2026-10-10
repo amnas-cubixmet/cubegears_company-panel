@@ -169,6 +169,7 @@ export const jobService = {
   getJobWorkflow,
   completeJobStage,
   createJobEstimate,
+  saveQuickJobEstimate,
   rejectJobEstimate,
   deleteJob,
   getVehicleHistory,
