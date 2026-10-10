@@ -304,10 +304,15 @@ export function JobCardWorkspace() {
   const complaints = job?.complaints || job?.customerComplaints || [];
   const findings = job?.inspection?.findings || job?.vehicleInspection?.findings || job?.inspectionFindings || [];
   const inspectionChecks = job?.inspection?.checklist || {};
-  const labourRecords = job?.labourRecords || [];
+  const labourRecords = USE_MOCK_API ? (job?.labourRecords || []) : (job?.work || []);
   const parts = job?.partsUsed || [];
   const outsidePurchases = job?.outsidePurchases || [];
-  const estimates = job?.estimates || [];
+  const estimates = (job?.estimates || []).map((item) => ({ ...item,
+    approvalStatus: item.approvalStatus || (item.status === 'Draft' ? 'Pending' : item.status),
+    grandTotal: item.grandTotal ?? item.total,
+    taxAmount: item.taxAmount ?? item.tax,
+    version: item.version ? 'Estimate V' + item.version : item.version
+  }));
   const updates = job?.workUpdates || [];
   const timeline = job?.timeline || [];
   const qc = job?.qualityCheck || {
@@ -505,12 +510,34 @@ export function JobCardWorkspace() {
       startedAt: new Date().toISOString()
     };
 
-    await persist({ labourRecords: [...labourRecords, record] });
-    setLabour(blankLabour());
+    const updated = await persist(USE_MOCK_API
+      ? { labourRecords: [...labourRecords, record] }
+      : { work: [...labourRecords, record] });
+    if (updated) setLabour(blankLabour());
   };
 
   const createEstimate = async (kind = 'Estimate') => {
     const nextVersion = estimates.length + 1;
+    if (!USE_MOCK_API) {
+      setSaving(true);
+      setError('');
+      try {
+        await jobService.createJobEstimate(job.id, {
+          version: nextVersion,
+          status: 'Draft',
+          items: [{ description: kind, quantity: 1 }],
+          subtotal: estimateSubtotal.toFixed(2),
+          tax: estimateTaxAmount.toFixed(2),
+          total: estimateGrandTotal.toFixed(2)
+        });
+        await refreshJobWorkflow();
+      } catch (e) {
+        setError(e?.response?.data?.detail || e?.message || 'Estimate could not be created.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const record = {
       id: `EST-${Date.now()}`,
       version: kind === 'Additional Work' ? `Additional Work V${nextVersion}` : `Estimate V${nextVersion}`,
@@ -537,6 +564,20 @@ export function JobCardWorkspace() {
   };
 
   const setEstimateApproval = async (estimateKey, approvalStatus) => {
+    if (!USE_MOCK_API) {
+      if (approvalStatus === 'Approved') return completeStage('estimate');
+      setSaving(true);
+      setError('');
+      try {
+        await jobService.rejectJobEstimate(job.id, estimateKey);
+        await refreshJobWorkflow();
+      } catch (e) {
+        setError(e?.response?.data?.detail || e?.message || 'Estimate decision could not be saved.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const nextEstimates = estimates.map((item) => (item.id || item.version) === estimateKey
       ? {
           ...item,
