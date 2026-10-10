@@ -346,3 +346,64 @@
 @media (prefers-reduced-motion: reduce) {
   .job-workspace-dashboard * { scroll-behavior: auto !important; }
 }
+
+
+/* Persistent staged Job Card: consistent alignment across all tab routes */
+.job-workspace-dashboard .job-workspace-lock-note {
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;line-height:1.5;color:var(--text-secondary);
+  min-width:0;max-width:100%;
+}
+.job-workspace-dashboard .job-stage-complete-button {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:42px;padding:0 15px;
+  border:1px solid var(--primary);border-radius:10px;
+  background:var(--primary);color:#fff;
+  font:inherit;font-size:12px;font-weight:750;
+  white-space:nowrap;cursor:pointer;
+}
+.job-workspace-dashboard .job-stage-complete-button:disabled {opacity:.55;cursor:not-allowed}
+.job-workspace-dashboard .job-workspace-section-bar {row-gap:10px}
+.job-workspace-dashboard .job-workspace-section-title h2 {line-height:1.35}
+.job-workspace-dashboard .job-workspace-section-title p {max-width:65ch}
+.job-workspace-dashboard .job-workflow-tab:disabled {
+  opacity:.45;filter:none;cursor:not-allowed;
+  box-shadow:none!important;
+}
+.job-workspace-dashboard .job-workflow-tab:disabled:hover {
+  transform:none!important;
+}
+.job-workspace-dashboard .job-workflow-gate {min-width:0}
+.job-workspace-dashboard .job-workflow-gate>div {min-width:0;flex:1}
+.job-workspace-dashboard .job-workflow-gate button {flex:0 0 auto}
+.job-workspace-dashboard .job-panel,
+.job-workspace-dashboard .job-work-payroll-stack,
+.job-workspace-dashboard .job-estimate-grid,
+.job-workspace-dashboard .job-qc-grid,
+.job-workspace-dashboard .job-invoice-dashboard,
+.job-workspace-dashboard .job-inspection-grid {
+  min-width:0;max-width:100%;
+}
+.job-workspace-dashboard .job-panel :is(input,select,textarea) {min-width:0;max-width:100%}
+.job-workspace-dashboard :is(.job-panel,.job-work-payroll-stack,.job-parts-workflow) button {
+  min-height:34px;max-width:100%;
+}
+.job-workspace-dashboard :is(.job-panel,.job-work-payroll-stack) :is(h2,h3,label,button) {
+  overflow-wrap:anywhere;
+}
+.job-workspace-dashboard .job-workflow-tabs {
+  scrollbar-width:thin;white-space:nowrap;
+}
+@media(max-width:767px) {
+  .job-workspace-dashboard .job-stage-complete-button {
+    width:100%;min-height:44px;flex:1 1 100%;white-space:normal;
+  }
+  .job-workspace-dashboard .job-workspace-section-state {margin-left:auto}
+  .job-workspace-dashboard .job-workflow-gate {align-items:stretch}
+  .job-workspace-dashboard .job-workflow-gate button {min-height:42px}
+  .job-workspace-dashboard .job-workspace-lock-note {font-size:11px}
+}
+@media(max-width:380px) {
+  .job-workspace-dashboard .job-workspace-section-state {margin-left:auto}
+  .job-workspace-dashboard .job-workflow-gate button {width:100%}
+}
