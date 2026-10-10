@@ -336,7 +336,6 @@ export function JobCardWorkspace() {
   const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
-  const activeTabIndex = TABS.findIndex(([key]) => key === activeTab);
   const activeTabComplete = sectionComplete[activeTab];
 
 
@@ -681,7 +680,12 @@ export function JobCardWorkspace() {
   };
 
   if (loading) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Loading job card…</div>;
-  if (!job) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Job card not found.</div>;
+  if (!job) return (
+    <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted" role={error ? 'alert' : undefined}>
+      <p>{error || 'Job card not found.'}</p>
+      {error && <button type="button" className="mt-3 rounded-lg border border-line px-4 py-2 text-content" onClick={load}>Retry</button>}
+    </div>
+  );
 
   return (
     <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-4">
@@ -792,6 +796,15 @@ export function JobCardWorkspace() {
 
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 xl:col-span-2">
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-secondary">Customer complaint</div>
+              <p className="mt-1 break-words text-sm text-content">{complaints[0]?.description || complaints[0]?.wording || 'No complaint recorded yet.'}</p>
+            </div>
+            <button type="button" onClick={() => openTab('complaints')} className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-content">
+              {complaints.length ? 'View complaints' : 'Add complaint'}
+            </button>
+          </section>
           <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center gap-2 text-sm font-extrabold text-content"><UserRound size={16} className="text-primary"/>Customer & Vehicle</div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
@@ -820,7 +833,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
+          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
             <div className="flex items-center gap-2 text-sm font-extrabold text-content">
               <Star size={16} className="text-primary"/>
               Customer Feedback
@@ -863,7 +876,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
+          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
             <div className="flex items-center gap-2 text-sm font-extrabold text-content"><History size={16} className="text-primary"/>Vehicle Service History</div>
             {!vehicleHistory.length ? (
               <div className="mt-3 rounded-xl border border-dashed border-line p-5 text-center text-xs text-muted">No previous job cards for this registration.</div>
