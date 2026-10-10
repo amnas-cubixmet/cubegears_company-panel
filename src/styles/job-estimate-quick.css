@@ -1,0 +1,154 @@
+/* Simple Job Card Estimate — fast item entry and compact billing summary. */
+.cg-job-detail .job-quick-estimate {
+  display:flex;flex-direction:column;gap:14px;min-width:0;width:100%;
+  font-family:inherit;color:var(--text-primary);
+}
+.cg-job-detail .job-quick-estimate * {box-sizing:border-box}
+.cg-job-detail .job-quick-header,
+.cg-job-detail .job-quick-panel,
+.cg-job-detail .job-quick-history {
+  min-width:0;padding:17px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm);
+}
+.cg-job-detail .job-quick-header {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.cg-job-detail .job-quick-header>div {flex:1 1 220px;min-width:0}
+.cg-job-detail .job-quick-eyebrow {display:block;margin-bottom:5px;color:var(--text-muted);font-size:11px;font-weight:650}
+.cg-job-detail .job-quick-header h2 {
+  display:flex;align-items:center;gap:9px;margin:0;
+  color:var(--text-primary);font-size:18px;font-weight:750;line-height:1.35;
+}
+.cg-job-detail .job-quick-header h2 svg {color:var(--primary)}
+.cg-job-detail .job-quick-header p,
+.cg-job-detail .job-quick-section-head p {
+  margin:5px 0 0;color:var(--text-muted);font-size:12px;line-height:1.5;
+}
+.cg-job-detail .job-quick-outline,
+.cg-job-detail .job-quick-add-actions button {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:41px;padding:0 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);color:var(--text-primary);
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+.cg-job-detail .job-quick-estimate button:disabled {opacity:.52;cursor:not-allowed}
+.cg-job-detail .job-quick-grid {
+  display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,.78fr);
+  gap:13px;align-items:start;
+}
+.cg-job-detail .job-quick-panel {display:flex;flex-direction:column;gap:16px}
+.cg-job-detail .job-quick-section-head {
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+.cg-job-detail .job-quick-section-head h3 {margin:0;font-size:14px;font-weight:750;line-height:1.4}
+.cg-job-detail .job-quick-count {
+  display:inline-flex;align-items:center;padding:5px 9px;
+  border-radius:99px;background:var(--surface-2);
+  color:var(--text-secondary);font-size:11px;font-weight:650;white-space:nowrap;
+}
+.cg-job-detail .job-quick-items {display:flex;flex-direction:column;gap:9px;min-width:0}
+.cg-job-detail .job-quick-line {
+  min-width:0;padding:13px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+}
+.cg-job-detail .job-quick-line-header {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.cg-job-detail .job-quick-line-header strong {font-size:12px;font-weight:750}
+.cg-job-detail .job-quick-line-header button {
+  display:grid;place-items:center;width:30px;height:30px;
+  border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);color:var(--text-secondary);cursor:pointer;
+}
+.cg-job-detail .job-quick-line-fields {
+  display:grid;grid-template-columns:minmax(0,1.1fr) minmax(90px,.64fr) 72px 112px;
+  gap:9px;align-items:end;
+}
+.cg-job-detail .job-quick-line-fields label,
+.cg-job-detail .job-quick-adjustments label {
+  display:flex;flex-direction:column;gap:6px;min-width:0;
+  color:var(--text-secondary);font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-quick-estimate :is(input,select) {
+  width:100%;min-width:0;max-width:100%;min-height:40px;
+  padding:9px 10px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);color:var(--text-primary);
+  font-family:inherit;font-size:13px;font-weight:500;
+}
+.cg-job-detail .job-quick-estimate :is(input,select):focus-visible,
+.cg-job-detail .job-quick-estimate button:focus-visible,
+.cg-job-detail .job-quick-history summary:focus-visible {
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+.cg-job-detail .job-quick-line-total {
+  display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:10px;
+  color:var(--text-muted);font-size:11px;
+}
+.cg-job-detail .job-quick-line-total strong {color:var(--text-primary);font-size:12px;font-variant-numeric:tabular-nums}
+.cg-job-detail .job-quick-add-actions {display:flex;flex-wrap:wrap;gap:8px}
+.cg-job-detail .job-quick-add-actions button {min-height:39px}
+.cg-job-detail .job-quick-amounts {margin:0;display:flex;flex-direction:column;gap:13px}
+.cg-job-detail .job-quick-amounts>div:not(.job-quick-adjustments) {
+  display:flex;justify-content:space-between;gap:12px;align-items:center;
+}
+.cg-job-detail .job-quick-amounts dt {color:var(--text-secondary);font-size:12px;font-weight:650}
+.cg-job-detail .job-quick-amounts dd {
+  margin:0;text-align:right;color:var(--text-primary);
+  font-size:13px;font-weight:750;font-variant-numeric:tabular-nums;
+}
+.cg-job-detail .job-quick-adjustments {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cg-job-detail .job-quick-grand-total {
+  padding:13px;border-radius:10px;background:var(--primary-soft);
+}
+.cg-job-detail .job-quick-grand-total dt {color:var(--primary);font-weight:750}
+.cg-job-detail .job-quick-grand-total dd {font-size:21px}
+.cg-job-detail .job-quick-actions {display:flex;flex-direction:column;gap:9px}
+.cg-job-detail .job-quick-actions button {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:43px;padding:9px 12px;border-radius:9px;
+  font-size:12px;font-weight:750;cursor:pointer;
+}
+.cg-job-detail .job-quick-primary {border:1px solid var(--border);background:var(--surface-2);color:var(--text-primary)}
+.cg-job-detail .job-quick-approve {border:1px solid var(--primary);background:var(--primary);color:#fff}
+.cg-job-detail .job-quick-actions small {text-align:center;font-size:11px;line-height:1.5;color:var(--text-muted)}
+.cg-job-detail .job-quick-invalid {margin:0;color:var(--danger);font-size:11px;line-height:1.4}
+.cg-job-detail .job-quick-warning,
+.cg-job-detail .job-quick-feedback {
+  margin:0;padding:11px 13px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);font-size:12px;color:var(--text-secondary);
+}
+.cg-job-detail .job-quick-warning {color:var(--danger);border-color:var(--danger)}
+.cg-job-detail .job-quick-history {padding:0;overflow:hidden}
+.cg-job-detail .job-quick-history summary {
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:15px 17px;list-style:none;cursor:pointer;
+  font-size:12px;font-weight:750;
+}
+.cg-job-detail .job-quick-history summary::-webkit-details-marker {display:none}
+.cg-job-detail .job-quick-history[open] summary svg {transform:rotate(180deg)}
+.cg-job-detail .job-quick-history-list {padding:10px 15px;border-top:1px solid var(--border)}
+.cg-job-detail .job-quick-history-list>div {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:10px;padding:11px 0;border-bottom:1px solid var(--border);font-size:12px;
+}
+.cg-job-detail .job-quick-history-list>div:last-child {border:0}
+.cg-job-detail .job-quick-history-list strong {font-variant-numeric:tabular-nums}
+.cg-job-detail .job-quick-history-list button {
+  min-height:33px;padding:0 10px;border:1px solid var(--border);
+  border-radius:8px;background:var(--surface-2);color:var(--text-primary);
+  font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-quick-history-list>p {font-size:12px;color:var(--text-muted)}
+@media(max-width:1020px){
+  .cg-job-detail .job-quick-grid {grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .cg-job-detail .job-quick-estimate {gap:10px}
+  .cg-job-detail .job-quick-header,.cg-job-detail .job-quick-panel {padding:13px}
+  .cg-job-detail .job-quick-header .job-quick-outline {width:100%}
+  .cg-job-detail .job-quick-line-fields {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cg-job-detail .job-quick-line-fields .job-quick-description {grid-column:1 / -1}
+  .cg-job-detail .job-quick-line {padding:11px}
+  .cg-job-detail .job-quick-estimate :is(input,select) {font-size:16px}
+}
+@media(max-width:380px){
+  .cg-job-detail .job-quick-line-fields {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cg-job-detail .job-quick-add-actions button {width:100%}
+  .cg-job-detail .job-quick-adjustments {gap:7px}
+}
