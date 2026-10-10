@@ -156,7 +156,7 @@ export const JobCreatePage = () => {
   const set = (key, value) => {
     setError('');
     if (key === 'vehicleReg') {
-      const normalized = (number) => String(number || '').replace(/\\s+/g, '').toUpperCase();
+      const normalized = (number) => String(number || '').replace(/\s+/g, '').toUpperCase();
       const matched = customerVehicles.find((vehicle) =>
         normalized(vehicle.regNo || vehicle.registration || vehicle.licensePlate) === normalized(value)
       );
@@ -199,7 +199,6 @@ export const JobCreatePage = () => {
       const created = await jobService.createJob({
         ...form,
         ...(selectedCustomer?.id ? { customer: selectedCustomer.id } : {}),
-        ...(selectedVehicleId ? { selectedVehicleId } : {}),
         checkInTime: form.jobDateTime,
         customerComplaints: form.complaint
           ? [{ id: `CMP-${Date.now()}`, description: form.complaint, wording: form.complaint, status: 'Open' }]
