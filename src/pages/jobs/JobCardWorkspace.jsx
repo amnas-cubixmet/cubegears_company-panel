@@ -14,7 +14,9 @@ import {
   Trash2,
   UserRound,
   Wrench,
-  ChevronRight
+  ChevronRight,
+  LockKeyhole,
+  LockKeyholeOpen
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
@@ -72,6 +74,20 @@ const TABS = [
   ['activity', 'Activity']
 ];
 
+const SECTION_DETAILS = {
+  overview: 'Customer, vehicle and technician at a glance.',
+  complaints: 'Customer concerns and work requests.',
+  inspection: 'Vehicle checks and inspection findings.',
+  estimate: 'Labour, parts, estimates and customer approval.',
+  work: 'Technician assignments and workshop work.',
+  parts: 'Spare parts request, issue and usage.',
+  updates: 'Technician notes and work updates.',
+  qc: 'Quality inspection and final checks.',
+  invoice: 'Invoice, payments, balance and delivery.',
+  activity: 'Job Card activity and recorded events.'
+};
+const GUIDED_STAGES = ['overview', 'inspection', 'estimate', 'work', 'qc', 'invoice'];
+
 const TAB_ICONS = {
   overview: Gauge,
   complaints: FileText,
@@ -120,6 +136,7 @@ export function JobCardWorkspace() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [lockSections, setLockSections] = useState(false);
   const [error, setError] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
@@ -366,20 +383,24 @@ export function JobCardWorkspace() {
     invoiceTotal
   ]);
 
-  const unlockedTabIndex = useMemo(() => {
-    let unlocked = 0;
-    for (let index = 0; index < TABS.length - 1; index += 1) {
-      const [key] = TABS[index];
-      if (!sectionComplete[key]) break;
-      unlocked = index + 1;
+  // Guided section locking is an opt-in UI workflow, not API authorization.
+  const unlockedGuidedIndex = useMemo(() => {
+    for (let index = 0; index < GUIDED_STAGES.length - 1; index += 1) {
+      if (!sectionComplete[GUIDED_STAGES[index]]) return index;
     }
-    return unlocked;
+    return GUIDED_STAGES.length - 1;
   }, [sectionComplete]);
-
+  const isSectionLocked = (key) => {
+    const index = GUIDED_STAGES.indexOf(key);
+    return lockSections && index > unlockedGuidedIndex && !sectionComplete[key];
+  };
   const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
-  const activeTabComplete = sectionComplete[activeTab];
+  const activeTabComplete = Boolean(sectionComplete[activeTab]);
+  const activeTabLocked = isSectionLocked(activeTab);
+  const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
+  const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
 
   const addComplaint = async () => {
@@ -754,6 +775,10 @@ export function JobCardWorkspace() {
   };
 
   const openTab = (key) => {
+    if (isSectionLocked(key)) {
+      setError('This step is locked in guided mode. Complete earlier steps or turn off Lock steps.');
+      return;
+    }
     setError('');
     navigate(`/jobs/${job.id}/${key}`);
   };
@@ -767,7 +792,7 @@ export function JobCardWorkspace() {
   );
 
   return (
-    <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-4">
+    <div className="job-management-page cg-job-detail job-workspace-dashboard flex w-full min-w-0 flex-col gap-4 pb-4">
       <JobBreadcrumbs current={TABS.find(([key]) => key === activeTab)?.[1] || "Overview"} jobLabel={jobDisplayLabel(job)} jobId={job.id} />
       <header className="job-detail-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
@@ -793,11 +818,17 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2">
-        <span className="text-xs text-secondary">Current status: <strong className="text-content">{normalizeJobStatus(job.status)}</strong></span>
-        <button type="button" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-content" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
-          {showAdvanced ? 'Simple view' : 'Show all details'}
-        </button>
+      <div className="job-workspace-toolbar">
+        <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
+        <div className="job-workspace-toolbar-actions">
+          <button type="button" onClick={() => { setLockSections((value) => !value); setError(''); }} aria-pressed={lockSections} title="Optional guided step lock – does not replace backend permissions">
+            {lockSections ? <LockKeyhole size={14} aria-hidden="true"/> : <LockKeyholeOpen size={14} aria-hidden="true"/>}
+            {lockSections ? 'Unlock steps' : 'Lock steps'}
+          </button>
+          <button type="button" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+            {showAdvanced ? 'Simple view' : 'Show all details'}
+          </button>
+        </div>
       </div>
 
       <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-3">
@@ -840,39 +871,62 @@ export function JobCardWorkspace() {
       <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
         {visibleTabs.map(([key, label], index) => {
           const completed = sectionComplete[key];
+          const locked = isSectionLocked(key);
           const TabIcon = TAB_ICONS[key];
           return (
             <button
               type="button"
               key={key}
               onClick={() => openTab(key)}
+              disabled={locked}
               aria-current={activeTab === key ? "page" : undefined}
-              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : ''].join(' ')}
-              title={label}
+              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : '', locked ? 'is-locked' : ''].join(' ')}
+              title={locked ? label + ' – complete earlier steps to unlock' : label}
             >
               <span className="job-workflow-tab-number">{index + 1}</span>
               <span className="job-workflow-tab-label"><TabIcon size={14} aria-hidden="true" />{label}</span>
-              {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
+              {locked ? <LockKeyhole size={12} className="job-workflow-tab-lock" aria-label="Locked" /> : completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
             </button>
           );
         })}
       </nav>
 
-      <div className={`job-workflow-gate ${activeTabComplete ? 'is-complete' : 'is-pending'}`}>
-        <div>
-          <strong>{activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
-          <span>Move freely between job stages. Save the details you record.</span>
+      <section className="job-workspace-section-bar" aria-label={activeTabLabel + ' section'}>
+        <div className="job-workspace-section-icon"><ActiveSectionIcon size={17} aria-hidden="true"/></div>
+        <div className="job-workspace-section-title">
+          <h2>{activeTabLabel}</h2>
+          <p>{SECTION_DETAILS[activeTab]}</p>
         </div>
-        {nextVisibleTab ? (
-          <button type="button" disabled={saving} onClick={() => openTab(nextVisibleTab[0])}>
+        <span className={'job-workspace-section-state ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-open')}>
+          {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
+          {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
+        </span>
+      </section>
+
+      <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
+        <div>
+          <strong>{activeTabLocked ? 'Step locked in guided mode' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
+          <span>{lockSections ? 'Guided mode follows essential stages; optional sections stay available.' : 'Move freely between sections and save changes before continuing.'}</span>
+        </div>
+        {nextVisibleTab && !activeTabLocked ? (
+          <button type="button" disabled={saving || isSectionLocked(nextVisibleTab[0])} onClick={() => openTab(nextVisibleTab[0])}>
             Next: {nextVisibleTab[1]}
-            <ChevronRight size={14} />
+            {isSectionLocked(nextVisibleTab[0]) ? <LockKeyhole size={14} aria-hidden="true"/> : <ChevronRight size={14}/>}
           </button>
         ) : null}
       </div>
 
       {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
+      {activeTabLocked ? (
+        <section className="job-workspace-locked-panel">
+          <LockKeyhole size={24} aria-hidden="true" />
+          <h3>{activeTabLabel} is locked</h3>
+          <p>Complete the previous guided step, or turn off Lock steps to continue in any order.</p>
+          <button type="button" onClick={() => setLockSections(false)}>Unlock steps</button>
+        </section>
+      ) : (
+        <>
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 xl:col-span-2">
@@ -1377,6 +1431,8 @@ export function JobCardWorkspace() {
             ))}
           </div>
         </section>
+      )}
+        </>
       )}
 
     </div>
