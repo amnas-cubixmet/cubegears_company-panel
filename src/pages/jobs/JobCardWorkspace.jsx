@@ -26,6 +26,7 @@ import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 import { JobInspectionPanel } from '../../components/jobs/JobInspectionPanel';
+import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
@@ -998,7 +999,7 @@ export function JobCardWorkspace() {
         </div>
       )}
 
-      {activeTab !== 'overview' && activeTab !== 'inspection' && (
+      {activeTab !== 'overview' && activeTab !== 'inspection' && activeTab !== 'estimate' && (
         <>
       <section className="job-workspace-section-bar" aria-label={activeTabLabel + ' section'}>
         <div className="job-workspace-section-icon"><ActiveSectionIcon size={17} aria-hidden="true"/></div>
@@ -1212,9 +1213,12 @@ export function JobCardWorkspace() {
       {activeTab === 'inspection' && (
         <JobInspectionPanel
           job={job}
-          onChanged={async () => {
+          canCorrect={currentStage === 'estimate' && !activeTabLocked}
+          startEditing={new URLSearchParams(location.search).get('edit') === '1'}
+          onDoneEditing={() => navigate('/jobs/' + job.id + '/estimate')}
+          onChanged={async (operation) => {
             try {
-              await refreshJobWorkflow('inspection');
+              await refreshJobWorkflow(operation === 'complete' ? 'inspection' : null);
             } catch (e) {
               setError(e?.message || 'Could not refresh job details.');
             }
@@ -1294,67 +1298,17 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'estimate' && (
-        <div className="job-estimate-grid grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel job-estimate-history-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Estimate History</div>
-            <div className="job-estimate-history mt-3 flex flex-col gap-2">
-              {estimates.map((item)=>(
-                <div key={item.id || item.version} className="job-estimate-card rounded-xl border border-line bg-surface-2 p-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <div className="text-xs font-extrabold text-content">{item.version}</div>
-                      <div className="mt-1 text-[10px] text-muted">{item.date}</div>
-                    </div>
-                    <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-bold text-primary">{item.approvalStatus}</span>
-                  </div>
-                  <div className="job-estimate-breakdown mt-3 grid grid-cols-2 gap-2 text-[11px] text-secondary">
-                    <div>Parts <strong className="float-right text-content">{money.format(item.partsTotal || 0)}</strong></div>
-                    <div>Labour <strong className="float-right text-content">{money.format(item.servicesTotal || 0)}</strong></div>
-                    <div>Tax <strong className="float-right text-content">{money.format(item.taxAmount || 0)}</strong></div>
-                    <div>Discount <strong className="float-right text-content">{money.format(item.discount || 0)}</strong></div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
-                    <strong className="text-sm text-content">{money.format(item.grandTotal || 0)}</strong>
-                    {item.approvalStatus === 'Pending' && (USE_MOCK_API || item.id === estimates.at(-1)?.id) ? (
-                      <div className="flex gap-2">
-                        <button onClick={()=>setEstimateApproval(item.id || item.version,'Approved')} className="h-8 rounded-lg border-0 bg-emerald-600 px-3 text-[10px] font-bold text-white">Approve</button>
-                        <button onClick={()=>setEstimateApproval(item.id || item.version,'Rejected')} className="h-8 rounded-lg border-0 bg-red-500 px-3 text-[10px] font-bold text-white">Reject</button>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-              {!estimates.length ? <Empty text="No estimate created yet."/> : null}
-            </div>
-          </section>
-
-          <section className="job-panel job-current-estimate rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Current Estimate</div>
-            <div className="job-current-estimate__body mt-3 flex flex-col gap-2 text-xs">
-              <AmountRow label="Parts" value={partsTotal}/>
-              <AmountRow label="Outside Purchase" value={outsideTotal}/>
-              <AmountRow label="Labour" value={labourTotal}/>
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <label className="text-[10px] font-semibold text-muted">Tax %
-                  <input inputMode="decimal" value={estimateTax} onChange={(e)=>setEstimateTax(e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-line bg-surface-2 px-2 text-xs text-content"/>
-                </label>
-                <label className="text-[10px] font-semibold text-muted">Discount ₹
-                  <input inputMode="decimal" value={estimateDiscount} onChange={(e)=>setEstimateDiscount(e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-line bg-surface-2 px-2 text-xs text-content"/>
-                </label>
-              </div>
-              <AmountRow label="Tax" value={estimateTaxAmount}/>
-              <div className="job-estimate-total mt-2 flex items-center justify-between rounded-xl bg-primary-soft p-3">
-                <span className="text-xs font-bold text-primary">Estimated Total</span>
-                <strong className="text-lg text-content">{money.format(estimateGrandTotal)}</strong>
-              </div>
-              <button type="button" onClick={() => openTab('parts')} disabled={isSectionLocked('parts')} className="mt-2 h-10 rounded-xl border border-line bg-surface-2 text-xs font-bold text-content">
-                <PackageSearch size={14} className="mr-1 inline" aria-hidden="true" /> Manage Parts
-              </button>
-              <button onClick={()=>createEstimate('Estimate')} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Create Estimate</button>
-              <button onClick={()=>createEstimate('Additional Work')} className="h-10 rounded-xl border border-line bg-surface text-xs font-bold text-content">Additional Work Approval</button>
-            </div>
-          </section>
-        </div>
+        <QuickEstimatePanel
+          job={job}
+          estimates={estimates}
+          findings={findings}
+          canEdit={currentStage === 'estimate' && !activeTabLocked}
+          onSaved={() => refreshJobWorkflow()}
+          onApprove={() => completeStage('estimate')}
+          onReject={(estimateId) => setEstimateApproval(estimateId, 'Rejected')}
+          onEditInspection={() => navigate('/jobs/' + job.id + '/inspection?edit=1')}
+          onGoToWork={() => navigate('/jobs/' + job.id + '/' + currentStage)}
+        />
       )}
 
       {activeTab === 'updates' && (
