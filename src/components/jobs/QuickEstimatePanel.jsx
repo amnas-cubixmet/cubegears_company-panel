@@ -73,9 +73,11 @@ export function QuickEstimatePanel({
   }, [lines, discount, taxPercent]);
 
   const validation = useMemo(() => {
+    if (lines.length > 75) return 'Maximum 75 items per estimate.';
     if (!lines.length || lines.some((row) => !row.description.trim() ||
       !Number.isFinite(Number(row.unitPrice)) || Number(row.unitPrice) < 0 ||
-      !Number.isFinite(Number(row.quantity)) || Number(row.quantity) <= 0)) {
+      !Number.isFinite(Number(row.quantity)) || Number(row.quantity) <= 0 ||
+      Number(row.quantity) > 10000 || Number(row.unitPrice) > 10000000)) {
       return 'Add a description, quantity and valid price for every item.';
     }
     if (!Number.isFinite(Number(taxPercent)) || Number(taxPercent) < 0 || Number(taxPercent) > 100) {
@@ -126,7 +128,7 @@ export function QuickEstimatePanel({
     }
   };
   const addLine = (type) => {
-    setLines((current) => [...current, emptyLine(type)]);
+    setLines((current) => current.length >= 75 ? current : [...current, emptyLine(type)]);
     setChanged(true);
     setFeedback('');
   };
@@ -199,9 +201,10 @@ export function QuickEstimatePanel({
   const addInspection = () => {
     const suggestions = inspectSuggestions(findings);
     if (!suggestions.length) return;
-    setLines((current) => [
-      ...current.filter((line) => line.description.trim()), ...suggestions
-    ]);
+    setLines((current) => {
+      const filled = current.filter((line) => line.description.trim());
+      return [...filled, ...suggestions.slice(0, Math.max(0, 75 - filled.length))];
+    });
     setChanged(true);
     setFeedback('');
   };
@@ -240,7 +243,7 @@ export function QuickEstimatePanel({
                 <h4><Wrench size={16} aria-hidden="true"/> Work & Labour</h4>
                 <p>{money(amount.work)} · {lines.filter((item) => item.type !== 'Part').length} items</p>
               </div>
-              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy} onClick={() => addLine('Labour')}>
+              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy || lines.length >= 75} onClick={() => addLine('Labour')}>
                 <Plus size={15} aria-hidden="true"/> Add Work
               </button>}
             </div>
@@ -257,7 +260,7 @@ export function QuickEstimatePanel({
                 <h4><Package size={16} aria-hidden="true"/> Spare Parts</h4>
                 <p>{money(amount.parts)} · {lines.filter((item) => item.type === 'Part').length} items</p>
               </div>
-              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy} onClick={() => addLine('Part')}>
+              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy || lines.length >= 75} onClick={() => addLine('Part')}>
                 <Plus size={15} aria-hidden="true"/> Add Part
               </button>}
             </div>
