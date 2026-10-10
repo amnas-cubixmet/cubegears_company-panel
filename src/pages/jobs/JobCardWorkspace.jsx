@@ -55,6 +55,8 @@ const normalizeJobStatus = (status) => {
 
 const INSPECTION_CHECKS = ['Tyres', 'Warning Lights', 'Battery', 'Engine Oil', 'Coolant', 'Brake Fluid'];
 
+const SIMPLE_TABS = ['overview', 'inspection', 'estimate', 'work', 'parts', 'invoice'];
+
 const TABS = [
   ['overview', 'Overview'],
   ['complaints', 'Complaints'],
@@ -111,6 +113,7 @@ export function JobCardWorkspace() {
   const [vehicleHistory, setVehicleHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
@@ -330,6 +333,9 @@ export function JobCardWorkspace() {
     return unlocked;
   }, [sectionComplete]);
 
+  const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
+  const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
+  const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabIndex = TABS.findIndex(([key]) => key === activeTab);
   const activeTabComplete = sectionComplete[activeTab];
 
@@ -704,7 +710,14 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
-      <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2">
+        <span className="text-xs text-secondary">Current status: <strong className="text-content">{normalizeJobStatus(job.status)}</strong></span>
+        <button type="button" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-content" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+          {showAdvanced ? 'Simple view' : 'Show all details'}
+        </button>
+      </div>
+
+      <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-3">
         {[
           ['Customer', job.customerName || 'Walk-in'],
           ['KM', job.kilometre || '—'],
@@ -712,7 +725,7 @@ export function JobCardWorkspace() {
           ['Technician', job.assignedEmployeeName || 'Unassigned'],
           ['Estimate', latestEstimate ? money.format(latestEstimate.grandTotal || 0) : 'Not created'],
           ['Payment', job.paymentStatus || 'Pending']
-        ].map(([label, value]) => (
+        ].filter(([label]) => showAdvanced || ['Customer', 'Technician', 'Payment'].includes(label)).map(([label, value]) => (
           <div key={label} className="min-w-0 rounded-2xl border border-line bg-surface p-3">
             <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">{label}</div>
             <div className="mt-1 truncate text-sm font-extrabold text-content">{value}</div>
@@ -720,7 +733,7 @@ export function JobCardWorkspace() {
         ))}
       </section>
 
-      <section className="job-status-pipeline" aria-label="Job status progress">
+      {showAdvanced && <section className="job-status-pipeline" aria-label="Job status progress">
         {JOB_STATUSES.map((status, index) => {
           const currentIndex = JOB_STATUSES.indexOf(normalizeJobStatus(job.status));
           const state = index < currentIndex ? 'is-done' : index === currentIndex ? 'is-current' : 'is-next';
@@ -739,10 +752,10 @@ export function JobCardWorkspace() {
             </button>
           );
         })}
-      </section>
+      </section>}
 
       <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
-        {TABS.map(([key, label], index) => {
+        {visibleTabs.map(([key, label], index) => {
           const completed = sectionComplete[key];
           const TabIcon = TAB_ICONS[key];
           return (
@@ -767,9 +780,9 @@ export function JobCardWorkspace() {
           <strong>{activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
           <span>Move freely between job stages. Save the details you record.</span>
         </div>
-        {activeTabIndex < TABS.length - 1 ? (
-          <button type="button" disabled={saving} onClick={() => openTab(TABS[activeTabIndex + 1][0])}>
-            Next: {TABS[activeTabIndex + 1][1]}
+        {nextVisibleTab ? (
+          <button type="button" disabled={saving} onClick={() => openTab(nextVisibleTab[0])}>
+            Next: {nextVisibleTab[1]}
             <ChevronRight size={14} />
           </button>
         ) : null}
