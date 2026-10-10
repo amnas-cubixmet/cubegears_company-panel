@@ -14,7 +14,9 @@ import {
   Trash2,
   UserRound,
   Wrench,
-  ChevronRight
+  ChevronRight,
+  LockKeyhole,
+  LockKeyholeOpen
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
@@ -72,6 +74,20 @@ const TABS = [
   ['activity', 'Activity']
 ];
 
+const SECTION_DETAILS = {
+  overview: 'Customer, vehicle and technician at a glance.',
+  complaints: 'Customer concerns and work requests.',
+  inspection: 'Vehicle checks and inspection findings.',
+  estimate: 'Labour, parts, estimates and customer approval.',
+  work: 'Technician assignments and workshop work.',
+  parts: 'Spare parts request, issue and usage.',
+  updates: 'Technician notes and work updates.',
+  qc: 'Quality inspection and final checks.',
+  invoice: 'Invoice, payments, balance and delivery.',
+  activity: 'Job Card activity and recorded events.'
+};
+const GUIDED_STAGES = ['overview', 'inspection', 'estimate', 'work', 'qc', 'invoice'];
+
 const TAB_ICONS = {
   overview: Gauge,
   complaints: FileText,
@@ -120,6 +136,7 @@ export function JobCardWorkspace() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [lockSections, setLockSections] = useState(false);
   const [error, setError] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
@@ -366,20 +383,24 @@ export function JobCardWorkspace() {
     invoiceTotal
   ]);
 
-  const unlockedTabIndex = useMemo(() => {
-    let unlocked = 0;
-    for (let index = 0; index < TABS.length - 1; index += 1) {
-      const [key] = TABS[index];
-      if (!sectionComplete[key]) break;
-      unlocked = index + 1;
+  // Guided section locking is an opt-in UI workflow, not API authorization.
+  const unlockedGuidedIndex = useMemo(() => {
+    for (let index = 0; index < GUIDED_STAGES.length - 1; index += 1) {
+      if (!sectionComplete[GUIDED_STAGES[index]]) return index;
     }
-    return unlocked;
+    return GUIDED_STAGES.length - 1;
   }, [sectionComplete]);
-
+  const isSectionLocked = (key) => {
+    const index = GUIDED_STAGES.indexOf(key);
+    return lockSections && index > unlockedGuidedIndex && !sectionComplete[key];
+  };
   const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
-  const activeTabComplete = sectionComplete[activeTab];
+  const activeTabComplete = Boolean(sectionComplete[activeTab]);
+  const activeTabLocked = isSectionLocked(activeTab);
+  const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
+  const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
 
   const addComplaint = async () => {
@@ -754,6 +775,10 @@ export function JobCardWorkspace() {
   };
 
   const openTab = (key) => {
+    if (isSectionLocked(key)) {
+      setError('This step is locked in guided mode. Complete earlier steps or turn off Lock steps.');
+      return;
+    }
     setError('');
     navigate(`/jobs/${job.id}/${key}`);
   };
@@ -767,7 +792,7 @@ export function JobCardWorkspace() {
   );
 
   return (
-    <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-4">
+    <div className="job-management-page cg-job-detail job-workspace-dashboard flex w-full min-w-0 flex-col gap-4 pb-4">
       <JobBreadcrumbs current={TABS.find(([key]) => key === activeTab)?.[1] || "Overview"} jobLabel={jobDisplayLabel(job)} jobId={job.id} />
       <header className="job-detail-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
