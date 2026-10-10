@@ -331,7 +331,7 @@ export function JobCardWorkspace() {
   const invoicePaid = linkedInvoice ? cleanNumber(linkedInvoice.paid) : cleanNumber(job?.billing?.paidAmount || 0);
   const invoiceBalance = Math.max(0, linkedInvoice ? cleanNumber(linkedInvoice.balance ?? (invoiceTotal - invoicePaid)) : invoiceTotal - invoicePaid);
   const invoicePaymentStatus = linkedInvoice
-    ? (invoiceBalance <= 0 ? 'Paid' : invoicePaid > 0 ? 'Partial' : 'Pending')
+    ? (invoiceTotal <= 0 ? 'No amount due' : invoiceBalance <= 0 ? 'Paid' : invoicePaid > 0 ? 'Partially Paid' : 'Unpaid')
     : (USE_MOCK_API ? job?.paymentStatus || 'Pending' : 'Not invoiced');
 
 
