@@ -55,6 +55,8 @@ const normalizeJobStatus = (status) => {
 
 const INSPECTION_CHECKS = ['Tyres', 'Warning Lights', 'Battery', 'Engine Oil', 'Coolant', 'Brake Fluid'];
 
+const SIMPLE_TABS = ['overview', 'inspection', 'estimate', 'work', 'parts', 'invoice'];
+
 const TABS = [
   ['overview', 'Overview'],
   ['complaints', 'Complaints'],
@@ -111,6 +113,7 @@ export function JobCardWorkspace() {
   const [vehicleHistory, setVehicleHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
@@ -330,7 +333,9 @@ export function JobCardWorkspace() {
     return unlocked;
   }, [sectionComplete]);
 
-  const activeTabIndex = TABS.findIndex(([key]) => key === activeTab);
+  const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
+  const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
+  const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = sectionComplete[activeTab];
 
 
@@ -675,7 +680,12 @@ export function JobCardWorkspace() {
   };
 
   if (loading) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Loading job card…</div>;
-  if (!job) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Job card not found.</div>;
+  if (!job) return (
+    <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted" role={error ? 'alert' : undefined}>
+      <p>{error || 'Job card not found.'}</p>
+      {error && <button type="button" className="mt-3 rounded-lg border border-line px-4 py-2 text-content" onClick={load}>Retry</button>}
+    </div>
+  );
 
   return (
     <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-4">
@@ -704,7 +714,14 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
-      <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2">
+        <span className="text-xs text-secondary">Current status: <strong className="text-content">{normalizeJobStatus(job.status)}</strong></span>
+        <button type="button" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-content" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+          {showAdvanced ? 'Simple view' : 'Show all details'}
+        </button>
+      </div>
+
+      <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-3">
         {[
           ['Customer', job.customerName || 'Walk-in'],
           ['KM', job.kilometre || '—'],
@@ -712,7 +729,7 @@ export function JobCardWorkspace() {
           ['Technician', job.assignedEmployeeName || 'Unassigned'],
           ['Estimate', latestEstimate ? money.format(latestEstimate.grandTotal || 0) : 'Not created'],
           ['Payment', job.paymentStatus || 'Pending']
-        ].map(([label, value]) => (
+        ].filter(([label]) => showAdvanced || ['Customer', 'Technician', 'Payment'].includes(label)).map(([label, value]) => (
           <div key={label} className="min-w-0 rounded-2xl border border-line bg-surface p-3">
             <div className="text-[10px] font-semibold uppercase tracking-wide text-muted">{label}</div>
             <div className="mt-1 truncate text-sm font-extrabold text-content">{value}</div>
@@ -720,7 +737,7 @@ export function JobCardWorkspace() {
         ))}
       </section>
 
-      <section className="job-status-pipeline" aria-label="Job status progress">
+      {showAdvanced && <section className="job-status-pipeline" aria-label="Job status progress">
         {JOB_STATUSES.map((status, index) => {
           const currentIndex = JOB_STATUSES.indexOf(normalizeJobStatus(job.status));
           const state = index < currentIndex ? 'is-done' : index === currentIndex ? 'is-current' : 'is-next';
@@ -739,10 +756,10 @@ export function JobCardWorkspace() {
             </button>
           );
         })}
-      </section>
+      </section>}
 
       <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
-        {TABS.map(([key, label], index) => {
+        {visibleTabs.map(([key, label], index) => {
           const completed = sectionComplete[key];
           const TabIcon = TAB_ICONS[key];
           return (
@@ -767,9 +784,9 @@ export function JobCardWorkspace() {
           <strong>{activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
           <span>Move freely between job stages. Save the details you record.</span>
         </div>
-        {activeTabIndex < TABS.length - 1 ? (
-          <button type="button" disabled={saving} onClick={() => openTab(TABS[activeTabIndex + 1][0])}>
-            Next: {TABS[activeTabIndex + 1][1]}
+        {nextVisibleTab ? (
+          <button type="button" disabled={saving} onClick={() => openTab(nextVisibleTab[0])}>
+            Next: {nextVisibleTab[1]}
             <ChevronRight size={14} />
           </button>
         ) : null}
@@ -779,6 +796,15 @@ export function JobCardWorkspace() {
 
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 xl:col-span-2">
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-secondary">Customer complaint</div>
+              <p className="mt-1 break-words text-sm text-content">{complaints[0]?.description || complaints[0]?.wording || 'No complaint recorded yet.'}</p>
+            </div>
+            <button type="button" onClick={() => openTab('complaints')} className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-content">
+              {complaints.length ? 'View complaints' : 'Add complaint'}
+            </button>
+          </section>
           <section className="job-panel rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center gap-2 text-sm font-extrabold text-content"><UserRound size={16} className="text-primary"/>Customer & Vehicle</div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
@@ -807,7 +833,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
+          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
             <div className="flex items-center gap-2 text-sm font-extrabold text-content">
               <Star size={16} className="text-primary"/>
               Customer Feedback
@@ -850,7 +876,7 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-line bg-surface p-4 xl:col-span-2">
+          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
             <div className="flex items-center gap-2 text-sm font-extrabold text-content"><History size={16} className="text-primary"/>Vehicle Service History</div>
             {!vehicleHistory.length ? (
               <div className="mt-3 rounded-xl border border-dashed border-line p-5 text-center text-xs text-muted">No previous job cards for this registration.</div>
