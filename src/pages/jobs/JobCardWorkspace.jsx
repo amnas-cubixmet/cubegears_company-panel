@@ -857,10 +857,7 @@ export function JobCardWorkspace() {
       <div className="job-workspace-toolbar">
         <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
         <div className="job-workspace-toolbar-actions">
-          <button type="button" onClick={() => { setLockSections((value) => !value); setError(''); }} aria-pressed={lockSections} title="Optional guided step lock – does not replace backend permissions">
-            {lockSections ? <LockKeyhole size={14} aria-hidden="true"/> : <LockKeyholeOpen size={14} aria-hidden="true"/>}
-            {lockSections ? 'Unlock steps' : 'Lock steps'}
-          </button>
+          <span className="job-workspace-lock-note"><LockKeyhole size={14} aria-hidden="true"/> Next stage unlocks on completion</span>
           <button type="button" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
             {showAdvanced ? 'Simple view' : 'Show all details'}
           </button>
@@ -941,8 +938,8 @@ export function JobCardWorkspace() {
 
       <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
         <div>
-          <strong>{activeTabLocked ? 'Step locked in guided mode' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
-          <span>{lockSections ? 'Guided mode follows essential stages; optional sections stay available.' : 'Move freely between sections and save changes before continuing.'}</span>
+          <strong>{activeTabLocked ? 'Stage locked' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
+          <span>{'Complete each stage to unlock the next. Finished stages remain accessible.'}</span>
         </div>
         {nextVisibleTab && !activeTabLocked ? (
           <button type="button" disabled={saving || isSectionLocked(nextVisibleTab[0])} onClick={() => openTab(nextVisibleTab[0])}>
@@ -958,8 +955,8 @@ export function JobCardWorkspace() {
         <section className="job-workspace-locked-panel">
           <LockKeyhole size={24} aria-hidden="true" />
           <h3>{activeTabLabel} is locked</h3>
-          <p>Complete the previous guided step, or turn off Lock steps to continue in any order.</p>
-          <button type="button" onClick={() => setLockSections(false)}>Unlock steps</button>
+          <p>Complete the current required stage to unlock this section.</p>
+          <button type="button" onClick={() => navigate('/jobs/' + job.id + '/' + currentStage, { replace: true })}>Go to current stage</button>
         </section>
       ) : (
         <>
