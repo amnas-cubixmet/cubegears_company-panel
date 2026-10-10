@@ -164,6 +164,21 @@ export function JobCardWorkspace() {
   }, [location.pathname]);
 
   useEffect(() => {
+    const dismissMore = (event) => {
+      if (!moreStepsRef.current?.contains(event.target)) moreStepsRef.current?.removeAttribute('open');
+    };
+    const dismissEscape = (event) => {
+      if (event.key === 'Escape') moreStepsRef.current?.removeAttribute('open');
+    };
+    document.addEventListener('pointerdown', dismissMore);
+    document.addEventListener('keydown', dismissEscape);
+    return () => {
+      document.removeEventListener('pointerdown', dismissMore);
+      document.removeEventListener('keydown', dismissEscape);
+    };
+  }, []);
+
+  useEffect(() => {
     const rail = workflowTabsRef.current;
     const activeButton = rail?.querySelector('[aria-current="step"]');
     if (!rail || !activeButton || rail.scrollWidth <= rail.clientWidth) return;
