@@ -15,8 +15,7 @@ import {
   UserRound,
   Wrench,
   ChevronRight,
-  LockKeyhole,
-  LockKeyholeOpen
+  LockKeyhole
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
@@ -58,8 +57,6 @@ const normalizeJobStatus = (status) => {
 };
 
 const INSPECTION_CHECKS = ['Tyres', 'Warning Lights', 'Battery', 'Engine Oil', 'Coolant', 'Brake Fluid'];
-
-const SIMPLE_TABS = ['overview', 'inspection', 'estimate', 'work', 'parts', 'invoice'];
 
 const TABS = [
   ['overview', 'Overview'],
@@ -270,21 +267,6 @@ export function JobCardWorkspace() {
     }
   };
 
-  const setStatus = async (status) => {
-    if (status === normalizeJobStatus(job?.status)) return;
-    setSaving(true);
-    setError('');
-    try {
-      const updated = await jobService.updateJobStatus(job.id, status);
-      setJob(updated || { ...job, status });
-    } catch (requestError) {
-      const details = requestError?.response?.data;
-      setError(details?.status || details?.message || requestError?.message || 'Could not change Job Card status.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const assignTechnician = async (staffId) => {
     const selected = staff.find((item) => String(item.id) === String(staffId));
 
@@ -307,12 +289,15 @@ export function JobCardWorkspace() {
   const labourRecords = USE_MOCK_API ? (job?.labourRecords || []) : (job?.work || []);
   const parts = job?.partsUsed || [];
   const outsidePurchases = job?.outsidePurchases || [];
-  const estimates = (job?.estimates || []).map((item) => ({ ...item,
-    approvalStatus: item.approvalStatus || (item.status === 'Draft' ? 'Pending' : item.status),
-    grandTotal: item.grandTotal ?? item.total,
-    taxAmount: item.taxAmount ?? item.tax,
-    version: item.version ? 'Estimate V' + item.version : item.version
-  }));
+  const estimates = (job?.estimates || [])
+    .map((item) => ({
+      ...item,
+      approvalStatus: item.approvalStatus || (item.status === 'Draft' ? 'Pending' : item.status),
+      grandTotal: item.grandTotal ?? item.total,
+      taxAmount: item.taxAmount ?? item.tax,
+      version: USE_MOCK_API ? item.version : 'Estimate V' + (item.version || 1)
+    }))
+    .sort((a, b) => String(a.created_at || a.date || '').localeCompare(String(b.created_at || b.date || '')));
   const updates = job?.workUpdates || [];
   const timeline = job?.timeline || [];
   const qc = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {
@@ -1235,7 +1220,7 @@ export function JobCardWorkspace() {
                   </div>
                   <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
                     <strong className="text-sm text-content">{money.format(item.grandTotal || 0)}</strong>
-                    {item.approvalStatus === 'Pending' ? (
+                    {item.approvalStatus === 'Pending' && (USE_MOCK_API || item.id === estimates.at(-1)?.id) ? (
                       <div className="flex gap-2">
                         <button onClick={()=>setEstimateApproval(item.id || item.version,'Approved')} className="h-8 rounded-lg border-0 bg-emerald-600 px-3 text-[10px] font-bold text-white">Approve</button>
                         <button onClick={()=>setEstimateApproval(item.id || item.version,'Rejected')} className="h-8 rounded-lg border-0 bg-red-500 px-3 text-[10px] font-bold text-white">Reject</button>
