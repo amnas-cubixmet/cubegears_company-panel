@@ -646,15 +646,18 @@ export function JobCardWorkspace() {
       }));
 
   const updateQcItem = async (itemId, status) => {
-    await persist({
-      qualityCheck: {
-        ...qc,
-        checklist: qcChecklist.map((item) => item.id === itemId ? { ...item, status } : item)
-      }
-    });
+    const update = {
+      ...qc,
+      checklist: qcChecklist.map((item) => item.id === itemId ? { ...item, status } : item)
+    };
+    await persist(USE_MOCK_API ? { qualityCheck: update } : { qc: update });
   };
 
   const completeQc = async (status) => {
+    if (status === 'Pass' && qcChecklist.some((item) => item.status !== 'Pass')) {
+      setError('Mark every Quality Check item as Pass before completing this stage.');
+      return;
+    }
     const result = {
       ...qc,
       inspector: qc.inspector === 'Unassigned' ? (job.serviceAdvisor || 'Workshop Supervisor') : qc.inspector,
