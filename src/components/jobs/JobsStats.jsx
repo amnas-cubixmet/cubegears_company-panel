@@ -5,8 +5,8 @@ export const JobsStats = ({ counts, onFilter, selectedStatus }) => {
   const cards = [
     { label: 'Total Jobs', value: counts.total, icon: ClipboardList, filter: 'All', tone: 'default' },
     { label: 'Active Jobs', value: counts.active, icon: Clock3, filter: 'Active', tone: 'primary' },
-    { label: 'Waiting Parts', value: counts.waiting, icon: PackageSearch, filter: 'Waiting for Parts', tone: 'warning' },
-    { label: 'Ready Delivery', value: counts.ready, icon: CircleCheckBig, filter: 'Ready for Delivery', tone: 'success' },
+    { label: 'Waiting for Parts', value: counts.waiting, icon: PackageSearch, filter: 'Waiting for Parts', tone: 'warning' },
+    { label: 'Ready for Delivery', value: counts.ready, icon: CircleCheckBig, filter: 'Ready for Delivery', tone: 'success' },
   ];
 
   return (
