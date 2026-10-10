@@ -1,0 +1,187 @@
+
+/* Job Card billing dashboard. Matches shared Dashboard tokens and layouts. */
+.cg-job-detail .job-invoice-dashboard {
+  width:100%;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  font-family:inherit;
+  color:var(--text-primary);
+}
+.cg-job-detail .job-invoice-dashboard-head {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:17px;
+}
+.cg-job-detail .job-invoice-dashboard-head h2 {
+  display:flex;align-items:center;gap:9px;margin:0;
+  color:var(--text-primary);font-size:17px;font-weight:750;line-height:1.4;
+}
+.cg-job-detail .job-invoice-dashboard-head h2 svg {color:var(--primary);flex:0 0 auto}
+.cg-job-detail .job-invoice-dashboard-head p,
+.cg-job-detail .job-invoice-section-heading p {
+  margin:4px 0 0;color:var(--text-muted);font-size:12px;line-height:1.5;
+}
+.cg-job-detail .job-invoice-dashboard .job-primary-action {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:42px;padding:0 15px;border:1px solid var(--primary);
+  border-radius:9px;background:var(--primary);color:#fff;
+  cursor:pointer;font-size:12px;font-weight:700;
+}
+.cg-job-detail .job-invoice-dashboard-stats {
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;
+}
+.cg-job-detail .job-invoice-stat {
+  min-width:0;min-height:94px;display:flex;flex-direction:column;gap:10px;
+  padding:15px;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface);box-shadow:var(--shadow-sm);
+}
+.cg-job-detail .job-invoice-stat span {font-size:11px;font-weight:650;color:var(--text-muted)}
+.cg-job-detail .job-invoice-stat strong {font-size:20px;line-height:1.3;font-weight:750;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.cg-job-detail .job-invoice-stat.is-balance strong {color:var(--primary)}
+.cg-job-detail .job-invoice-stat.is-status strong {font-size:17px}
+.cg-job-detail .job-invoice-dashboard-columns {
+  display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,0.9fr);gap:14px;align-items:start;
+}
+.cg-job-detail .job-invoice-dashboard-columns>.job-panel {
+  min-width:0;display:flex;flex-direction:column;gap:16px;
+  padding:17px!important;margin:0;
+}
+.cg-job-detail .job-invoice-section-heading {
+  display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.cg-job-detail .job-invoice-section-heading h3 {
+  margin:0;color:var(--text-primary);font-size:15px;font-weight:750;line-height:1.4;
+}
+.cg-job-detail .job-invoice-status-badge {
+  padding:5px 9px;border:1px solid var(--border);border-radius:999px;
+  background:var(--surface-2);color:var(--text-secondary);font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-invoice-details {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;
+}
+.cg-job-detail .job-invoice-details>div {
+  display:flex;flex-direction:column;gap:6px;min-width:0;
+  padding:12px;background:var(--surface-2);border-bottom:1px solid var(--border);
+}
+.cg-job-detail .job-invoice-details>div:nth-child(odd) {border-right:1px solid var(--border)}
+.cg-job-detail .job-invoice-details>div:nth-last-child(-n+2) {border-bottom:0}
+.cg-job-detail .job-invoice-details span,
+.cg-job-detail .job-invoice-document-list h4,
+.cg-job-detail .job-payment-history h4 {color:var(--text-muted);font-size:11px;font-weight:650}
+.cg-job-detail .job-invoice-details strong {color:var(--text-primary);font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.cg-job-detail .job-invoice-empty {
+  display:flex;align-items:flex-start;flex-direction:column;gap:7px;padding:17px;
+  border:1px dashed var(--border);border-radius:10px;
+  background:var(--surface-2);
+}
+.cg-job-detail .job-invoice-empty svg {color:var(--primary)}
+.cg-job-detail .job-invoice-empty strong {font-size:13px;font-weight:750}
+.cg-job-detail .job-invoice-empty p {margin:0;color:var(--text-secondary);font-size:12px;line-height:1.5}
+.cg-job-detail .job-invoice-document-list {display:flex;flex-direction:column;gap:7px}
+.cg-job-detail .job-invoice-document-list h4,
+.cg-job-detail .job-payment-history h4 {margin:0 0 5px}
+.cg-job-detail .job-invoice-document-list button {
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:11px;border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);font-size:12px;color:var(--text-primary);text-align:left;cursor:pointer;
+}
+.cg-job-detail .job-invoice-inline-message {
+  margin:0;padding:11px 13px;border:1px solid var(--border);border-radius:9px;
+  color:var(--text-secondary);background:var(--surface-2);font-size:12px;line-height:1.5;
+}
+.cg-job-detail .job-invoice-inline-message.is-error {
+  color:var(--danger);border-color:var(--danger);
+}
+.cg-job-detail .job-invoice-inline-message button {
+  margin-left:10px;text-decoration:underline;color:inherit;font-weight:750;cursor:pointer;
+}
+.cg-job-detail .job-invoice-dashboard .job-payment-form {
+  margin:0;padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);
+}
+.cg-job-detail .job-invoice-dashboard .job-payment-form__title {
+  margin-bottom:12px;color:var(--text-primary);font-size:13px;font-weight:750;
+}
+.cg-job-detail .job-invoice-dashboard .job-payment-form label,
+.cg-job-detail .job-invoice-delivery-fields label {
+  display:flex;flex-direction:column;gap:6px;color:var(--text-secondary);font-size:12px;font-weight:650;
+}
+.cg-job-detail .job-invoice-dashboard .job-payment-form input,
+.cg-job-detail .job-invoice-dashboard .job-payment-form select,
+.cg-job-detail .job-invoice-dashboard .job-invoice-delivery-fields input,
+.cg-job-detail .job-invoice-dashboard .job-invoice-delivery-fields textarea {
+  width:100%;min-width:0;min-height:42px;padding:10px 12px;
+  border:1px solid var(--border);border-radius:9px;background:var(--surface);
+  color:var(--text-primary);font-size:13px;font-weight:500;outline:none;
+}
+.cg-job-detail .job-invoice-dashboard input:focus,
+.cg-job-detail .job-invoice-dashboard select:focus,
+.cg-job-detail .job-invoice-dashboard textarea:focus {
+  border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);
+}
+.cg-job-detail .job-invoice-dashboard .job-payment-submit {min-height:42px;margin-top:12px;font-size:12px}
+.cg-job-detail .job-invoice-dashboard .job-payment-history {
+  margin:0;gap:8px;
+}
+.cg-job-detail .job-invoice-dashboard .job-payment-history>div {padding:10px;border-color:var(--border)}
+.cg-job-detail .job-invoice-dashboard .job-payment-history span,
+.cg-job-detail .job-invoice-dashboard .job-payment-history strong {font-size:12px}
+.cg-job-detail .job-invoice-delivery-fields {display:flex;flex-direction:column;gap:13px}
+.cg-job-detail .job-invoice-delivery-fields textarea {resize:vertical;min-height:92px}
+.cg-job-detail .job-invoice-delivery-fields :disabled {opacity:.65;cursor:not-allowed}
+.cg-job-detail .job-invoice-deliver-button {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;min-height:42px;padding:0 14px;
+  border:1px solid var(--primary);border-radius:9px;
+  background:var(--primary);color:#fff;font-size:12px;font-weight:750;cursor:pointer;
+}
+.cg-job-detail .job-invoice-deliver-button:disabled {opacity:.55;cursor:not-allowed}
+.cg-job-detail .job-invoice-dashboard button:focus-visible {outline:2px solid var(--primary);outline-offset:3px}
+
+.jobs-dashboard .jobs-overview-strip {
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:10px;min-height:45px;padding:9px 13px;
+  border:1px solid var(--border);border-radius:10px;background:var(--surface);
+}
+.jobs-dashboard .jobs-overview-strip p {margin:0;font-size:12px;color:var(--text-secondary)}
+.jobs-dashboard .jobs-overview-strip button {
+  min-height:34px;padding:0 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);color:var(--text-primary);
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+
+@media(max-width:960px){
+  .cg-job-detail .job-invoice-dashboard-stats {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cg-job-detail .job-invoice-dashboard-columns {grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .cg-job-detail .job-invoice-dashboard {gap:10px}
+  .cg-job-detail .job-invoice-dashboard-head {padding:14px;align-items:stretch}
+  .cg-job-detail .job-invoice-dashboard-head>div {width:100%}
+  .cg-job-detail .job-invoice-dashboard-head .job-primary-action {width:100%}
+  .cg-job-detail .job-invoice-stat {min-height:84px;padding:12px;gap:7px}
+  .cg-job-detail .job-invoice-stat strong {font-size:18px}
+  .cg-job-detail .job-invoice-dashboard-columns>.job-panel {padding:12px!important}
+  .cg-job-detail .job-invoice-dashboard .job-payment-form__grid {grid-template-columns:1fr}
+  .cg-job-detail .job-invoice-dashboard .job-payment-form input,
+  .cg-job-detail .job-invoice-dashboard .job-payment-form select,
+  .cg-job-detail .job-invoice-dashboard .job-invoice-delivery-fields input,
+  .cg-job-detail .job-invoice-dashboard .job-invoice-delivery-fields textarea {font-size:16px}
+  .jobs-dashboard .jobs-overview-strip {align-items:stretch}
+}
+@media(max-width:380px){
+  .cg-job-detail .job-invoice-dashboard-stats {gap:8px}
+  .cg-job-detail .job-invoice-stat {padding:10px}
+  .cg-job-detail .job-invoice-stat strong {font-size:16px}
+  .cg-job-detail .job-invoice-details {grid-template-columns:1fr}
+  .cg-job-detail .job-invoice-details>div {border-right:0!important;border-bottom:1px solid var(--border)!important}
+  .cg-job-detail .job-invoice-details>div:last-child {border-bottom:0!important}
+}
