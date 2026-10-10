@@ -396,6 +396,7 @@ export function JobCardWorkspace() {
   const visibleTabs = TABS.filter(([key]) => GUIDED_STAGES.includes(key));
   const extraTabs = TABS.filter(([key]) => !GUIDED_STAGES.includes(key));
   const activeExtraTab = extraTabs.some(([key]) => key === activeTab);
+  const showWorkTools = activeTab === 'work' || activeExtraTab;
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = Boolean(sectionComplete[activeTab]);
@@ -916,7 +917,7 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
-      {activeTab !== 'overview' && (
+      {activeTab !== 'overview' && !showWorkTools && (
         <>
       <div className="job-workspace-toolbar">
         <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
@@ -950,12 +951,12 @@ export function JobCardWorkspace() {
       )}
 
 
-      <div className="job-simple-step-nav" aria-label="Job Card sections">
-        <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Main Job Card workflow">
+      <div className="job-simple-step-nav" aria-label="Job Card workflow">
+        <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Main Job Card stages">
           {visibleTabs.map(([key, label], index) => {
             const complete = Boolean(sectionComplete[key]);
             const locked = isSectionLocked(key);
-            const isActive = activeTab === key;
+            const isActive = activeTab === key || (key === 'work' && activeExtraTab && !locked);
             return (
               <button
                 type="button"
@@ -977,34 +978,54 @@ export function JobCardWorkspace() {
             );
           })}
         </nav>
-        <details ref={moreStepsRef} className={['job-workflow-more', activeExtraTab ? 'has-active-step' : ''].join(' ')}>
-          <summary aria-label={activeExtraTab ? 'More sections, current: ' + activeTabLabel : 'More Job Card sections'}>
-            <span>More</span>
-            <ChevronDown size={14} aria-hidden="true" />
-          </summary>
-          <div className="job-workflow-more-menu" aria-label="Additional Job Card sections">
-            {extraTabs.map(([key, label]) => {
-              const locked = isSectionLocked(key);
-              const completed = Boolean(sectionComplete[key]);
-              const ExtraIcon = TAB_ICONS[key];
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  disabled={locked}
-                  onClick={() => openTab(key)}
-                  aria-current={activeTab === key ? 'page' : undefined}
-                  className={activeTab === key ? 'is-current' : ''}
-                >
-                  <ExtraIcon size={15} aria-hidden="true" />
-                  <span>{label}</span>
-                  {locked ? <LockKeyhole size={13} aria-label="Locked" /> : completed ? <CheckCircle2 size={13} aria-label="Completed" /> : null}
-                </button>
-              );
-            })}
-          </div>
-        </details>
       </div>
+
+      {showWorkTools && (
+        <div className="job-work-tools" aria-label="Work tools">
+          <div className="job-work-tools-copy">
+            <Wrench size={16} aria-hidden="true" />
+            <span>Work tools</span>
+          </div>
+          <div className="job-work-tools-actions">
+            <button
+              type="button"
+              disabled={isSectionLocked('work')}
+              onClick={() => openTab('work')}
+              aria-current={activeTab === 'work' ? 'page' : undefined}
+              className={activeTab === 'work' ? 'is-selected' : ''}
+            >
+              Work details
+            </button>
+            <details ref={moreStepsRef} className={['job-workflow-more', activeExtraTab ? 'has-active-step' : ''].join(' ')}>
+              <summary aria-label={activeExtraTab ? 'More work sections, current: ' + activeTabLabel : 'More work sections'}>
+                <span>More</span>
+                <ChevronDown size={14} aria-hidden="true" />
+              </summary>
+              <div className="job-workflow-more-menu" aria-label="Additional work sections">
+                {extraTabs.map(([key, label]) => {
+                  const locked = isSectionLocked(key);
+                  const completed = Boolean(sectionComplete[key]);
+                  const ExtraIcon = TAB_ICONS[key];
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      disabled={locked}
+                      onClick={() => openTab(key)}
+                      aria-current={activeTab === key ? 'page' : undefined}
+                      className={activeTab === key ? 'is-current' : ''}
+                    >
+                      <ExtraIcon size={15} aria-hidden="true" />
+                      <span>{label}</span>
+                      {locked ? <LockKeyhole size={13} aria-label="Locked" /> : completed ? <CheckCircle2 size={13} aria-label="Completed" /> : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </details>
+          </div>
+        </div>
+      )}
 
       {activeTab !== 'overview' && (
         <>
@@ -1026,6 +1047,7 @@ export function JobCardWorkspace() {
         )}
       </section>
 
+      {!showWorkTools && (
       <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
         <div>
           <strong>{activeTabLocked ? 'Stage locked' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
@@ -1038,6 +1060,7 @@ export function JobCardWorkspace() {
           </button>
         ) : null}
       </div>
+      )}
 
         </>
       )}
@@ -1229,8 +1252,7 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'work' && (
-        <div className="job-work-payroll-stack">
-          <OutsideLabourPanel jobId={job.id} />
+        <div className="job-work-payroll-stack job-work-simple">
           <JobWorkerAssignments
             key={timerRefreshVersion}
             jobId={job.id}
@@ -1284,6 +1306,15 @@ export function JobCardWorkspace() {
             </form>
           </section>
           </div>
+          <details className="job-work-extra-panel">
+            <summary>
+              <span><Wrench size={16} aria-hidden="true" /> Outside Labour</span>
+              <ChevronDown size={16} aria-hidden="true" />
+            </summary>
+            <div className="job-work-extra-content">
+              <OutsideLabourPanel jobId={job.id} />
+            </div>
+          </details>
         </div>
       )}
 
@@ -1345,7 +1376,10 @@ export function JobCardWorkspace() {
                 <span className="text-xs font-bold text-primary">Estimated Total</span>
                 <strong className="text-lg text-content">{money.format(estimateGrandTotal)}</strong>
               </div>
-              <button onClick={()=>createEstimate('Estimate')} className="mt-2 h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Create Estimate</button>
+              <button type="button" onClick={() => openTab('parts')} disabled={isSectionLocked('parts')} className="mt-2 h-10 rounded-xl border border-line bg-surface-2 text-xs font-bold text-content">
+                <PackageSearch size={14} className="mr-1 inline" aria-hidden="true" /> Manage Parts
+              </button>
+              <button onClick={()=>createEstimate('Estimate')} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Create Estimate</button>
               <button onClick={()=>createEstimate('Additional Work')} className="h-10 rounded-xl border border-line bg-surface text-xs font-bold text-content">Additional Work Approval</button>
             </div>
           </section>
