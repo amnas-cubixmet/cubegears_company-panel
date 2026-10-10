@@ -30,12 +30,11 @@ export const JobRecordsPanel = ({
           <table className="jobs-table">
             <thead>
               <tr>
-                <th>Job</th>
+                <th>Job Card</th>
                 <th>Vehicle</th>
                 <th>Customer</th>
                 <th>Technician</th>
                 <th>Status</th>
-                <th>Date</th>
                 <th aria-label="Open" />
               </tr>
             </thead>
@@ -44,7 +43,7 @@ export const JobRecordsPanel = ({
                 <tr key={job.id}>
                   <td>
                     <button className="jobs-table-job-link" type="button" onClick={() => onOpenJob(job.id)}>{jobDisplayLabel(job)}</button>
-                    <span>{job.serviceType || job.createdDate || 'Workshop service'}</span>
+                    <span>{job.createdDate || job.serviceType || 'Workshop service'}</span>
                   </td>
                   <td>
                     <strong>{job.vehicleReg || 'No registration'}</strong>
@@ -60,7 +59,6 @@ export const JobRecordsPanel = ({
                       {job.status || 'New'}
                     </span>
                   </td>
-                  <td><strong>{job.createdDate || '—'}</strong></td>
                   <td><button type="button" className="jobs-table-open" onClick={() => onOpenJob(job.id)} aria-label={`Open ${jobDisplayLabel(job)}`}><ChevronRight size={17} /></button></td>
                 </tr>
               ))}
