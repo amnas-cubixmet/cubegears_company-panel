@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Camera, CheckCircle2, ClipboardCheck, Plus, RefreshCcw, Search, ShieldCheck, Trash2, Wrench } from 'lucide-react';
+import { Camera, CheckCircle2, ClipboardCheck, Plus, RefreshCcw, Search, Trash2, Wrench } from 'lucide-react';
 import { jobInspectionService, DEFAULT_INSPECTION_CATEGORIES } from '../../services/jobInspection.service';
 
 const newFinding = () => ({
   description: '', severity: 'Medium', recommendedAction: '', estimatedCost: ''
 });
 
-const STATUS_OPTIONS = ['Not Checked', 'Good', 'Needs Attention', 'Critical'];
-const baseInput = 'min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface-2 px-3 text-sm text-content outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 const formatMoney = (number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(number) || 0);
 
 const readImage = (file) => new Promise((resolve, reject) => {
