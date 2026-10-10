@@ -122,7 +122,6 @@ export function JobCardWorkspace() {
   const location = useLocation();
   const navigate = useNavigate();
   const workflowTabsRef = useRef(null);
-  const moreStepsRef = useRef(null);
 
   const [job, setJob] = useState(null);
   const [workflow, setWorkflow] = useState(null);
@@ -162,21 +161,6 @@ export function JobCardWorkspace() {
     const section = location.pathname.split('/').filter(Boolean).at(-1);
     return TABS.some(([key]) => key === section) ? section : 'overview';
   }, [location.pathname]);
-
-  useEffect(() => {
-    const dismissMore = (event) => {
-      if (!moreStepsRef.current?.contains(event.target)) moreStepsRef.current?.removeAttribute('open');
-    };
-    const dismissEscape = (event) => {
-      if (event.key === 'Escape') moreStepsRef.current?.removeAttribute('open');
-    };
-    document.addEventListener('pointerdown', dismissMore);
-    document.addEventListener('keydown', dismissEscape);
-    return () => {
-      document.removeEventListener('pointerdown', dismissMore);
-      document.removeEventListener('keydown', dismissEscape);
-    };
-  }, []);
 
   useEffect(() => {
     const rail = workflowTabsRef.current;
@@ -872,7 +856,6 @@ export function JobCardWorkspace() {
       return;
     }
     setError('');
-    moreStepsRef.current?.removeAttribute('open');
     navigate(`/jobs/${job.id}/${key}`);
   };
 
@@ -986,44 +969,32 @@ export function JobCardWorkspace() {
             <Wrench size={16} aria-hidden="true" />
             <span>Work tools</span>
           </div>
-          <div className="job-work-tools-actions">
-            <button
-              type="button"
-              disabled={isSectionLocked('work')}
-              onClick={() => openTab('work')}
-              aria-current={activeTab === 'work' ? 'page' : undefined}
-              className={activeTab === 'work' ? 'is-selected' : ''}
-            >
-              Work details
-            </button>
-            <details ref={moreStepsRef} className={['job-workflow-more', activeExtraTab ? 'has-active-step' : ''].join(' ')}>
-              <summary aria-label={activeExtraTab ? 'More work sections, current: ' + activeTabLabel : 'More work sections'}>
-                <span>More</span>
-                <ChevronDown size={14} aria-hidden="true" />
-              </summary>
-              <div className="job-workflow-more-menu" aria-label="Additional work sections">
-                {extraTabs.map(([key, label]) => {
-                  const locked = isSectionLocked(key);
-                  const completed = Boolean(sectionComplete[key]);
-                  const ExtraIcon = TAB_ICONS[key];
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      disabled={locked}
-                      onClick={() => openTab(key)}
-                      aria-current={activeTab === key ? 'page' : undefined}
-                      className={activeTab === key ? 'is-current' : ''}
-                    >
-                      <ExtraIcon size={15} aria-hidden="true" />
-                      <span>{label}</span>
-                      {locked ? <LockKeyhole size={13} aria-label="Locked" /> : completed ? <CheckCircle2 size={13} aria-label="Completed" /> : null}
-                    </button>
-                  );
-                })}
-              </div>
-            </details>
-          </div>
+          <nav className="job-work-tools-actions" aria-label="Work tools sections">
+            {[
+              ['work', 'Work details'],
+              ['complaints', 'Complaints'],
+              ['parts', 'Parts'],
+              ['updates', 'Technician Updates'],
+              ['activity', 'Activity']
+            ].map(([key, label]) => {
+              const locked = isSectionLocked(key);
+              const selected = activeTab === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={locked}
+                  onClick={() => openTab(key)}
+                  aria-current={selected ? 'page' : undefined}
+                  className={selected ? 'is-selected' : ''}
+                  title={locked ? 'Complete the required stage first' : label}
+                >
+                  {label}
+                  {locked && <LockKeyhole size={12} aria-label="Locked" />}
+                </button>
+              );
+            })}
+          </nav>
         </div>
       )}
 
