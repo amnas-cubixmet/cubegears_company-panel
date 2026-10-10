@@ -33,6 +33,7 @@ import './styles/outside-labour.css';
 import './styles/jobs-ops-polish.css';
 import './styles/outside-labour-dashboard.css';
 import './styles/form-validation.css';
+import './styles/job-invoice-dashboard.css';
 
 export function App() {
   return (

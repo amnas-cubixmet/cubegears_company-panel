@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
+import { billingService } from '../../services/billing.service';
+import { paymentService } from '../../services/payment.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
@@ -108,6 +110,10 @@ export function JobCardWorkspace() {
   const workflowTabsRef = useRef(null);
 
   const [job, setJob] = useState(null);
+  const [jobInvoices, setJobInvoices] = useState([]);
+  const [jobPayments, setJobPayments] = useState([]);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState('');
   const [staff, setStaff] = useState([]);
   const [timerRefreshVersion, setTimerRefreshVersion] = useState(0);
   const [vehicleHistory, setVehicleHistory] = useState([]);
@@ -148,6 +154,35 @@ export function JobCardWorkspace() {
     const left = activeButton.offsetLeft - rail.offsetLeft - (rail.clientWidth - activeButton.clientWidth) / 2;
     rail.scrollTo({ left: Math.max(0, left), behavior: 'instant' });
   }, [activeTab]);
+
+  const loadBilling = async () => {
+    if (!id) return;
+    setBillingLoading(true);
+    setBillingError('');
+    try {
+      const invoiceResponse = await billingService.list({ jobId: id });
+      const allInvoices = Array.isArray(invoiceResponse) ? invoiceResponse : invoiceResponse?.results || [];
+      const related = allInvoices.filter((row) =>
+        (row.kind || 'invoice') === 'invoice' &&
+        (String(row.sourceJobId || '') === String(id) ||
+         (job?.jobNumber && String(row.jobCardNo || '') === String(job.jobNumber)))
+      ).sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
+      const current = related.find((row) => row.status !== 'Cancelled') || related[0];
+      const paymentResponse = current ? await paymentService.getPayments({ invoice: current.id }) : [];
+      const allPayments = Array.isArray(paymentResponse) ? paymentResponse : paymentResponse?.results || [];
+      setJobInvoices(related);
+      setJobPayments(allPayments.filter((row) => String(row.invoice || '') === String(current?.id))
+        .sort((a, b) => String(b.created_at || b.date || '').localeCompare(String(a.created_at || a.date || ''))));
+    } catch (requestError) {
+      setBillingError(requestError?.message || 'Unable to load invoice and payment records.');
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'invoice' && job?.id) loadBilling();
+  }, [activeTab, job?.id, job?.jobNumber]);
 
   const load = async () => {
     setLoading(true);
@@ -289,7 +324,15 @@ export function JobCardWorkspace() {
   const estimateGrandTotal = taxable + estimateTaxAmount;
 
   const latestEstimate = estimates.at(-1) || null;
-  const invoiceTotal = cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0);
+  const linkedInvoice = jobInvoices.find((row) => row.status !== 'Cancelled') || null;
+  const invoiceTotal = linkedInvoice
+    ? cleanNumber(linkedInvoice.total)
+    : (USE_MOCK_API ? cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0) : 0);
+  const invoicePaid = linkedInvoice ? cleanNumber(linkedInvoice.paid) : cleanNumber(job?.billing?.paidAmount || 0);
+  const invoiceBalance = Math.max(0, linkedInvoice ? cleanNumber(linkedInvoice.balance ?? (invoiceTotal - invoicePaid)) : invoiceTotal - invoicePaid);
+  const invoicePaymentStatus = linkedInvoice
+    ? (invoiceTotal <= 0 ? 'No amount due' : invoiceBalance <= 0 ? 'Paid' : invoicePaid > 0 ? 'Partially Paid' : 'Unpaid')
+    : (USE_MOCK_API ? job?.paymentStatus || 'Pending' : 'Not invoiced');
 
 
   const sectionComplete = useMemo(() => ({
@@ -627,6 +670,38 @@ export function JobCardWorkspace() {
       return;
     }
 
+    if (paymentAmount > invoiceBalance) {
+      setError('Payment cannot exceed the outstanding invoice balance.');
+      return;
+    }
+
+    if (!USE_MOCK_API) {
+      if (!linkedInvoice?.id || !job?.customerId) {
+        setError('Create an invoice linked to this Job Card before recording payment.');
+        return;
+      }
+      setSaving(true);
+      setError('');
+      try {
+        const today = new Date();
+        const date = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+        await paymentService.createPayment({
+          invoice: linkedInvoice.id,
+          customer: job.customerId,
+          date,
+          amount: paymentAmount.toFixed(2),
+          method: paymentForm.method
+        });
+        setPaymentForm((old) => ({ ...old, amount: '' }));
+        await loadBilling();
+      } catch (requestError) {
+        setError(requestError?.message || 'Payment could not be recorded.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+
     const currentPaid = cleanNumber(job.billing?.paidAmount || 0);
     const paidAmount = Math.min(invoiceTotal, currentPaid + paymentAmount);
     const outstandingBalance = Math.max(0, invoiceTotal - paidAmount);
@@ -659,6 +734,10 @@ export function JobCardWorkspace() {
   };
 
   const saveDelivery = async () => {
+    if (!USE_MOCK_API) {
+      await setStatus('Delivered');
+      return;
+    }
     const nextDelivery = {
       ...(job.delivery || {}),
       finalKm: deliveryForm.finalKm,
@@ -708,8 +787,8 @@ export function JobCardWorkspace() {
           >
             {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
           </select>
-          <button type="button" onClick={createInvoice} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
-            <ReceiptText size={15}/>Create Invoice
+          <button type="button" onClick={() => openTab('invoice')} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
+            <ReceiptText size={15}/>{linkedInvoice ? 'View Invoice' : 'Create Invoice'}
           </button>
         </div>
       </header>
@@ -1130,72 +1209,153 @@ export function JobCardWorkspace() {
         </div>
       )}
 
+
       {activeTab === 'invoice' && (
-        <div className="job-invoice-grid grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title flex items-center gap-2 text-sm font-extrabold text-content"><FileText size={16} className="text-primary"/>Invoice & Payment</div>
-
-            <div className="job-invoice-metrics">
-              <Info label="Invoice No" value={job.billing?.invoiceNumber || 'Not generated'}/>
-              <Info label="Invoice Total" value={money.format(invoiceTotal)}/>
-              <Info label="Paid" value={money.format(job.billing?.paidAmount || 0)}/>
-              <Info label="Balance" value={money.format(Math.max(0, invoiceTotal - cleanNumber(job.billing?.paidAmount || 0)))}/>
-              <Info label="Payment Status" value={job.paymentStatus || 'Pending'}/>
-              <Info label="Method" value={job.billing?.paymentMethod || '—'}/>
+        <div className="job-invoice-dashboard">
+          <header className="job-invoice-dashboard-head">
+            <div>
+              <h2><ReceiptText size={18} aria-hidden="true" /> Invoice & Payment</h2>
+              <p>Review the invoice, outstanding amount and vehicle delivery in one place.</p>
             </div>
+            <button
+              type="button"
+              onClick={() => linkedInvoice ? navigate('/invoices/' + linkedInvoice.id) : createInvoice()}
+              className="job-primary-action"
+            >
+              <ReceiptText size={15} aria-hidden="true" />
+              {linkedInvoice ? 'View Invoice' : 'Create Invoice'}
+            </button>
+          </header>
 
-            <div className="job-invoice-actions">
-              <button onClick={createInvoice} className="job-primary-action"><ReceiptText size={15}/>Create / Open Invoice</button>
-            </div>
-
-            <form className="job-payment-form" onSubmit={recordPayment}>
-              <div className="job-payment-form__title">Record Payment</div>
-              <div className="job-payment-form__grid">
-                <label>
-                  Amount
-                  <input
-                    inputMode="decimal"
-                    value={paymentForm.amount}
-                    onChange={(e)=>setPaymentForm({...paymentForm,amount:e.target.value})}
-                    placeholder="₹0"
-                  />
-                </label>
-                <label>
-                  Method
-                  <select value={paymentForm.method} onChange={(e)=>setPaymentForm({...paymentForm,method:e.target.value})}>
-                    <option>Cash</option>
-                    <option>Card</option>
-                    <option>UPI</option>
-                    <option>Bank</option>
-                  </select>
-                </label>
+          <div className="job-invoice-dashboard-stats">
+            {[
+              ['Invoice Total', invoiceTotal, 'total'],
+              ['Paid Amount', invoicePaid, 'paid'],
+              ['Balance Due', invoiceBalance, 'balance']
+            ].map(([label, amount, tone]) => (
+              <div className={'job-invoice-stat is-' + tone} key={label}>
+                <span>{label}</span>
+                <strong>{money.format(amount)}</strong>
               </div>
-              <button type="submit" disabled={saving || invoiceTotal <= 0} className="job-payment-submit">
-                Record Payment
-              </button>
-            </form>
+            ))}
+            <div className="job-invoice-stat is-status">
+              <span>Payment Status</span>
+              <strong>{invoicePaymentStatus}</strong>
+            </div>
+          </div>
 
-            {job.billing?.payments?.length ? (
-              <div className="job-payment-history">
-                {job.billing.payments.slice(0, 4).map((payment) => (
-                  <div key={payment.id}>
-                    <span>{payment.date}</span>
-                    <strong>{money.format(payment.amount)} · {payment.method}</strong>
+          {billingLoading && <p className="job-invoice-inline-message" role="status">Loading invoice and payment records…</p>}
+          {billingError && <div className="job-invoice-inline-message is-error" role="alert">
+            {billingError}
+            <button type="button" onClick={loadBilling}>Retry</button>
+          </div>}
+
+          <div className="job-invoice-dashboard-columns">
+            <section className="job-panel job-invoice-billing-card">
+              <div className="job-invoice-section-heading">
+                <div>
+                  <h3>Billing details</h3>
+                  <p>{linkedInvoice ? 'Linked to the official invoice record' : 'Create an invoice to start billing this job'}</p>
+                </div>
+                <span className="job-invoice-status-badge">{linkedInvoice?.status || 'Not invoiced'}</span>
+              </div>
+
+              <div className="job-invoice-details">
+                <div><span>Invoice Number</span><strong>{linkedInvoice?.number || (USE_MOCK_API ? job.billing?.invoiceNumber : '') || 'Not generated'}</strong></div>
+                <div><span>Customer</span><strong>{job.customerName || 'Walk-in'}</strong></div>
+                <div><span>Vehicle</span><strong>{job.vehicleReg || '—'}</strong></div>
+                <div><span>Payment Method</span><strong>{linkedInvoice?.paymentMode || (USE_MOCK_API ? job.billing?.paymentMethod : '') || '—'}</strong></div>
+              </div>
+
+              {jobInvoices.length > 1 && (
+                <div className="job-invoice-document-list">
+                  <h4>Other invoices for this Job Card</h4>
+                  {jobInvoices.filter((row) => row.id !== linkedInvoice?.id).map((row) => (
+                    <button key={row.id} type="button" onClick={() => navigate('/invoices/' + row.id)}>
+                      <span>{row.number || 'Invoice'} · {row.status}</span>
+                      <strong>{money.format(cleanNumber(row.total))}</strong>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {(!linkedInvoice && !USE_MOCK_API) ? (
+                <div className="job-invoice-empty">
+                  <FileText size={20} aria-hidden="true" />
+                  <strong>No invoice linked yet</strong>
+                  <p>Generate an invoice from this job before recording a payment.</p>
+                  <button type="button" onClick={createInvoice} className="job-primary-action">Create Invoice</button>
+                </div>
+              ) : (
+                <form className="job-payment-form" onSubmit={recordPayment}>
+                  <div className="job-payment-form__title">Record payment</div>
+                  <div className="job-payment-form__grid">
+                    <label>
+                      Amount (₹)
+                      <input
+                        inputMode="decimal"
+                        value={paymentForm.amount}
+                        onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                        placeholder="Enter amount"
+                        aria-label="Payment amount"
+                      />
+                    </label>
+                    <label>
+                      Payment method
+                      <select value={paymentForm.method} onChange={(e) => setPaymentForm({ ...paymentForm, method: e.target.value })}>
+                        <option>Cash</option><option>Card</option><option>UPI</option><option>Bank</option>
+                      </select>
+                    </label>
                   </div>
-                ))}
-              </div>
-            ) : null}
-          </section>
+                  <button type="submit" disabled={saving || billingLoading || invoiceBalance <= 0} className="job-payment-submit">
+                    {saving ? 'Saving…' : 'Record Payment'}
+                  </button>
+                </form>
+              )}
 
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Delivery</div>
-            <div className="mt-3 flex flex-col gap-2">
-              <input value={deliveryForm.finalKm} onChange={(e)=>setDeliveryForm({...deliveryForm,finalKm:e.target.value})} placeholder="Final KM" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              <input value={deliveryForm.customerSignature} onChange={(e)=>setDeliveryForm({...deliveryForm,customerSignature:e.target.value})} placeholder="Customer acknowledgement / signature name" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              <textarea rows={4} value={deliveryForm.warrantyNotes} onChange={(e)=>setDeliveryForm({...deliveryForm,warrantyNotes:e.target.value})} placeholder="Warranty / service notes" className="rounded-xl border border-line bg-surface-2 p-3 text-xs text-content"/>
-              <button onClick={saveDelivery} className="h-10 rounded-xl border-0 bg-emerald-600 text-xs font-bold text-white">Mark Delivered</button>
-            </div>
-          </section>
+              {(USE_MOCK_API ? job.billing?.payments || [] : jobPayments).length > 0 && (
+                <div className="job-payment-history">
+                  <h4>Recent payments</h4>
+                  {(USE_MOCK_API ? job.billing?.payments || [] : jobPayments).slice(0, 4).map((payment) => (
+                    <div key={payment.id}>
+                      <span>{payment.date || 'Payment'}</span>
+                      <strong>{money.format(cleanNumber(payment.amount))} · {payment.method}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="job-panel job-invoice-delivery-card">
+              <div className="job-invoice-section-heading">
+                <div>
+                  <h3>Vehicle delivery</h3>
+                  <p>Confirm final handover details.</p>
+                </div>
+              </div>
+              {!USE_MOCK_API && (
+                <p className="job-invoice-inline-message">The backend currently supports delivery status, but not storing the KM, acknowledgement and warranty fields shown below.</p>
+              )}
+              <div className="job-invoice-delivery-fields">
+                <label>
+                  Final KM
+                  <input disabled={!USE_MOCK_API} value={deliveryForm.finalKm} onChange={(e) => setDeliveryForm({ ...deliveryForm, finalKm: e.target.value })} placeholder="Vehicle odometer" />
+                </label>
+                <label>
+                  Customer acknowledgement
+                  <input disabled={!USE_MOCK_API} value={deliveryForm.customerSignature} onChange={(e) => setDeliveryForm({ ...deliveryForm, customerSignature: e.target.value })} placeholder="Customer name" />
+                </label>
+                <label>
+                  Warranty / service notes
+                  <textarea disabled={!USE_MOCK_API} rows={3} value={deliveryForm.warrantyNotes} onChange={(e) => setDeliveryForm({ ...deliveryForm, warrantyNotes: e.target.value })} placeholder="Handover notes" />
+                </label>
+                <button type="button" disabled={saving || normalizeJobStatus(job.status) === 'Delivered'} onClick={saveDelivery} className="job-invoice-deliver-button">
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  {normalizeJobStatus(job.status) === 'Delivered' ? 'Vehicle Delivered' : 'Mark Delivered'}
+                </button>
+              </div>
+            </section>
+          </div>
         </div>
       )}
 
