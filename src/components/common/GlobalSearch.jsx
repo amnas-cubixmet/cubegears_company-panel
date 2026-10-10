@@ -171,7 +171,7 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDownInput}
-          placeholder={isMobileView ? "Search customers, vehicles, jobs..." : "Search customers, vehicles, jobs..."}
+          placeholder="Search customers, vehicles, jobs..."
           aria-label="Search the CubixGear workspace"
           autoComplete="off"
           spellCheck={false}
