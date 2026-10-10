@@ -160,20 +160,18 @@ export function JobCardWorkspace() {
     setBillingLoading(true);
     setBillingError('');
     try {
-      const [invoiceResponse, paymentResponse] = await Promise.all([
-        billingService.list(),
-        paymentService.getPayments()
-      ]);
+      const invoiceResponse = await billingService.list({ jobId: id });
       const allInvoices = Array.isArray(invoiceResponse) ? invoiceResponse : invoiceResponse?.results || [];
       const related = allInvoices.filter((row) =>
         (row.kind || 'invoice') === 'invoice' &&
         (String(row.sourceJobId || '') === String(id) ||
          (job?.jobNumber && String(row.jobCardNo || '') === String(job.jobNumber)))
       ).sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
-      const relatedIds = new Set(related.map((row) => String(row.id)));
+      const current = related.find((row) => row.status !== 'Cancelled') || related[0];
+      const paymentResponse = current ? await paymentService.getPayments({ invoice: current.id }) : [];
       const allPayments = Array.isArray(paymentResponse) ? paymentResponse : paymentResponse?.results || [];
       setJobInvoices(related);
-      setJobPayments(allPayments.filter((row) => relatedIds.has(String(row.invoice || '')))
+      setJobPayments(allPayments.filter((row) => String(row.invoice || '') === String(current?.id))
         .sort((a, b) => String(b.created_at || b.date || '').localeCompare(String(a.created_at || a.date || ''))));
     } catch (requestError) {
       setBillingError(requestError?.message || 'Unable to load invoice and payment records.');
