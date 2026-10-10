@@ -891,15 +891,27 @@ export function JobCardWorkspace() {
         })}
       </nav>
 
-      <div className={`job-workflow-gate ${activeTabComplete ? 'is-complete' : 'is-pending'}`}>
-        <div>
-          <strong>{activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
-          <span>Move freely between job stages. Save the details you record.</span>
+      <section className="job-workspace-section-bar" aria-label={activeTabLabel + ' section'}>
+        <div className="job-workspace-section-icon"><ActiveSectionIcon size={17} aria-hidden="true"/></div>
+        <div className="job-workspace-section-title">
+          <h2>{activeTabLabel}</h2>
+          <p>{SECTION_DETAILS[activeTab]}</p>
         </div>
-        {nextVisibleTab ? (
-          <button type="button" disabled={saving} onClick={() => openTab(nextVisibleTab[0])}>
+        <span className={'job-workspace-section-state ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-open')}>
+          {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
+          {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
+        </span>
+      </section>
+
+      <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
+        <div>
+          <strong>{activeTabLocked ? 'Step locked in guided mode' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
+          <span>{lockSections ? 'Guided mode follows essential stages; optional sections stay available.' : 'Move freely between sections and save changes before continuing.'}</span>
+        </div>
+        {nextVisibleTab && !activeTabLocked ? (
+          <button type="button" disabled={saving || isSectionLocked(nextVisibleTab[0])} onClick={() => openTab(nextVisibleTab[0])}>
             Next: {nextVisibleTab[1]}
-            <ChevronRight size={14} />
+            {isSectionLocked(nextVisibleTab[0]) ? <LockKeyhole size={14} aria-hidden="true"/> : <ChevronRight size={14}/>}
           </button>
         ) : null}
       </div>
