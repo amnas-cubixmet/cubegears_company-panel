@@ -789,7 +789,7 @@ export function JobCardWorkspace() {
           >
             {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
           </select>
-          <button type="button" onClick={() => linkedInvoice ? navigate('/invoices/' + linkedInvoice.id) : createInvoice()} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
+          <button type="button" onClick={() => openTab('invoice')} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
             <ReceiptText size={15}/>{linkedInvoice ? 'View Invoice' : 'Create Invoice'}
           </button>
         </div>
