@@ -69,9 +69,7 @@ export function JobComplaintDetails() {
         index === found.index ? { ...entry, status: nextStatus } : entry
       );
       const saved = await jobService.updateJob(job.id, { complaints: nextComplaints });
-      // Re-read instead of trusting a partial PATCH response.
-      const updated = await jobService.getJobById(jobId);
-      setJob(updated || saved || { ...job, complaints: nextComplaints });
+      setJob({ ...job, ...(saved || {}), complaints: nextComplaints });
     } catch (err) {
       setError(err?.response?.data?.detail || err?.message || 'Could not update complaint status.');
     } finally {
