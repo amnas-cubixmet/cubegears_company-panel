@@ -26,6 +26,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
   const [data, setData] = useState({ lines: [], transactions: [], purchaseOrders: [], canComplete: true, blockingReasons: [] });
   const [stock, setStock] = useState([]);
+  const [outsideParts, setOutsideParts] = useState([]);
   const [tab, setTab] = useState('pending');
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState('');
@@ -46,12 +47,14 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
     try {
       setLoading(true);
       setError('');
-      const [workflow, items] = await Promise.all([
+      const [workflow, items, purchases] = await Promise.all([
         jobPartsService.get(jobId),
-        stockService.getStockItems()
+        stockService.getStockItems(),
+        jobPartsService.getOutsideJobParts(jobId)
       ]);
       setData(workflow);
       setStock(Array.isArray(items) ? items : items?.results || []);
+      setOutsideParts(purchases);
     } catch (e) {
       setError(e?.message || 'Unable to load parts workflow.');
     } finally {
@@ -185,7 +188,14 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
                 <strong className="text-sm text-cg-text">Find & Add Stock</strong>
                 <p>Search your inventory or add a part requirement.</p>
               </div>
-              <button type="button" className="primary-button job-parts-finder-add" onClick={() => setPanel({ type: 'add' })}><PackagePlus size={15} aria-hidden="true"/> Add Part</button>
+              <div className="job-parts-finder-actions">
+                <button type="button" className="secondary-button" onClick={() => setPanel({ type: 'outside', partName: stockLookup })}>
+                  <ShoppingCart size={15} aria-hidden="true" /> Buy Outside
+                </button>
+                <button type="button" className="primary-button job-parts-finder-add" onClick={() => setPanel({ type: 'add' })}>
+                  <PackagePlus size={15} aria-hidden="true" /> Add Stock Part
+                </button>
+              </div>
             </div>
             <label className="job-parts-inventory-search relative block min-w-0">
               <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cg-muted"/>
@@ -196,11 +206,19 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
                 const available = Number(item.available ?? (Number(item.onHand || 0) - Number(item.reserved || 0)));
                 return <div key={item.id} className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg bg-cg-surface p-2">
                   <div className="min-w-0 flex-1"><strong className="block break-words text-xs text-cg-text">{item.partName}</strong><span className="text-xs text-cg-muted">{item.sku || 'No SKU'} · Available {Math.max(0, available)} · {money.format(item.sellingPrice || 0)}</span></div>
-                  <button type="button" className="secondary-button" onClick={() => { setPanel({ type: 'add', selectedPartId: item.id }); setStockLookup(''); }}>
-                    {available > 0 ? 'Select' : 'Buy / Order'}
+                  <button type="button" className="secondary-button" onClick={() => {
+                    setPanel(available > 0 ? { type: 'add', selectedPartId: item.id } : { type: 'outside', partName: item.partName, sku: item.sku || '', sellingPrice: item.sellingPrice || '' });
+                    setStockLookup('');
+                  }}>
+                    {available > 0 ? 'Select' : 'Buy Outside'}
                   </button>
                 </div>;
-              }) : <p className="text-xs text-cg-muted">No matching inventory item. Add it in Stock Management before creating a job requirement.</p>}
+              }) : <div className="job-parts-no-stock">
+                <p>No stock match. You can buy the part directly from an outside shop for this Job Card.</p>
+                <button type="button" className="secondary-button" onClick={() => setPanel({ type: 'outside', partName: stockLookup })}>
+                  <ShoppingCart size={14} aria-hidden="true"/> Buy Outside Shop
+                </button>
+              </div>}
             </div>}
           </div>
           <div className="job-parts-records-head">
@@ -327,6 +345,47 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
           </>
         )}
       </div>
+
+      <section className="job-parts-outside-list" aria-label="Outside shop purchases">
+        <div className="job-parts-outside-head">
+          <div>
+            <h3>Outside Shop Purchases</h3>
+            <p>Parts bought from other shops and used directly on this Job Card. Inventory remains unchanged.</p>
+          </div>
+          <div className="job-parts-outside-total">
+            <span>Purchase Cost</span>
+            <strong>{money.format(outsideParts.reduce((sum, row) => sum + Number(row.totalCost || 0), 0))}</strong>
+          </div>
+        </div>
+        {outsideParts.length ? (
+          <div className="job-parts-outside-records">
+            {outsideParts.map((row) => (
+              <article className="job-parts-outside-record" key={row.id}>
+                <div>
+                  <strong>{row.partName}</strong>
+                  <span>{row.vendor} · {row.invoiceNo ? `Bill ${row.invoiceNo} · ` : ''}Qty {row.quantity} {row.sku ? `· ${row.sku}` : ''}</span>
+                  <small>{row.usedAt ? new Date(row.usedAt).toLocaleDateString('en-IN') : 'Outside purchase'} · Purchase {money.format(row.unitCost)} / unit</small>
+                </div>
+                <div className="job-parts-outside-amount">
+                  <strong>{money.format(row.totalCost)}</strong>
+                  <span>Selling {money.format(row.totalSelling)}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="job-parts-outside-empty">No outside purchases yet. Use Buy Outside when the required part is not in stock.</p>
+        )}
+      </section>
+
+      {panel?.type === 'outside' && (
+        <OutsidePartPurchasePanel
+          initial={panel}
+          onClose={() => setPanel(null)}
+          onSave={(payload) => act('outside', () => jobPartsService.buyOutsideJobPart(jobId, payload))}
+          busy={busy === 'outside'}
+        />
+      )}
 
       {panel?.type === 'add' && (
         <AddPartPanel stock={stock} initialPartId={panel.selectedPartId} assignedTo={assignedTo} onClose={() => setPanel(null)}
