@@ -90,12 +90,17 @@ const buildState = async (job) => {
 
 const persist = async (jobId, state) => {
   const cleanLines = state.lines.map(({ stockItem, qtyOnHand, availableQty, grossIssued, returnedQty, netIssued, pendingQty, stockState, ...line }) => line);
+  // Read the latest job when editing stock lines so a stock requirement
+  // never overwrites direct purchases saved through the outside-parts API.
+  const currentJob = await jobService.getJobById(jobId);
+  const previous = currentJob?.partsWorkflow || {};
   return jobService.updateJob(jobId, {
     partsWorkflow: {
+      ...previous,
       lines: cleanLines,
       transactions: state.transactions,
       purchaseOrders: state.purchaseOrders,
-      outsideParts: state.outsideParts || []
+      outsideParts: previous.outsideParts || state.outsideParts || []
     }
   });
 };
