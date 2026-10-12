@@ -82,6 +82,18 @@ const mockWorkflow = (job) => {
   };
 };
 
+export const getJobCostSummary = async (id) => {
+  if (USE_MOCK_API) {
+    return {
+      mechanicCost: '0.00', outsideStaffCost: '0.00', partsCost: '0.00',
+      totalCost: '0.00', outsidePending: '0.00',
+      unallocatedDailyWages: true, unapprovedMechanicWork: false, partsAtCurrentCost: false,
+      note: 'Demo mode does not have real payment or stock cost records.'
+    };
+  }
+  return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/cost-summary`);
+};
+
 export const getJobWorkflow = async (id) => {
   if (USE_MOCK_API) return mockWorkflow(await getJobById(id));
   return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/workflow`);
@@ -163,6 +175,7 @@ export const getVehicleHistory = async (registration) => {
 export const jobService = {
   getJobs,
   getJobById,
+  getJobCostSummary,
   createJob,
   updateJobStatus,
   updateJob,
