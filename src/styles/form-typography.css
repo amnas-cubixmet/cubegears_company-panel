@@ -1,0 +1,33 @@
+/*
+ * CUBIXGEAR — Project-wide form field typography
+ *
+ * Labels, section titles, badges and action buttons retain their own weights.
+ * Only text typed/selected in controls and text shown by selectable options is
+ * regular (400), regardless of the parent label's inherited font weight.
+ * Use an ID-level selector to override legacy !important form rules.
+ * :is(body, #root) also covers dropdowns mounted in a body portal.
+ */
+:is(body, #root) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"])
+    :not([type="button"]):not([type="submit"]):not([type="reset"])
+    :not([type="image"]),
+  textarea,
+  select,
+  option,
+  optgroup,
+  [role="combobox"],
+  [role="option"]
+) {
+  font-weight: 400 !important;
+}
+
+:is(body, #root) input:not([type="checkbox"]):not([type="radio"]):not([type="file"])::placeholder,
+:is(body, #root) textarea::placeholder {
+  font-weight: 400 !important;
+}
+
+/* Custom Select components use clickable div/span rather than a native select. */
+:is(body, #root) .searchable-select-wrapper .form-control > span:first-child,
+:is(body, #root) .searchable-select-wrapper .searchable-select-item {
+  font-weight: 400 !important;
+}
