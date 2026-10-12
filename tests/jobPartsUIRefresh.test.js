@@ -23,7 +23,7 @@ test('Stock search and records search remain independent', () => {
   assert.match(parts, /job-parts-inventory-search/);
   assert.match(parts, /job-parts-record-search/);
   assert.match(parts, /selectedPartId: item\.id/);
-  assert.match(parts, /setPanel\(\{ type: 'add', selectedPartId: item\.id \}\)/);
+  assert.match(parts, /available > 0 \? \{ type: 'add', selectedPartId: item\.id \} : \{ type: 'outside'/);
   assert.match(parts, /value=\{search\}/);
 });
 
