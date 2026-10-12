@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HardHat, Plus, X, ClipboardList } from 'lucide-react';
+import { HardHat, Plus, X } from 'lucide-react';
 import { OutsideLabourPanel } from './OutsideLabourPanel';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
@@ -13,21 +13,10 @@ export function JobOutsideStaffSection({ jobId }) {
   const canView = hasPermission(user, 'expenses.view');
   const canCreate = hasPermission(user, 'expenses.create');
   const [formOpen, setFormOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
 
   const addStaff = () => {
     if (!canView || !canCreate) return;
-    if (formOpen) {
-      setFormOpen(false);
-    } else {
-      setExpanded(true);
-      setFormOpen(true);
-    }
-  };
-
-  const toggleRecords = () => {
-    if (expanded) setFormOpen(false);
-    setExpanded((current) => !current);
+    setFormOpen((current) => !current);
   };
 
   return (
@@ -39,17 +28,6 @@ export function JobOutsideStaffSection({ jobId }) {
           <p>Add an external mechanic, painter or freelance worker to this Job Card.</p>
         </div>
         <div className="job-outside-staff-actions">
-          {canView && (
-            <button
-              type="button"
-              className="job-outside-staff-view"
-              aria-expanded={expanded}
-              onClick={toggleRecords}
-            >
-              <ClipboardList size={15} aria-hidden="true" />
-              {expanded ? 'Hide Records' : 'View Records'}
-            </button>
-          )}
           {canView && canCreate && (
             <button
               type="button"
@@ -77,7 +55,7 @@ export function JobOutsideStaffSection({ jobId }) {
           Expenses Create permission is required to add outside staff.
         </p>
       )}
-      {canView && expanded && (
+      {canView && (
         <div className="job-outside-staff-content">
           <OutsideLabourPanel
             jobId={jobId}
