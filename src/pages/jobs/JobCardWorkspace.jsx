@@ -100,15 +100,6 @@ const TAB_ICONS = {
   activity: Clock3,
 };
 
-const blankLabour = () => ({
-  service: '',
-  mechanicName: '',
-  estimatedHours: '',
-  hours: '',
-  rate: '',
-  internalCost: ''
-});
-
 const blankFinding = () => ({
   description: '',
   severity: 'Medium',
@@ -140,7 +131,6 @@ export function JobCardWorkspace() {
 
   const [complaintText, setComplaintText] = useState('');
   const [finding, setFinding] = useState(blankFinding());
-  const [labour, setLabour] = useState(blankLabour());
   const [updateNote, setUpdateNote] = useState('');
   const [updateType, setUpdateType] = useState('Work Update');
   const [estimateTax, setEstimateTax] = useState('18');
@@ -488,28 +478,6 @@ export function JobCardWorkspace() {
       status: job.status === 'New' ? 'Inspection' : job.status
     });
     setFinding(blankFinding());
-  };
-
-  const addLabour = async (event) => {
-    event.preventDefault();
-    if (!labour.service.trim()) return;
-
-    const record = {
-      id: `LAB-${Date.now()}`,
-      ...labour,
-      estimatedHours: cleanNumber(labour.estimatedHours),
-      hours: cleanNumber(labour.hours),
-      rate: cleanNumber(labour.rate),
-      internalCost: cleanNumber(labour.internalCost),
-      customerCharge: cleanNumber(labour.hours || labour.estimatedHours) * cleanNumber(labour.rate),
-      status: 'In Progress',
-      startedAt: new Date().toISOString()
-    };
-
-    const updated = await persist(USE_MOCK_API
-      ? { labourRecords: [...labourRecords, record] }
-      : { work: [...labourRecords, record] });
-    if (updated) setLabour(blankLabour());
   };
 
   const createEstimate = async (kind = 'Estimate') => {
@@ -1228,6 +1196,8 @@ export function JobCardWorkspace() {
 
       {activeTab === 'work' && (
         <div className="job-work-payroll-stack job-work-simple">
+          <JobOutsideStaffSection jobId={job.id} />
+
           <JobWorkerAssignments
             key={timerRefreshVersion}
             jobId={job.id}
@@ -1242,46 +1212,34 @@ export function JobCardWorkspace() {
             onChanged={() => setTimerRefreshVersion((value) => value + 1)}
           />
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Labour & Work Items</div>
-            <div className="mt-3 flex flex-col gap-2">
-              {labourRecords.map((item)=>(
-                <div key={item.id} className="rounded-xl border border-line bg-surface-2 p-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
+          <section className="job-panel job-work-items-panel rounded-2xl border border-line bg-surface p-4" aria-label="Labour and Work Items">
+            <header className="job-work-items-head">
+              <div>
+                <h3>Labour & Work Items</h3>
+                <p>Saved work entries for this Job Card.</p>
+              </div>
+              <span className="job-work-items-count">
+                {labourRecords.length} {labourRecords.length === 1 ? 'entry' : 'entries'}
+              </span>
+            </header>
+            {labourRecords.length ? (
+              <div className="job-work-items-list">
+                {labourRecords.map((item) => (
+                  <div key={item.id} className="job-work-items-row">
                     <div>
-                      <div className="text-xs font-bold text-content">{item.service}</div>
-                      <div className="mt-1 text-[10px] text-muted">{item.mechanicName || 'Unassigned'} · Estimated {item.estimatedHours || 0}h · Actual {item.hours || 0}h</div>
+                      <strong>{item.service || 'Work item'}</strong>
+                      <span>{item.mechanicName || 'Unassigned'} · Estimated {item.estimatedHours || 0}h · Actual {item.hours || 0}h</span>
                     </div>
-                    <strong className="text-xs text-primary">{money.format(item.customerCharge || 0)}</strong>
+                    <strong className="job-work-items-price">{money.format(cleanNumber(item.customerCharge || 0))}</strong>
                   </div>
-                </div>
-              ))}
-              {!labourRecords.length ? <Empty text="No labour entries yet."/> : null}
-            </div>
-          </section>
-
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Add Labour</div>
-            <form onSubmit={addLabour} className="mt-3 flex flex-col gap-2">
-              <input value={labour.service} onChange={(e)=>setLabour({...labour,service:e.target.value})} placeholder="Labour / work item" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              <select value={labour.mechanicName} onChange={(e)=>setLabour({...labour,mechanicName:e.target.value})} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
-                <option value="">Technician</option>
-                {staff.map((item)=><option key={item.id} value={item.name}>{item.name}</option>)}
-              </select>
-              <div className="grid grid-cols-2 gap-2">
-                <input inputMode="decimal" value={labour.estimatedHours} onChange={(e)=>setLabour({...labour,estimatedHours:e.target.value})} placeholder="Est. hours" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-                <input inputMode="decimal" value={labour.hours} onChange={(e)=>setLabour({...labour,hours:e.target.value})} placeholder="Actual hours" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
+                ))}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input inputMode="decimal" value={labour.rate} onChange={(e)=>setLabour({...labour,rate:e.target.value})} placeholder="Rate / hour ₹" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-                <input inputMode="decimal" value={labour.internalCost} onChange={(e)=>setLabour({...labour,internalCost:e.target.value})} placeholder="Internal cost ₹" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              </div>
-              <button disabled={saving} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Add Labour</button>
-            </form>
+            ) : (
+              <p className="job-work-items-empty">
+                No labour entries yet. Record internal work using Technician Work Timers above.
+              </p>
+            )}
           </section>
-          </div>
-          <JobOutsideStaffSection jobId={job.id} />
         </div>
       )}
 
