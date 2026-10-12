@@ -82,6 +82,22 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
     });
   }, [data.lines, searchTerm, tab]);
 
+  const visibleTransactions = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return data.transactions;
+    return data.transactions.filter((row) =>
+      [row.partName, row.type, row.reference, row.createdBy]
+        .some((value) => String(value || '').toLowerCase().includes(term))
+    );
+  }, [data.transactions, searchTerm]);
+
+  const recordCounts = useMemo(() => ({
+    pending: data.lines.filter((line) => line.lineStatus !== 'Cancelled' && Number(line.pendingQty) > 0).length,
+    issued: data.lines.filter((line) => Number(line.netIssued) > 0).length,
+    returned: data.lines.filter((line) => Number(line.returnedQty) > 0).length,
+    history: data.transactions.length
+  }), [data.lines, data.transactions]);
+
   const act = async (key, fn) => {
     if (busy) return;
     setBusy(key);
@@ -136,44 +152,45 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
   }, [data.lines]);
 
   return (
-    <section className="job-parts-workflow space-y-4">
-      <div className="job-parts-summary-card rounded-xl border border-cg-border bg-cg-surface p-4 shadow-sm md:p-5">
+    <section className="job-parts-workflow job-parts-refined space-y-4">
+      <div className="job-parts-summary-card rounded-xl border border-cg-border bg-cg-surface p-4 shadow-sm md:p-5" aria-label="Parts Overview">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-[.14em] text-cg-primary">Parts Issue & Inventory</span>
-            <h2 className="mt-1 text-lg font-bold text-cg-text">Job Parts Workflow</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-cg-muted">
-              Check stock, issue available parts, order shortages, receive inward stock and return unused issued parts.
+            <span className="job-parts-eyebrow">Job Card / Inventory</span>
+            <h2 className="job-parts-heading mt-1 text-lg font-bold text-cg-text">Parts Overview</h2>
+            <p className="job-parts-subheading mt-1 max-w-2xl text-sm leading-6 text-cg-muted">
+              Add required parts, issue stock, order shortages, and track returns.
             </p>
           </div>
 
-          <CompletionGuard
-            canComplete={data.canComplete}
-            reasons={data.blockingReasons}
-
-          />
+          {loading
+            ? <span className="job-parts-loading-summary" role="status">Checking parts status…</span>
+            : <CompletionGuard canComplete={data.canComplete} reasons={data.blockingReasons} />}
         </div>
 
         <div className="job-parts-metrics mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
-          <Metric label="Parts Used" value={summary.parts} tone="blue" />
-          <Metric label="Quantity Issued" value={summary.issued} tone="blue" />
-          <Metric label="Issued Selling Value" value={money.format(summary.selling)} tone="green" />
-          <Metric label="Pending Quantity" value={summary.pending} tone="amber" />
+          <Metric label="Parts Used" value={loading ? '—' : summary.parts} tone="blue" />
+          <Metric label="Quantity Issued" value={loading ? '—' : summary.issued} tone="blue" />
+          <Metric label="Issued Selling Value" value={loading ? '—' : money.format(summary.selling)} tone="green" />
+          <Metric label="Pending Quantity" value={loading ? '—' : summary.pending} tone="amber" />
         </div>
       </div>
 
       <div className="job-parts-main-card rounded-xl border border-cg-border bg-cg-surface shadow-sm">
         <div className="job-parts-toolbar border-b border-cg-border p-3 md:p-4">
           <div className="job-parts-stock-finder mb-3 rounded-xl border border-cg-border bg-cg-surface-2 p-3">
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <strong className="text-sm text-cg-text">Find Stock & Add to Job</strong>
-              <button type="button" className="secondary-button" onClick={() => setPanel({ type: 'add' })}><PackagePlus size={15}/> Add Part</button>
+            <div className="job-parts-finder-head mb-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="job-parts-finder-title">
+                <strong className="text-sm text-cg-text">Find & Add Stock</strong>
+                <p>Search your inventory or add a part requirement.</p>
+              </div>
+              <button type="button" className="primary-button job-parts-finder-add" onClick={() => setPanel({ type: 'add' })}><PackagePlus size={15} aria-hidden="true"/> Add Part</button>
             </div>
-            <label className="relative block min-w-0">
+            <label className="job-parts-inventory-search relative block min-w-0">
               <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cg-muted"/>
               <input className="cubegears-input w-full !pl-9" value={stockLookup} onChange={(event) => setStockLookup(event.target.value)} aria-label="Find stock to add" placeholder="Search inventory name, SKU or barcode"/>
             </label>
-            {stockLookup.trim() && <div className="mt-2 grid gap-1" role="status">
+            {stockLookup.trim() && <div className="job-parts-stock-results mt-2 grid gap-1" role="status">
               {stockMatches.length ? stockMatches.map((item) => {
                 const available = Number(item.available ?? (Number(item.onHand || 0) - Number(item.reserved || 0)));
                 return <div key={item.id} className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg bg-cg-surface p-2">
@@ -185,7 +202,13 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
               }) : <p className="text-xs text-cg-muted">No matching inventory item. Add it in Stock Management before creating a job requirement.</p>}
             </div>}
           </div>
-          <div className="job-parts-tabs flex gap-2 overflow-x-auto pb-1">
+          <div className="job-parts-records-head">
+            <div>
+              <h3>Parts Records</h3>
+              <p>Check pending, issued, returned parts and stock activity.</p>
+            </div>
+          </div>
+          <div className="job-parts-tabs flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filter job parts">
             {[
               ['pending', 'Pending Issue'],
               ['issued', 'Issued'],
@@ -197,29 +220,24 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
                 type="button"
                 onClick={() => setTab(key)}
                 className={`job-parts-tab ${tab === key ? 'is-active' : ''}`}
+                aria-pressed={tab === key}
               >
-                {label}
+                {label} <span className="job-parts-tab-count">{recordCounts[key]}</span>
               </button>
             ))}
           </div>
 
           <div className="job-parts-search-row mt-3 flex flex-col gap-2 sm:flex-row">
-            <label className="relative min-w-0 flex-1">
+            <label className="job-parts-record-search relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cg-muted" size={16} />
               <input
                 className="cubegears-input !pl-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search part name, SKU or barcode" aria-label="Search job parts"
+                placeholder={tab === 'history' ? 'Search transaction or part name' : 'Search records by name, SKU or barcode'}
+                aria-label="Search job parts"
               />
             </label>
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => setPanel({ type: 'add' })}
-            >
-              <PackagePlus size={16} /> Add Required Part
-            </button>
           </div>
         </div>
 
@@ -233,7 +251,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
         )}
 
         {tab === 'history' ? (
-          <TransactionHistory transactions={data.transactions} />
+          <TransactionHistory transactions={visibleTransactions} />
         ) : (
           <>
             <div className="job-parts-table-wrap hidden overflow-x-auto md:block">
@@ -274,7 +292,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
               </table>
             </div>
 
-            <div className="grid gap-3 p-3 md:hidden">
+            <div className="job-parts-mobile-list grid gap-3 p-3 md:hidden">
               {lines.map((line) => (
                 <PartMobileCard
                   key={line.id}
@@ -300,9 +318,9 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
               <div className="job-parts-empty p-8 text-center">
                 <PackageCheck className="mx-auto text-cg-muted" size={28} />
                 <h3 className="mt-3 text-sm font-semibold text-cg-text">
-                  {tab === 'pending' ? 'No pending parts' : tab === 'issued' ? 'No active issued parts' : 'No returned parts'}
+                  {searchTerm.trim() ? 'No matching parts' : tab === 'pending' ? 'No pending parts' : tab === 'issued' ? 'No active issued parts' : 'No returned parts'}
                 </h3>
-                <p className="mt-1 text-xs text-cg-muted">Use Add Part to select stock or create a pending purchase requirement.</p>
+                <p className="mt-1 text-xs text-cg-muted">{searchTerm.trim() ? 'Try another search or clear the search field.' : 'Use Add Part above to select stock or create a pending purchase requirement.'}</p>
               </div>
             )}
           </>
