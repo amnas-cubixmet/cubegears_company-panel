@@ -5,6 +5,8 @@ import { readFileSync } from 'node:fs';
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const workspace = read('../src/pages/jobs/JobCardWorkspace.jsx');
 const css = read('../src/styles/job-workspace-dashboard.css');
+const mechanic = read('../src/components/jobs/JobWorkTimerPanel.jsx');
+const outside = read('../src/components/jobs/OutsideLabourPanel.jsx');
 
 const workStart = workspace.indexOf("{activeTab === 'work' && (");
 const partsStart = workspace.indexOf("{activeTab === 'parts' && (", workStart);
@@ -29,10 +31,22 @@ test('Remove duplicate Add Labour form, state, handler without hiding saved work
   assert.match(work, /No labour entries yet/);
 });
 
-test('Work timer still allows recording internal mechanics without duplicate form', () => {
+test('Mechanic section retains work session start, pause, resume and approval', () => {
   assert.match(work, /<JobWorkTimerPanel/);
   assert.match(work, /jobStatus=\{normalizeJobStatus\(job\.status\)\}/);
   assert.match(work, /labourRecords=\{labourRecords\}/);
+  assert.match(mechanic, /<h3><Clock3 size=\{17\} \/> Mechanic<\/h3>/);
+  assert.match(mechanic, /Mechanic Work Records/);
+  assert.match(mechanic, /call\(row\.id,'pause'\)/);
+  assert.match(mechanic, /call\(row\.id,'resume'\)/);
+  assert.match(mechanic, /call\(row\.id,'approve'\)/);
+});
+
+test('Outside Labour Records are fetched and rendered by default for each Job Card', () => {
+  assert.match(outside, /outsideLabourService\.list\(jobId \? \{ job: jobId \} : \{\}\)/);
+  assert.match(outside, /<h3>Outside Labour Records<\/h3>/);
+  assert.match(outside, /visibleRows\.map/);
+  assert.doesNotMatch(outside, /\(!compactJobMode \|\| !isFormOpen\)/);
 });
 
 test('Labour & Work Items uses one responsive full width card with compact empty state', () => {
