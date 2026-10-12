@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   AlertTriangle,
   ArrowDownToLine,
@@ -503,11 +504,11 @@ function AddPartPanel({ stock, initialPartId = '', assignedTo, onClose, onSave, 
 
 
   return <Sheet title="Add Required Part" subtitle="Add a stock item required for this Job Card." onClose={onClose}>
-    <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); if (!busy) onSave(form); }}>
-      <label className="form-label md:col-span-2">Find Inventory Part
+    <form className="job-parts-modal-form" onSubmit={(e) => { e.preventDefault(); if (!busy) onSave(form); }}>
+      <label className="form-label job-parts-modal-full">Find Inventory Part
         <input className="cubegears-input mt-1" value={lookup} onChange={(e) => setLookup(e.target.value)} placeholder="Search part name, SKU or barcode" aria-label="Find inventory part"/>
       </label>
-      <label className="form-label md:col-span-2">Part
+      <label className="form-label job-parts-modal-full">Part
         <select className="cubegears-select mt-1" value={form.partId} onChange={(e) => {
           const item = stock.find((x) => String(x.id) === e.target.value);
           setForm({ ...form, partId: e.target.value, sellingPrice: item?.sellingPrice || '' });
@@ -522,9 +523,9 @@ function AddPartPanel({ stock, initialPartId = '', assignedTo, onClose, onSave, 
       <label className="form-label">Requested Qty<input className="cubegears-input mt-1" inputMode="decimal" value={form.requestedQty} onChange={(e) => setForm({ ...form, requestedQty: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Selling Price ₹<input className="cubegears-input mt-1" inputMode="decimal" value={form.sellingPrice} onChange={(e) => setForm({ ...form, sellingPrice: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Amount ₹<input className="cubegears-input mt-1" readOnly value={(Number(form.requestedQty || 0) * Number(form.sellingPrice || 0)).toFixed(2)}/></label>
-      <label className="form-label md:col-span-2">Issued To<input className="cubegears-input mt-1" value={form.issuedTo} onChange={(e) => setForm({ ...form, issuedTo: e.target.value })} placeholder="Mechanic / store destination"/></label>
-      {chosen && Number(chosen.available ?? (Number(chosen.onHand || 0) - Number(chosen.reserved || 0))) <= 0 && <p className="md:col-span-2 text-sm text-amber-700" role="status">Out of stock. Save as a pending requirement, then use Order on the Pending Issue tab to purchase it. No stock is deducted until Issue.</p>}
-      {chosen && <div className="md:col-span-2 rounded-xl bg-cg-surface-2 p-3 text-xs text-cg-muted">Available: <strong className="text-cg-text">{Math.max(0, Number(chosen.onHand || 0) - Number(chosen.reserved || 0))}</strong> · Rack: {chosen.location || '—'} · Cost: {money.format(chosen.costPrice || 0)}</div>}
+      <label className="form-label job-parts-modal-full">Issued To<input className="cubegears-input mt-1" value={form.issuedTo} onChange={(e) => setForm({ ...form, issuedTo: e.target.value })} placeholder="Mechanic / store destination"/></label>
+      {chosen && Number(chosen.available ?? (Number(chosen.onHand || 0) - Number(chosen.reserved || 0))) <= 0 && <p className="job-parts-modal-warning job-parts-modal-full" role="status">Out of stock. Save as a pending requirement, then use Order on the Pending Issue tab to purchase it. No stock is deducted until Issue.</p>}
+      {chosen && <div className="job-parts-modal-stock-note job-parts-modal-full">Available: <strong className="text-cg-text">{Math.max(0, Number(chosen.onHand || 0) - Number(chosen.reserved || 0))}</strong> · Rack: {chosen.location || '—'} · Cost: {money.format(chosen.costPrice || 0)}</div>}
       <button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
       <button className="primary-button" disabled={busy || !form.partId || !(Number(form.requestedQty) > 0) || !Number.isFinite(Number(form.sellingPrice)) || Number(form.sellingPrice) < 0}>{busy ? 'Adding…' : 'Add to Job Card'}</button>
     </form>
@@ -534,15 +535,15 @@ function AddPartPanel({ stock, initialPartId = '', assignedTo, onClose, onSave, 
 function OrderPanel({ line, onClose, onSave, busy }) {
   const [form, setForm] = useState({ vendor: line.stockItem?.supplier || '', type: 'Cash', orderDate: today(), orderedQty: String(line.pendingQty), unitCost: String(line.stockItem?.costPrice || ''), discount: '0', tax: '18' });
   return <Sheet title="Create Purchase Order" subtitle={`${line.partName} · ${line.pendingQty} pending`} onClose={onClose}>
-    <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
-      <label className="form-label md:col-span-2">Vendor *<input className="cubegears-input mt-1" required value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })}/></label>
+    <form className="job-parts-modal-form" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
+      <label className="form-label job-parts-modal-full">Vendor *<input className="cubegears-input mt-1" required value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })}/></label>
       <label className="form-label">Type<select className="cubegears-select mt-1" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option>Cash</option><option>Credit</option></select></label>
       <label className="form-label">Order Date<input type="date" className="cubegears-input mt-1" value={form.orderDate} onChange={(e) => setForm({ ...form, orderDate: e.target.value })}/></label>
       <label className="form-label">Order Qty<input className="cubegears-input mt-1" inputMode="decimal" value={form.orderedQty} onChange={(e) => setForm({ ...form, orderedQty: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Unit Cost ₹<input className="cubegears-input mt-1" inputMode="decimal" value={form.unitCost} onChange={(e) => setForm({ ...form, unitCost: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Discount %<input className="cubegears-input mt-1" inputMode="decimal" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Tax %<input className="cubegears-input mt-1" inputMode="decimal" value={form.tax} onChange={(e) => setForm({ ...form, tax: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
-      <button className="primary-button md:col-span-2" disabled={busy}>{busy ? 'Creating…' : 'Create Order'}</button>
+      <button className="primary-button job-parts-modal-full" disabled={busy}>{busy ? 'Creating…' : 'Create Order'}</button>
     </form>
   </Sheet>;
 }
@@ -552,31 +553,85 @@ function InwardPanel({ line, po, onClose, onSave, busy }) {
   const [form, setForm] = useState({ inwardQty: String(openQty || line.pendingQty || 1), billNo: '', billDate: today(), taxType: 'GST', rack: line.stockItem?.location || '', barcode: '' });
   return <Sheet title="Inward / Goods Receipt" subtitle={po ? `${po.poNo} · ${po.vendor}` : 'Create an order first for this shortage.'} onClose={onClose}>
     {!po ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">No open purchase order found for this part.</div> :
-    <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
+    <form className="job-parts-modal-form" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
       <label className="form-label">Vendor<input className="cubegears-input mt-1" value={po.vendor} disabled/></label>
       <label className="form-label">Inward Qty *<input className="cubegears-input mt-1" inputMode="decimal" value={form.inwardQty} onChange={(e) => setForm({ ...form, inwardQty: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Bill No.<input className="cubegears-input mt-1" value={form.billNo} onChange={(e) => setForm({ ...form, billNo: e.target.value })}/></label>
       <label className="form-label">Bill Date *<input type="date" required className="cubegears-input mt-1" value={form.billDate} onChange={(e) => setForm({ ...form, billDate: e.target.value })}/></label>
       <label className="form-label">Tax Type<select className="cubegears-select mt-1" value={form.taxType} onChange={(e) => setForm({ ...form, taxType: e.target.value })}><option>GST</option><option>Non-GST</option></select></label>
       <label className="form-label">Rack / Bin<input className="cubegears-input mt-1" value={form.rack} onChange={(e) => setForm({ ...form, rack: e.target.value })}/></label>
-      <label className="form-label md:col-span-2">Barcode / Serial<input className="cubegears-input mt-1" value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} placeholder="Leave blank to auto-generate"/></label>
-      <div className="md:col-span-2 rounded-xl bg-cg-surface-2 p-3 text-xs text-cg-muted">Open PO Qty: <strong className="text-cg-text">{openQty}</strong> · Unit Cost: {money.format(po.unitCost || 0)}</div>
-      <button className="primary-button md:col-span-2" disabled={busy}>{busy ? 'Posting…' : 'Post Inward'}</button>
+      <label className="form-label job-parts-modal-full">Barcode / Serial<input className="cubegears-input mt-1" value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} placeholder="Leave blank to auto-generate"/></label>
+      <div className="job-parts-modal-stock-note job-parts-modal-full">Open PO Qty: <strong className="text-cg-text">{openQty}</strong> · Unit Cost: {money.format(po.unitCost || 0)}</div>
+      <button className="primary-button job-parts-modal-full" disabled={busy}>{busy ? 'Posting…' : 'Post Inward'}</button>
     </form>}
   </Sheet>;
 }
 
 function Sheet({ title, subtitle, onClose, children }) {
-  return (
-    <div className="fixed inset-0 z-[120] flex items-end bg-slate-950/50 backdrop-blur-[2px] md:items-center md:justify-center md:p-4">
-      <div className="max-h-[88dvh] w-full overflow-auto rounded-t-[22px] border border-cg-border bg-cg-surface shadow-2xl md:max-w-2xl md:rounded-[20px]">
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-cg-border bg-cg-surface p-4">
-          <div><h3 className="text-base font-bold text-cg-text">{title}</h3><p className="mt-1 text-xs text-cg-muted">{subtitle}</p></div>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Close"><X size={17}/></button>
+  const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  const titleId = useId();
+  const subtitleId = useId();
+
+  useEffect(() => {
+    closeRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.querySelector('[data-parts-close]')?.focus();
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeRef.current?.();
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...(dialogRef.current?.querySelectorAll(
+        'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href]'
+      ) || [])].filter((node) => node.getClientRects().length > 0);
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus?.();
+    };
+  }, []);
+
+  return createPortal(
+    <div className="job-parts-modal-overlay" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) closeRef.current?.();
+    }}>
+      <section
+        ref={dialogRef}
+        className="job-parts-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={subtitleId}
+      >
+        <header className="job-parts-dialog-header">
+          <div className="job-parts-dialog-heading">
+            <h3 id={titleId}>{title}</h3>
+            <p id={subtitleId}>{subtitle}</p>
+          </div>
+          <button type="button" data-parts-close className="job-parts-dialog-close" onClick={onClose} aria-label="Close dialog">
+            <X size={18} aria-hidden="true"/>
+          </button>
         </header>
-        <div className="p-4">{children}</div>
-      </div>
-    </div>
+        <div className="job-parts-dialog-content">{children}</div>
+      </section>
+    </div>,
+    document.body
   );
 }
 
