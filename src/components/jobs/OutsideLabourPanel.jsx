@@ -237,7 +237,7 @@ export const OutsideLabourPanel = ({
       </header>
       )}
 
-      {(!compactJobMode || !isFormOpen) && (
+      {!compactJobMode && (
       <>
       <div className="dashboard-stats outside-labour-stats" aria-label="Outside Labour financial summary">
         {[
@@ -326,7 +326,6 @@ export const OutsideLabourPanel = ({
         </form>
       )}
 
-      {(!compactJobMode || !isFormOpen) && (
       <section className="outside-labour-records operations-card">
       <div className="outside-labour-list-head operations-header">
         <div><h3>Outside Labour Records</h3><span>{rows.length} total · {visibleRows.length} shown</span></div>
@@ -357,7 +356,7 @@ export const OutsideLabourPanel = ({
         </div>
       </div>
       {loading ? <p className="outside-labour-empty">Loading outside labour…</p>
-        : !visibleRows.length ? <p className="outside-labour-empty">{rows.length ? 'No records match the selected status.' : 'No outside labour records yet. Add a worker and manual charge above.'}</p>
+        : !visibleRows.length ? <p className="outside-labour-empty">{rows.length ? 'No records match the selected status.' : compactJobMode ? 'No outside labour records yet. Use Add Outside Staff to create one.' : 'No outside labour records yet. Add a worker and manual charge above.'}</p>
         : <div className="outside-labour-list">
           <div className="outside-labour-list-columns" aria-hidden="true"><span>Worker / Job</span><span>Labour Charges</span><span>Status & Actions</span></div>
           {visibleRows.map((row) => (
@@ -400,7 +399,6 @@ export const OutsideLabourPanel = ({
           ))}
         </div>}
       </section>
-      )}
     </section>
   );
 };
