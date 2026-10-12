@@ -27,7 +27,7 @@ test('Saving a complaint retains user text when the API reports a failure', () =
 test('Customer concerns are filterable by status without changing their API structure', () => {
   assert.match(complaints, /\['All', 'Open', 'In Progress', 'Completed'\]/);
   assert.match(complaints, /aria-pressed=\{complaintFilter === filter\}/);
-  assert.match(complaints, /\.filter\(\(\{ item \}\) => complaintFilter === 'All'/);
+  assert.match(complaints, /\.filter\(\(\) => complaintFilter === 'All' \|\| automaticComplaintStatus === complaintFilter/);
   assert.match(complaints, /automaticComplaintStatus === filter/);
   assert.match(complaints, /job-complaint-auto-status/);
   assert.doesNotMatch(complaints, /<select|updateComplaintStatus/);
