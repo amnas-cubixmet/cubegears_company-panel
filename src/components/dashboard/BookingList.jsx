@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search } from 'lucide-react';
-import { statusClass } from './dashboard.utils';
+import { dashboardText, statusClass } from './dashboard.utils';
 
 export const BookingList = ({
   bookings,
@@ -30,13 +30,13 @@ export const BookingList = ({
             onClick={() => onSelectBooking(booking.id)}
           >
             <div className="booking-row-top">
-              <strong>{booking.id} · {booking.customer}</strong>
-              <span className={`status-pill ${statusClass(booking.status)}`}>{booking.status}</span>
+              <strong>{dashboardText(booking.id)} · {dashboardText(booking.customer)}</strong>
+              <span className={`status-pill ${statusClass(dashboardText(booking.status, 'Pending'))}`}>{dashboardText(booking.status, 'Pending')}</span>
             </div>
-            <span className="booking-vehicle">{booking.vehicle}</span>
+            <span className="booking-vehicle">{dashboardText(booking.vehicle)}</span>
             <div className="booking-row-bottom">
-              <span>{booking.service}</span>
-              <time>{booking.time}</time>
+              <span>{dashboardText(booking.service, 'Service not specified')}</span>
+              <time>{dashboardText(booking.time)}</time>
             </div>
           </button>
         );
