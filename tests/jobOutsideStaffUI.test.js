@@ -13,7 +13,7 @@ test('Work stage exposes a visible Outside Staff section, not hidden More/detail
 });
 
 test('Add Outside Staff opens a job-bound Outside Labour form', () => {
-  assert.match(section, />Add Outside Staff</);
+  assert.ok(section.includes("'Add Outside Staff'"));
   assert.match(section, /formOpen=\{formOpen\}/);
   assert.match(section, /jobId=\{jobId\}/);
   assert.match(section, /onFormOpenChange=\{setFormOpen\}/);
