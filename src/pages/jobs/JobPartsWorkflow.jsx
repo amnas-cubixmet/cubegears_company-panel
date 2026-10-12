@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowDownToLine,
   CheckCircle2,
-  ClipboardCheck,
   History,
   PackageCheck,
   PackagePlus,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 import { stockService } from '../../services/stock.service';
 import { jobPartsService } from '../../services/jobParts.service';
-import { jobService } from '../../services/job.service';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -24,7 +22,7 @@ const money = new Intl.NumberFormat('en-IN', {
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
+export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
   const [data, setData] = useState({ lines: [], transactions: [], purchaseOrders: [], canComplete: true, blockingReasons: [] });
   const [stock, setStock] = useState([]);
   const [tab, setTab] = useState('pending');
@@ -34,25 +32,35 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
   const [panel, setPanel] = useState(null);
   const [qty, setQty] = useState({});
   const [returnQty, setReturnQty] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchTerm(search), 250);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const load = async () => {
     try {
+      setLoading(true);
       setError('');
       const [workflow, items] = await Promise.all([
         jobPartsService.get(jobId),
         stockService.getStockItems()
       ]);
       setData(workflow);
-      setStock(items);
+      setStock(Array.isArray(items) ? items : items?.results || []);
     } catch (e) {
       setError(e?.message || 'Unable to load parts workflow.');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => { load(); }, [jobId]);
 
   const lines = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = searchTerm.trim().toLowerCase();
     return data.lines.filter((line) => {
       const matches = !q || [line.partName, line.partNo, line.brand, line.barcode]
         .filter(Boolean)
@@ -64,15 +72,17 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
       if (tab === 'returned') return line.returnedQty > 0;
       return true;
     });
-  }, [data.lines, search, tab]);
+  }, [data.lines, searchTerm, tab]);
 
   const act = async (key, fn) => {
+    if (busy) return;
     setBusy(key);
+    setNotice('');
     setError('');
     try {
-      const next = await fn();
-      if (next?.lines) setData(next);
-      else await load();
+      await fn();
+      await load();
+      setNotice('Parts records updated successfully.');
       setPanel(null);
     } catch (e) {
       setError(e?.message || 'Action failed.');
@@ -83,6 +93,10 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
 
   const issue = (line) => {
     const value = Number(qty[line.id] || Math.min(line.pendingQty, line.availableQty) || 0);
+    if (!Number.isFinite(value) || value <= 0 || value > Number(line.pendingQty) || value > Number(line.availableQty)) {
+      setError('Enter a valid issue quantity within the available and pending stock.');
+      return;
+    }
     return act(`issue-${line.id}`, async () => {
       const result = await jobPartsService.issue(jobId, line.id, value, line.issuedTo || assignedTo);
       setQty((prev) => ({ ...prev, [line.id]: '' }));
@@ -92,6 +106,10 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
 
   const returnPart = (line) => {
     const value = Number(returnQty[line.id] || 0);
+    if (!Number.isFinite(value) || value <= 0 || value > Number(line.netIssued)) {
+      setError('Enter a positive return quantity not exceeding issued stock.');
+      return;
+    }
     return act(`return-${line.id}`, async () => {
       const result = await jobPartsService.returnPart(jobId, line.id, value, 'Reusable');
       setReturnQty((prev) => ({ ...prev, [line.id]: '' }));
@@ -99,16 +117,19 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
     });
   };
 
-  const markDone = () => act('complete', async () => {
-    if (!data.canComplete) throw new Error('Resolve all pending part quantities before completing the job.');
-    await jobService.updateJobStatus(jobId, 'Ready for Delivery');
-    await onJobUpdated?.();
-    return data;
-  });
+  const summary = useMemo(() => {
+    const active = data.lines.filter((line) => line.lineStatus !== 'Cancelled');
+    return {
+      parts: active.filter((line) => Number(line.netIssued || 0) > 0).length,
+      issued: active.reduce((total, line) => total + Number(line.netIssued || 0), 0),
+      selling: active.reduce((total, line) => total + Number(line.netIssued || 0) * Number(line.sellingPrice || 0), 0),
+      pending: active.reduce((total, line) => total + Number(line.pendingQty || 0), 0)
+    };
+  }, [data.lines]);
 
   return (
     <section className="job-parts-workflow space-y-4">
-      <div className="job-parts-summary-card rounded-[18px] border border-cg-border bg-cg-surface p-4 shadow-sm md:p-5">
+      <div className="job-parts-summary-card rounded-xl border border-cg-border bg-cg-surface p-4 shadow-sm md:p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
             <span className="text-[11px] font-bold uppercase tracking-[.14em] text-cg-primary">Parts Issue & Inventory</span>
@@ -121,19 +142,19 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
           <CompletionGuard
             canComplete={data.canComplete}
             reasons={data.blockingReasons}
-            busy={busy === 'complete'}
-            onComplete={markDone}
+
           />
         </div>
 
-        <div className="job-parts-metrics mt-4 grid grid-cols-3 gap-2">
-          <Metric label="Pending" value={data.lines.reduce((s, x) => s + Number(x.pendingQty || 0), 0)} tone="amber" />
-          <Metric label="Issued" value={data.lines.reduce((s, x) => s + Number(x.netIssued || 0), 0)} tone="blue" />
-          <Metric label="Returned" value={data.lines.reduce((s, x) => s + Number(x.returnedQty || 0), 0)} tone="green" />
+        <div className="job-parts-metrics mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
+          <Metric label="Parts Used" value={summary.parts} tone="blue" />
+          <Metric label="Quantity Issued" value={summary.issued} tone="blue" />
+          <Metric label="Issued Selling Value" value={money.format(summary.selling)} tone="green" />
+          <Metric label="Pending Quantity" value={summary.pending} tone="amber" />
         </div>
       </div>
 
-      <div className="job-parts-main-card rounded-[18px] border border-cg-border bg-cg-surface shadow-sm">
+      <div className="job-parts-main-card rounded-xl border border-cg-border bg-cg-surface shadow-sm">
         <div className="job-parts-toolbar border-b border-cg-border p-3 md:p-4">
           <div className="job-parts-tabs flex gap-2 overflow-x-auto pb-1">
             {[
@@ -160,7 +181,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
                 className="cubegears-input !pl-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Part name / part number / barcode"
+                placeholder="Search part name, SKU or barcode" aria-label="Search job parts"
               />
             </label>
             <button
@@ -168,11 +189,13 @@ export function JobPartsWorkflow({ jobId, assignedTo = '', onJobUpdated }) {
               className="primary-button"
               onClick={() => setPanel({ type: 'add' })}
             >
-              <PackagePlus size={16} /> Other Part
+              <PackagePlus size={16} /> Add Required Part
             </button>
           </div>
         </div>
 
+        {loading && <div className="p-3 text-sm text-cg-muted" role="status">Loading stock and parts records…</div>}
+        {notice && <div className="mx-3 mt-3 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800" role="status">{notice}</div>}
         {error && (
           <div className="mx-3 mt-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 md:mx-4">
             <AlertTriangle size={17} className="mt-0.5 shrink-0" />
@@ -340,10 +363,10 @@ function PartTableRow({ line, tab, issueQty, returnQty, onIssueQty, onReturnQty,
 function PartMobileCard(props) {
   const { line, tab, issueQty, returnQty, onIssueQty, onReturnQty, onIssue, onReturn, onOrder, onInward, busy } = props;
   return (
-    <article className="rounded-[14px] border border-cg-border bg-cg-surface p-3 shadow-sm">
+    <article className="min-w-0 rounded-xl border border-cg-border bg-cg-surface p-3 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <strong className="block truncate text-sm text-cg-text">{line.partName}</strong>
+          <strong className="block break-words text-sm text-cg-text">{line.partName}</strong>
           <span className="text-xs text-cg-muted">{line.partNo || 'No code'}{line.brand ? ` · ${line.brand}` : ''}</span>
         </div>
         <StockBadge line={line} />
@@ -395,7 +418,7 @@ function PartMobileCard(props) {
   );
 }
 
-function CompletionGuard({ canComplete, reasons, busy, onComplete }) {
+function CompletionGuard({ canComplete, reasons }) {
   return (
     <div className={`job-parts-completion min-w-[250px] rounded-[14px] border p-3 ${canComplete ? 'is-clear' : 'is-blocked'}`}>
       <div className="flex items-start gap-2">
@@ -409,10 +432,7 @@ function CompletionGuard({ canComplete, reasons, busy, onComplete }) {
           </p>
         </div>
       </div>
-      <button type="button" disabled={!canComplete || busy} onClick={onComplete}
-        className="primary-button mt-3 w-full disabled:cursor-not-allowed disabled:opacity-50">
-        <ClipboardCheck size={16}/>{busy ? 'Updating…' : 'Ready for Delivery'}
-      </button>
+
     </div>
   );
 }
@@ -427,28 +447,37 @@ function Mini({ label, value }) {
 }
 
 function AddPartPanel({ stock, assignedTo, onClose, onSave, busy }) {
-  const [form, setForm] = useState({ partId: stock[0]?.id || '', requestedQty: '1', sellingPrice: stock[0]?.sellingPrice || '', issuedTo: assignedTo });
-  const chosen = stock.find((item) => item.id === form.partId);
+  const [form, setForm] = useState({ partId: '', requestedQty: '1', sellingPrice: '', issuedTo: assignedTo });
+  const [lookup, setLookup] = useState('');
+  const [deferredLookup, setDeferredLookup] = useState('');
+  useEffect(() => { const timer = setTimeout(() => setDeferredLookup(lookup), 250); return () => clearTimeout(timer); }, [lookup]);
+  const matches = stock.filter((item) => [item.partName, item.sku, item.barcode].some((value) => String(value || '').toLowerCase().includes(deferredLookup.trim().toLowerCase()))).slice(0, 20);
+  const chosen = stock.find((item) => String(item.id) === String(form.partId));
 
-  useEffect(() => {
-    if (!form.partId && stock[0]) setForm((p) => ({ ...p, partId: stock[0].id, sellingPrice: stock[0].sellingPrice || '' }));
-  }, [stock]);
 
   return <Sheet title="Add Required Part" subtitle="Add a stock item required for this Job Card." onClose={onClose}>
-    <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
+    <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); if (!busy) onSave(form); }}>
+      <label className="form-label md:col-span-2">Find Inventory Part
+        <input className="cubegears-input mt-1" value={lookup} onChange={(e) => setLookup(e.target.value)} placeholder="Search part name, SKU or barcode" aria-label="Find inventory part"/>
+      </label>
       <label className="form-label md:col-span-2">Part
         <select className="cubegears-select mt-1" value={form.partId} onChange={(e) => {
-          const item = stock.find((x) => x.id === e.target.value);
+          const item = stock.find((x) => String(x.id) === e.target.value);
           setForm({ ...form, partId: e.target.value, sellingPrice: item?.sellingPrice || '' });
         }}>
-          {stock.map((item) => <option key={item.id} value={item.id}>{item.partName} · {item.sku} · Stock {item.onHand}</option>)}
+          <option value="">Select a stock part</option>
+          {matches.map((item) => <option key={item.id} value={item.id}>{item.partName} · {item.sku} · Stock {item.onHand}</option>)}
         </select>
       </label>
+      <label className="form-label">Part Name<input className="cubegears-input mt-1" readOnly value={chosen?.partName || ""}/></label>
+      <label className="form-label">Unit<input className="cubegears-input mt-1" readOnly value={chosen?.unit || "—"}/></label>
       <label className="form-label">Requested Qty<input className="cubegears-input mt-1" inputMode="decimal" value={form.requestedQty} onChange={(e) => setForm({ ...form, requestedQty: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Selling Price ₹<input className="cubegears-input mt-1" inputMode="decimal" value={form.sellingPrice} onChange={(e) => setForm({ ...form, sellingPrice: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
+      <label className="form-label">Amount ₹<input className="cubegears-input mt-1" readOnly value={(Number(form.requestedQty || 0) * Number(form.sellingPrice || 0)).toFixed(2)}/></label>
       <label className="form-label md:col-span-2">Issued To<input className="cubegears-input mt-1" value={form.issuedTo} onChange={(e) => setForm({ ...form, issuedTo: e.target.value })} placeholder="Mechanic / store destination"/></label>
       {chosen && <div className="md:col-span-2 rounded-xl bg-cg-surface-2 p-3 text-xs text-cg-muted">Available: <strong className="text-cg-text">{Math.max(0, Number(chosen.onHand || 0) - Number(chosen.reserved || 0))}</strong> · Rack: {chosen.location || '—'} · Cost: {money.format(chosen.costPrice || 0)}</div>}
-      <button className="primary-button md:col-span-2" disabled={busy || !form.partId}>{busy ? 'Adding…' : 'Add to Job Card'}</button>
+      <button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
+      <button className="primary-button" disabled={busy || !form.partId || !(Number(form.requestedQty) > 0) || !Number.isFinite(Number(form.sellingPrice)) || Number(form.sellingPrice) < 0}>{busy ? 'Adding…' : 'Add to Job Card'}</button>
     </form>
   </Sheet>;
 }
@@ -514,7 +543,7 @@ function TransactionHistory({ transactions }) {
               <strong className="text-sm text-cg-text">{row.type} · {row.partName}</strong>
               <span className="text-xs font-semibold text-cg-text">Qty {row.qty}</span>
             </div>
-            <p className="mt-1 text-xs text-cg-muted">{row.reference || row.id} · {row.createdBy || 'User'} · {new Date(row.createdAt || Date.now()).toLocaleString('en-IN')}</p>
+            <p className="mt-1 text-xs text-cg-muted">{row.reference || row.id} · {row.createdBy || 'User'} {row.createdAt ? ` · ${new Date(row.createdAt).toLocaleString('en-IN')}` : ''}</p>
           </div>
         </div>
       ))}
