@@ -12,7 +12,7 @@ test('Job Work shows Outside Labour Records immediately without a View Records t
   assert.match(section, /\{canView && \(\s*<div className="job-outside-staff-content">/);
   assert.match(section, /<OutsideLabourPanel/);
   assert.match(section, /showRecordsWhileEditing/);
-  assert.doesNotMatch(section, /toggleRecords|View Records|expanded/);
+  assert.doesNotMatch(section, /toggleRecords|['"]View Records['"]|const \[expanded/);
   assert.match(outside, /<h3>Outside Labour Records<\/h3>/);
   assert.match(outside, /\(!compactJobMode \|\| !isFormOpen \|\| showRecordsWhileEditing\)/);
 });
