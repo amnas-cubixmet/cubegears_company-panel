@@ -37,6 +37,7 @@ export const OutsideLabourPanel = ({
   hideToolbar = false,
   closeAfterSave = false,
   compactJobMode = false,
+  showRecordsWhileEditing = false,
 }) => {
   const { user } = useAuth();
   const formRef = useRef(null);
@@ -237,7 +238,7 @@ export const OutsideLabourPanel = ({
       </header>
       )}
 
-      {(!compactJobMode || !isFormOpen) && (
+      {!compactJobMode && (
       <>
       <div className="dashboard-stats outside-labour-stats" aria-label="Outside Labour financial summary">
         {[
@@ -326,7 +327,7 @@ export const OutsideLabourPanel = ({
         </form>
       )}
 
-      {(!compactJobMode || !isFormOpen) && (
+      {(!compactJobMode || !isFormOpen || showRecordsWhileEditing) && (
       <section className="outside-labour-records operations-card">
       <div className="outside-labour-list-head operations-header">
         <div><h3>Outside Labour Records</h3><span>{rows.length} total · {visibleRows.length} shown</span></div>
