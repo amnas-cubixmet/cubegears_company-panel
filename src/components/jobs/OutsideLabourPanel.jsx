@@ -36,6 +36,7 @@ export const OutsideLabourPanel = ({
   refreshVersion = 0,
   hideToolbar = false,
   closeAfterSave = false,
+  compactJobMode = false,
 }) => {
   const { user } = useAuth();
   const formRef = useRef(null);
@@ -206,6 +207,7 @@ export const OutsideLabourPanel = ({
 
   return (
     <section className="outside-labour-panel outside-labour-dashboard">
+      {!compactJobMode && (
       <header className="outside-labour-header">
         <div className="outside-labour-header-copy">
           <span className="outside-labour-title-icon" aria-hidden="true"><HardHat size={19}/></span>
@@ -233,7 +235,10 @@ export const OutsideLabourPanel = ({
           </div>
         )}
       </header>
+      )}
 
+      {(!compactJobMode || !isFormOpen) && (
+      <>
       <div className="dashboard-stats outside-labour-stats" aria-label="Outside Labour financial summary">
         {[
           { label: 'Customer Labour', value: totals.customer, Icon: ClipboardList, meta: 'Reference amount' },
@@ -255,6 +260,8 @@ export const OutsideLabourPanel = ({
         ))}
       </div>
       <small className="outside-labour-note">Customer Labour is reference-only, not an extra invoice item. Labour Margin excludes parts, tax and overheads.</small>
+      </>
+      )}
 
       {notice && <p className="outside-labour-notice" role="status">{notice}</p>}
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
@@ -264,8 +271,8 @@ export const OutsideLabourPanel = ({
           <div className="outside-labour-form-heading">
             <span className="outside-labour-form-icon" aria-hidden="true"><Plus size={17}/></span>
             <div>
-              <h3>Add Outside Labour</h3>
-              <p>Enter the worker, vehicle job and manually agreed charges.</p>
+              <h3>{compactJobMode ? 'Add Outside Staff' : 'Add Outside Labour'}</h3>
+              <p>{compactJobMode ? 'Enter outside worker details and agreed charges.' : 'Enter the worker, vehicle job and manually agreed charges.'}</p>
             </div>
           </div>
           <div className="outside-labour-form-grid">
@@ -319,6 +326,7 @@ export const OutsideLabourPanel = ({
         </form>
       )}
 
+      {(!compactJobMode || !isFormOpen) && (
       <section className="outside-labour-records operations-card">
       <div className="outside-labour-list-head operations-header">
         <div><h3>Outside Labour Records</h3><span>{rows.length} total · {visibleRows.length} shown</span></div>
@@ -392,6 +400,7 @@ export const OutsideLabourPanel = ({
           ))}
         </div>}
       </section>
+      )}
     </section>
   );
 };
