@@ -1074,11 +1074,6 @@
   font-weight:700;
   cursor:pointer;
 }
-.cg-job-detail.job-workspace-dashboard .job-outside-staff-view {
-  border:1px solid var(--border);
-  color:var(--text-primary);
-  background:var(--surface-2);
-}
 .cg-job-detail.job-workspace-dashboard .job-outside-staff-add {
   border:1px solid var(--primary);
   color:#fff;
@@ -1171,7 +1166,7 @@
     display:grid;
     grid-column:1 / -1;
     grid-row:2;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
+    grid-template-columns:minmax(0, 1fr);
     width:100%;
     min-width:0;
     gap:8px;
@@ -1236,13 +1231,6 @@
   .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions {
     grid-template-columns:minmax(0, 1fr);
     gap:8px;
-  }
-  /* Most important mobile action first, history still immediately available. */
-  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions .job-outside-staff-add {
-    order:0;
-  }
-  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions .job-outside-staff-view {
-    order:1;
   }
   .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions button {
     min-height:44px;
@@ -1387,5 +1375,42 @@
   }
   .cg-job-detail.job-workspace-dashboard .job-work-items-row > .job-work-items-price {
     margin-left:auto;
+  }
+}
+
+
+/* Mechanic work records: preserve session actions while using compact list hierarchy. */
+.cg-job-detail.job-workspace-dashboard .job-mechanic-records-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  min-width:0;
+  margin:14px 0 8px;
+}
+.cg-job-detail.job-workspace-dashboard .job-mechanic-records-header > strong {
+  font-size:13px;
+  font-weight:750;
+  line-height:1.45;
+  color:var(--text-primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-mechanic-records-header > span {
+  display:inline-flex;
+  padding:5px 9px;
+  border:1px solid var(--border);
+  border-radius:99px;
+  background:var(--surface-2);
+  color:var(--text-secondary);
+  font-size:11px;
+  font-weight:650;
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-records {
+  min-width:0;
+  max-width:100%;
+}
+@media (max-width:767px) {
+  .cg-job-detail.job-workspace-dashboard .job-mechanic-records-header {
+    margin-top:12px;
   }
 }
