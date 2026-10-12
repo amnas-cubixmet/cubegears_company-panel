@@ -1721,3 +1721,14 @@
   .job-workspace-dashboard .job-parts-search-row .primary-button { min-height:44px; width:100%; }
   .job-workspace-dashboard .job-parts-workflow article { min-width:0; overflow-wrap:anywhere; }
 }
+
+
+/* Quick stock finder for Job Card Parts. */
+.job-workspace-dashboard .job-parts-stock-finder { min-width:0; }
+.job-workspace-dashboard .job-parts-stock-finder input { min-height:44px; font-weight:400!important; border:1px solid var(--border)!important; box-shadow:none!important; }
+.job-workspace-dashboard .job-parts-stock-finder input::placeholder { font-weight:400!important; }
+.job-workspace-dashboard .job-parts-stock-finder button { min-height:38px; white-space:nowrap; }
+@media(max-width:480px) {
+  .job-workspace-dashboard .job-parts-stock-finder { padding:10px!important; }
+  .job-workspace-dashboard .job-parts-stock-finder button { max-width:100%; }
+}
