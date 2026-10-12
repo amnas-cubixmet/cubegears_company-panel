@@ -16,8 +16,12 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [reload, setReload] = useState(0);
   useEffect(() => {
-    if (!jobId || !permitted) return;
+    if (!jobId || !permitted) {
+      setSummary(null);
+      return;
+    }
     let active = true;
     setLoading(true);
     setError('');
@@ -30,23 +34,7 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0 }) {
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [jobId, refreshVersion, permitted]);
-
-  const [reload, setReload] = useState(0);
-  // Reload is an explicit user action and does not mutate any financial data.
-  useEffect(() => {
-    if (!reload || !jobId || !permitted) return;
-    let active = true;
-    setLoading(true);
-    setError('');
-    jobService.getJobCostSummary(jobId)
-      .then((data) => { if (active) setSummary(data); })
-      .catch((err) => {
-        if (active) setError(err?.response?.data?.detail || err?.message || 'Could not refresh costs.');
-      })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [reload]);
+  }, [jobId, refreshVersion, permitted, reload]);
 
   return (
     <section className="job-total-cost-panel" aria-label="Job Card total cost">
