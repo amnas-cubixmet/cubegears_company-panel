@@ -467,3 +467,156 @@ body .job-parts-modal-warning {
     font-size:16px!important;
   }
 }
+
+
+/* Parts search + direct outside-shop purchase workflow */
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-finder-actions {
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-finder-actions button {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:44px;padding:9px 13px;border-radius:9px;
+  font-size:12px;font-weight:700;white-space:nowrap;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-inventory-search {
+  width:100%;border:0;box-shadow:none;background:transparent;
+  padding:0!important;line-height:normal;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-inventory-search input {
+  box-sizing:border-box;width:100%!important;height:44px!important;
+  min-width:0!important;min-height:44px!important;
+  padding:0 12px 0 38px!important;margin:0!important;
+  border:1px solid var(--border)!important;border-radius:9px!important;
+  background:var(--surface)!important;
+  font-size:13px!important;font-weight:400!important;box-shadow:none!important;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-inventory-search input:focus {
+  outline:0!important;border-color:var(--primary)!important;
+  box-shadow:0 0 0 3px var(--primary-soft)!important;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-no-stock {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:9px;padding:11px;border:1px dashed var(--border);
+  border-radius:9px;background:var(--surface);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-no-stock p {
+  flex:1 1 170px;margin:0;color:var(--text-secondary);
+  font-size:12px;line-height:1.5;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-no-stock button {
+  display:inline-flex;align-items:center;gap:6px;min-height:40px;
+  border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text-primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-list {
+  display:flex;flex-direction:column;gap:12px;
+  width:100%;min-width:0;padding:16px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-head {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-head > div:first-child {
+  flex:1 1 220px;min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-head h3 {
+  margin:0;font-size:14px;font-weight:750;color:var(--text-primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-head p {
+  margin:5px 0 0;color:var(--text-muted);font-size:11px;line-height:1.5;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-total {
+  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+  padding:10px 13px;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:9px;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-total span {
+  color:var(--text-secondary);font-size:11px;font-weight:650;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-total strong {
+  color:var(--text-primary);font-size:17px;font-weight:750;
+  font-variant-numeric:tabular-nums;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-records {
+  display:flex;flex-direction:column;gap:8px;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-record {
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+  gap:12px;padding:12px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-record > div:first-child {
+  flex:1 1 200px;min-width:0;overflow-wrap:anywhere;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-record > div:first-child strong,
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-record > div:first-child span,
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-record > div:first-child small {
+  display:block;font-size:12px;line-height:1.5;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-record > div:first-child span,
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-record > div:first-child small {
+  margin-top:4px;font-size:11px;color:var(--text-secondary);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-amount {
+  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+  color:var(--text-primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-amount strong {
+  font-size:13px;font-weight:750;white-space:nowrap;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-amount span {
+  font-size:11px;color:var(--text-muted);white-space:nowrap;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-empty {
+  margin:0;padding:13px;border:1px dashed var(--border);
+  border-radius:9px;background:var(--surface-2);
+  color:var(--text-muted);font-size:12px;line-height:1.55;
+}
+body .job-parts-outside-calculation {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+body .job-parts-outside-calculation > div {
+  display:flex;flex-direction:column;gap:4px;padding:11px;
+  border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);min-width:0;
+}
+body .job-parts-outside-calculation span {
+  color:var(--text-secondary);font-size:11px;
+}
+body .job-parts-outside-calculation strong {
+  color:var(--text-primary);font-size:17px;font-weight:750;
+  overflow-wrap:anywhere;
+}
+@media(max-width:767px) {
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-finder-actions,
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-finder-actions button {
+    width:100%;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-finder-actions {
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-finder-actions button {
+    min-width:0;white-space:normal;min-height:44px;padding:8px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-inventory-search input {
+    font-size:16px!important;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-list {
+    padding:12px;gap:10px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-total {
+    align-items:flex-start;flex:1 1 100%;width:100%;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-outside-amount {
+    flex:1 1 100%;align-items:flex-start;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-no-stock button {
+    width:100%;justify-content:center;
+  }
+}
+@media(max-width:380px) {
+  body .job-parts-outside-calculation {grid-template-columns:minmax(0,1fr)}
+}
