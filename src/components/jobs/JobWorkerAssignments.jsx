@@ -57,8 +57,8 @@ export const JobWorkerAssignments = ({ jobId, staff = [], onChanged }) => {
         <div>
           <UsersRound size={18} />
           <div>
-            <strong>Internal Staff Assignments</strong>
-            <span>Assign existing workshop employees here for time tracking. Freelancers and outside part-work are recorded separately in Outside Labour, without creating staff.</span>
+            <strong>Mechanic Assignments</strong>
+            <span>Assign workshop mechanics for time tracking. Outside workers appear in Outside Labour Records above.</span>
           </div>
         </div>
         <strong>{rows.length} assigned</strong>
