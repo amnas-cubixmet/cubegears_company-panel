@@ -591,6 +591,84 @@ function AddPartPanel({ stock, initialPartId = '', assignedTo, onClose, onSave, 
   </Sheet>;
 }
 
+function OutsidePartPurchasePanel({ initial, onClose, onSave, busy }) {
+  const [requestId] = useState(() => (
+    globalThis.crypto?.randomUUID?.() || `outside-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  ));
+  const [form, setForm] = useState(() => ({
+    partName: initial.partName || '', sku: initial.sku || '',
+    vendor: '', invoiceNo: '', quantity: '1',
+    unitCost: '', sellingPrice: String(initial.sellingPrice ?? '')
+  }));
+  const set = (key, value) => setForm((old) => ({ ...old, [key]: value }));
+  const quantity = Number(form.quantity);
+  const cost = Number(form.unitCost);
+  const selling = Number(form.sellingPrice);
+  const valid = !!form.partName.trim() && !!form.vendor.trim() &&
+    Number.isFinite(quantity) && quantity > 0 && quantity <= 999999.99 &&
+    Number.isFinite(cost) && cost >= 0 && cost <= 999999999.99 &&
+    Number.isFinite(selling) && selling >= 0 && selling <= 999999999.99;
+  const submit = (event) => {
+    event.preventDefault();
+    if (!valid || busy) return;
+    onSave({
+      requestId, partName: form.partName.trim(), sku: form.sku.trim(),
+      vendor: form.vendor.trim(), invoiceNo: form.invoiceNo.trim(),
+      quantity: form.quantity, unitCost: form.unitCost,
+      sellingPrice: form.sellingPrice
+    });
+  };
+  return (
+    <Sheet title="Buy Part From Outside Shop" subtitle="Purchase and use a part directly for this Job Card. Stock inventory is not changed." onClose={onClose}>
+      <form className="job-parts-modal-form job-parts-outside-form" onSubmit={submit}>
+        <label className="form-label job-parts-modal-full">Part Name *
+          <input className="cubegears-input" required maxLength={160} autoFocus
+            value={form.partName} onChange={(e) => set('partName', e.target.value)} placeholder="Part / spare name" />
+        </label>
+        <label className="form-label job-parts-modal-full">Shop / Supplier Name *
+          <input className="cubegears-input" required maxLength={160}
+            value={form.vendor} onChange={(e) => set('vendor', e.target.value)} placeholder="Outside shop name" />
+        </label>
+        <label className="form-label">SKU / Part Number
+          <input className="cubegears-input" maxLength={80}
+            value={form.sku} onChange={(e) => set('sku', e.target.value)} placeholder="Optional" />
+        </label>
+        <label className="form-label">Bill / Invoice Number
+          <input className="cubegears-input" maxLength={120}
+            value={form.invoiceNo} onChange={(e) => set('invoiceNo', e.target.value)} placeholder="Optional" />
+        </label>
+        <label className="form-label">Quantity *
+          <input className="cubegears-input" type="number" required inputMode="decimal"
+            min="0.01" step="0.01" max="999999.99"
+            value={form.quantity} onChange={(e) => set('quantity', e.target.value)} />
+        </label>
+        <label className="form-label">Purchase Price / Unit (₹) *
+          <input className="cubegears-input" type="number" required inputMode="decimal"
+            min="0" step="0.01" max="999999999.99"
+            value={form.unitCost} onChange={(e) => set('unitCost', e.target.value)} placeholder="Cost from shop" />
+        </label>
+        <label className="form-label job-parts-modal-full">Customer Selling Price / Unit (₹) *
+          <input className="cubegears-input" type="number" required inputMode="decimal"
+            min="0" step="0.01" max="999999999.99"
+            value={form.sellingPrice} onChange={(e) => set('sellingPrice', e.target.value)} placeholder="Selling price" />
+        </label>
+        <div className="job-parts-outside-calculation job-parts-modal-full">
+          <div><span>Purchase Total</span><strong>{money.format(valid ? quantity * cost : 0)}</strong></div>
+          <div><span>Customer Value</span><strong>{money.format(valid ? quantity * selling : 0)}</strong></div>
+        </div>
+        <p className="job-parts-modal-stock-note job-parts-modal-full">
+          Direct outside purchase: recorded as used for this Job Card and included in Total Cost.
+          No inventory stock entry or stock deduction is created.
+        </p>
+        <button type="button" className="secondary-button" onClick={onClose} disabled={busy}>Cancel</button>
+        <button type="submit" className="primary-button" disabled={!valid || busy}>
+          {busy ? 'Saving Purchase…' : 'Save & Use Part'}
+        </button>
+      </form>
+    </Sheet>
+  );
+}
+
 function OrderPanel({ line, onClose, onSave, busy }) {
   const [form, setForm] = useState({ vendor: line.stockItem?.supplier || '', type: 'Cash', orderDate: today(), orderedQty: String(line.pendingQty), unitCost: String(line.stockItem?.costPrice || ''), discount: '0', tax: '18' });
   return <Sheet title="Create Purchase Order" subtitle={`${line.partName} · ${line.pendingQty} pending`} onClose={onClose}>
