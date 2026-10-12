@@ -19,6 +19,8 @@ test('Add Outside Staff opens a job-bound Outside Labour form', () => {
   assert.match(section, /onFormOpenChange=\{setFormOpen\}/);
   assert.match(section, /closeAfterSave/);
   assert.match(section, /onClick=\{addStaff\}/);
+  assert.match(section, /\{canView && \(/);
+  assert.doesNotMatch(section, /toggleRecords/);
 });
 
 test('Expense permissions protect adding outside workers', () => {
