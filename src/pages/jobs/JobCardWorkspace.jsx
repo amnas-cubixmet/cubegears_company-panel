@@ -28,7 +28,7 @@ import { JobPartsWorkflow } from './JobPartsWorkflow';
 import { JobInspectionPanel } from '../../components/jobs/JobInspectionPanel';
 import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
-import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
+import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
@@ -1281,15 +1281,7 @@ export function JobCardWorkspace() {
             </form>
           </section>
           </div>
-          <details className="job-work-extra-panel">
-            <summary>
-              <span><Wrench size={16} aria-hidden="true" /> Outside Labour</span>
-              <ChevronDown size={16} aria-hidden="true" />
-            </summary>
-            <div className="job-work-extra-content">
-              <OutsideLabourPanel jobId={job.id} />
-            </div>
-          </details>
+          <JobOutsideStaffSection jobId={job.id} />
         </div>
       )}
 
