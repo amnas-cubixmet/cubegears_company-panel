@@ -30,6 +30,7 @@ import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
 import { JobTotalCostPanel } from '../../components/jobs/JobTotalCostPanel';
+import { JobActivityTimeline } from '../../components/jobs/JobActivityTimeline';
 import { JobWorkPhotoPanel } from '../../components/jobs/JobWorkPhotoPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
@@ -296,7 +297,6 @@ export function JobCardWorkspace() {
     }))
     .sort((a, b) => String(a.created_at || a.date || '').localeCompare(String(b.created_at || b.date || '')));
   const updates = job?.workUpdates || [];
-  const timeline = job?.timeline || [];
   const qc = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {
     inspector: 'Unassigned',
     status: 'Pending',
@@ -1579,23 +1579,7 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'activity' && (
-        <section className="job-panel job-activity-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="job-panel-title text-sm font-extrabold text-content">Job Activity</div>
-          <div className="job-activity-timeline mt-4 border-l border-line pl-4">
-            {[...timeline, ...updates.map((item)=>({
-              time: item.time || new Date(item.createdAt || Date.now()).toLocaleString('en-IN'),
-              title: item.type || 'Work Update',
-              desc: item.note
-            }))].map((item,index)=>(
-              <div key={`${item.time}-${index}`} className="job-activity-item relative pb-5">
-                <span className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-primary ring-4 ring-surface"/>
-                <div className="text-[10px] font-semibold text-muted">{item.time}</div>
-                <div className="mt-1 text-xs font-extrabold text-content">{item.title}</div>
-                <div className="mt-1 text-[11px] text-secondary">{item.desc}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <JobActivityTimeline jobId={job.id} />
       )}
         </>
       )}
