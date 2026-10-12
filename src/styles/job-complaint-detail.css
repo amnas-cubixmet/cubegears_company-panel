@@ -136,3 +136,47 @@
   .job-complaint-detail-fields {grid-template-columns:minmax(0,1fr);gap:9px}
   .job-complaint-detail-fields select {font-size:16px}
 }
+
+
+/* Automatic complaint status (no editable dropdown). */
+.cg-job-detail.job-workspace-dashboard .job-complaint-status {
+  display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  min-width:135px;flex:0 1 155px;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-status-label {
+  color:var(--text-muted);font-size:11px;font-weight:650;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-auto-status,
+.job-complaint-detail-auto-status {
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:34px;padding:7px 12px;
+  border-radius:9px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--text-secondary);
+  font-size:12px;font-weight:700;line-height:1.4;
+  white-space:nowrap;
+}
+:is(.job-complaint-auto-status,.job-complaint-detail-auto-status,.job-complaint-detail-status).is-progress {
+  border-color:var(--primary);
+  background:var(--primary-soft);color:var(--primary);
+}
+:is(.job-complaint-auto-status,.job-complaint-detail-auto-status,.job-complaint-detail-status).is-completed {
+  border-color:var(--border);background:var(--surface-2);
+  color:var(--text-primary);
+}
+:is(.job-complaint-auto-status,.job-complaint-detail-auto-status,.job-complaint-detail-status).is-open {
+  border-color:var(--border);background:var(--surface-2);
+  color:var(--text-secondary);
+}
+.job-complaint-detail-fields .job-complaint-detail-auto-status {
+  width:max-content;max-width:100%;overflow-wrap:anywhere;
+}
+@media(max-width:767px) {
+  .cg-job-detail.job-workspace-dashboard .job-complaint-status {
+    flex:1 1 145px;min-width:0;width:auto;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-complaint-actions {
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;flex-wrap:wrap;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-complaint-view {flex:0 0 auto;min-width:88px;width:auto}
+}
