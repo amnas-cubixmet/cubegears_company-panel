@@ -17,16 +17,21 @@ test('Complaint Records has a dedicated protected View route before wildcard', (
   assert.match(routes, /element=\{<JobComplaintDetails\s*\/>\}/);
 });
 
-test('Every complaint card has View control and keeps query string when navigating', () => {
+test('Clicking anywhere on a complaint card opens its detail route and retains filters', () => {
   const start = workspace.indexOf("{activeTab === 'complaints' && (");
   const end = workspace.indexOf("{activeTab === 'inspection' && (", start);
   const list = workspace.slice(start, end);
-  assert.match(list, /className="job-complaint-view"/);
-  assert.match(list, /aria-label=\{\`View complaint:/);
-  assert.match(list, /navigate\(\`\/jobs\/\$\{encodeURIComponent\(job\.id\)\}\/complaints\//);
+  assert.match(workspace, /import \{ Link, useLocation, useNavigate, useParams \}/);
+  assert.match(list, /<Link\s+key=\{item\.id \|\| index\}/);
+  assert.match(list, /className="job-complaint-card job-complaint-card-link"/);
+  assert.match(list, /aria-label=\{\`Open complaint details:/);
+  assert.match(list, /to=\{\`\/jobs\/\$\{encodeURIComponent\(job\.id\)\}\/complaints\//);
   assert.match(list, /\$\{location\.search\}/);
   assert.match(list, /complaints\.map\(\(item, index\) => \(\{ item, index \}\)\)/);
   assert.match(list, /row-\$\{index\}/);
+  assert.match(list, /<ChevronRight size=\{17\}/);
+  assert.doesNotMatch(list, /<button[^>]*className="job-complaint-view"/);
+  assert.doesNotMatch(list, /<article key=\{item\.id \|\| index\}/);
 });
 
 test('View page loads job-scoped data and safely handles removed or legacy records', () => {
@@ -51,7 +56,9 @@ test('Complaint details show customer and vehicle with responsive single-column 
   assert.match(details, /Complaint Reference/);
   assert.match(details, /Recorded/);
   assert.match(css, /\.job-complaint-detail-page/);
-  assert.match(css, /\.job-complaint-view/);
+  assert.match(css, /\.job-complaint-card-link:hover/);
+  assert.match(css, /\.job-complaint-card-link:focus-visible/);
+  assert.doesNotMatch(css, /\.job-complaint-view/);
   assert.match(css, /@media\(max-width:700px\)/);
   assert.match(css, /grid-template-columns:minmax\(0,1fr\)/);
   assert.match(app, /import '\.\/styles\/job-complaint-detail\.css'/);

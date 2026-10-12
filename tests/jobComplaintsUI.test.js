@@ -34,7 +34,7 @@ test('Customer concerns are filterable by status without changing their API stru
 });
 
 test('Readable record cards show optional related service, empty states, and accessible status', () => {
-  assert.match(complaints, /<article key=\{item\.id \|\| index\}/);
+  assert.match(complaints, /<Link\s+key=\{item\.id \|\| index\}/);
   assert.match(complaints, /job-complaint-description/);
   assert.match(complaints, /job-complaint-status/);
   assert.match(complaints, /Status · Auto/);

@@ -1,30 +1,55 @@
 
-/* Complaints list: View button alongside the editable status control. */
+/* Complaint Records: the whole card opens details on click, tap or Enter.
+   Automatic status remains visible; there is no separate View control. */
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  min-width:0;
+  text-decoration:none!important;
+  color:inherit;
+  cursor:pointer;
+  transition:border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:hover {
+  border-color:var(--primary)!important;
+  background:var(--surface)!important;
+  box-shadow:0 2px 12px rgba(0,0,0,.05);
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:focus-visible {
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
 .cg-job-detail.job-workspace-dashboard .job-complaint-actions {
-  display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
   min-width:0;
 }
-.cg-job-detail.job-workspace-dashboard .job-complaint-view {
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  height:44px;min-height:44px;min-width:78px;
-  padding:0 12px;border:1px solid var(--border);
-  border-radius:9px;background:var(--surface);color:var(--text-primary);
-  font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-arrow {
+  display:block;
+  flex:0 0 17px;
+  color:var(--text-secondary);
 }
-.cg-job-detail.job-workspace-dashboard .job-complaint-view:hover {
-  background:var(--primary-soft);border-color:var(--primary);
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:hover .job-complaint-card-arrow,
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:focus-visible .job-complaint-card-arrow {
   color:var(--primary);
 }
 @media(max-width:767px) {
   .cg-job-detail.job-workspace-dashboard .job-complaint-actions {
-    width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:9px;align-items:end;
+    display:flex;
+    width:100%;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
   }
-  .cg-job-detail.job-workspace-dashboard .job-complaint-view {width:100%}
-  .cg-job-detail.job-workspace-dashboard .job-complaint-status {width:100%;min-width:0}
-}
-@media(max-width:380px) {
-  .cg-job-detail.job-workspace-dashboard .job-complaint-actions {grid-template-columns:minmax(0,1fr)}
+  .cg-job-detail.job-workspace-dashboard .job-complaint-status {
+    width:auto;
+    min-width:0;
+    flex:0 1 auto;
+  }
 }
 
 /* Dedicated complaint record detail screen. */
@@ -172,11 +197,10 @@
 }
 @media(max-width:767px) {
   .cg-job-detail.job-workspace-dashboard .job-complaint-status {
-    flex:1 1 145px;min-width:0;width:auto;
+    flex:0 1 auto;min-width:0;width:auto;
   }
   .cg-job-detail.job-workspace-dashboard .job-complaint-actions {
     display:flex;align-items:center;justify-content:space-between;
     gap:10px;flex-wrap:wrap;
   }
-  .cg-job-detail.job-workspace-dashboard .job-complaint-view {flex:0 0 auto;min-width:88px;width:auto}
 }
