@@ -85,6 +85,7 @@ export function JobOutsideStaffSection({ jobId }) {
             onFormOpenChange={setFormOpen}
             hideToolbar
             closeAfterSave
+            compactJobMode
           />
         </div>
       )}
