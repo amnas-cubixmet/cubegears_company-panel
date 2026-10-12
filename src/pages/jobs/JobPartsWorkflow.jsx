@@ -30,6 +30,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [panel, setPanel] = useState(null);
+  const [stockLookup, setStockLookup] = useState('');
   const [qty, setQty] = useState({});
   const [returnQty, setReturnQty] = useState({});
   const [loading, setLoading] = useState(true);
@@ -58,6 +59,13 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
   };
 
   useEffect(() => { load(); }, [jobId]);
+
+  const stockMatches = useMemo(() => {
+    const term = stockLookup.trim().toLowerCase();
+    if (!term) return [];
+    return stock.filter((item) => [item.partName, item.sku, item.barcode, item.brand]
+      .some((value) => String(value || '').toLowerCase().includes(term))).slice(0, 8);
+  }, [stock, stockLookup]);
 
   const lines = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -156,6 +164,27 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
 
       <div className="job-parts-main-card rounded-xl border border-cg-border bg-cg-surface shadow-sm">
         <div className="job-parts-toolbar border-b border-cg-border p-3 md:p-4">
+          <div className="job-parts-stock-finder mb-3 rounded-xl border border-cg-border bg-cg-surface-2 p-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <strong className="text-sm text-cg-text">Find Stock & Add to Job</strong>
+              <button type="button" className="secondary-button" onClick={() => setPanel({ type: 'add' })}><PackagePlus size={15}/> Add Part</button>
+            </div>
+            <label className="relative block min-w-0">
+              <Search size={16} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cg-muted"/>
+              <input className="cubegears-input w-full !pl-9" value={stockLookup} onChange={(event) => setStockLookup(event.target.value)} aria-label="Find stock to add" placeholder="Search inventory name, SKU or barcode"/>
+            </label>
+            {stockLookup.trim() && <div className="mt-2 grid gap-1" role="status">
+              {stockMatches.length ? stockMatches.map((item) => {
+                const available = Number(item.available ?? (Number(item.onHand || 0) - Number(item.reserved || 0)));
+                return <div key={item.id} className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg bg-cg-surface p-2">
+                  <div className="min-w-0 flex-1"><strong className="block break-words text-xs text-cg-text">{item.partName}</strong><span className="text-xs text-cg-muted">{item.sku || 'No SKU'} · Available {Math.max(0, available)} · {money.format(item.sellingPrice || 0)}</span></div>
+                  <button type="button" className="secondary-button" onClick={() => { setPanel({ type: 'add', selectedPartId: item.id }); setStockLookup(''); }}>
+                    {available > 0 ? 'Select' : 'Buy / Order'}
+                  </button>
+                </div>;
+              }) : <p className="text-xs text-cg-muted">No matching inventory item. Add it in Stock Management before creating a job requirement.</p>}
+            </div>}
+          </div>
           <div className="job-parts-tabs flex gap-2 overflow-x-auto pb-1">
             {[
               ['pending', 'Pending Issue'],
@@ -273,7 +302,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
                 <h3 className="mt-3 text-sm font-semibold text-cg-text">
                   {tab === 'pending' ? 'No pending parts' : tab === 'issued' ? 'No active issued parts' : 'No returned parts'}
                 </h3>
-                <p className="mt-1 text-xs text-cg-muted">Use Other Part to add a required stock item to this job.</p>
+                <p className="mt-1 text-xs text-cg-muted">Use Add Part to select stock or create a pending purchase requirement.</p>
               </div>
             )}
           </>
@@ -281,7 +310,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
       </div>
 
       {panel?.type === 'add' && (
-        <AddPartPanel stock={stock} assignedTo={assignedTo} onClose={() => setPanel(null)}
+        <AddPartPanel stock={stock} initialPartId={panel.selectedPartId} assignedTo={assignedTo} onClose={() => setPanel(null)}
           onSave={(payload) => act('add', () => jobPartsService.addRequiredPart(jobId, payload))} busy={busy === 'add'} />
       )}
 
@@ -446,8 +475,8 @@ function Mini({ label, value }) {
   return <div><span className="block text-[9px] uppercase tracking-wide text-cg-muted">{label}</span><strong className="text-sm text-cg-text">{value}</strong></div>;
 }
 
-function AddPartPanel({ stock, assignedTo, onClose, onSave, busy }) {
-  const [form, setForm] = useState({ partId: '', requestedQty: '1', sellingPrice: '', issuedTo: assignedTo });
+function AddPartPanel({ stock, initialPartId = '', assignedTo, onClose, onSave, busy }) {
+  const [form, setForm] = useState(() => ({ partId: initialPartId, requestedQty: '1', sellingPrice: stock.find((item) => String(item.id) === String(initialPartId))?.sellingPrice ?? '', issuedTo: assignedTo }));
   const [lookup, setLookup] = useState('');
   const [deferredLookup, setDeferredLookup] = useState('');
   useEffect(() => { const timer = setTimeout(() => setDeferredLookup(lookup), 250); return () => clearTimeout(timer); }, [lookup]);
@@ -466,6 +495,7 @@ function AddPartPanel({ stock, assignedTo, onClose, onSave, busy }) {
           setForm({ ...form, partId: e.target.value, sellingPrice: item?.sellingPrice || '' });
         }}>
           <option value="">Select a stock part</option>
+          {chosen && !matches.some((item) => String(item.id) === String(chosen.id)) && <option value={chosen.id}>{chosen.partName} · {chosen.sku || "No SKU"}</option>}
           {matches.map((item) => <option key={item.id} value={item.id}>{item.partName} · {item.sku} · Stock {item.onHand}</option>)}
         </select>
       </label>
@@ -475,6 +505,7 @@ function AddPartPanel({ stock, assignedTo, onClose, onSave, busy }) {
       <label className="form-label">Selling Price ₹<input className="cubegears-input mt-1" inputMode="decimal" value={form.sellingPrice} onChange={(e) => setForm({ ...form, sellingPrice: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
       <label className="form-label">Amount ₹<input className="cubegears-input mt-1" readOnly value={(Number(form.requestedQty || 0) * Number(form.sellingPrice || 0)).toFixed(2)}/></label>
       <label className="form-label md:col-span-2">Issued To<input className="cubegears-input mt-1" value={form.issuedTo} onChange={(e) => setForm({ ...form, issuedTo: e.target.value })} placeholder="Mechanic / store destination"/></label>
+      {chosen && Number(chosen.available ?? (Number(chosen.onHand || 0) - Number(chosen.reserved || 0))) <= 0 && <p className="md:col-span-2 text-sm text-amber-700" role="status">Out of stock. Save as a pending requirement, then use Order on the Pending Issue tab to purchase it. No stock is deducted until Issue.</p>}
       {chosen && <div className="md:col-span-2 rounded-xl bg-cg-surface-2 p-3 text-xs text-cg-muted">Available: <strong className="text-cg-text">{Math.max(0, Number(chosen.onHand || 0) - Number(chosen.reserved || 0))}</strong> · Rack: {chosen.location || '—'} · Cost: {money.format(chosen.costPrice || 0)}</div>}
       <button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
       <button className="primary-button" disabled={busy || !form.partId || !(Number(form.requestedQty) > 0) || !Number.isFinite(Number(form.sellingPrice)) || Number(form.sellingPrice) < 0}>{busy ? 'Adding…' : 'Add to Job Card'}</button>
