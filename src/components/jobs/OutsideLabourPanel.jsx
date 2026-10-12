@@ -45,6 +45,8 @@ export const OutsideLabourPanel = ({
   const canCreate = hasPermission(user, 'expenses.create');
   const canDelete = hasPermission(user, 'expenses.delete');
   const [rows, setRows] = useState([]);
+  const [knownWorkers, setKnownWorkers] = useState([]);
+  const [workerOptionsOpen, setWorkerOptionsOpen] = useState(false);
   const [form, setForm] = useState(() => blank(jobId));
   const [payTarget, setPayTarget] = useState(null);
   const [payMethod, setPayMethod] = useState('Cash');
@@ -72,7 +74,18 @@ export const OutsideLabourPanel = ({
     setLoading(true);
     setError('');
     try {
-      setRows(await outsideLabourService.list(jobId ? { job: jobId } : {}));
+      const records = await outsideLabourService.list(jobId ? { job: jobId } : {});
+      setRows(records);
+      // Suggestions are sourced from company-scoped outside labour history, not regular employees.
+      if (jobId && canCreate) {
+        try {
+          setKnownWorkers(await outsideLabourService.list());
+        } catch {
+          setKnownWorkers(records);
+        }
+      } else {
+        setKnownWorkers(records);
+      }
     } catch (err) {
       setError(errorText(err));
     } finally {
@@ -106,6 +119,24 @@ export const OutsideLabourPanel = ({
       ].some((field) => String(field || '').toLowerCase().includes(term)))
     ));
   }, [rows, filter, search]);
+
+  const workerSuggestions = useMemo(() => {
+    const unique = new Map();
+    for (const record of knownWorkers) {
+      const name = String(record.workerName || '').trim();
+      const phone = String(record.workerPhone || '').trim();
+      if (!name) continue;
+      const key = name.toLocaleLowerCase() + '|' + phone;
+      if (!unique.has(key)) unique.set(key, { name, phone });
+    }
+    const query = form.workerName.trim().toLocaleLowerCase();
+    return [...unique.values()].filter((worker) => !query || worker.name.toLocaleLowerCase().includes(query)).slice(0, 8);
+  }, [knownWorkers, form.workerName]);
+
+  const selectWorker = (worker) => {
+    setForm((previous) => ({ ...previous, workerName: worker.name, workerPhone: worker.phone || previous.workerPhone }));
+    setWorkerOptionsOpen(false);
+  };
 
   const save = async (event) => {
     event.preventDefault();
@@ -289,9 +320,35 @@ export const OutsideLabourPanel = ({
                 </select>
               </label>
             )}
-            <label>Worker Name *
-              <input name="workerName" required maxLength={160} value={form.workerName} onChange={(event) => set('workerName', event.target.value)} placeholder="Outside painter / mechanic"/>
-            </label>
+            <div className="outside-worker-picker">
+              <label htmlFor="outside-worker-name">Worker Name *</label>
+              <div className="outside-worker-search-field">
+                <Search size={16} aria-hidden="true"/>
+                <input id="outside-worker-name" name="workerName" required maxLength={160}
+                  autoComplete="off" role="combobox" aria-autocomplete="list"
+                  aria-expanded={workerOptionsOpen && workerSuggestions.length > 0}
+                  aria-controls="outside-worker-options"
+                  value={form.workerName}
+                  onFocus={() => setWorkerOptionsOpen(true)}
+                  onBlur={() => window.setTimeout(() => setWorkerOptionsOpen(false), 120)}
+                  onChange={(event) => { set('workerName', event.target.value); setWorkerOptionsOpen(true); }}
+                  placeholder="Search or enter new worker name"/>
+              </div>
+              {workerOptionsOpen && workerSuggestions.length > 0 && (
+                <div id="outside-worker-options" role="listbox" className="outside-worker-options">
+                  {workerSuggestions.map((worker) => (
+                    <button key={worker.name + worker.phone} type="button" role="option"
+                      aria-selected={form.workerName === worker.name}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => selectWorker(worker)}>
+                      <strong>{worker.name}</strong>
+                      {worker.phone && <small>{worker.phone}</small>}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <small>Choose an existing outside worker or type a new name to add one with this job.</small>
+            </div>
             <label>Phone (optional)
               <input name="workerPhone" type="tel" maxLength={30} value={form.workerPhone} onChange={(event) => set('workerPhone', event.target.value)} placeholder="Worker mobile"/>
             </label>
