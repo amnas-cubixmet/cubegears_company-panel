@@ -17,8 +17,12 @@
   min-width: 0;
   max-width: 100%;
   font-family: var(--cg-font-family, inherit);
+  font-size: 13px;
   font-weight: 400;
+  border: 1px solid var(--cg-field-border);
   border-radius: var(--cg-field-radius);
+  background-color: var(--surface-2);
+  color: var(--text-primary);
 }
 :where(input,textarea)::placeholder {
   font-weight: 400;
