@@ -123,8 +123,8 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
     <section className="job-work-timer-panel">
       <header className="job-work-timer-head">
         <div>
-          <h3><Clock3 size={17} /> Technician Work Timers</h3>
-          <p>Track internal staff work time and service progress. Outside freelancers are paid manually in Outside Labour above.</p>
+          <h3><Clock3 size={17} /> Mechanic</h3>
+          <p>Track assigned mechanics, record work time and review their work history.</p>
         </div>
         <div className="job-work-timer-summary">
           <strong>{hoursApproved.toFixed(2)}h</strong>
@@ -168,9 +168,13 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
           : 'One active timer per mechanic across all Job Cards. Pause current work before changing jobs.'}
       </p>
 
+      <div className="job-mechanic-records-header">
+        <strong>Mechanic Work Records</strong>
+        <span>{sessions.length} {sessions.length === 1 ? 'record' : 'records'}</span>
+      </div>
       <div className="job-work-timer-list">
         {loading && <div className="job-work-timer-empty">Loading work logs…</div>}
-        {!loading && !sessions.length && <div className="job-work-timer-empty">No timed service records yet. Assign a mechanic first.</div>}
+        {!loading && !sessions.length && <div className="job-work-timer-empty">No mechanic work records yet. Assign a mechanic and start work above.</div>}
         {!loading && sessions.map((row) => (
           <article key={row.id} className="job-work-timer-row">
             <div className="job-work-timer-person">
