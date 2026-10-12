@@ -38,7 +38,7 @@ export const SearchableSelect = ({
           onClick={() => !disabled && setIsOpen(!isOpen)}
           style={{ cursor: 'pointer', justifyContent: 'space-between' }}
         >
-          <span style={{ color: selectedLabel ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: '13px', fontWeight: '500' }}>
+          <span style={{ color: selectedLabel ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: '13px', fontWeight: '400' }}>
             {selectedLabel || placeholder}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

@@ -39,6 +39,8 @@ import './styles/job-inspection-simple.css';
 import './styles/job-estimate-quick.css';
 import './styles/job-create-customer.css';
 import './styles/job-create-alignment.css';
+// Imported last so old page styles cannot reintroduce bold form values.
+import './styles/form-typography.css';
 
 export function App() {
   return (
