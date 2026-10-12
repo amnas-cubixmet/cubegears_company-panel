@@ -39,8 +39,9 @@ import './styles/job-inspection-simple.css';
 import './styles/job-estimate-quick.css';
 import './styles/job-create-customer.css';
 import './styles/job-create-alignment.css';
-// Imported last so old page styles cannot reintroduce bold form values.
+// Last shared layers: preserve regular text and a single clean search border.
 import './styles/form-typography.css';
+import './styles/form-controls-unified.css';
 
 export function App() {
   return (
