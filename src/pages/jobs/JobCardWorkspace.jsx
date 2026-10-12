@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Camera,
   CheckCircle2,
   Clock3,
   FileText,
@@ -31,6 +30,7 @@ import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
 import { JobTotalCostPanel } from '../../components/jobs/JobTotalCostPanel';
+import { JobWorkPhotoPanel } from '../../components/jobs/JobWorkPhotoPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 import { complaintStatusForJob, complaintStatusClass } from '../../components/jobs/complaintStatus';
@@ -561,25 +561,6 @@ export function JobCardWorkspace() {
     });
   };
 
-  const addPhoto = async (file, stage = 'Inspection') => {
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const record = {
-        id: `PH-${Date.now()}`,
-        stage,
-        url: reader.result,
-        caption: `${stage} photo`,
-        uploadedBy: job.assignedEmployeeName || job.serviceAdvisor || 'Current User',
-        timestamp: new Date().toLocaleString('en-IN')
-      };
-
-      await persist({ photos: [record, ...(job.photos || [])] });
-    };
-    reader.readAsDataURL(file);
-  };
-
   const addTechnicianUpdate = async (presetType) => {
     const note = updateNote.trim() || presetType;
     if (!note) return;
@@ -597,8 +578,8 @@ export function JobCardWorkspace() {
 
     const patch = { workUpdates: [record, ...updates] };
     if (presetType === 'Work Started' || presetType === 'Resume') patch.status = 'In Progress';
-    await persist(patch);
-    setUpdateNote('');
+    const saved = await persist(patch);
+    if (saved) setUpdateNote('');
   };
 
   const defaultChecklist = [
@@ -1345,46 +1326,77 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'updates' && (
-        <section className="job-panel job-updates-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="job-updates-header flex flex-wrap items-center justify-between gap-3">
+        <section className="job-panel job-updates-panel">
+          <header className="job-updates-header">
             <div>
-              <div className="text-sm font-extrabold text-content">Technician Updates</div>
-              <div className="mt-1 text-xs text-muted">Track work start, pause/resume, notes, photos and completion.</div>
+              <h3>Technician Updates</h3>
+              <p>Record repair progress, notes, work photos and image captions.</p>
             </div>
-            <div className="job-update-actions flex flex-wrap gap-2">
-              {['Work Started','Pause','Resume','Completed Work'].map((type)=>(
-                <button key={type} onClick={()=>addTechnicianUpdate(type)} className="h-9 rounded-xl border border-line bg-surface-2 px-3 text-[11px] font-semibold text-content">{type}</button>
-              ))}
-            </div>
-          </div>
+            <span className="job-updates-count">{updates.length} updates</span>
+          </header>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 text-[11px] font-semibold text-content">
-              <Camera size={14}/>Add Work Photo
-              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>addPhoto(e.target.files?.[0],'During Repair')}/>
-            </label>
-          </div>
-
-          <div className="job-update-compose mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[160px_minmax(0,1fr)_auto]">
-            <select value={updateType} onChange={(e)=>setUpdateType(e.target.value)} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
-              <option>Work Update</option><option>Inspection</option><option>Parts Update</option><option>Customer Update</option><option>Issue Found</option>
-            </select>
-            <input value={updateNote} onChange={(e)=>setUpdateNote(e.target.value)} placeholder="Technician note..." className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-            <button onClick={()=>addTechnicianUpdate(updateType)} disabled={!updateNote.trim()} className="h-10 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">Add Update</button>
-          </div>
-
-          <div className="job-update-list mt-4 flex flex-col gap-2">
-            {updates.map((item)=>(
-              <div key={item.id} className="job-update-card rounded-xl border border-line bg-surface-2 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <strong className="text-xs text-content">{item.type || 'Update'}</strong>
-                  <span className="text-[10px] text-muted">{item.time || new Date(item.createdAt || Date.now()).toLocaleString('en-IN')}</span>
-                </div>
-                <div className="mt-1 text-[11px] text-secondary">{item.note}</div>
-                <div className="mt-1 text-[10px] text-muted">{item.staff || item.createdBy || 'Staff'}</div>
-              </div>
+          <div className="job-update-progress-actions" aria-label="Quick work progress">
+            {['Work Started', 'Pause', 'Resume', 'Completed Work'].map((type) => (
+              <button type="button" key={type} disabled={saving}
+                onClick={() => addTechnicianUpdate(type)}>
+                {type}
+              </button>
             ))}
           </div>
+
+          <div className="job-update-note-panel">
+            <h4>Add Technician Note</h4>
+            <div className="job-update-compose">
+              <select aria-label="Update type" value={updateType} disabled={saving}
+                onChange={(e) => setUpdateType(e.target.value)}>
+                <option>Work Update</option>
+                <option>Inspection</option>
+                <option>Parts Update</option>
+                <option>Customer Update</option>
+                <option>Issue Found</option>
+              </select>
+              <input aria-label="Technician note" value={updateNote} disabled={saving}
+                maxLength={2000} onChange={(e) => setUpdateNote(e.target.value)}
+                placeholder="Enter work progress or issue details..." />
+              <button type="button" disabled={!updateNote.trim() || saving}
+                onClick={() => addTechnicianUpdate(updateType)}>
+                {saving ? 'Saving…' : 'Add Update'}
+              </button>
+            </div>
+          </div>
+
+          <JobWorkPhotoPanel
+            jobId={job.id}
+            photos={(job.photos || []).filter((photo) => photo.photo_type !== 'inspection')}
+            disabled={saving}
+            onUploaded={async () => {
+              const refreshed = await jobService.getJobById(job.id);
+              if (refreshed) setJob(refreshed);
+            }}
+          />
+
+          <section className="job-update-history" aria-label="Technician update history">
+            <div className="job-update-history-heading">
+              <h4>Update History</h4>
+              <span>{updates.length} records</span>
+            </div>
+            <div className="job-update-list">
+              {updates.length ? updates.map((item, index) => (
+                <article key={item.id || index} className="job-update-card">
+                  <div className="job-update-card-top">
+                    <strong>{item.type || 'Work Update'}</strong>
+                    <time>{item.createdAt ? new Date(item.createdAt).toLocaleString('en-IN') : item.time || 'Recent'}</time>
+                  </div>
+                  <p>{item.note || 'Work status recorded'}</p>
+                  <small>{item.staff || item.createdBy || 'Staff'}</small>
+                </article>
+              )) : (
+                <div className="job-update-history-empty">
+                  No technician updates yet. Add the first note above.
+                </div>
+              )}
+            </div>
+          </section>
         </section>
       )}
 
