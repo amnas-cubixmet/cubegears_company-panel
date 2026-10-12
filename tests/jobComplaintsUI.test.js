@@ -37,7 +37,7 @@ test('Readable record cards show optional related service, empty states, and acc
   assert.match(complaints, /<article key=\{item\.id \|\| index\}/);
   assert.match(complaints, /job-complaint-description/);
   assert.match(complaints, /job-complaint-status/);
-  assert.match(complaints, /aria-label=\{\`Status for complaint/);
+  assert.match(complaints, /Status · Auto/);
   assert.match(complaints, /No complaints recorded/);
   assert.match(complaints, /Choose All to view every customer complaint/);
 });
