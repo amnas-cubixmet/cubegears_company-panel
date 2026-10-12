@@ -11,7 +11,7 @@ test('desktop Parts table has accessible issue quantity and readable action butt
   assert.match(page, /className="job-parts-action-cell"/);
   assert.match(page, /className="job-parts-row-actions"/);
   assert.match(page, /className="job-parts-action-heading"/);
-  assert.match(page, /className="job-parts-quantity-input/);
+  assert.match(page, /className="cubegears-input job-parts-quantity-input/);
   assert.match(page, /aria-label=\{\`Issue quantity for \$\{line\.partName\}\`\}/);
   assert.match(page, /aria-label=\{\`Return quantity for \$\{line\.partName\}\`\}/);
   assert.match(page, /job-parts-action-button[^"]*" disabled=\{Boolean\(busy\)\}/);
