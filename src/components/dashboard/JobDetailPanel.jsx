@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { repairStages, statusClass } from './dashboard.utils';
+import { dashboardText, repairStages, statusClass } from './dashboard.utils';
 
 export const JobDetailPanel = ({ selectedBooking, jobProgress, advisorName, onViewJob }) => (
   <div className="job-detail-pane">
@@ -9,25 +9,25 @@ export const JobDetailPanel = ({ selectedBooking, jobProgress, advisorName, onVi
         <div className="job-detail-head">
           <div>
             <div className="job-id-row">
-              <strong>{selectedBooking.id}</strong>
-              <span className={`status-pill ${statusClass(selectedBooking.status)}`}>{selectedBooking.status}</span>
+              <strong>{dashboardText(selectedBooking.id)}</strong>
+              <span className={`status-pill ${statusClass(dashboardText(selectedBooking.status, 'Pending'))}`}>{dashboardText(selectedBooking.status, 'Pending')}</span>
             </div>
-            <span>{selectedBooking.vehicle}</span>
+            <span>{dashboardText(selectedBooking.vehicle)}</span>
           </div>
           <button type="button" className="text-link" onClick={onViewJob}>View Job</button>
         </div>
 
         <div className="job-meta-grid">
-          <div><small>Customer</small><strong>{selectedBooking.customer}</strong></div>
-          <div><small>Booking Time</small><strong>{selectedBooking.time}</strong></div>
+          <div><small>Customer</small><strong>{dashboardText(selectedBooking.customer)}</strong></div>
+          <div><small>Booking Time</small><strong>{dashboardText(selectedBooking.time)}</strong></div>
           <div><small>Advisor</small><strong>{advisorName || 'Workshop Advisor'}</strong></div>
-          <div className="job-meta-wide"><small>Service Request</small><strong>{selectedBooking.service}</strong></div>
+          <div className="job-meta-wide"><small>Service Request</small><strong>{dashboardText(selectedBooking.service, 'Service not specified')}</strong></div>
         </div>
 
         <div className="repair-details">
           <h3>Repair Details</h3>
           <div className="repair-detail-grid">
-            <div><span>Job Status</span><strong>{selectedBooking.status}</strong></div>
+            <div><span>Job Status</span><strong>{dashboardText(selectedBooking.status, 'Pending')}</strong></div>
             <div><span>Assigned Team</span><strong>Workshop A</strong></div>
           </div>
         </div>
