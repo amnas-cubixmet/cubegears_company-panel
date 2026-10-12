@@ -375,6 +375,38 @@ export const cancelRequiredPart = async (jobId, lineId, reason) => {
   return getJobPartsWorkflow(jobId);
 };
 
+export const getOutsideJobParts = async (jobId) => {
+  if (!USE_MOCK_API) {
+    const result = await apiClient.get(`/job-cards/${jobId}/outside-parts`);
+    return Array.isArray(result?.items) ? result.items : [];
+  }
+  const job = await jobService.getJobById(jobId);
+  return job?.partsWorkflow?.outsideParts || [];
+};
+
+export const buyOutsideJobPart = async (jobId, payload) => {
+  if (!USE_MOCK_API) {
+    return apiClient.post(`/job-cards/${jobId}/outside-parts`, payload);
+  }
+  const job = await jobService.getJobById(jobId);
+  if (!job) throw new Error('Job Card not found.');
+  const workflow = job.partsWorkflow || {};
+  const previous = workflow.outsideParts || [];
+  const found = previous.find((entry) => entry.requestId === payload.requestId);
+  if (found) return found;
+  const purchased = {
+    ...payload,
+    id: `OUT-${Date.now()}`,
+    totalCost: (Number(payload.quantity) * Number(payload.unitCost)).toFixed(2),
+    totalSelling: (Number(payload.quantity) * Number(payload.sellingPrice)).toFixed(2),
+    usedAt: now(), createdBy: 'Current User'
+  };
+  await jobService.updateJob(jobId, {
+    partsWorkflow: { ...workflow, outsideParts: [purchased, ...previous] }
+  });
+  return purchased;
+};
+
 export const jobPartsService = {
   get: getJobPartsWorkflow,
   addRequiredPart,
@@ -382,7 +414,9 @@ export const jobPartsService = {
   returnPart: returnJobParts,
   createOrder: createJobPurchaseOrder,
   inward: inwardPurchaseOrder,
-  cancelRequiredPart
+  cancelRequiredPart,
+  getOutsideJobParts,
+  buyOutsideJobPart
 };
 
 export default jobPartsService;
