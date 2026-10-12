@@ -126,6 +126,22 @@ export const getJobWorkPhotoBlob = async (id, photoId) => {
   });
 };
 
+export const getJobActivity = async (id) => {
+  if (USE_MOCK_API) {
+    const job = await getJobById(id);
+    return (job?.activities || job?.timeline || []).map((row, index) => ({
+      ...row,
+      id: row.id || `demo-${index}`,
+      event: row.event || row.title || 'Job Update',
+      description: row.description || row.desc || '',
+      actorName: row.actorName || 'Demo user',
+      created_at: row.created_at || row.createdAt || row.time || ''
+    }));
+  }
+  const data = await apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/activity`);
+  return Array.isArray(data) ? data : data?.results || [];
+};
+
 export const getJobWorkflow = async (id) => {
   if (USE_MOCK_API) return mockWorkflow(await getJobById(id));
   return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/workflow`);
@@ -214,6 +230,7 @@ export const jobService = {
   updateJobStatus,
   updateJob,
   getJobWorkflow,
+  getJobActivity,
   completeJobStage,
   createJobEstimate,
   saveQuickJobEstimate,
