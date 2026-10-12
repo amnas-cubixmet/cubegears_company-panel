@@ -82,6 +82,7 @@ const buildState = async (job) => {
     lines,
     transactions,
     purchaseOrders,
+    outsideParts: Array.isArray(job?.partsWorkflow?.outsideParts) ? job.partsWorkflow.outsideParts : [],
     canComplete: blocking.length === 0,
     blockingReasons: blocking
   };
@@ -93,7 +94,8 @@ const persist = async (jobId, state) => {
     partsWorkflow: {
       lines: cleanLines,
       transactions: state.transactions,
-      purchaseOrders: state.purchaseOrders
+      purchaseOrders: state.purchaseOrders,
+      outsideParts: state.outsideParts || []
     }
   });
 };
