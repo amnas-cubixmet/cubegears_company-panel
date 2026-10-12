@@ -18,7 +18,7 @@ import {
   ChevronDown,
   LockKeyhole
 } from 'lucide-react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { billingService } from '../../services/billing.service';
 import { paymentService } from '../../services/payment.service';
@@ -1218,28 +1218,26 @@ export function JobCardWorkspace() {
 
           <div className="job-complaint-list" aria-live="polite">
             {complaints.map((item, index) => ({ item, index })).filter(() => complaintFilter === 'All' || automaticComplaintStatus === complaintFilter).map(({ item, index }) => (
-              <article key={item.id || index} className="job-complaint-card">
+              <Link
+                key={item.id || index}
+                className="job-complaint-card job-complaint-card-link"
+                to={`/jobs/${encodeURIComponent(job.id)}/complaints/${encodeURIComponent(item.id != null ? String(item.id) : `row-${index}`)}${location.search}`}
+                aria-label={`Open complaint details: ${item.description || item.wording || `Complaint ${index + 1}`}`}
+              >
                 <div className="job-complaint-copy">
                   <div className="job-complaint-description">{item.description || item.wording || 'Customer complaint'}</div>
                   <p>{typeof item.relatedService === 'string' && item.relatedService.trim() ? item.relatedService : 'Customer reported issue'}</p>
                 </div>
                 <div className="job-complaint-actions">
-                  <button
-                    type="button"
-                    className="job-complaint-view"
-                    onClick={() => navigate(`/jobs/${encodeURIComponent(job.id)}/complaints/${encodeURIComponent(item.id != null ? String(item.id) : `row-${index}`)}${location.search}`)}
-                    aria-label={`View complaint: ${item.description || item.wording || index + 1}`}
-                  >
-                    View <ChevronRight size={15} aria-hidden="true"/>
-                  </button>
                   <div className="job-complaint-status">
                     <span className="job-complaint-status-label">Status · Auto</span>
-                    <span role="status" className={`job-complaint-auto-status ${complaintStatusClass(automaticComplaintStatus)}`}>
+                    <span className={`job-complaint-auto-status ${complaintStatusClass(automaticComplaintStatus)}`}>
                       {automaticComplaintStatus}
                     </span>
                   </div>
+                  <ChevronRight size={17} aria-hidden="true" className="job-complaint-card-arrow"/>
                 </div>
-              </article>
+              </Link>
             ))}
             {complaints.length === 0 ? (
               <div className="job-complaint-empty">
