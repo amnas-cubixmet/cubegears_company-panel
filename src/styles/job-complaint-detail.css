@@ -197,11 +197,10 @@
 }
 @media(max-width:767px) {
   .cg-job-detail.job-workspace-dashboard .job-complaint-status {
-    flex:1 1 145px;min-width:0;width:auto;
+    flex:0 1 auto;min-width:0;width:auto;
   }
   .cg-job-detail.job-workspace-dashboard .job-complaint-actions {
     display:flex;align-items:center;justify-content:space-between;
     gap:10px;flex-wrap:wrap;
   }
-  .cg-job-detail.job-workspace-dashboard .job-complaint-view {flex:0 0 auto;min-width:88px;width:auto}
 }
