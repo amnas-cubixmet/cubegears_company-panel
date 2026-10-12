@@ -27,18 +27,17 @@ test('Saving a complaint retains user text when the API reports a failure', () =
 test('Customer concerns are filterable by status without changing their API structure', () => {
   assert.match(complaints, /\['All', 'Open', 'In Progress', 'Completed'\]/);
   assert.match(complaints, /aria-pressed=\{complaintFilter === filter\}/);
-  assert.match(complaints, /\.filter\(\(\{ item \}\) => complaintFilter === 'All'/);
-  assert.match(complaints, /onChange=\{\(e\) => updateComplaintStatus\(item\.id, e\.target\.value\)\}/);
-  assert.match(complaints, /<option value="Open">Open<\/option>/);
-  assert.match(complaints, /<option value="In Progress">In Progress<\/option>/);
-  assert.match(complaints, /<option value="Completed">Completed<\/option>/);
+  assert.match(complaints, /\.filter\(\(\) => complaintFilter === 'All' \|\| automaticComplaintStatus === complaintFilter/);
+  assert.match(complaints, /automaticComplaintStatus === filter/);
+  assert.match(complaints, /job-complaint-auto-status/);
+  assert.doesNotMatch(complaints, /<select|updateComplaintStatus/);
 });
 
 test('Readable record cards show optional related service, empty states, and accessible status', () => {
   assert.match(complaints, /<article key=\{item\.id \|\| index\}/);
   assert.match(complaints, /job-complaint-description/);
   assert.match(complaints, /job-complaint-status/);
-  assert.match(complaints, /aria-label=\{\`Status for complaint/);
+  assert.match(complaints, /Status · Auto/);
   assert.match(complaints, /No complaints recorded/);
   assert.match(complaints, /Choose All to view every customer complaint/);
 });

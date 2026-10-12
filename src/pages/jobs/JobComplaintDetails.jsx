@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
+import { complaintStatusForJob, complaintStatusClass } from '../../components/jobs/complaintStatus';
 
 const textValue = (value, fallback = 'Not added') => {
   if (typeof value === 'string') return value.trim() || fallback;
@@ -34,7 +35,6 @@ export function JobComplaintDetails() {
   const location = useLocation();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const backToComplaints = `/jobs/${encodeURIComponent(jobId)}/complaints${location.search}`;
 
@@ -57,25 +57,8 @@ export function JobComplaintDetails() {
   const complaints = useMemo(() => complaintList(job), [job]);
   const found = useMemo(() => findComplaint(complaints, complaintId), [complaints, complaintId]);
   const complaint = found?.entry;
-  const status = complaint?.status || 'Open';
+  const status = complaintStatusForJob(job);
   const description = textValue(complaint?.description || complaint?.wording, 'No description recorded');
-
-  const changeStatus = async (nextStatus) => {
-    if (!job || !found || saving || nextStatus === status) return;
-    setSaving(true);
-    setError('');
-    try {
-      const nextComplaints = complaints.map((entry, index) =>
-        index === found.index ? { ...entry, status: nextStatus } : entry
-      );
-      const saved = await jobService.updateJob(job.id, { complaints: nextComplaints });
-      setJob({ ...job, ...(saved || {}), complaints: nextComplaints });
-    } catch (err) {
-      setError(err?.response?.data?.detail || err?.message || 'Could not update complaint status.');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <div className="job-complaint-detail-page">
@@ -113,8 +96,8 @@ export function JobComplaintDetails() {
                 <h2>Customer Complaint</h2>
                 <p>What the customer reported about this vehicle.</p>
               </div>
-              <span className="job-complaint-detail-status">
-                <CheckCircle2 size={15} aria-hidden="true"/> {status}
+              <span role="status" className={`job-complaint-detail-status ${complaintStatusClass(status)}`}>
+                <CheckCircle2 size={15} aria-hidden="true"/> {status} · Auto
               </span>
             </div>
             <p className="job-complaint-detail-description">{description}</p>
@@ -135,21 +118,11 @@ export function JobComplaintDetails() {
                   : 'Not recorded'}</strong>
               </div>
               <div>
-                <span>Update Status</span>
-                <select
-                  aria-label="Update complaint status"
-                  value={status}
-                  disabled={saving}
-                  onChange={(event) => changeStatus(event.target.value)}
-                >
-                  {!['Open', 'In Progress', 'Completed'].includes(status) && (
-                    <option value={status}>{status}</option>
-                  )}
-                  <option value="Open">Open</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
-                <small>{saving ? 'Saving status…' : 'Changes save directly to this Job Card.'}</small>
+                <span>Status (Automatic)</span>
+                <strong className={`job-complaint-detail-auto-status ${complaintStatusClass(status)}`}>
+                  {status}
+                </strong>
+                <small>Updated automatically: Open before Work, In Progress during Work/QC, Completed after QC passes.</small>
               </div>
             </div>
           </section>
