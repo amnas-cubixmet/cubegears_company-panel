@@ -12,8 +12,9 @@ test('Work stage exposes a visible Outside Staff section, not hidden More/detail
   assert.doesNotMatch(work, /<details className="job-work-extra-panel">/);
 });
 
-test('Add Outside Staff opens a job-bound Outside Labour form', () => {
+test('Add Outside Staff opens a job-bound Outside Labour form, records remain visible', () => {
   assert.ok(section.includes("'Add Outside Staff'"));
+  assert.match(section, /showRecordsWhileEditing/);
   assert.match(section, /formOpen=\{formOpen\}/);
   assert.match(section, /jobId=\{jobId\}/);
   assert.match(section, /onFormOpenChange=\{setFormOpen\}/);

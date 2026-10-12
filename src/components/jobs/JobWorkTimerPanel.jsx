@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Clock3, Play, Pause, CheckCheck, CheckCircle2, RefreshCw, Wrench } from 'lucide-react';
+import { Play, Pause, CheckCheck, CheckCircle2, RefreshCw, Wrench } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
 import { hasPermission } from '../../utils/permissions';
 import { useAuth } from '../../hooks/useAuth';
@@ -123,12 +123,12 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
     <section className="job-work-timer-panel">
       <header className="job-work-timer-head">
         <div>
-          <h3><Clock3 size={17} /> Technician Work Timers</h3>
-          <p>Track internal staff work time and service progress. Outside freelancers are paid manually in Outside Labour above.</p>
+          <h3><Wrench size={17} aria-hidden="true" /> Mechanic</h3>
+          <p>Internal mechanics, assigned work and tracked hours for this Job Card.</p>
         </div>
         <div className="job-work-timer-summary">
           <strong>{hoursApproved.toFixed(2)}h</strong>
-          <small>Verified work</small>
+          <small>Approved hours</small>
         </div>
       </header>
 
@@ -170,12 +170,12 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
 
       <div className="job-work-timer-list">
         {loading && <div className="job-work-timer-empty">Loading work logs…</div>}
-        {!loading && !sessions.length && <div className="job-work-timer-empty">No timed service records yet. Assign a mechanic first.</div>}
+        {!loading && !sessions.length && <div className="job-work-timer-empty">No mechanic work records yet. Assign a mechanic above to start work.</div>}
         {!loading && sessions.map((row) => (
           <article key={row.id} className="job-work-timer-row">
             <div className="job-work-timer-person">
-              <strong>{row.serviceName}</strong>
-              <span>{row.staffName} · Customer labour: {money(row.labourCharge)}</span>
+              <strong>{row.staffName || 'Mechanic'}</strong>
+              <span>{row.serviceName || 'Work'} · Customer labour: {money(row.labourCharge)}</span>
               <small>Status: {row.status === 'PendingApproval' ? 'Awaiting Supervisor Approval' : row.status}</small>
             </div>
             <div className="job-work-timer-duration">
@@ -206,7 +206,7 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
         ))}
       </div>
       <button className="job-work-timer-refresh" type="button" onClick={refresh} disabled={loading || Boolean(busy)}>
-        <RefreshCw size={13}/> Refresh work logs
+        <RefreshCw size={13}/> Refresh mechanic records
       </button>
     </section>
   );
