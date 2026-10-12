@@ -37,7 +37,7 @@ test('outside purchases render persisted records with no stock movement', () => 
 
 test('mock-mode stock changes preserve direct purchases', () => {
   assert.match(service, /outsideParts: Array\.isArray\(job\?\.partsWorkflow\?\.outsideParts\)/);
-  assert.match(service, /outsideParts: state\.outsideParts \|\| \[\]/);
+  assert.match(service, /outsideParts: previous\.outsideParts \|\| state\.outsideParts \|\| \[\]/);
   assert.match(service, /requestId === payload\.requestId/);
 });
 
