@@ -33,6 +33,7 @@ import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
 import { JobTotalCostPanel } from '../../components/jobs/JobTotalCostPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
+import { complaintStatusForJob, complaintStatusClass } from '../../components/jobs/complaintStatus';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -279,6 +280,7 @@ export function JobCardWorkspace() {
 
   const complaintSource = job?.complaints || job?.customerComplaints || [];
   const complaints = Array.isArray(complaintSource) ? complaintSource : [];
+  const automaticComplaintStatus = complaintStatusForJob(job, workflow);
   const findings = job?.inspection?.findings || job?.vehicleInspection?.findings || job?.inspectionFindings || [];
   const inspectionChecks = job?.inspection?.checklist || {};
   const labourRecords = USE_MOCK_API ? (job?.labourRecords || []) : (job?.work || []);
@@ -441,7 +443,7 @@ export function JobCardWorkspace() {
       id: `CMP-${Date.now()}`,
       description,
       wording: description,
-      status: 'Open',
+      status: automaticComplaintStatus,
       createdAt: new Date().toISOString()
     };
 
@@ -450,12 +452,6 @@ export function JobCardWorkspace() {
       setComplaintText('');
       setComplaintFilter('All');
     }
-  };
-
-  const updateComplaintStatus = async (complaintId, status) => {
-    await persist({
-      complaints: complaints.map((item) => item.id === complaintId ? { ...item, status } : item)
-    });
   };
 
   const updateInspectionCheck = async (item, status) => {
@@ -1190,7 +1186,7 @@ export function JobCardWorkspace() {
               </button>
             </div>
             <div className="job-complaint-entry-footer">
-              <span>Each complaint can be tracked from Open to Completed.</span>
+              <span>Status updates automatically with Work and QC progress.</span>
               <span>{complaintText.length}/1000</span>
             </div>
           </div>
@@ -1198,13 +1194,13 @@ export function JobCardWorkspace() {
           <div className="job-complaints-list-header">
             <div>
               <h4>Complaint Records</h4>
-              <p>View concerns and change their current status.</p>
+              <p>Complaint status updates automatically as this Job Card progresses.</p>
             </div>
             <div className="job-complaints-filters" role="group" aria-label="Filter complaints by status">
               {['All', 'Open', 'In Progress', 'Completed'].map((filter) => {
                 const count = filter === 'All'
                   ? complaints.length
-                  : complaints.filter((item) => (item.status || 'Open') === filter).length;
+                  : complaints.filter(() => automaticComplaintStatus === filter).length;
                 return (
                   <button
                     type="button"
@@ -1221,7 +1217,7 @@ export function JobCardWorkspace() {
           </div>
 
           <div className="job-complaint-list" aria-live="polite">
-            {complaints.map((item, index) => ({ item, index })).filter(({ item }) => complaintFilter === 'All' || (item.status || 'Open') === complaintFilter).map(({ item, index }) => (
+            {complaints.map((item, index) => ({ item, index })).filter(() => complaintFilter === 'All' || automaticComplaintStatus === complaintFilter).map(({ item, index }) => (
               <article key={item.id || index} className="job-complaint-card">
                 <div className="job-complaint-copy">
                   <div className="job-complaint-description">{item.description || item.wording || 'Customer complaint'}</div>
@@ -1237,18 +1233,10 @@ export function JobCardWorkspace() {
                     View <ChevronRight size={15} aria-hidden="true"/>
                   </button>
                   <div className="job-complaint-status">
-                  <label htmlFor={`job-complaint-status-${item.id || index}`}>Status</label>
-                  <select
-                    id={`job-complaint-status-${item.id || index}`}
-                    aria-label={`Status for complaint ${item.description || item.wording || index + 1}`}
-                    value={item.status || 'Open'}
-                    disabled={saving}
-                    onChange={(e) => updateComplaintStatus(item.id, e.target.value)}
-                  >
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
+                    <span className="job-complaint-status-label">Status · Auto</span>
+                    <span role="status" className={`job-complaint-auto-status ${complaintStatusClass(automaticComplaintStatus)}`}>
+                      {automaticComplaintStatus}
+                    </span>
                   </div>
                 </div>
               </article>
@@ -1259,7 +1247,7 @@ export function JobCardWorkspace() {
                 <strong>No complaints recorded</strong>
                 <p>Add a customer complaint above to start tracking it.</p>
               </div>
-            ) : !complaints.some((item) => complaintFilter === 'All' || (item.status || 'Open') === complaintFilter) ? (
+            ) : !complaints.some(() => complaintFilter === 'All' || automaticComplaintStatus === complaintFilter) ? (
               <div className="job-complaint-empty">
                 <FileText size={24} aria-hidden="true"/>
                 <strong>No {complaintFilter.toLowerCase()} complaints</strong>
