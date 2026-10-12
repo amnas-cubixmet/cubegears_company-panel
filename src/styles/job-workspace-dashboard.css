@@ -1692,3 +1692,32 @@
     font-size:16px!important;
   }
 }
+
+
+/* Parts workflow: dashboard-aligned compact controls and responsive cards. */
+.job-workspace-dashboard .job-parts-workflow { min-width:0; max-width:100%; border:0!important; background:transparent!important; box-shadow:none!important; }
+.job-workspace-dashboard .job-parts-summary-card,
+.job-workspace-dashboard .job-parts-main-card { min-width:0; border-radius:12px!important; }
+.job-workspace-dashboard .job-parts-metrics { min-width:0; }
+.job-workspace-dashboard .job-parts-metric { min-width:0; border-radius:10px; }
+.job-workspace-dashboard .job-parts-metric strong { overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+.job-workspace-dashboard .job-parts-tab { white-space:nowrap; }
+.job-workspace-dashboard .job-parts-tabs { scrollbar-width:none; }
+.job-workspace-dashboard .job-parts-tabs::-webkit-scrollbar { display:none; }
+.job-workspace-dashboard .job-parts-search-row { min-width:0; }
+.job-workspace-dashboard .job-parts-search-row label { min-width:0; }
+.job-workspace-dashboard .job-parts-search-row input { width:100%; border:1px solid var(--border)!important; box-shadow:none!important; }
+.job-workspace-dashboard .job-parts-workflow input,
+.job-workspace-dashboard .job-parts-workflow select,
+.job-workspace-dashboard .job-parts-workflow textarea { font-weight:400!important; min-height:44px; }
+.job-workspace-dashboard .job-parts-workflow input::placeholder { font-weight:400!important; }
+.job-workspace-dashboard .job-parts-table-wrap { max-width:100%; }
+.job-workspace-dashboard .job-parts-table-wrap table { width:100%; }
+.job-workspace-dashboard .job-parts-workflow button:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
+@media(max-width:767px) {
+  .job-workspace-dashboard .job-parts-workflow .job-parts-summary-card { padding:12px!important; }
+  .job-workspace-dashboard .job-parts-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .job-workspace-dashboard .job-parts-completion { width:100%; }
+  .job-workspace-dashboard .job-parts-search-row .primary-button { min-height:44px; width:100%; }
+  .job-workspace-dashboard .job-parts-workflow article { min-width:0; overflow-wrap:anywhere; }
+}
