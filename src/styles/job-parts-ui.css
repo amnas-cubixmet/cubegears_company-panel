@@ -239,3 +239,231 @@
     padding:9px 10px;font-size:11px!important;
   }
 }
+
+
+/* Parts modal shells are portalled to document.body to avoid clipping from the
+   Job Card layout. Explicit styling intentionally does not rely on utility CSS. */
+body .job-parts-modal-overlay {
+  position:fixed!important;
+  inset:0;
+  z-index:2000!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:100dvh;
+  padding:20px;
+  background:rgba(15,23,42,.46);
+  backdrop-filter:blur(3px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+body .job-parts-dialog {
+  display:flex;
+  flex-direction:column;
+  width:min(100%,640px);
+  max-width:640px;
+  max-height:calc(100dvh - 40px);
+  min-width:0;
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--surface);
+  color:var(--text-primary);
+  box-shadow:0 24px 65px rgba(15,23,42,.23);
+}
+body .job-parts-dialog *,
+body .job-parts-dialog *::before,
+body .job-parts-dialog *::after {box-sizing:border-box}
+body .job-parts-dialog-header {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  flex:0 0 auto;
+  padding:18px 20px 15px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+body .job-parts-dialog-heading {flex:1;min-width:0}
+body .job-parts-dialog-heading h3 {
+  margin:0!important;
+  font-size:17px!important;
+  font-weight:750!important;
+  line-height:1.35;
+  color:var(--text-primary);
+}
+body .job-parts-dialog-heading p {
+  margin:5px 0 0!important;
+  font-size:12px!important;
+  line-height:1.5;
+  color:var(--text-muted);
+}
+body .job-parts-dialog-close {
+  display:grid;
+  place-items:center;
+  flex:0 0 36px;
+  width:36px;
+  min-width:36px;
+  height:36px;
+  min-height:36px;
+  padding:0!important;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-primary);
+  cursor:pointer;
+}
+body .job-parts-dialog-content {
+  flex:1 1 auto;
+  min-height:0;
+  min-width:0;
+  width:100%;
+  overflow-y:auto;
+  padding:20px;
+  overscroll-behavior:contain;
+}
+body .job-parts-modal-form {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:start!important;
+  gap:15px!important;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  margin:0!important;
+  padding:0!important;
+}
+body .job-parts-modal-form > .job-parts-modal-full {
+  grid-column:1 / -1!important;
+}
+body .job-parts-modal-form > label {
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%;
+  margin:0!important;
+  padding:0!important;
+  color:var(--text-secondary);
+  font-size:12px!important;
+  font-weight:650!important;
+  line-height:1.45!important;
+  text-align:left!important;
+  white-space:normal!important;
+}
+body .job-parts-modal-form > label > :is(input,select,textarea) {
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  height:44px!important;
+  min-height:44px!important;
+  margin:0!important;
+  padding:0 12px!important;
+  border:1px solid var(--border)!important;
+  border-radius:9px!important;
+  background:var(--surface-2)!important;
+  color:var(--text-primary)!important;
+  box-shadow:none!important;
+  outline:none!important;
+  font-family:inherit;
+  font-size:13px!important;
+  font-weight:400!important;
+  line-height:normal!important;
+  text-overflow:ellipsis;
+}
+body .job-parts-modal-form > label > :is(input,select,textarea):focus-visible {
+  border-color:var(--primary)!important;
+  box-shadow:0 0 0 3px var(--primary-soft)!important;
+}
+body .job-parts-modal-form > label > input[readonly],
+body .job-parts-modal-form > label > input:disabled {
+  background:var(--surface)!important;
+  color:var(--text-secondary)!important;
+}
+body .job-parts-modal-form > label > input::placeholder {
+  color:var(--text-muted);
+  font-weight:400!important;
+  opacity:1;
+}
+body .job-parts-modal-form > button {
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  min-width:0!important;
+  width:100%;
+  min-height:44px!important;
+  height:auto!important;
+  margin:0!important;
+  padding:10px 14px!important;
+  border-radius:9px!important;
+  border:1px solid var(--border)!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  line-height:1.45;
+  white-space:normal;
+  text-align:center;
+  cursor:pointer;
+}
+body .job-parts-modal-form > button.primary-button {
+  background:var(--primary)!important;
+  border-color:var(--primary)!important;
+  color:#fff!important;
+}
+body .job-parts-modal-form > button.secondary-button {
+  background:var(--surface-2)!important;
+  border-color:var(--border)!important;
+  color:var(--text-primary)!important;
+}
+body .job-parts-modal-form > button:disabled {opacity:.55;cursor:not-allowed}
+body .job-parts-dialog button:focus-visible {
+  outline:2px solid var(--primary)!important;
+  outline-offset:2px;
+}
+body .job-parts-modal-stock-note,
+body .job-parts-modal-warning {
+  min-width:0;
+  padding:12px;
+  border-radius:9px;
+  font-size:12px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+body .job-parts-modal-stock-note {
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  color:var(--text-secondary);
+}
+body .job-parts-modal-warning {
+  border:1px solid #f4ce76;
+  background:#fffbeb;
+  color:#92400e;
+}
+@media(max-width:639px) {
+  body .job-parts-modal-overlay {
+    align-items:flex-end;
+    padding:0;
+  }
+  body .job-parts-dialog {
+    width:100%;
+    max-width:100%;
+    max-height:92dvh;
+    border-radius:16px 16px 0 0;
+    border-bottom:0;
+  }
+  body .job-parts-dialog-header {padding:15px 15px 13px}
+  body .job-parts-dialog-content {
+    padding:15px 15px max(18px,env(safe-area-inset-bottom));
+  }
+  body .job-parts-modal-form {
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:13px!important;
+  }
+  body .job-parts-modal-form > label > :is(input,select,textarea) {
+    font-size:16px!important;
+  }
+}
