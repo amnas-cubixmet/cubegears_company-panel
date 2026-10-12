@@ -381,6 +381,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
       {panel?.type === 'outside' && (
         <OutsidePartPurchasePanel
           initial={panel}
+          error={error}
           onClose={() => setPanel(null)}
           onSave={(payload) => act('outside', () => jobPartsService.buyOutsideJobPart(jobId, payload))}
           busy={busy === 'outside'}
@@ -591,7 +592,7 @@ function AddPartPanel({ stock, initialPartId = '', assignedTo, onClose, onSave, 
   </Sheet>;
 }
 
-function OutsidePartPurchasePanel({ initial, onClose, onSave, busy }) {
+function OutsidePartPurchasePanel({ initial, onClose, onSave, busy, error }) {
   const [requestId] = useState(() => (
     globalThis.crypto?.randomUUID?.() || `outside-${Date.now()}-${Math.random().toString(36).slice(2)}`
   ));
@@ -661,6 +662,7 @@ function OutsidePartPurchasePanel({ initial, onClose, onSave, busy }) {
           Direct outside purchase: recorded as used for this Job Card and included in Total Cost.
           No inventory stock entry or stock deduction is created.
         </p>
+        {error && <p className="job-parts-modal-warning job-parts-modal-full" role="alert">{error}</p>}
         <button type="button" className="secondary-button" onClick={onClose} disabled={busy}>Cancel</button>
         <button type="submit" className="primary-button" disabled={!valid || busy}>
           {busy ? 'Saving Purchase…' : 'Save & Use Part'}
