@@ -8,7 +8,7 @@ const section = read('../src/components/jobs/JobOutsideStaffSection.jsx');
 const ledger = read('../src/components/jobs/OutsideLabourPanel.jsx');
 
 test('Work stage exposes a visible Outside Staff section, not hidden More/details only', () => {
-  assert.match(work, /<JobOutsideStaffSection jobId=\{job\.id\}\s*\/>/);
+  assert.match(work, /<JobOutsideStaffSection\s+jobId=\{job\.id\}\s+onChanged=/);
   assert.doesNotMatch(work, /<details className="job-work-extra-panel">/);
 });
 
