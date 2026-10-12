@@ -1221,13 +1221,22 @@ export function JobCardWorkspace() {
           </div>
 
           <div className="job-complaint-list" aria-live="polite">
-            {complaints.filter((item) => complaintFilter === 'All' || (item.status || 'Open') === complaintFilter).map((item, index) => (
+            {complaints.map((item, index) => ({ item, index })).filter(({ item }) => complaintFilter === 'All' || (item.status || 'Open') === complaintFilter).map(({ item, index }) => (
               <article key={item.id || index} className="job-complaint-card">
                 <div className="job-complaint-copy">
                   <div className="job-complaint-description">{item.description || item.wording || 'Customer complaint'}</div>
                   <p>{typeof item.relatedService === 'string' && item.relatedService.trim() ? item.relatedService : 'Customer reported issue'}</p>
                 </div>
-                <div className="job-complaint-status">
+                <div className="job-complaint-actions">
+                  <button
+                    type="button"
+                    className="job-complaint-view"
+                    onClick={() => navigate(`/jobs/${encodeURIComponent(job.id)}/complaints/${encodeURIComponent(item.id != null ? String(item.id) : `row-${index}`)}${location.search}`)}
+                    aria-label={`View complaint: ${item.description || item.wording || index + 1}`}
+                  >
+                    View <ChevronRight size={15} aria-hidden="true"/>
+                  </button>
+                  <div className="job-complaint-status">
                   <label htmlFor={`job-complaint-status-${item.id || index}`}>Status</label>
                   <select
                     id={`job-complaint-status-${item.id || index}`}
@@ -1240,6 +1249,7 @@ export function JobCardWorkspace() {
                     <option value="In Progress">In Progress</option>
                     <option value="Completed">Completed</option>
                   </select>
+                  </div>
                 </div>
               </article>
             ))}
