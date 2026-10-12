@@ -131,6 +131,7 @@ export function JobCardWorkspace() {
   const [error, setError] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
+  const [complaintFilter, setComplaintFilter] = useState('All');
   const [finding, setFinding] = useState(blankFinding());
   const [updateNote, setUpdateNote] = useState('');
   const [updateType, setUpdateType] = useState('Work Update');
@@ -276,7 +277,8 @@ export function JobCardWorkspace() {
     });
   };
 
-  const complaints = job?.complaints || job?.customerComplaints || [];
+  const complaintSource = job?.complaints || job?.customerComplaints || [];
+  const complaints = Array.isArray(complaintSource) ? complaintSource : [];
   const findings = job?.inspection?.findings || job?.vehicleInspection?.findings || job?.inspectionFindings || [];
   const inspectionChecks = job?.inspection?.checklist || {};
   const labourRecords = USE_MOCK_API ? (job?.labourRecords || []) : (job?.work || []);
@@ -443,8 +445,11 @@ export function JobCardWorkspace() {
       createdAt: new Date().toISOString()
     };
 
-    await persist({ complaints: [...complaints, record] });
-    setComplaintText('');
+    const updated = await persist({ complaints: [...complaints, record] });
+    if (updated) {
+      setComplaintText('');
+      setComplaintFilter('All');
+    }
   };
 
   const updateComplaintStatus = async (complaintId, status) => {
@@ -1155,26 +1160,102 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'complaints' && (
-        <section className="job-panel job-complaints-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="job-panel-title text-sm font-extrabold text-content">Customer Complaints</div>
-          <div className="job-complaint-compose mt-3 flex flex-col gap-2 sm:flex-row">
-            <textarea value={complaintText} onChange={(e) => setComplaintText(e.target.value)} placeholder="Add complaint exactly as customer explains it..." className="min-h-20 flex-1 rounded-xl border border-line bg-surface-2 p-3 text-sm text-content"/>
-            <button type="button" onClick={addComplaint} disabled={!complaintText.trim() || saving} className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white"><Plus size={15} className="inline"/> Add Complaint</button>
+        <section className="job-panel job-complaints-panel" aria-label="Customer Complaints">
+          <header className="job-complaints-head">
+            <div className="job-complaints-title">
+              <span className="job-complaints-icon" aria-hidden="true"><FileText size={18}/></span>
+              <div>
+                <h3>Customer Complaints</h3>
+                <p>Record customer concerns and keep their progress updated.</p>
+              </div>
+            </div>
+            <span className="job-complaints-total">{complaints.length} {complaints.length === 1 ? 'complaint' : 'complaints'}</span>
+          </header>
+
+          <div className="job-complaint-entry">
+            <label htmlFor="job-customer-complaint">Add Customer Complaint</label>
+            <div className="job-complaint-compose">
+              <textarea
+                id="job-customer-complaint"
+                value={complaintText}
+                onChange={(e) => setComplaintText(e.target.value)}
+                placeholder="Describe the issue as explained by the customer..."
+                maxLength={1000}
+                rows={3}
+                disabled={saving}
+              />
+              <button type="button" onClick={addComplaint} disabled={!complaintText.trim() || saving}>
+                <Plus size={16} aria-hidden="true"/>
+                {saving ? 'Saving…' : 'Add Complaint'}
+              </button>
+            </div>
+            <div className="job-complaint-entry-footer">
+              <span>Each complaint can be tracked from Open to Completed.</span>
+              <span>{complaintText.length}/1000</span>
+            </div>
           </div>
 
-          <div className="job-complaint-list mt-4 flex flex-col gap-2">
-            {complaints.map((item) => (
-              <div key={item.id} className="job-complaint-card flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold text-content">{item.description}</div>
-                  <div className="mt-1 text-[10px] text-muted">{item.relatedService || 'Not linked to work item'}</div>
+          <div className="job-complaints-list-header">
+            <div>
+              <h4>Complaint Records</h4>
+              <p>View concerns and change their current status.</p>
+            </div>
+            <div className="job-complaints-filters" role="group" aria-label="Filter complaints by status">
+              {['All', 'Open', 'In Progress', 'Completed'].map((filter) => {
+                const count = filter === 'All'
+                  ? complaints.length
+                  : complaints.filter((item) => (item.status || 'Open') === filter).length;
+                return (
+                  <button
+                    type="button"
+                    key={filter}
+                    className={complaintFilter === filter ? 'is-active' : ''}
+                    aria-pressed={complaintFilter === filter}
+                    onClick={() => setComplaintFilter(filter)}
+                  >
+                    {filter} <span>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="job-complaint-list" aria-live="polite">
+            {complaints.filter((item) => complaintFilter === 'All' || (item.status || 'Open') === complaintFilter).map((item, index) => (
+              <article key={item.id || index} className="job-complaint-card">
+                <div className="job-complaint-copy">
+                  <div className="job-complaint-description">{item.description || item.wording || 'Customer complaint'}</div>
+                  <p>{typeof item.relatedService === 'string' && item.relatedService.trim() ? item.relatedService : 'Customer reported issue'}</p>
                 </div>
-                <select aria-label={`Status for complaint ${item.description}`} value={item.status || 'Open'} onChange={(e) => updateComplaintStatus(item.id, e.target.value)} className="h-8 rounded-lg border border-line bg-surface px-2 text-[11px] font-semibold text-content">
-                  <option>Open</option><option>In Progress</option><option>Completed</option>
-                </select>
-              </div>
+                <div className="job-complaint-status">
+                  <label htmlFor={`job-complaint-status-${item.id || index}`}>Status</label>
+                  <select
+                    id={`job-complaint-status-${item.id || index}`}
+                    aria-label={`Status for complaint ${item.description || item.wording || index + 1}`}
+                    value={item.status || 'Open'}
+                    disabled={saving}
+                    onChange={(e) => updateComplaintStatus(item.id, e.target.value)}
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+              </article>
             ))}
-            {!complaints.length ? <Empty text="No customer complaints recorded."/> : null}
+            {complaints.length === 0 ? (
+              <div className="job-complaint-empty">
+                <FileText size={24} aria-hidden="true"/>
+                <strong>No complaints recorded</strong>
+                <p>Add a customer complaint above to start tracking it.</p>
+              </div>
+            ) : !complaints.some((item) => complaintFilter === 'All' || (item.status || 'Open') === complaintFilter) ? (
+              <div className="job-complaint-empty">
+                <FileText size={24} aria-hidden="true"/>
+                <strong>No {complaintFilter.toLowerCase()} complaints</strong>
+                <p>Choose All to view every customer complaint.</p>
+              </div>
+            ) : null}
           </div>
         </section>
       )}
