@@ -12,7 +12,7 @@ const work = workspace.slice(workStart, partsStart);
 
 test('Outside Staff is the first feature in the Job Card Work stage', () => {
   assert.ok(workStart !== -1 && partsStart > workStart);
-  const outside = work.indexOf('<JobOutsideStaffSection jobId={job.id} />');
+  const outside = work.indexOf('<JobOutsideStaffSection');
   const internal = work.indexOf('<JobWorkerAssignments');
   const timers = work.indexOf('<JobWorkTimerPanel');
   const items = work.indexOf('Labour & Work Items');

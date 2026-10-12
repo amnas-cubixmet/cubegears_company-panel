@@ -30,6 +30,7 @@ import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
+import { JobTotalCostPanel } from '../../components/jobs/JobTotalCostPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 
@@ -1196,7 +1197,12 @@ export function JobCardWorkspace() {
 
       {activeTab === 'work' && (
         <div className="job-work-payroll-stack job-work-simple">
-          <JobOutsideStaffSection jobId={job.id} />
+          <JobOutsideStaffSection
+            jobId={job.id}
+            onChanged={() => setTimerRefreshVersion((value) => value + 1)}
+          />
+
+          <JobTotalCostPanel jobId={job.id} refreshVersion={timerRefreshVersion} />
 
           <JobWorkerAssignments
             key={timerRefreshVersion}
