@@ -284,7 +284,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
                     <th>{tab === 'issued' ? 'Issued' : tab === 'returned' ? 'Returned' : 'Issue Qty'}</th>
                     <th>Pending</th>
                     <th>Selling</th>
-                    <th className="text-right">Action</th>
+                    <th className="job-parts-action-heading">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -350,7 +350,8 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
         <div className="job-parts-outside-head">
           <div>
             <h3>Outside Shop Purchases</h3>
-            <p>Parts bought from other shops and used directly on this Job Card. Inventory remains unchanged.</p>
+            <p>Parts purchased externally for this job. These do not change workshop inventory.</p>
+            <span className="job-parts-outside-count">{outsideParts.length} {outsideParts.length === 1 ? 'purchase' : 'purchases'}</span>
           </div>
           <div className="job-parts-outside-total">
             <span>Purchase Cost</span>
@@ -374,7 +375,16 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
             ))}
           </div>
         ) : (
-          <p className="job-parts-outside-empty">No outside purchases yet. Use Buy Outside when the required part is not in stock.</p>
+          <div className="job-parts-outside-empty">
+            <span className="job-parts-outside-empty-icon" aria-hidden="true"><ShoppingCart size={19}/></span>
+            <div>
+              <strong>{loading ? 'Loading outside purchases…' : 'No outside purchases yet'}</strong>
+              <p>When a part is not available in stock, record a direct shop purchase for this Job Card.</p>
+            </div>
+            <button type="button" className="secondary-button job-parts-outside-empty-action" onClick={() => setPanel({ type: 'outside', partName: stockLookup })} disabled={loading || Boolean(busy)}>
+              <ShoppingCart size={15} aria-hidden="true"/> Buy Outside
+            </button>
+          </div>
         )}
       </section>
 
@@ -430,35 +440,35 @@ function PartTableRow({ line, tab, issueQty, returnQty, onIssueQty, onReturnQty,
       <td>{line.requestedQty}</td>
       <td>
         {tab === 'pending' ? (
-          <input className="cubegears-input !h-9 !w-20 !min-h-9" inputMode="decimal" value={issueQty}
+          <input aria-label={`Issue quantity for ${line.partName}`} className="cubegears-input job-parts-quantity-input !h-9 !w-20 !min-h-9" inputMode="decimal" value={issueQty}
             placeholder={String(Math.min(line.pendingQty, line.availableQty))}
             onChange={(e) => onIssueQty(e.target.value.replace(/[^0-9.]/g, ''))} />
         ) : tab === 'issued' ? (
           <div className="flex items-center gap-2">
             <span>{line.netIssued}</span>
-            <input className="cubegears-input !h-9 !w-20 !min-h-9" inputMode="decimal" value={returnQty}
+            <input aria-label={`Return quantity for ${line.partName}`} className="cubegears-input job-parts-quantity-input !h-9 !w-20 !min-h-9" inputMode="decimal" value={returnQty}
               placeholder="Return"
               onChange={(e) => onReturnQty(e.target.value.replace(/[^0-9.]/g, ''))} />
           </div>
         ) : line.returnedQty}
       </td>
       <td>{line.pendingQty}</td>
-      <td>{money.format(line.sellingPrice || 0)}</td>
-      <td>
-        <div className="flex justify-end gap-1.5">
+      <td className="job-parts-selling-cell">{money.format(line.sellingPrice || 0)}</td>
+      <td className="job-parts-action-cell">
+        <div className="job-parts-row-actions">
           {tab === 'pending' && line.availableQty > 0 && (
-            <button className="primary-button !min-h-9 !px-3 !text-xs" disabled={busy === `issue-${line.id}`} onClick={onIssue}>
+            <button type="button" className="primary-button job-parts-action-button !min-h-9 !px-3 !text-xs" disabled={Boolean(busy)} onClick={onIssue}>
               <PackageCheck size={14}/> Issue
             </button>
           )}
           {tab === 'pending' && line.pendingQty > line.availableQty && (
-            <button className="secondary-button !min-h-9 !px-3 !text-xs" onClick={onOrder}><ShoppingCart size={14}/> Order</button>
+            <button type="button" className="secondary-button job-parts-action-button !min-h-9 !px-3 !text-xs" disabled={Boolean(busy)} onClick={onOrder}><ShoppingCart size={14} aria-hidden="true"/> Order</button>
           )}
           {tab === 'pending' && (
-            <button className="secondary-button !min-h-9 !px-3 !text-xs" onClick={onInward}><ArrowDownToLine size={14}/> Inward</button>
+            <button type="button" className="secondary-button job-parts-action-button !min-h-9 !px-3 !text-xs" disabled={Boolean(busy)} onClick={onInward}><ArrowDownToLine size={14} aria-hidden="true"/> Inward</button>
           )}
           {tab === 'issued' && (
-            <button className="secondary-button !min-h-9 !px-3 !text-xs" disabled={busy === `return-${line.id}`} onClick={onReturn}>
+            <button type="button" className="secondary-button job-parts-action-button !min-h-9 !px-3 !text-xs" disabled={Boolean(busy)} onClick={onReturn}>
               <RotateCcw size={14}/> Return
             </button>
           )}
