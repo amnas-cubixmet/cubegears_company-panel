@@ -1127,3 +1127,154 @@
     min-height:44px;
   }
 }
+
+
+/* Outside Staff on phones and tablets.
+   Desktop keeps the existing horizontal compact card shown in the screenshot.
+   Mobile header uses a fixed-size icon + flexible title; actions form their own row. */
+@media (max-width: 767px) {
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff {
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    padding:14px;
+    gap:12px;
+    overflow:visible;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-head {
+    display:grid;
+    grid-template-columns:38px minmax(0, 1fr);
+    align-items:center;
+    column-gap:11px;
+    row-gap:14px;
+    width:100%;
+    min-width:0;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-icon {
+    grid-column:1;
+    grid-row:1;
+    align-self:start;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-heading {
+    grid-column:2;
+    grid-row:1;
+    width:100%;
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-heading h3 {
+    font-size:14px;
+    line-height:1.45;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-heading p {
+    font-size:11px;
+    line-height:1.5;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions {
+    display:grid;
+    grid-column:1 / -1;
+    grid-row:2;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    width:100%;
+    min-width:0;
+    gap:8px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions button {
+    width:100%;
+    min-width:0;
+    min-height:44px;
+    margin:0;
+    padding:9px 10px;
+    font-size:12px;
+    line-height:1.4;
+    white-space:normal;
+    text-align:center;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions button svg {
+    flex:0 0 15px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-description {
+    font-size:11px;
+    line-height:1.55;
+    overflow-wrap:anywhere;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content {
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    overflow-x:clip;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-form,
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-records {
+    width:100%;
+    min-width:0;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-form-grid {
+    grid-template-columns:minmax(0, 1fr);
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content :is(input:not([type="checkbox"]), select) {
+    max-width:100%;
+    min-width:0;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-list-head,
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-record-tools {
+    flex-wrap:wrap;
+    min-width:0;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-search {
+    max-width:100%;
+    min-width:0;
+  }
+}
+@media (max-width: 480px) {
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff {
+    padding:12px;
+    gap:10px;
+    border-radius:11px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-head {
+    column-gap:10px;
+    row-gap:12px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions {
+    grid-template-columns:minmax(0, 1fr);
+    gap:8px;
+  }
+  /* Most important mobile action first, history still immediately available. */
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions .job-outside-staff-add {
+    order:0;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions .job-outside-staff-view {
+    order:1;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions button {
+    min-height:44px;
+    font-size:12px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-stats.dashboard-stats {
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-stat-card {
+    min-width:0;
+    padding:10px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-stat-card:last-child {
+    grid-column:1 / -1;
+    min-height:88px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-stat-card .stat-value {
+    overflow-wrap:anywhere;
+    font-size:16px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-form-heading,
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-form-grid,
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-list-head,
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-record-tools {
+    padding-left:11px;
+    padding-right:11px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-entry {
+    padding:11px;
+  }
+}
