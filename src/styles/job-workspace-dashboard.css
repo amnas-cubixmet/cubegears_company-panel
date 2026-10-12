@@ -1402,3 +1402,90 @@
     grid-template-columns:minmax(0, 1fr);
   }
 }
+
+
+/* Work Cost: values come from the job-scoped, permission-checked backend. */
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel {
+  display:flex;flex-direction:column;gap:14px;
+  width:100%;min-width:0;padding:16px;
+  border:1px solid var(--border);border-radius:12px;
+  background:var(--surface);box-shadow:var(--shadow-sm);
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-heading {
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-heading h3 {
+  display:flex;align-items:center;gap:9px;margin:0;
+  font-size:14px;line-height:1.4;font-weight:750;
+  color:var(--text-primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-heading svg {color:var(--primary)}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-heading p {
+  margin:5px 0 0;font-size:11px;line-height:1.55;
+  color:var(--text-muted);
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-refresh {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:40px;padding:8px 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);
+  color:var(--text-primary);font-size:12px;font-weight:650;cursor:pointer;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-refresh:disabled {opacity:.55;cursor:not-allowed}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-grid {
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-card {
+  display:flex;flex-direction:column;gap:8px;
+  min-width:0;padding:14px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-card span {
+  color:var(--text-secondary);font-size:11px;font-weight:650;
+  line-height:1.4;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-card strong {
+  color:var(--text-primary);font-size:clamp(16px,1.7vw,23px);
+  line-height:1.25;font-weight:750;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-card small {
+  color:var(--text-muted);font-size:10px;line-height:1.45;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-card.is-primary {
+  background:var(--primary-soft);
+  border-color:var(--primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-card.is-primary span {
+  color:var(--primary);font-weight:750;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-footnotes {
+  display:flex;flex-direction:column;gap:5px;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-footnotes p,
+.cg-job-detail.job-workspace-dashboard .job-total-cost-notice {
+  margin:0;color:var(--text-muted);font-size:11px;line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-notice {
+  padding:12px;border:1px dashed var(--border);
+  border-radius:9px;background:var(--surface-2);
+}
+@media(max-width:1100px) {
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:540px) {
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-panel {padding:12px;gap:12px}
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-refresh {
+    width:100%;min-height:44px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-grid {gap:8px}
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-card {
+    padding:11px;gap:6px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-card strong {font-size:17px}
+}
