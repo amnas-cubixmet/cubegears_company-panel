@@ -1012,3 +1012,118 @@
   font-weight: 400 !important;
   opacity: 1;
 }
+
+
+/* Job Card Work — visible Outside Staff add action, simple on mobile. */
+.cg-job-detail.job-workspace-dashboard .job-outside-staff {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-width:0;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-head {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-icon {
+  display:grid;
+  place-items:center;
+  flex:0 0 38px;
+  width:38px;
+  height:38px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface-2);
+  color:var(--primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-heading {
+  flex:1 1 230px;
+  min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-heading h3 {
+  margin:0;
+  font-size:14px;
+  font-weight:750;
+  color:var(--text-primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-heading p {
+  margin:4px 0 0;
+  font-size:12px;
+  line-height:1.5;
+  color:var(--text-muted);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-actions {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-actions button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:42px;
+  padding:8px 13px;
+  border-radius:9px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-view {
+  border:1px solid var(--border);
+  color:var(--text-primary);
+  background:var(--surface-2);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-add {
+  border:1px solid var(--primary);
+  color:#fff;
+  background:var(--primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-description {
+  margin:0;
+  font-size:11px;
+  line-height:1.55;
+  color:var(--text-secondary);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-permission {
+  margin:0;
+  padding:11px 12px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  color:var(--text-secondary);
+  background:var(--surface-2);
+  font-size:12px;
+  line-height:1.5;
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-content {
+  min-width:0;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-content .outside-labour-dashboard {
+  padding:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+.cg-job-detail.job-workspace-dashboard .job-outside-staff-actions button:focus-visible {
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+@media(max-width:650px) {
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff {padding:12px;gap:10px}
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-heading {flex:1 1 180px}
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions {width:100%}
+  .cg-job-detail.job-workspace-dashboard .job-outside-staff-actions button {
+    flex:1 1 120px;
+    min-height:44px;
+  }
+}
