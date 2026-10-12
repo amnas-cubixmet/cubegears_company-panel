@@ -1236,7 +1236,7 @@ export function JobCardWorkspace() {
               </div>
             ) : (
               <p className="job-work-items-empty">
-                No labour entries yet. Record internal work using Technician Work Timers above.
+                No labour entries yet. Record internal work using the Mechanic section above.
               </p>
             )}
           </section>
