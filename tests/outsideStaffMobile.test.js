@@ -37,6 +37,9 @@ test('narrow phones stack full-width actions, prioritizing Add Outside Staff', (
 test('embedded Outside Labour form is job-bound and renders one field column on mobile', () => {
   assert.match(section, /jobId=\{jobId\}/);
   assert.match(section, /closeAfterSave/);
+  assert.match(section, /compactJobMode/);
+  assert.match(ledger, /!compactJobMode &&/);
+  assert.match(ledger, /\(!compactJobMode \|\| !isFormOpen\)/);
   assert.match(ledger, /outsideLabourService\.create/);
   assert.match(css, /\.job-outside-staff-content \.outside-labour-form-grid \{\s*grid-template-columns:minmax\(0, 1fr\)/);
   assert.match(css, /\.job-outside-staff-content \.outside-labour-stats\.dashboard-stats \{/);
