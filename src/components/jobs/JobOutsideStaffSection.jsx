@@ -8,7 +8,7 @@ import { hasPermission } from '../../utils/permissions';
  * Add external workers to a specific Job Card without creating employees.
  * Reuses Outside Labour's existing company-scoped Expenses APIs and payment rules.
  */
-export function JobOutsideStaffSection({ jobId }) {
+export function JobOutsideStaffSection({ jobId, onChanged }) {
   const { user } = useAuth();
   const canView = hasPermission(user, 'expenses.view');
   const canCreate = hasPermission(user, 'expenses.create');
@@ -63,6 +63,7 @@ export function JobOutsideStaffSection({ jobId }) {
         <div className="job-outside-staff-content">
           <OutsideLabourPanel
             jobId={jobId}
+            onChanged={onChanged}
             formOpen={formOpen}
             onFormOpenChange={setFormOpen}
             hideToolbar
