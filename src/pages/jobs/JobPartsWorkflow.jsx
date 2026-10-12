@@ -605,6 +605,7 @@ function OutsidePartPurchasePanel({ initial, onClose, onSave, busy }) {
   const cost = Number(form.unitCost);
   const selling = Number(form.sellingPrice);
   const valid = !!form.partName.trim() && !!form.vendor.trim() &&
+    form.unitCost !== '' && form.sellingPrice !== '' &&
     Number.isFinite(quantity) && quantity > 0 && quantity <= 999999.99 &&
     Number.isFinite(cost) && cost >= 0 && cost <= 999999999.99 &&
     Number.isFinite(selling) && selling >= 0 && selling <= 999999999.99;
