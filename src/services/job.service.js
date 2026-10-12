@@ -115,7 +115,7 @@ export const uploadJobWorkPhoto = async (id, file, caption) => {
   form.append('image', file);
   form.append('caption', caption || '');
   return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/photos/upload`, form, {
-    headers: { 'Content-Type': undefined }
+    headers: { 'Content-Type': 'multipart/form-data' }
   });
 };
 
