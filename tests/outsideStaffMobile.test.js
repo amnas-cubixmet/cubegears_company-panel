@@ -26,14 +26,15 @@ test('tablet/mobile card uses a two-column icon/title grid plus action row', () 
   assert.match(rules, /min-height:44px/);
 });
 
-test('narrow phones stack full-width actions, prioritizing Add Outside Staff', () => {
+test('narrow phones show Add Outside Staff as a full-width button', () => {
   const marker = css.indexOf('@media (max-width: 480px)', css.indexOf('/* Outside Staff on phones and tablets.'));
   assert.ok(marker > -1, 'narrow phone styles must be present');
   const narrow = css.slice(marker);
   assert.match(narrow, /\.job-outside-staff-actions \{/);
   assert.match(narrow, /grid-template-columns:minmax\(0, 1fr\)/);
-  assert.match(narrow, /\.job-outside-staff-add \{\s*order:0;/);
-  assert.match(narrow, /\.job-outside-staff-view \{\s*order:1;/);
+  assert.match(narrow, /\.job-outside-staff-actions button \{\s*min-height:44px;/);
+  assert.match(section, /'Add Outside Staff'/);
+  assert.doesNotMatch(section, /'View Records'/);
 });
 
 test('embedded Outside Labour form is job-bound and renders one field column on mobile', () => {
