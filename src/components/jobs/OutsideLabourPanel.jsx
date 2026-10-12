@@ -35,6 +35,7 @@ export const OutsideLabourPanel = ({
   onFormOpenChange,
   refreshVersion = 0,
   hideToolbar = false,
+  closeAfterSave = false,
 }) => {
   const { user } = useAuth();
   const formRef = useRef(null);
@@ -146,7 +147,7 @@ export const OutsideLabourPanel = ({
         setNotice('Outside labour saved as Pending. Pay when money is actually given.');
       }
       setForm(blank(jobId));
-      if (controlledForm) onFormOpenChange?.(Boolean(jobId));
+      if (controlledForm) onFormOpenChange?.(closeAfterSave ? false : Boolean(jobId));
       else setShowForm(Boolean(jobId));
       await refresh();
       onChanged?.();
