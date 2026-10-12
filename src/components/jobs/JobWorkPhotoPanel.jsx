@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Camera, ImagePlus, UploadCloud, X } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 
@@ -55,6 +55,7 @@ function JobWorkPhoto({ jobId, photo }) {
 }
 
 export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = false }) {
+  const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [caption, setCaption] = useState('');
   const [preview, setPreview] = useState('');
@@ -102,8 +103,7 @@ export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = f
       await jobService.uploadJobWorkPhoto(jobId, file, caption.trim());
       setFile(null);
       setCaption('');
-      const input = event.currentTarget?.querySelector('input[type="file"]');
-      if (input) input.value = '';
+      if (fileInputRef.current) fileInputRef.current.value = '';
       setSuccess('Photo and caption saved.');
       try {
         await onUploaded?.();
@@ -130,7 +130,7 @@ export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = f
       <form className="job-work-photo-form" onSubmit={upload}>
         <label className="job-work-photo-file-field">
           <span>Choose image</span>
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
             onChange={chooseFile} disabled={busy || disabled} />
         </label>
         <label className="job-work-photo-caption-field">
@@ -145,7 +145,7 @@ export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = f
           <div className="job-work-photo-selected">
             <img src={preview} alt="Selected work photo preview"/>
             <span>{file?.name}</span>
-            <button type="button" onClick={() => setFile(null)} disabled={busy}
+            <button type="button" onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} disabled={busy}
               aria-label="Remove selected image"><X size={16}/></button>
           </div>
         )}
