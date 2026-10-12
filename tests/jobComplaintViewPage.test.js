@@ -38,13 +38,11 @@ test('View page loads job-scoped data and safely handles removed or legacy recor
   assert.match(details, /\$\{location\.search\}/);
 });
 
-test('Complaint status edits save through existing Job update API', () => {
-  assert.match(details, /jobService\.updateJob\(job\.id, \{ complaints: nextComplaints \}\)/);
-  assert.match(details, /index === found\.index \? \{ \.\.\.entry, status: nextStatus \}/);
-  assert.match(details, /disabled=\{saving\}/);
-  assert.match(details, /<option value="Open">Open<\/option>/);
-  assert.match(details, /<option value="In Progress">In Progress<\/option>/);
-  assert.match(details, /<option value="Completed">Completed<\/option>/);
+test('Complaint detail status is automatic and the manual status selector is removed', () => {
+  assert.match(details, /complaintStatusForJob\(job\)/);
+  assert.match(details, /Status \(Automatic\)/);
+  assert.match(details, /job-complaint-detail-auto-status/);
+  assert.doesNotMatch(details, /changeStatus|Update Status|aria-label="Update complaint status"/);
 });
 
 test('Complaint details show customer and vehicle with responsive single-column mobile layout', () => {
