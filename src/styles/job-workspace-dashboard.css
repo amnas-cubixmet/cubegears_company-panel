@@ -1000,3 +1000,15 @@
     flex-basis: 100%;
   }
 }
+
+
+/* Work timer form: labels can be bold, but entered values and placeholders
+   must stay regular. Global Job Card form controls inherit label font-weight. */
+.cg-job-detail.job-workspace-dashboard .job-work-timer-form :is(input, select),
+.cg-job-detail.job-workspace-dashboard .job-work-timer-form select option {
+  font-weight: 400 !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-timer-form input::placeholder {
+  font-weight: 400 !important;
+  opacity: 1;
+}
