@@ -30,5 +30,5 @@ test('prefill goods-specific HSN and per-line tax, not overall invoice rates', (
   assert.match(page, /hsnCode: item.hsnCode \|\| item.hsn_sac/);
   assert.match(page, /Number\(item.taxRate \|\| 0\) \/ 2/);
   assert.match(page, /place: invoice.customer\?\.city/);
-  assert.match(page, /Official generation requires a connected GST E-Way Bill API/);
+  assert.match(page, /not official GST portal E-Way Bills/);
 });
