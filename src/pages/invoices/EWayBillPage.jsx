@@ -251,6 +251,7 @@ export function EWayBillPage() {
 
         {error && <div className="billing-error">{error}</div>}
 
+        <div className="billing-card eway-safety-note">Prepared locally ≠ generated on the GST portal. No official EBN, validity or QR has been issued by CubixGear.</div>
         <section className="billing-card billing-list-card">
           {loading ? <div className="billing-empty">Loading…</div> : (
             <div className="billing-doc-list">
@@ -325,6 +326,7 @@ export function EWayBillPage() {
         </div>
 
         {error && <div className="billing-error no-print">{error}</div>}
+        {!form.ewayBillNo && <div className="billing-card eway-safety-note no-print">Local preparation preview only — not a valid transport E-Way Bill. Obtain an official EBN from the GST portal when required.</div>}
         {loading ? <div className="billing-empty">Loading…</div> : <EWayBillPrint doc={form} totals={totals}/>}
       </div>
     );
@@ -371,6 +373,7 @@ export function EWayBillPage() {
 
       {error && <div className="billing-error no-print">{error}</div>}
 
+      <div className="billing-card eway-safety-note no-print">This form prepares information for the E-Way Bill system; it does not submit to NIC or issue an official EBN. <a href="https://ewaybillgst.gov.in/" target="_blank" rel="noopener noreferrer">Open official E-Way Bill portal</a>.</div>
       <div className="no-print grid gap-4">
         <section className="billing-card">
           <div className="mb-4">
