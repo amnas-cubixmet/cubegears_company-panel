@@ -50,6 +50,7 @@ export const StockManagementTabs = () => {
           <NavLink
             key={path}
             to={path}
+            end={path === '/stock'}
             className={({ isActive }) =>
               `stock-management-tab ${isActive ? 'active' : ''}`
             }
