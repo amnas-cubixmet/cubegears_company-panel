@@ -63,7 +63,11 @@ export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelec
       unitPrice: String(priceOf(row, kind)),
       type: isPart ? 'Part' : 'Labour',
       catalogId: row.id,
-      catalogCode: isPart ? row.sku || row.barcode || '' : row.code || ''
+      catalogCode: isPart ? row.sku || row.barcode || '' : row.code || '',
+      taxRate: isPart
+        ? (Number(row.tax ?? row.tax_rate) > 0 ? String(row.tax ?? row.tax_rate) : '')
+        : String(row.taxRate ?? row.tax_rate ?? 18),
+      hsnSac: isPart ? row.hsnCode || row.hsn_code || '' : row.hsnSac || row.hsn_sac || '998714'
     });
     setOpened(false);
     setActive(-1);
