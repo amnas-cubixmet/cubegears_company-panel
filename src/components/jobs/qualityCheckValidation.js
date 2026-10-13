@@ -65,7 +65,7 @@ export const qcFormErrors = (draft, mode) => {
     return errors;
   }
   if (mode !== 'Draft') {
-    if (!inspector) errors.inspector = 'Enter the QC inspector name.';
+    if (!inspector) errors.inspector = 'QC inspector name is unavailable. Check your login account profile.';
     if (mode === 'Pass') {
       draft.checklist.forEach((item) => {
         if (item.status !== 'Pass') errors.items[item.id] = 'Mark this check as Pass before approving QC.';
