@@ -829,11 +829,16 @@
   outline:2px solid var(--primary);
   outline-offset:2px;
 }
-.jobs-dashboard .jobs-table td .jobs-customer-contact-actions span{
+.jobs-dashboard .jobs-table td .jobs-customer-contact-actions .jobs-customer-contact-button > span{
   display:inline;
   margin:0;
   font-size:inherit;
   color:inherit;
+}
+.jobs-dashboard .jobs-table td .jobs-customer-contact-actions > span.jobs-customer-contact-button{
+  display:inline-flex;
+  font-size:11px;
+  margin:0;
 }
 .jobs-dashboard .jobs-table td:has(.jobs-customer-contact-actions){
   min-width:170px;
