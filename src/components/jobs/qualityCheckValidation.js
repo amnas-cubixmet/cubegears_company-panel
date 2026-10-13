@@ -17,6 +17,11 @@ export const resolveQcInspector = (savedInspector, loggedInName = '') => {
   return String(loggedInName || '').trim();
 };
 
+// For an editable QC, the acting account is authoritative. For completed
+// read-only QC, keep the inspector who last saved that QC result.
+export const qcInspectorForMode = (savedInspector, loggedInName = '', canEdit = false) =>
+  canEdit ? String(loggedInName || '').trim() : resolveQcInspector(savedInspector, loggedInName);
+
 export const makeQcDraft = (qc = {}, loggedInName = '') => ({
   inspector: resolveQcInspector(qc?.inspector, loggedInName),
   testDriveNotes: String(qc?.testDriveNotes || ''),

@@ -4,7 +4,7 @@ import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { useAuth } from '../../hooks/useAuth';
 import {
-  makeQcDraft, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
+  makeQcDraft, qcInspectorForMode, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
 } from './qualityCheckValidation';
 import '../../styles/job-quality-check.css';
 
@@ -36,6 +36,10 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
       ? current : { ...current, inspector: loggedInName });
   }, [loggedInName]);
 
+  // The current editor is always the authenticated inspector. Read-only QC
+  // retains the inspector who signed the previously saved result.
+  const inspectorName = qcInspectorForMode(draft.inspector, loggedInName, canEdit);
+  const submissionDraft = { ...draft, inspector: inspectorName };
   const summary = qcSummary(draft);
   const change = (update) => {
     setDraft((current) => ({ ...current, ...update }));
@@ -53,7 +57,7 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
 
   const submit = async (mode) => {
     if (!canEdit || lockRef.current || busy) return;
-    const invalid = qcFormErrors(draft, mode);
+    const invalid = qcFormErrors(submissionDraft, mode);
     if (qcHasErrors(invalid)) {
       setErrors(invalid);
       setSuccess('');
@@ -70,7 +74,7 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
     setServerError('');
     setSuccess('');
     try {
-      const qc = qcPayload(draft, mode === 'Draft' ? 'Pending' : mode);
+      const qc = qcPayload(submissionDraft, mode === 'Draft' ? 'Pending' : mode);
       await jobService.updateJob(job.id, USE_MOCK_API
         ? { qualityCheck: qc } : { qc });
 
@@ -162,14 +166,14 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
         <div className="job-qc-field">
           <label htmlFor="job-qc-inspector">QC Inspector <span>*</span></label>
           <input id="job-qc-inspector" type="text" maxLength={120}
-            value={draft.inspector} readOnly
+            value={inspectorName} readOnly
             placeholder="Account name unavailable"
             aria-readonly="true"
             aria-invalid={Boolean(errors?.inspector)}
             aria-describedby={errors?.inspector ? 'job-qc-inspector-error' : 'job-qc-inspector-hint'}/>
           {errors?.inspector
             ? <small id="job-qc-inspector-error" className="job-qc-field-error">{errors.inspector}</small>
-            : <small id="job-qc-inspector-hint">Auto-filled from the logged-in account. Existing saved inspector names are preserved.</small>}
+            : <small id="job-qc-inspector-hint">Auto-filled from your logged-in account. Saved QC records retain their original inspector when read-only.</small>}
         </div>
 
         <div className="job-qc-field">
