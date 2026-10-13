@@ -94,7 +94,7 @@ export function QuickEstimatePanel({
     if (registered && !placeOfSupply) return 'Select the legal place-of-supply state.';
     if (registered && lines.some((line) => !String(line.taxRate ?? '').trim() ||
       Number(line.taxRate) < 0 || Number(line.taxRate) > 100 ||
-      !/^\\d+(?:\\.\\d{1,2})?$/.test(String(line.taxRate)))) {
+      !/^\d+(?:\.\d{1,2})?$/.test(String(line.taxRate)))) {
       return 'Set a valid item-wise GST rate for every work and spare part.';
     }
     return '';
