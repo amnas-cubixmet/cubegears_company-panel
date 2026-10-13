@@ -13,7 +13,9 @@ export const API_ENDPOINTS = {
   ATTENDANCE: "/attendance",
   REPORTS: "/reports",
   NOTIFICATIONS: "/notifications",
-  SETTINGS: "/settings"
+  SETTINGS: "/settings",
+  SAAS_BILLING: "/saas/billing",
+  MEDIA_STORAGE: "/saas/storage"
 };
 
 export const ENDPOINTS = API_ENDPOINTS;
