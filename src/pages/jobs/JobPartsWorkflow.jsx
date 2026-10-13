@@ -273,18 +273,18 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
           <TransactionHistory transactions={visibleTransactions} />
         ) : (
           <>
-            <div className="job-parts-table-wrap hidden overflow-x-auto md:block">
-              <table>
+            <div className="job-parts-table-wrap hidden overflow-x-auto md:block" role="region" aria-label="Job Card parts records" tabIndex={0}>
+              <table className="job-parts-record-table">
                 <thead>
                   <tr>
-                    <th>Stock</th>
-                    <th>Part</th>
-                    <th>On Hand</th>
-                    <th>Requested</th>
-                    <th>{tab === 'issued' ? 'Issued' : tab === 'returned' ? 'Returned' : 'Issue Qty'}</th>
-                    <th>Pending</th>
-                    <th>Selling</th>
-                    <th className="job-parts-action-heading">Action</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Part</th>
+                    <th scope="col">On Hand</th>
+                    <th scope="col">Requested</th>
+                    <th scope="col">{tab === 'issued' ? 'Issued / Return Qty' : tab === 'returned' ? 'Returned' : 'Issue Qty'}</th>
+                    <th scope="col">Pending</th>
+                    <th scope="col">Selling</th>
+                    <th scope="col" className="job-parts-action-heading">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -311,7 +311,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
               </table>
             </div>
 
-            <div className="job-parts-mobile-list grid gap-3 p-3 md:hidden">
+            <div className="job-parts-mobile-list grid gap-3 p-3 md:hidden" aria-label="Job Card parts records">
               {lines.map((line) => (
                 <PartMobileCard
                   key={line.id}
@@ -430,15 +430,15 @@ function StockBadge({ line }) {
 
 function PartTableRow({ line, tab, issueQty, returnQty, onIssueQty, onReturnQty, onIssue, onReturn, onOrder, onInward, busy }) {
   return (
-    <tr>
-      <td><StockBadge line={line} /></td>
-      <td>
-        <strong className="block text-sm">{line.partName}</strong>
-        <span className="text-xs text-cg-muted">{line.partNo || 'No code'}{line.brand ? ` · ${line.brand}` : ''}</span>
+    <tr className="job-parts-data-row">
+      <td className="job-parts-stock-cell"><StockBadge line={line} /></td>
+      <td className="job-parts-part-cell">
+        <strong className="job-parts-part-name">{line.partName}</strong>
+        <span className="job-parts-part-meta">{line.partNo || 'No code'}{line.brand ? ` · ${line.brand}` : ''}</span>
       </td>
-      <td>{line.qtyOnHand}</td>
-      <td>{line.requestedQty}</td>
-      <td>
+      <td className="job-parts-number-cell">{line.qtyOnHand}</td>
+      <td className="job-parts-number-cell">{line.requestedQty}</td>
+      <td className="job-parts-issue-cell">
         {tab === 'pending' ? (
           <input aria-label={`Issue quantity for ${line.partName}`} className="cubegears-input job-parts-quantity-input !h-9 !w-20 !min-h-9" inputMode="decimal" value={issueQty}
             placeholder={String(Math.min(line.pendingQty, line.availableQty))}
@@ -452,7 +452,7 @@ function PartTableRow({ line, tab, issueQty, returnQty, onIssueQty, onReturnQty,
           </div>
         ) : line.returnedQty}
       </td>
-      <td>{line.pendingQty}</td>
+      <td className="job-parts-number-cell">{line.pendingQty}</td>
       <td className="job-parts-selling-cell">{money.format(line.sellingPrice || 0)}</td>
       <td className="job-parts-action-cell">
         <div className="job-parts-row-actions">
@@ -481,7 +481,7 @@ function PartTableRow({ line, tab, issueQty, returnQty, onIssueQty, onReturnQty,
 function PartMobileCard(props) {
   const { line, tab, issueQty, returnQty, onIssueQty, onReturnQty, onIssue, onReturn, onOrder, onInward, busy } = props;
   return (
-    <article className="min-w-0 rounded-xl border border-cg-border bg-cg-surface p-3 shadow-sm">
+    <article className="job-parts-mobile-card min-w-0 rounded-xl border border-cg-border bg-cg-surface p-3 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <strong className="block break-words text-sm text-cg-text">{line.partName}</strong>
@@ -518,7 +518,7 @@ function PartMobileCard(props) {
         <div className="text-right"><span className="block text-[10px] text-cg-muted">Selling</span><strong className="text-sm">{money.format(line.sellingPrice || 0)}</strong></div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="job-parts-mobile-actions mt-3 grid grid-cols-2 gap-2">
         {tab === 'pending' && line.availableQty > 0 && (
           <button className="primary-button !px-2" disabled={busy === `issue-${line.id}`} onClick={onIssue}><PackageCheck size={15}/>Issue</button>
         )}
