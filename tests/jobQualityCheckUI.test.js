@@ -44,11 +44,12 @@ test('QC Passed needs inspector and every item marked Pass', () => {
 });
 
 test('QC Failed requires at least one failed check, reason and inspector', () => {
-  const draft = passedDraft();
+  const draft = { ...passedDraft(), testDriveNotes: '' };
   let errors = qcFormErrors(draft, 'Rework Required');
   assert.match(errors.form, /at least one/i);
   assert.match(errors.testDriveNotes, /failure or work needed/i);
   draft.checklist[1].status = 'Fail';
+  draft.testDriveNotes = 'Brake balance uneven; rework required.';
   errors = qcFormErrors(draft, 'Rework Required');
   assert.equal(errors.form, '');
   assert.equal(qcHasErrors(errors), false);
