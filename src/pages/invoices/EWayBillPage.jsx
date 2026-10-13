@@ -293,10 +293,11 @@ export function EWayBillPage() {
         </header>
         {error && <div className="billing-error">{error}</div>}
         <section className="billing-card">
-          <h3>Delete this local E-Way Bill draft?</h3>
+          <h3>{form.status === 'Draft' && !form.ewayBillNo ? 'Delete this local draft?' : 'Prepared or official records cannot be deleted'}</h3>
           <p>This only deletes the CubixGear record. It does not cancel an E-Way Bill already generated on the GST portal.</p>
           <div className="billing-head-actions">
-            <button className="bill-btn danger" disabled={saving} onClick={remove}><Trash2 size={16}/>{saving ? 'Deleting…' : 'Delete Draft'}</button>
+            {form.status === 'Draft' && !form.ewayBillNo && <button className="bill-btn danger" disabled={saving} onClick={remove}><Trash2 size={16}/>{saving ? 'Deleting…' : 'Delete Draft'}</button>}
+            <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}`)}>Back to record</button>
           </div>
         </section>
       </div>
@@ -315,7 +316,8 @@ export function EWayBillPage() {
             </div>
           </div>
           <div className="billing-head-actions">
-            <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit</button>
+            {form.status === 'Draft' && !form.ewayBillNo && <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit Draft</button>}
+            {canResetPrepared && <button className="bill-btn secondary" disabled={saving} onClick={resetPrepared}><RotateCcw size={16}/>Reset to Draft</button>}
             <button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print</button>
             <button className="bill-btn" onClick={() => window.print()}><Download size={16}/>Download PDF</button>
             {form.status === 'Draft' && <button className="bill-btn" disabled={saving} onClick={submit}><CheckCircle2 size={16}/>Prepare for API</button>}
@@ -795,7 +797,7 @@ function EWayBillPrint({ doc, totals }) {
       <div className="eway-official-top">
         <div>
           <h2>e-Way Bill</h2>
-          <span className="eway-local-badge">{ewbReady ? 'API GENERATED RECORD' : 'LOCAL PREVIEW · READY FOR NIC API'}</span>
+          <span className="eway-local-badge">{ewbReady ? 'API GENERATED RECORD' : 'LOCAL PREVIEW · NOT AN OFFICIAL E-WAY BILL'}</span>
         </div>
         <div className={`eway-qr-placeholder${qrImage || qrValue ? ' has-image' : ''}`} aria-label="E-Way Bill QR">
           <ScannableQRCode value={qrValue} image={qrImage} />
