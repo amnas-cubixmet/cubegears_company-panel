@@ -70,7 +70,7 @@ test('posting rejects zero, overpaid, invalid precision, and missing customer be
 test('Payments provides real API posting and safe form/filter states', () => {
   assert.match(page, /makePaymentPayload\(form, selectedInvoice, outstanding, USE_MOCK_API\)/);
   assert.match(page, /await paymentService\.create\(payload\)/);
-  assert.match(page, /status: 'Completed'/);
+  assert.match(page, /<strong>Completed<\/strong>/);
   assert.match(page, /disabled=\{saving \|\| !selectedInvoice\}/);
   assert.match(page, /role="alert"/);
   assert.match(toolbar, /onClear/);
