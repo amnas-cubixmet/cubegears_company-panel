@@ -334,7 +334,9 @@ export function InvoiceRoutePage() {
     if (!gstConfig) return 'Unable to verify workshop GST registration. Reload the invoice and check Company Settings.';
     const expected = gstConfig.registered ? 'gst' : 'regular';
     if (form.invoiceType !== expected) return 'Invoice type must match the workshop GST registration in Company Settings.';
-    if (!form.customer?.name?.trim()) return 'Customer / company name is required.';
+    if (!['individual', 'business'].includes(form.customer?.customerType || 'individual')) return 'Choose Individual or Company billing.';
+    if (form.customer?.customerType === 'business' && !form.customer?.companyName?.trim()) return 'Company name is required for B2B billing.';
+    if (!form.customer?.name?.trim()) return 'Customer or contact name is required.';
     if (!form.items?.length) return 'Add at least one item.';
     if (form.items.some((row) => !row.description?.trim() && row.type !== 'Stock Part')) return 'Enter an item / service description.';
     if (expected === 'gst') {
@@ -937,13 +939,14 @@ function InvoicePrint({ doc, totals }) {
     .map((part) => part[0])
     .join('')
     .toUpperCase();
+  const isBusiness = doc.customer?.customerType === 'business';
   const documentTitle = doc.kind === 'estimate'
     ? 'Estimate / Quotation'
-    : doc.invoiceType === 'gst'
-      ? 'Tax Invoice'
-      : 'Normal Invoice';
+    : isBusiness
+      ? (doc.invoiceType === 'gst' ? 'Tax Invoice' : 'Business Invoice')
+      : (doc.invoiceType === 'gst' ? 'Service Bill / Tax Invoice' : 'Service Bill');
 
-  return <section className={`invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template ${doc.invoiceType !== 'gst' ? 'invoice-no-gst' : ''}`}>
+  return <section className={`invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template ${doc.invoiceType !== 'gst' ? 'invoice-no-gst' : ''} ${!isBusiness ? 'invoice-consumer-bill' : 'invoice-business-bill'}`}>
     <div className="invoice-creative-topbar">
       <span>ORIGINAL</span>
       <span>{doc.status || 'Draft'}</span>
@@ -965,7 +968,7 @@ function InvoicePrint({ doc, totals }) {
 
       <div className="invoice-creative-docmeta">
         <span>{documentTitle}</span>
-        <strong>{doc.number || 'DRAFT'}</strong>
+        <strong>{isBusiness ? 'Invoice No.' : 'Bill No.'}: {doc.number || 'DRAFT'}</strong>
         <small>{doc.date || '—'}</small>
       </div>
     </div>
@@ -974,10 +977,11 @@ function InvoicePrint({ doc, totals }) {
 
     <div className="invoice-sale-info">
       <div>
-        <strong>Bill To</strong>
-        <b>{doc.customer?.name || '—'}</b>
+        <strong>{isBusiness ? 'Bill To · Company' : 'Customer'}</strong>
+        {isBusiness && <b>{doc.customer?.companyName || doc.customer?.name || '—'}</b>}
+        <span>{isBusiness ? (doc.customer?.name || '—') : (doc.customer?.name || 'Walk-in Customer')}</span>
         <span>{doc.customer?.address || '—'}</span>
-        {doc.invoiceType === 'gst' && doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
+        {isBusiness && doc.invoiceType === 'gst' && doc.customer?.gstin && <span>Customer GSTIN: {doc.customer.gstin}</span>}
         {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
       </div>
       <div>
@@ -987,7 +991,7 @@ function InvoicePrint({ doc, totals }) {
       </div>
       <div className="invoice-sale-info-right">
         <strong>{doc.kind === 'estimate' ? 'Estimate Details' : 'Invoice Details'}</strong>
-        <span>{doc.kind === 'estimate' ? 'Estimate No.' : 'Invoice No.'}: {doc.number || 'DRAFT'}</span>
+        <span>{doc.kind === 'estimate' ? 'Estimate No.' : (isBusiness ? 'Invoice No.' : 'Bill No.')}: {doc.number || 'DRAFT'}</span>
         <span>Date: {doc.date || '—'}</span>
         {doc.invoiceType === 'gst' && <span>Place of Supply: {doc.customer?.placeOfSupply || doc.customer?.state || '—'}</span>}
       </div>
@@ -1038,7 +1042,7 @@ function InvoicePrint({ doc, totals }) {
         </div>}
 
         <div className="invoice-sale-blue-box">
-          <strong>{doc.kind === 'estimate' ? 'Estimate Amount In Words' : 'Invoice Amount In Words'}</strong>
+          <strong>{doc.kind === 'estimate' ? 'Estimate Amount In Words' : (isBusiness ? 'Invoice Amount In Words' : 'Bill Amount In Words')}</strong>
           <span>{amountToIndianWords(totals.total)}</span>
         </div>
 
