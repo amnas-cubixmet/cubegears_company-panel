@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -356,7 +357,7 @@ export const InventoryList = () => {
   };
 
   const removeItem = async (item) => {
-    if (!window.confirm(`Delete inventory item ${item.name}?`)) return;
+    if (!await appConfirm(`Delete inventory item ${item.name}?`)) return;
     await inventoryService.deleteInventoryItem(item.id);
     if (isDetail) navigate('/inventory');
     else await load();

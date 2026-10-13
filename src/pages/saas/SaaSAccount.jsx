@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ChevronRight, FilePenLine, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
@@ -116,7 +117,7 @@ function StorageView({ storage, setStorage }) {
   };
 
   const remove = async (ids) => {
-    if (!ids.length || !window.confirm(`Delete ${ids.length} photo(s)? This cannot be undone.`)) return;
+    if (!ids.length || !await appConfirm(`Delete ${ids.length} photo(s)? This cannot be undone.`)) return;
     const next = await saasAccountService.deleteMediaFiles(ids);
     setStorage(next);
     await storageHistoryService.recordTodayStorageSnapshot(next);

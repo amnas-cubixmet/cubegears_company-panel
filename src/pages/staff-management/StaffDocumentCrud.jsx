@@ -1,3 +1,4 @@
+import { appConfirm, appAlert } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, FileText, Pencil, Plus, Save, ShieldCheck, Trash2, Upload } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
@@ -82,12 +83,12 @@ export const StaffDocumentCrud = ({ staff = [] }) => {
   };
 
   const remove = async (document) => {
-    if (!window.confirm(`Delete "${document.name}" from ${document.staffName}?`)) return;
+    if (!await appConfirm(`Delete "${document.name}" from ${document.staffName}?`)) return;
     try {
       await staffManagementService.deleteDocument(document.staffId, document.id);
       await load();
     } catch (err) {
-      window.alert(err?.message || 'Unable to delete document.');
+      appAlert(err?.message || 'Unable to delete document.');
     }
   };
 

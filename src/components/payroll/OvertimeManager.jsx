@@ -1,3 +1,4 @@
+import { appPrompt } from '../common/appDialogs';
 import React, { useState, useEffect } from 'react';
 import { overtimeService } from '../../services/overtime.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
@@ -56,7 +57,7 @@ export const OvertimeManager = () => {
   };
 
   const handleReject = async (id) => {
-    const reason = prompt('Enter rejection reason:', 'Not authorized for this shift');
+    const reason = await appPrompt('Enter rejection reason:', 'Not authorized for this shift');
     if (reason !== null) {
       await overtimeService.rejectOvertime(id, { rejectedBy: 'Branch Manager', reason });
       showToast('Overtime rejected.');

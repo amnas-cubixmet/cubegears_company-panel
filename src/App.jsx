@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { PayrollPeriodProvider } from './context/PayrollPeriodContext';
 import { AppErrorBoundary } from './components/feedback/AppErrorBoundary';
 import { GlobalFormValidation } from './components/common/GlobalFormValidation';
+import { AppDialogHost } from './components/common/AppDialogHost';
 import './api/registerSaasEndpoints';
 import { AppRoutes } from './routes/AppRoutes';
 import './routes/saasRouteRegistration';
@@ -50,6 +51,7 @@ export function App() {
       <BrowserRouter>
         <GlobalFormValidation />
         <ThemeProvider>
+          <AppDialogHost />
           <AuthProvider>
             <CompanyProvider>
               <PayrollPeriodProvider>

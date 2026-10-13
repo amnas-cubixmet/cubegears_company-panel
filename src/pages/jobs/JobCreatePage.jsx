@@ -1,3 +1,4 @@
+import { appAlert } from '../../components/common/appDialogs';
 import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -227,7 +228,7 @@ export const JobCreatePage = () => {
           await payrollService.createJobTimerAssignment(created.id, form.assignedEmployeeId);
         } catch (assignmentError) {
           console.warn('Job created; worker assignment needs confirmation.', assignmentError);
-          window.alert('Job Card created. Please verify worker assignment in Work & Labour.');
+          appAlert('Job Card created. Please verify worker assignment in Work & Labour.');
         }
       }
 

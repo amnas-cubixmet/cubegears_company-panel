@@ -1,3 +1,4 @@
+import { appConfirm } from '../common/appDialogs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ClipboardList, HardHat, Plus, RefreshCcw, Search, TrendingUp, Trash2, Wallet, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -216,7 +217,7 @@ export const OutsideLabourPanel = ({
   };
 
   const remove = async (row) => {
-    if (!canDelete || !window.confirm('Remove this unpaid outside labour record?')) return;
+    if (!canDelete || !await appConfirm('Remove this unpaid outside labour record?')) return;
     setSaving(true);
     setError('');
     try {

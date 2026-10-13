@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -414,8 +415,8 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
                             <ShieldCheck size={14} aria-hidden="true"/> Approve
                           </button>
                           <button type="button" className="secondary-button" disabled={Boolean(busy)}
-                            onClick={() => {
-                              if (window.confirm('Reject this supplier quotation?')) {
+                            onClick={async () => {
+                              if (await appConfirm('Reject this supplier quotation?')) {
                                 act('reject-' + row.id, () => jobPartsService.decideOutsideJobPart(jobId, row.id, 'reject'));
                               }
                             }}>Reject</button>

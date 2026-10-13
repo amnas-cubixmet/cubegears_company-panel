@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell,
@@ -144,7 +145,7 @@ export function Notifications() {
   };
 
   const remove = async (row) => {
-    if (!window.confirm('Delete this notification?')) return;
+    if (!await appConfirm('Delete this notification?')) return;
     try {
       await service.remove(row.id);
       setRows((old) => old.filter((item) => item.id !== row.id));
