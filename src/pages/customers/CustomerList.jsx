@@ -279,7 +279,7 @@ export const CustomerList = () => {
 
       <CustomerManagementTabs />
 
-      {loadError && <div role="alert" className="customer-directory-error">{loadError} <button type="button" onClick={fetchCustomers}>Retry</button></div>
+      {loadError && <div role="alert" className="customer-directory-error">{loadError} <button type="button" onClick={fetchCustomers}>Retry</button></div>}
 
       {/* SUMMARY CARDS GRID (4 DESKTOP, 2x2 MOBILE) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px' }} className="customers-summary-grid">
