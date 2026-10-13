@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FileText, Plus, Printer, ReceiptText, Trash2, CheckCircle2, XCircle, CopyPlus } from 'lucide-react';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
@@ -97,7 +98,7 @@ export function BillingWorkspace() {
   };
 
   const cancel = async () => {
-    if (!form.id || !window.confirm('Cancel this document?')) return;
+    if (!form.id || !await appConfirm('Cancel this document?')) return;
     try {
       const done = await billingService.cancel(form.id);
       setForm(done);
