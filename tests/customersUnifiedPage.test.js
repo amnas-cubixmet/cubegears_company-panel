@@ -13,13 +13,14 @@ test('customers entry route renders one summary and directory page', () => {
   assert.match(routes, /path="\/customers\/:id" element={<CustomerDetails \/>}/);
 });
 
-test('customer tabs no longer duplicate Overview and All Customers', () => {
-  assert.match(tabs, /label: 'Customers', path: '\/customers'/);
-  assert.doesNotMatch(tabs, /path: '\/customers\/overview'/);
-  assert.doesNotMatch(tabs, /path: '\/customers\/all'/);
-  assert.doesNotMatch(tabs, /path: '\/customers\/new'/);
-  assert.match(tabs, /end={path === '\/customers'}/);
-  assert.match(tabs, /\/customers\/service-history/);
+test('customer tabs only show the unified All Customers directory', () => {
+  assert.match(tabs, /to="\/customers"/);
+  assert.match(tabs, /All Customers/);
+  for (const retired of ['/customers/overview', '/customers/all', '/customers/new',
+    '/customers/service-history', '/customers/outstanding', '/customers/reminders', '/customers/reports']) {
+    assert.doesNotMatch(tabs, new RegExp(retired));
+  }
+  assert.match(tabs, /<NavLink to="\/customers" end/);
 });
 
 test('main Customers page includes summary cards, filters and desktop/mobile lists', () => {
