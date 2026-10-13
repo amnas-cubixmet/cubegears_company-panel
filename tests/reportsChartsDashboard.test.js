@@ -138,3 +138,28 @@ test('CSV export honors current selected invoice filters and uses persisted amou
   assert.match(page, /a\.download = 'cubixgear-invoices-'/);
   assert.match(page, /loaded\.invoices && !dateError/);
 });
+
+
+test('Branch / staff selector resolves real directory names instead of UUIDs', () => {
+  const branchId = 'f8430b1e-c0c2-4752-89dc-3787695bb31a';
+  const staffId = 'd3a8fc98-8f97-4908-b188-88f6081fff28';
+  const directory = {
+    branches: [{ id: branchId, name: 'Main Branch' }],
+    staff: [{ id: staffId, name: 'Rahul Technician' }],
+  };
+  const raw = {
+    invoices: [{ id: 'd1', kind: 'invoice', status: 'Finalized', date: '2026-10-02',
+      total: '100', paid: '100', balance: '0', branch: branchId, staff: staffId }],
+    payments: [], expenses: [], stock: [],
+  };
+  const opts = reportFilterOptions(raw, directory);
+  assert.ok(opts.branches.includes('Main Branch'));
+  assert.ok(opts.staff.includes('Rahul Technician'));
+  assert.ok(!opts.branches.includes(branchId));
+  assert.ok(!opts.staff.includes(staffId));
+  assert.equal(scopedReportRows(raw, '2026-10-01', '2026-10-31', 'Main Branch',
+    'Rahul Technician', directory).invoices.length, 1);
+  assert.equal(scopedReportRows(raw, '2026-10-01', '2026-10-31', 'Main Branch',
+    'Other Staff', directory).invoices.length, 0);
+  assert.equal(reportFilterOptions(raw).branches.includes(branchId), false);
+});
