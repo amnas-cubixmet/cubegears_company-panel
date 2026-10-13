@@ -46,6 +46,7 @@ export function InvoiceRoutePage() {
   const [form, setForm] = useState(blankBillingDocument(kindFromUrl));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState('');
 
   const loadList = async () => {
@@ -369,6 +370,19 @@ export function InvoiceRoutePage() {
     }
   };
 
+  const downloadPdf = async (documentToDownload) => {
+    if (pdfLoading) return;
+    setPdfLoading(true);
+    setError('');
+    try {
+      await billingService.downloadPdf(documentToDownload);
+    } catch (e) {
+      setError(e?.message || 'Unable to download invoice PDF.');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   const deleteDocument = async () => {
     setSaving(true);
     try {
@@ -421,7 +435,7 @@ export function InvoiceRoutePage() {
         calculateTotals={calculateDocumentTotals}
         formatMoney={(value) => money.format(value || 0)}
         onView={(document) => navigate(`/invoices/${document.id}`)}
-        onPdf={(document) => navigate(`/invoices/${document.id}?print=1`)}
+        onPdf={(document) => downloadPdf(document)}
         onEdit={(document) => navigate(`/invoices/${document.id}/edit`)}
         onDelete={(document) => navigate(`/invoices/${document.id}/delete`)}
       />
@@ -473,8 +487,9 @@ export function InvoiceRoutePage() {
           <button className="bill-btn secondary" onClick={() => window.print()}>
             <Printer size={16}/>Print
           </button>
-          <button className="bill-btn" onClick={() => window.print()}>
-            <Download size={16}/>Download PDF
+          <button className="bill-btn" type="button" disabled={loading || pdfLoading || !form.id}
+            onClick={() => downloadPdf(form)}>
+            <Download size={16}/>{pdfLoading ? 'Generating PDF…' : 'Download Invoice PDF'}
           </button>
 
           {form.status !== 'Cancelled' && form.status !== 'Converted' && (
@@ -516,8 +531,10 @@ export function InvoiceRoutePage() {
         </div>
         <div className="billing-head-actions">
           <button className="bill-btn secondary" disabled={saving} onClick={save}>Save Draft</button>
-          <button className="bill-btn secondary" type="button" onClick={() => window.print()}>
-            <Download size={16}/>Download PDF
+          <button className="bill-btn secondary" type="button" disabled={!form.id || saving || pdfLoading}
+            title={form.id ? 'Download saved invoice (unsaved edits are not included)' : 'Save Draft first to download PDF'}
+            onClick={() => downloadPdf(form)}>
+            <Download size={16}/>{pdfLoading ? 'Generating PDF…' : 'Download Saved PDF'}
           </button>
           <button className="bill-btn" disabled={saving} onClick={finalize}>
             <CheckCircle2 size={16}/>{form.kind === 'estimate' ? 'Issue Estimate' : 'Finalize Invoice'}
