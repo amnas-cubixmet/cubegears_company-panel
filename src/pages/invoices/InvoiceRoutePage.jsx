@@ -32,7 +32,9 @@ export function InvoiceRoutePage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const mode = resolveMode(location.pathname, id);
-  const kindFromUrl = new URLSearchParams(location.search).get('kind') === 'estimate' ? 'estimate' : 'invoice';
+  const params = new URLSearchParams(location.search);
+  const kindFromUrl = params.get('kind') === 'estimate' ? 'estimate' : 'invoice';
+  const newCustomerType = params.get('customerType') === 'business' ? 'business' : 'individual';
 
   const [documents, setDocuments] = useState([]);
   const [inventory, setInventory] = useState([]);
@@ -118,7 +120,8 @@ export function InvoiceRoutePage() {
       setSelectedCustomerId('');
       setSelectedVehicleId('');
       setCustomerVehicles([]);
-      setForm(blankBillingDocument(kindFromUrl));
+      const draft = blankBillingDocument(kindFromUrl);
+      setForm({ ...draft, customer: { ...draft.customer, customerType: newCustomerType } });
       loadList();
     } else loadDocument();
   }, [location.pathname, location.search, id]);
@@ -436,6 +439,8 @@ export function InvoiceRoutePage() {
       <InvoiceListHeader
         activeTab={activeTab}
         onCreate={() => navigate(`/invoices/new?kind=${activeTab}`)}
+        onCreateCompany={() => navigate('/invoices/new?kind=invoice&customerType=business')}
+        onCreateIndividual={() => navigate('/invoices/new?kind=invoice&customerType=individual')}
       />
 
       <InvoiceTabs
