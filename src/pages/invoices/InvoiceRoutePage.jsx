@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Download, Edit3, Eye, FileText, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
+import { INDIA_STATES } from '../../utils/indiaGst';
 import { customerService } from '../../services/customer.service';
 import {
   InvoiceFilterToolbar,
@@ -48,15 +49,35 @@ export function InvoiceRoutePage() {
   const [saving, setSaving] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState('');
+  const [gstConfig, setGstConfig] = useState(null);
 
   const loadList = async () => {
     setLoading(true);
     try {
-      const [docs, stock, customerRows] = await Promise.all([
+      const [docs, stock, customerRows, config] = await Promise.all([
         billingService.list(),
         billingService.inventory(),
-        customerService.getCustomers({ status: 'Active' })
+        customerService.getCustomers({ status: 'Active' }),
+        billingService.getGstContext().catch(() => null)
       ]);
+      setGstConfig(config);
+      if (mode === 'create' && config) {
+        setForm((draft) => ({
+          ...draft,
+          invoiceType: config.invoiceType || (config.registered ? 'gst' : 'regular'),
+          taxMode: 'none',
+          seller: {
+            ...draft.seller,
+            name: config.companyName || '',
+            address: config.companyAddress || '',
+            phone: config.companyPhone || '',
+            email: config.companyEmail || '',
+            state: config.companyState || '',
+            stateCode: config.supplierState || '',
+            gstin: config.gstin || ''
+          }
+        }));
+      }
       setDocuments(Array.isArray(docs) ? docs : []);
       setInventory(Array.isArray(stock) ? stock : []);
       setCustomers(Array.isArray(customerRows) ? customerRows : []);
@@ -71,11 +92,13 @@ export function InvoiceRoutePage() {
     if (!id) return;
     setLoading(true);
     try {
-      const [doc, stock, customerRows] = await Promise.all([
+      const [doc, stock, customerRows, config] = await Promise.all([
         billingService.get(id),
         billingService.inventory(),
-        customerService.getCustomers({ status: 'Active' })
+        customerService.getCustomers({ status: 'Active' }),
+        billingService.getGstContext().catch(() => null)
       ]);
+      setGstConfig(config);
       if (!doc) setError('Invoice / estimate not found.');
       else setForm(JSON.parse(JSON.stringify(doc)));
       setInventory(Array.isArray(stock) ? stock : []);
