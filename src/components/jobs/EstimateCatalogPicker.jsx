@@ -15,7 +15,7 @@ const priceOf = (row, kind) => Number(
     : row.price ?? row.defaultPrice ?? 0
 );
 
-export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelect }) {
+export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelect, invalid = false }) {
   const id = useId();
   const [opened, setOpened] = useState(false);
   const [results, setResults] = useState([]);
@@ -93,6 +93,7 @@ export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelec
         <input
           type="text"
           role="combobox"
+          aria-invalid={invalid}
           aria-label={isPart ? 'Search and select a spare part' : 'Search and select a work service'}
           aria-autocomplete="list"
           aria-expanded={opened}
