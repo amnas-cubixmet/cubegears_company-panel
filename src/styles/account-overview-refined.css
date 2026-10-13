@@ -273,3 +273,9 @@
   .account-overview-refined .account-overview-shortcut-grid{grid-template-columns:1fr}
   .account-overview-refined .account-overview-shortcut-grid button{min-height:105px}
 }
+
+.account-overview-refined .account-overview-company-form [aria-invalid="true"]{border-color:var(--danger);outline:1px solid var(--danger)}
+.account-overview-refined .account-overview-field-error{color:var(--danger);font-size:11px;line-height:1.45;font-weight:500}
+.account-overview-refined .account-overview-company-form input:focus-visible,.account-overview-refined .account-overview-company-form textarea:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+.account-overview-refined .account-overview-form-actions button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:550px){.account-overview-refined .account-overview-form-actions button{flex:1}}

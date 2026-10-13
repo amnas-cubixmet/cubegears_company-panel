@@ -5,6 +5,7 @@ import {
   ShieldCheck, Users,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { validateCompanyDraft, formatCompanyApiError } from './companyAccountValidation';
 
 const display = (value) => value === null || value === undefined || value === '' ? '—' : String(value);
 const fmtMoney = (value) => value === null || value === undefined
@@ -35,6 +36,7 @@ export function AccountOverview({
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [saveError, setSaveError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     if (!editing) setDraft({
@@ -47,20 +49,16 @@ export function AccountOverview({
   const onSubmit = async (event) => {
     event.preventDefault();
     if (saving || !company || !onSaveCompany) return;
-    const name = draft.name?.trim();
-    if (!name) return setSaveError('Enter a workshop / company name.');
-    if (name.length > 180) return setSaveError('Company name must be 180 characters or fewer.');
-    const gstNo = String(draft.gstNo || '').toUpperCase().trim();
-    if (gstNo && !/^[0-9]{2}[A-Z0-9]{13}$/.test(gstNo)) {
-      return setSaveError('GSTIN must contain 15 letters and digits.');
-    }
+    const validated = validateCompanyDraft(draft);
+    setFieldErrors(validated.errors);
+    if (Object.keys(validated.errors).length) return;
     setSaving(true); setSaveError(''); setSaveMessage('');
     try {
-      await onSaveCompany({ ...draft, name, gstNo });
+      await onSaveCompany(validated.draft);
       setEditing(false);
       setSaveMessage('Company details updated successfully.');
     } catch (err) {
-      setSaveError(err?.message || 'Could not save company details.');
+      setSaveError(formatCompanyApiError(err));
     } finally { setSaving(false); }
   };
 
@@ -115,7 +113,7 @@ export function AccountOverview({
               <p>Real company profile from your workshop account.</p></div>
             {!editing && company && (
               <button type="button" className="account-overview-edit" onClick={() => {
-                setSaveMessage('');setSaveError('');setEditing(true);
+                setSaveMessage('');setSaveError('');setFieldErrors({});setEditing(true);
               }}>Edit Details</button>
             )}
           </header>
@@ -129,16 +127,19 @@ export function AccountOverview({
                 <label key={key} className={type==='textarea'?'is-wide':''}>
                   {label}
                   {type==='textarea'
-                    ? <textarea rows={3} value={draft[key] || ''} maxLength={500}
-                        onChange={(e) => setDraft((prev)=>({...prev,[key]:e.target.value}))}/>
+                    ? <textarea rows={3} value={draft[key] || ''} maxLength={2000}
+                        aria-invalid={Boolean(fieldErrors[key])}
+                        onChange={(e) => { setDraft((prev)=>({...prev,[key]:e.target.value})); setFieldErrors((prev)=>({...prev,[key]:''})); }}/>
                     : <input type={type} value={draft[key] || ''} required={required}
                         maxLength={key==='gstNo'?15:key==='name'?180:key==='phone'?30:254}
-                        onChange={(e) => setDraft((prev)=>({...prev,[key]:e.target.value}))}/>}
+                        aria-invalid={Boolean(fieldErrors[key])}
+                        onChange={(e) => { setDraft((prev)=>({...prev,[key]:e.target.value})); setFieldErrors((prev)=>({...prev,[key]:''})); }}/>}
+                  {fieldErrors[key] && <small className="account-overview-field-error" role="alert">{fieldErrors[key]}</small>}
                 </label>
               ))}
               {saveError && <p className="account-overview-warning" role="alert">{saveError}</p>}
               <div className="account-overview-form-actions">
-                <button type="button" disabled={saving} onClick={()=>{setEditing(false);setSaveError('');}}>Cancel</button>
+                <button type="button" disabled={saving} onClick={()=>{setEditing(false);setSaveError('');setFieldErrors({});}}>Cancel</button>
                 <button type="submit" className="is-primary" disabled={saving}>
                   <Save size={15} aria-hidden="true"/>{saving?'Saving…':'Save Company'}
                 </button>
