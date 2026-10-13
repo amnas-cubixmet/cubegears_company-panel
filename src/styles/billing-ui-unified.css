@@ -373,8 +373,4 @@
     grid-template-columns: minmax(220px, 2fr) 74px 82px 110px 118px 38px;
   }
 }
-.invoice-print-sheet.invoice-no-gst .invoice-sale-table-head,
-.invoice-print-sheet.invoice-no-gst .invoice-sale-table-row,
-.invoice-print-sheet.invoice-no-gst .invoice-sale-table-total {
-  grid-template-columns: 28px minmax(160px, 2fr) 72px 70px 115px 130px;
-}
+
