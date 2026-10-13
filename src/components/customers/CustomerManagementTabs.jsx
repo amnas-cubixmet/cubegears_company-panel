@@ -3,17 +3,13 @@ import {
   BarChart3,
   BellRing,
   Clock3,
-  LayoutDashboard,
-  Plus,
   ReceiptText,
   Users,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 const customerTabs = [
-  { label: 'Overview', path: '/customers/overview', icon: LayoutDashboard },
-  { label: 'All Customers', path: '/customers/all', icon: Users },
-  { label: 'Add Customer', path: '/customers/new', icon: Plus },
+  { label: 'Customers', path: '/customers', icon: Users },
   { label: 'Service History', path: '/customers/service-history', icon: Clock3 },
   { label: 'Outstanding', path: '/customers/outstanding', icon: ReceiptText },
   { label: 'Reminders', path: '/customers/reminders', icon: BellRing },
@@ -43,6 +39,7 @@ export const CustomerManagementTabs = () => {
           <NavLink
             key={path}
             to={path}
+            end={path === '/customers'}
             className={({ isActive }) =>
               `customer-management-tab ${isActive ? 'active' : ''}`
             }

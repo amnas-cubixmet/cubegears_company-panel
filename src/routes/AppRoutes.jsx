@@ -122,9 +122,9 @@ export const AppRoutes = () => (
       <Route path="/payroll/approvals" element={<Navigate to="/payroll/daily-wages" replace />} />
       <Route path="/payroll/disbursal" element={<Navigate to="/payroll/daily-wages" replace />} />
 
-      <Route path="/customers" element={<Navigate to="/customers/overview" replace />} />
-      <Route path="/customers/overview" element={<CustomerManagement section="overview" />} />
-      <Route path="/customers/all" element={<CustomerList />} />
+      <Route path="/customers" element={<CustomerList />} />
+      <Route path="/customers/overview" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/all" element={<Navigate to="/customers" replace />} />
       <Route path="/customers/new" element={<AddCustomer />} />
       <Route path="/customers/add" element={<Navigate to="/customers/new" replace />} />
       <Route path="/customers/vehicles" element={<CustomerManagement section="vehicles" />} />

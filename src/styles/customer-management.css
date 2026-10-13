@@ -2000,3 +2000,55 @@ button.customer-data-row {
     font-size:16px;
   }
 }
+
+
+/* Unified Customers home: overview KPI cards + one searchable directory. */
+.cg-customers .customer-directory-list-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+  margin:2px 0 -6px;
+}
+.cg-customers .customer-directory-list-heading h2{
+  margin:0;
+  color:var(--text-primary);
+  font-size:16px;
+  line-height:1.3;
+  font-weight:700;
+  letter-spacing:-.01em;
+}
+.cg-customers .customer-directory-list-heading p{
+  margin:4px 0 0;
+  color:var(--text-muted);
+  font-size:12px;
+  line-height:1.45;
+}
+.cg-customers .customer-directory-error{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  border:1px solid var(--danger,#c92a2a);
+  border-radius:10px;
+  padding:12px;
+  color:var(--danger,#c92a2a);
+  background:var(--surface);
+  font-size:12px;
+}
+.cg-customers .customer-directory-error button{
+  padding:7px 12px;
+  border:1px solid currentColor;
+  border-radius:8px;
+  background:transparent;
+  font-size:12px;
+  font-weight:600;
+  color:inherit;
+  cursor:pointer;
+}
+@media(max-width:767px){
+  .cg-customers .customer-directory-list-heading h2{font-size:15px}
+  .cg-customers .customer-directory-list-heading p{font-size:11px}
+}
