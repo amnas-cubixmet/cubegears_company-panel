@@ -94,7 +94,7 @@ export const issueStock = async (payload) => {
   if (USE_MOCK_API) {
     await delay();
     addMockStockMovement({
-      type: 'Job Issue',
+      type: payload.jobId ? 'Job Issue' : 'Internal Use',
       itemId: payload.itemId,
       partName: payload.partName,
       sku: payload.sku,

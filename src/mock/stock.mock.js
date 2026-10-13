@@ -299,7 +299,7 @@ export const addMockStockMovement = (payload) => {
   if (item) {
     if (payload.type === 'Stock In' || payload.type === 'Job Return' || payload.type === 'Adjustment +') {
       item.onHand += payload.qty;
-    } else if (payload.type === 'Job Issue' || payload.type === 'Adjustment -' || payload.type === 'Damage') {
+    } else if (payload.type === 'Job Issue' || payload.type === 'Internal Use' || payload.type === 'Adjustment -' || payload.type === 'Damage') {
       item.onHand = Math.max(0, item.onHand - payload.qty);
       if (payload.type === 'Job Issue' && item.reserved > 0) {
         item.reserved = Math.max(0, item.reserved - payload.qty);
@@ -315,7 +315,7 @@ export const addMockStockMovement = (payload) => {
     sku: item?.sku || payload.sku || 'SKU-00',
     type: payload.type,
     qtyIn: (payload.type === 'Stock In' || payload.type === 'Job Return' || payload.type === 'Adjustment +') ? payload.qty : 0,
-    qtyOut: (payload.type === 'Job Issue' || payload.type === 'Damage' || payload.type === 'Adjustment -') ? payload.qty : 0,
+    qtyOut: (payload.type === 'Job Issue' || payload.type === 'Internal Use' || payload.type === 'Damage' || payload.type === 'Adjustment -') ? payload.qty : 0,
     balanceAfter: item?.onHand || 0,
     branch: payload.branch || 'Main Garage Branch',
     jobRef: payload.jobRef || 'REF-GENERAL',

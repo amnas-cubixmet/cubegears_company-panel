@@ -1,4 +1,4 @@
-import { stockManagementService } from './stockManagement.service';
+import { stockCatalogService } from './stockCatalog.service';
 
 const normalizeInventory = (item = {}) => ({
   ...item,
@@ -43,7 +43,7 @@ const toStockShape = (data = {}) => ({
 });
 
 export const getInventory = async (params = {}) => {
-  let rows = await stockManagementService.getItems();
+  let rows = await stockCatalogService.getItems();
   rows = rows.map(normalizeInventory);
 
   const q = String(params.search || '').trim().toLowerCase();
@@ -74,28 +74,28 @@ export const getInventory = async (params = {}) => {
 };
 
 export const getInventoryById = async (id) => {
-  const item = await stockManagementService.getItem(id);
+  const item = await stockCatalogService.getItem(id);
   return item ? normalizeInventory(item) : null;
 };
 
 export const createInventoryItem = async (data) => {
-  const item = await stockManagementService.createItem(toStockShape(data));
+  const item = await stockCatalogService.createItem(toStockShape(data));
   return normalizeInventory(item);
 };
 
 export const updateInventoryItem = async (id, data) => {
-  const item = await stockManagementService.updateItem(id, toStockShape(data));
+  const item = await stockCatalogService.updateItem(id, toStockShape(data));
   return normalizeInventory(item);
 };
 
 export const deleteInventoryItem = async (id) =>
-  stockManagementService.deleteItem(id);
+  stockCatalogService.deleteItem(id);
 
 export const getInventoryCategories = async () =>
-  stockManagementService.getCategories();
+  stockCatalogService.getCategories();
 
 export const getInventorySuppliers = async () =>
-  stockManagementService.getSuppliers();
+  stockCatalogService.getSuppliers();
 
 export const inventoryService = {
   getInventory,
