@@ -14,7 +14,7 @@ import {
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const itemTypes = ['Stock Part', 'Outside Purchase', 'Labour', 'Service', 'Consumable', 'Custom Item'];
-const emptyItem = () => ({ id: `ROW-${Date.now()}-${Math.random()}`, type: 'Labour', description: '', code: '', hsnCode: '', qty: 1, unit: 'PCS', purchasePrice: '', rate: '', taxRate: 18, discount: 0, inventoryId: '' });
+const emptyItem = () => ({ id: `ROW-${Date.now()}-${Math.random()}`, type: 'Labour', description: '', code: '', hsnCode: '', qty: 1, unit: 'PCS', purchasePrice: '', rate: '', taxRate: '', discount: 0, inventoryId: '' });
 const n = (value) => Number(value || 0);
 const inputNumber = (value) => (value === 0 || value === '0' || value == null ? '' : String(value));
 const parseDecimal = (value) => value === '' ? '' : value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
