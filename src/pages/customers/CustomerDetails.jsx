@@ -223,23 +223,42 @@ export const CustomerDetails = () => {
 
   const handleRecordPaymentSubmit = async (e) => {
     e.preventDefault();
-    if (!payAmount || Number(payAmount) <= 0) return;
-
-    const newPayment = {
-      id: `PAY-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      invoiceNo: payInvoiceNo || (invoices[0]?.invoiceNo || 'INV-2026-092'),
-      method: payMethod,
-      amount: Number(payAmount),
-      reference: payRef || 'REF-ONLINE',
-      recordedBy: 'Current Staff'
-    };
-
-    setPayments([newPayment, ...payments]);
-    showToast(`Payment of ${formatINR(payAmount)} recorded successfully.`);
-    setIsRecordPaymentOpen(false);
-    setPayAmount('');
-    setPayRef('');
+    if (paymentSaving) return;
+    const selectedInvoice = activeCustomerInvoices(invoices).find(
+      (invoice) => String(invoice.id) === String(payInvoiceNo)
+    );
+    const amount = Number(payAmount);
+    const balance = Number(selectedInvoice?.balance ?? selectedInvoice?.balanceDue);
+    if (!selectedInvoice) return setPaymentError('Select an existing customer invoice.');
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(balance) || amount > balance) {
+      return setPaymentError('Enter a payment amount greater than zero and not exceeding the invoice balance.');
+    }
+    setPaymentSaving(true);
+    setPaymentError('');
+    try {
+      await paymentService.createPayment({
+        customer: customer.id,
+        invoice: selectedInvoice.id,
+        date: new Date().toISOString().slice(0, 10),
+        method: payMethod,
+        amount: amount.toFixed(2),
+        reference: payRef.trim(),
+        notes: payNotes.trim(),
+        status: 'Completed',
+      });
+      setIsRecordPaymentOpen(false);
+      setPayAmount('');
+      setPayInvoiceNo('');
+      setPayRef('');
+      setPayNotes('');
+      showToast('Payment saved successfully.');
+      await loadCustomerData();
+    } catch (err) {
+      setPaymentError(err?.response?.data?.message || err?.response?.data?.amount?.[0]
+        || err?.message || 'Unable to save payment. Please retry.');
+    } finally {
+      setPaymentSaving(false);
+    }
   };
 
   const handleEditCustomerSubmit = async (e) => {
@@ -355,6 +374,9 @@ export const CustomerDetails = () => {
   const lastVisitDate = customerVisitLabel(customer, jobs);
   const contact = customerContactLinks({ customerPhone: customer.phone, customerWhatsapp: customer.whatsapp });
   const archived = String(customer.status || '').toLowerCase() === 'archived';
+  const payableInvoices = activeCustomerInvoices(invoices).filter(
+    (inv) => Number(inv.balance ?? inv.balanceDue ?? 0) > 0
+  );
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -601,7 +623,7 @@ export const CustomerDetails = () => {
                 </button>
 
                 <button
-                  onClick={() => setIsRecordPaymentOpen(true)}
+                  onClick={() => { setPaymentError(''); setIsRecordPaymentOpen(true); }}
                   style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--success)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
                 >
                   <CreditCard size={16} /> Record Payment
@@ -960,7 +982,7 @@ export const CustomerDetails = () => {
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>All transactions recorded against customer invoices</p>
               </div>
               <button
-                onClick={() => setIsRecordPaymentOpen(true)}
+                onClick={() => { setPaymentError(''); setIsRecordPaymentOpen(true); }}
                 style={{ height: '38px', padding: '0 14px', borderRadius: '10px', backgroundColor: 'var(--success)', color: '#ffffff', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Plus size={15} /> Record Payment
@@ -1093,17 +1115,19 @@ export const CustomerDetails = () => {
         maxWidth="480px"
       >
         <form onSubmit={handleRecordPaymentSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <Select
-            label="Invoice"
-            value={payInvoiceNo}
-            onChange={(e) => setPayInvoiceNo(e.target.value)}
-          >
-            {invoices.map(inv => (
-              <option key={inv.invoiceNo} value={inv.invoiceNo}>
-                {inv.invoiceNo} ({inv.vehicle}) - Due: {formatINR(inv.balanceDue)}
+          {paymentError && <p className="customer-profile-form-error" role="alert">{paymentError}</p>}
+          <Select label="Invoice *" value={payInvoiceNo}
+            onChange={(event) => { setPayInvoiceNo(event.target.value); setPaymentError(''); }}>
+            <option value="">Select unpaid invoice</option>
+            {payableInvoices.map((inv) => (
+              <option key={inv.id} value={inv.id}>
+                {customerInvoiceLabel(inv)} — Due {customerInvoiceBalance(inv)}
               </option>
             ))}
           </Select>
+          {payableInvoices.length === 0 && (
+            <p className="customer-profile-form-info">No outstanding finalized invoices to pay.</p>
+          )}
 
           <AmountInput
             label="Payment Amount"
@@ -1142,11 +1166,9 @@ export const CustomerDetails = () => {
             placeholder="Received advance payment..."
           />
 
-          <button
-            type="submit"
-            style={{ height: '44px', borderRadius: '11px', border: 'none', backgroundColor: 'var(--success)', color: '#ffffff', fontWeight: '700', cursor: 'pointer', marginTop: '6px' }}
-          >
-            Confirm & Save Payment
+          <button type="submit" disabled={paymentSaving || payableInvoices.length === 0}
+            className="customer-profile-primary-action">
+            {paymentSaving ? 'Saving Payment…' : 'Confirm & Save Payment'}
           </button>
         </form>
       </ResponsiveModalSheet>
@@ -1339,6 +1361,7 @@ export const CustomerDetails = () => {
           <button
             onClick={() => {
               setIsMoreMenuOpen(false);
+              setPaymentError('');
               setIsRecordPaymentOpen(true);
             }}
             style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontWeight: '600', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
