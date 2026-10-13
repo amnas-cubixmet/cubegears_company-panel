@@ -166,6 +166,7 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id/qc" element={<JobDetails />} />
       <Route path="/jobs/:id/invoice" element={<JobDetails />} />
       <Route path="/jobs/:id/activity" element={<JobDetails />} />
+      <Route path="/jobs/:id/full-log" element={<JobDetails />} />
       <Route path="/jobs/:id/edit" element={<JobDetails />} />
       <Route path="/jobs/:id/status" element={<JobStatus />} />
 
