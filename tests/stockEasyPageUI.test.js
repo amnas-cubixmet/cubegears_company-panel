@@ -26,7 +26,7 @@ test('stock receiving and internal consumption use backend workflow methods', ()
 
 test('new parts start with zero quantity and are received separately', () => {
   assert.match(page, /onHand: 0, reserved: 0/);
-  assert.match(page, /beginMove\('in', created\.id\)/);
+  assert.match(page, /beginMove\('in', created\.id, created\)/);
 });
 
 test('advanced stock management is removed from all navigation', () => {
