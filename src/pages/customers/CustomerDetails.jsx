@@ -130,29 +130,37 @@ export const CustomerDetails = () => {
         setEditAddress(cust.address || '');
         setEditCity(cust.city || 'Kochi');
         setEditState(cust.state || 'Kerala');
-        setEditPincode(cust.pincode || '682031');
+        setEditPincode(cust.pincode || '');
         setEditType(cust.customerType || 'Individual');
         setEditCompany(cust.companyName || '');
         setEditGst(cust.gstNo || '');
-        setEditBranch(cust.branch || 'Main Garage Branch');
+        setEditBranch(cust.branchName || cust.branch || '');
         setDocuments(Array.isArray(cust.documents) ? cust.documents : []);
 
         setNotesList(cust.notes ? [{ id: 'customer-note', text: cust.notes, addedBy: 'Workshop team', date: cust.createdAt || '' }] : []);
 
-        const vList = await customerService.getCustomerVehicles(targetId);
-        setVehicles(vList);
-
-        const jList = await customerService.getCustomerJobs(targetId);
-        setJobs(jList);
-
-        const invList = await customerService.getCustomerInvoices(targetId);
-        setInvoices(invList);
-
-        const payList = await customerService.getCustomerPayments(targetId);
-        setPayments(payList);
-
-        const actList = await customerService.getCustomerActivity(targetId);
-        setActivity(actList);
+        // A missing optional subresource must not make the entire customer profile fail.
+        const loaders = [
+          customerService.getCustomerVehicles(targetId),
+          customerService.getCustomerJobs(targetId),
+          customerService.getCustomerInvoices(targetId),
+          customerService.getCustomerPayments(targetId),
+          customerService.getCustomerActivity(targetId),
+        ];
+        const result = await Promise.allSettled(loaders);
+        const rows = (index) => {
+          if (result[index].status !== 'fulfilled') return [];
+          const value = result[index].value;
+          return Array.isArray(value) ? value : (Array.isArray(value?.results) ? value.results : []);
+        };
+        setVehicles(rows(0));
+        setJobs(rows(1));
+        setInvoices(rows(2));
+        setPayments(rows(3));
+        setActivity(rows(4));
+        if (result.some((entry) => entry.status === 'rejected')) {
+          setLoadError('Some related customer records could not be loaded.');
+        }
       }
     } catch (e) {
       console.error(e);
@@ -333,6 +341,7 @@ export const CustomerDetails = () => {
   const totalOutstanding = Math.max(0, totalBilled - totalPaid);
   const lastVisitDate = customer.lastVisit || jobs[0]?.createdDate || '—';
   const contact = customerContactLinks({ customerPhone: customer.phone, customerWhatsapp: customer.whatsapp });
+  const archived = String(customer.status || '').toLowerCase() === 'archived';
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -357,6 +366,8 @@ export const CustomerDetails = () => {
         </div>
       )}
 
+      {loadError && <div className="customer-profile-partial-error" role="status">{loadError} <button type="button" onClick={loadCustomerData}>Retry</button></div>}
+
       {/* 1. CUSTOMER PROFILE HEADER */}
       <nav className="customer-profile-breadcrumb" aria-label="Customer profile navigation">
         <button type="button" onClick={() => navigate('/customers')}><ArrowLeft size={16}/> All Customers</button>
@@ -373,12 +384,12 @@ export const CustomerDetails = () => {
                 <h1 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
                   {customer.name}
                 </h1>
-                <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '6px', backgroundColor: customer.status === 'Archived' ? 'var(--surface-2)' : 'var(--success-soft)', color: customer.status === 'Archived' ? 'var(--text-muted)' : 'var(--success)' }}>
-                  {customer.status || 'Active'}
+                <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '6px', backgroundColor: archived ? 'var(--surface-2)' : 'var(--success-soft)', color: archived ? 'var(--text-muted)' : 'var(--success)' }}>
+                  {archived ? 'Archived' : 'Active'}
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {customer.customerType || 'Individual'} · Customer Profile
+                {customer.customerType || customer.customer_type || 'Individual'} · Customer Profile
               </div>
             </div>
           </div>
@@ -440,7 +451,7 @@ export const CustomerDetails = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
             <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-            <span>Customer Since: <strong>{customer.createdAt ? new Date(customer.createdAt).toLocaleDateString('en-IN') : '—'}</strong></span>
+            <span>Customer Since: <strong>{(customer.createdAt || customer.created_at) ? new Date(customer.createdAt || customer.created_at).toLocaleDateString('en-IN') : '—'}</strong></span>
           </div>
         </div>
       </div>
