@@ -817,3 +817,181 @@ body .job-parts-outside-calculation strong {
     padding:12px;
   }
 }
+
+
+/* Job Card Parts records: readable columns and strong Issue / Inward actions.
+   These rules are deliberately scoped so Stock Management tables are unchanged. */
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table {
+  width:100%;
+  min-width:1090px;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td) {
+  min-width:0;
+  padding:13px 12px!important;
+  border-bottom:1px solid var(--border);
+  font-size:12px!important;
+  line-height:1.5!important;
+  vertical-align:middle!important;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table th {
+  padding-top:12px!important;
+  padding-bottom:12px!important;
+  background:var(--surface-2);
+  color:var(--text-secondary);
+  font-size:11px!important;
+  font-weight:700!important;
+  text-align:left;
+  white-space:nowrap;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(1) {width:95px}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(2) {width:210px}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(3) {width:90px;text-align:center}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(4) {width:93px;text-align:center}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(5) {width:125px;text-align:center}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(6) {width:90px;text-align:center}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(7) {width:120px;text-align:right}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table :is(th,td):nth-child(8) {width:268px;text-align:right}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table tbody tr {
+  background:var(--surface);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table tbody tr:hover {
+  background:var(--surface-2);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table tbody tr:last-child td {
+  border-bottom:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-part-cell {
+  overflow-wrap:anywhere;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-part-name {
+  display:block;
+  color:var(--text-primary);
+  font-size:13px;
+  font-weight:700;
+  line-height:1.5;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-part-meta {
+  display:block;
+  margin-top:3px;
+  font-size:11px;
+  color:var(--text-muted);
+  overflow-wrap:anywhere;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-number-cell,
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-selling-cell {
+  font-variant-numeric:tabular-nums;
+  color:var(--text-primary);
+  font-weight:500;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-stock-cell span {
+  white-space:nowrap;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-issue-cell > div {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table .job-parts-action-cell {
+  min-width:0!important;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table .job-parts-row-actions {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  width:100%;
+  min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-row-actions .job-parts-action-button {
+  min-height:40px!important;
+  height:40px!important;
+  padding:8px 12px!important;
+  border:1px solid var(--border)!important;
+  background:var(--surface-2)!important;
+  color:var(--text-primary)!important;
+  font-size:12px!important;
+  font-weight:650!important;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-row-actions .job-parts-action-button.primary-button {
+  border-color:var(--primary)!important;
+  background:var(--primary)!important;
+  color:#fff!important;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-row-actions .job-parts-action-button.primary-button svg {
+  color:inherit;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-record-table .job-parts-quantity-input {
+  display:block!important;
+  width:82px!important;
+  min-width:82px!important;
+  max-width:82px!important;
+  height:40px!important;
+  min-height:40px!important;
+  margin-inline:auto!important;
+  padding:0 10px!important;
+  text-align:center;
+  font-size:13px!important;
+  font-weight:400!important;
+}
+/* Keep table scroll inside its region; provide visible keyboard focus. */
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-table-wrap:focus-visible {
+  outline:2px solid var(--primary);
+  outline-offset:-2px;
+}
+
+/* Use readable cards on tablets: no clipped eight-column table. */
+@media (min-width:768px) and (max-width:1099px) {
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-table-wrap {
+    display:none!important;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-list {
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    padding:14px!important;
+  }
+}
+@media (max-width:767px) {
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-list {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-card {
+  min-width:0;
+  border-radius:11px;
+  border:1px solid var(--border);
+  background:var(--surface);
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-actions {
+  min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-actions button {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  min-height:44px;
+  padding:9px 10px;
+  border-radius:9px;
+  font-size:12px;
+  font-weight:650;
+  white-space:normal;
+}
+.cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-actions button.primary-button {
+  background:var(--primary)!important;
+  color:#fff!important;
+  border:1px solid var(--primary)!important;
+}
+@media(max-width:379px) {
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-actions {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .cg-job-detail.job-workspace-dashboard .job-parts-refined .job-parts-mobile-actions button {
+    width:100%;
+  }
+}
