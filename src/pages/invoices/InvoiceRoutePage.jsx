@@ -321,16 +321,25 @@ export function InvoiceRoutePage() {
         unit: stock?.unit || 'PCS',
         purchasePrice: stock?.cost ? String(stock.cost) : '',
         rate: stock?.price ? String(stock.price) : '',
-        taxRate: stock?.taxRate ?? 18
+        taxRate: stock?.taxRate ?? stock?.tax_rate ?? ''
       } : row)
     }));
   };
 
   const validate = () => {
+    if (!gstConfig) return 'Unable to verify workshop GST registration. Reload the invoice and check Company Settings.';
+    const expected = gstConfig.registered ? 'gst' : 'regular';
+    if (form.invoiceType !== expected) return 'Invoice type must match the workshop GST registration in Company Settings.';
     if (!form.customer?.name?.trim()) return 'Customer / company name is required.';
     if (!form.items?.length) return 'Add at least one item.';
     if (form.items.some((row) => !row.description?.trim() && row.type !== 'Stock Part')) return 'Enter an item / service description.';
-    if (form.invoiceType === 'gst' && form.items.some((row) => !String(row.hsnCode || '').trim())) return 'HSN / SAC is required for every GST invoice item.';
+    if (expected === 'gst') {
+      if (!gstConfig.supplierState) return 'Configure a valid GSTIN and supplier state in Company Settings.';
+      if (!form.customer?.placeOfSupply) return 'Select the legal place of supply (State/UT).';
+      if (form.items.some((row) => !String(row.hsnCode || '').trim() || String(row.taxRate ?? '').trim() === '')) {
+        return 'Enter HSN/SAC and the applicable GST percentage for every taxable invoice line.';
+      }
+    }
     return '';
   };
 
@@ -353,8 +362,7 @@ export function InvoiceRoutePage() {
     if (validation) return setError(validation);
     setSaving(true);
     try {
-      let current = form;
-      if (!current.id) current = await billingService.saveDraft(current);
+      const current = await billingService.saveDraft(form);
       const done = await billingService.finalize(current.id);
       navigate(`/invoices/${done.id}`, { replace: true });
     } catch (e) {
