@@ -1,5 +1,3 @@
-import { calculateDocumentTotals } from '../../services/billing.service';
-
 const moneyNumber = (value) => {
   if (value === null || value === undefined || value === '') return null;
   const num = Number(value);
@@ -22,14 +20,37 @@ const readRows = (result) => Array.isArray(result)
 
 export const reportRows = readRows;
 
+// Prefer persisted Django money fields over re-computing finalized balances.
+// Legacy local billing records do not have persisted totals.
+const legacyInvoiceTotal = (row) => {
+  if (!Array.isArray(row.items)) return null;
+  const items = row.items.map((item) => ({
+    taxable: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) -
+      Number(item.discount || 0)),
+    taxRate: Number(item.taxRate || 0),
+  }));
+  const subtotal = items.reduce((sum, item) => sum + item.taxable, 0);
+  const taxable = Math.max(0, subtotal - Number(row.discount || 0));
+  const ratio = subtotal > 0 ? taxable / subtotal : 0;
+  const gst = row.invoiceType === 'gst' && row.taxMode !== 'none'
+    ? items.reduce((sum, item) => sum + item.taxable * ratio *
+        (item.taxRate || (row.taxMode === 'igst'
+          ? Number(row.igstRate || 0)
+          : Number(row.cgstRate || 0) + Number(row.sgstRate || 0))) / 100, 0)
+    : 0;
+  const gross = taxable + gst;
+  const adjustment = row.adjustment !== '' && row.adjustment != null
+    ? Number(row.adjustment || 0) : Math.round(gross) - gross;
+  return Math.round((gross + adjustment) * 100) / 100;
+};
+
 export const invoiceAmounts = (row) => {
-  const computed = calculateDocumentTotals(row);
-  // On Django, paid/total/balance are the canonical persisted invoice amounts.
-  const total = moneyNumber(row.total ?? row.totalAmount) ?? computed.total;
-  const paid = moneyNumber(row.paid ?? row.paidAmount) ?? computed.paid;
-  const balance = moneyNumber(row.balance ?? row.balanceDue) ??
-    Math.max(0, total - paid);
-  return { total, paid, balance: Math.max(0, balance) };
+  const total = moneyNumber(row.total ?? row.totalAmount) ?? legacyInvoiceTotal(row);
+  const paid = moneyNumber(row.paid ?? row.paidAmount) ?? 0;
+  const recordedBalance = moneyNumber(row.balance ?? row.balanceDue);
+  const balance = recordedBalance ??
+    (total !== null ? Math.max(0, total - paid) : null);
+  return { total, paid, balance: balance !== null ? Math.max(0, balance) : null };
 };
 
 export const reportDate = (row, type) => {
@@ -109,8 +130,8 @@ export const buildReportSummary = ({
   const expenseRows = available.expenses
     ? scoped(expenses.filter(isRealExpense), 'expense') : [];
 
-  const sales = round(invoiceRows.reduce((sum, inv) => sum + invoiceAmounts(inv).total, 0));
-  const outstanding = round(invoiceRows.reduce((sum, inv) => sum + invoiceAmounts(inv).balance, 0));
+  const sales = round(invoiceRows.reduce((sum, inv) => sum + (invoiceAmounts(inv).total || 0), 0));
+  const outstanding = round(invoiceRows.reduce((sum, inv) => sum + (invoiceAmounts(inv).balance || 0), 0));
   const collected = round(paymentRows.reduce((sum, item) => sum + (moneyNumber(item.amount) || 0), 0));
   const expenseTotal = round(expenseRows.reduce((sum, item) => sum + (moneyNumber(item.amount) || 0), 0));
   const stockRows = available.stock && branch === 'All' && staff === 'All' ? stock : [];
