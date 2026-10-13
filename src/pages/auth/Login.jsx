@@ -51,7 +51,7 @@ export const Login = () => {
     try {
       await login({ email: cleanEmail, password });
       const next = params.get('next');
-      navigate(next && next.startsWith('/') ? next : '/dashboard', { replace: true });
+      navigate(next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard', { replace: true });
     } catch (error) {
       const backendFields = getAuthFieldErrors(error);
       const credentialError = getCredentialError(error);
