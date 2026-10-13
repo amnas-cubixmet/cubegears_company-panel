@@ -12,13 +12,15 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0, refreshOnTab = ''
   const { user } = useAuth();
   const permitted = ['jobs.view', 'payroll.view', 'expenses.view', 'stock.view']
     .every((code) => hasPermission(user, code));
-  const [summary, setSummary] = useState(null);
+  const [costState, setCostState] = useState({ jobId: null, data: null });
+  // Never show the previous Job Card's financial figures during navigation.
+  const summary = costState.jobId === jobId ? costState.data : null;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!jobId || !permitted) {
-      setSummary(null);
+      setCostState({ jobId: null, data: null });
       setError('');
       setLoading(false);
       return undefined;
@@ -36,7 +38,7 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0, refreshOnTab = ''
       setError('');
       try {
         const data = await jobService.getJobCostSummary(jobId);
-        if (active) setSummary(data);
+        if (active) setCostState({ jobId, data });
       } catch (err) {
         if (active) {
           setError(err?.response?.data?.detail || err?.message || 'Unable to update job costs.');
