@@ -256,33 +256,101 @@ export default function StockEasyPage() {
         )) : <p>No stock movements yet.</p>}</div>
       </section>
 
-      <ResponsiveModalSheet isOpen={partOpen} onClose={() => !saving && setPartOpen(false)} title="Add New Part" maxWidth="550px">
-        <form className="cg-easy-form" onSubmit={savePart}>
-          {error && <p className="cg-easy-alert" role="alert">{error}</p>}
-          <label>Part name *<input required value={part.partName} onChange={(e) => setPart({ ...part, partName: e.target.value })}/></label>
-          <label>SKU / Part number *<input required value={part.sku} onChange={(e) => setPart({ ...part, sku: e.target.value })}/></label>
-          <div className="cg-easy-fields"><label>Brand<input value={part.brand} onChange={(e) => setPart({ ...part, brand: e.target.value })}/></label>
-            <label>Unit<select value={part.unit} onChange={(e) => setPart({ ...part, unit: e.target.value })}>{['Piece', 'Set', 'Pair', 'Litre', 'Can', 'Box'].map((x) => <option key={x}>{x}</option>)}</select></label></div>
-          <label>Category<select value={part.category} onChange={(e) => setPart({ ...part, category: e.target.value })}><option value="">Uncategorized</option>{categories.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
-          <div className="cg-easy-fields"><label>Purchase cost (₹)<input type="number" min="0" step="0.01" value={part.costPrice} onChange={(e) => setPart({ ...part, costPrice: e.target.value })}/></label>
-            <label>Selling price (₹)<input type="number" min="0" step="0.01" value={part.sellingPrice} onChange={(e) => setPart({ ...part, sellingPrice: e.target.value })}/></label></div>
-          <div className="cg-easy-fields"><label>Minimum stock<input type="number" min="0" step="0.01" value={part.minimumStock} onChange={(e) => setPart({ ...part, minimumStock: e.target.value })}/></label>
-            <label>Rack / location<input value={part.location} onChange={(e) => setPart({ ...part, location: e.target.value })}/></label></div>
-          <p className="cg-easy-hint">New parts start with zero quantity. Use Receive Stock to add available quantity.</p>
-          <div className="cg-easy-form-actions"><button type="button" onClick={() => setPartOpen(false)}>Cancel</button><button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Part'}</button></div>
-        </form>
+      <ResponsiveModalSheet isOpen={partOpen} onClose={() => !saving && setPartOpen(false)} title="Add New Part" maxWidth="600px">
+        {partMode === 'find' ? (
+          <div className="cg-easy-form">
+            <p className="cg-easy-hint">Search the product catalogue first. Select an existing part to receive stock without creating a duplicate.</p>
+            <label>Search part name / SKU / barcode
+              <div className="cg-easy-picker-search"><Search size={17}/><input autoFocus placeholder="Search existing products..." value={partLookup} onChange={(event) => setPartLookup(event.target.value)} /></div>
+            </label>
+            <div className="cg-easy-pick-list">
+              {matchingParts.length ? matchingParts.map((item) => (
+                <button key={item.id} type="button" onClick={() => { setPartOpen(false); beginMove('in', item.id, item); }}>
+                  <span><strong>{item.partName || item.name}</strong><small>{item.sku || 'No SKU'} · {item.available} available</small></span>
+                  <span>Receive <ArrowRight size={15}/></span>
+                </button>
+              )) : <p className="cg-easy-hint">No existing products matched your search.</p>}
+            </div>
+            <button type="button" className="cg-easy-new-product" onClick={() => {
+              const exists = matchingParts.some((item) =>
+                (item.partName || item.name || '').toLowerCase() === partLookup.trim().toLowerCase());
+              if (exists) { setError('This part already exists. Select it from the list above.'); return; }
+              setError(''); setPart({ ...initialPart, partName: partLookup.trim() }); setPartMode('new');
+            }}><Plus size={17}/> Add as New Product</button>
+            {error && <p className="cg-easy-alert" role="alert">{error}</p>}
+          </div>
+        ) : (
+          <form className="cg-easy-form" onSubmit={savePart}>
+            <button type="button" className="cg-easy-back-picker" onClick={() => { setPartMode('find'); setError(''); }}>← Search Existing Products</button>
+            {error && <p className="cg-easy-alert" role="alert">{error}</p>}
+            <label>Part name *<input required value={part.partName} onChange={(e) => setPart({ ...part, partName: e.target.value })}/></label>
+            <label>SKU / Part number *<input required value={part.sku} onChange={(e) => setPart({ ...part, sku: e.target.value })}/></label>
+            <div className="cg-easy-fields"><label>Brand<input value={part.brand} onChange={(e) => setPart({ ...part, brand: e.target.value })}/></label>
+              <label>Unit<select value={part.unit} onChange={(e) => setPart({ ...part, unit: e.target.value })}>{['Piece', 'Set', 'Pair', 'Litre', 'Can', 'Box'].map((x) => <option key={x}>{x}</option>)}</select></label></div>
+            <label>Category<select value={part.category} onChange={(e) => setPart({ ...part, category: e.target.value })}><option value="">Uncategorized</option>{categories.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+            <div className="cg-easy-fields">
+              <label>Purchase Cost / Unit (₹) *<input required type="number" min="0" step="0.01" value={part.costPrice} onChange={(e) => setPart({ ...part, costPrice: e.target.value })}/></label>
+              <label>Selling Price / Unit (₹) *<input required type="number" min="0" step="0.01" value={part.sellingPrice} onChange={(e) => setPart({ ...part, sellingPrice: e.target.value })}/></label>
+            </div>
+            <div className="cg-easy-fields"><label>Minimum stock<input type="number" min="0" step="0.01" value={part.minimumStock} onChange={(e) => setPart({ ...part, minimumStock: e.target.value })}/></label>
+              <label>Rack / location<input value={part.location} onChange={(e) => setPart({ ...part, location: e.target.value })}/></label></div>
+            <p className="cg-easy-hint">Save the product with zero stock. The Receive Stock form opens next to enter the initial quantity.</p>
+            <div className="cg-easy-form-actions"><button type="button" onClick={() => setPartOpen(false)}>Cancel</button><button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save Product & Receive Stock'}</button></div>
+          </form>
+        )}
       </ResponsiveModalSheet>
 
-      <ResponsiveModalSheet isOpen={moveOpen} onClose={() => !saving && setMoveOpen(false)} title={move.mode === 'in' ? 'Receive Stock' : 'Internal Use — Stock Out'} maxWidth="520px">
+      <ResponsiveModalSheet isOpen={moveOpen} onClose={() => !saving && setMoveOpen(false)} title={move.mode === 'in' ? 'Receive Stock' : 'Internal Use — Stock Out'} maxWidth="590px">
         <form className="cg-easy-form" onSubmit={saveMovement}>
           {error && <p className="cg-easy-alert" role="alert">{error}</p>}
           {move.mode === 'out' && <p className="cg-easy-hint">For customer vehicle repairs, issue stock on the Job Card Parts page instead. This action records internal workshop consumption only.</p>}
-          <label>Part / Product *<select required value={move.itemId} onChange={(e) => setMove({ ...move, itemId: e.target.value })}><option value="">Select part</option>{items.map((item) => <option key={item.id} value={item.id}>{item.partName || item.name} — {number(item.available ?? (number(item.onHand) - number(item.reserved)))} available</option>)}</select></label>
+          <label>Search Part / Product *
+            <div className="cg-easy-picker-search"><Search size={17}/><input placeholder="Search by part name, SKU, barcode or brand" value={moveLookup} onChange={(event) => { setMoveLookup(event.target.value); if(selected) setMove({ ...move, itemId: '', priceMode: '' }); }} /></div>
+          </label>
+          {(!selected || !moveLookup || ![selected.partName, selected.name].includes(moveLookup)) && (
+            <div className="cg-easy-pick-list">
+              {receiptMatches.map((item) => (
+                <button key={item.id} type="button" onClick={() => selectMovePart(item)}>
+                  <span><strong>{item.partName || item.name}</strong><small>{item.sku || 'No SKU'} · {item.available} available</small></span>
+                  <span>Select <ArrowRight size={15}/></span>
+                </button>
+              ))}
+              {!receiptMatches.length && <p className="cg-easy-hint">No part found. Add the product first.</p>}
+            </div>
+          )}
+          {selected ? <div className="cg-easy-selected-product">
+            <strong><PackagePlus size={16}/> {selected.partName || selected.name}</strong>
+            <span>Old stock: {number(selected.onHand)} {selected.unit || 'PCS'} · Purchase {cash(selected.costPrice)} · Selling {cash(selected.sellingPrice)}</span>
+            <button type="button" onClick={() => { setMove({ ...move, itemId: '', priceMode: '' }); setMoveLookup(''); }}>Change</button>
+          </div> : <button type="button" className="cg-easy-new-product" onClick={() => { setMoveOpen(false); openPartDialog(moveLookup); }}><Plus size={16}/> Add New Product</button>}
           <label>Quantity *<input required type="number" min="0.01" step="0.01" value={move.quantity} onChange={(e) => setMove({ ...move, quantity: e.target.value })}/></label>
-          {move.mode === 'in' && <label>Purchase invoice (optional)<input value={move.invoiceNo} onChange={(e) => setMove({ ...move, invoiceNo: e.target.value })}/></label>}
+          {move.mode === 'in' && selected && (
+            <>
+              <div className="cg-easy-fields">
+                <label>New Purchase Cost / Unit (₹) *<input required type="number" min="0" step="0.01" value={move.costPrice} onChange={(e) => setMove({ ...move, costPrice: e.target.value, priceMode: '' })}/></label>
+                <label>New Selling Price / Unit (₹) *<input required type="number" min="0" step="0.01" value={move.sellingPrice} onChange={(e) => setMove({ ...move, sellingPrice: e.target.value, priceMode: '' })}/></label>
+              </div>
+              {receiptPricesDiffer && (
+                <fieldset className="cg-easy-price-choice">
+                  <legend>Use the same prices for old stock and new stock? *</legend>
+                  <p>Existing: Purchase {cash(selected.costPrice)}, Selling {cash(selected.sellingPrice)}. New: Purchase {cash(move.costPrice)}, Selling {cash(move.sellingPrice)}.</p>
+                  <label className={move.priceMode === 'apply_new' ? 'is-checked' : ''}>
+                    <input type="radio" name="receipt-price-choice" required checked={move.priceMode === 'apply_new'} onChange={() => setMove({ ...move, priceMode: 'apply_new' })} />
+                    <span><strong>Yes — Apply new prices to all stock</strong><small>Update the product catalogue purchase cost and selling price for old and new quantities.</small></span>
+                  </label>
+                  <label className={move.priceMode === 'keep_existing' ? 'is-checked' : ''}>
+                    <input type="radio" name="receipt-price-choice" checked={move.priceMode === 'keep_existing'} onChange={() => setMove({ ...move, priceMode: 'keep_existing' })} />
+                    <span><strong>No — Keep existing product prices</strong><small>Save new purchase and selling prices in receipt history; current catalogue prices remain the same. Separate batch selling prices require separate product SKUs.</small></span>
+                  </label>
+                </fieldset>
+              )}
+              <div className="cg-easy-receipt-total"><span>Total Purchase Cost</span><strong>{cash(number(move.quantity) * number(move.costPrice))}</strong></div>
+              <label>Purchase invoice (optional)<input value={move.invoiceNo} onChange={(e) => setMove({ ...move, invoiceNo: e.target.value })}/></label>
+            </>
+          )}
           <label>Reason / Notes {move.mode === 'out' ? '*' : ''}<textarea rows="2" required={move.mode === 'out'} value={move.notes} onChange={(e) => setMove({ ...move, notes: e.target.value })}/></label>
           {selected && <p className="cg-easy-hint">Available now: {selectedAvailable} {selected.unit || 'PCS'}</p>}
-          <div className="cg-easy-form-actions"><button type="button" onClick={() => setMoveOpen(false)}>Cancel</button><button type="submit" disabled={saving}>{saving ? 'Saving...' : (move.mode === 'in' ? 'Confirm Stock In' : 'Confirm Internal Use')}</button></div>
+          <div className="cg-easy-form-actions"><button type="button" onClick={() => setMoveOpen(false)}>Cancel</button><button type="submit" disabled={saving || !selected || (receiptPricesDiffer && !move.priceMode)}>{saving ? 'Saving...' : (move.mode === 'in' ? 'Confirm Stock In' : 'Confirm Internal Use')}</button></div>
         </form>
       </ResponsiveModalSheet>
     </div>
