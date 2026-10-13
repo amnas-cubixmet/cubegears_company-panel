@@ -9,8 +9,10 @@ export const InvoiceListHeader = ({ activeTab, onCreate }) => {
   return (
     <header className="invoice-dashboard-header">
       <div>
-        <h1>Invoices & Estimates</h1>
-        <p>Create, manage, print and export workshop billing documents.</p>
+        <h1>{activeTab === 'estimate' ? 'Estimates' : 'Invoices'}</h1>
+        <p>{activeTab === 'estimate'
+          ? 'Prepare quotations, track approvals, and convert accepted estimates to invoices.'
+          : 'Manage customer invoices, payments, downloads and billing records.'}</p>
       </div>
 
       <div className="invoice-dashboard-header-actions">
