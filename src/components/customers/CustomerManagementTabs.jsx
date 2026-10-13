@@ -3,7 +3,6 @@ import {
   BarChart3,
   BellRing,
   Clock3,
-  Plus,
   ReceiptText,
   Users,
 } from 'lucide-react';
@@ -11,7 +10,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 const customerTabs = [
   { label: 'Customers', path: '/customers', icon: Users },
-  { label: 'Add Customer', path: '/customers/new', icon: Plus },
   { label: 'Service History', path: '/customers/service-history', icon: Clock3 },
   { label: 'Outstanding', path: '/customers/outstanding', icon: ReceiptText },
   { label: 'Reminders', path: '/customers/reminders', icon: BellRing },
