@@ -7,6 +7,7 @@ import { Textarea } from '../../components/common/Textarea';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { customerService } from '../../services/customer.service';
 import { CustomerManagementTabs } from '../../components/customers/CustomerManagementTabs';
+import { CustomerContactActions } from '../../components/customers/CustomerContactActions';
 import {
   Users,
   UserCheck,
@@ -130,6 +131,20 @@ export const CustomerList = () => {
   const showToast = (msg) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  const openCustomer = (customer) => navigate(`/customers/${customer.id}`);
+  const isInteractiveTarget = (target) => target?.closest('a, button, input, select, textarea, [role="button"]');
+  const handleCustomerClick = (event, customer) => {
+    if (isInteractiveTarget(event.target)) return;
+    openCustomer(customer);
+  };
+  const handleCustomerKeyDown = (event, customer) => {
+    if (event.target !== event.currentTarget) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openCustomer(customer);
+    }
   };
 
   const formatINR = (val) => {
@@ -407,14 +422,17 @@ export const CustomerList = () => {
               </thead>
               <tbody>
                 {visibleCustomers.map((c) => (
-                  <tr key={c.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.15s ease' }}>
+                  <tr key={c.id} className="customer-directory-row" tabIndex={0} aria-label={`Open ${c.name} profile`}
+                    onClick={(event) => handleCustomerClick(event, c)}
+                    onKeyDown={(event) => handleCustomerKeyDown(event, c)}
+                    style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.15s ease' }}>
                     <td style={{ padding: '12px 14px' }}>
                       <strong style={{ display: 'block', color: 'var(--text-primary)' }}>{c.name}</strong>
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{c.email || c.id}</span>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{c.email || c.phone || 'Customer'}</span>
                     </td>
                     <td style={{ padding: '12px 14px' }}>
-                      <div style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{c.phone}</div>
-                      <span style={{ fontSize: '11px', color: 'var(--success)' }}>WhatsApp ✓</span>
+                      <div className="customer-directory-phone">{c.phone || 'No phone number'}</div>
+                      <CustomerContactActions customer={c} compact />
                     </td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.customerType || 'Individual'}</td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.vehicleCount || 0} Vehicles</td>
@@ -427,13 +445,13 @@ export const CustomerList = () => {
                     </td>
                     <td style={{ padding: '12px 14px', textAlign: 'right' }}>
                       <button
-                        onClick={() => navigate(`/customers/${c.id}`)}
+                        onClick={(event) => { event.stopPropagation(); openCustomer(c); }}
                         style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--primary)', fontWeight: '600', fontSize: '12px', cursor: 'pointer', marginRight: '6px' }}
                       >
                         View
                       </button>
                       <button
-                        onClick={() => openEditModal(c)}
+                        onClick={(event) => { event.stopPropagation(); openEditModal(c); }}
                         style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', cursor: 'pointer' }}
                       >
                         <Edit size={14} />
@@ -448,11 +466,15 @@ export const CustomerList = () => {
           {/* MOBILE CARDS VIEW */}
           <div className="mobile-customers-cards" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {visibleCustomers.map((c) => (
-              <div key={c.id} style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div key={c.id} tabIndex={0} role="link" className="customer-directory-card"
+                aria-label={`Open ${c.name} profile`}
+                onClick={(event) => handleCustomerClick(event, c)}
+                onKeyDown={(event) => handleCustomerKeyDown(event, c)}
+                style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-primary)', margin: 0 }}>{c.name}</h3>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>{c.phone} • WhatsApp available</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>{c.phone || 'No phone number'}</div>
                   </div>
                   <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '6px', backgroundColor: c.status === 'Active' ? 'var(--success-soft)' : 'var(--surface-2)', color: c.status === 'Active' ? 'var(--success)' : 'var(--text-muted)' }}>
                     {c.status}
@@ -466,9 +488,10 @@ export const CustomerList = () => {
                   <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Outstanding</span><strong style={{ color: c.outstanding ? 'var(--warning)' : 'var(--success)' }}>{formatINR(c.outstanding)}</strong></div>
                 </div>
 
+                <CustomerContactActions customer={c} />
                 <div style={{ display: 'flex', gap: '8px', paddingTop: '4px' }}>
                   <button
-                    onClick={() => navigate(`/customers/${c.id}`)}
+                    onClick={(event) => { event.stopPropagation(); openCustomer(c); }}
                     style={{ flex: 1, height: '38px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
                   >
                     View Customer <ChevronRight size={16} />
