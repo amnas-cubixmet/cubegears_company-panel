@@ -438,6 +438,7 @@ export function InvoiceRoutePage() {
     <div className="billing-page billing-list-dashboard invoice-dashboard">
       <InvoiceListHeader
         activeTab={activeTab}
+        companyRegistered={Boolean(gstConfig?.registered)}
         onCreate={() => navigate(`/invoices/new?kind=${activeTab}`)}
         onCreateCompany={() => navigate('/invoices/new?kind=invoice&customerType=business')}
         onCreateIndividual={() => navigate('/invoices/new?kind=invoice&customerType=individual')}
