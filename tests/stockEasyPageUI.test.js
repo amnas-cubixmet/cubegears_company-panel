@@ -35,3 +35,21 @@ test('advanced stock management is removed from all navigation', () => {
   assert.doesNotMatch(routes, /<StockManagement |<AddStockItem/);
   assert.match(page, /href="#stock-history"/);
 });
+
+test('add product searches existing stock before creating duplicate parts', () => {
+  assert.match(page, /matchingParts = useMemo/);
+  assert.match(page, /Search part name \/ SKU \/ barcode/);
+  assert.match(page, /Add as New Product/);
+  assert.match(page, /beginMove\('in', item\.id, item\)/);
+  assert.match(page, /Save Product & Receive Stock/);
+});
+
+test('receiving stock asks whether new prices apply to old stock', () => {
+  assert.match(page, /Use the same prices for old stock and new stock\?/);
+  assert.match(page, /priceMode: receiptPricesDiffer \? move\.priceMode : 'keep_existing'/);
+  assert.match(page, /move\.priceMode === 'apply_new'/);
+  assert.match(page, /move\.priceMode === 'keep_existing'/);
+  assert.match(page, /New Purchase Cost \/ Unit/);
+  assert.match(page, /New Selling Price \/ Unit/);
+  assert.match(page, /Total Purchase Cost/);
+});
