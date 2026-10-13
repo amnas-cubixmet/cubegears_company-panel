@@ -336,7 +336,7 @@ export function InvoiceRoutePage() {
     if (form.invoiceType !== expected) return 'Invoice type must match the workshop GST registration in Company Settings.';
     if (!['individual', 'business'].includes(form.customer?.customerType || 'individual')) return 'Choose Individual or Company billing.';
     if (form.customer?.customerType === 'business' && !form.customer?.companyName?.trim()) return 'Company name is required for B2B billing.';
-    if (!form.customer?.name?.trim()) return 'Customer or contact name is required.';
+    if (form.customer?.customerType !== 'business' && !form.customer?.name?.trim()) return 'Customer name is required.';
     if (!form.items?.length) return 'Add at least one item.';
     if (form.items.some((row) => !row.description?.trim() && row.type !== 'Stock Part')) return 'Enter an item / service description.';
     if (expected === 'gst') {
@@ -979,7 +979,7 @@ function InvoicePrint({ doc, totals }) {
       <div>
         <strong>{isBusiness ? 'Bill To · Company' : 'Customer'}</strong>
         {isBusiness && <b>{doc.customer?.companyName || doc.customer?.name || '—'}</b>}
-        <span>{isBusiness ? (doc.customer?.name || '—') : (doc.customer?.name || 'Walk-in Customer')}</span>
+        {(!isBusiness || (doc.customer?.name && doc.customer.name !== doc.customer.companyName)) && <span>{doc.customer?.name || 'Walk-in Customer'}</span>}
         <span>{doc.customer?.address || '—'}</span>
         {isBusiness && doc.invoiceType === 'gst' && doc.customer?.gstin && <span>Customer GSTIN: {doc.customer.gstin}</span>}
         {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
