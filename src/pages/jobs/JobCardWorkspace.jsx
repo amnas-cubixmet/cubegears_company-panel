@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
@@ -411,11 +412,11 @@ export function JobCardWorkspace() {
     if (!workflow || saving) return;
     const options = {};
     if (stage === 'estimate') {
-      if (!window.confirm('Confirm that the customer approved the latest estimate?')) return;
+      if (!await appConfirm('Confirm that the customer approved the latest estimate?')) return;
       options.approveEstimate = true;
     }
     if (stage === 'work') {
-      if (!window.confirm('Confirm all work is finished and mechanic timers are stopped?')) return;
+      if (!await appConfirm('Confirm all work is finished and mechanic timers are stopped?')) return;
       options.confirmWorkDone = true;
     }
     setSaving(true);
