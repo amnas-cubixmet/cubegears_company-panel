@@ -162,15 +162,41 @@
   .cg-job-detail .job-qc-decision-actions{grid-template-columns:1fr}
 }
 
-/* Logged-in QC inspector is identified automatically and cannot be edited here. */
-.cg-job-detail .job-qc-field input[readonly]{
-  background:var(--surface-2);
-  border-color:var(--border);
-  color:var(--text-primary);
-  font-weight:600;
-  cursor:default;
+/* Inspector is authenticated server-side. Display the name as plain text,
+   never as a disabled/read-only input or a background-filled field. */
+.cg-job-detail .job-qc-inspector-display {
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  gap:5px;
 }
-.cg-job-detail .job-qc-field input[readonly]:focus-visible{
-  outline:2px solid var(--primary);
-  outline-offset:2px;
+.cg-job-detail .job-qc-inspector-label {
+  font-size:12px;
+  font-weight:600;
+  line-height:1.45;
+  color:var(--text-secondary);
+}
+.cg-job-detail .job-qc-inspector-label span {color:var(--danger)}
+.cg-job-detail .job-qc-inspector-name {
+  display:block;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  color:var(--text-primary);
+  font-size:14px;
+  font-weight:600;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.cg-job-detail .job-qc-inspector-display > small {
+  margin:0;
+  font-size:11px;
+  line-height:1.5;
+  color:var(--text-muted);
 }
