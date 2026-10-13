@@ -9,7 +9,10 @@ import {
   Download,
   Trash2,
   RotateCcw,
-  Truck
+  Truck,
+  Search,
+  IndianRupee,
+  FileClock
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -21,6 +24,7 @@ import {
 import { billingService } from '../../services/billing.service';
 import { appConfirm } from '../../components/common/appDialogs';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
+import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const n = (value) => Number(value || 0);
@@ -63,6 +67,30 @@ export function EWayBillPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const canResetPrepared = form.status === 'Ready for API' && !form.ewayBillNo;
+
+  const [listQuery, setListQuery] = useState('');
+  const [listStatus, setListStatus] = useState('All');
+
+  const statuses = useMemo(
+    () => [...new Set(rows.map((row) => row.status).filter(Boolean))].sort(),
+    [rows],
+  );
+  const filteredRows = useMemo(() => {
+    const query = listQuery.trim().toLowerCase();
+    return rows.filter((row) => {
+      if (listStatus !== 'All' && row.status !== listStatus) return false;
+      if (!query) return true;
+      return [
+        row.documentNo, row.ewayBillNo, row.jobCardNo, row.documentType,
+        row.supplyType, row.from?.tradeName, row.from?.gstin,
+        row.to?.tradeName, row.to?.gstin, row.transport?.vehicleNo,
+      ].some((value) => String(value ?? '').toLowerCase().includes(query));
+    });
+  }, [rows, listQuery, listStatus]);
+  const totalDocumentValue = useMemo(
+    () => rows.reduce((total, row) => total + calculateEWayTotals(row).totalValue, 0),
+    [rows],
+  );
 
   const totals = useMemo(() => calculateEWayTotals(form), [form]);
 
@@ -231,54 +259,103 @@ export function EWayBillPage() {
 
   if (mode === 'list') {
     return (
-      <div className="billing-page">
-        <header className="billing-page-head">
+      <div className="billing-page billing-list-dashboard invoice-dashboard billing-eway-list">
+        <header className="invoice-dashboard-header">
           <div>
-            <span className="billing-kicker">BILLING · GOODS MOVEMENT</span>
             <h1>E-Way Bills</h1>
-            <p>Prepare goods transport details. Official generation requires a connected GST E-Way Bill API.</p>
+            <p>Track workshop goods movement documents and preparation status.</p>
           </div>
-          <button className="bill-btn" onClick={() => navigate('/invoices/e-way-bills/new')}>
-            <Plus size={17}/>Create E-Way Bill
-          </button>
+          <div className="invoice-dashboard-header-actions">
+            <button type="button" className="bill-btn" onClick={() => navigate('/invoices/e-way-bills/new')}>
+              <Plus size={16} aria-hidden="true"/> New E-Way Bill
+            </button>
+          </div>
         </header>
 
-        <div className="billing-tabs">
-          <button onClick={() => navigate('/invoices?kind=invoice')}><FileText size={16}/>Invoices</button>
-          <button onClick={() => navigate('/invoices?kind=estimate')}><FileText size={16}/>Estimates</button>
-          <button className="active"><Truck size={16}/>E-Way Bills</button>
-        </div>
+        <InvoiceTabs
+          activeTab="eway"
+          onChange={(kind) => navigate(`/invoices?kind=${kind}`)}
+          onEWayBills={() => navigate('/invoices/e-way-bills')}
+        />
 
-        {error && <div className="billing-error">{error}</div>}
+        <section className="invoice-dashboard-stats" aria-label="E-Way Bill overview">
+          {[
+            { label: 'Total Documents', value: rows.length, meta: 'saved transport records', Icon: Truck },
+            { label: 'Draft', value: rows.filter((row) => row.status === 'Draft').length, meta: 'editable drafts', Icon: FileClock },
+            { label: 'Ready for API', value: rows.filter((row) => row.status === 'Ready for API').length, meta: 'not proof of NIC generation', Icon: CheckCircle2 },
+            { label: 'Total Goods Value', value: money.format(totalDocumentValue), meta: 'sum of document values', Icon: IndianRupee },
+          ].map(({ label, value, meta, Icon }) => (
+            <article key={label} className="invoice-dashboard-stat-card">
+              <div className="invoice-dashboard-stat-top">
+                <div>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </div>
+                <i aria-hidden="true"><Icon size={16}/></i>
+              </div>
+              <small>{meta}</small>
+            </article>
+          ))}
+        </section>
 
-        <div className="billing-card eway-safety-note">Prepared locally ≠ generated on the GST portal. No official EBN, validity or QR has been issued by CubixGear.</div>
-        <section className="billing-card billing-list-card">
-          {loading ? <div className="billing-empty">Loading…</div> : (
+        <InvoiceFilterToolbar
+          query={listQuery}
+          onQueryChange={setListQuery}
+          status={listStatus}
+          onStatusChange={setListStatus}
+          statuses={statuses}
+          resultCount={filteredRows.length}
+          placeholder="Search document, sender, recipient, GSTIN or vehicle"
+        />
+
+        <p className="billing-eway-notice">
+          CubixGear drafts and “Ready for API” documents are not official GST portal E-Way Bills.
+          An official E-Way Bill number must be issued by the authorized NIC/GST system.
+        </p>
+
+        {error && <div className="billing-error" role="alert">{error}</div>}
+
+        <section className="billing-card billing-list-card billing-eway-records" aria-label="E-Way Bill records">
+          <header className="invoice-dashboard-section-title">
+            <div>
+              <h2>E-Way Bill Records</h2>
+              <p>Document numbers, movement details, values and current status.</p>
+            </div>
+            <span>{filteredRows.length} record{filteredRows.length === 1 ? '' : 's'}</span>
+          </header>
+
+          {loading ? (
+            <div className="billing-empty" role="status">Loading E-Way Bills…</div>
+          ) : filteredRows.length === 0 ? (
+            <div className="billing-empty">
+              <Search size={18} aria-hidden="true"/>
+              <span>{rows.length ? 'No E-Way Bills match these filters.' : 'No E-Way Bills yet. Create a draft to get started.'}</span>
+            </div>
+          ) : (
             <div className="billing-doc-list">
-              {rows.map((row) => {
+              {filteredRows.map((row) => {
                 const total = calculateEWayTotals(row).totalValue;
                 return (
                   <article className="billing-doc-row" key={row.id}>
                     <button type="button" className="billing-doc-main" onClick={() => navigate(`/invoices/e-way-bills/${row.id}`)}>
                       <strong>{row.documentNo || row.id}</strong>
-                      <span>{row.supplyType} · {row.from?.tradeName || 'From'} → {row.to?.tradeName || 'To'}</span>
+                      <span>{row.supplyType || 'Movement'} · {row.from?.tradeName || 'From'} → {row.to?.tradeName || 'To'}</span>
                     </button>
                     <div className="billing-doc-meta">
                       <span>{row.documentDate || '—'}</span>
                       <strong>{money.format(total)}</strong>
                     </div>
-                    <span className="billing-status">{row.status === 'Ready for API' ? 'Prepared · Not generated' : row.status}</span>
+                    <span className="billing-status">{row.status === 'Ready for API' ? 'Prepared · Not generated' : (row.status || 'Draft')}</span>
                     <div className="billing-list-actions">
-                      <button aria-label="View" onClick={() => navigate(`/invoices/e-way-bills/${row.id}`)}><Eye size={16}/></button>
-                      {row.status === 'Draft' && !row.ewayBillNo && <>
-                        <button aria-label="Edit draft" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/edit`)}><Edit3 size={16}/></button>
-                        <button aria-label="Delete draft" className="danger" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/delete`)}><Trash2 size={16}/></button>
-                      </>}
+                      <button type="button" aria-label={`View ${row.documentNo || row.id}`} title="View" onClick={() => navigate(`/invoices/e-way-bills/${row.id}`)}><Eye size={16}/></button>
+                      {row.status === 'Draft' && !row.ewayBillNo && (
+                        <button type="button" aria-label={`Edit ${row.documentNo || row.id}`} title="Edit" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/edit`)}><Edit3 size={16}/></button>
+                      )}
+                      {row.status === 'Draft' && !row.ewayBillNo && <button type="button" aria-label={`Delete ${row.documentNo || row.id}`} title="Delete" className="danger" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/delete`)}><Trash2 size={16}/></button>}
                     </div>
                   </article>
                 );
               })}
-              {!rows.length && <div className="billing-empty">No E-Way Bill drafts yet.</div>}
             </div>
           )}
         </section>
