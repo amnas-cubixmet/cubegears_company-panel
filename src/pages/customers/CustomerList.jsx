@@ -7,13 +7,10 @@ import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { customerService } from '../../services/customer.service';
-import { CustomerManagementTabs } from '../../components/customers/CustomerManagementTabs';
+import { customerInvoiceMoney, customerStatusLabel, formatCustomerMoney } from './customerDirectoryMoney';
 import { CustomerContactActions } from '../../components/customers/CustomerContactActions';
 import {
   Users,
-  UserCheck,
-  UserPlus,
-  DollarSign,
   Plus,
   Filter,
   MoreVertical,
@@ -85,26 +82,54 @@ export const CustomerList = () => {
       const response = await customerService.getCustomers();
       const data = Array.isArray(response) ? response : (response?.results || []);
 
+      let partialErrors = 0;
       const enriched = await Promise.all(data.map(async (customer) => {
-        const [vehicles, jobs, invoices] = await Promise.all([
+        // Optional vehicle/job permissions or endpoint errors should never hide
+        // the entire customer directory or misrepresent unpaid invoice amounts as zero.
+        const [vehicleResult, jobResult, invoiceResult] = await Promise.allSettled([
           customerService.getCustomerVehicles(customer.id),
           customerService.getCustomerJobs(customer.id),
-          customerService.getCustomerInvoices(customer.id)
+          customerService.getCustomerInvoices(customer.id),
         ]);
+        const rows = (result) => {
+          if (result.status !== 'fulfilled') return [];
+          return Array.isArray(result.value) ? result.value
+            : (Array.isArray(result.value?.results) ? result.value.results : []);
+        };
+        const vehicles = rows(vehicleResult);
+        const jobs = rows(jobResult);
+        let money = { totalSpent: null, outstanding: null, moneyAvailable: false };
+        if (invoiceResult.status === 'fulfilled') {
+          try {
+            const invoiceRows = Array.isArray(invoiceResult.value)
+              ? invoiceResult.value : invoiceResult.value?.results;
+            money = customerInvoiceMoney(invoiceRows);
+          } catch {
+            partialErrors += 1;
+          }
+        } else {
+          partialErrors += 1;
+        }
+        if (vehicleResult.status === 'rejected' || jobResult.status === 'rejected') {
+          partialErrors += 1;
+        }
 
         return {
           ...customer,
+          status: customerStatusLabel(customer.status),
+          customerType: customer.customerType || customer.customer_type || 'Individual',
           vehicleCount: vehicles.length,
           jobsCount: jobs.length,
-          totalSpent: invoices.reduce((sum, invoice) => sum + Number(invoice.paidAmount || 0), 0),
-          outstanding: invoices.reduce((sum, invoice) => sum + Number(invoice.balanceDue || 0), 0),
+          ...money,
           __vehicles: vehicles,
-          __jobs: jobs
+          __jobs: jobs,
         };
       }));
 
       setCustomers(enriched);
-      setLoadError('');
+      setLoadError(partialErrors
+        ? 'Some linked customer records could not load. Missing invoice balances are shown as — instead of ₹0. Please check permissions or retry.'
+        : '');
     } catch (e) {
       console.error(e);
       setLoadError(e?.message || 'Could not load customers. Check the backend connection.');
@@ -146,10 +171,6 @@ export const CustomerList = () => {
       event.preventDefault();
       openCustomer(customer);
     }
-  };
-
-  const formatINR = (val) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
   };
 
   const openAddModal = () => {
@@ -246,12 +267,6 @@ export const CustomerList = () => {
     }
   };
 
-  // Metrics
-  const totalCount = customers.length;
-  const activeCount = customers.filter(c => c.status === 'Active').length;
-  const currentMonth = new Date().toISOString().slice(0, 7);
-  const newThisMonthCount = customers.filter(c => c.createdAt && c.createdAt.startsWith(currentMonth)).length;
-  const totalOutstandingAmount = customers.reduce((sum, customer) => sum + Number(customer.outstanding || 0), 0);
 
   return (
     <div className="customer-directory-page cg-customers" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', boxSizing: 'border-box', paddingBottom: '70px' }}>
@@ -293,52 +308,7 @@ export const CustomerList = () => {
         </button>
       </div>
 
-      <CustomerManagementTabs />
-
       {loadError && <div role="alert" className="customer-directory-error">{loadError} <button type="button" onClick={fetchCustomers}>Retry</button></div>}
-
-      {/* SUMMARY CARDS GRID (4 DESKTOP, 2x2 MOBILE) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px' }} className="customers-summary-grid">
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Users size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total Customers</div>
-            <strong style={{ fontSize: '18px', color: 'var(--text-primary)' }}>{totalCount}</strong>
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--success-soft)', color: 'var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <UserCheck size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Active Customers</div>
-            <strong style={{ fontSize: '18px', color: 'var(--success)' }}>{activeCount}</strong>
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--primary-soft)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <UserPlus size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>New This Month</div>
-            <strong style={{ fontSize: '18px', color: 'var(--primary)' }}>{newThisMonthCount}</strong>
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'var(--warning-soft)', color: 'var(--warning)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <DollarSign size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Outstanding</div>
-            <strong style={{ fontSize: '18px', color: 'var(--warning)' }}>{formatINR(totalOutstandingAmount)}</strong>
-          </div>
-        </div>
-      </div>
 
       {/* SEARCH + FILTERS TOOLBAR */}
       <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -438,7 +408,10 @@ export const CustomerList = () => {
                     <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.customerType || 'Individual'}</td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.vehicleCount || 0} Vehicles</td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.lastVisit || '—'}</td>
-                    <td style={{ padding: '12px 14px', fontWeight: '700', color: c.outstanding ? 'var(--warning)' : 'var(--success)' }}>{formatINR(c.outstanding)}</td>
+                    <td title={!c.moneyAvailable ? 'Invoice balance unavailable' : undefined}
+                      style={{ padding: '12px 14px', fontWeight: '700', color: c.outstanding === null ? 'var(--text-muted)' : c.outstanding > 0 ? 'var(--warning)' : 'var(--success)' }}>
+                      {formatCustomerMoney(c.outstanding)}
+                    </td>
                     <td style={{ padding: '12px 14px' }}>
                       <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '6px', backgroundColor: c.status === 'Active' ? 'var(--success-soft)' : 'var(--surface-2)', color: c.status === 'Active' ? 'var(--success)' : 'var(--text-muted)' }}>
                         {c.status}
@@ -486,7 +459,8 @@ export const CustomerList = () => {
                   <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Vehicles & Jobs</span><strong>{c.vehicleCount || 0} Vehicles • {c.jobsCount || 0} Jobs</strong></div>
                   <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Last Visit</span><strong>{c.lastVisit || '—'}</strong></div>
                   <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Customer Type</span><strong>{c.customerType || 'Individual'}</strong></div>
-                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Outstanding</span><strong style={{ color: c.outstanding ? 'var(--warning)' : 'var(--success)' }}>{formatINR(c.outstanding)}</strong></div>
+                  <div><span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '11px' }}>Outstanding</span><strong title={!c.moneyAvailable ? 'Invoice balance unavailable' : undefined}
+                    style={{ color: c.outstanding === null ? 'var(--text-muted)' : c.outstanding > 0 ? 'var(--warning)' : 'var(--success)' }}>{formatCustomerMoney(c.outstanding)}</strong></div>
                 </div>
 
                 <CustomerContactActions customer={c} />
@@ -498,7 +472,7 @@ export const CustomerList = () => {
                     View Customer <ChevronRight size={16} />
                   </button>
                   <button
-                    onClick={() => openEditModal(c)}
+                    onClick={(event) => { event.stopPropagation(); openEditModal(c); }}
                     style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                   >
                     <Edit size={16} />
@@ -730,9 +704,6 @@ export const CustomerList = () => {
 
       <style>{`
         @media (max-width: 767px) {
-          .customers-summary-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          }
           .mobile-full-width-btn {
             width: 100% !important;
           }
