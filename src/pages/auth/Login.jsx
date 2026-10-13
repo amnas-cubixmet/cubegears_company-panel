@@ -177,6 +177,10 @@ export const Login = () => {
             </button>
           </form>
 
+          <p className="login-description" style={{ textAlign: 'center', marginTop: '16px' }}>
+            New workshop? <Link to="/signup" className="login-forgot">Create your company account</Link>
+          </p>
+
           <div className="login-footer">
             <div className="login-secure">
               <span className="login-secure-dot" />
