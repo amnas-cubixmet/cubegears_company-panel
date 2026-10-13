@@ -1,6 +1,7 @@
 import React from 'react';
 import { Car, ChevronRight, User, Wrench } from 'lucide-react';
 import { jobDisplayLabel, statusClass } from './jobs.utils';
+import { JobCustomerContactActions } from './JobCustomerContactActions';
 
 export const JobRecordsPanel = ({
   jobs,
@@ -52,6 +53,7 @@ export const JobRecordsPanel = ({
                   <td>
                     <strong>{job.customerName || 'Walk-in customer'}</strong>
                     <span>{job.customerPhone || '—'}</span>
+                    <JobCustomerContactActions job={job} />
                   </td>
                   <td><strong>{job.assignedEmployeeName || 'Unassigned'}</strong></td>
                   <td>
@@ -68,12 +70,7 @@ export const JobRecordsPanel = ({
 
         <div className="jobs-mobile-list">
           {jobs.map((job) => (
-            <button
-              key={job.id}
-              type="button"
-              className="jobs-mobile-card"
-              onClick={() => onOpenJob(job.id)}
-            >
+            <article key={job.id} className="jobs-mobile-card">
               <div className="jobs-mobile-card-head">
                 <div>
                   <strong>{jobDisplayLabel(job)}</strong>
@@ -90,11 +87,13 @@ export const JobRecordsPanel = ({
                 <span><Wrench size={12} />{job.assignedEmployeeName || 'Unassigned'}</span>
               </div>
 
+              <JobCustomerContactActions job={job} />
               <div className="jobs-mobile-card-footer">
                 <span>{job.createdDate || '—'}</span>
-                <ChevronRight size={15} />
+                <button className="jobs-mobile-view-job" type="button" onClick={() => onOpenJob(job.id)}
+                  aria-label={`Open ${jobDisplayLabel(job)}`}>View Job <ChevronRight size={15} /></button>
               </div>
-            </button>
+            </article>
           ))}
         </div>
       </>

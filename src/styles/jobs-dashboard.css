@@ -780,3 +780,98 @@
 @media(prefers-reduced-motion:reduce){
  .jobs-dashboard .jobs-kpi-card{transition:none;transform:none!important}
 }
+
+
+/* Accessible customer contact shortcuts in every Job Card row. */
+.jobs-dashboard .jobs-customer-contact-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+  margin-top:8px;
+  min-width:0;
+}
+.jobs-dashboard .jobs-customer-contact-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:34px;
+  padding:6px 10px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface);
+  text-decoration:none;
+  font-size:11px;
+  line-height:1.2;
+  font-weight:600;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.jobs-dashboard .jobs-customer-contact-button svg{flex-shrink:0}
+.jobs-dashboard .jobs-customer-contact-button.is-call{color:var(--primary)}
+.jobs-dashboard .jobs-customer-contact-button.is-whatsapp{
+  color:var(--success,#13854c);
+  background:var(--success-soft,#eaf9f0);
+  border-color:color-mix(in srgb,var(--success,#13854c) 25%,var(--border));
+}
+.jobs-dashboard .jobs-customer-contact-button.is-disabled{
+  color:var(--text-muted);
+  background:var(--surface-2);
+  cursor:not-allowed;
+  opacity:.65;
+}
+.jobs-dashboard .jobs-customer-contact-button:is(:hover,:focus-visible):not(.is-disabled){
+  border-color:currentColor;
+}
+.jobs-dashboard .jobs-customer-contact-button:focus-visible,
+.jobs-dashboard .jobs-mobile-view-job:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+.jobs-dashboard .jobs-table td .jobs-customer-contact-actions .jobs-customer-contact-button > span{
+  display:inline;
+  margin:0;
+  font-size:inherit;
+  color:inherit;
+}
+.jobs-dashboard .jobs-table td .jobs-customer-contact-actions > span.jobs-customer-contact-button{
+  display:inline-flex;
+  font-size:11px;
+  margin:0;
+}
+.jobs-dashboard .jobs-table td:has(.jobs-customer-contact-actions){
+  min-width:170px;
+}
+.jobs-dashboard .jobs-mobile-card{
+  cursor:default;
+}
+.jobs-dashboard .jobs-mobile-view-job{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:36px;
+  padding:0 10px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--primary);
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+}
+@media(max-width:767px){
+  .jobs-dashboard .jobs-mobile-card .jobs-customer-contact-actions{
+    margin-top:12px;
+    gap:8px;
+  }
+  .jobs-dashboard .jobs-mobile-card .jobs-customer-contact-button{
+    flex:1 1 110px;
+    min-height:42px;
+    font-size:12px;
+  }
+  .jobs-dashboard .jobs-mobile-card-footer{
+    gap:12px;
+  }
+}
