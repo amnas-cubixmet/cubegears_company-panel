@@ -31,6 +31,18 @@ test('different states use IGST and discounts reduce taxable value', () => {
   assert.equal(totals.total, 1593);
 });
 
+test('many tiny lines allocate discount without dropping pennies', () => {
+  const tiny = Array.from({ length: 100 }, () => ({
+    type: 'Part', quantity: '1', unitPrice: '0.01', taxRate: '18',
+  }));
+  const result = calculateEstimateIndiaGst({
+    lines: tiny, discount: 0.40, registered: true,
+    supplierState: '32', placeOfSupply: '32',
+  });
+  assert.equal(result.taxable, 0.60);
+  assert.equal(result.total, 0.60);
+});
+
 test('nonregistered supplier cannot charge GST in preview', () => {
   const totals = calculateEstimateIndiaGst({
     lines, discount: 0, registered: false, supplierState: '32', placeOfSupply: '33',
