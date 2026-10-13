@@ -4,7 +4,7 @@ import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { useAuth } from '../../hooks/useAuth';
 import {
-  makeQcDraft, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
+  makeQcDraft, qcInspectorForMode, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
 } from './qualityCheckValidation';
 import '../../styles/job-quality-check.css';
 
@@ -38,7 +38,7 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
 
   // The current editor is always the authenticated inspector. Read-only QC
   // retains the inspector who signed the previously saved result.
-  const inspectorName = canEdit ? loggedInName : draft.inspector;
+  const inspectorName = qcInspectorForMode(draft.inspector, loggedInName, canEdit);
   const submissionDraft = { ...draft, inspector: inspectorName };
   const summary = qcSummary(draft);
   const change = (update) => {
