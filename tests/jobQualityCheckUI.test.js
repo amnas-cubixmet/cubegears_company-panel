@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  makeQcDraft, resolveQcInspector, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
+  makeQcDraft, resolveQcInspector, qcInspectorForMode, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
 } from '../src/components/jobs/qualityCheckValidation.js';
 
 const panel = readFileSync(new URL('../src/components/jobs/JobQualityCheckPanel.jsx', import.meta.url), 'utf8');
@@ -122,7 +122,23 @@ test('QC inspector is readonly, driven by AuthContext, never job advisor or manu
   assert.match(panel, /makeQcDraft\(savedQc, loggedInName\)/);
   assert.match(panel, /if \(!loggedInName\) return;/);
   assert.match(panel, /current\.inspector\s*\?\s*current : \{ \.\.\.current, inspector: loggedInName \}/);
-  assert.match(panel, /value=\{draft\.inspector\} readOnly/);
+  assert.match(panel, /value=\{inspectorName\} readOnly/);
   assert.doesNotMatch(panel, /onChange=\{\(event\) => change\(\{ inspector:/);
-  assert.match(panel, /Auto-filled from the logged-in account/);
+  assert.match(panel, /Auto-filled from your logged-in account/);
+});
+
+test('editable QC identifies the active logged-in user, even if prior inspector was saved', () => {
+  assert.equal(qcInspectorForMode('Previous Inspector', 'Logged In Inspector', true), 'Logged In Inspector');
+  assert.equal(qcInspectorForMode('Previous Inspector', 'Logged In Inspector', false), 'Previous Inspector');
+  assert.equal(qcInspectorForMode('', 'Logged In Inspector', true), 'Logged In Inspector');
+  assert.equal(qcInspectorForMode('Previous Inspector', '', true), '');
+});
+
+test('editable QC submits authenticated inspector, not an old saved inspector name', () => {
+  assert.match(panel, /const inspectorName = qcInspectorForMode\(draft\.inspector, loggedInName, canEdit\)/);
+  assert.match(panel, /const submissionDraft = \{ \.\.\.draft, inspector: inspectorName \}/);
+  assert.match(panel, /qcFormErrors\(submissionDraft, mode\)/);
+  assert.match(panel, /qcPayload\(submissionDraft, mode === 'Draft'/);
+  assert.match(panel, /value=\{inspectorName\} readOnly/);
+  assert.doesNotMatch(panel, /onChange=\{\(event\) => change\(\{ inspector:/);
 });
