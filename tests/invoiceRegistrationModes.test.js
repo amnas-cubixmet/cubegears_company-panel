@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const form = readFileSync(new URL('../src/pages/invoices/InvoiceRoutePage.jsx', import.meta.url), 'utf8');
 const preview = readFileSync(new URL('../src/services/billing.service.js', import.meta.url), 'utf8');
+const listHeader = readFileSync(new URL('../src/components/invoices/InvoiceListHeader.jsx', import.meta.url), 'utf8');
 
 test('invoice type follows workshop GST status, not an editable tax toggle', () => {
   assert.match(form, /billingService\.getGstContext\(\)/);
@@ -50,4 +51,13 @@ test('business vs personal bill is a recipient presentation choice, not a GST ex
 test('business contact may be blank but company name is required', () => {
   assert.match(form, /Company name is required for B2B billing/);
   assert.match(form, /form\.customer\?\.customerType !== 'business'/);
+});
+
+test('invoice list offers two distinct new-bill actions', () => {
+  assert.match(listHeader, /Company Tax Invoice/);
+  assert.match(listHeader, /Simple Service Bill/);
+  assert.match(form, /onCreateCompany=\{\(\) => navigate\('/);
+  assert.match(form, /customerType=business/);
+  assert.match(form, /customerType=individual/);
+  assert.match(form, /customerType: newCustomerType/);
 });
