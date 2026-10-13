@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AccountHeader } from '../../components/account';
 import { Eye, EyeOff, KeyRound, Link2, Lock, ShieldCheck } from 'lucide-react';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { useAuth } from '../../hooks/useAuth';
@@ -6,6 +8,7 @@ import '../../styles/account-security.css';
 
 export const AccountSecurity = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -49,25 +52,23 @@ export const AccountSecurity = () => {
 
   return (
     <div className="account-security-page">
-      <header className="account-security-hero">
-        <div>
-          <span>ACCOUNT SECURITY</span>
-          <h1>Password & Sign-in</h1>
-          <p>Change your password, test passwordless access and manage secure account recovery.</p>
-        </div>
-        <ShieldCheck size={24}/>
-      </header>
+      <AccountHeader
+        title="Password & Sign-in"
+        subtitle="Change your password and manage secure account recovery."
+        active="security"
+        onNavigate={navigate}
+      />
 
-      {message && <div className="account-security-message">{message}</div>}
+      {message && <div className="account-security-message" role="status" aria-live="polite">{message}</div>}
 
       <div className="account-security-grid">
         <section className="account-security-card">
           <div className="account-security-card-head"><KeyRound size={18}/><div><strong>Change Password</strong><span>Update your current account password.</span></div></div>
           <form onSubmit={change} className="account-security-form">
-            <label>Current Password<div><Lock size={15}/><input type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required/><button type="button" onClick={() => setShowCurrent((v) => !v)}>{showCurrent ? <EyeOff size={15}/> : <Eye size={15}/>}</button></div></label>
-            <label>New Password<div><Lock size={15}/><input type={showNew ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimum 8 characters" required/><button type="button" onClick={() => setShowNew((v) => !v)}>{showNew ? <EyeOff size={15}/> : <Eye size={15}/>}</button></div></label>
-            <label>Confirm New Password<div><Lock size={15}/><input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required/></div></label>
-            <button className="account-security-primary" disabled={loading}>{loading ? 'Updating…' : 'Change Password'}</button>
+            <label>Current Password<div><Lock size={15}/><input autoComplete="current-password" aria-label="Current password" type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required/><button type="button" aria-label={showCurrent ? "Hide current password" : "Show current password"} onClick={() => setShowCurrent((v) => !v)}>{showCurrent ? <EyeOff size={15}/> : <Eye size={15}/>}</button></div></label>
+            <label>New Password<div><Lock size={15}/><input autoComplete="new-password" minLength={8} aria-label="New password" type={showNew ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Minimum 8 characters" required/><button type="button" aria-label={showNew ? "Hide new password" : "Show new password"} onClick={() => setShowNew((v) => !v)}>{showNew ? <EyeOff size={15}/> : <Eye size={15}/>}</button></div></label>
+            <label>Confirm New Password<div><Lock size={15}/><input type="password" autoComplete="new-password" minLength={8} aria-label="Confirm new password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required/></div></label>
+            <button type="submit" className="account-security-primary" disabled={loading}>{loading ? 'Updating…' : 'Change Password'}</button>
           </form>
         </section>
 
@@ -75,7 +76,7 @@ export const AccountSecurity = () => {
           <div className="account-security-card-head"><Link2 size={18}/><div><strong>Magic Link Sign-in</strong><span>Passwordless one-time access for {user?.email || 'your account'}.</span></div></div>
           <div className="account-security-info">
             <p>Send a one-time secure link to the account email. The link can be exchanged for an authenticated session.</p>
-            <button className="account-security-secondary" onClick={sendMagic} disabled={magicLoading}>{magicLoading ? 'Sending…' : 'Send Magic Link'}</button>
+            <button type="button" className="account-security-secondary" onClick={sendMagic} disabled={magicLoading}>{magicLoading ? 'Sending…' : 'Send Magic Link'}</button>
           </div>
         </section>
 
