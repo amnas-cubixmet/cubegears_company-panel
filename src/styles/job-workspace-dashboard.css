@@ -2155,3 +2155,60 @@
   .cg-job-detail.job-workspace-dashboard .job-activity-event-main {padding:11px}
   .cg-job-detail.job-workspace-dashboard .job-activity-meta {gap:8px}
 }
+
+
+/* Job-wide Total Cost — one shared compact summary above workflow navigation. */
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global {
+  gap:10px;
+  min-width:0;
+  padding:13px 15px;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-heading h3 {
+  font-size:13px;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-heading p {
+  font-size:11px;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-grid {
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-card {
+  gap:5px;
+  padding:11px 12px;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-card strong {
+  font-size:clamp(17px,1.6vw,21px);
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-card small {
+  font-size:10px;
+  line-height:1.4;
+}
+.cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-footnotes {
+  gap:3px;
+  padding:2px 0 0;
+  border-top:1px solid var(--border);
+}
+@media (max-width:900px) {
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width:540px) {
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global {
+    gap:10px;
+    padding:11px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-card {
+    gap:4px;
+    min-width:0;
+    padding:10px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-card strong {
+    font-size:16px;
+    overflow-wrap:anywhere;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-total-cost-panel.is-global .job-total-cost-card small {
+    font-size:9px;
+  }
+}
