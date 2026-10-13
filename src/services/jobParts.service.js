@@ -434,7 +434,9 @@ export const completeOutsideJobPart = async (jobId, purchaseId, form) => {
     payload.append('invoiceNo', form.invoiceNo);
     payload.append('unitCost', String(form.unitCost));
     payload.append('bill', form.bill);
-    return apiClient.post(`/job-cards/${jobId}/outside-parts/${purchaseId}/complete`, payload);
+    return apiClient.post(`/job-cards/${jobId}/outside-parts/${purchaseId}/complete`, payload, {
+      headers: { 'Content-Type': undefined }
+    });
   }
   const job = await jobService.getJobById(jobId);
   const old = job?.partsWorkflow || {};
