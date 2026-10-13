@@ -161,3 +161,16 @@
 @media(max-width:350px){
   .cg-job-detail .job-qc-decision-actions{grid-template-columns:1fr}
 }
+
+/* Logged-in QC inspector is identified automatically and cannot be edited here. */
+.cg-job-detail .job-qc-field input[readonly]{
+  background:var(--surface-2);
+  border-color:var(--border);
+  color:var(--text-primary);
+  font-weight:600;
+  cursor:default;
+}
+.cg-job-detail .job-qc-field input[readonly]:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}

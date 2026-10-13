@@ -9,8 +9,16 @@ export const DEFAULT_QC_ITEMS = [
 
 const STATUS = new Set(['Pending', 'Pass', 'Fail']);
 
-export const makeQcDraft = (qc = {}) => ({
-  inspector: String(qc?.inspector === 'Unassigned' ? '' : (qc?.inspector || '')).trim(),
+// Keep the inspector already recorded on a QC, otherwise use the authenticated
+// account name. Never substitute a job-assigned mechanic or fake default name.
+export const resolveQcInspector = (savedInspector, loggedInName = '') => {
+  const existing = String(savedInspector || '').trim();
+  if (existing && existing !== 'Unassigned') return existing;
+  return String(loggedInName || '').trim();
+};
+
+export const makeQcDraft = (qc = {}, loggedInName = '') => ({
+  inspector: resolveQcInspector(qc?.inspector, loggedInName),
   testDriveNotes: String(qc?.testDriveNotes || ''),
   checklist: (Array.isArray(qc?.checklist) && qc.checklist.length
     ? qc.checklist
