@@ -384,7 +384,7 @@ export const CustomerList = () => {
           <Users size={36} style={{ color: 'var(--text-muted)' }} />
           <strong style={{ fontSize: '15px', color: 'var(--text-primary)' }}>No matching customers found.</strong>
           <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: 0 }}>Try clearing filters or add a new customer.</p>
-          <button onClick={() => navigate('/customers/new')} style={{ padding: '8px 16px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontWeight: '700', fontSize: '12.5px', cursor: 'pointer', marginTop: '6px' }}>
+          <button onClick={openAddModal} style={{ padding: '8px 16px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', fontWeight: '700', fontSize: '12.5px', cursor: 'pointer', marginTop: '6px' }}>
             + Add First Customer
           </button>
         </div>
@@ -447,7 +447,7 @@ export const CustomerList = () => {
 
           {/* MOBILE CARDS VIEW */}
           <div className="mobile-customers-cards" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {customers.map((c) => (
+            {visibleCustomers.map((c) => (
               <div key={c.id} style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
