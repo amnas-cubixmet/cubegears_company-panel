@@ -29,8 +29,8 @@ test('account loads independent data sources and preserves account page after on
 
 test('company profile is saved through the real company-scoped settings endpoint',()=>{
   assert.match(account, /settingsService\.updateSettings\('company', nextCompany\)/);
-  assert.match(overview, /onSaveCompany\(\{ \.\.\.draft, name, gstNo \}\)/);
-  assert.match(overview, /GSTIN must contain 15 letters and digits/);
+  assert.match(overview, /onSaveCompany\(validated\.draft\)/);
+  assert.match(overview, /validateCompanyDraft\(draft\)/);
   assert.match(overview, /AccountOverview/);
   assert.match(overview, /Signed in as/);
   assert.match(overview, /role="status"/);
