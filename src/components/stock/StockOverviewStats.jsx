@@ -8,9 +8,9 @@ export const StockOverviewStats = ({ dashboard, items, lowItems, outItems, forma
     { label: 'Stock Value', value: formatMoney(dashboard?.totalValue ?? items.reduce(
       (sum, item) => sum + Number(item.onHand || 0) * Number(item.costPrice || 0), 0)),
       meta: 'At recorded purchase cost', icon: IndianRupee },
-    { label: 'Low Stock', value: dashboard?.lowStock ?? lowItems.length,
+    { label: 'Low Stock', value: lowItems.length,
       meta: 'Reorder soon', icon: AlertTriangle, tone: 'warning' },
-    { label: 'Out of Stock', value: dashboard?.outOfStock ?? outItems.length,
+    { label: 'Out of Stock', value: outItems.length,
       meta: 'Available quantity is zero', icon: PackageMinus, tone: 'danger' },
   ];
 
