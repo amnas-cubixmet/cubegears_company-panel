@@ -1,0 +1,41 @@
+/* Approval receipt / PDF actions shared by the Job Card Estimate. */
+.job-approved-pdf-offer{display:flex;flex-direction:column;gap:17px;min-width:0}
+.job-approved-pdf-offer-status{
+  display:flex;align-items:flex-start;gap:13px;
+  padding:15px;border-radius:12px;
+  background:var(--success-soft,#eaf8ee);
+  border:1px solid var(--border,#dce4ec);
+}
+.job-approved-pdf-offer-status>svg{flex:0 0 auto;color:var(--success,#18834d)}
+.job-approved-pdf-offer-status strong{font-size:14px;color:var(--text-primary,#192d43);font-weight:700}
+.job-approved-pdf-offer-status p{margin:6px 0 0;font-size:12px;line-height:1.55;color:var(--text-secondary,#65758a)}
+.job-approved-pdf-error,.job-approved-pdf-success{
+  margin:0;padding:10px 12px;border-radius:9px;
+  border:1px solid var(--border,#dce4ec);font-size:12px;line-height:1.5;overflow-wrap:anywhere;
+}
+.job-approved-pdf-error{color:var(--danger,#bb2530)}
+.job-approved-pdf-success{color:var(--success,#168349)}
+.job-approved-pdf-offer-actions{display:flex;flex-direction:column;gap:9px}
+.job-approved-pdf-offer-actions button,.cg-job-detail .job-quick-approved-download{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:45px;padding:10px 15px;
+  border-radius:10px;font-size:13px;font-weight:600;
+  text-align:center;cursor:pointer;
+}
+.job-approved-pdf-download,.cg-job-detail .job-quick-approved-download{
+  background:var(--primary,#225ed0);
+  border:1px solid var(--primary,#225ed0);
+  color:#fff;
+}
+.job-approved-pdf-continue{
+  border:1px solid var(--border,#dce4ec);
+  color:var(--text-primary,#192d43);
+  background:var(--surface-2,#f5f8fb);
+}
+.job-approved-pdf-offer-actions button:focus-visible,.cg-job-detail .job-quick-approved-download:focus-visible{
+  outline:2px solid var(--primary,#225ed0);outline-offset:2px
+}
+@media(max-width:600px){
+  .job-approved-pdf-offer-actions button{width:100%;min-height:48px}
+  .job-approved-pdf-offer-status{padding:13px}
+}
