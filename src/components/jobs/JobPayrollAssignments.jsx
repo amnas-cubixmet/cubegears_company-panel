@@ -1,3 +1,4 @@
+import { appConfirm } from '../common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Percent, Plus, Save, Trash2, UsersRound, Wrench } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
@@ -147,7 +148,7 @@ export const JobPayrollAssignments = ({
   };
 
   const remove = async (row) => {
-    if (!window.confirm('Remove this mechanic from payroll allocation for this Job Card?')) return;
+    if (!await appConfirm('Remove this mechanic from payroll allocation for this Job Card?')) return;
     try {
       await payrollService.deleteJobAssignment(row.id);
       if (draft.id === row.id) reset();
