@@ -2211,3 +2211,58 @@
     font-size:9px;
   }
 }
+
+
+/* Every Job Card has a dedicated Full Log tab. It is not a required workflow
+   stage: the six numbered stages remain in the scrollable left rail. */
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-full-log-tab {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  gap:7px;
+  min-height:40px;
+  padding:0 14px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface-2);
+  color:var(--text-primary);
+  font-family:inherit;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-full-log-tab:hover {
+  border-color:var(--primary);
+  color:var(--primary);
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-full-log-tab.is-active {
+  border-color:var(--primary);
+  background:var(--primary);
+  color:#fff;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-full-log-tab:focus-visible {
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+.cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-full-log-tab > svg {
+  flex:0 0 16px;
+}
+@media (max-width:600px) {
+  .cg-job-detail.job-workspace-dashboard .job-simple-step-nav {
+    gap:5px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-full-log-tab {
+    min-height:40px;
+    padding:0 10px;
+    gap:5px;
+    font-size:11px;
+  }
+}
+@media (max-width:350px) {
+  .cg-job-detail.job-workspace-dashboard .job-simple-step-nav .job-full-log-tab {
+    padding:0 8px;
+  }
+}
