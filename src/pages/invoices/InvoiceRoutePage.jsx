@@ -581,19 +581,20 @@ export function InvoiceRoutePage() {
           <section className="billing-card invoice-seller-card">
             <span className="billing-kicker">SELLER / FROM</span>
             <h3>Business Details</h3>
+            <p className="invoice-registration-note">Workshop details and GSTIN come from Company Settings.</p>
 
             <label>Business Name
-              <input value={form.seller?.name || ''} onChange={(e) => update('seller.name', e.target.value)} placeholder="Business / company name"/>
+              <input value={form.seller?.name || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="Business / company name"/>
             </label>
             <label>Address
-              <textarea value={form.seller?.address || ''} onChange={(e) => update('seller.address', e.target.value)} placeholder="Registered / dispatch address"/>
+              <textarea value={form.seller?.address || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="Registered / dispatch address"/>
             </label>
             <div className="invoice-two-col">
               <label>Phone
-                <input value={form.seller?.phone || ''} onChange={(e) => update('seller.phone', e.target.value)} placeholder="+91"/>
+                <input value={form.seller?.phone || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="+91"/>
               </label>
               <label>Email
-                <input type="email" value={form.seller?.email || ''} onChange={(e) => update('seller.email', e.target.value)} placeholder="accounts@example.com"/>
+                <input type="email" value={form.seller?.email || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="accounts@example.com"/>
               </label>
             </div>
             {form.invoiceType === 'gst' ? (
@@ -605,10 +606,10 @@ export function InvoiceRoutePage() {
             )}
             <div className="invoice-two-col">
               <label>State
-                <input value={form.seller?.state || ''} onChange={(e) => update('seller.state', e.target.value)} placeholder="Kerala"/>
+                <input value={form.seller?.state || ''} readOnly aria-readonly="true" title="Change workshop state in Company Settings" placeholder="Kerala"/>
               </label>
               <label>State Code
-                <input value={form.seller?.stateCode || ''} onChange={(e) => update('seller.stateCode', e.target.value.replace(/\D/g,'').slice(0,2))} placeholder="32"/>
+                <input value={form.seller?.stateCode || ''} readOnly aria-readonly="true" title="State derives from Company Settings" placeholder="32"/>
               </label>
             </div>
           </section>
