@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearch } from '../common/GlobalSearch';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
+import { unreadNotificationCount } from '../../utils/notificationInbox';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 import { hasPermission } from '../../utils/permissions';
 import { staffService } from '../../services/staff.service';
@@ -48,7 +49,7 @@ export const Header = () => {
     const loadNotificationCount = async () => {
       try {
         const rows = await resourceConfigs.notifications.service.list();
-        if (mounted) setNotificationCount((Array.isArray(rows) ? rows : []).filter((row) => row.status === 'Unread').length);
+        if (mounted) setNotificationCount(unreadNotificationCount(rows));
       } catch {
         if (mounted) setNotificationCount(0);
       }
@@ -58,9 +59,11 @@ export const Header = () => {
       if (!event.key || event.key === 'cubixgear:notifications') loadNotificationCount();
     };
     window.addEventListener('storage', onStorage);
+    window.addEventListener('cubixgear:notifications-changed', loadNotificationCount);
     return () => {
       mounted = false;
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('cubixgear:notifications-changed', loadNotificationCount);
     };
   }, [location.pathname]);
 
