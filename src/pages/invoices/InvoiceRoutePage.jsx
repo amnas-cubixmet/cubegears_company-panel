@@ -218,6 +218,8 @@ export function InvoiceRoutePage() {
       setForm((old) => ({
         ...old,
         customer: {
+          customerType: 'individual',
+          companyName: '',
           name: '',
           phone: '',
           email: '',
@@ -252,7 +254,9 @@ export function InvoiceRoutePage() {
       customer: {
         ...(old.customer || {}),
         id: customer.id,
-        name: displayName,
+        customerType: customer.customerType || customer.customer_type || (customer.companyName ? 'business' : 'individual'),
+        companyName: customer.companyName || customer.company_name || '',
+        name: customer.name || displayName,
         phone: customer.phone || '',
         email: customer.email || '',
         address: fullAddress,
