@@ -1,3 +1,4 @@
+import { appConfirm } from '../common/appDialogs';
 import React, { useEffect, useState } from 'react';
 import { Plus, Trash2, UsersRound } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
@@ -39,7 +40,7 @@ export const JobWorkerAssignments = ({ jobId, staff = [], onChanged }) => {
   };
 
   const remove = async (id) => {
-    if (!window.confirm('Unassign this worker from the Job Card?')) return;
+    if (!await appConfirm('Unassign this worker from the Job Card?')) return;
     setSaving(true);
     setError('');
     try {
