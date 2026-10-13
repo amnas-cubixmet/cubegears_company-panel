@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { customerService } from '../../services/customer.service';
@@ -294,7 +295,7 @@ export const CustomerDetails = () => {
   };
 
   const deleteDocument = async (documentId) => {
-    if (!window.confirm('Delete this customer document record?')) return;
+    if (!await appConfirm('Delete this customer document record?')) return;
     const nextDocuments = documents.filter((document) => document.id !== documentId);
     await customerService.updateCustomer(customer.id, { documents: nextDocuments });
     setDocuments(nextDocuments);
@@ -302,7 +303,7 @@ export const CustomerDetails = () => {
   };
 
   const handleArchiveCustomer = async () => {
-    if (window.confirm(`Are you sure you want to archive ${customer.name}? This will preserve historical records.`)) {
+    if (await appConfirm(`Are you sure you want to archive ${customer.name}? This will preserve historical records.`)) {
       await customerService.archiveCustomer(customer.id);
       showToast('Customer archived.');
       navigate('/customers');
