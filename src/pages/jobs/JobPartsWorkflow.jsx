@@ -710,7 +710,7 @@ function OutsidePartPurchasePanel({ initial, onClose, onSave, busy, error }) {
     });
   };
   return (
-    <Sheet title="Buy Part From Outside Shop" subtitle="Purchase and use a part directly for this Job Card. Stock inventory is not changed." onClose={onClose}>
+    <Sheet title="Buy Part From Outside Shop" subtitle="Request approval for a supplier quotation. Purchase is not completed yet." onClose={onClose}>
       <form className="job-parts-modal-form job-parts-outside-form" onSubmit={submit}>
         <label className="form-label job-parts-modal-full">Part Name *
           <input className="cubegears-input" required maxLength={160} autoFocus
@@ -724,10 +724,9 @@ function OutsidePartPurchasePanel({ initial, onClose, onSave, busy, error }) {
           <input className="cubegears-input" maxLength={80}
             value={form.sku} onChange={(e) => set('sku', e.target.value)} placeholder="Optional" />
         </label>
-        <label className="form-label">Bill / Invoice Number
-          <input className="cubegears-input" maxLength={120}
-            value={form.invoiceNo} onChange={(e) => set('invoiceNo', e.target.value)} placeholder="Optional" />
-        </label>
+        <div className="job-parts-approval-note job-parts-modal-full">
+          Invoice number and bill file are required after manager approval, when the part is purchased.
+        </div>
         <label className="form-label">Quantity *
           <input className="cubegears-input" type="number" required inputMode="decimal"
             min="0.01" step="0.01" max="999999.99"
@@ -744,17 +743,90 @@ function OutsidePartPurchasePanel({ initial, onClose, onSave, busy, error }) {
             value={form.sellingPrice} onChange={(e) => set('sellingPrice', e.target.value)} placeholder="Selling price" />
         </label>
         <div className="job-parts-outside-calculation job-parts-modal-full">
-          <div><span>Purchase Total</span><strong>{money.format(valid ? quantity * cost : 0)}</strong></div>
+          <div><span>Quoted Purchase Total</span><strong>{money.format(valid ? quantity * cost : 0)}</strong></div>
           <div><span>Customer Value</span><strong>{money.format(valid ? quantity * selling : 0)}</strong></div>
         </div>
         <p className="job-parts-modal-stock-note job-parts-modal-full">
-          Direct outside purchase: recorded as used for this Job Card and included in Total Cost.
-          No inventory stock entry or stock deduction is created.
+          Submitting this request does not purchase the part or affect Total Cost.
+          Manager approval and a supplier bill are required. Workshop inventory stays unchanged.
         </p>
         {error && <p className="job-parts-modal-warning job-parts-modal-full" role="alert">{error}</p>}
         <button type="button" className="secondary-button" onClick={onClose} disabled={busy}>Cancel</button>
         <button type="submit" className="primary-button" disabled={!valid || busy}>
-          {busy ? 'Saving Purchase…' : 'Save & Use Part'}
+          {busy ? 'Sending Request…' : 'Request Approval'}
+        </button>
+      </form>
+    </Sheet>
+  );
+}
+
+function OutsidePartCompletionPanel({ purchase, onClose, onSave, busy, error }) {
+  const [invoiceNo, setInvoiceNo] = useState('');
+  const [unitCost, setUnitCost] = useState(String(purchase.unitCost || ''));
+  const [bill, setBill] = useState(null);
+  const [uploadError, setUploadError] = useState('');
+  const quantity = Number(purchase.quantity);
+  const actualTotal = quantity * Number(unitCost);
+  const approvedTotal = Number(purchase.quotedTotal || 0);
+  const withinApproval = Number.isFinite(actualTotal) &&
+    Number(unitCost) >= 0 && actualTotal <= approvedTotal && Number(unitCost) <= 999999999.99;
+  const valid = invoiceNo.trim().length > 0 && invoiceNo.trim().length <= 120 &&
+    bill && withinApproval && unitCost !== '';
+  const chooseFile = (file) => {
+    setBill(null);
+    if (!file) {
+      setUploadError('');
+      return;
+    }
+    if (file.size === 0 || file.size > 8 * 1024 * 1024) {
+      setUploadError('The supplier bill must be less than 8 MB.');
+      return;
+    }
+    if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setUploadError('Choose a PDF, JPEG, PNG or WebP invoice.');
+      return;
+    }
+    setUploadError('');
+    setBill(file);
+  };
+  return (
+    <Sheet title="Complete Outside Purchase" subtitle="Approved quotation → supplier invoice → actual Job Cost" onClose={onClose}>
+      <form className="job-parts-modal-form job-parts-outside-form" onSubmit={(event) => {
+        event.preventDefault();
+        if (valid && !busy) onSave({ invoiceNo: invoiceNo.trim(), unitCost, bill });
+      }}>
+        <div className="job-parts-approval-note job-parts-modal-full">
+          <strong>{purchase.partName}</strong>
+          <span>{purchase.vendor} · Quantity {purchase.quantity} · Approved maximum {money.format(approvedTotal)}</span>
+          <span>Changes above the approved amount need a new quotation and approval.</span>
+        </div>
+        <label className="form-label job-parts-modal-full">Supplier Bill Number *
+          <input className="cubegears-input" required maxLength={120}
+            value={invoiceNo} onChange={(event) => setInvoiceNo(event.target.value)}
+            placeholder="Bill / invoice number" />
+        </label>
+        <label className="form-label job-parts-modal-full">Actual Purchase Price / Unit (₹) *
+          <input className="cubegears-input" type="number" inputMode="decimal"
+            min="0" max="999999999.99" step="0.01" required
+            value={unitCost} onChange={(event) => setUnitCost(event.target.value)} />
+        </label>
+        <label className="form-label job-parts-modal-full">Supplier Bill (PDF or Image, max 8 MB) *
+          <input className="cubegears-input job-parts-file-input" type="file" required
+            accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+            onChange={(event) => chooseFile(event.target.files?.[0])} />
+        </label>
+        <div className="job-parts-outside-calculation job-parts-modal-full">
+          <div><span>Approved Quote</span><strong>{money.format(approvedTotal)}</strong></div>
+          <div><span>Actual Purchase Total</span><strong>{money.format(Number.isFinite(actualTotal) ? actualTotal : 0)}</strong></div>
+        </div>
+        {!withinApproval && <p className="job-parts-modal-warning job-parts-modal-full" role="alert">
+          Actual purchase total exceeds the approved quotation. Request a revised approval.
+        </p>}
+        {uploadError && <p className="job-parts-modal-warning job-parts-modal-full" role="alert">{uploadError}</p>}
+        {error && <p className="job-parts-modal-warning job-parts-modal-full" role="alert">{error}</p>}
+        <button type="button" className="secondary-button" disabled={busy} onClick={onClose}>Cancel</button>
+        <button type="submit" className="primary-button" disabled={!valid || busy}>
+          <FileUp size={15} aria-hidden="true"/> {busy ? 'Saving Purchase…' : 'Upload Bill & Mark Purchased'}
         </button>
       </form>
     </Sheet>
