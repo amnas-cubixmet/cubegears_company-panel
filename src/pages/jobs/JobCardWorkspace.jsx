@@ -16,6 +16,7 @@ import {
   Wrench,
   ChevronRight,
   ChevronDown,
+  Download,
   LockKeyhole
 } from 'lucide-react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -27,6 +28,9 @@ import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 import { JobInspectionPanel } from '../../components/jobs/JobInspectionPanel';
 import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
+import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import { downloadApprovedEstimatePdf, latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
+import '../../styles/approved-estimate-pdf.css';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
@@ -132,6 +136,9 @@ export function JobCardWorkspace() {
   const [saving, setSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
+  const [pdfOffer, setPdfOffer] = useState(null);
+  const [pdfError, setPdfError] = useState('');
+  const [pdfFilename, setPdfFilename] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
   const [complaintFilter, setComplaintFilter] = useState('All');
@@ -425,7 +432,23 @@ export function JobCardWorkspace() {
       const result = await jobService.completeJobStage(job.id, stage, options);
       if (result.job) setJob(result.job);
       setWorkflow(result);
-      if (result.current && result.current !== stage) {
+      if (stage === 'estimate' && result.completed?.includes('estimate')) {
+        // Approval must succeed on the server before a PDF can be offered.
+        // Stay on Estimate until the user chooses Download or Continue.
+        const approvedJob = result.job || await jobService.getJobById(job.id);
+        const approvedEstimate = latestApprovedEstimate(approvedJob.estimates || []);
+        if (approvedEstimate) {
+          setPdfError('');
+          setPdfFilename('');
+          setPdfOffer({
+            job: approvedJob,
+            estimate: approvedEstimate,
+            nextStage: result.current || 'work',
+          });
+        } else {
+          setError('Estimate approved, but the approved PDF is not ready yet. Refresh the job card to download it.');
+        }
+      } else if (result.current && result.current !== stage) {
         navigate('/jobs/' + job.id + '/' + result.current, { replace: true });
       }
     } catch (e) {
@@ -433,6 +456,27 @@ export function JobCardWorkspace() {
       setError(details?.stage || details?.message || e?.message || 'Unable to complete this stage.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const continueAfterApproval = () => {
+    if (!pdfOffer) return;
+    const next = pdfOffer.nextStage || 'work';
+    setPdfOffer(null);
+    setPdfError('');
+    setPdfFilename('');
+    navigate('/jobs/' + job.id + '/' + next, { replace: true });
+  };
+
+  const downloadApprovalPdf = (approvedJob, approvedEstimate) => {
+    try {
+      const filename = downloadApprovedEstimatePdf(approvedJob, approvedEstimate);
+      setPdfError('');
+      setPdfFilename(filename);
+      return filename;
+    } catch (e) {
+      setPdfError(e?.message || 'Could not create the approved PDF.');
+      return null;
     }
   };
 
@@ -1332,6 +1376,7 @@ export function JobCardWorkspace() {
           onSaved={() => refreshJobWorkflow()}
           onApprove={() => completeStage('estimate')}
           onReject={(estimateId) => setEstimateApproval(estimateId, 'Rejected')}
+          onDownloadApproved={(approvedEstimate) => downloadApprovalPdf(job, approvedEstimate)}
           onEditInspection={() => navigate('/jobs/' + job.id + '/inspection?edit=1')}
           onGoToWork={() => navigate('/jobs/' + job.id + '/' + currentStage)}
         />
@@ -1595,6 +1640,32 @@ export function JobCardWorkspace() {
       )}
         </>
       )}
+
+      <ResponsiveModalSheet isOpen={Boolean(pdfOffer)}
+        onClose={continueAfterApproval}
+        title="Estimate Approved" maxWidth="480px">
+        <div className="job-approved-pdf-offer">
+          <div className="job-approved-pdf-offer-status">
+            <CheckCircle2 size={22} aria-hidden="true"/>
+            <div>
+              <strong>Customer estimate approved</strong>
+              <p>Approval is saved. Download the approved estimate PDF for your records or to share with the customer.</p>
+            </div>
+          </div>
+          {pdfError && <p className="job-approved-pdf-error" role="alert">{pdfError}</p>}
+          {pdfFilename && <p className="job-approved-pdf-success" role="status">PDF download started: {pdfFilename}</p>}
+          <div className="job-approved-pdf-offer-actions">
+            <button type="button" className="job-approved-pdf-download"
+              onClick={() => downloadApprovalPdf(pdfOffer.job, pdfOffer.estimate)}>
+              <Download size={16} aria-hidden="true"/> Download PDF
+            </button>
+            <button type="button" className="job-approved-pdf-continue"
+              onClick={continueAfterApproval}>
+              Continue to Work <ChevronRight size={16} aria-hidden="true"/>
+            </button>
+          </div>
+        </div>
+      </ResponsiveModalSheet>
 
     </div>
   );
