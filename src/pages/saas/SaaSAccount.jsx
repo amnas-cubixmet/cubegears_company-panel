@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ChevronRight, FilePenLine, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { settingsService } from '../../services/settings.service';
+import { useAuth } from '../../hooks/useAuth';
+import { USE_MOCK_API } from '../../api/apiConfig';
 import { storageHistoryService } from '../../services/storageHistory.service';
 import { AccountHeader, AccountOverview } from '../../components/account';
 import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
@@ -106,6 +108,10 @@ function BillingView({ billing, storage, onOpenTemplates }) {
 
 function StorageView({ storage, setStorage }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [storageError, setStorageError] = useState('');
+  const [historyError, setHistoryError] = useState('');
+  const [storageBusy, setStorageBusy] = useState(false);
   const [selected, setSelected] = useState([]);
   const [category, setCategory] = useState('Job Card');
   const [history, setHistory] = useState([]);
@@ -119,12 +125,21 @@ function StorageView({ storage, setStorage }) {
 
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(history), [history]);
 
-  const refreshHistory = async (nextFrom = from, nextTo = to) => setHistory(await storageHistoryService.getStorageHistory({ from: nextFrom, to: nextTo }));
+  const refreshHistory = async (nextFrom = from, nextTo = to) => {
+    try {
+      const rows = await storageHistoryService.getStorageHistory({ from: nextFrom, to: nextTo });
+      setHistory(Array.isArray(rows) ? rows : []);
+      setHistoryError('');
+    } catch (error) {
+      setHistoryError(error?.message || 'Could not load storage history.');
+      setHistory([]);
+    }
+  };
 
   useEffect(() => { refreshHistory(); }, []);
 
   const log = (action, details) => {
-    const next = [{ id: Date.now(), at: new Date().toISOString(), action, details, user: 'Current User' }, ...audit].slice(0, 100);
+    const next = [{ id: Date.now(), at: new Date().toISOString(), action, details, user: user?.name || 'Local Account' }, ...audit].slice(0, 100);
     setAudit(next);
     localStorage.setItem('cubixgear-storage-audit', JSON.stringify(next));
   };
@@ -144,30 +159,47 @@ function StorageView({ storage, setStorage }) {
 
   const upload = async (event) => {
     const files = Array.from(event.target.files || []);
-    const valid = files.filter((file) => storage.settings.allowedTypes.includes(file.type) && file.size <= storage.settings.maxFileMb * 1024 * 1024);
-    if (!valid.length) return;
-    const next = await saasAccountService.uploadMediaFiles(valid, category);
-    setStorage(next);
-    await storageHistoryService.recordTodayStorageSnapshot(next);
-    await refreshHistory();
-    log('UPLOAD', `${valid.length} photo(s) uploaded to ${category}`);
+    const valid = files.filter((file) =>
+      storage.settings.allowedTypes.includes(file.type) &&
+      file.size <= storage.settings.maxFileMb * 1024 * 1024);
     event.target.value = '';
+    if (!valid.length) return setStorageError('Select JPG, PNG or WebP images within the allowed file size.');
+    setStorageBusy(true); setStorageError('');
+    try {
+      const next = await saasAccountService.uploadMediaFiles(valid, category);
+      setStorage(next);
+      await storageHistoryService.recordTodayStorageSnapshot(next);
+      await refreshHistory();
+      log('UPLOAD', `${valid.length} photo(s) uploaded to ${category}`);
+    } catch (error) {
+      setStorageError(error?.message || 'Upload failed. Please retry.');
+    } finally { setStorageBusy(false); }
   };
 
   const remove = async (ids) => {
     if (!ids.length || !await appConfirm(`Delete ${ids.length} photo(s)? This cannot be undone.`)) return;
-    const next = await saasAccountService.deleteMediaFiles(ids);
-    setStorage(next);
-    await storageHistoryService.recordTodayStorageSnapshot(next);
-    await refreshHistory();
-    log('DELETE', `${ids.length} photo(s) deleted`);
-    setSelected((old) => old.filter((id) => !ids.includes(id)));
+    setStorageBusy(true); setStorageError('');
+    try {
+      const next = await saasAccountService.deleteMediaFiles(ids);
+      setStorage(next);
+      await storageHistoryService.recordTodayStorageSnapshot(next);
+      await refreshHistory();
+      log('DELETE', `${ids.length} photo(s) deleted`);
+      setSelected((old) => old.filter((id) => !ids.includes(id)));
+    } catch (error) {
+      setStorageError(error?.message || 'Unable to delete selected media.');
+    } finally { setStorageBusy(false); }
   };
 
   const setting = async (key, value) => {
-    const next = await saasAccountService.updateStorageSettings({ [key]: value });
-    setStorage(next);
-    log('SETTINGS', `${key} changed to ${String(value)}`);
+    setStorageBusy(true); setStorageError('');
+    try {
+      const next = await saasAccountService.updateStorageSettings({ [key]: value });
+      setStorage(next);
+      log('SETTINGS', `${key} changed to ${String(value)}`);
+    } catch (error) {
+      setStorageError(error?.message || 'Unable to save storage settings.');
+    } finally { setStorageBusy(false); }
   };
 
   return (
@@ -181,10 +213,14 @@ function StorageView({ storage, setStorage }) {
         </div>
         <div className="saas-storage-actions">
           <select value={category} onChange={(e) => setCategory(e.target.value)}><option>Job Card</option><option>Inspection</option><option>Invoice</option><option>Delivery</option><option>General</option></select>
-          <label className="saas-button"><Upload size={18} /> Upload photos<input hidden multiple type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} /></label>
-          <button className="saas-button danger" disabled={!selected.length} onClick={() => remove(selected)}><Trash2 size={18} /> Delete selected</button>
+          <label className="saas-button"><Upload size={18} /> {storageBusy ? 'Working…' : 'Upload photos'}<input hidden multiple disabled={storageBusy} type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} /></label>
+          <button className="saas-button danger" disabled={!selected.length || storageBusy} onClick={() => remove(selected)}><Trash2 size={18} /> Delete selected</button>
         </div>
-        <p className="saas-muted">No storage cap. Billing is calculated from each day’s recorded storage snapshot.</p>
+        <p className="saas-muted">
+          Current media usage is measured from your uploaded files. Daily rate is indicative only,
+          not a verified subscription charge.
+        </p>
+        {storageError && <p className="saas-error" role="alert">{storageError}</p>}
       </section>
 
       <section className="saas-card saas-wide storage-history-card">
@@ -206,9 +242,13 @@ function StorageView({ storage, setStorage }) {
           <div><span>Days</span><strong>{summary.days}</strong></div>
           <div><span>Average storage</span><strong>{summary.averageGb.toFixed(2)} GB</strong></div>
           <div><span>Peak storage</span><strong>{summary.peakGb.toFixed(2)} GB</strong></div>
-          <div><span>Interval charge</span><strong>{money.format(summary.totalCharge)}</strong></div>
+          <div><span>Interval charge</span><strong>{USE_MOCK_API ? money.format(summary.totalCharge) : '—'}</strong></div>
         </div>
 
+        {historyError && <p className="saas-error" role="alert">{historyError}</p>}
+        {!history.length && !historyError && <p className="saas-muted">
+          No recorded storage snapshots in this range yet.
+        </p>}
         <div className="storage-history-list">
           {history.map((row) => (
             <button key={row.date} className="storage-history-row" onClick={() => navigate(`/account/storage/history/${row.date}`)}>
@@ -228,7 +268,7 @@ function StorageView({ storage, setStorage }) {
           ['keepOriginals', 'Keep original files'],
           ['allowStaffUpload', 'Staff can upload'],
           ['allowStaffDelete', 'Staff can delete']
-        ].map(([key, label]) => <label className="saas-toggle" key={key}><span>{label}</span><input type="checkbox" checked={Boolean(storage.settings[key])} onChange={(e) => setting(key, e.target.checked)} /></label>)}
+        ].map(([key, label]) => <label className="saas-toggle" key={key}><span>{label}</span><input type="checkbox" checked={Boolean(storage.settings[key])} disabled={storageBusy} onChange={(e) => setting(key, e.target.checked)} /></label>)}
         <label className="saas-field"><span>Auto-delete after days (0 = never)</span><input type="number" min="0" value={storage.settings.retentionDays} onChange={(e) => setting('retentionDays', Number(e.target.value))} /></label>
       </section>
 
@@ -238,7 +278,8 @@ function StorageView({ storage, setStorage }) {
       </section>
 
       <section className="saas-card saas-wide">
-        <div className="saas-card-head"><div><span className="saas-kicker">AUDIT LOG</span><h2>Storage activity</h2></div><History size={22} /></div>
+        <div className="saas-card-head"><div><span className="saas-kicker">LOCAL ACTIVITY</span><h2>Storage actions on this browser</h2></div><History size={22} /></div>
+        <p className="saas-muted">This activity list is stored only in this browser, not a server audit log.</p>
         {audit.length ? <div className="saas-table-wrap"><table className="saas-table"><thead><tr><th>Date & time</th><th>Action</th><th>Details</th><th>User</th></tr></thead><tbody>{audit.map((item) => <tr key={item.id}><td>{dateTime.format(new Date(item.at))}</td><td>{item.action}</td><td>{item.details}</td><td>{item.user}</td></tr>)}</tbody></table></div> : <p className="saas-muted">No storage activity recorded yet.</p>}
       </section>
     </div>
