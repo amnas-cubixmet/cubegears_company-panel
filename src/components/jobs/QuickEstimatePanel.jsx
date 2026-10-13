@@ -133,10 +133,9 @@ export function QuickEstimatePanel({
     try {
       const draftId = latest?.status === 'Draft' && !stale ? latest.id : null;
       await jobService.saveQuickJobEstimate(job.id, {
-        lines: lines.map(({ description, type, quantity, unitPrice, catalogId }) => ({
+        lines: lines.map(({ description, type, quantity, unitPrice, catalogId, taxRate, hsnSac }) => ({
           description: description.trim(), type, quantity, unitPrice,
-          taxRate: lines.find((item) => item.description === description && item.type === type)?.taxRate || '0',
-          hsnSac: lines.find((item) => item.description === description && item.type === type)?.hsnSac || '',
+          taxRate: taxRate || '0', hsnSac: hsnSac || '',
           ...(catalogId ? { catalogId } : {})
         })),
         taxPercent: '0', discount,
