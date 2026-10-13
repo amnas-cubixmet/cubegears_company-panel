@@ -82,7 +82,9 @@ export function Reports() {
     month: month || currentMonth(), year: value, period: null, from: null, to: null,
   });
   const chooseCustom = (key, value) => changeParams({
-    month: null, year: null, period: null, [key]: value,
+    month: null, year: null, period: null,
+    from: key === 'from' ? value : from,
+    to: key === 'to' ? value : to,
   });
   const chooseThisMonth = () => changeParams({
     month: currentMonth(), year: currentYear(), period: null, from: null, to: null,
