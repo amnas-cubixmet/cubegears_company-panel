@@ -89,6 +89,16 @@ const prettify = (value) => {
 
 const buildHref = (segments, index) => '/' + segments.slice(0, index + 1).join('/');
 
+// Only IDs for actual detail pages should be looked up. Static routes such as
+// /customers/new and /vehicles/new retain their ordinary breadcrumb labels.
+const STATIC_RECORD_ROUTES = {
+  customers: new Set(['new', 'add', 'all', 'overview', 'edit', 'vehicles', 'service-history', 'outstanding', 'reminders', 'reports']),
+  vehicles: new Set(['new', 'add']),
+};
+const isRecordPath = (kind, id) =>
+  Boolean(STATIC_RECORD_ROUTES[kind] && id && !STATIC_RECORD_ROUTES[kind].has(id));
+
+
 export function AppBreadcrumbs() {
   const location = useLocation();
   const scrollRef = useRef(null);
@@ -129,7 +139,7 @@ export function AppBreadcrumbs() {
 
   useEffect(() => {
     const match = location.pathname.match(/^\/(customers|vehicles)\/([^/]+)(?:\/|$)/);
-    if (!match) {
+    if (!match || !isRecordPath(match[1], match[2])) {
       setRecordLabel(null);
       return undefined;
     }
@@ -179,7 +189,7 @@ export function AppBreadcrumbs() {
         label:
           isStaffProfile && index === 2
             ? staffBreadcrumbLabel || 'Staff Profile'
-            : index === 1 && (segments[0] === 'customers' || segments[0] === 'vehicles')
+            : index === 1 && isRecordPath(segments[0], segment)
               ? (recordLabel?.kind === segments[0] && recordLabel?.identifier === decodeURIComponent(segment)
                   ? recordLabel.label
                   : segments[0] === 'customers' ? 'Customer Profile' : 'Vehicle Profile')
