@@ -2140,15 +2140,15 @@ button.customer-data-row {
 .cg-customers .customer-profile-kpis>div>div:last-child{overflow-wrap:anywhere}
 .cg-customers .customer-profile-tabs__rail{scrollbar-width:none;overscroll-behavior-x:contain}
 .cg-customers .customer-profile-tabs__rail::-webkit-scrollbar{display:none}
-.cg-customers .customer-profile-unavailable{
+.customer-profile-unavailable{
   display:flex;flex-direction:column;align-items:center;gap:12px;
   padding:44px 16px;text-align:center;border:1px solid var(--border);
   border-radius:14px;background:var(--surface);
 }
-.cg-customers .customer-profile-unavailable h2{margin:0;font-size:18px}
-.cg-customers .customer-profile-unavailable p{margin:0;font-size:13px;color:var(--text-muted)}
-.cg-customers .customer-profile-unavailable>div{display:flex;gap:8px;flex-wrap:wrap}
-.cg-customers .customer-profile-unavailable button{
+.customer-profile-unavailable h2{margin:0;font-size:18px}
+.customer-profile-unavailable p{margin:0;font-size:13px;color:var(--text-muted)}
+.customer-profile-unavailable>div{display:flex;gap:8px;flex-wrap:wrap}
+.customer-profile-unavailable button{
   display:inline-flex;align-items:center;gap:6px;min-height:42px;
   padding:0 14px;border:1px solid var(--border);border-radius:9px;
   background:var(--surface-2);color:var(--text-primary);cursor:pointer;font-weight:600;
@@ -2169,4 +2169,14 @@ button.customer-data-row {
 @media(max-width:380px){
   .cg-customers .customer-profile-actions>button:not([title="More Actions"]){flex:1 1 100%}
   .cg-customers .customer-profile-actions>button[title="More Actions"]{min-width:42px}
+}
+
+.cg-customers .customer-profile-partial-error{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:8px;padding:11px 13px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--text-secondary);font-size:12px;
+}
+.cg-customers .customer-profile-partial-error button{
+  padding:6px 12px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;
 }
