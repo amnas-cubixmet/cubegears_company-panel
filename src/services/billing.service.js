@@ -5,6 +5,7 @@ const DOCS_KEY = 'cubixgear:billing-documents';
 const INVENTORY_KEY = 'cubixgear:inventory';
 const STOCK_LEDGER_KEY = 'cubixgear:stock-ledger';
 const JOB_PREFILL_KEY = 'cubixgear:invoice-job-prefill';
+import { calculateEstimateIndiaGst } from '../utils/indiaGst';
 
 const seedDocuments = [
   {
@@ -143,7 +144,7 @@ export const blankBillingDocument = (kind = 'invoice') => {
     invoiceType: 'regular',
     status: 'Draft',
     date: today(),
-    seller: { name: 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '32' },
+    seller: { name: 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '' },
     customer: { name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
     vehicle: { registration: '', makeModel: '', odometer: '', vin: '', ...(prefill?.vehicle || {}) },
     jobCardNo: prefill?.jobNumber || prefill?.jobId || '',
@@ -152,7 +153,7 @@ export const blankBillingDocument = (kind = 'invoice') => {
     transportation: { vehicleNo: '', transporterName: '', ...(prefill?.transportation || {}) },
     notes: prefill?.jobId ? `Created from Job Card ${prefill.jobNumber || prefill.jobId}` : '',
     items: Array.isArray(prefill?.items)
-      ? clone(prefill.items).map((item) => ({ unit: 'PCS', hsnCode: '', taxRate: 18, ...item }))
+      ? clone(prefill.items).map((item) => ({ unit: 'PCS', hsnCode: '', taxRate: '', ...item }))
       : [],
     discount: 0,
     adjustment: '',
@@ -163,76 +164,57 @@ export const blankBillingDocument = (kind = 'invoice') => {
 };
 
 export const calculateDocumentTotals = (doc) => {
-  const rows = (doc.items || []).map((item) => {
-    const gross = Number(item.qty || 0) * Number(item.rate || 0);
-    return {
-      item,
-      taxable: Math.max(0, gross - Number(item.discount || 0))
-    };
-  });
-
-  const itemSubtotal = rows.reduce((sum, row) => sum + row.taxable, 0);
+  // A billing line's own discount is removed before invoice-wide discount.
+  // Share the same line-wise paise rounding as Job Card previews and Django.
+  const rows = (doc.items || []).map((item) => ({
+    item,
+    taxable: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) -
+      Number(item.discount || 0)),
+  }));
+  const supplier = String(doc.seller?.gstin || '').slice(0, 2) ||
+    doc.seller?.stateCode || '';
+  const placeOfSupply = String(doc.customer?.placeOfSupply ||
+    doc.customer?.stateCode || '').slice(0, 2);
   const documentDiscount = Number(doc.discount || 0);
-  const taxable = Math.max(0, itemSubtotal - documentDiscount);
-  const ratio = itemSubtotal > 0 ? taxable / itemSubtotal : 0;
-
-  let cgst = 0;
-  let sgst = 0;
-  let igst = 0;
+  const gst = calculateEstimateIndiaGst({
+    lines: rows.map(({ item, taxable }) => ({
+      type: item.type || 'Service', quantity: 1, unitPrice: taxable,
+      taxRate: item.taxRate,
+    })),
+    discount: documentDiscount,
+    registered: doc.invoiceType === 'gst',
+    supplierState: supplier,
+    placeOfSupply,
+  });
   const taxGroups = new Map();
-
-  if (doc.invoiceType === 'gst' && doc.taxMode !== 'none') {
-    rows.forEach(({ item, taxable: lineTaxable }) => {
-      const adjustedTaxable = lineTaxable * ratio;
-      const fallbackRate = doc.taxMode === 'igst'
-        ? Number(doc.igstRate || 0)
-        : Number(doc.cgstRate || 0) + Number(doc.sgstRate || 0);
-      const rate = item.taxRate === '' || item.taxRate == null
-        ? fallbackRate
-        : Number(item.taxRate || 0);
-      const tax = adjustedTaxable * rate / 100;
-
-      if (doc.taxMode === 'igst') {
-        igst += tax;
-      } else {
-        cgst += tax / 2;
-        sgst += tax / 2;
-      }
-
-      const key = `${doc.taxMode}:${rate}`;
-      const current = taxGroups.get(key) || {
-        type: doc.taxMode === 'igst' ? 'IGST' : 'CGST + SGST',
-        rate,
-        taxable: 0,
-        tax: 0
-      };
-      current.taxable += adjustedTaxable;
-      current.tax += tax;
-      taxGroups.set(key, current);
-    });
-  }
-
-  const beforeAdjustment = taxable + cgst + sgst + igst;
-  const hasManualAdjustment = doc.adjustment !== '' && doc.adjustment != null;
-  const adjustment = hasManualAdjustment
-    ? Number(doc.adjustment || 0)
-    : Number((Math.round(beforeAdjustment) - beforeAdjustment).toFixed(2));
-  const total = Number((beforeAdjustment + adjustment).toFixed(2));
+  gst.taxRows.forEach((row, index) => {
+    const rate = Number(rows[index]?.item.taxRate || 0);
+    const key = gst.mode + ':' + rate;
+    const current = taxGroups.get(key) || {
+      type: gst.mode === 'igst' ? 'IGST' : 'CGST + SGST',
+      rate, taxable: 0, tax: 0,
+    };
+    current.taxable += row.taxable;
+    current.tax += row.cgst + row.sgst + row.igst;
+    taxGroups.set(key, current);
+  });
+  const adjustment = Number(doc.adjustment || 0);
+  const total = Number((gst.total + adjustment).toFixed(2));
   const paid = Number(doc.paid || 0);
-
   return {
-    itemSubtotal,
+    itemSubtotal: gst.subtotal,
     documentDiscount,
-    taxable,
-    cgst,
-    sgst,
-    igst,
+    taxable: gst.taxable,
+    cgst: gst.cgst,
+    sgst: gst.sgst,
+    igst: gst.igst,
+    taxMode: gst.mode,
     taxGroups: Array.from(taxGroups.values()),
     adjustment,
     rounding: adjustment,
     total,
     paid,
-    balance: Math.max(0, Number((total - paid).toFixed(2)))
+    balance: Math.max(0, Number((total - paid).toFixed(2))),
   };
 };
 
@@ -302,6 +284,10 @@ export const downloadBillingPdf = async (savedInvoice) => {
 
 export const billingService = {
   downloadPdf: downloadBillingPdf,
+  async getGstContext() {
+    if (!USE_MOCK_API) return apiClient.get('/billing/documents/gst-context');
+    return { registered: false, gstin: '', supplierState: '', companyName: 'Sample Workshop' };
+  },
   async list(params = {}) {
     if (!USE_MOCK_API) return apiClient.get('/billing/documents', { params });
     return read(DOCS_KEY, seedDocuments);
