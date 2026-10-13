@@ -1,40 +1,54 @@
 import React from 'react';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowRight, ArrowLeftRight } from 'lucide-react';
+import { normalizeStockMovement } from '../../utils/stockOverview';
 
-const statusClass = (value = '') =>
-  `is-${String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+export const StockRecentMovementPanel = ({ ledger, onNavigate }) => {
+  const movements = ledger.slice(0, 8).map(normalizeStockMovement);
+  const formatQuantity = (value) =>
+    value === null ? '—' : `${value > 0 ? '+' : ''}${value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
-export const StockRecentMovementPanel = ({ ledger, onNavigate }) => (
-  <section className="stock-dashboard-records">
-    <header className="stock-dashboard-section-title">
-      <div>
-        <h2>Recent Stock Movement</h2>
-        <p>Latest inward, issue, return and adjustment activity.</p>
-      </div>
-      <button type="button" onClick={() => onNavigate('/stock/movements')}>
-        <ArrowLeftRight size={12} />
-        Full Ledger
-      </button>
-    </header>
-
-    <div className="stock-overview-ledger">
-      <div className="stock-overview-ledger-head">
-        <span>Type</span><span>Part</span><span>Reference</span><span>Qty</span><span>Balance</span>
-      </div>
-
-      {ledger.slice(0, 8).map((movement) => (
-        <div key={movement.id} className="stock-overview-ledger-row">
-          <span className={`stock-status ${statusClass(movement.type)}`}>{movement.type}</span>
-          <div><strong>{movement.partName}</strong><small>{movement.date}</small></div>
-          <span>{movement.jobRef || '—'}</span>
-          <b>{movement.qtyIn ? `+${movement.qtyIn}` : `-${movement.qtyOut}`}</b>
-          <em>{movement.balanceAfter}</em>
+  return (
+    <section className="stock-dashboard-records">
+      <header className="stock-dashboard-section-title">
+        <div>
+          <h2>Recent Stock Movements</h2>
+          <p>Latest received, issued, returned and adjusted parts.</p>
         </div>
-      ))}
+        <button type="button" onClick={() => onNavigate('/stock/movements')}>
+          <ArrowLeftRight size={16} aria-hidden="true" /> Full History <ArrowRight size={14} aria-hidden="true" />
+        </button>
+      </header>
 
-      {!ledger.length && (
-        <div className="stock-dashboard-empty">No stock movement recorded yet.</div>
-      )}
-    </div>
-  </section>
-);
+      {movements.length ? (
+        <div className="stock-overview-ledger">
+          <table>
+            <thead><tr>
+              <th scope="col">Movement</th>
+              <th scope="col">Part</th>
+              <th scope="col">Reference</th>
+              <th scope="col">Date</th>
+              <th scope="col">Quantity</th>
+            </tr></thead>
+            <tbody>
+              {movements.map((movement, index) => (
+                <tr key={movement.id ?? index}>
+                  <td data-label="Movement">
+                    <span className={`stock-overview-type is-${movement.typeKey || 'other'}`}>{movement.label}</span>
+                  </td>
+                  <td data-label="Part"><strong>{movement.partName}</strong></td>
+                  <td data-label="Reference">{movement.reference}</td>
+                  <td data-label="Date">{movement.dateLabel}</td>
+                  <td data-label="Quantity">
+                    <b className={movement.quantity > 0 ? 'is-in' : movement.quantity < 0 ? 'is-out' : ''}>
+                      {formatQuantity(movement.quantity)}
+                    </b>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : <div className="stock-dashboard-empty">No stock movements yet. Receiving or issuing parts will appear here.</div>}
+    </section>
+  );
+};
