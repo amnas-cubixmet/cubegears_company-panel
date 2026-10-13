@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera, ImagePlus, UploadCloud, X } from 'lucide-react';
+import { Camera, ImagePlus, Plus, UploadCloud, X } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 
 const ALLOWED_IMAGES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -57,6 +57,7 @@ function JobWorkPhoto({ jobId, photo }) {
 export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = false }) {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
+  const [adding, setAdding] = useState(false);
   const [caption, setCaption] = useState('');
   const [preview, setPreview] = useState('');
   const [busy, setBusy] = useState(false);
@@ -95,7 +96,7 @@ export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = f
 
   const upload = async (event) => {
     event.preventDefault();
-    if (!file || busy || disabled) return;
+    if (!file || !caption.trim() || busy || disabled) return;
     setBusy(true);
     setError('');
     setSuccess('');
@@ -103,6 +104,7 @@ export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = f
       await jobService.uploadJobWorkPhoto(jobId, file, caption.trim());
       setFile(null);
       setCaption('');
+      setAdding(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setSuccess('Photo and caption saved.');
       try {
@@ -124,18 +126,26 @@ export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = f
           <h3><Camera size={17} aria-hidden="true"/> Work Photos</h3>
           <p>Add an image and caption to document the repair.</p>
         </div>
-        <span>{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
+        <div className="job-work-photo-head-actions">
+          <span>{photos.length} {photos.length === 1 ? 'photo' : 'photos'}</span>
+          <button type="button" className="job-work-photo-add-toggle" disabled={disabled || busy}
+            aria-expanded={adding} aria-controls="job-work-photo-upload-form"
+            onClick={() => { setAdding((value) => !value); setError(''); setSuccess(''); }}>
+            {adding ? <X size={15} aria-hidden="true"/> : <Plus size={15} aria-hidden="true"/>}
+            {adding ? 'Cancel' : 'Add Image'}
+          </button>
+        </div>
       </header>
 
-      <form className="job-work-photo-form" onSubmit={upload}>
+      {adding && <form id="job-work-photo-upload-form" className="job-work-photo-form" onSubmit={upload}>
         <label className="job-work-photo-file-field">
           <span>Choose image</span>
           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
             onChange={chooseFile} disabled={busy || disabled} />
         </label>
         <label className="job-work-photo-caption-field">
-          <span>Image Caption</span>
-          <input type="text" maxLength={255} value={caption}
+          <span>Image Caption *</span>
+          <input type="text" required maxLength={255} value={caption}
             onChange={(event) => setCaption(event.target.value)}
             placeholder="e.g. Replaced brake pads — before testing"
             disabled={busy || disabled} />
@@ -151,14 +161,15 @@ export function JobWorkPhotoPanel({ jobId, photos = [], onUploaded, disabled = f
         )}
         <div className="job-work-photo-form-footer">
           <span>JPG, PNG, WebP or GIF · Max 5 MB</span>
-          <button type="submit" disabled={!file || busy || disabled}>
+          <button type="submit" disabled={!file || !caption.trim() || busy || disabled}>
             {busy ? <UploadCloud size={16} aria-hidden="true"/> : <ImagePlus size={16} aria-hidden="true"/>}
             {busy ? 'Uploading…' : 'Add Photo'}
           </button>
         </div>
         {error && <p role="alert" className="job-work-photo-error">{error}</p>}
         {success && <p role="status" className="job-work-photo-success">{success}</p>}
-      </form>
+      </form>}
+      {success && !adding && <p role="status" className="job-work-photo-success">{success}</p>}
 
       <div className="job-work-photo-gallery" aria-label="Uploaded work photos">
         {photos.length ? photos.map((photo) => (
