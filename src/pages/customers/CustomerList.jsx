@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from '../../components/common/Search';
 import { Input } from '../../components/common/Input';
@@ -34,6 +34,7 @@ export const CustomerList = () => {
   // Core Data State
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   // Filters State
   const [search, setSearch] = useState('');
@@ -71,18 +72,16 @@ export const CustomerList = () => {
   // Toast feedback
   const [toastMsg, setToastMsg] = useState('');
 
+  // Load the directory once; filtering is local and never refetches all linked jobs on each keystroke.
   useEffect(() => {
     fetchCustomers();
-  }, [search, statusFilter, branchFilter, typeFilter]);
+  }, []);
 
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const data = await customerService.getCustomers({
-        status: statusFilter,
-        branch: branchFilter,
-        customerType: typeFilter
-      });
+      const response = await customerService.getCustomers();
+      const data = Array.isArray(response) ? response : (response?.results || []);
 
       const enriched = await Promise.all(data.map(async (customer) => {
         const [vehicles, jobs, invoices] = await Promise.all([
@@ -102,32 +101,31 @@ export const CustomerList = () => {
         };
       }));
 
-      const q = search.trim().toLowerCase();
-      const filtered = q
-        ? enriched.filter((customer) =>
-            String(customer.name || '').toLowerCase().includes(q) ||
-            String(customer.email || '').toLowerCase().includes(q) ||
-            String(customer.phone || '').toLowerCase().includes(q) ||
-            String(customer.whatsapp || '').toLowerCase().includes(q) ||
-            String(customer.companyName || '').toLowerCase().includes(q) ||
-            customer.__vehicles?.some((vehicle) =>
-              String(vehicle.regNo || '').toLowerCase().includes(q) ||
-              String(vehicle.vin || '').toLowerCase().includes(q)
-            ) ||
-            customer.__jobs?.some((job) =>
-              String(job.jobNumber || job.id || '').toLowerCase().includes(q) ||
-              String(job.vehicleReg || '').toLowerCase().includes(q)
-            )
-          )
-        : enriched;
-
-      setCustomers(filtered);
+      setCustomers(enriched);
+      setLoadError('');
     } catch (e) {
       console.error(e);
+      setLoadError(e?.message || 'Could not load customers. Check the backend connection.');
     } finally {
       setLoading(false);
     }
   };
+
+  const visibleCustomers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return customers.filter((customer) => {
+      if (statusFilter !== 'All' && (customer.status || '').toLowerCase() !== statusFilter.toLowerCase()) return false;
+      if (branchFilter !== 'All' && customer.branch !== branchFilter) return false;
+      if (typeFilter !== 'All' && customer.customerType !== typeFilter) return false;
+      if (!q) return true;
+      return [customer.name, customer.email, customer.phone, customer.whatsapp, customer.companyName]
+        .some((value) => String(value || '').toLowerCase().includes(q)) ||
+        customer.__vehicles?.some((vehicle) =>
+          [vehicle.regNo, vehicle.vin].some((value) => String(value || '').toLowerCase().includes(q))) ||
+        customer.__jobs?.some((job) =>
+          [job.jobNumber, job.id, job.vehicleReg].some((value) => String(value || '').toLowerCase().includes(q)));
+    });
+  }, [customers, search, statusFilter, branchFilter, typeFilter]);
 
   const showToast = (msg) => {
     setToastMsg(msg);
@@ -256,7 +254,7 @@ export const CustomerList = () => {
           <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>Manage workshop customers, vehicles and service history.</p>
         </div>
         <button
-          onClick={() => navigate('/customers/new')}
+          onClick={openAddModal}
           style={{
             height: '42px',
             padding: '0 18px',
@@ -280,6 +278,8 @@ export const CustomerList = () => {
       </div>
 
       <CustomerManagementTabs />
+
+      {loadError && <div role="alert" className="customer-directory-error">{loadError} <button type="button" onClick={fetchCustomers}>Retry</button></div>
 
       {/* SUMMARY CARDS GRID (4 DESKTOP, 2x2 MOBILE) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px' }} className="customers-summary-grid">
@@ -374,9 +374,12 @@ export const CustomerList = () => {
       </div>
 
       {/* CUSTOMER LIST: DESKTOP TABLE & MOBILE CARDS */}
+      <div className="customer-directory-list-heading">
+        <div><h2>All Customers</h2><p>{visibleCustomers.length} of {customers.length} customers shown</p></div>
+      </div>
       {loading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading customers directory...</div>
-      ) : customers.length === 0 ? (
+      ) : visibleCustomers.length === 0 ? (
         <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '40px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
           <Users size={36} style={{ color: 'var(--text-muted)' }} />
           <strong style={{ fontSize: '15px', color: 'var(--text-primary)' }}>No matching customers found.</strong>
@@ -403,7 +406,7 @@ export const CustomerList = () => {
                 </tr>
               </thead>
               <tbody>
-                {customers.map((c) => (
+                {visibleCustomers.map((c) => (
                   <tr key={c.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.15s ease' }}>
                     <td style={{ padding: '12px 14px' }}>
                       <strong style={{ display: 'block', color: 'var(--text-primary)' }}>{c.name}</strong>
