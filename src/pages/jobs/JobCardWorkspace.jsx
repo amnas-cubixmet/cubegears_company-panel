@@ -28,6 +28,7 @@ import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 import { JobInspectionPanel } from '../../components/jobs/JobInspectionPanel';
 import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
+import { JobQualityCheckPanel } from '../../components/jobs/JobQualityCheckPanel';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { downloadApprovedEstimatePdf, latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 import '../../styles/approved-estimate-pdf.css';
@@ -147,7 +148,6 @@ export function JobCardWorkspace() {
   const [updateType, setUpdateType] = useState('Work Update');
   const [estimateTax, setEstimateTax] = useState('18');
   const [estimateDiscount, setEstimateDiscount] = useState('0');
-  const [qcRoadTest, setQcRoadTest] = useState('');
   const [deliveryForm, setDeliveryForm] = useState({
     finalKm: '',
     customerSignature: '',
@@ -229,7 +229,6 @@ export function JobCardWorkspace() {
         customerSignature: data?.delivery?.acknowledgedBy || '',
         warrantyNotes: data?.delivery?.notes || ''
       });
-      setQcRoadTest(data?.qualityCheck?.testDriveNotes || '');
       setPaymentForm((old) => ({
         ...old,
         amount: '',
@@ -627,54 +626,6 @@ export function JobCardWorkspace() {
     if (saved) setUpdateNote('');
   };
 
-  const defaultChecklist = [
-    'Engine / Mechanical Check',
-    'Fluid Levels',
-    'Electrical / Warning Lights',
-    'Brake & Tyre Check',
-    'Road Test',
-    'Cleaning & Final Presentation'
-  ];
-
-  const qcChecklist = qc.checklist?.length
-    ? qc.checklist.map((item, index) => ({
-        ...item,
-        id: item.id || `QC-${index + 1}`
-      }))
-    : defaultChecklist.map((item, index) => ({
-        id: `QC-${index + 1}`,
-        item,
-        status: 'Pending',
-        remark: ''
-      }));
-
-  const updateQcItem = async (itemId, status) => {
-    const update = {
-      ...qc,
-      checklist: qcChecklist.map((item) => item.id === itemId ? { ...item, status } : item)
-    };
-    await persist(USE_MOCK_API ? { qualityCheck: update } : { qc: update });
-  };
-
-  const completeQc = async (status) => {
-    if (status === 'Pass' && qcChecklist.some((item) => item.status !== 'Pass')) {
-      setError('Mark every Quality Check item as Pass before completing this stage.');
-      return;
-    }
-    const result = {
-      ...qc,
-      inspector: qc.inspector === 'Unassigned' ? (job.serviceAdvisor || 'Workshop Supervisor') : qc.inspector,
-      checkDate: new Date().toISOString().split('T')[0],
-      checklist: qcChecklist,
-      testDriveNotes: qcRoadTest,
-      status
-    };
-    const updated = await persist(USE_MOCK_API
-      ? { qualityCheck: result, status: status === 'Pass' ? 'Ready for Delivery' : 'QC' }
-      : { qc: result });
-    if (updated && status === 'Pass') await completeStage('qc');
-  };
-
   const saveCustomerFeedback = async () => {
     const rating = Number(feedbackRating || 0);
     if (rating < 1 || rating > 5) {
@@ -1013,7 +964,7 @@ export function JobCardWorkspace() {
           {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
           {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
         </span>
-        {!activeTabLocked && !activeTabComplete && activeTab === currentStage && (
+        {!activeTabLocked && !activeTabComplete && activeTab === currentStage && activeTab !== 'qc' && (
           <button type="button" className="job-stage-complete-button" disabled={saving} onClick={() => completeStage(activeTab)}>
             <CheckCircle2 size={15} aria-hidden="true" />
             {saving ? 'Saving…' : activeTab === 'estimate' ? 'Approve & Continue' : activeTab === 'work' ? 'Finish Work & Continue' : activeTab === 'invoice' ? 'Finish Job Card' : 'Complete & Continue'}
@@ -1458,33 +1409,13 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'qc' && (
-        <div className="job-qc-grid grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel job-qc-checklist-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title flex items-center gap-2 text-sm font-extrabold text-content"><ShieldCheck size={16} className="text-primary"/>Quality Check</div>
-            <div className="job-qc-list mt-3 flex flex-col gap-2">
-              {qcChecklist.map((item)=>(
-                <div key={item.id} className="job-qc-row flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
-                  <span className="text-xs font-semibold text-content">{item.item}</span>
-                  <select value={item.status || 'Pending'} onChange={(e)=>updateQcItem(item.id,e.target.value)} className="h-8 rounded-lg border border-line bg-surface px-2 text-[10px] font-bold text-content">
-                    <option>Pending</option><option>Pass</option><option>Fail</option>
-                  </select>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="job-panel job-qc-result-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Road Test & Result</div>
-            <textarea value={qcRoadTest} onChange={(e)=>setQcRoadTest(e.target.value)} rows={5} placeholder="Road test notes / issues found..." className="mt-3 min-h-28 w-full rounded-xl border border-line bg-surface-2 p-3 text-xs text-content"/>
-            <div className="job-qc-actions mt-3 grid grid-cols-2 gap-2">
-              <button onClick={()=>completeQc('Pass')} className="h-10 rounded-xl border-0 bg-emerald-600 text-xs font-bold text-white">QC Passed</button>
-              <button onClick={()=>completeQc('Rework Required')} className="h-10 rounded-xl border-0 bg-red-500 text-xs font-bold text-white">QC Failed</button>
-            </div>
-            <div className="mt-3 rounded-xl bg-surface-2 p-3 text-xs text-secondary">Current: <strong className="text-content">{qc.status || 'Pending'}</strong></div>
-          </section>
-        </div>
+        <JobQualityCheckPanel
+          job={job}
+          canEdit={currentStage === 'qc' && !activeTabLocked && !activeTabComplete}
+          onSaved={() => refreshJobWorkflow()}
+          onCompleted={() => refreshJobWorkflow('qc')}
+        />
       )}
-
 
       {activeTab === 'invoice' && (
         <div className="job-invoice-dashboard">
