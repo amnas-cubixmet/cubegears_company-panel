@@ -576,7 +576,7 @@ export function InvoiceRoutePage() {
 
       {error && <div className="billing-error no-print">{error}</div>}
 
-      {loading && mode === 'edit' ? <div className="billing-empty">Loading…</div> : <>
+      {loading && (mode === 'edit' || mode === 'create') ? <div className="billing-empty">Loading company billing settings…</div> : <>
         <div className="invoice-source-grid no-print">
           <section className="billing-card invoice-seller-card">
             <span className="billing-kicker">SELLER / FROM</span>
@@ -767,13 +767,13 @@ export function InvoiceRoutePage() {
             <button className="bill-btn" onClick={() => update('items', [...form.items, emptyItem()])}><Plus size={16}/>Add Item</button>
           </div>
 
-          <div className="invoice-sale-head">
+          <div className={`invoice-sale-head ${form.invoiceType !== 'gst' ? 'invoice-no-gst' : ''}`}>
             <span>Item Name / Source</span>
-            <span>HSN / SAC</span>
+            {form.invoiceType === 'gst' && <span>HSN / SAC</span>}
             <span>Qty</span>
             <span>Unit</span>
             <span>Price / Unit</span>
-            <span>GST %</span>
+            {form.invoiceType === 'gst' && <span>GST %</span>}
             <span>Amount</span>
             <span></span>
           </div>
@@ -781,10 +781,10 @@ export function InvoiceRoutePage() {
           <div className="invoice-sale-editor">
             {form.items.map((row) => {
               const base = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
-              const rate = form.invoiceType === 'gst' && form.taxMode !== 'none' ? n(row.taxRate) : 0;
+              const rate = form.invoiceType === 'gst' && totals.taxMode !== 'unknown' ? n(row.taxRate) : 0;
               const lineAmount = base + (base * rate / 100);
 
-              return <div className="invoice-sale-row" key={row.id}>
+              return <div className={`invoice-sale-row ${form.invoiceType !== 'gst' ? 'invoice-no-gst' : ''}`} key={row.id}>
                 <div className="invoice-item-main-cell">
                   <select aria-label="Item source" value={row.type} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
                     {itemTypes.map((type) => <option key={type}>{type}</option>)}
@@ -797,13 +797,13 @@ export function InvoiceRoutePage() {
                     : <input aria-label="Item name" value={row.description || ''} onChange={(e) => updateItem(row.id, 'description', e.target.value)} placeholder="Item / service name"/>
                   }
                 </div>
-                <input aria-label="HSN or SAC" value={row.hsnCode || ''} onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value.replace(/[^0-9A-Za-z]/g, ''))} placeholder="HSN / SAC"/>
+                {form.invoiceType === 'gst' && <input aria-label="HSN or SAC" value={row.hsnCode || ''} onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value.replace(/[^0-9A-Za-z]/g, ''))} placeholder="HSN / SAC"/>}
                 <input className="plain-number-input" aria-label="Quantity" inputMode="decimal" value={inputNumber(row.qty) || '1'} onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
                 <select aria-label="Unit" value={row.unit || 'PCS'} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
                   {['PCS','NOS','SET','KG','LTR','MTR','BOX','PAIR','HRS','JOB'].map((unit) => <option key={unit}>{unit}</option>)}
                 </select>
                 <input className="plain-number-input" aria-label="Price per unit" inputMode="decimal" value={inputNumber(row.rate)} onChange={(e) => updateItem(row.id, 'rate', parseDecimal(e.target.value))} placeholder="₹ 0.00"/>
-                <input className="plain-number-input" aria-label="GST rate" inputMode="decimal" value={inputNumber(row.taxRate)} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder="18"/>
+                {form.invoiceType === 'gst' && <input className="plain-number-input" aria-label="GST rate" inputMode="decimal" value={row.taxRate ?? ''} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder="Applicable GST %"/>}
                 <strong className="billing-line-total">{money.format(lineAmount)}</strong>
                 <button aria-label="Remove item" className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
               </div>;
@@ -816,13 +816,12 @@ export function InvoiceRoutePage() {
             <span className="billing-kicker">PAYMENT & TERMS</span>
             <h3>Invoice Terms</h3>
             <div className="invoice-two-col">
-              {form.invoiceType === 'gst' && <label>Tax Type
-                <select value={form.taxMode} onChange={(e) => update('taxMode', e.target.value)}>
-                  <option value="igst">IGST</option>
-                  <option value="cgst_sgst">CGST + SGST</option>
-                  <option value="none">No Tax</option>
-                </select>
-              </label>}
+              {form.invoiceType === 'gst' && (
+                <div className="invoice-tax-mode-note">
+                  <strong>Tax type: {totals.taxMode === 'cgst_sgst' ? 'CGST + SGST' : totals.taxMode === 'igst' ? 'IGST' : 'Select place of supply'}</strong>
+                  <span>Automatically determined from workshop GSTIN and place of supply.</span>
+                </div>
+              )}
               <label>Payment Type
                 <select value={form.paymentType || 'Credit'} onChange={(e) => update('paymentType', e.target.value)}>
                   <option>Credit</option>
@@ -858,8 +857,12 @@ export function InvoiceRoutePage() {
             <h3>Invoice Summary</h3>
             <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal)}</strong></div>
             {totals.documentDiscount > 0 && <div><span>Discount</span><strong>- {money.format(totals.documentDiscount)}</strong></div>}
-            <div><span>Taxable Amount</span><strong>{money.format(totals.taxable)}</strong></div>
-            <div><span>GST</span><strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong></div>
+            <div><span>{form.invoiceType === 'gst' ? 'Taxable Amount' : 'Amount after Discount'}</span><strong>{money.format(totals.taxable)}</strong></div>
+            {form.invoiceType === 'gst' && <>
+              <div><span>CGST</span><strong>{money.format(totals.cgst)}</strong></div>
+              <div><span>SGST</span><strong>{money.format(totals.sgst)}</strong></div>
+              <div><span>IGST</span><strong>{money.format(totals.igst)}</strong></div>
+            </>}
             <div><span>Adjustment</span><strong>{money.format(totals.adjustment)}</strong></div>
             <div className="grand"><span>Total</span><strong>{money.format(totals.total)}</strong></div>
             <div><span>Received</span><strong>{money.format(totals.paid)}</strong></div>
