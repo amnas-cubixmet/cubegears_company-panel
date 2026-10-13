@@ -1,0 +1,362 @@
+/* Account workspace: shared design across Overview, Billing, Storage, Templates and Security.
+   Preserve feature API logic, invoice preview dimensions, storage figures and existing colors.
+   Scoped to account routes; other Company Panel forms are unaffected. */
+
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) {
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+  color:var(--text-primary);
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) *,
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) *::before,
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) *::after {
+  box-sizing:border-box;
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  gap:12px;
+  min-width:0;
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header>div:first-child {min-width:0;flex:1 1 220px}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header h1 {
+  margin:0;
+  font-size:clamp(20px,2vw,25px);
+  line-height:1.3;
+  letter-spacing:-.025em;
+  font-weight:750;
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header p {
+  margin:5px 0 0;
+  max-width:72ch;
+  font-size:12px;
+  color:var(--text-secondary);
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-actions {
+  flex:0 1 auto;
+  min-width:0;
+  align-items:center;
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs {
+  display:flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:6px;
+  width:100%;
+  min-width:0;
+  padding:6px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs::-webkit-scrollbar {display:none}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button {
+  display:inline-flex;
+  flex:1 0 auto;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:max-content;
+  min-height:43px;
+  padding:9px 13px;
+  border:0;
+  border-radius:9px;
+  color:var(--text-secondary);
+  background:transparent;
+  font-size:12px;
+  font-weight:650;
+  line-height:1.4;
+  white-space:nowrap;
+  cursor:pointer;
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button:hover {
+  background:var(--surface-2);
+  color:var(--text-primary);
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button.is-active {
+  color:var(--primary);
+  background:var(--primary-soft);
+}
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button:focus-visible,
+:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) button:focus-visible {
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+
+/* Shared account cards, data labels, buttons. */
+.saas-page.account-billing-page .saas-grid {gap:14px}
+.saas-page.account-billing-page .saas-card,
+.document-templates-page .template-settings-card,
+.document-templates-page .template-preview-card,
+.account-security-page .account-security-card {
+  min-width:0;
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.saas-page.account-billing-page .saas-card-head {gap:12px;margin-bottom:12px}
+.saas-page.account-billing-page .saas-card-head h2 {
+  font-size:15px;
+  line-height:1.45;
+  font-weight:750;
+}
+.saas-page.account-billing-page .saas-card-head>svg {width:19px;height:19px}
+.saas-page.account-billing-page .saas-kicker {font-size:10px;font-weight:750;letter-spacing:.07em}
+.saas-page.account-billing-page .saas-muted,
+.saas-page.account-billing-page .saas-billing-note {font-size:12px;line-height:1.6}
+.saas-page.account-billing-page .saas-price {font-size:27px;margin:5px 0 14px}
+.saas-page.account-billing-page .saas-price span {font-size:12px}
+.saas-page.account-billing-page .saas-details-grid,
+.saas-page.account-billing-page .saas-storage-summary {gap:10px}
+.saas-page.account-billing-page .saas-details-grid>div,
+.saas-page.account-billing-page .saas-storage-summary>div,
+.saas-page.account-billing-page .storage-interval-summary>div {
+  min-width:0;
+  padding:12px;
+  border-radius:10px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+}
+.saas-page.account-billing-page :is(.saas-details-grid,.saas-storage-summary,.storage-interval-summary) span {
+  color:var(--text-secondary);
+  font-size:11px;
+  line-height:1.45;
+}
+.saas-page.account-billing-page :is(.saas-details-grid,.saas-storage-summary,.storage-interval-summary) strong {
+  font-size:14px;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.saas-page.account-billing-page .saas-breakdown>div {padding:11px 0}
+.saas-page.account-billing-page .saas-breakdown span {font-size:12px;line-height:1.45}
+.saas-page.account-billing-page .saas-breakdown strong {font-size:13px}
+.saas-page.account-billing-page .saas-status {font-size:11px;min-height:28px}
+.saas-page.account-billing-page .saas-table :is(th,td) {padding:11px 12px;font-size:12px}
+.saas-page.account-billing-page .saas-template-entry .saas-button {min-height:44px}
+
+/* Storage: readable summary, input controls and media rows. */
+.saas-page.account-billing-page .saas-field>span,
+.saas-page.account-billing-page .storage-custom-range label {font-size:12px;font-weight:650}
+.saas-page.account-billing-page :is(.saas-field input,.saas-storage-actions select,.storage-custom-range input) {
+  min-width:0;
+  max-width:100%;
+  min-height:44px;
+  height:44px;
+  padding:0 12px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-primary);
+  font-size:13px;
+  font-weight:400;
+}
+.saas-page.account-billing-page :is(.saas-button,.storage-range-presets button,.storage-custom-range button,.saas-retry) {
+  min-height:42px;
+  border-radius:9px;
+  font-size:12px;
+  font-weight:650;
+}
+.saas-page.account-billing-page .saas-toggle {font-size:12px;min-height:49px}
+.saas-page.account-billing-page .saas-file-main strong,
+.saas-page.account-billing-page .storage-history-row strong {
+  font-size:12px;
+  overflow-wrap:anywhere;
+}
+.saas-page.account-billing-page .saas-file-main span,
+.saas-page.account-billing-page .saas-file-date,
+.saas-page.account-billing-page .storage-history-row span {font-size:11px;line-height:1.45}
+.saas-page.account-billing-page .saas-media-row {gap:10px;padding:11px;border-radius:9px}
+.saas-page.account-billing-page .saas-icon-button {min-width:36px;min-height:36px}
+.saas-page.account-billing-page .saas-error,
+.saas-page.account-billing-page .saas-loading {font-size:12px;line-height:1.5}
+.saas-page.account-billing-page .storage-history-row {min-height:58px;padding:12px}
+
+/* Template editor: form controls only. Never scale the miniature PDF preview. */
+.document-templates-page .template-settings-title strong {font-size:14px;font-weight:750}
+.document-templates-page .template-settings-title span {font-size:12px;line-height:1.5}
+.document-templates-page .template-control-grid {gap:12px}
+.document-templates-page .template-control-grid label {padding:12px}
+.document-templates-page .template-control-grid label>span {font-size:12px;font-weight:700}
+.document-templates-page .template-control-grid label small {font-size:11px;line-height:1.5}
+.document-templates-page .template-control-grid select,
+.document-templates-page .business-fields-grid input,
+.document-templates-page .custom-template-grid input {
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  height:44px;
+  padding:0 12px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-primary);
+  font-size:13px;
+  font-weight:400;
+}
+.document-templates-page :is(.business-fields-grid textarea,.custom-template-grid textarea) {
+  width:100%;
+  min-width:0;
+  min-height:90px;
+  padding:11px 12px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-primary);
+  font-size:13px;
+  font-weight:400;
+}
+.document-templates-page .business-fields-grid label,
+.document-templates-page .custom-template-grid label {
+  gap:7px;
+  font-size:12px;
+  font-weight:650;
+}
+.document-templates-page .business-subsection-head strong {font-size:13px}
+.document-templates-page .business-subsection-head span,
+.document-templates-page .business-logo-panel small {font-size:11px;line-height:1.5}
+.document-templates-page .business-logo-panel {gap:12px}
+.document-templates-page .business-logo-preview {width:115px;height:115px}
+.document-templates-page :is(.template-upload-button,.template-remove-logo,.template-save-button) {
+  min-height:42px;
+  padding:9px 13px;
+  font-size:12px;
+  font-weight:700;
+}
+.document-templates-page .template-toggle-row {gap:9px}
+.document-templates-page .template-toggle-row label {min-height:42px;padding:8px 12px;font-size:12px}
+.document-templates-page .template-preview-card-head h2 {font-size:14px}
+.document-templates-page .custom-template-maker-head :is(h3,p) {overflow-wrap:anywhere}
+
+/* Security: match the same card/label/input hierarchy as the account editor. */
+.account-security-page .account-security-grid {gap:14px}
+.account-security-page .account-security-card-head {gap:11px;margin-bottom:16px}
+.account-security-page .account-security-card-head>svg {width:20px;height:20px}
+.account-security-page .account-security-card-head strong {font-size:15px;font-weight:750;line-height:1.4}
+.account-security-page .account-security-card-head span {font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+.account-security-page .account-security-form {gap:15px}
+.account-security-page .account-security-form label {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  color:var(--text-secondary);
+  font-size:12px;
+  font-weight:650;
+}
+.account-security-page .account-security-form label>div {
+  width:100%;
+  min-width:0;
+  height:44px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+}
+.account-security-page .account-security-form label>div:focus-within {
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--primary-soft);
+}
+.account-security-page .account-security-form input {
+  flex:1 1 auto;
+  min-width:0;
+  width:100%;
+  min-height:0;
+  height:100%;
+  border:0;
+  outline:0;
+  box-shadow:none;
+  background:transparent;
+  color:var(--text-primary);
+  font-size:13px;
+  font-weight:400;
+}
+.account-security-page .account-security-form input:focus-visible {outline:0}
+.account-security-page .account-security-form label>div>button {
+  flex:0 0 34px;
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border:0;
+  background:transparent;
+  color:var(--text-secondary);
+}
+.account-security-page :is(.account-security-primary,.account-security-secondary) {
+  min-height:44px;
+  padding:10px 16px;
+  font-size:12px;
+  font-weight:700;
+}
+.account-security-page .account-security-info p {font-size:12px;line-height:1.65}
+.account-security-page .account-security-flow span {font-size:12px;line-height:1.5;padding:12px}
+.account-security-page .account-security-message {
+  font-size:12px;
+  line-height:1.6;
+  font-weight:650;
+  overflow-wrap:anywhere;
+}
+
+/* Responsive account layouts: scrolling tabs rather than 6 cramped buttons. */
+@media(max-width:980px) {
+  .saas-page.account-billing-page .saas-grid {grid-template-columns:1fr}
+  .saas-page.account-billing-page .saas-wide {grid-column:auto}
+  .document-templates-page .business-branding-layout {grid-template-columns:1fr}
+}
+@media(max-width:767px) {
+  :is(.saas-page.account-billing-page,.document-templates-page,.account-security-page) {gap:12px}
+  :is(.saas-page.account-billing-page,.document-templates-page,.account-security-page) .account-dashboard-tabs button {
+    flex:0 0 auto;
+    min-height:44px;
+  }
+  .saas-page.account-billing-page .saas-card,
+  .document-templates-page :is(.template-settings-card,.template-preview-card),
+  .account-security-page .account-security-card {padding:14px}
+  .saas-page.account-billing-page .saas-template-entry {
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+  }
+  .saas-page.account-billing-page .saas-template-entry .saas-button {width:100%}
+  .document-templates-page .template-control-grid {grid-template-columns:1fr}
+  .document-templates-page .template-preview-grid {grid-template-columns:1fr}
+  .document-templates-page :is(.business-fields-grid,.custom-template-grid) {grid-template-columns:1fr}
+  .document-templates-page .business-logo-actions {width:100%}
+  .document-templates-page .template-save-button {width:100%}
+  .account-security-page .account-security-grid {grid-template-columns:1fr}
+  .account-security-page .account-security-wide {grid-column:auto}
+  .account-security-page .account-security-flow {grid-template-columns:1fr}
+  .account-security-page .account-security-flow i {transform:rotate(90deg);text-align:center}
+}
+@media(max-width:520px) {
+  .saas-page.account-billing-page :is(.saas-storage-summary,.saas-details-grid,.storage-interval-summary) {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .saas-page.account-billing-page .saas-storage-actions {display:flex;flex-direction:column;align-items:stretch;gap:9px}
+  .saas-page.account-billing-page .saas-storage-actions>* {width:100%!important}
+  .saas-page.account-billing-page .storage-custom-range {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .saas-page.account-billing-page .storage-custom-range button {grid-column:1/-1}
+  .saas-page.account-billing-page .saas-media-row {grid-template-columns:auto 34px minmax(0,1fr) auto}
+  .saas-page.account-billing-page .saas-file-date {grid-column:3;grid-row:2}
+  .saas-page.account-billing-page .saas-icon-button {grid-column:4;grid-row:1/3}
+  .saas-page.account-billing-page .saas-table-wrap {overflow-x:auto}
+  .saas-page.account-billing-page .saas-table {min-width:580px}
+  .document-templates-page .business-logo-panel {align-items:center}
+  .document-templates-page .template-preview-card {min-width:0;overflow:hidden}
+  .document-templates-page :is(.template-control-grid select,.business-fields-grid input,.business-fields-grid textarea,.custom-template-grid input,.custom-template-grid textarea),
+  .account-security-page .account-security-form input,
+  .saas-page.account-billing-page :is(.saas-field input,.saas-storage-actions select,.storage-custom-range input) {
+    font-size:16px;
+  }
+}
