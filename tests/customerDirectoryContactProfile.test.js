@@ -53,8 +53,8 @@ test('profile uses customer name, never displays raw UUID as ID text', () => {
   assert.doesNotMatch(profile, /Customer ID:.*customer\.id/);
   assert.match(profile, /customer-profile-breadcrumb/);
   assert.match(profile, /All Customers/);
-  assert.match(profile, /customer-profile-edit/);
+  assert.match(profile, /customer-profile-action is-secondary/);
   assert.match(profile, /customerContactLinks/);
   assert.match(profile, /Promise\.allSettled/);
-  assert.match(profile, /lastVisitDate = customer\.lastVisit \|\| jobs\[0\]\?\.createdDate \|\| '—'/);
+  assert.match(profile, /lastVisitDate = customerVisitLabel\(customer, jobs\)/);
 });
