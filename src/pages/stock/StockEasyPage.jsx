@@ -205,7 +205,7 @@ export default function StockEasyPage() {
       </section>
 
       <section className="cg-easy-bottom" id="stock-history">
-        <div className="cg-easy-panel-header"><div><h2>Recent movements</h2><p>Received and issued stock history</p></div><a href="#stock-history">Recent movements <History size={14}/></a></div>
+        <div className="cg-easy-panel-header"><div><h2>Recent movements</h2><p>Received and issued stock history</p></div></div>
         <div className="cg-easy-history">{ledger.length ? ledger.slice(0, 5).map((entry) => (
           <div key={entry.id} className="cg-easy-history-row"><div><strong>{entry.partName || entry.itemName || 'Stock Item'}</strong><small>{entry.type || entry.movement_type || 'Movement'}</small></div><b>{number(entry.quantity ?? entry.qty) > 0 ? '+' : ''}{number(entry.quantity ?? entry.qty)}</b></div>
         )) : <p>No stock movements yet.</p>}</div>
