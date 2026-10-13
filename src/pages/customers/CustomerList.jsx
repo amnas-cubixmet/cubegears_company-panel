@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from '../../components/common/Search';
@@ -238,7 +239,7 @@ export const CustomerList = () => {
   };
 
   const handleArchive = async (id) => {
-    if (window.confirm('Archive this customer profile? Customer record will remain in job history.')) {
+    if (await appConfirm('Archive this customer profile? Customer record will remain in job history.')) {
       await customerService.archiveCustomer(id);
       showToast('Customer archived.');
       fetchCustomers();
