@@ -14,6 +14,7 @@ import {
 import { NavLink, useLocation } from 'react-router-dom';
 
 const stockTabs = [
+  { label: 'Simple Stock', path: '/stock', icon: LayoutDashboard },
   { label: 'Overview', path: '/stock/overview', icon: LayoutDashboard },
   { label: 'Parts & Products', path: '/stock/items', icon: Boxes },
   { label: 'Categories', path: '/stock/categories', icon: FolderTree },
@@ -49,6 +50,7 @@ export const StockManagementTabs = () => {
           <NavLink
             key={path}
             to={path}
+            end={path === '/stock'}
             className={({ isActive }) =>
               `stock-management-tab ${isActive ? 'active' : ''}`
             }

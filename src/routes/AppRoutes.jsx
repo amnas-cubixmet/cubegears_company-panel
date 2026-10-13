@@ -33,6 +33,7 @@ import { JobDetails } from '../pages/jobs/JobDetails';
 import { JobStatus } from '../pages/jobs/JobStatus';
 import { JobReports } from '../pages/jobs/JobReports';
 import { StockManagement } from '../pages/stock/StockManagement';
+import StockEasyPage from '../pages/stock/StockEasyPage';
 import { AddStockItem } from '../pages/stock/AddStockItem';
 import { InvoiceList } from '../pages/invoices/InvoiceList';
 import { EWayBillPage } from '../pages/invoices/EWayBillPage';
@@ -175,7 +176,7 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id/history" element={<JobDetails />} />
       <Route path="/jobs/:id/*" element={<JobDetails />} />
 
-      <Route path="/stock" element={<Navigate to="/stock/overview" replace />} />
+      <Route path="/stock" element={<StockEasyPage />} />
       <Route path="/stock/overview" element={<StockManagement section="overview" />} />
       <Route path="/stock/items" element={<StockManagement section="items" />} />
       <Route path="/stock/add" element={<AddStockItem />} />
