@@ -11,6 +11,7 @@ const STATUS = new Set(['Pending', 'Pass', 'Fail']);
 
 export const makeQcDraft = (qc = {}) => ({
   inspector: String(qc?.inspector === 'Unassigned' ? '' : (qc?.inspector || '')).trim(),
+  inspectorId: String(qc?.inspectorId || ''),
   testDriveNotes: String(qc?.testDriveNotes || ''),
   checklist: (Array.isArray(qc?.checklist) && qc.checklist.length
     ? qc.checklist
@@ -73,6 +74,7 @@ export const qcHasErrors = (errors) =>
 
 export const qcPayload = (draft, status) => ({
   inspector: draft.inspector.trim(),
+  inspectorId: String(draft.inspectorId || ''),
   testDriveNotes: draft.testDriveNotes.trim(),
   checklist: draft.checklist.map((item) => ({
     id: item.id,
