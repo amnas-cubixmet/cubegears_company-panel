@@ -13,19 +13,21 @@ export const StockHealthPanel = ({
     <header className="stock-dashboard-panel-title">
       <div>
         <h2>Inventory Health</h2>
-        <p>Current workshop stock availability.</p>
+        <p>How many parts are above minimum stock.</p>
       </div>
-      <Activity size={15} />
+      <Activity size={18} aria-hidden="true" />
     </header>
 
     <div className="stock-health-score">
       <div
         className="stock-health-ring"
-        style={{ '--stock-health': `${stockHealth * 3.6}deg` }}
+        role="img"
+        aria-label={stockHealth === null ? 'No stock data yet' : `${stockHealth}% of inventory items have healthy stock levels`}
+        style={{ '--stock-health': `${(stockHealth ?? 0) * 3.6}deg` }}
       >
         <div>
-          <strong>{stockHealth}%</strong>
-          <span>Healthy</span>
+          <strong>{stockHealth === null ? '—' : `${stockHealth}%`}</strong>
+          <span>{stockHealth === null ? 'No items' : 'Healthy'}</span>
         </div>
       </div>
 
@@ -37,9 +39,9 @@ export const StockHealthPanel = ({
     </div>
 
     <div className="stock-health-footer">
-      <div><span>Pending POs</span><strong>{pendingPOs.length}</strong></div>
-      <div><span>Today Stock In</span><strong>{dashboard?.receivedToday || 0}</strong></div>
-      <div><span>Today Stock Out</span><strong>{dashboard?.issuedToday || 0}</strong></div>
+      <div><span>Pending Orders</span><strong>{pendingPOs.length}</strong></div>
+      <div><span>Receipts Today</span><strong>{dashboard?.receivedToday ?? 0}</strong></div>
+      <div><span>Issues Today</span><strong>{dashboard?.issuedToday ?? 0}</strong></div>
     </div>
   </article>
 );
