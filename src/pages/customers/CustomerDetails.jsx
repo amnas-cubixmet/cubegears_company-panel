@@ -29,6 +29,7 @@ import {
   Plus,
   Wrench,
   Edit,
+  Pencil,
   Archive,
   MoreVertical,
   Calendar,
