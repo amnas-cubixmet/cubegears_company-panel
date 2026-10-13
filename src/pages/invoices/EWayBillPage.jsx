@@ -197,6 +197,27 @@ export function EWayBillPage() {
     }
   };
 
+  const resetForm = async () => {
+    if (!await appConfirm('Reset unsaved changes? Saved E-Way Bill records will not be deleted.')) return;
+    setError('');
+    if (mode === 'edit') await loadOne();
+    else setForm(blankEWayBill());
+  };
+
+  const resetPrepared = async () => {
+    if (!canResetPrepared) return;
+    if (!await appConfirm('Reset this locally prepared record to Draft? This does not cancel a GST portal bill.')) return;
+    setSaving(true);
+    setError('');
+    try {
+      const result = await eWayBillService.resetDraft(form.id);
+      setForm(result);
+      navigate(`/invoices/e-way-bills/${result.id}/edit`, { replace: true });
+    } catch (e) {
+      setError(e?.message || 'Could not reset local draft.');
+    } finally { setSaving(false); }
+  };
+
   const remove = async () => {
     setSaving(true);
     try {
