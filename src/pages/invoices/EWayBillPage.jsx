@@ -8,6 +8,7 @@ import {
   Printer,
   Download,
   Trash2,
+  RotateCcw,
   Truck
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -18,6 +19,7 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
+import { appConfirm } from '../../components/common/appDialogs';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
@@ -60,6 +62,7 @@ export function EWayBillPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const canResetPrepared = form.status === 'Ready for API' && !form.ewayBillNo;
 
   const totals = useMemo(() => calculateEWayTotals(form), [form]);
 
@@ -107,13 +110,13 @@ export function EWayBillPage() {
                 id: `EWI-PREFILL-${index}-${Date.now()}`,
                 productName: item.description || 'Goods',
                 description: item.code || '',
-                hsnCode: '',
+                hsnCode: item.hsnCode || item.hsn_sac || '',
                 qty: Number(item.qty || 1),
-                unit: 'PCS',
+                unit: item.unit || 'PCS',
                 taxableValue: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) - Number(item.discount || 0)),
-                cgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.cgstRate || 0) : '',
-                sgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.sgstRate || 0) : '',
-                igstRate: invoice.taxMode === 'igst' ? Number(invoice.igstRate || 0) : '',
+                cgstRate: invoice.taxMode === 'cgst_sgst' ? Number(item.taxRate || 0) / 2 : '',
+                sgstRate: invoice.taxMode === 'cgst_sgst' ? Number(item.taxRate || 0) / 2 : '',
+                igstRate: invoice.taxMode === 'igst' ? Number(item.taxRate || 0) : '',
                 cessRate: ''
               }));
 
