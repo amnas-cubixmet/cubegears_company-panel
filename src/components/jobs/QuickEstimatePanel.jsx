@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, ChevronDown, ClipboardList, Package, Pencil, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ClipboardList, Download, Package, Pencil, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 import { serviceService } from '../../services/service.service';
 import { stockCatalogService } from '../../services/stockCatalog.service';
@@ -7,6 +7,7 @@ import { EstimateCatalogPicker } from './EstimateCatalogPicker';
 import { EstimateAddCatalogModal } from './EstimateAddCatalogModal';
 import { buildEstimateCatalogSelection } from './estimateNewCatalog';
 import { estimateLineErrors, estimateFormValidation } from './quickEstimateValidation';
+import { latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
@@ -44,9 +45,10 @@ const inspectSuggestions = (findings) => findings.flatMap((item) => {
 
 export function QuickEstimatePanel({
   job, estimates = [], findings = [], canEdit, onSaved, onApprove,
-  onReject, onEditInspection, onGoToWork
+  onReject, onEditInspection, onGoToWork, onDownloadApproved
 }) {
   const latest = estimates.at(-1) || null;
+  const approvedEstimate = latestApprovedEstimate(estimates);
   const [lines, setLines] = useState([]);
   const [discount, setDiscount] = useState('0');
   const [taxPercent, setTaxPercent] = useState('0');
@@ -426,7 +428,15 @@ export function QuickEstimatePanel({
               <small>Save changes first. Approval unlocks Work & Labour.</small>
             </div>
           ) : (
-            <button type="button" className="job-quick-outline" onClick={onGoToWork}>Go to current stage</button>
+            <div className="job-quick-actions">
+              {approvedEstimate && (
+                <button type="button" className="job-quick-approved-download"
+                  onClick={() => onDownloadApproved?.(approvedEstimate)}>
+                  <Download size={16} aria-hidden="true"/> Download Approved PDF
+                </button>
+              )}
+              <button type="button" className="job-quick-outline" onClick={onGoToWork}>Go to current stage</button>
+            </div>
           )}
         </section>
       </div>
