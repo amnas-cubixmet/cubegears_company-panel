@@ -2,14 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2, ClipboardCheck, Save, ShieldCheck, XCircle } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
+import { useAuth } from '../../hooks/useAuth';
 import {
   makeQcDraft, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
 } from './qualityCheckValidation';
 import '../../styles/job-quality-check.css';
 
 export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
+  const { user } = useAuth();
+  const loggedInName = String(user?.name || '').trim();
   const original = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {};
-  const [draft, setDraft] = useState(() => makeQcDraft(original));
+  const [draft, setDraft] = useState(() => makeQcDraft(original, loggedInName));
   const [errors, setErrors] = useState(null);
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -20,10 +23,18 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
 
   useEffect(() => {
     const savedQc = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {};
-    setDraft(makeQcDraft(savedQc));
+    setDraft(makeQcDraft(savedQc, loggedInName));
     setDirty(false);
     setErrors(null);
   }, [job?.id, job?.qc, job?.qualityCheck]);
+
+  // /auth/me may resolve after the QC page mounts. Fill only a blank inspector:
+  // never overwrite an existing saved name or unsaved checklist/notes.
+  useEffect(() => {
+    if (!loggedInName) return;
+    setDraft((current) => current.inspector
+      ? current : { ...current, inspector: loggedInName });
+  }, [loggedInName]);
 
   const summary = qcSummary(draft);
   const change = (update) => {
@@ -151,12 +162,14 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
         <div className="job-qc-field">
           <label htmlFor="job-qc-inspector">QC Inspector <span>*</span></label>
           <input id="job-qc-inspector" type="text" maxLength={120}
-            value={draft.inspector} disabled={!canEdit || busy}
-            placeholder="Enter inspector name"
+            value={draft.inspector} readOnly
+            placeholder="Account name unavailable"
+            aria-readonly="true"
             aria-invalid={Boolean(errors?.inspector)}
-            aria-describedby={errors?.inspector ? 'job-qc-inspector-error' : undefined}
-            onChange={(event) => change({ inspector: event.target.value })}/>
-          {errors?.inspector && <small id="job-qc-inspector-error" className="job-qc-field-error">{errors.inspector}</small>}
+            aria-describedby={errors?.inspector ? 'job-qc-inspector-error' : 'job-qc-inspector-hint'}/>
+          {errors?.inspector
+            ? <small id="job-qc-inspector-error" className="job-qc-field-error">{errors.inspector}</small>
+            : <small id="job-qc-inspector-hint">Auto-filled from the logged-in account. Existing saved inspector names are preserved.</small>}
         </div>
 
         <div className="job-qc-field">
