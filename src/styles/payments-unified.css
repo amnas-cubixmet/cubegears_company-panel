@@ -1,0 +1,218 @@
+/* CubixGear Payments — unified desktop/mobile styling, scoped to Payments only.
+   This layer intentionally replaces legacy 8px typography without changing other pages. */
+.payments-page {min-width:0;width:100%;max-width:100%;color:var(--text-primary)}
+.payments-page *{box-sizing:border-box}
+.payments-page :is(button,input,select):focus-visible {outline:2px solid var(--primary);outline-offset:2px}
+.payments-page :is(button,input,select):disabled {cursor:not-allowed;opacity:.6}
+.payments-page .payments-primary-btn,.payments-page .payments-secondary-btn {
+  display:inline-flex;justify-content:center;align-items:center;gap:8px;
+  min-height:44px;padding:9px 16px;border-radius:10px;
+  font-family:inherit;font-size:13px;font-weight:700;line-height:1.4;cursor:pointer;text-decoration:none;
+}
+.payments-page .payments-primary-btn {background:var(--primary);color:#fff;border:1px solid var(--primary)}
+.payments-page .payments-secondary-btn {background:var(--surface);color:var(--text-primary);border:1px solid var(--border)}
+.payments-page .payments-error {padding:13px 15px;border-radius:10px;font-size:12px;line-height:1.55}
+.payments-page .payments-empty {padding:28px 16px;font-size:13px;line-height:1.6;text-align:center}
+
+.payments-page.payments-dashboard {gap:15px}
+.payments-page.payments-dashboard .payments-dashboard-header {align-items:center;gap:14px;flex-wrap:wrap}
+.payments-page.payments-dashboard .payments-dashboard-header h1 {font-size:24px;line-height:1.25;font-weight:750}
+.payments-page.payments-dashboard .payments-dashboard-header p {font-size:12px;line-height:1.55;max-width:62ch;margin-top:6px}
+.payments-page.payments-dashboard .payments-dashboard-header-actions {gap:10px;flex-wrap:wrap}
+.payments-page.payments-dashboard .payments-dashboard-header-badge {
+  min-height:42px;padding:8px 12px;border-radius:10px;font-size:12px;
+}
+.payments-page.payments-dashboard .payments-dashboard-header .payments-primary-btn {
+  min-height:44px;height:44px;padding:9px 15px;font-size:13px;
+}
+
+/* Compact four-column dashboard summary with readable numbers. */
+.payments-page.payments-dashboard .payments-dashboard-stats {
+  grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+}
+.payments-page.payments-dashboard .payments-dashboard-stat-card {padding:16px;border-radius:12px;min-height:102px}
+.payments-page.payments-dashboard .payments-dashboard-stat-top span {font-size:12px;white-space:normal;line-height:1.35}
+.payments-page.payments-dashboard .payments-dashboard-stat-top strong {
+  font-size:clamp(18px,2vw,25px);line-height:1.3;
+  margin-top:8px;white-space:normal;overflow-wrap:anywhere;letter-spacing:-.015em;
+}
+.payments-page.payments-dashboard .payments-dashboard-stat-top i {
+  width:36px;height:36px;border-radius:9px;
+}
+.payments-page.payments-dashboard .payments-dashboard-stat-card > small {
+  font-size:11px;line-height:1.5;margin-top:8px;
+}
+
+/* Search and filters: outer shell owns a SINGLE visible border. */
+.payments-page.payments-dashboard .payments-dashboard-toolbar {
+  grid-template-columns:minmax(230px,1fr) minmax(150px,180px) minmax(150px,180px) auto auto auto;
+  align-items:center;gap:10px;padding:12px;border-radius:12px;
+}
+.payments-page.payments-dashboard .payments-dashboard-search,
+.payments-page.payments-dashboard .payments-dashboard-filter {
+  display:flex;align-items:center;gap:10px;
+  width:100%;min-width:0;height:44px;padding:0 12px;
+  border:1px solid var(--border);border-radius:9px;background:var(--surface-2);
+}
+.payments-page.payments-dashboard .payments-dashboard-search :is(input),
+.payments-page.payments-dashboard .payments-dashboard-filter select {
+  display:block;flex:1 1 auto;width:100%;min-width:0;max-width:100%;
+  height:100%!important;min-height:0!important;padding:0!important;margin:0!important;
+  border:0!important;border-radius:0!important;
+  outline:none!important;box-shadow:none!important;
+  background:transparent!important;color:var(--text-primary);
+  font-size:13px!important;font-weight:400!important;
+}
+.payments-page.payments-dashboard .payments-dashboard-search :is(input):focus,
+.payments-page.payments-dashboard .payments-dashboard-filter select:focus {
+  outline:none!important;box-shadow:none!important;border:0!important;
+}
+.payments-page.payments-dashboard .payments-dashboard-toolbar :is(.payments-toolbar-clear,.payments-toolbar-refresh) {
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:44px;padding:8px 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);color:var(--text-primary);
+  font-size:12px;font-weight:650;cursor:pointer;white-space:nowrap;
+}
+.payments-page.payments-dashboard .payments-dashboard-result-count {
+  min-height:44px;height:auto;min-width:112px;
+  padding:8px 11px;font-size:12px;gap:5px;border-radius:9px;white-space:nowrap;
+}
+.payments-page.payments-dashboard .payments-dashboard-result-count strong {font-size:13px}
+.payments-page.payments-dashboard .payments-dashboard-section-title {
+  align-items:center;padding:16px 17px;gap:12px;
+}
+.payments-page.payments-dashboard .payments-dashboard-section-title h2 {font-size:15px;line-height:1.35}
+.payments-page.payments-dashboard .payments-dashboard-section-title p {font-size:12px;line-height:1.5;margin-top:4px}
+.payments-page.payments-dashboard .payments-dashboard-section-title > span {
+  min-height:28px;padding:4px 10px;font-size:11px;
+}
+.payments-page.payments-dashboard .payments-dashboard-table {min-width:920px}
+.payments-page.payments-dashboard .payments-dashboard-table th {
+  padding:12px 13px;font-size:11px;letter-spacing:.02em;text-transform:none;
+}
+.payments-page.payments-dashboard .payments-dashboard-table td {
+  padding:12px 13px;font-size:12px;line-height:1.5;
+}
+.payments-page.payments-dashboard .payments-dashboard-table td strong,
+.payments-page.payments-dashboard .payments-dashboard-table td>button:not(.payments-dashboard-view-btn) strong {font-size:12px}
+.payments-page.payments-dashboard .payments-dashboard-table td button:not(.payments-dashboard-view-btn) {
+  display:block;max-width:160px;overflow-wrap:anywhere;
+}
+.payments-page.payments-dashboard .payments-dashboard-status {
+  min-height:28px;padding:5px 10px;font-size:11px;font-weight:700;
+}
+.payments-page.payments-dashboard .payments-dashboard-view-btn {
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  width:auto;min-width:72px;min-height:36px;padding:7px 10px;font-size:11px;font-weight:650;
+}
+.payments-page.payments-dashboard .payments-dashboard-empty {min-height:140px;font-size:13px;gap:9px}
+
+/* Payment entry and detail — readable 44px controls and equal spacing. */
+.payments-page.payments-entry-page,.payments-page.payments-detail-page {gap:16px}
+.payments-page :is(.payments-head) {
+  display:flex;align-items:center;flex-wrap:wrap;gap:14px;
+  padding:18px 20px;border-radius:12px;background:var(--surface);
+}
+.payments-page .payments-head > div {flex:1 1 270px;min-width:0}
+.payments-page .payments-head h1 {font-size:23px;font-weight:750;line-height:1.35}
+.payments-page .payments-head p {font-size:12px;line-height:1.6;max-width:64ch;margin-top:6px}
+.payments-page .payments-kicker {font-size:11px;letter-spacing:.075em;margin-bottom:6px}
+.payments-page .payment-form-card {padding:20px;border-radius:12px}
+.payments-page .payment-form-intro {padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--border)}
+.payments-page .payment-form-intro h2 {margin:0;font-size:16px;font-weight:750}
+.payments-page .payment-form-intro p {margin:5px 0 0;font-size:12px;color:var(--text-muted);line-height:1.5}
+.payments-page .payment-form-grid {grid-template-columns:repeat(2,minmax(0,1fr));column-gap:16px;row-gap:16px}
+.payments-page .payment-form-grid label {gap:7px;min-width:0}
+.payments-page .payment-form-grid label > span {
+  font-size:12px;font-weight:650;line-height:1.45;color:var(--text-secondary);
+}
+.payments-page .payment-form-grid :is(input,select) {
+  display:block;width:100%;min-width:0;max-width:100%;
+  height:44px;min-height:44px;padding:9px 12px;
+  border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);font-size:13px;font-weight:400;line-height:1.45;
+  color:var(--text-primary);
+}
+.payments-page .payment-form-grid :is(input,select):focus {
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);
+}
+.payments-page .payment-form-grid input[readonly] {
+  background:var(--surface);color:var(--text-secondary);
+}
+.payments-page .payment-form-grid small {font-size:11px;line-height:1.5}
+.payments-page .payment-form-confirmation {
+  display:flex;align-items:flex-start;gap:11px;
+  padding:13px;border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text-secondary);font-size:12px;line-height:1.6;
+}
+.payments-page .payment-form-confirmation svg {flex:0 0 17px;color:var(--primary);margin-top:1px}
+.payments-page .payment-form-actions {gap:10px;margin-top:20px;padding-top:17px}
+.payments-page .payment-detail-card {
+  border-radius:12px;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;
+}
+.payments-page .payment-detail-card > div {min-width:0;gap:8px;padding:19px;overflow-wrap:anywhere}
+.payments-page .payment-detail-card span {font-size:12px;line-height:1.4}
+.payments-page .payment-detail-card strong {font-size:14px;font-weight:700;line-height:1.5}
+.payments-page .payment-detail-status {color:var(--primary)}
+.payments-page .payment-detail-status.is-completed {color:var(--success)}
+.payments-page .payment-detail-status.is-refunded {color:var(--danger)}
+.payments-page .payment-detail-status.is-pending {color:var(--warning)}
+
+/* Tablet / narrow desktop: toolbar wraps without squeezing controls. */
+@media(max-width:1150px) {
+  .payments-page.payments-dashboard .payments-dashboard-toolbar {
+    grid-template-columns:minmax(0,1fr) minmax(145px,170px) minmax(145px,170px);
+  }
+  .payments-page.payments-dashboard .payments-dashboard-result-count {min-width:0}
+}
+@media(max-width:900px) {
+  .payments-page.payments-dashboard .payments-dashboard-stats {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px) {
+  .payments-page.payments-dashboard .payments-dashboard-header {align-items:flex-start}
+  .payments-page.payments-dashboard .payments-dashboard-header h1 {font-size:21px}
+  .payments-page.payments-dashboard .payments-dashboard-header-actions {width:100%}
+  .payments-page.payments-dashboard .payments-dashboard-header .payments-primary-btn {flex:1}
+  .payments-page.payments-dashboard .payments-dashboard-toolbar {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .payments-page.payments-dashboard .payments-dashboard-search {grid-column:1/-1}
+  .payments-page.payments-dashboard .payments-dashboard-filter {height:44px}
+  .payments-page.payments-dashboard .payments-dashboard-search :is(input),
+  .payments-page.payments-dashboard .payments-dashboard-filter select {font-size:16px!important}
+  .payments-page.payments-dashboard .payments-toolbar-clear,
+  .payments-page.payments-dashboard .payments-toolbar-refresh {width:100%}
+  .payments-page.payments-dashboard .payments-dashboard-result-count {grid-column:1/-1;min-height:34px}
+  .payments-page.payments-dashboard .payments-dashboard-mobile-list {padding:12px;gap:10px}
+  .payments-page.payments-dashboard .payments-dashboard-mobile-card {padding:14px;border-radius:11px}
+  .payments-page.payments-dashboard .payments-dashboard-mobile-head strong {
+    font-size:13px;line-height:1.45;white-space:normal;overflow-wrap:anywhere;
+  }
+  .payments-page.payments-dashboard .payments-dashboard-mobile-head>div>span {
+    font-size:12px;line-height:1.45;white-space:normal;
+  }
+  .payments-page.payments-dashboard .payments-dashboard-mobile-meta {gap:9px;margin-top:13px}
+  .payments-page.payments-dashboard .payments-dashboard-mobile-meta > div {min-height:56px;padding:10px}
+  .payments-page.payments-dashboard .payments-dashboard-mobile-meta span {font-size:10px;line-height:1.4}
+  .payments-page.payments-dashboard .payments-dashboard-mobile-meta strong {
+    font-size:12px;line-height:1.45;white-space:normal;overflow-wrap:anywhere;
+  }
+  .payments-page.payments-dashboard .payments-dashboard-reference {padding:11px;margin-top:10px}
+  .payments-page.payments-dashboard .payments-dashboard-reference :is(span,strong) {
+    font-size:12px;line-height:1.4;overflow-wrap:anywhere;
+  }
+  .payments-page.payments-dashboard .payments-dashboard-mobile-view {
+    min-height:44px;margin-top:13px;font-size:12px;gap:8px;cursor:pointer;
+  }
+  .payments-page .payments-head {padding:15px}
+  .payments-page .payment-form-card {padding:15px}
+  .payments-page .payment-form-grid,.payments-page .payment-detail-card {grid-template-columns:minmax(0,1fr)}
+  .payments-page .payment-form-grid :is(input,select) {font-size:16px}
+  .payments-page .payment-form-actions {flex-direction:column-reverse}
+  .payments-page .payment-form-actions button {width:100%}
+}
+@media(max-width:440px) {
+  .payments-page.payments-dashboard .payments-dashboard-stat-card {padding:11px;min-height:108px}
+  .payments-page.payments-dashboard .payments-dashboard-stat-top strong {font-size:17px}
+  .payments-page.payments-dashboard .payments-dashboard-stat-card>small {font-size:10px}
+  .payments-page.payments-dashboard .payments-dashboard-header-badge {display:none}
+  .payments-page.payments-dashboard .payments-dashboard-toolbar {gap:8px;padding:10px}
+}
