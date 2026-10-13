@@ -2266,3 +2266,37 @@
     padding:0 8px;
   }
 }
+
+/* Technician Updates: compact Add Image action, accessible caption composer. */
+.cg-job-detail.job-workspace-dashboard .job-work-photo-head-actions {
+  display:flex;align-items:center;justify-content:flex-end;
+  flex-wrap:wrap;gap:9px;min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-photo-head-actions > span {
+  padding:6px 10px;border:1px solid var(--border);border-radius:99px;
+  background:var(--surface-2);color:var(--text-secondary);
+  font-size:11px;font-weight:650;white-space:nowrap;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-photo-add-toggle {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:42px;padding:9px 13px;border:1px solid var(--primary);
+  border-radius:9px;background:var(--primary);color:#fff;
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-photo-add-toggle:disabled {
+  opacity:.55;cursor:not-allowed;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-photo-add-toggle:focus-visible {
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-photo-form {
+  scroll-margin-top:90px;
+}
+@media (max-width:650px) {
+  .cg-job-detail.job-workspace-dashboard .job-work-photo-head-actions {
+    width:100%;justify-content:space-between;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-work-photo-add-toggle {
+    min-height:44px;flex:1 1 120px;
+  }
+}
