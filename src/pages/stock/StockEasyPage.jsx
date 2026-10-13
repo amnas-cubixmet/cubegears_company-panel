@@ -15,7 +15,7 @@ const number = (value) => Number(value) || 0;
 const list = (result) => Array.isArray(result) ? result : (result?.results || []);
 const initialPart = { partName: '', sku: '', brand: '', category: '', unit: 'Piece',
   costPrice: '', sellingPrice: '', minimumStock: '5', location: '' };
-const initialMove = { mode: 'in', itemId: '', quantity: '1', invoiceNo: '', notes: '' };
+const initialMove = { mode: 'in', itemId: '', quantity: '1', invoiceNo: '', notes: '', costPrice: '', sellingPrice: '', priceMode: '' };
 
 function stockState(item) {
   const available = number(item.available ?? (number(item.onHand) - number(item.reserved)));
@@ -37,6 +37,9 @@ export default function StockEasyPage() {
   const [filter, setFilter] = useState('all');
   const [partOpen, setPartOpen] = useState(false);
   const [part, setPart] = useState(initialPart);
+  const [partLookup, setPartLookup] = useState('');
+  const [partMode, setPartMode] = useState('find');
+  const [moveLookup, setMoveLookup] = useState('');
   const [moveOpen, setMoveOpen] = useState(false);
   const [move, setMove] = useState(initialMove);
 
@@ -76,16 +79,43 @@ export default function StockEasyPage() {
   );
   const selected = items.find((item) => String(item.id) === String(move.itemId));
   const selectedAvailable = selected ? number(selected.available ?? (number(selected.onHand) - number(selected.reserved))) : 0;
-
-  const beginMove = (mode, itemId = '') => {
+  const matchingParts = useMemo(() => items.filter((item) =>
+    [item.partName, item.sku, item.barcode, item.brand].join(' ').toLowerCase().includes(partLookup.trim().toLowerCase())
+  ).slice(0, 8), [items, partLookup]);
+  const receiptMatches = useMemo(() => items.filter((item) =>
+    [item.partName, item.sku, item.barcode, item.brand].join(' ').toLowerCase().includes(moveLookup.trim().toLowerCase())
+  ).slice(0, 12), [items, moveLookup]);
+  const receiptPricesDiffer = selected && move.mode === 'in' &&
+    (Number(move.costPrice) !== number(selected.costPrice) || Number(move.sellingPrice) !== number(selected.sellingPrice));
+  const selectMovePart = (item) => {
+    setMove((current) => ({ ...current, itemId: String(item.id),
+      costPrice: String(item.costPrice ?? '0'), sellingPrice: String(item.sellingPrice ?? '0'), priceMode: '' }));
+    setMoveLookup(item.partName || item.name || item.sku || '');
     setError('');
-    setMove({ ...initialMove, mode, itemId: String(itemId) });
+  };
+  const openPartDialog = (lookup = '') => {
+    setError(''); setPart(initialPart); setPartMode('find'); setPartLookup(lookup); setPartOpen(true);
+  };
+
+  const beginMove = (mode, itemId = '', partItem = null) => {
+    setError('');
+    const item = partItem || items.find((row) => String(row.id) === String(itemId));
+    setMove({ ...initialMove, mode, itemId: String(itemId || ''),
+      costPrice: item ? String(item.costPrice ?? 0) : '',
+      sellingPrice: item ? String(item.sellingPrice ?? 0) : '' });
+    setMoveLookup(item?.partName || item?.name || '');
     setMoveOpen(true);
   };
 
   const savePart = async (event) => {
     event.preventDefault();
     if (saving) return;
+    if (!part.partName.trim() || !part.sku.trim() ||
+        part.costPrice === '' || part.sellingPrice === '' ||
+        !Number.isFinite(Number(part.costPrice)) || Number(part.costPrice) < 0 ||
+        !Number.isFinite(Number(part.sellingPrice)) || Number(part.sellingPrice) < 0) {
+      setError('Enter a part name, SKU, valid purchase cost and selling price.'); return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -96,9 +126,11 @@ export default function StockEasyPage() {
       });
       setPartOpen(false);
       setPart(initialPart);
-      setSuccess('Part created. Receive stock to add available quantity.');
+      setPartLookup('');
+      setPartMode('find');
+      setSuccess('Part created. Enter quantity and confirm receipt to add stock.');
       await reload();
-      if (created?.id) beginMove('in', created.id);
+      if (created?.id) beginMove('in', created.id, created);
     } catch (exception) {
       setError(exception?.message || 'Unable to add part.');
     } finally { setSaving(false); }
@@ -114,13 +146,26 @@ export default function StockEasyPage() {
     if (move.mode === 'out' && quantity > selectedAvailable) {
       setError('Not enough available stock for this issue.'); return;
     }
+    if (move.mode === 'in') {
+      if (move.costPrice === '' || move.sellingPrice === '' ||
+          ![move.costPrice, move.sellingPrice].every((value) =>
+            Number.isFinite(Number(value)) && Number(value) >= 0 &&
+            /^\d+(\.\d{1,2})?$/.test(String(value)))) {
+        setError('Enter valid purchase cost and selling price (maximum 2 decimals).'); return;
+      }
+      if (receiptPricesDiffer && !['keep_existing', 'apply_new'].includes(move.priceMode)) {
+        setError('Choose whether old stock and new stock should use the same prices.'); return;
+      }
+    }
     setSaving(true);
     setError('');
     try {
       const payload = {
         itemId: selected.id, quantity: move.quantity,
         notes: move.notes.trim(),
-        ...(move.mode === 'in' ? { invoiceNo: move.invoiceNo.trim() } : {}),
+        ...(move.mode === 'in' ? { invoiceNo: move.invoiceNo.trim(),
+          costPrice: move.costPrice, sellingPrice: move.sellingPrice,
+          priceMode: receiptPricesDiffer ? move.priceMode : 'keep_existing' } : {}),
       };
       if (move.mode === 'in') await stockCatalogService.stockIn(payload);
       else await stockCatalogService.stockOut(payload);
@@ -142,7 +187,7 @@ export default function StockEasyPage() {
         </div>
         <div className="cg-easy-actions">
           <button type="button" className="cg-easy-secondary" onClick={reload} disabled={loading}><RefreshCw size={16}/> Refresh</button>
-          <button type="button" className="cg-easy-primary" onClick={() => { setError(''); setPartOpen(true); }}><Plus size={16}/> Add Part</button>
+          <button type="button" className="cg-easy-primary" onClick={() => openPartDialog()}><Plus size={16}/> Add New Part</button>
         </div>
       </header>
 
@@ -182,7 +227,7 @@ export default function StockEasyPage() {
           </div>
         </div>
         {loading ? <div className="cg-easy-empty">Loading stock...</div>
-          : filtered.length === 0 ? <div className="cg-easy-empty">No matching parts. Add a new part or change the search.</div>
+          : filtered.length === 0 ? <div className="cg-easy-empty">No matching parts. <button type="button" className="cg-easy-inline-add" onClick={() => openPartDialog(query)}><Plus size={15}/> Add New Part</button></div>
           : (
             <div className="cg-easy-table-wrap">
               <table className="cg-easy-table">
