@@ -2052,3 +2052,121 @@ button.customer-data-row {
   .cg-customers .customer-directory-list-heading h2{font-size:15px}
   .cg-customers .customer-directory-list-heading p{font-size:11px}
 }
+
+
+/* One Customers directory: clickable records and dedicated contact actions. */
+.cg-customers .customer-directory-row,
+.cg-customers .customer-directory-card{
+  cursor:pointer;
+  transition:background-color .15s,border-color .15s,box-shadow .15s;
+}
+.cg-customers .customer-directory-row:hover{background:var(--surface-2)}
+.cg-customers .customer-directory-row:focus-visible,
+.cg-customers .customer-directory-card:focus-visible{
+  outline:2px solid var(--primary);
+  outline-offset:-2px;
+}
+.cg-customers .customer-directory-card:hover{
+  border-color:var(--primary)!important;
+  box-shadow:0 2px 12px rgba(15,23,42,.06);
+}
+.cg-customers .customer-directory-phone{font-size:12px;color:var(--text-primary);font-weight:500}
+.cg-customers .customer-directory-contact{
+  display:flex;align-items:center;flex-wrap:wrap;gap:7px;
+  min-width:0;
+}
+.cg-customers .customer-directory-contact__button{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  min-height:40px;padding:0 13px;border:1px solid var(--border);
+  border-radius:9px;color:var(--text-primary);background:var(--surface);
+  font-size:12px;line-height:1.25;font-weight:600;
+  text-decoration:none;white-space:nowrap;cursor:pointer;
+}
+.cg-customers .customer-directory-contact__button.is-call{color:var(--primary)}
+.cg-customers .customer-directory-contact__button.is-whatsapp{
+  color:var(--success,#12854a);
+  background:var(--success-soft,#eaf8ef);
+}
+.cg-customers .customer-directory-contact__button.is-disabled{
+  color:var(--text-muted);background:var(--surface-2);
+  cursor:not-allowed;opacity:.6;
+}
+.cg-customers .customer-directory-contact__button:not(.is-disabled):hover{border-color:currentColor}
+.cg-customers .customer-directory-contact__button:focus-visible{
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+.cg-customers .customer-directory-contact.is-compact{margin-top:8px;gap:5px}
+.cg-customers .customer-directory-contact.is-compact .customer-directory-contact__button{
+  min-height:32px;padding:0 9px;font-size:11px;
+}
+.cg-customers .desktop-customers-table{overflow-x:auto!important;scrollbar-width:thin}
+.cg-customers .desktop-customers-table table{min-width:875px}
+.cg-customers .desktop-customers-table td{vertical-align:middle}
+.cg-customers .desktop-customers-table td:nth-child(2){min-width:178px}
+.cg-customers .desktop-customers-table td:first-child strong{
+  font-size:13px;line-height:1.4;font-weight:600;
+}
+.cg-customers .desktop-customers-table td:first-child span{
+  overflow-wrap:anywhere;font-size:11px;
+}
+
+/* Customer profile header — human-readable name, no UUID in visible content. */
+.cg-customers .customer-profile-breadcrumb{
+  display:flex;align-items:center;flex-wrap:wrap;gap:9px;
+  min-width:0;font-size:12px;color:var(--text-muted);
+}
+.cg-customers .customer-profile-breadcrumb button{
+  display:inline-flex;align-items:center;gap:6px;
+  min-height:36px;padding:0 11px;border:1px solid var(--border);
+  border-radius:9px;color:var(--text-primary);background:var(--surface);
+  font-size:12px;font-weight:600;cursor:pointer;
+}
+.cg-customers .customer-profile-breadcrumb strong{
+  min-width:0;max-width:100%;overflow-wrap:anywhere;color:var(--text-secondary);
+  font-weight:600;
+}
+.cg-customers .customer-profile-header{min-width:0}
+.cg-customers .customer-profile-header h1{font-size:21px!important;line-height:1.35!important;overflow-wrap:anywhere}
+.cg-customers .customer-profile-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+.cg-customers .customer-profile-actions>button{min-height:42px}
+.cg-customers .customer-profile-edit{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:40px;padding:0 13px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);color:var(--text-primary);
+  font-size:12px;font-weight:600;cursor:pointer;
+}
+.cg-customers .customer-contact-action.is-unavailable{color:var(--text-muted);cursor:default}
+.cg-customers .customer-profile-kpis>div{min-width:0}
+.cg-customers .customer-profile-kpis>div>div:last-child{overflow-wrap:anywhere}
+.cg-customers .customer-profile-tabs__rail{scrollbar-width:none;overscroll-behavior-x:contain}
+.cg-customers .customer-profile-tabs__rail::-webkit-scrollbar{display:none}
+.cg-customers .customer-profile-unavailable{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:44px 16px;text-align:center;border:1px solid var(--border);
+  border-radius:14px;background:var(--surface);
+}
+.cg-customers .customer-profile-unavailable h2{margin:0;font-size:18px}
+.cg-customers .customer-profile-unavailable p{margin:0;font-size:13px;color:var(--text-muted)}
+.cg-customers .customer-profile-unavailable>div{display:flex;gap:8px;flex-wrap:wrap}
+.cg-customers .customer-profile-unavailable button{
+  display:inline-flex;align-items:center;gap:6px;min-height:42px;
+  padding:0 14px;border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text-primary);cursor:pointer;font-weight:600;
+}
+@media(max-width:767px){
+  .cg-customers .customer-directory-card .customer-directory-contact{width:100%}
+  .cg-customers .customer-directory-card .customer-directory-contact__button{flex:1 1 108px}
+  .cg-customers .customer-profile-header{padding:14px!important}
+  .cg-customers .customer-profile-header>div:first-child{align-items:stretch!important}
+  .cg-customers .customer-profile-actions{width:100%;justify-content:flex-start;gap:7px}
+  .cg-customers .customer-profile-actions>button:not([title="More Actions"]){
+    flex:1 1 120px;padding:0 10px!important;justify-content:center;
+  }
+  .cg-customers .customer-profile-header>div:nth-child(2){gap:10px!important}
+  .cg-customers .customer-profile-tabs__rail>button{min-height:44px}
+  .cg-customers .customer-profile-breadcrumb{gap:7px}
+}
+@media(max-width:380px){
+  .cg-customers .customer-profile-actions>button:not([title="More Actions"]){flex:1 1 100%}
+  .cg-customers .customer-profile-actions>button[title="More Actions"]{min-width:42px}
+}
