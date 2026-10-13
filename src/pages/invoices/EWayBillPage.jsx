@@ -319,7 +319,7 @@ export function EWayBillPage() {
             {form.status === 'Draft' && !form.ewayBillNo && <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit Draft</button>}
             {canResetPrepared && <button className="bill-btn secondary" disabled={saving} onClick={resetPrepared}><RotateCcw size={16}/>Reset to Draft</button>}
             <button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print</button>
-            <button className="bill-btn" onClick={() => window.print()}><Download size={16}/>Download PDF</button>
+            <button className="bill-btn" onClick={() => window.print()}><Download size={16}/>Save as PDF</button>
             {form.status === 'Draft' && <button className="bill-btn" disabled={saving} onClick={submit}><CheckCircle2 size={16}/>Prepare for API</button>}
           </div>
         </div>
@@ -329,6 +329,18 @@ export function EWayBillPage() {
       </div>
     );
   }
+
+  if (mode === 'edit' && !loading && form.status !== 'Draft') return (
+    <div className="billing-page">
+      <section className="billing-card">
+        <h2>This E-Way Bill is not editable</h2>
+        <p>Only drafts can be edited. Official bills must be managed through the GST portal.</p>
+        {canResetPrepared && <button className="bill-btn" onClick={resetPrepared} disabled={saving}><RotateCcw size={16}/>Reset local draft</button>}
+        <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}`)}>View record</button>
+      </section>
+      {error && <div className="billing-error">{error}</div>}
+    </div>
+  );
 
   return (
     <div className="billing-page">
@@ -342,7 +354,10 @@ export function EWayBillPage() {
               <Printer size={16}/>Preview
             </button>
             <button className="bill-btn" type="button" onClick={() => window.print()}>
-              <Download size={16}/>Download PDF
+              <Download size={16}/>Save as PDF
+            </button>
+            <button className="bill-btn secondary" disabled={saving} onClick={resetForm}>
+              <RotateCcw size={16}/>Reset Form
             </button>
             <button className="bill-btn secondary" disabled={saving} onClick={save}>
               Save Draft
