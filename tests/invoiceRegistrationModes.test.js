@@ -15,8 +15,8 @@ test('invoice type follows workshop GST status, not an editable tax toggle', () 
 });
 
 test('normal invoices do not show GST-only line inputs, tax fields or GSTIN', () => {
-  assert.match(form, /form\.invoiceType === 'gst' && <input aria-label="GST rate"/);
-  assert.match(form, /form\.invoiceType === 'gst' && <input aria-label="HSN or SAC"/);
+  assert.match(form, /form\.invoiceType === 'gst' && <input[^>]*aria-label="GST rate"/);
+  assert.match(form, /form\.invoiceType === 'gst' && <input[^>]*aria-label="HSN or SAC"/);
   assert.match(form, /form\.invoiceType === 'gst' && <span>GST %<\/span>/);
   assert.match(form, /doc\.invoiceType === 'gst' && <span>GSTIN:/);
   assert.match(form, /doc\.invoiceType === 'gst' && taxGroups\.length > 0/);
