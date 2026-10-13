@@ -20,7 +20,7 @@ export function QcInspectorPicker({ staff = [], value = '', inspectorId = '', di
   const rootRef = useRef(null);
   const inputRef = useRef(null);
 
-  useEffect(() => setQuery(String(value || '')), [value]);
+  useEffect(() => { if (value) setQuery(String(value)); }, [value]);
 
   useEffect(() => {
     const close = (event) => {
