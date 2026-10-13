@@ -41,7 +41,7 @@ test('Client restricts images to supported types under five megabytes', () => {
   assert.match(photos, /'image\/jpeg', 'image\/png', 'image\/webp', 'image\/gif'/);
   assert.match(photos, /MAX_SIZE = 5 \* 1024 \* 1024/);
   assert.match(photos, /Choose a photo under 5 MB/);
-  assert.match(photos, /disabled=\{!file \|\| busy \|\| disabled\}/);
+  assert.match(photos, /disabled=\{!file \|\| !caption\.trim\(\) \|\| busy \|\| disabled\}/);
 });
 
 test('Work update notes retain content when save fails and gallery reloads from Django', () => {
