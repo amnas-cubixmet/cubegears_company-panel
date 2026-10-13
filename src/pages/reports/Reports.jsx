@@ -3,6 +3,8 @@ import { AlertCircle, Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { billingService, calculateDocumentTotals } from '../../services/billing.service';
 import { expenseService } from '../../services/expense.service';
+import { branchService } from '../../services/branch.service';
+import { staffService } from '../../services/staff.service';
 import { stockCatalogService } from '../../services/stockCatalog.service';
 import { resourceConfigs } from '../operations/resourceConfigs';
 import {
@@ -62,6 +64,7 @@ export function Reports() {
   const [tab, setTab] = useState('overview');
   const [query, setQuery] = useState('');
   const [raw, setRaw] = useState({ invoices: [], payments: [], expenses: [], stock: [] });
+  const [directory, setDirectory] = useState({ branches: [], staff: [] });
   const [loaded, setLoaded] = useState(initialLoaded);
   const [loading, setLoading] = useState(true);
   const [warnings, setWarnings] = useState([]);
@@ -98,6 +101,7 @@ export function Reports() {
     const result = await Promise.allSettled([
       billingService.list(), paymentService.list(),
       expenseService.getExpenses(), stockCatalogService.getItems(),
+      branchService.getBranches(), staffService.getStaff(),
     ]);
     const names = ['invoices', 'payments', 'expenses', 'stock'];
     const fresh = {};
@@ -111,6 +115,10 @@ export function Reports() {
         issues.push(namedSource[name] + ' could not be loaded.');
       }
     });
+    setDirectory({
+      branches: result[4].status === 'fulfilled' ? listRows(result[4].value) : [],
+      staff: result[5].status === 'fulfilled' ? listRows(result[5].value) : [],
+    });
     fresh.invoices = fresh.invoices.filter((row) =>
       String(row.kind || 'invoice').toLowerCase() === 'invoice').map(fallbackInvoiceTotals);
     setRaw(fresh);
@@ -121,11 +129,11 @@ export function Reports() {
 
   useEffect(() => { load(); }, []);
 
-  const options = useMemo(() => reportFilterOptions(raw), [raw]);
+  const options = useMemo(() => reportFilterOptions(raw, directory), [raw, directory]);
   const rows = useMemo(() => !dateError
-    ? scopedReportRows(raw, from, to, branch, staff)
+    ? scopedReportRows(raw, from, to, branch, staff, directory)
     : { invoices: [], payments: [], expenses: [], stock: [] },
-    [raw, from, to, branch, staff, dateError]);
+    [raw, from, to, branch, staff, directory, dateError]);
   const report = useMemo(() => aggregateReports(rows, loaded), [rows, loaded]);
   const seriesBounds = useMemo(() => {
     if (from && to) return { from, to };
