@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ChevronDown, ClipboardList, Package, Pencil, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
 import { jobService } from '../../services/job.service';
+import { serviceService } from '../../services/service.service';
+import { stockCatalogService } from '../../services/stockCatalog.service';
 import { EstimateCatalogPicker } from './EstimateCatalogPicker';
+import { EstimateAddCatalogModal } from './EstimateAddCatalogModal';
+import { buildEstimateCatalogSelection } from './estimateNewCatalog';
 import { estimateLineErrors, estimateFormValidation } from './quickEstimateValidation';
 
 const emptyLine = (type = 'Labour') => ({
@@ -50,6 +54,9 @@ export function QuickEstimatePanel({
   const [changed, setChanged] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [showValidation, setShowValidation] = useState(false);
+  const [catalogRequest, setCatalogRequest] = useState(null);
+  const [catalogSaving, setCatalogSaving] = useState(false);
+  const [catalogError, setCatalogError] = useState('');
   const formRef = useRef(null);
   const revisedAt = job?.inspection?.revisedAt;
   const stale = !!(latest?.created_at && revisedAt &&
@@ -64,6 +71,8 @@ export function QuickEstimatePanel({
     setChanged(false);
     setFeedback('');
     setShowValidation(false);
+    setCatalogRequest(null);
+    setCatalogError('');
   }, [job?.id, latest?.id, latest?.updated_at, latest?.status]);
 
   const amount = useMemo(() => {
@@ -126,7 +135,7 @@ export function QuickEstimatePanel({
       await onSaved?.();
       setChanged(false);
       setShowValidation(false);
-      setFeedback(draftId ? 'Draft updated.' : 'Estimate draft saved.');
+      setFeedback('Estimate draft saved.');
     } catch (err) {
       setFeedback(err?.message || 'Unable to save estimate.');
     } finally {
@@ -145,10 +154,65 @@ export function QuickEstimatePanel({
       setBusy(false);
     }
   };
-  const addLine = (type) => {
-    setLines((current) => current.length >= 75 ? current : [...current, emptyLine(type)]);
+  const addLine = (type, catalogItem = null) => {
+    setLines((current) => current.length >= 75 ? current : [
+      ...current,
+      { ...emptyLine(type), ...(catalogItem || {}) }
+    ]);
     setChanged(true);
     setFeedback('');
+  };
+
+  const openCatalogCreate = (kind, lineKey = null, name = '') => {
+    if (!canEdit || busy || catalogSaving) return;
+    if (!lineKey && lines.length >= 75) return;
+    setCatalogError('');
+    setCatalogRequest({ kind, lineKey, name });
+  };
+
+  const createCatalogItem = async (draft) => {
+    if (!catalogRequest || catalogSaving || !canEdit) return;
+    setCatalogSaving(true);
+    setCatalogError('');
+    try {
+      const created = draft.kind === 'part'
+        ? await stockCatalogService.createItem({
+            partName: draft.name.trim(),
+            sku: draft.sku.trim(),
+            brand: draft.brand.trim(),
+            costPrice: Number(draft.costPrice),
+            sellingPrice: Number(draft.price),
+            unit: 'Piece',
+            minimumStock: 0,
+            onHand: 0,
+          })
+        : await serviceService.createService({
+            name: draft.name.trim(),
+            code: 'SVC-' + Date.now().toString(36).toUpperCase() + '-' +
+              Math.random().toString(36).slice(2, 7).toUpperCase(),
+            price: Number(draft.price),
+            is_active: true,
+          });
+
+      const selection = buildEstimateCatalogSelection(draft, created);
+      if (!selection.catalogId) {
+        throw new Error('Product was created but its reference was not returned. Refresh the catalogue before retrying.');
+      }
+      if (catalogRequest.lineKey) {
+        selectCatalog(catalogRequest.lineKey, selection);
+      } else {
+        addLine(selection.type, selection);
+      }
+      setCatalogRequest(null);
+      setCatalogError('');
+      setFeedback(draft.kind === 'part'
+        ? 'New spare part saved in Stock and added to the estimate.'
+        : 'New work saved in Services and added to the estimate.');
+    } catch (error) {
+      setCatalogError(error?.message || 'Could not create the catalogue item.');
+    } finally {
+      setCatalogSaving(false);
+    }
   };
   const removeLine = (key) => {
     setLines((current) => current.filter((line) => line.key !== key));
@@ -185,6 +249,7 @@ export function QuickEstimatePanel({
               disabled={!canEdit || busy}
               onChange={(value) => edit(line.key, 'description', value)}
               onSelect={(item) => selectCatalog(line.key, item)}
+              onAddNew={(name) => openCatalogCreate(part ? 'part' : 'service', line.key, name)}
             />
             {errors.description && <small className="job-quick-field-error">{errors.description}</small>}
             {line.catalogId && (
@@ -275,9 +340,15 @@ export function QuickEstimatePanel({
                 <h4><Wrench size={16} aria-hidden="true"/> Work & Labour</h4>
                 <p>{money(amount.work)} · {lines.filter((item) => item.type !== 'Part').length} items</p>
               </div>
-              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy || lines.length >= 75} onClick={() => addLine('Labour')}>
-                <Plus size={15} aria-hidden="true"/> Add Work
-              </button>}
+              {canEdit && <div className="job-quick-group-actions">
+                <button type="button" className="job-quick-add-button" disabled={busy || lines.length >= 75} onClick={() => addLine('Labour')}>
+                  <Plus size={15} aria-hidden="true"/> Add Work
+                </button>
+                <button type="button" className="job-quick-add-button is-catalog-add" disabled={busy || lines.length >= 75}
+                  onClick={() => openCatalogCreate('service')}>
+                  <Plus size={15} aria-hidden="true"/> Add New Work
+                </button>
+              </div>}
             </div>
             <div className="job-quick-items">
               {lines.filter((line) => line.type !== 'Part').map(renderItem)}
@@ -292,9 +363,15 @@ export function QuickEstimatePanel({
                 <h4><Package size={16} aria-hidden="true"/> Spare Parts</h4>
                 <p>{money(amount.parts)} · {lines.filter((item) => item.type === 'Part').length} items</p>
               </div>
-              {canEdit && <button type="button" className="job-quick-add-button" disabled={busy || lines.length >= 75} onClick={() => addLine('Part')}>
-                <Plus size={15} aria-hidden="true"/> Add Part
-              </button>}
+              {canEdit && <div className="job-quick-group-actions">
+                <button type="button" className="job-quick-add-button" disabled={busy || lines.length >= 75} onClick={() => addLine('Part')}>
+                  <Plus size={15} aria-hidden="true"/> Add Part
+                </button>
+                <button type="button" className="job-quick-add-button is-catalog-add" disabled={busy || lines.length >= 75}
+                  onClick={() => openCatalogCreate('part')}>
+                  <Plus size={15} aria-hidden="true"/> Add New Part
+                </button>
+              </div>}
             </div>
             <div className="job-quick-items">
               {lines.filter((line) => line.type === 'Part').map(renderItem)}
@@ -339,7 +416,7 @@ export function QuickEstimatePanel({
               {showValidation && validation && <p className="job-quick-invalid" role="alert">{validation}</p>}
               <button type="button" className="job-quick-primary"
                 disabled={busy} onClick={save}>
-                {busy ? 'Please wait…' : latest?.status === 'Draft' && !stale ? 'Update Draft' : 'Save Draft'}
+                {busy ? 'Please wait…' : 'Save Draft'}
               </button>
               <button type="button" className="job-quick-approve"
                 disabled={busy || !latest || changed || stale || latest.status === 'Rejected'}
@@ -353,6 +430,14 @@ export function QuickEstimatePanel({
           )}
         </section>
       </div>
+
+      <EstimateAddCatalogModal
+        request={catalogRequest}
+        saving={catalogSaving}
+        error={catalogError}
+        onClose={() => { if (!catalogSaving) setCatalogRequest(null); }}
+        onCreate={createCatalogItem}
+      />
 
       <details className="job-quick-history">
         <summary>Estimate History ({estimates.length}) <ChevronDown size={15} aria-hidden="true"/></summary>

@@ -367,3 +367,96 @@
 .cg-job-detail .job-quick-line-fields label:has(.job-quick-field-error){
   align-self:stretch;
 }
+
+
+/* Search & Select and persistent Add New actions for both Estimate sections. */
+.cg-job-detail .job-quick-group-actions{
+  display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;
+  min-width:0;
+}
+.cg-job-detail .job-quick-group-actions .job-quick-add-button{
+  min-height:40px;
+}
+.cg-job-detail .job-quick-group-actions .job-quick-add-button.is-catalog-add{
+  border-color:var(--primary);
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+.cg-job-detail .job-quick-group-actions .job-quick-add-button.is-catalog-add:hover:not(:disabled){
+  background:var(--primary-soft);
+  border-color:var(--primary);
+}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new{
+  display:flex;align-items:center;justify-content:flex-start;gap:10px;
+  margin-top:5px;padding:11px;
+  border:1px dashed var(--primary);
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new > svg{flex:0 0 17px}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new strong{
+  color:var(--primary);font-size:12px;
+}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new small{
+  color:var(--text-secondary);
+}
+.job-estimate-create-form{display:flex;flex-direction:column;gap:15px;min-width:0}
+.job-estimate-create-form *{box-sizing:border-box}
+.job-estimate-create-intro,.job-estimate-create-note{
+  margin:0;font-size:12px;line-height:1.6;color:var(--text-secondary);
+}
+.job-estimate-create-note{
+  padding:11px 12px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+}
+.job-estimate-create-form label{
+  display:flex;flex-direction:column;gap:7px;min-width:0;
+  font-size:12px;line-height:1.4;font-weight:600;color:var(--text-secondary);
+}
+.job-estimate-create-two{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;
+}
+.job-estimate-create-form :is(input,select){
+  width:100%;min-width:0;min-height:43px;
+  padding:10px 12px;border:1px solid var(--border);border-radius:10px;
+  background:var(--surface);color:var(--text-primary);
+  font-size:13px;font-weight:400;font-family:inherit;
+}
+.job-estimate-create-form :is(input,select):focus-visible{
+  outline:2px solid var(--primary);outline-offset:1px;
+}
+.job-estimate-create-form [aria-invalid="true"]{
+  border-color:var(--danger);
+}
+.job-estimate-create-form label small,.job-estimate-create-error{
+  font-size:11px;line-height:1.45;font-weight:500;color:var(--danger);
+}
+.job-estimate-create-error{
+  margin:0;padding:10px 12px;border:1px solid var(--danger);
+  border-radius:9px;background:var(--surface);font-size:12px;
+}
+.job-estimate-create-actions{
+  display:flex;align-items:center;justify-content:flex-end;gap:9px;
+  padding-top:8px;border-top:1px solid var(--border);
+}
+.job-estimate-create-actions button{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:44px;padding:0 16px;border-radius:10px;
+  font-size:12px;font-weight:600;cursor:pointer;
+}
+.job-estimate-create-actions .job-estimate-create-cancel{
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text-primary);
+}
+.job-estimate-create-actions .job-estimate-create-save{
+  background:var(--primary);border:1px solid var(--primary);color:#fff;
+}
+.job-estimate-create-actions button:disabled{opacity:.65;cursor:not-allowed}
+@media(max-width:650px){
+  .cg-job-detail .job-quick-group-actions{width:100%;justify-content:stretch}
+  .cg-job-detail .job-quick-group-actions .job-quick-add-button{
+    flex:1 1 120px;min-height:44px;width:auto;
+  }
+  .job-estimate-create-two{grid-template-columns:1fr;gap:13px}
+  .job-estimate-create-form :is(input,select){font-size:16px}
+  .job-estimate-create-actions button{flex:1}
+}
