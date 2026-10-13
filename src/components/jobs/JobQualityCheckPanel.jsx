@@ -163,17 +163,18 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
           </div>
         </header>
 
-        <div className="job-qc-field">
-          <label htmlFor="job-qc-inspector">QC Inspector <span>*</span></label>
-          <input id="job-qc-inspector" type="text" maxLength={120}
-            value={inspectorName} readOnly
-            placeholder="Account name unavailable"
-            aria-readonly="true"
-            aria-invalid={Boolean(errors?.inspector)}
-            aria-describedby={errors?.inspector ? 'job-qc-inspector-error' : 'job-qc-inspector-hint'}/>
+        <div className="job-qc-field job-qc-inspector-display">
+          <span id="job-qc-inspector-label" className="job-qc-inspector-label">
+            QC Inspector <span aria-hidden="true">*</span>
+          </span>
+          <output className="job-qc-inspector-name" aria-labelledby="job-qc-inspector-label">
+            {inspectorName || 'Account name unavailable'}
+          </output>
           {errors?.inspector
-            ? <small id="job-qc-inspector-error" className="job-qc-field-error">{errors.inspector}</small>
-            : <small id="job-qc-inspector-hint">Auto-filled from your logged-in account. Saved QC records retain their original inspector when read-only.</small>}
+            ? <small id="job-qc-inspector-error" className="job-qc-field-error" role="alert">{errors.inspector}</small>
+            : <small id="job-qc-inspector-hint">{canEdit
+              ? 'Automatically assigned from your login.'
+              : 'Inspector recorded when this QC was saved.'}</small>}
         </div>
 
         <div className="job-qc-field">
