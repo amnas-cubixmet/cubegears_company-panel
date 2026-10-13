@@ -3418,3 +3418,20 @@
 .invoice-print-sheet.invoice-no-gst .invoice-sale-table-total {
   grid-template-columns: 28px minmax(160px, 2fr) 72px 70px 115px 130px;
 }
+
+
+/* B2C service bill: simpler customer-facing presentation. Legal GST fields remain
+   available on taxable supplies; tax/serial numbers are not suppressed. */
+.invoice-print-sheet.invoice-consumer-bill .invoice-creative-title {
+  font-size: 20px;
+  letter-spacing: -.02em;
+}
+.invoice-print-sheet.invoice-consumer-bill .invoice-creative-docmeta strong {
+  font-size: 12px;
+}
+.invoice-print-sheet.invoice-consumer-bill .invoice-sale-info {
+  gap: 10px;
+}
+.invoice-print-sheet.invoice-consumer-bill .invoice-sale-amounts .grand {
+  font-weight: 800;
+}
