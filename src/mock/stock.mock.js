@@ -320,7 +320,9 @@ export const addMockStockMovement = (payload) => {
     branch: payload.branch || 'Main Garage Branch',
     jobRef: payload.jobRef || 'REF-GENERAL',
     user: payload.user || 'Current User',
-    notes: payload.notes || ''
+    notes: payload.notes || '',
+    unit_cost: payload.unitCost ?? item?.costPrice ?? 0,
+    unit_selling_price: payload.unitSellingPrice ?? item?.sellingPrice ?? 0
   };
 
   stockLedgerMock.unshift(newMov);
