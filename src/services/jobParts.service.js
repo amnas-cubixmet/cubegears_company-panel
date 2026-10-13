@@ -401,17 +401,66 @@ export const buyOutsideJobPart = async (jobId, payload) => {
   const previous = workflow.outsideParts || [];
   const found = previous.find((entry) => entry.requestId === payload.requestId);
   if (found) return found;
-  const purchased = {
-    ...payload,
-    id: `OUT-${Date.now()}`,
-    totalCost: (Number(payload.quantity) * Number(payload.unitCost)).toFixed(2),
-    totalSelling: (Number(payload.quantity) * Number(payload.sellingPrice)).toFixed(2),
-    usedAt: now(), createdBy: 'Current User'
+  const requested = {
+    ...payload, id: `OUT-${Date.now()}`, status: 'Pending Approval',
+    quotedTotal: (Number(payload.quantity) * Number(payload.unitCost)).toFixed(2),
+    totalCost: '0.00', totalSelling: '0.00',
+    createdAt: now(), createdBy: 'Current User'
   };
   await jobService.updateJob(jobId, {
-    partsWorkflow: { ...workflow, outsideParts: [purchased, ...previous] }
+    partsWorkflow: { ...workflow, outsideParts: [requested, ...previous] }
   });
-  return purchased;
+  return requested;
+};
+
+export const decideOutsideJobPart = async (jobId, purchaseId, decision) => {
+  if (!USE_MOCK_API) {
+    return apiClient.post(`/job-cards/${jobId}/outside-parts/${purchaseId}/decision`, { decision });
+  }
+  const job = await jobService.getJobById(jobId);
+  const old = job?.partsWorkflow || {};
+  const purchase = old.outsideParts?.find((item) => item.id === purchaseId);
+  if (!purchase || purchase.status !== 'Pending Approval') throw new Error('Request is no longer pending approval.');
+  const changed = { ...purchase, status: decision === 'approve' ? 'Approved' : 'Rejected', decisionAt: now() };
+  await jobService.updateJob(jobId, {
+    partsWorkflow: { ...old, outsideParts: old.outsideParts.map((item) => item.id === purchaseId ? changed : item) }
+  });
+  return changed;
+};
+
+export const completeOutsideJobPart = async (jobId, purchaseId, form) => {
+  if (!USE_MOCK_API) {
+    const payload = new FormData();
+    payload.append('invoiceNo', form.invoiceNo);
+    payload.append('unitCost', String(form.unitCost));
+    payload.append('bill', form.bill);
+    return apiClient.post(`/job-cards/${jobId}/outside-parts/${purchaseId}/complete`, payload);
+  }
+  const job = await jobService.getJobById(jobId);
+  const old = job?.partsWorkflow || {};
+  const purchase = old.outsideParts?.find((item) => item.id === purchaseId);
+  if (!purchase || purchase.status !== 'Approved') throw new Error('Approval is required.');
+  if (!form.bill) throw new Error('Supplier invoice file is required.');
+  const qty = Number(purchase.quantity);
+  const actualCost = Number(form.unitCost);
+  if (qty * actualCost > Number(purchase.quotedTotal)) throw new Error('Actual amount exceeds approved quote.');
+  const result = {
+    ...purchase, status: 'Purchased', invoiceNo: form.invoiceNo,
+    unitCost: String(actualCost), totalCost: (qty * actualCost).toFixed(2),
+    totalSelling: (qty * Number(purchase.sellingPrice)).toFixed(2),
+    usedAt: now(), billId: 'demo-upload'
+  };
+  await jobService.updateJob(jobId, {
+    partsWorkflow: { ...old, outsideParts: old.outsideParts.map((item) => item.id === purchaseId ? result : item) }
+  });
+  return result;
+};
+
+export const downloadOutsidePartBill = async (jobId, purchaseId) => {
+  if (USE_MOCK_API) throw new Error('Supplier bill downloads are not available in demo mode.');
+  return apiClient.get(`/job-cards/${jobId}/outside-parts/${purchaseId}/bill`, {
+    responseType: 'blob'
+  });
 };
 
 export const jobPartsService = {
@@ -423,7 +472,10 @@ export const jobPartsService = {
   inward: inwardPurchaseOrder,
   cancelRequiredPart,
   getOutsideJobParts,
-  buyOutsideJobPart
+  buyOutsideJobPart,
+  decideOutsideJobPart,
+  completeOutsideJobPart,
+  downloadOutsidePartBill
 };
 
 export default jobPartsService;
