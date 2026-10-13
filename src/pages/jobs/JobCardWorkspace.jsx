@@ -852,6 +852,12 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
+      <JobTotalCostPanel
+        jobId={job.id}
+        refreshVersion={timerRefreshVersion}
+        refreshOnTab={activeTab}
+      />
+
       {activeTab !== 'overview' && !showWorkTools && (
         <>
       <div className="job-workspace-toolbar">
@@ -1260,8 +1266,6 @@ export function JobCardWorkspace() {
             onChanged={() => setTimerRefreshVersion((value) => value + 1)}
           />
 
-          <JobTotalCostPanel jobId={job.id} refreshVersion={timerRefreshVersion} />
-
           <JobWorkerAssignments
             key={timerRefreshVersion}
             jobId={job.id}
@@ -1308,7 +1312,14 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'parts' && (
-        <JobPartsWorkflow jobId={job.id} assignedTo={job.assignedEmployeeName || ''} onJobUpdated={load}/>
+        <JobPartsWorkflow
+          jobId={job.id}
+          assignedTo={job.assignedEmployeeName || ''}
+          onJobUpdated={() => {
+            setTimerRefreshVersion((value) => value + 1);
+            return load();
+          }}
+        />
       )}
 
       {activeTab === 'estimate' && (
