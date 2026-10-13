@@ -1,14 +1,34 @@
 import React from 'react';
-import { BarChart3, IndianRupee, Package, ReceiptText, WalletCards } from 'lucide-react';
+import { TrendingUp, IndianRupee, Package, ReceiptText, WalletCards, Landmark } from 'lucide-react';
 
-export const ReportStats=({report,formatMoney})=>{
- const cards=[
-  ['Sales',formatMoney(report.sales),report.invoiceRows.length+' invoices',ReceiptText],
-  ['Collected',formatMoney(report.collected),report.paymentRows.length+' payments',WalletCards],
-  ['Expenses',formatMoney(report.expenseTotal),report.expenseRows.length+' expenses',IndianRupee],
-  ['Net Cash',formatMoney(report.netCash),'Collections − expenses',BarChart3],
-  ['Outstanding',formatMoney(report.outstanding),'Invoice balance',ReceiptText],
-  ['Stock Value',formatMoney(report.stockValue),report.lowStock.length+' low-stock items',Package],
- ];
- return <section className="reports-dashboard-stats">{cards.map(([label,value,note,Icon])=><article key={label}><div><span>{label}</span><strong>{value}</strong><small>{note}</small></div><i><Icon size={15}/></i></article>)}</section>;
+export const ReportStats = ({ report, formatMoney }) => {
+  const cards = [
+    ['Total Billed', report.available.invoices ? formatMoney(report.sales) : '—',
+      report.invoiceRows.length + ' finalized invoices', ReceiptText, 'blue'],
+    ['Collections', report.available.payments ? formatMoney(report.collected) : '—',
+      report.paymentRows.length + ' completed payments', WalletCards, 'green'],
+    ['Expenses', report.available.expenses ? formatMoney(report.expenseTotal) : '—',
+      report.expenseRows.length + ' expense entries', IndianRupee, 'orange'],
+    ['Net Cash Flow', report.available.payments && report.available.expenses
+      ? formatMoney(report.netCash) : '—', 'Collections less expenses', TrendingUp, 'purple'],
+    ['Invoice Balance', report.available.invoices ? formatMoney(report.outstanding) : '—',
+      'Due from selected invoices', Landmark, 'red'],
+    ['Stock Value', report.available.stock && report.comparable ? formatMoney(report.stockValue) : '—',
+      report.comparable ? report.lowStock.length + ' low-stock items · current snapshot'
+        : 'Not staff / branch scoped', Package, 'neutral'],
+  ];
+  return (
+    <section className="reports-dashboard-stats" aria-label="Report performance summary">
+      {cards.map(([label, value, note, Icon, tone]) => (
+        <article key={label} className={'is-' + tone}>
+          <div className="reports-dashboard-stat-main">
+            <span>{label}</span>
+            <strong title={value}>{value}</strong>
+            <small>{note}</small>
+          </div>
+          <i aria-hidden="true"><Icon size={19}/></i>
+        </article>
+      ))}
+    </section>
+  );
 };
