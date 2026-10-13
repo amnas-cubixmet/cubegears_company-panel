@@ -5,6 +5,7 @@ const DOCS_KEY = 'cubixgear:billing-documents';
 const INVENTORY_KEY = 'cubixgear:inventory';
 const STOCK_LEDGER_KEY = 'cubixgear:stock-ledger';
 const JOB_PREFILL_KEY = 'cubixgear:invoice-job-prefill';
+import { indiaTaxMode } from '../utils/indiaGst';
 
 const seedDocuments = [
   {
@@ -143,7 +144,7 @@ export const blankBillingDocument = (kind = 'invoice') => {
     invoiceType: 'regular',
     status: 'Draft',
     date: today(),
-    seller: { name: 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '32' },
+    seller: { name: 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '' },
     customer: { name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
     vehicle: { registration: '', makeModel: '', odometer: '', vin: '', ...(prefill?.vehicle || {}) },
     jobCardNo: prefill?.jobNumber || prefill?.jobId || '',
@@ -152,7 +153,7 @@ export const blankBillingDocument = (kind = 'invoice') => {
     transportation: { vehicleNo: '', transporterName: '', ...(prefill?.transportation || {}) },
     notes: prefill?.jobId ? `Created from Job Card ${prefill.jobNumber || prefill.jobId}` : '',
     items: Array.isArray(prefill?.items)
-      ? clone(prefill.items).map((item) => ({ unit: 'PCS', hsnCode: '', taxRate: 18, ...item }))
+      ? clone(prefill.items).map((item) => ({ unit: 'PCS', hsnCode: '', taxRate: '', ...item }))
       : [],
     discount: 0,
     adjustment: '',
@@ -181,27 +182,25 @@ export const calculateDocumentTotals = (doc) => {
   let igst = 0;
   const taxGroups = new Map();
 
-  if (doc.invoiceType === 'gst' && doc.taxMode !== 'none') {
+  const supplier = String(doc.seller?.gstin || '').slice(0, 2) || doc.seller?.stateCode || '';
+  const pos = String(doc.customer?.placeOfSupply || doc.customer?.stateCode || '').slice(0, 2);
+  const taxMode = doc.invoiceType === 'gst' ? indiaTaxMode(true, supplier, pos) : 'none';
+  if (taxMode !== 'none' && taxMode !== 'unknown') {
     rows.forEach(({ item, taxable: lineTaxable }) => {
       const adjustedTaxable = lineTaxable * ratio;
-      const fallbackRate = doc.taxMode === 'igst'
-        ? Number(doc.igstRate || 0)
-        : Number(doc.cgstRate || 0) + Number(doc.sgstRate || 0);
-      const rate = item.taxRate === '' || item.taxRate == null
-        ? fallbackRate
-        : Number(item.taxRate || 0);
+      const rate = Number(item.taxRate || 0);
       const tax = adjustedTaxable * rate / 100;
 
-      if (doc.taxMode === 'igst') {
+      if (taxMode === 'igst') {
         igst += tax;
       } else {
         cgst += tax / 2;
         sgst += tax / 2;
       }
 
-      const key = `${doc.taxMode}:${rate}`;
+      const key = `${taxMode}:${rate}`;
       const current = taxGroups.get(key) || {
-        type: doc.taxMode === 'igst' ? 'IGST' : 'CGST + SGST',
+        type: taxMode === 'igst' ? 'IGST' : 'CGST + SGST',
         rate,
         taxable: 0,
         tax: 0
@@ -227,6 +226,7 @@ export const calculateDocumentTotals = (doc) => {
     cgst,
     sgst,
     igst,
+    taxMode,
     taxGroups: Array.from(taxGroups.values()),
     adjustment,
     rounding: adjustment,
@@ -302,6 +302,10 @@ export const downloadBillingPdf = async (savedInvoice) => {
 
 export const billingService = {
   downloadPdf: downloadBillingPdf,
+  async getGstContext() {
+    if (!USE_MOCK_API) return apiClient.get('/billing/documents/gst-context');
+    return { registered: false, gstin: '', supplierState: '', companyName: 'Sample Workshop' };
+  },
   async list(params = {}) {
     if (!USE_MOCK_API) return apiClient.get('/billing/documents', { params });
     return read(DOCS_KEY, seedDocuments);
