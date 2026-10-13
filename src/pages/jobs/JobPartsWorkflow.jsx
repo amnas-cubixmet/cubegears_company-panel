@@ -441,7 +441,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
                   </div>
                 </article>
               );
-            }            ))}
+            })}
           </div>
         ) : (
           <div className="job-parts-outside-empty">
