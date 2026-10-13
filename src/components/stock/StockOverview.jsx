@@ -1,9 +1,11 @@
 import React from 'react';
+import { ArrowRight, Plus } from 'lucide-react';
 import { StockAttentionPanel } from './StockAttentionPanel';
 import { StockHealthPanel } from './StockHealthPanel';
 import { StockOverviewStats } from './StockOverviewStats';
 import { StockQuickActions } from './StockQuickActions';
 import { StockRecentMovementPanel } from './StockRecentMovementPanel';
+import { stockHealthGroups } from '../../utils/stockOverview';
 
 export const StockOverview = ({
   dashboard,
@@ -13,51 +15,35 @@ export const StockOverview = ({
   formatMoney,
   onNavigate,
 }) => {
-  const lowItems = items.filter(
-    (item) => Number(item.onHand || 0) > 0 && Number(item.available || 0) <= Number(item.minimumStock || 0),
-  );
-  const outItems = items.filter((item) => Number(item.onHand || 0) <= 0);
+  const { lowItems, outItems, healthyItems, healthPercentage } = stockHealthGroups(items);
   const pendingPOs = purchases.filter((po) =>
     ['Draft', 'Ordered', 'Partially Received'].includes(po.status),
   );
-  const healthyItems = Math.max(0, items.length - lowItems.length - outItems.length);
-  const stockHealth = items.length
-    ? Math.round((healthyItems / items.length) * 100)
-    : 100;
 
   return (
     <div className="stock-management-view stock-dashboard-overview">
-      <StockOverviewStats
-        dashboard={dashboard}
-        items={items}
-        lowItems={lowItems}
-        outItems={outItems}
-        formatMoney={formatMoney}
-      />
+      <div className="stock-overview-toolbar">
+        <div>
+          <h2>Inventory overview</h2>
+          <p>See stock levels, items needing attention and recent movement.</p>
+        </div>
+        <div className="stock-overview-toolbar-actions">
+          <button type="button" onClick={() => onNavigate('/stock')} className="stock-overview-outline">Quick Stock <ArrowRight size={16} /></button>
+          <button type="button" onClick={() => onNavigate('/stock/add')} className="stock-overview-primary"><Plus size={16} /> Add Part</button>
+        </div>
+      </div>
 
-      <section className="stock-dashboard-bottom-grid">
-        <StockHealthPanel
-          stockHealth={stockHealth}
-          healthyItems={healthyItems}
-          lowItems={lowItems}
-          outItems={outItems}
-          pendingPOs={pendingPOs}
-          dashboard={dashboard}
-        />
+      <StockOverviewStats dashboard={dashboard} items={items}
+        lowItems={lowItems} outItems={outItems} formatMoney={formatMoney} />
 
-        <StockAttentionPanel
-          lowItems={lowItems}
-          outItems={outItems}
-          onNavigate={onNavigate}
-        />
-
-        <StockQuickActions onNavigate={onNavigate} />
+      <section className="stock-dashboard-bottom-grid" aria-label="Stock health and attention">
+        <StockAttentionPanel lowItems={lowItems} outItems={outItems} onNavigate={onNavigate} />
+        <StockHealthPanel stockHealth={healthPercentage} healthyItems={healthyItems}
+          lowItems={lowItems} outItems={outItems} pendingPOs={pendingPOs} dashboard={dashboard} />
       </section>
 
-      <StockRecentMovementPanel
-        ledger={ledger}
-        onNavigate={onNavigate}
-      />
+      <StockQuickActions onNavigate={onNavigate} />
+      <StockRecentMovementPanel ledger={ledger} onNavigate={onNavigate} />
     </div>
   );
 };
