@@ -1,3 +1,4 @@
+import { appPrompt } from '../common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Play, Pause, CheckCheck, CheckCircle2, RefreshCw, Wrench } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
@@ -91,27 +92,27 @@ export const JobWorkTimerPanel = ({ jobId, jobStatus, labourRecords = [], onChan
   };
 
   const correct = async (row) => {
-    const minutesInput = window.prompt('Corrected approved work minutes:', String(row.approvedMinutes || Math.max(1, Math.ceil(Number(row.elapsedSeconds || 0) / 60))));
+    const minutesInput = await appPrompt('Corrected approved work minutes:', String(row.approvedMinutes || Math.max(1, Math.ceil(Number(row.elapsedSeconds || 0) / 60))));
     if (minutesInput === null) return;
     const minutes = Number(minutesInput);
     if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1440) {
       setMessage('Enter a valid whole number between 1 and 1440 minutes.');
       return;
     }
-    const chargeInput = window.prompt('Corrected eligible labour amount (₹):', String(row.labourCharge || '0'));
+    const chargeInput = await appPrompt('Corrected eligible labour amount (₹):', String(row.labourCharge || '0'));
     if (chargeInput === null) return;
     const labourAmount = Number(chargeInput);
     if (!Number.isFinite(labourAmount) || labourAmount < 0) {
       setMessage('Enter a valid nonnegative labour amount.');
       return;
     }
-    const reason = window.prompt('Reason for supervisor correction:');
+    const reason = await appPrompt('Reason for supervisor correction:');
     if (!reason?.trim()) return;
     await call(row.id, 'correct', { minutes, labourCharge: labourAmount, reason: reason.trim() });
   };
 
   const reject = async (row) => {
-    const reason = window.prompt('Why is this work being rejected?');
+    const reason = await appPrompt('Why is this work being rejected?');
     if (reason?.trim()) await call(row.id, 'reject', { reason: reason.trim() });
   };
 
