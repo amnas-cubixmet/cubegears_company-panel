@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { billingService, calculateDocumentTotals } from '../../services/billing.service';
 import { expenseService } from '../../services/expense.service';
-import { stockManagementService } from '../../services/stockManagement.service';
+import { stockCatalogService } from '../../services/stockCatalog.service';
 import { resourceConfigs } from '../operations/resourceConfigs';
 import {
   ReportPeriodFilter,
@@ -53,7 +53,7 @@ export function Reports() {
         billingService.list(),
         paymentService.list(),
         expenseService.getExpenses(),
-        stockManagementService.getItems()
+        stockCatalogService.getItems()
       ]);
       setInvoices((Array.isArray(docs) ? docs : []).filter((row) => row.kind === 'invoice'));
       setPayments(Array.isArray(paymentRows) ? paymentRows : []);
