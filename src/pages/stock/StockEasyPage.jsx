@@ -5,7 +5,7 @@ import {
   Plus, RefreshCw, Search, ShoppingCart, Wrench,
 } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
-import { stockManagementService } from '../../services/stockManagement.service';
+import { stockCatalogService } from '../../services/stockCatalog.service';
 import '../../styles/stock-easy.css';
 
 const cash = (value) => new Intl.NumberFormat('en-IN', {
@@ -43,12 +43,12 @@ export default function StockEasyPage() {
   const reload = async () => {
     setLoading(true);
     try {
-      const loaded = await stockManagementService.getItems();
+      const loaded = await stockCatalogService.getItems();
       setItems(list(loaded));
       const [stats, movements, groups] = await Promise.allSettled([
-        stockManagementService.getStockDashboard(),
-        stockManagementService.getLedger(),
-        stockManagementService.getCategories(),
+        stockCatalogService.getStockDashboard(),
+        stockCatalogService.getLedger(),
+        stockCatalogService.getCategories(),
       ]);
       setDashboard(stats.status === 'fulfilled' ? stats.value : null);
       setLedger(movements.status === 'fulfilled' ? list(movements.value) : []);
@@ -89,7 +89,7 @@ export default function StockEasyPage() {
     setSaving(true);
     setError('');
     try {
-      const created = await stockManagementService.createItem({
+      const created = await stockCatalogService.createItem({
         ...part, onHand: 0, reserved: 0, reorderLevel: number(part.minimumStock),
         costPrice: number(part.costPrice), sellingPrice: number(part.sellingPrice),
         minimumStock: number(part.minimumStock),
@@ -122,8 +122,8 @@ export default function StockEasyPage() {
         notes: move.notes.trim(),
         ...(move.mode === 'in' ? { invoiceNo: move.invoiceNo.trim() } : {}),
       };
-      if (move.mode === 'in') await stockManagementService.stockIn(payload);
-      else await stockManagementService.stockOut(payload);
+      if (move.mode === 'in') await stockCatalogService.stockIn(payload);
+      else await stockCatalogService.stockOut(payload);
       setMoveOpen(false);
       setMove(initialMove);
       setSuccess(move.mode === 'in' ? 'Stock received successfully.' : 'Internal use recorded.');
@@ -166,13 +166,12 @@ export default function StockEasyPage() {
         <button type="button" onClick={() => beginMove('in')}><PackagePlus size={19}/><span>Receive Stock</span><ArrowRight size={16}/></button>
         <button type="button" onClick={() => beginMove('out')}><PackageMinus size={19}/><span>Internal Use</span><ArrowRight size={16}/></button>
         <Link to="/jobs"><Wrench size={19}/><span>Job Card Parts</span><ArrowRight size={16}/></Link>
-        <Link to="/stock/movements"><History size={19}/><span>Stock History</span><ArrowRight size={16}/></Link>
+        <a href="#stock-history"><History size={19}/><span>Stock History</span><ArrowRight size={16}/></a>
       </section>
 
       <section className="cg-easy-panel">
         <div className="cg-easy-panel-header">
           <div><h2>Parts & Products</h2><p>Choose a part to receive stock. For vehicle jobs, issue parts from the Job Card.</p></div>
-          <Link to="/stock/overview">Advanced stock management <ArrowRight size={14}/></Link>
         </div>
         <div className="cg-easy-filters">
           <label className="cg-easy-search"><Search size={18}/><input aria-label="Search stock" placeholder="Search part name, SKU, barcode or brand" value={query} onChange={(e) => setQuery(e.target.value)}/></label>
@@ -202,11 +201,11 @@ export default function StockEasyPage() {
               </table>
             </div>
           )}
-        <footer className="cg-easy-footer"><span>{filtered.length} parts shown</span><Link to="/stock/items">Manage all items <ArrowRight size={14}/></Link></footer>
+        <footer className="cg-easy-footer"><span>{filtered.length} parts shown</span></footer>
       </section>
 
-      <section className="cg-easy-bottom">
-        <div className="cg-easy-panel-header"><div><h2>Recent movements</h2><p>Received and issued stock history</p></div><Link to="/stock/movements">View history <ArrowRight size={14}/></Link></div>
+      <section className="cg-easy-bottom" id="stock-history">
+        <div className="cg-easy-panel-header"><div><h2>Recent movements</h2><p>Received and issued stock history</p></div><a href="#stock-history">Recent movements <History size={14}/></a></div>
         <div className="cg-easy-history">{ledger.length ? ledger.slice(0, 5).map((entry) => (
           <div key={entry.id} className="cg-easy-history-row"><div><strong>{entry.partName || entry.itemName || 'Stock Item'}</strong><small>{entry.type || entry.movement_type || 'Movement'}</small></div><b>{number(entry.quantity ?? entry.qty) > 0 ? '+' : ''}{number(entry.quantity ?? entry.qty)}</b></div>
         )) : <p>No stock movements yet.</p>}</div>
