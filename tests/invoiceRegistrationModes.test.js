@@ -8,8 +8,8 @@ const preview = readFileSync(new URL('../src/services/billing.service.js', impor
 test('invoice type follows workshop GST status, not an editable tax toggle', () => {
   assert.match(form, /billingService\.getGstContext\(\)/);
   assert.match(form, /invoiceType: config\.invoiceType \|\| \(config\.registered \? 'gst' : 'regular'\)/);
-  assert.match(form, /GST Tax Invoice/);
-  assert.match(form, /Normal Invoice — No GST/);
+  assert.match(form, /Company Invoice \(B2B\)/);
+  assert.match(form, /Simple Service Bill \(B2C\)/);
   assert.match(form, /Invoice type must match the workshop GST registration/);
   assert.doesNotMatch(form, /onChange=\{\(e\) => update\('invoiceType', e\.target\.value\)\}/);
 });
@@ -34,4 +34,20 @@ test('GST invoices use classified item rates and select legal place of supply', 
   assert.match(form, /if \(!form\.customer\?\.placeOfSupply\)/);
   assert.match(form, /String\(row\.taxRate \?\? ''\)\.trim\(\) === ''/);
   assert.match(form, /const current = await billingService\.saveDraft\(form\)/);
+});
+
+test('business vs personal bill is a recipient presentation choice, not a GST exemption', () => {
+  assert.match(form, /aria-label="Bill customer type"/);
+  assert.match(form, /Individual — Simple Service Bill/);
+  assert.match(form, /Company — Business Invoice/);
+  assert.match(form, /customerType: customer\.customerType \|\| customer\.customer_type/);
+  assert.match(form, /isBusiness \? 'Invoice No\.' : 'Bill No\.'/);
+  assert.match(form, /Service Bill \/ Tax Invoice/);
+  assert.match(form, /Company GSTIN \(if registered\)/);
+  assert.match(form, /doc\.invoiceType === 'gst' && taxGroups\.length > 0/);
+});
+
+test('business contact may be blank but company name is required', () => {
+  assert.match(form, /Company name is required for B2B billing/);
+  assert.match(form, /form\.customer\?\.customerType !== 'business'/);
 });
