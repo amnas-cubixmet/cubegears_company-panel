@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { customerService } from '../../services/customer.service';
 import { paymentService } from '../../services/payment.service';
+import '../../styles/customer-profile-polished.css';
 import {
   customerProfileFinancials, activeCustomerInvoices, customerInvoiceLabel,
   customerInvoiceTotal, customerInvoiceBalance, customerVisitLabel,
@@ -202,18 +203,22 @@ export const CustomerDetails = () => {
   const handleAddVehicleSubmit = async (e) => {
     e.preventDefault();
     if (!vRegNo.trim()) return;
+    const odometer = Number(String(vKm || '0').replace(/,/g, '').trim());
+    if (!Number.isInteger(odometer) || odometer < 0) {
+      showToast('Enter a valid nonnegative odometer reading.');
+      return;
+    }
     await customerService.addCustomerVehicle(customer.id, {
-      regNo: vRegNo,
-      make: vMake,
-      model: vModel,
-      vehicleType: vType,
+      regNo: vRegNo.trim(),
+      make: vMake.trim(),
+      model: vModel.trim(),
       fuelType: vFuel,
       transmission: vTransmission,
-      year: vYear,
-      color: vColor,
-      vin: vVin,
-      kilometres: vKm,
-      notes: vNotes
+      year: vYear ? Number(vYear) : null,
+      color: vColor.trim(),
+      vin: vVin.trim(),
+      kilometres: odometer,
+      notes: vNotes.trim(),
     });
     showToast('New vehicle registered to customer.');
     setIsAddVehicleOpen(false);
@@ -272,10 +277,9 @@ export const CustomerDetails = () => {
       city: editCity,
       state: editState,
       pincode: editPincode,
-      customerType: editType,
+      customerType: editType === 'Business' ? 'business' : 'individual',
       companyName: editCompany,
-      gstNo: editGst,
-      branch: editBranch
+      gstin: editGst
     });
     setCustomer(updated);
     showToast('Customer profile updated.');
@@ -1110,8 +1114,8 @@ export const CustomerDetails = () => {
           <Input label="Registration Number" required icon={Car} value={vRegNo} onChange={(e) => setVRegNo(e.target.value)} placeholder="e.g. KL 10 AB 1234" />
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <Input label="Make" required value={vMake} onChange={(e) => setVMake(e.target.value)} placeholder="Toyota" />
-            <Input label="Model" required value={vModel} onChange={(e) => setVModel(e.target.value)} placeholder="Innova 2.5V" />
+            <Input label="Make" required value={vMake} onChange={(e) => setVMake(e.target.value)} placeholder="e.g. Toyota" />
+            <Input label="Model" required value={vModel} onChange={(e) => setVModel(e.target.value)} placeholder="e.g. Innova" />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -1136,11 +1140,11 @@ export const CustomerDetails = () => {
               <option value="Manual">Manual</option>
               <option value="Automatic">Automatic</option>
             </Select>
-            <Input label="Current Kilometres" value={vKm} onChange={(e) => setVKm(e.target.value)} placeholder="1,24,500 km" />
+            <Input label="Current Kilometres" value={vKm} onChange={(e) => setVKm(e.target.value)} placeholder="e.g. 124500" />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <Input label="Manufacturing Year" value={vYear} onChange={(e) => setVYear(e.target.value)} placeholder="2021" />
+            <Input label="Manufacturing Year" value={vYear} onChange={(e) => setVYear(e.target.value)} placeholder="e.g. 2021" />
             <Input label="VIN / Chassis Number" value={vVin} onChange={(e) => setVVin(e.target.value)} placeholder="MBJ11223344" />
           </div>
 
@@ -1172,18 +1176,13 @@ export const CustomerDetails = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <Select label="Customer Type" value={editType} onChange={(e) => setEditType(e.target.value)}>
               <option value="Individual">Individual</option>
-              <option value="Company/Fleet">Company / Fleet</option>
-              <option value="Insurance">Insurance</option>
-              <option value="Dealer/Partner">Dealer / Partner</option>
+              <option value="Business">Business</option>
             </Select>
 
-            <Select label="Branch" value={editBranch} onChange={(e) => setEditBranch(e.target.value)}>
-              <option value="Main Garage Branch">Main Garage Branch</option>
-              <option value="Kochi South Branch">Kochi South Branch</option>
-            </Select>
+
           </div>
 
-          {editType !== 'Individual' && (
+          {editType === 'Business' && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <Input label="Company Name" value={editCompany} onChange={(e) => setEditCompany(e.target.value)} />
               <Input label="GST Number" value={editGst} onChange={(e) => setEditGst(e.target.value)} />
