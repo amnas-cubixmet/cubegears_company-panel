@@ -114,12 +114,7 @@ export function BillingWorkspace() {
       setSelected(saved);
       await load();
     } catch (e) { setError(e?.message || 'Could not save billing document.'); }
-    return;
-    /* previous flow retained below only for reference */
-    const saved = await billingService.saveDraft(form);
-    setForm(saved);
-    setSelected(saved);
-    await load();
+
   };
 
   const finalize = async () => {
@@ -131,8 +126,7 @@ export function BillingWorkspace() {
           throw new Error('Classify each invoice item with its HSN/SAC and GST rate first.');
         }
       }
-      let doc = form;
-      if (!doc.id) doc = await billingService.saveDraft(doc);
+      const doc = await billingService.saveDraft(form);
       const done = await billingService.finalize(doc.id);
       setForm(done);
       setSelected(done);
