@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calculator, RefreshCw } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
@@ -12,29 +12,70 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0, refreshOnTab = ''
   const { user } = useAuth();
   const permitted = ['jobs.view', 'payroll.view', 'expenses.view', 'stock.view']
     .every((code) => hasPermission(user, code));
-  const [summary, setSummary] = useState(null);
+  const [costState, setCostState] = useState({ jobId: null, data: null });
+  // Never show the previous Job Card's financial figures during navigation.
+  const summary = costState.jobId === jobId ? costState.data : null;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [reload, setReload] = useState(0);
   useEffect(() => {
     if (!jobId || !permitted) {
-      setSummary(null);
-      return;
+      setCostState({ jobId: null, data: null });
+      setError('');
+      setLoading(false);
+      return undefined;
     }
+
     let active = true;
-    setLoading(true);
-    setError('');
-    jobService.getJobCostSummary(jobId)
-      .then((data) => { if (active) setSummary(data); })
-      .catch((err) => {
-        if (!active) return;
-        setError(err?.response?.data?.detail || err?.message || 'Unable to load job cost summary.');
-        setSummary(null);
-      })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [jobId, refreshVersion, refreshOnTab, permitted, reload]);
+    let inFlight = false;
+    let lastRequestAt = 0;
+
+    const loadCosts = async () => {
+      if (!active || inFlight) return;
+      inFlight = true;
+      lastRequestAt = Date.now();
+      setLoading(true);
+      setError('');
+      try {
+        const data = await jobService.getJobCostSummary(jobId);
+        if (active) setCostState({ jobId, data });
+      } catch (err) {
+        if (active) {
+          setError(err?.response?.data?.detail || err?.message || 'Unable to update job costs.');
+          // Keep the latest successful figures visible during temporary outages.
+        }
+      } finally {
+        inFlight = false;
+        if (active) setLoading(false);
+      }
+    };
+
+    // Load immediately on Job change, entering the Work tab, or after
+    // Mechanic / Outside Staff / Parts mutations update refreshVersion.
+    void loadCosts();
+
+    if (refreshOnTab !== 'work') {
+      return () => { active = false; };
+    }
+
+    // Sync changes made by another worker/browser while this Work page
+    // is visible. No network polling when the document is in the background.
+    const syncWhenVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - lastRequestAt < 3000) return;
+      void loadCosts();
+    };
+    const intervalId = window.setInterval(syncWhenVisible, 30000);
+    window.addEventListener('focus', syncWhenVisible);
+    document.addEventListener('visibilitychange', syncWhenVisible);
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', syncWhenVisible);
+      document.removeEventListener('visibilitychange', syncWhenVisible);
+    };
+  }, [jobId, refreshVersion, refreshOnTab, permitted]);
 
   return (
     <section className="job-total-cost-panel is-global" aria-label="Job Card total cost">
@@ -43,12 +84,7 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0, refreshOnTab = ''
           <h3><Calculator size={18} aria-hidden="true" /> Total Cost</h3>
           <p>Recorded direct costs for this Job Card, not customer charges or invoice totals.</p>
         </div>
-        {permitted && (
-          <button type="button" onClick={() => setReload((old) => old + 1)}
-            disabled={loading} aria-label="Refresh job total costs" className="job-total-cost-refresh">
-            <RefreshCw size={15} aria-hidden="true"/> Refresh
-          </button>
-        )}
+        {permitted && <span className="job-total-cost-auto-note">Updates automatically</span>}
       </header>
 
       {!permitted ? (

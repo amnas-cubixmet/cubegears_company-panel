@@ -37,7 +37,7 @@ test('Summary updates when mechanic or outside worker changes, with proper warni
   assert.match(workspace, /<JobTotalCostPanel[\s\S]*?refreshVersion=\{timerRefreshVersion\}[\s\S]*?refreshOnTab=\{activeTab\}/);
   assert.match(workspace, /<JobOutsideStaffSection\s+jobId=\{job\.id\}\s+onChanged=/);
   assert.match(workspace, /<JobPartsWorkflow[\s\S]*?onJobUpdated=\{\(\) => \{\s*setTimerRefreshVersion/);
-  assert.match(component, /\[jobId, refreshVersion, refreshOnTab, permitted, reload\]/);
+  assert.match(component, /\[jobId, refreshVersion, refreshOnTab, permitted\]/);
   assert.match(component, /summary\.unallocatedDailyWages/);
   assert.match(component, /summary\.partsAtCurrentCost/);
   assert.match(component, /outsidePending/);
