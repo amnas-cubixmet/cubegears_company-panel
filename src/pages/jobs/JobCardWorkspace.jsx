@@ -854,7 +854,7 @@ export function JobCardWorkspace() {
         refreshOnTab={activeTab}
       />
 
-      {activeTab !== 'overview' && !showWorkTools && (
+      {activeTab !== 'overview' && activeTab !== 'activity' && !showWorkTools && (
         <>
       <div className="job-workspace-toolbar">
         <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
@@ -969,10 +969,10 @@ export function JobCardWorkspace() {
           <h2>{activeTabLabel}</h2>
           <p>{SECTION_DETAILS[activeTab]}</p>
         </div>
-        <span className={'job-workspace-section-state ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-open')}>
+        {activeTab !== 'activity' && <span className={'job-workspace-section-state ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-open')}>
           {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
           {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
-        </span>
+        </span>}
         {!activeTabLocked && !activeTabComplete && activeTab === currentStage && activeTab !== 'qc' && (
           <button type="button" className="job-stage-complete-button" disabled={saving} onClick={() => completeStage(activeTab)}>
             <CheckCircle2 size={15} aria-hidden="true" />
@@ -981,7 +981,7 @@ export function JobCardWorkspace() {
         )}
       </section>
 
-      {!showWorkTools && (
+      {!showWorkTools && activeTab !== 'activity' && (
       <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
         <div>
           <strong>{activeTabLocked ? 'Stage locked' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
