@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Bell, CalendarDays, ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
+import { Bell, BellRing, CalendarDays, ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearch } from '../common/GlobalSearch';
@@ -136,8 +136,8 @@ export const Header = () => {
           </div>
 
           {canViewNotifications && (
-            <button type="button" className="header-icon-button has-notification-count" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
-              <Bell size={15}/>
+            <button type="button" className={`header-icon-button has-notification-count ${location.pathname === '/notifications' ? 'is-notifications-active' : ''}`} onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`} aria-current={location.pathname === '/notifications' ? 'page' : undefined}>
+              {notificationCount ? <BellRing size={19}/> : <Bell size={19}/>}
               {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
             </button>
           )}
@@ -179,8 +179,8 @@ export const Header = () => {
           <div className="mobile-header-actions">
             <button type="button" onClick={() => setSearchOpen((value) => !value)} aria-label={searchOpen ? "Close workspace search" : "Open workspace search"} aria-expanded={searchOpen}><Search size={15}/></button>
             {canViewNotifications && (
-              <button type="button" className="mobile-notification-button" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
-                <Bell size={15}/>
+              <button type="button" className={`mobile-notification-button ${location.pathname === '/notifications' ? 'is-notifications-active' : ''}`} onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`} aria-current={location.pathname === '/notifications' ? 'page' : undefined}>
+                {notificationCount ? <BellRing size={19}/> : <Bell size={19}/>}
                 {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
               </button>
             )}
