@@ -128,10 +128,10 @@ export const AppRoutes = () => (
       <Route path="/customers/new" element={<AddCustomer />} />
       <Route path="/customers/add" element={<Navigate to="/customers/new" replace />} />
       <Route path="/customers/vehicles" element={<CustomerManagement section="vehicles" />} />
-      <Route path="/customers/service-history" element={<CustomerManagement section="service-history" />} />
-      <Route path="/customers/outstanding" element={<CustomerManagement section="outstanding" />} />
-      <Route path="/customers/reminders" element={<CustomerManagement section="reminders" />} />
-      <Route path="/customers/reports" element={<CustomerManagement section="reports" />} />
+      <Route path="/customers/service-history" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/outstanding" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/reminders" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/reports" element={<Navigate to="/customers" replace />} />
       <Route path="/customers/:id" element={<CustomerDetails />} />
       <Route path="/customers/:id/edit" element={<EditCustomer />} />
       <Route path="/customers/edit/:id" element={<EditCustomer />} />
