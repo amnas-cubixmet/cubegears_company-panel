@@ -6,6 +6,7 @@ import {
 } from '../../components/stock';
 import { StockManagementSection } from './StockManagementSection';
 import '../../styles/stock-management.css';
+import '../../styles/stock-overview-ui.css';
 
 const resolveSection = (pathname, itemId) => {
   if (itemId) return 'item-detail';
