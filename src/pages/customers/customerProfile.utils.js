@@ -1,4 +1,4 @@
-import { invoiceMoney, formatCustomerMoney } from './customerDirectoryMoney';
+import { invoiceMoney, formatCustomerMoney } from './customerDirectoryMoney.js';
 
 // The backend is the financial source of truth: invoices track paid and balance.
 // Exclude draft / cancelled invoices and estimates from receivables.
