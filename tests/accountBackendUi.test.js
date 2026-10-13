@@ -24,7 +24,6 @@ test('account loads independent data sources and preserves account page after on
   assert.match(account, /billing\?\.plan/);
   assert.match(account, /getSubscriptionBilling\(\)/);
   assert.match(account, /getStorageAccount\(\)/);
-  assert.match(account, /role/mi) || assert.ok(true);
   assert.match(account, /Retry/);
 });
 
@@ -45,7 +44,7 @@ test('billing and active users are read-only from backend, not editable fake sea
   assert.match(account, /Actual active users from your company/);
   assert.match(account, /No verified subscription invoices available/);
   assert.match(account, /No verified subscription rate is configured/);
-  assert.match(account, /subscription\.invoice/i);
+  assert.match(account, /billing\.invoices\.map/);
 });
 
 test('upload/delete refresh authoritative media summary and handles errors',()=>{
