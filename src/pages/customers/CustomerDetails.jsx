@@ -556,51 +556,6 @@ export const CustomerDetails = () => {
         {activeTab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             
-            {/* Quick Actions Grid (2x2 Mobile) */}
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>Quick Actions</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '10px' }} className="quick-actions-grid">
-                <style>{`
-                  @media (max-width: 767px) {
-                    .quick-actions-grid {
-                      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                    }
-                  }
-                `}</style>
-
-                <button
-                  onClick={() => {
-                    const targetVehicle = vehicles[0]?.regNo || '';
-                    navigate(`/jobs/new?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
-                  }}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--primary)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <Plus size={16} /> New Job Card
-                </button>
-
-                <button
-                  onClick={() => setIsAddVehicleOpen(true)}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <Car size={16} /> Add Vehicle
-                </button>
-
-                <button
-                  onClick={() => navigate(`/invoices/create?customerId=${customer.id}`)}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <FileText size={16} /> Create Invoice
-                </button>
-
-                <button
-                  onClick={() => { setPaymentError(''); setIsRecordPaymentOpen(true); }}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--success)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <CreditCard size={16} /> Record Payment
-                </button>
-              </div>
-            </div>
-
             {/* Detailed Profile Information */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '14px' }} className="overview-details-grid">
               <style>{`
@@ -627,7 +582,7 @@ export const CustomerDetails = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>WhatsApp</span>
-                    <strong style={{ color: 'var(--success)' }}>{customer.whatsapp || customer.phone}</strong>
+                    <strong style={{ color: 'var(--success)' }}>{customer.whatsapp || customer.phone || '—'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Email</span>
@@ -635,7 +590,7 @@ export const CustomerDetails = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Customer Type</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{customer.customerType || 'Individual'}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{profileCustomerType(customer.customerType || customer.customer_type)}</strong>
                   </div>
                 </div>
               </div>
@@ -648,7 +603,7 @@ export const CustomerDetails = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Address</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{customer.address || 'Street 1, Main Road'}</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{customer.address || '—'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>City / State</span>
@@ -656,15 +611,15 @@ export const CustomerDetails = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Company / GST</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{customer.companyName || 'N/A'} {customer.gstNo ? `(${customer.gstNo})` : ''}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{customer.companyName || customer.company_name || '—'} {(customer.gstNo || customer.gstin) ? `(${customer.gstNo || customer.gstin})` : ''}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Primary Branch</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{customer.branch}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{customer.branchName || '—'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Status</span>
-                    <span style={{ color: 'var(--success)', fontWeight: '700' }}>{customer.status || 'Active'}</span>
+                    <span style={{ color: 'var(--success)', fontWeight: '700' }}>{archived ? 'Archived' : 'Active'}</span>
                   </div>
                 </div>
               </div>
@@ -683,6 +638,7 @@ export const CustomerDetails = () => {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {!activity.length && <p className="customer-empty">No activity recorded yet.</p>}
                 {activity.slice(0, 5).map((act, idx) => (
                   <div key={idx} style={{ backgroundColor: 'var(--surface-2)', padding: '10px 12px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -692,7 +648,7 @@ export const CustomerDetails = () => {
                         <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{act.desc}</div>
                       </div>
                     </div>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{act.time}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{act.time || act.created_at || '—'}</span>
                   </div>
                 ))}
               </div>
@@ -733,7 +689,7 @@ export const CustomerDetails = () => {
                     <div>Type: <strong style={{ color: 'var(--text-primary)' }}>{v.vehicleType}</strong></div>
                     <div>Trans: <strong style={{ color: 'var(--text-primary)' }}>{v.transmission}</strong></div>
                     <div>Year: <strong style={{ color: 'var(--text-primary)' }}>{v.year}</strong></div>
-                    <div>Current KM: <strong style={{ color: 'var(--text-primary)' }}>{v.kilometres || '1,24,500 km'}</strong></div>
+                    <div>Current KM: <strong style={{ color: 'var(--text-primary)' }}>{v.kilometres || '—'}</strong></div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px', marginTop: '6px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
@@ -876,7 +832,7 @@ export const CustomerDetails = () => {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '8px', fontSize: '12.5px', color: 'var(--text-muted)' }}>
-                      <div>Technician: <strong style={{ color: 'var(--text-primary)' }}>{j.serviceAdvisor || 'Ajmal K'}</strong></div>
+                      <div>Technician: <strong style={{ color: 'var(--text-primary)' }}>{j.serviceAdvisor || j.assignedEmployeeName || '—'}</strong></div>
                       <div>
                         Labour: <strong>{formatINR((j.labourRecords || []).reduce((sum, item) => sum + Number(item.customerCharge || 0), 0))}</strong> • Parts: <strong>{formatINR((j.partsUsed || []).reduce((sum, item) => sum + Number(item.total || (Number(item.qty || 0) * Number(item.unitPrice || 0))), 0))}</strong> • <strong style={{ color: 'var(--primary)', fontSize: '14px' }}>Total: {formatINR(j.billing?.invoiceTotal || j.estimates?.at(-1)?.grandTotal || 0)}</strong>
                       </div>
@@ -924,7 +880,7 @@ export const CustomerDetails = () => {
               {invoices.map((inv, idx) => (
                 <div key={idx} style={{ backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{inv.invoiceNo}</strong> (Job #{inv.jobNumber})
+                    <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{customerInvoiceLabel(inv)}</strong> {inv.jobNumber ? `(Job ${inv.jobNumber})` : ''}
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                       Date: {inv.date} • Vehicle: {inv.vehicle}
                     </div>
@@ -934,8 +890,8 @@ export const CustomerDetails = () => {
                     <span style={{ fontSize: '11px', fontWeight: '700', color: inv.status === 'Paid' ? 'var(--success)' : 'var(--warning)' }}>
                       {inv.status}
                     </span>
-                    <strong style={{ fontSize: '15px', color: 'var(--primary)' }}>{formatINR(inv.totalAmount)}</strong>
-                    <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Balance: {formatINR(inv.balanceDue)}</div>
+                    <strong style={{ fontSize: '15px', color: 'var(--primary)' }}>{customerInvoiceTotal(inv)}</strong>
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Balance: {customerInvoiceBalance(inv)}</div>
                   </div>
                 </div>
               ))}
@@ -966,11 +922,11 @@ export const CustomerDetails = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{p.method}</strong>
                       <span style={{ fontSize: '11px', padding: '2px 7px', borderRadius: '6px', backgroundColor: 'var(--surface-3)', color: 'var(--text-secondary)' }}>
-                        {p.invoiceNo}
+                        {p.invoiceNo || '—'}
                       </span>
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Date: {p.date} • Ref: {p.reference} • Recorded by: {p.recordedBy}
+                      Date: {p.date} • Ref: {p.reference} • Recorded by: {p.recordedBy || '—'}
                     </div>
                   </div>
                   <strong style={{ fontSize: '16px', color: 'var(--success)' }}>+{formatINR(p.amount)}</strong>
@@ -1066,9 +1022,9 @@ export const CustomerDetails = () => {
               {activity.map((act, idx) => (
                 <div key={idx} style={{ position: 'relative' }}>
                   <div style={{ position: 'absolute', left: '-22px', top: '4px', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--primary)', border: '2px solid var(--surface)' }} />
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--primary)' }}>{act.time}</span>
-                  <h4 style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-primary)', margin: '2px 0' }}>{act.type}</h4>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>{act.desc}</p>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--primary)' }}>{act.time || act.created_at || '—'}</span>
+                  <h4 style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-primary)', margin: '2px 0' }}>{act.type || act.activity_type || 'Customer Activity'}</h4>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>{act.desc || act.description || '—'}</p>
                 </div>
               ))}
             </div>
