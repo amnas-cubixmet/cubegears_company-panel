@@ -1,3 +1,4 @@
+import { appAlert } from '../common/appDialogs';
 import { useState, useEffect } from 'react';
 import { Save, Upload, Trash2, Plus, DollarSign, ChevronDown, ChevronUp } from 'lucide-react';
 import { ResponsiveModalSheet } from '../common/ResponsiveModalSheet';
@@ -151,7 +152,7 @@ export const StaffFormSheet = ({ isOpen, onClose, onSave, initialData, userPermi
     if (saving) return;
 
     if (!formData.name.trim() || !formData.phone.trim() || !formData.designation.trim() || !formData.branch.trim() || !formData.joiningDate || !formData.employmentStatus) {
-      alert('Please fill in all required staff fields.');
+      appAlert('Please fill in all required staff fields.');
       return;
     }
 
