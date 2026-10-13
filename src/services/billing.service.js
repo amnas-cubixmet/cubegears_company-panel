@@ -262,7 +262,46 @@ const applyStockMovement = (doc, direction) => {
   write(STOCK_LEDGER_KEY, [...movements, ...ledger]);
 };
 
+const safePdfName = (value) => String(value || 'invoice')
+  .replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 80) || 'invoice';
+
+/**
+ * Download a PDF created from the saved, tenant-authorized invoice.
+ * Do not use window.print() or unsaved editor state for financial documents.
+ */
+export const downloadBillingPdf = async (document) => {
+  const documentId = typeof document === 'object' ? document?.id : document;
+  const number = typeof document === 'object' ? document?.number : '';
+  if (!documentId) throw new Error('Save the invoice before downloading its PDF.');
+  if (USE_MOCK_API) {
+    throw new Error('Official invoice PDF download requires the connected Django backend.');
+  }
+  const pdf = await apiClient.get(`/billing/documents/${encodeURIComponent(documentId)}/pdf`, {
+    responseType: 'blob',
+    headers: { Accept: 'application/pdf' }
+  });
+  if (!(pdf instanceof Blob) || (pdf.type && !pdf.type.includes('pdf'))) {
+    throw new Error('The server did not return a valid invoice PDF.');
+  }
+  const url = URL.createObjectURL(pdf);
+  const filename = safePdfName(number || documentId) + '.pdf';
+  try {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } finally {
+    // Some browsers need the blob URL to survive until the download starts.
+    window.setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
+  return filename;
+};
+
 export const billingService = {
+  downloadPdf: downloadBillingPdf,
   async list(params = {}) {
     if (!USE_MOCK_API) return apiClient.get('/billing/documents', { params });
     return read(DOCS_KEY, seedDocuments);
