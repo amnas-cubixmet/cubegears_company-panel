@@ -22,7 +22,7 @@ test('outside shop modal validates vendor, quantities, separate cost and sell pr
   assert.match(page, /Purchase Price \/ Unit/);
   assert.match(page, /Customer Selling Price \/ Unit/);
   assert.match(page, /requestId, partName:/);
-  assert.match(page, /Save & Use Part/);
+  assert.match(page, /Request Approval/);
   assert.match(page, /disabled=\{!valid \|\| busy\}/);
 });
 
@@ -31,7 +31,7 @@ test('outside purchases render persisted records with no stock movement', () => 
   assert.match(page, /jobPartsService\.buyOutsideJobPart\(jobId, payload\)/);
   assert.match(page, /outsideParts\.map/);
   assert.match(page, /Outside Shop Purchases/);
-  assert.match(page, /No inventory stock entry or stock deduction/);
+  assert.match(page, /Workshop inventory stays unchanged/);
   assert.match(service, /\/job-cards\/\$\{jobId\}\/outside-parts/);
 });
 
@@ -47,4 +47,20 @@ test('search UI and outside records remain responsive and single-border', () => 
   assert.match(css, /\.job-parts-outside-records/);
   assert.match(css, /@media\(max-width:767px\)/);
   assert.match(css, /font-size:16px!important/);
+});
+
+test('outside shop requests require manager decision and attached bill before cost', () => {
+  assert.match(page, /Pending Approval/);
+  assert.match(page, /Upload Bill & Complete/);
+  assert.match(page, /supplier quotation/i);
+  assert.match(page, /purchaseStatus === 'Approved'/);
+  assert.match(page, /row\.status \|\| 'Purchased'/);
+  assert.match(page, /\.filter\(\(row\) => !row\.status \|\| row\.status === 'Purchased'\)/);
+  assert.match(page, /function OutsidePartCompletionPanel/);
+  assert.match(page, /type="file"/);
+  assert.match(page, /Request Approval/);
+  assert.match(service, /decideOutsideJobPart/);
+  assert.match(service, /completeOutsideJobPart/);
+  assert.match(service, /downloadOutsidePartBill/);
+  assert.match(service, /responseType: 'blob'/);
 });
