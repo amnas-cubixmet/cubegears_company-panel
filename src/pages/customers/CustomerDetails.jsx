@@ -2,8 +2,14 @@ import { appConfirm } from '../../components/common/appDialogs';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { customerService } from '../../services/customer.service';
+import { paymentService } from '../../services/payment.service';
+import {
+  customerProfileFinancials, activeCustomerInvoices, customerInvoiceLabel,
+  customerInvoiceTotal, customerInvoiceBalance, customerVisitLabel,
+  profileCustomerType, profileMoney,
+} from './customerProfile.utils';
 import { customerContactLinks } from '../../components/jobs/customerContact.utils';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, Pencil, ChevronRight, Wallet, RefreshCw } from 'lucide-react';
 import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
@@ -65,20 +71,22 @@ export const CustomerDetails = () => {
 
   // New Vehicle form state
   const [vRegNo, setVRegNo] = useState('');
-  const [vMake, setVMake] = useState('Toyota');
-  const [vModel, setVModel] = useState('Innova 2.5V');
-  const [vType, setVType] = useState('MPV');
-  const [vFuel, setVFuel] = useState('Diesel');
+  const [vMake, setVMake] = useState('');
+  const [vModel, setVModel] = useState('');
+  const [vType, setVType] = useState('Car / SUV');
+  const [vFuel, setVFuel] = useState('Petrol');
   const [vTransmission, setVTransmission] = useState('Manual');
-  const [vYear, setVYear] = useState('2021');
-  const [vColor, setVColor] = useState('Silver Metallic');
+  const [vYear, setVYear] = useState('');
+  const [vColor, setVColor] = useState('');
   const [vVin, setVVin] = useState('');
-  const [vKm, setVKm] = useState('1,24,500 km');
+  const [vKm, setVKm] = useState('');
   const [vNotes, setVNotes] = useState('');
 
   // Record Payment form state
   const [payInvoiceNo, setPayInvoiceNo] = useState('');
   const [payAmount, setPayAmount] = useState('');
+  const [paymentSaving, setPaymentSaving] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
   const [payMethod, setPayMethod] = useState('UPI');
   const [payRef, setPayRef] = useState('');
   const [payNotes, setPayNotes] = useState('');
@@ -95,7 +103,7 @@ export const CustomerDetails = () => {
   const [editType, setEditType] = useState('Individual');
   const [editCompany, setEditCompany] = useState('');
   const [editGst, setEditGst] = useState('');
-  const [editBranch, setEditBranch] = useState('Main Garage Branch');
+  const [editBranch, setEditBranch] = useState('');
 
   // Customer Note form state
   const [newNoteText, setNewNoteText] = useState('');
@@ -111,6 +119,9 @@ export const CustomerDetails = () => {
   // Service History filter state
   const [serviceSearch, setServiceSearch] = useState('');
   const [serviceVehicleFilter, setServiceVehicleFilter] = useState('All');
+  const [invoicesAvailable, setInvoicesAvailable] = useState(false);
+  const [vehiclesAvailable, setVehiclesAvailable] = useState(false);
+  const [jobsAvailable, setJobsAvailable] = useState(false);
 
   useEffect(() => {
     loadCustomerData();
@@ -129,12 +140,12 @@ export const CustomerDetails = () => {
         setEditWhatsapp(cust.whatsapp || cust.phone || '');
         setEditEmail(cust.email || '');
         setEditAddress(cust.address || '');
-        setEditCity(cust.city || 'Kochi');
-        setEditState(cust.state || 'Kerala');
+        setEditCity(cust.city || '');
+        setEditState(cust.state || '');
         setEditPincode(cust.pincode || '');
-        setEditType(cust.customerType || 'Individual');
-        setEditCompany(cust.companyName || '');
-        setEditGst(cust.gstNo || '');
+        setEditType(profileCustomerType(cust.customerType || cust.customer_type));
+        setEditCompany(cust.companyName || cust.company_name || '');
+        setEditGst(cust.gstNo || cust.gstin || '');
         setEditBranch(cust.branchName || cust.branch || '');
         setDocuments(Array.isArray(cust.documents) ? cust.documents : []);
 
@@ -157,6 +168,9 @@ export const CustomerDetails = () => {
         setVehicles(rows(0));
         setJobs(rows(1));
         setInvoices(rows(2));
+        setVehiclesAvailable(result[0].status === 'fulfilled');
+        setJobsAvailable(result[1].status === 'fulfilled');
+        setInvoicesAvailable(result[2].status === 'fulfilled');
         setPayments(rows(3));
         setActivity(rows(4));
         if (result.some((entry) => entry.status === 'rejected')) {
@@ -176,9 +190,7 @@ export const CustomerDetails = () => {
     setTimeout(() => setToastMsg(''), 3000);
   };
 
-  const formatINR = (val) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
-  };
+  const formatINR = profileMoney;
 
   const handleTabClick = (tabId, event) => {
     setActiveTab(tabId);
@@ -336,11 +348,11 @@ export const CustomerDetails = () => {
     );
   }
 
-  // Financial calculations derived from actual invoices & payments
-  const totalBilled = invoices.reduce((acc, inv) => acc + Number(inv.totalAmount || 0), 0);
-  const totalPaid = payments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
-  const totalOutstanding = Math.max(0, totalBilled - totalPaid);
-  const lastVisitDate = customer.lastVisit || jobs[0]?.createdDate || '—';
+  // The invoice already includes its paid and remaining balance; counting
+  // separate payments again would double count receipts.
+  const { billed: totalBilled, paid: totalPaid, outstanding: totalOutstanding } =
+    customerProfileFinancials(invoices, invoicesAvailable);
+  const lastVisitDate = customerVisitLabel(customer, jobs);
   const contact = customerContactLinks({ customerPhone: customer.phone, customerWhatsapp: customer.whatsapp });
   const archived = String(customer.status || '').toLowerCase() === 'archived';
 
