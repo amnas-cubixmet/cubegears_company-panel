@@ -46,34 +46,43 @@ const isBilled = (r) => String(r.kind || 'invoice').toLowerCase() === 'invoice'
 const isCollected = (r) => ['completed', 'paid', 'success', 'successful'].includes(
   String(r.status || '').toLowerCase());
 
-export const branchLabel = (row) => {
-  const ref = row.branchName ?? row.branch_name ?? row.branch;
-  return String(typeof ref === 'object' ? (ref?.name || ref?.id || '') : (ref ?? '')).trim();
+// Resolve backend ForeignKey IDs to user-facing branch/staff names. Never
+// render raw UUID values in the dropdown when the directory lookup is missing.
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const plainValue = (ref) => String(typeof ref === 'object'
+  ? (ref?.name || ref?.full_name || ref?.id || '') : (ref ?? '')).trim();
+const resolveLabel = (value, entries = []) => {
+  const raw = plainValue(value);
+  const match = entries.find((entry) =>
+    [entry.id, entry.name].some((field) => String(field || '').toLowerCase() === raw.toLowerCase()));
+  return match?.name || (uuidPattern.test(raw) ? '' : raw);
 };
-export const staffLabel = (row) => {
-  const ref = row.staffName ?? row.staff_name ?? row.staff ??
-    row.recordedBy ?? row.recorded_by ?? row.created_by;
-  return String(typeof ref === 'object'
-    ? (ref?.name || ref?.full_name || ref?.id || '') : (ref ?? '')).trim();
-};
-export const scopeMatches = (row, branch, staff, type) => {
-  if (branch && branch !== 'All' && branchLabel(row) !== branch) return false;
+export const branchLabel = (row, directory = {}) => resolveLabel(
+  row.branchName ?? row.branch_name ?? row.branch, directory.branches || []);
+export const staffLabel = (row, directory = {}) => resolveLabel(
+  row.staffName ?? row.staff_name ?? row.staff ??
+    row.recordedBy ?? row.recorded_by ?? row.created_by, directory.staff || []);
+
+export const scopeMatches = (row, branch, staff, type, directory = {}) => {
+  const requestedBranch = resolveLabel(branch, directory.branches || []) || branch;
+  const requestedStaff = resolveLabel(staff, directory.staff || []) || staff;
+  if (branch && branch !== 'All' && branchLabel(row, directory) !== requestedBranch) return false;
   // Physical stock valuation is a current snapshot and has no staff dimension.
-  if (type !== 'stock' && staff && staff !== 'All' && staffLabel(row) !== staff) return false;
+  if (type !== 'stock' && staff && staff !== 'All' && staffLabel(row, directory) !== requestedStaff) return false;
   return true;
 };
 
-export const scopedReportRows = (raw, from, to, branch = 'All', staff = 'All') => ({
+export const scopedReportRows = (raw, from, to, branch = 'All', staff = 'All', directory = {}) => ({
   invoices: (raw.invoices || []).filter((r) =>
     isBilled(r) && inReportRange(dateFrom(r, 'invoice'), from, to)
-    && scopeMatches(r, branch, staff, 'invoice')),
+    && scopeMatches(r, branch, staff, 'invoice', directory)),
   payments: (raw.payments || []).filter((r) =>
     inReportRange(dateFrom(r, 'payment'), from, to)
-    && scopeMatches(r, branch, staff, 'payment')),
+    && scopeMatches(r, branch, staff, 'payment', directory)),
   expenses: (raw.expenses || []).filter((r) =>
     inReportRange(dateFrom(r, 'expense'), from, to)
-    && scopeMatches(r, branch, staff, 'expense')),
-  stock: (raw.stock || []).filter((r) => scopeMatches(r, branch, staff, 'stock')),
+    && scopeMatches(r, branch, staff, 'expense', directory)),
+  stock: (raw.stock || []).filter((r) => scopeMatches(r, branch, staff, 'stock', directory)),
 });
 
 export const aggregateReports = (rows, loaded) => {
@@ -157,14 +166,21 @@ export const reportChartSeries = (rows, from, to) => {
   }));
 };
 
-export const reportFilterOptions = (raw) => {
+export const reportFilterOptions = (raw, directory = {}) => {
   const rows = [...(raw.invoices || []), ...(raw.payments || []),
     ...(raw.expenses || []), ...(raw.stock || [])];
+  const sort = (names) => ['All', ...new Set(names.filter(Boolean)
+    .filter((name) => name !== 'All'))].sort((a, b) =>
+    a === 'All' ? -1 : b === 'All' ? 1 : a.localeCompare(b));
   return {
-    branches: ['All', ...new Set(rows.map(branchLabel).filter(Boolean))].sort((a, b) =>
-      a === 'All' ? -1 : b === 'All' ? 1 : a.localeCompare(b)),
-    staff: ['All', ...new Set(rows.map(staffLabel).filter(Boolean))].sort((a, b) =>
-      a === 'All' ? -1 : b === 'All' ? 1 : a.localeCompare(b)),
+    branches: sort([
+      ...(directory.branches || []).map((row) => row.name),
+      ...rows.map((r) => branchLabel(r, directory)),
+    ]),
+    staff: sort([
+      ...(directory.staff || []).map((row) => row.name),
+      ...rows.map((r) => staffLabel(r, directory)),
+    ]),
   };
 };
 
