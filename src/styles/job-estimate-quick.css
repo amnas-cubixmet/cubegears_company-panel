@@ -333,3 +333,37 @@
   }
   .cg-job-detail .job-quick-catalog-options {max-height:220px}
 }
+
+
+/* Specific, accessible validation feedback for estimate Work/Part rows. */
+.cg-job-detail .job-quick-line.is-invalid{
+  border-color:var(--danger,#bc2532);
+  background:var(--surface-2);
+}
+.cg-job-detail .job-quick-estimate [aria-invalid="true"]{
+  border-color:var(--danger,#bc2532)!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--danger,#bc2532) 18%,transparent);
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field:has(input[aria-invalid="true"]){
+  border-color:var(--danger,#bc2532);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--danger,#bc2532) 18%,transparent);
+}
+.cg-job-detail .job-quick-field-error{
+  color:var(--danger,#bc2532);
+  font-size:11px;
+  font-weight:500;
+  line-height:1.45;
+  margin-top:2px;
+  overflow-wrap:anywhere;
+}
+.cg-job-detail .job-quick-invalid{
+  padding:11px 12px;
+  border:1px solid var(--danger,#bc2532);
+  background:var(--surface);
+  border-radius:9px;
+  font-size:12px;
+  font-weight:600;
+}
+.cg-job-detail .job-quick-line-fields label:has(.job-quick-field-error){
+  align-self:stretch;
+}
