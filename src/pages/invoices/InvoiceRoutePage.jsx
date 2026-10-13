@@ -917,9 +917,9 @@ function InvoicePrint({ doc, totals }) {
     ? 'Estimate / Quotation'
     : doc.invoiceType === 'gst'
       ? 'Tax Invoice'
-      : 'Invoice';
+      : 'Normal Invoice';
 
-  return <section className="invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template">
+  return <section className={`invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template ${doc.invoiceType !== 'gst' ? 'invoice-no-gst' : ''}`}>
     <div className="invoice-creative-topbar">
       <span>ORIGINAL</span>
       <span>{doc.status || 'Draft'}</span>
@@ -935,7 +935,7 @@ function InvoicePrint({ doc, totals }) {
             {seller.phone && <span>Phone: {seller.phone}</span>}
             {seller.email && <span>Email: {seller.email}</span>}
           </div>
-          <span>GSTIN: {seller.gstin || 'Configure GSTIN'}{sellerState ? ` · ${sellerState}` : ''}</span>
+          {doc.invoiceType === 'gst' && <span>GSTIN: {seller.gstin || 'Not configured'}{sellerState ? ` · ${sellerState}` : ''}</span>}
         </div>
       </div>
 
@@ -953,7 +953,7 @@ function InvoicePrint({ doc, totals }) {
         <strong>Bill To</strong>
         <b>{doc.customer?.name || '—'}</b>
         <span>{doc.customer?.address || '—'}</span>
-        {doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
+        {doc.invoiceType === 'gst' && doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
         {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
       </div>
       <div>
@@ -965,17 +965,17 @@ function InvoicePrint({ doc, totals }) {
         <strong>{doc.kind === 'estimate' ? 'Estimate Details' : 'Invoice Details'}</strong>
         <span>{doc.kind === 'estimate' ? 'Estimate No.' : 'Invoice No.'}: {doc.number || 'DRAFT'}</span>
         <span>Date: {doc.date || '—'}</span>
-        <span>Place of Supply: {doc.customer?.placeOfSupply || doc.customer?.state || '—'}</span>
+        {doc.invoiceType === 'gst' && <span>Place of Supply: {doc.customer?.placeOfSupply || doc.customer?.state || '—'}</span>}
       </div>
     </div>
 
     <div className="invoice-sale-table">
       <div className="invoice-sale-table-head">
-        <span>#</span><span>Item Name</span><span>HSN / SAC</span><span>Quantity</span><span>Unit</span><span>Price / Unit</span><span>GST</span><span>Amount</span>
+        <span>#</span><span>Item Name</span>{doc.invoiceType === 'gst' && <span>HSN / SAC</span>}<span>Quantity</span><span>Unit</span><span>Price / Unit</span>{doc.invoiceType === 'gst' && <span>GST</span>}<span>Amount</span>
       </div>
       {rows.map((row, index) => {
         const taxable = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
-        const rate = doc.invoiceType === 'gst' && doc.taxMode !== 'none'
+        const rate = doc.invoiceType === 'gst'
           ? (row.taxRate === '' || row.taxRate == null
               ? (doc.taxMode === 'igst' ? n(doc.igstRate) : n(doc.cgstRate) + n(doc.sgstRate))
               : n(row.taxRate))
@@ -984,26 +984,26 @@ function InvoicePrint({ doc, totals }) {
         return <div className="invoice-sale-table-row" key={row.id || index}>
           <span>{index + 1}</span>
           <strong>{row.description || row.code || 'Item'}</strong>
-          <span>{row.hsnCode || '—'}</span>
+          {doc.invoiceType === 'gst' && <span>{row.hsnCode || '—'}</span>}
           <span>{row.qty || 0}</span>
           <span>{row.unit || 'PCS'}</span>
           <span>{money.format(n(row.rate))}</span>
-          <span>{rate ? <>{money.format(tax)}<small>({rate}%)</small></> : '—'}</span>
+          {doc.invoiceType === 'gst' && <span>{rate ? <>{money.format(tax)}<small>({rate}%)</small></> : '—'}</span>}
           <strong>{money.format(taxable + tax)}</strong>
         </div>;
       })}
       <div className="invoice-sale-table-total">
-        <span></span><strong>Total</strong><span></span>
+        <span></span><strong>Total</strong>{doc.invoiceType === 'gst' && <span></span>}
         <strong>{rows.reduce((sum,row)=>sum+n(row.qty),0)}</strong>
         <span></span><span></span>
-        <strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong>
+        {doc.invoiceType === 'gst' && <strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong>}
         <strong>{money.format(totals.total - totals.adjustment)}</strong>
       </div>
     </div>
 
     <div className="invoice-sale-lower">
       <div className="invoice-sale-left">
-        {taxGroups.length > 0 && <div className="invoice-sale-tax-table">
+        {doc.invoiceType === 'gst' && taxGroups.length > 0 && <div className="invoice-sale-tax-table">
           <div className="head"><span>Tax type</span><span>Taxable amount</span><span>Rate</span><span>Tax amount</span></div>
           {taxGroups.map((group, index) => <div className="row" key={index}>
             <span>{group.type}</span>
@@ -1031,7 +1031,9 @@ function InvoicePrint({ doc, totals }) {
 
       <div className="invoice-sale-amounts">
         <div className="title">Amounts</div>
-        <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal + totals.cgst + totals.sgst + totals.igst)}</strong></div>
+        <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal)}</strong></div>
+        {totals.documentDiscount > 0 && <div><span>Discount</span><strong>- {money.format(totals.documentDiscount)}</strong></div>}
+        {doc.invoiceType === 'gst' && <div><span>GST</span><strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong></div>}
         <div><span>Adjustment</span><strong>{money.format(totals.adjustment)}</strong></div>
         <div className="grand"><span>Total</span><strong>{money.format(totals.total)}</strong></div>
         <div><span>Received</span><strong>{money.format(totals.paid)}</strong></div>
