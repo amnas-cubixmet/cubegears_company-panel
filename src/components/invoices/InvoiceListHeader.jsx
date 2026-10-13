@@ -3,7 +3,7 @@ import { Plus, ReceiptText } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 
-export const InvoiceListHeader = ({ activeTab, onCreate, onCreateCompany, onCreateIndividual }) => {
+export const InvoiceListHeader = ({ activeTab, onCreate, onCreateCompany, onCreateIndividual, companyRegistered }) => {
   const { user } = useAuth();
 
   return (
@@ -28,7 +28,7 @@ export const InvoiceListHeader = ({ activeTab, onCreate, onCreateCompany, onCrea
         ) : (
           <>
             <button type="button" className="bill-btn secondary" onClick={onCreateCompany || onCreate}>
-              <Plus size={14}/>Company Tax Invoice
+              <Plus size={14}/>{companyRegistered ? 'Company Tax Invoice' : 'Company Invoice'}
             </button>
             <button type="button" className="bill-btn" onClick={onCreateIndividual || onCreate}>
               <Plus size={14}/>Simple Service Bill
