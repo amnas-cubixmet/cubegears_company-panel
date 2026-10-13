@@ -128,6 +128,8 @@ export function JobCardWorkspace() {
   const [workflow, setWorkflow] = useState(null);
   const [jobInvoices, setJobInvoices] = useState([]);
   const [jobPayments, setJobPayments] = useState([]);
+  const [invoicePdfLoading, setInvoicePdfLoading] = useState(false);
+  const [invoicePdfError, setInvoicePdfError] = useState('');
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState('');
   const [staff, setStaff] = useState([]);
@@ -699,6 +701,19 @@ export function JobCardWorkspace() {
     }));
 
     navigate(`/invoices/new?kind=invoice&jobId=${encodeURIComponent(job.id)}`);
+  };
+
+  const downloadJobInvoicePdf = async () => {
+    if (!linkedInvoice?.id || invoicePdfLoading) return;
+    setInvoicePdfError('');
+    setInvoicePdfLoading(true);
+    try {
+      await billingService.downloadPdf(linkedInvoice);
+    } catch (err) {
+      setInvoicePdfError(err?.message || 'Unable to download invoice PDF.');
+    } finally {
+      setInvoicePdfLoading(false);
+    }
   };
 
   const recordPayment = async (event) => {
@@ -1433,14 +1448,23 @@ export function JobCardWorkspace() {
               <h2><ReceiptText size={18} aria-hidden="true" /> Invoice & Payment</h2>
               <p>Review the invoice, outstanding amount and vehicle delivery in one place.</p>
             </div>
-            <button
-              type="button"
-              onClick={() => linkedInvoice ? navigate('/invoices/' + linkedInvoice.id) : createInvoice()}
-              className="job-primary-action"
-            >
-              <ReceiptText size={15} aria-hidden="true" />
-              {linkedInvoice ? 'View Invoice' : 'Create Invoice'}
-            </button>
+            <div className="job-invoice-header-actions">
+              {linkedInvoice?.id && (
+                <button type="button" onClick={downloadJobInvoicePdf}
+                  disabled={invoicePdfLoading || billingLoading} className="job-invoice-download-button">
+                  <Download size={15} aria-hidden="true"/>
+                  {invoicePdfLoading ? 'Generating PDF…' : 'Download Invoice PDF'}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => linkedInvoice ? navigate('/invoices/' + linkedInvoice.id) : createInvoice()}
+                className="job-primary-action"
+              >
+                <ReceiptText size={15} aria-hidden="true" />
+                {linkedInvoice ? 'View Invoice' : 'Create Invoice'}
+              </button>
+            </div>
           </header>
 
           <div className="job-invoice-dashboard-stats">
@@ -1460,6 +1484,7 @@ export function JobCardWorkspace() {
             </div>
           </div>
 
+          {invoicePdfError && <p role="alert" className="job-invoice-inline-message is-error">{invoicePdfError}</p>}
           {billingLoading && <p className="job-invoice-inline-message" role="status">Loading invoice and payment records…</p>}
           {billingError && <div className="job-invoice-inline-message is-error" role="alert">
             {billingError}
