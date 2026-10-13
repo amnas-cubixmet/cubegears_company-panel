@@ -241,7 +241,7 @@ export function EWayBillPage() {
         <InvoiceTabs
           activeTab="eway"
           onChange={(kind) => navigate(`/invoices?kind=${kind}`)}
-          onEWayBills={() => {}}
+          onEWayBills={() => navigate('/invoices/e-way-bills')}
         />
 
         <section className="invoice-dashboard-stats" aria-label="E-Way Bill overview">
