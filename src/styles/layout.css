@@ -298,3 +298,29 @@
   .mobile-header-actions{gap:4px}
   .mobile-header-actions>button,.mobile-profile-button{width:32px;height:32px}
 }
+
+
+/* Navigation notification bell: visible, keyboard accessible and stateful. */
+.app-header :is(.header-icon-button.has-notification-count, .mobile-notification-button) {
+  position: relative;
+  color: var(--text-primary);
+}
+.app-header :is(.header-icon-button.has-notification-count, .mobile-notification-button):hover,
+.app-header :is(.header-icon-button.has-notification-count, .mobile-notification-button).is-notifications-active {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+.app-header :is(.header-icon-button.has-notification-count, .mobile-notification-button):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.app-header .header-notification-count {
+  top: -6px;
+  right: -6px;
+  min-width: 19px;
+  height: 19px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 750;
+}
