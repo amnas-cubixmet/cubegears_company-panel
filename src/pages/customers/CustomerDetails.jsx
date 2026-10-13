@@ -403,184 +403,154 @@ export const CustomerDetails = () => {
 
       {loadError && <div className="customer-profile-partial-error" role="status">{loadError} <button type="button" onClick={loadCustomerData}>Retry</button></div>}
 
-      {/* 1. CUSTOMER PROFILE HEADER */}
+      {/* Clean customer identity header — never show a raw internal UUID. */}
       <nav className="customer-profile-breadcrumb" aria-label="Customer profile navigation">
-        <button type="button" onClick={() => navigate('/customers')}><ArrowLeft size={16}/> All Customers</button>
-        <span aria-hidden="true">/</span>
-        <strong>{customer.name || 'Customer Profile'}</strong>
+        <button type="button" onClick={() => navigate('/customers')}>
+          <ArrowLeft size={16} aria-hidden="true"/> Customers
+        </button>
+        <ChevronRight size={14} aria-hidden="true"/>
+        <span aria-current="page">{customer.name || 'Customer Profile'}</span>
       </nav>
-      <div className="customer-profile-header" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        
-        {/* Top Header Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h1 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
-                  {customer.name}
-                </h1>
-                <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '6px', backgroundColor: archived ? 'var(--surface-2)' : 'var(--success-soft)', color: archived ? 'var(--text-muted)' : 'var(--success)' }}>
-                  {archived ? 'Archived' : 'Active'}
+
+      <header className="customer-profile-header customer-profile-hero">
+        <div className="customer-profile-hero__main">
+          <div className="customer-profile-identity">
+            <div className="customer-profile-avatar" aria-hidden="true">
+              {String(customer.name || 'C').trim().split(/\s+/).slice(0, 2)
+                .map((name) => name.charAt(0).toUpperCase()).join('')}
+            </div>
+            <div className="customer-profile-identity__text">
+              <span className="customer-profile-eyebrow">CUSTOMER PROFILE</span>
+              <div className="customer-profile-name-row">
+                <h1>{customer.name || 'Customer'}</h1>
+                <span className={'customer-profile-status ' + (archived ? 'is-archived' : 'is-active')}>
+                  <span aria-hidden="true"/> {archived ? 'Archived' : 'Active'}
                 </span>
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {customer.customerType || customer.customer_type || 'Individual'} · Customer Profile
-              </div>
+              <p>
+                {profileCustomerType(customer.customerType || customer.customer_type)}
+                <span aria-hidden="true"> · </span>
+                Last visit: {lastVisitDate}
+              </p>
             </div>
           </div>
 
-          {/* Desktop Right Action Bar */}
-          <div className="customer-profile-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button type="button" className="customer-profile-edit" onClick={() => setIsEditCustomerOpen(true)}>
-              <Pencil size={15}/> Edit Customer
+          <div className="customer-profile-actions">
+            <button type="button" className="customer-profile-action is-secondary"
+              onClick={() => setIsEditCustomerOpen(true)}>
+              <Pencil size={16} aria-hidden="true"/> Edit Profile
             </button>
-            <button
+            <button type="button" className="customer-profile-action is-secondary"
+              onClick={() => setIsAddVehicleOpen(true)}>
+              <Car size={16} aria-hidden="true"/> Add Vehicle
+            </button>
+            <button type="button" className="customer-profile-action is-primary"
               onClick={() => {
                 const targetVehicle = vehicles[0]?.regNo || '';
-                navigate(`/jobs/new?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
-              }}
-              style={{ height: '40px', padding: '0 14px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#ffffff', border: 'none', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <Plus size={16} /> New Job Card
+                navigate('/jobs/new?customerId=' + customer.id +
+                  '&customerName=' + encodeURIComponent(customer.name) +
+                  '&vehicle=' + encodeURIComponent(targetVehicle));
+              }}>
+              <Plus size={17} aria-hidden="true"/> New Job Card
             </button>
-
-            <button
-              onClick={() => setIsAddVehicleOpen(true)}
-              style={{ height: '40px', padding: '0 14px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <Car size={16} /> Add Vehicle
-            </button>
-
-            <button
-              onClick={() => setIsMoreMenuOpen(true)}
-              style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-              title="More Actions"
-            >
-              <MoreVertical size={18} />
+            <button type="button" className="customer-profile-action is-icon"
+              title="More customer actions" aria-label="More customer actions"
+              onClick={() => setIsMoreMenuOpen(true)}>
+              <MoreVertical size={18} aria-hidden="true"/>
             </button>
           </div>
         </div>
 
-        {/* Contact Info & Meta Row */}
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '12.5px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+        <div className="customer-profile-hero__contacts">
           {contact.callUrl ? (
-            <a className="customer-contact-action" href={contact.callUrl}>
-              <Phone size={14} /><strong>{customer.phone}</strong>
+            <a className="customer-contact-action is-call" href={contact.callUrl}>
+              <Phone size={16} aria-hidden="true"/>
+              <span>Call</span>
+              <strong>{customer.phone}</strong>
             </a>
-          ) : <span className="customer-contact-action is-unavailable"><Phone size={14}/> No phone number</span>}
-          {contact.whatsappUrl ? (
-            <a className="customer-contact-action is-whatsapp" href={contact.whatsappUrl}
-              target="_blank" rel="noopener noreferrer">
-              <MessageSquare size={14}/><span>WhatsApp</span>
-            </a>
-          ) : <span className="customer-contact-action is-unavailable"><MessageSquare size={14}/> WhatsApp unavailable</span>}
-          {customer.email && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Mail size={14} style={{ color: 'var(--text-muted)' }} />
-              <span>{customer.email}</span>
-            </div>
+          ) : (
+            <span className="customer-contact-action is-unavailable">
+              <Phone size={15} aria-hidden="true"/> No phone number
+            </span>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Building size={14} style={{ color: 'var(--text-muted)' }} />
-            <span>Branch: <strong style={{ color: 'var(--text-primary)' }}>{customer.branchName || customer.branch || '—'}</strong></span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
-            <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-            <span>Customer Since: <strong>{(customer.createdAt || customer.created_at) ? new Date(customer.createdAt || customer.created_at).toLocaleDateString('en-IN') : '—'}</strong></span>
-          </div>
+          {contact.whatsappUrl ? (
+            <a className="customer-contact-action is-whatsapp"
+              href={contact.whatsappUrl} target="_blank" rel="noopener noreferrer">
+              <MessageSquare size={16} aria-hidden="true"/> WhatsApp
+            </a>
+          ) : (
+            <span className="customer-contact-action is-unavailable">
+              <MessageSquare size={15} aria-hidden="true"/> WhatsApp unavailable
+            </span>
+          )}
+          {customer.email && (
+            <a className="customer-contact-action is-email" href={'mailto:' + customer.email}>
+              <Mail size={15} aria-hidden="true"/>
+              {customer.email}
+            </a>
+          )}
+          {customer.branchName && (
+            <span className="customer-profile-header-meta">
+              <Building size={15} aria-hidden="true"/> {customer.branchName}
+            </span>
+          )}
+          {(customer.createdAt || customer.created_at) && (
+            <span className="customer-profile-header-meta">
+              <Calendar size={15} aria-hidden="true"/>
+              Since {new Date(customer.createdAt || customer.created_at).toLocaleDateString('en-IN')}
+            </span>
+          )}
         </div>
-      </div>
+      </header>
 
-      {/* 2. SUMMARY KPI CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '10px' }} className="customer-profile-kpis customer-kpi-grid">
-        <style>{`
-          @media (max-width: 1024px) {
-            .customer-kpi-grid {
-              grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            }
-          }
-          @media (max-width: 600px) {
-            .customer-kpi-grid {
-              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-          }
-        `}</style>
-        
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Vehicles</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>{vehicles.length}</div>
-        </div>
+      <section className="customer-profile-kpis" aria-label="Customer overview statistics">
+        {[
+          { label: 'Vehicles', value: vehiclesAvailable ? String(vehicles.length) : '—',
+            icon: Car, tone: 'neutral' },
+          { label: 'Job Cards', value: jobsAvailable ? String(jobs.length) : '—',
+            icon: ClipboardCheck, tone: 'neutral' },
+          { label: 'Total Billed', value: formatINR(totalBilled),
+            icon: FileText, tone: 'blue' },
+          { label: 'Amount Paid', value: formatINR(totalPaid),
+            icon: CheckCircle2, tone: 'green' },
+          { label: 'Outstanding', value: formatINR(totalOutstanding),
+            icon: Wallet, tone: totalOutstanding > 0 ? 'danger' : 'neutral' },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <div className={'customer-profile-stat is-' + item.tone} key={item.label}>
+              <div className="customer-profile-stat__heading">
+                <span>{item.label}</span>
+                <Icon size={17} aria-hidden="true"/>
+              </div>
+              <strong title={item.value}>{item.value}</strong>
+            </div>
+          );
+        })}
+      </section>
 
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Jobs</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>{jobs.length}</div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Billed</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>{formatINR(totalBilled)}</div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Paid</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--success)', marginTop: '4px' }}>{formatINR(totalPaid)}</div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Outstanding</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: totalOutstanding > 0 ? 'var(--danger)' : 'var(--text-primary)', marginTop: '4px' }}>
-            {formatINR(totalOutstanding)}
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Last Visit</div>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {lastVisitDate}
-          </div>
-        </div>
-      </div>
-
-      {/* 3. CUSTOMER HORIZONTAL TABS RAIL */}
-      <div className="customer-profile-tabs" style={{ width: '100%', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)', borderRadius: '12px', overflow: 'hidden' }}>
-        <div
-          ref={tabRailRef}
-          style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', padding: '4px 8px', whiteSpace: 'nowrap' }}
-          className="customer-profile-tabs__rail scroll-hidden"
-        >
+      <nav className="customer-profile-tabs" aria-label="Customer details sections">
+        <div ref={tabRailRef} className="customer-profile-tabs__rail scroll-hidden" role="tablist">
           {tabs.map((t) => {
             const Icon = t.icon;
             const isActive = activeTab === t.id;
             return (
-              <button
-                key={t.id}
+              <button type="button" key={t.id}
+                id={'customer-tab-' + t.id}
+                role="tab" aria-selected={isActive}
+                aria-controls={'customer-profile-sections'}
                 onClick={(e) => handleTabClick(t.id, e)}
-                className={isActive ? 'is-active' : ''}
-                style={{
-                  padding: '10px 14px',
-                  fontSize: '13px',
-                  fontWeight: isActive ? '700' : '500',
-                  color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                  borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 160ms ease'
-                }}
-              >
-                <Icon size={15} />
-                {t.label}
+                className={isActive ? 'is-active' : ''}>
+                <Icon size={16} aria-hidden="true"/>
+                <span>{t.label}</span>
               </button>
             );
           })}
         </div>
-      </div>
+      </nav>
 
       {/* TAB CONTENT PANELS */}
-      <div className="customer-profile-content" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div id="customer-profile-sections" className="customer-profile-content" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         
         {/* 4. OVERVIEW TAB */}
         {activeTab === 'overview' && (
