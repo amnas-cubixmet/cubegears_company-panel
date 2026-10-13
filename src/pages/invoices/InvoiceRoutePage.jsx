@@ -596,9 +596,13 @@ export function InvoiceRoutePage() {
                 <input type="email" value={form.seller?.email || ''} onChange={(e) => update('seller.email', e.target.value)} placeholder="accounts@example.com"/>
               </label>
             </div>
-            <label>GSTIN
-              <input value={form.seller?.gstin || ''} onChange={(e) => update('seller.gstin', e.target.value.toUpperCase())} placeholder="GSTIN"/>
-            </label>
+            {form.invoiceType === 'gst' ? (
+              <label>Workshop GSTIN (from Company Settings)
+                <input value={gstConfig?.gstin || form.seller?.gstin || ''} readOnly aria-readonly="true"/>
+              </label>
+            ) : (
+              <p className="invoice-registration-note">Workshop is not GST registered. No GST is charged on this invoice.</p>
+            )}
             <div className="invoice-two-col">
               <label>State
                 <input value={form.seller?.state || ''} onChange={(e) => update('seller.state', e.target.value)} placeholder="Kerala"/>
@@ -650,9 +654,11 @@ export function InvoiceRoutePage() {
               <textarea value={form.customer?.address || ''} onChange={(e) => update('customer.address', e.target.value)} placeholder="Billing address"/>
             </label>
 
-            <label>GSTIN
-              <input value={form.customer?.gstin || ''} onChange={(e) => update('customer.gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
-            </label>
+            {form.invoiceType === 'gst' && (
+              <label>Customer GSTIN (optional — B2B only)
+                <input value={form.customer?.gstin || ''} onChange={(e) => update('customer.gstin', e.target.value.toUpperCase())} placeholder="Leave blank for walk-in customer"/>
+              </label>
+            )}
 
             <div className="invoice-two-col">
               <label>State
@@ -724,18 +730,26 @@ export function InvoiceRoutePage() {
           <section className="billing-card">
             <span className="billing-kicker">INVOICE DETAILS</span>
             <h3>Document Details</h3>
-            <label>Invoice Type
-              <select value={form.invoiceType} onChange={(e) => update('invoiceType', e.target.value)}>
-                <option value="regular">Regular Bill</option>
-                <option value="gst">GST Tax Invoice</option>
-              </select>
-            </label>
+            <div className="invoice-registration-mode" role="status" aria-live="polite">
+              <strong>{form.invoiceType === 'gst' ? 'GST Tax Invoice' : 'Normal Invoice — No GST'}</strong>
+              <span>{gstConfig?.registered
+                ? 'Company GSTIN is registered in Settings. GST applies based on the classified items and place of supply.'
+                : gstConfig
+                  ? 'Company has no GSTIN. GST tax cannot be charged.'
+                  : 'Checking Company GST settings…'}</span>
+            </div>
             <label>Date
               <input type="date" value={form.date || ''} onChange={(e) => update('date', e.target.value)}/>
             </label>
-            <label>Place of Supply
-              <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', e.target.value)} placeholder="32-Kerala"/>
-            </label>
+            {form.invoiceType === 'gst' && (
+              <label>Place of Supply — State / UT
+                <select value={String(form.customer?.placeOfSupply || '').slice(0, 2)}
+                  onChange={(e) => update('customer.placeOfSupply', e.target.value)}>
+                  <option value="">Select State / UT</option>
+                  {INDIA_STATES.map(([code, name]) => <option key={code} value={code}>{code} — {name}</option>)}
+                </select>
+              </label>
+            )}
             <div className="invoice-two-col">
               <label>Job Card No.
                 <input value={form.jobCardNo || ''} onChange={(e) => update('jobCardNo', e.target.value)} placeholder="JOB-2048"/>
