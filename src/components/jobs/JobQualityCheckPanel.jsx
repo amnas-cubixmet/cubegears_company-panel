@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2, ClipboardCheck, Save, ShieldCheck, XCircle } from 'lucide-react';
 import { jobService } from '../../services/job.service';
+import { QcInspectorPicker } from './QcInspectorPicker';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import {
   makeQcDraft, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
 } from './qualityCheckValidation';
 import '../../styles/job-quality-check.css';
 
-export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
+export function JobQualityCheckPanel({ job, staff = [], canEdit, onStaffCreated, onSaved, onCompleted }) {
   const original = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {};
   const [draft, setDraft] = useState(() => makeQcDraft(original));
   const [errors, setErrors] = useState(null);
@@ -150,12 +151,16 @@ export function JobQualityCheckPanel({ job, canEdit, onSaved, onCompleted }) {
 
         <div className="job-qc-field">
           <label htmlFor="job-qc-inspector">QC Inspector <span>*</span></label>
-          <input id="job-qc-inspector" type="text" maxLength={120}
-            value={draft.inspector} disabled={!canEdit || busy}
-            placeholder="Enter inspector name"
-            aria-invalid={Boolean(errors?.inspector)}
-            aria-describedby={errors?.inspector ? 'job-qc-inspector-error' : undefined}
-            onChange={(event) => change({ inspector: event.target.value })}/>
+          <QcInspectorPicker
+            key={job?.id}
+            staff={staff}
+            value={draft.inspector}
+            inspectorId={draft.inspectorId}
+            disabled={!canEdit || busy}
+            invalid={Boolean(errors?.inspector)}
+            onStaffCreated={onStaffCreated}
+            onSelect={({ inspector, inspectorId }) => change({ inspector, inspectorId })}
+          />
           {errors?.inspector && <small id="job-qc-inspector-error" className="job-qc-field-error">{errors.inspector}</small>}
         </div>
 
