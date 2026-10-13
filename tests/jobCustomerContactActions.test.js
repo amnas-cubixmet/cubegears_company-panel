@@ -44,8 +44,8 @@ test('Call and WhatsApp actions are present for desktop and mobile Job Cards', (
   assert.match(action, /href={callUrl}/);
   assert.match(action, /href={whatsappUrl}/);
   assert.match(action, /rel="noopener noreferrer"/);
-  assert.match(action, /Phone size={14}/);
-  assert.match(action, /MessageCircle size={14}/);
+  assert.match(action, /Phone size=\{14\}/);
+  assert.match(action, /MessageCircle size=\{14\}/);
   assert.match(css, /jobs-customer-contact-button/);
   assert.match(css, /@media\(max-width:767px\)/);
 });
