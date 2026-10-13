@@ -4,6 +4,7 @@ import { ChevronRight, Home } from 'lucide-react';
 import { staffService } from '../../services/staff.service';
 import { customerService } from '../../services/customer.service';
 import { vehicleService } from '../../services/vehicle.service';
+import { isRecordPath, recordBreadcrumbFallback, recordBreadcrumbLabel } from './breadcrumbRecordLabels';
 import '../../styles/breadcrumbs.css';
 
 const LABELS = {
@@ -89,16 +90,6 @@ const prettify = (value) => {
 
 const buildHref = (segments, index) => '/' + segments.slice(0, index + 1).join('/');
 
-// Only IDs for actual detail pages should be looked up. Static routes such as
-// /customers/new and /vehicles/new retain their ordinary breadcrumb labels.
-const STATIC_RECORD_ROUTES = {
-  customers: new Set(['new', 'add', 'all', 'overview', 'edit', 'vehicles', 'service-history', 'outstanding', 'reminders', 'reports']),
-  vehicles: new Set(['new', 'add']),
-};
-const isRecordPath = (kind, id) =>
-  Boolean(STATIC_RECORD_ROUTES[kind] && id && !STATIC_RECORD_ROUTES[kind].has(id));
-
-
 export function AppBreadcrumbs() {
   const location = useLocation();
   const scrollRef = useRef(null);
@@ -146,7 +137,7 @@ export function AppBreadcrumbs() {
     let alive = true;
     const kind = match[1];
     const identifier = decodeURIComponent(match[2]);
-    const fallback = kind === 'customers' ? 'Customer Profile' : 'Vehicle Profile';
+    const fallback = recordBreadcrumbFallback(kind);
     setRecordLabel({ kind, identifier, label: fallback });
     const fetchRecord = kind === 'customers'
       ? customerService.getCustomerById(identifier)
@@ -154,10 +145,7 @@ export function AppBreadcrumbs() {
     Promise.resolve(fetchRecord)
       .then((record) => {
         if (!alive) return;
-        const label = kind === 'customers'
-          ? String(record?.name || '').trim()
-          : String(record?.registration || record?.regNo || record?.licensePlate || '').trim();
-        setRecordLabel({ kind, identifier, label: label || fallback });
+        setRecordLabel({ kind, identifier, label: recordBreadcrumbLabel(kind, record) });
       })
       .catch(() => {
         if (alive) setRecordLabel({ kind, identifier, label: fallback });
@@ -192,7 +180,7 @@ export function AppBreadcrumbs() {
             : index === 1 && isRecordPath(segments[0], segment)
               ? (recordLabel?.kind === segments[0] && recordLabel?.identifier === decodeURIComponent(segment)
                   ? recordLabel.label
-                  : segments[0] === 'customers' ? 'Customer Profile' : 'Vehicle Profile')
+                  : recordBreadcrumbFallback(segments[0]))
               : prettify(segment),
         href: buildHref(segments, index),
         current: index === segments.length - 1
