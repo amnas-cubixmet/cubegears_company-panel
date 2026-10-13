@@ -3411,3 +3411,10 @@
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+/* Six-column normal invoice print; GST columns are omitted. */
+.invoice-print-sheet.invoice-no-gst .invoice-sale-table-head,
+.invoice-print-sheet.invoice-no-gst .invoice-sale-table-row,
+.invoice-print-sheet.invoice-no-gst .invoice-sale-table-total {
+  grid-template-columns: 28px minmax(160px, 2fr) 72px 70px 115px 130px;
+}
