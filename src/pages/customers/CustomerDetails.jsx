@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { customerService } from '../../services/customer.service';
+import { customerContactLinks } from '../../components/jobs/customerContact.utils';
+import { ArrowLeft, Pencil } from 'lucide-react';
 import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
@@ -41,6 +43,7 @@ export const CustomerDetails = () => {
 
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [toastMsg, setToastMsg] = useState('');
 
@@ -115,7 +118,8 @@ export const CustomerDetails = () => {
   const loadCustomerData = async () => {
     setLoading(true);
     try {
-      const targetId = id || 'CUS-0001';
+      const targetId = id;
+      setLoadError('');
       const cust = await customerService.getCustomerById(targetId);
       if (cust) {
         setCustomer(cust);
@@ -133,10 +137,7 @@ export const CustomerDetails = () => {
         setEditBranch(cust.branch || 'Main Garage Branch');
         setDocuments(Array.isArray(cust.documents) ? cust.documents : []);
 
-        setNotesList(cust.notes ? [{ id: 1, text: cust.notes, addedBy: 'Service Advisor', date: '2026-09-14 09:15 AM' }] : [
-          { id: 1, text: 'Prefers evening delivery.', addedBy: 'Rajesh V', date: '2026-09-10 04:30 PM' },
-          { id: 2, text: 'Call before replacing additional parts.', addedBy: 'Ajmal K', date: '2026-09-12 11:20 AM' }
-        ]);
+        setNotesList(cust.notes ? [{ id: 'customer-note', text: cust.notes, addedBy: 'Workshop team', date: cust.createdAt || '' }] : []);
 
         const vList = await customerService.getCustomerVehicles(targetId);
         setVehicles(vList);
@@ -155,6 +156,7 @@ export const CustomerDetails = () => {
       }
     } catch (e) {
       console.error(e);
+      setLoadError(e?.message || 'Customer profile could not be loaded.');
     } finally {
       setLoading(false);
     }
@@ -295,7 +297,7 @@ export const CustomerDetails = () => {
     if (window.confirm(`Are you sure you want to archive ${customer.name}? This will preserve historical records.`)) {
       await customerService.archiveCustomer(customer.id);
       showToast('Customer archived.');
-      navigate('/customers/all');
+      navigate('/customers');
     }
   };
 
@@ -314,18 +316,23 @@ export const CustomerDetails = () => {
 
   if (!customer) {
     return (
-      <div style={{ padding: '40px 16px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
-        <h2 style={{ fontSize: '18px', color: 'var(--text-primary)', margin: 0 }}>Customer Not Found</h2>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>The requested customer profile does not exist or has been removed.</p>
+      <div className="customer-profile-unavailable">
+        <h2>Customer profile unavailable</h2>
+        <p>{loadError || 'The customer does not exist or you do not have access.'}</p>
+        <div>
+          <button type="button" onClick={() => navigate('/customers')}><ArrowLeft size={16}/> All Customers</button>
+          <button type="button" onClick={loadCustomerData}>Retry</button>
+        </div>
       </div>
     );
   }
 
   // Financial calculations derived from actual invoices & payments
-  const totalBilled = invoices.reduce((acc, inv) => acc + (inv.totalAmount || 0), 0);
-  const totalPaid = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
+  const totalBilled = invoices.reduce((acc, inv) => acc + Number(inv.totalAmount || 0), 0);
+  const totalPaid = payments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
   const totalOutstanding = Math.max(0, totalBilled - totalPaid);
-  const lastVisitDate = customer.lastVisit || (jobs[0]?.createdDate || '12 Sep 2026');
+  const lastVisitDate = customer.lastVisit || jobs[0]?.createdDate || '—';
+  const contact = customerContactLinks({ customerPhone: customer.phone, customerWhatsapp: customer.whatsapp });
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -351,6 +358,11 @@ export const CustomerDetails = () => {
       )}
 
       {/* 1. CUSTOMER PROFILE HEADER */}
+      <nav className="customer-profile-breadcrumb" aria-label="Customer profile navigation">
+        <button type="button" onClick={() => navigate('/customers')}><ArrowLeft size={16}/> All Customers</button>
+        <span aria-hidden="true">/</span>
+        <strong>{customer.name || 'Customer Profile'}</strong>
+      </nav>
       <div className="customer-profile-header" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         
         {/* Top Header Row */}
@@ -366,13 +378,16 @@ export const CustomerDetails = () => {
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {customer.customerType || 'Individual'} • Customer ID: <strong style={{ color: 'var(--text-primary)' }}>{customer.id}</strong>
+                {customer.customerType || 'Individual'} · Customer Profile
               </div>
             </div>
           </div>
 
           {/* Desktop Right Action Bar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="customer-profile-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button type="button" className="customer-profile-edit" onClick={() => setIsEditCustomerOpen(true)}>
+              <Pencil size={15}/> Edit Customer
+            </button>
             <button
               onClick={() => {
                 const targetVehicle = vehicles[0]?.regNo || '';
@@ -402,21 +417,17 @@ export const CustomerDetails = () => {
 
         {/* Contact Info & Meta Row */}
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '12.5px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
-          <a className="customer-contact-action" href={`tel:${customer.phone}`}>
-            <Phone size={14} />
-            <strong>{customer.phone}</strong>
-          </a>
-          {customer.whatsapp && (
-            <a
-              className="customer-contact-action is-whatsapp"
-              href={`https://wa.me/${String(customer.whatsapp).replace(/\D/g, '')}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <MessageSquare size={14} />
-              <span>{customer.whatsapp}</span>
+          {contact.callUrl ? (
+            <a className="customer-contact-action" href={contact.callUrl}>
+              <Phone size={14} /><strong>{customer.phone}</strong>
             </a>
-          )}
+          ) : <span className="customer-contact-action is-unavailable"><Phone size={14}/> No phone number</span>}
+          {contact.whatsappUrl ? (
+            <a className="customer-contact-action is-whatsapp" href={contact.whatsappUrl}
+              target="_blank" rel="noopener noreferrer">
+              <MessageSquare size={14}/><span>WhatsApp</span>
+            </a>
+          ) : <span className="customer-contact-action is-unavailable"><MessageSquare size={14}/> WhatsApp unavailable</span>}
           {customer.email && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Mail size={14} style={{ color: 'var(--text-muted)' }} />
@@ -425,11 +436,11 @@ export const CustomerDetails = () => {
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Building size={14} style={{ color: 'var(--text-muted)' }} />
-            <span>Branch: <strong style={{ color: 'var(--text-primary)' }}>{customer.branch}</strong></span>
+            <span>Branch: <strong style={{ color: 'var(--text-primary)' }}>{customer.branchName || customer.branch || '—'}</strong></span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
             <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-            <span>Customer Since: <strong>{customer.createdAt || '12 Jan 2025'}</strong></span>
+            <span>Customer Since: <strong>{customer.createdAt ? new Date(customer.createdAt).toLocaleDateString('en-IN') : '—'}</strong></span>
           </div>
         </div>
       </div>
@@ -625,7 +636,7 @@ export const CustomerDetails = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>City / State</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{customer.city || 'Kochi'}, {customer.state || 'Kerala'} ({customer.pincode || '682031'})</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{[customer.city, customer.state, customer.pincode].filter(Boolean).join(', ') || '—'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Company / GST</span>
