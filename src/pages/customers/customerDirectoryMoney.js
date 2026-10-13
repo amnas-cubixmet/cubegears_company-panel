@@ -27,7 +27,7 @@ export const invoiceMoney = (invoice = {}) => {
   };
 };
 
-export const customerInvoiceMoney = (invoices = []) => {
+export const customerInvoiceMoney = (invoices) => {
   if (!Array.isArray(invoices)) throw new Error('Invoice records were not returned as a list.');
   const relevant = invoices.filter((invoice) => {
     const kind = String(invoice?.kind || 'invoice').toLowerCase();
