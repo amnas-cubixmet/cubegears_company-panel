@@ -1,6 +1,5 @@
 export const hasPermission = (user, permission) => {
   if (!permission) return true;
-  if (user?.is_superuser) return true;
 
   const role = user?.role;
 
@@ -13,7 +12,6 @@ export const hasPermission = (user, permission) => {
 };
 
 export const getUserPermissions = (user) => {
-  if (user?.is_superuser) return ['*'];
 
   const role = user?.role;
 
@@ -52,6 +50,8 @@ const SPECIAL_PATH_PERMISSIONS = [
   ['/account/storage', 'storage.view'],
   ['/account/templates', 'settings.view'],
   ['/account/security', 'settings.view'],
+  ['/account', 'settings.view'],
+  ['/staff', 'payroll.view'],
 ];
 
 const actionForCrudPath = (pathname, prefix) => {
