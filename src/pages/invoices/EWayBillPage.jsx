@@ -127,13 +127,23 @@ export function EWayBillPage() {
               documentDate: invoice.date || base.documentDate,
               invoiceId: invoice.id || '',
               jobCardNo: invoice.jobCardNo || '',
+              from: {
+                ...base.from,
+                gstin: invoice.seller?.gstin || '',
+                tradeName: invoice.seller?.name || '',
+                address: invoice.seller?.address || '',
+                place: invoice.seller?.city || '',
+                pincode: invoice.seller?.pincode || '',
+                stateCode: invoice.seller?.stateCode || String(invoice.seller?.gstin || '').slice(0, 2),
+              },
               to: {
                 ...base.to,
                 gstin: invoice.customer?.gstin || 'URP',
                 tradeName: invoice.customer?.name || '',
                 address: invoice.customer?.address || '',
-                place: invoice.customer?.placeOfSupply || '',
-                stateCode: invoice.customer?.stateCode || base.to.stateCode
+                place: invoice.customer?.city || '',
+                pincode: invoice.customer?.pincode || '',
+                stateCode: invoice.customer?.stateCode || String(invoice.customer?.gstin || '').slice(0, 2) || ''
               },
               items: goods.length ? goods : base.items,
               notes: invoice.number ? `Created from CubixGear invoice ${invoice.number}` : ''
@@ -205,7 +215,7 @@ export function EWayBillPage() {
           <div>
             <span className="billing-kicker">BILLING · GOODS MOVEMENT</span>
             <h1>E-Way Bills</h1>
-            <p>Create inward/outward transport documents for workshop goods movement.</p>
+            <p>Prepare goods transport details. Official generation requires a connected GST E-Way Bill API.</p>
           </div>
           <button className="bill-btn" onClick={() => navigate('/invoices/e-way-bills/new')}>
             <Plus size={17}/>Create E-Way Bill
@@ -235,11 +245,13 @@ export function EWayBillPage() {
                       <span>{row.documentDate || '—'}</span>
                       <strong>{money.format(total)}</strong>
                     </div>
-                    <span className="billing-status">{row.status}</span>
+                    <span className="billing-status">{row.status === 'Ready for API' ? 'Prepared · Not generated' : row.status}</span>
                     <div className="billing-list-actions">
                       <button aria-label="View" onClick={() => navigate(`/invoices/e-way-bills/${row.id}`)}><Eye size={16}/></button>
-                      <button aria-label="Edit" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/edit`)}><Edit3 size={16}/></button>
-                      <button aria-label="Delete" className="danger" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/delete`)}><Trash2 size={16}/></button>
+                      {row.status === 'Draft' && !row.ewayBillNo && <>
+                        <button aria-label="Edit draft" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/edit`)}><Edit3 size={16}/></button>
+                        <button aria-label="Delete draft" className="danger" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/delete`)}><Trash2 size={16}/></button>
+                      </>}
                     </div>
                   </article>
                 );
