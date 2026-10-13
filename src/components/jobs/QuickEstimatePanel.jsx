@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ChevronDown, ClipboardList, Package, Pencil, Plus, ReceiptText, Trash2, Wrench } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 import { EstimateCatalogPicker } from './EstimateCatalogPicker';
+import { estimateLineErrors, estimateFormValidation } from './quickEstimateValidation';
 
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
@@ -48,6 +49,8 @@ export function QuickEstimatePanel({
   const [busy, setBusy] = useState(false);
   const [changed, setChanged] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [showValidation, setShowValidation] = useState(false);
+  const formRef = useRef(null);
   const revisedAt = job?.inspection?.revisedAt;
   const stale = !!(latest?.created_at && revisedAt &&
     new Date(latest.created_at).getTime() < new Date(revisedAt).getTime());
@@ -60,6 +63,7 @@ export function QuickEstimatePanel({
     setTaxPercent(String(pricing?.taxPercent ?? latest?.taxPercent ?? 0));
     setChanged(false);
     setFeedback('');
+    setShowValidation(false);
   }, [job?.id, latest?.id, latest?.updated_at, latest?.status]);
 
   const amount = useMemo(() => {
@@ -75,22 +79,10 @@ export function QuickEstimatePanel({
     return { work, parts, subtotal, tax, total: subtotal - rebate + tax };
   }, [lines, discount, taxPercent]);
 
-  const validation = useMemo(() => {
-    if (lines.length > 75) return 'Maximum 75 items per estimate.';
-    if (!lines.length || lines.some((row) => !row.description.trim() ||
-      !Number.isFinite(Number(row.unitPrice)) || Number(row.unitPrice) < 0 ||
-      !Number.isFinite(Number(row.quantity)) || Number(row.quantity) <= 0 ||
-      Number(row.quantity) > 10000 || Number(row.unitPrice) > 10000000)) {
-      return 'Add a description, quantity and valid price for every item.';
-    }
-    if (!Number.isFinite(Number(taxPercent)) || Number(taxPercent) < 0 || Number(taxPercent) > 100) {
-      return 'Enter tax between 0 and 100%.';
-    }
-    if (!Number.isFinite(Number(discount)) || Number(discount) < 0 || Number(discount) > amount.subtotal) {
-      return 'Discount must be between zero and subtotal.';
-    }
-    return '';
-  }, [lines, amount.subtotal, taxPercent, discount]);
+  const validation = useMemo(
+    () => estimateFormValidation(lines, discount, taxPercent),
+    [lines, discount, taxPercent]
+  );
 
   const edit = (key, field, value) => {
     setLines((current) => current.map((line) => line.key === key
@@ -109,7 +101,17 @@ export function QuickEstimatePanel({
     setFeedback('');
   };
   const save = async () => {
-    if (!canEdit || busy || validation) return;
+    if (!canEdit || busy) return;
+    if (validation) {
+      setShowValidation(true);
+      setFeedback('');
+      requestAnimationFrame(() => {
+        const field = formRef.current?.querySelector('[aria-invalid="true"]');
+        field?.focus();
+        field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      return;
+    }
     setBusy(true);
     setFeedback('');
     try {
@@ -123,6 +125,7 @@ export function QuickEstimatePanel({
       }, draftId);
       await onSaved?.();
       setChanged(false);
+      setShowValidation(false);
       setFeedback(draftId ? 'Draft updated.' : 'Estimate draft saved.');
     } catch (err) {
       setFeedback(err?.message || 'Unable to save estimate.');
@@ -154,8 +157,10 @@ export function QuickEstimatePanel({
   };
   const renderItem = (line, index) => {
     const part = line.type === 'Part';
+    const errors = showValidation ? estimateLineErrors(line) : {};
+    const invalid = Object.values(errors).some(Boolean);
     return (
-      <div className="job-quick-line" key={line.key}>
+      <div className={'job-quick-line' + (invalid ? ' is-invalid' : '')} key={line.key}>
         <div className="job-quick-line-header">
           <strong>{part ? 'Spare Part' : 'Work / Service'} {index + 1}</strong>
           {canEdit && (
@@ -176,10 +181,12 @@ export function QuickEstimatePanel({
             <EstimateCatalogPicker
               kind={part ? 'part' : 'service'}
               value={line.description}
+              invalid={Boolean(errors.description)}
               disabled={!canEdit || busy}
               onChange={(value) => edit(line.key, 'description', value)}
               onSelect={(item) => selectCatalog(line.key, item)}
             />
+            {errors.description && <small className="job-quick-field-error">{errors.description}</small>}
             {line.catalogId && (
               <small className="job-quick-catalog-selected">
                 Selected from {part ? 'stock' : 'services'}{line.catalogCode ? ' · ' + line.catalogCode : ''}
@@ -201,15 +208,19 @@ export function QuickEstimatePanel({
             <input
               type="number" min="0.01" max="10000" step="0.01" inputMode="decimal"
               value={line.quantity} disabled={!canEdit || busy}
+              aria-invalid={Boolean(errors.quantity)}
               onChange={(event) => edit(line.key, 'quantity', event.target.value)}
             />
+            {errors.quantity && <small className="job-quick-field-error">{errors.quantity}</small>}
           </label>
           <label>{part ? 'Unit Price (₹)' : 'Rate (₹)'}
             <input
               type="number" min="0" max="10000000" step="0.01" inputMode="decimal"
               value={line.unitPrice} disabled={!canEdit || busy} placeholder="0.00"
+              aria-invalid={Boolean(errors.unitPrice)}
               onChange={(event) => edit(line.key, 'unitPrice', event.target.value)}
             />
+            {errors.unitPrice && <small className="job-quick-field-error">{errors.unitPrice}</small>}
           </label>
         </div>
         <div className="job-quick-line-total">
@@ -231,7 +242,7 @@ export function QuickEstimatePanel({
   };
 
   return (
-    <div className="job-quick-estimate">
+    <div className="job-quick-estimate" ref={formRef}>
       <header className="job-quick-header">
         <div>
           <span className="job-quick-eyebrow">Job Card / Estimate</span>
@@ -311,10 +322,12 @@ export function QuickEstimatePanel({
             <div className="job-quick-adjustments">
               <label>Discount (₹)
                 <input type="number" min="0" step="0.01" value={discount} disabled={!canEdit || busy}
+                  aria-invalid={showValidation && validation.startsWith('Discount')}
                   onChange={(e) => { setDiscount(e.target.value); setChanged(true); }}/>
               </label>
               <label>Tax (%)
                 <input type="number" min="0" max="100" step="0.01" value={taxPercent} disabled={!canEdit || busy}
+                  aria-invalid={showValidation && validation.startsWith('Enter tax')}
                   onChange={(e) => { setTaxPercent(e.target.value); setChanged(true); }}/>
               </label>
             </div>
@@ -323,9 +336,9 @@ export function QuickEstimatePanel({
           </dl>
           {canEdit ? (
             <div className="job-quick-actions">
-              {validation && <p className="job-quick-invalid">{validation}</p>}
+              {showValidation && validation && <p className="job-quick-invalid" role="alert">{validation}</p>}
               <button type="button" className="job-quick-primary"
-                disabled={busy || !!validation} onClick={save}>
+                disabled={busy} onClick={save}>
                 {busy ? 'Please wait…' : latest?.status === 'Draft' && !stale ? 'Update Draft' : 'Save Draft'}
               </button>
               <button type="button" className="job-quick-approve"
