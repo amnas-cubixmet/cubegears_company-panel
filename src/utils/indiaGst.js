@@ -33,16 +33,18 @@ export const calculateEstimateIndiaGst = ({ lines = [], discount = 0, registered
   const rebate = toPaise(discount);
   const taxable = Math.max(0, subtotal - rebate);
   const weights = lines.map(row => toPaise(Number(row.quantity || 0) * Number(row.unitPrice || 0)));
-  let discountRemaining = Math.min(rebate, subtotal);
+  let allocated = 0;
+  let cumulativeGross = 0;
   let cgst = 0;
   let sgst = 0;
   let igst = 0;
   const taxRows = lines.map((row, i) => {
     const gross = weights[i];
-    const allocation = Math.max(0, Math.min(gross, discountRemaining,
-      i === lines.length - 1 ? discountRemaining : subtotal ?
-        Math.round(Math.min(rebate, subtotal) * gross / subtotal) : 0));
-    discountRemaining -= allocation;
+    cumulativeGross += gross;
+    const target = subtotal ?
+      Math.round(Math.min(rebate, subtotal) * cumulativeGross / subtotal) : 0;
+    const allocation = Math.max(0, Math.min(gross, target - allocated));
+    allocated += allocation;
     const value = gross - allocation;
     const rate = Number(row.taxRate || 0);
     const central = mode === 'cgst_sgst' ? Math.round(value * rate / 200) : 0;
