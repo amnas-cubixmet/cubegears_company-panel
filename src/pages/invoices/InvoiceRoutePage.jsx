@@ -621,6 +621,20 @@ export function InvoiceRoutePage() {
           <section className="billing-card invoice-customer-card">
             <span className="billing-kicker">BILL TO</span>
             <h3>Customer Details</h3>
+            <label>Billing For
+              <select aria-label="Bill customer type" value={form.customer?.customerType || 'individual'}
+                onChange={(e) => setForm((old) => ({
+                  ...old,
+                  customer: {
+                    ...old.customer,
+                    customerType: e.target.value,
+                    ...(e.target.value === 'individual' ? { companyName: '', gstin: '' } : {})
+                  }
+                }))}>
+                <option value="individual">Individual — Simple Service Bill</option>
+                <option value="business">Company — Business Invoice</option>
+              </select>
+            </label>
 
             <label>Phone / Existing Customer
               <select
@@ -643,8 +657,13 @@ export function InvoiceRoutePage() {
               </div>
             )}
 
-            <label>Name
-              <input value={form.customer?.name || ''} onChange={(e) => update('customer.name', e.target.value)} placeholder="Customer / Company name"/>
+            {form.customer?.customerType === 'business' && (
+              <label>Company / Business Name
+                <input value={form.customer?.companyName || ''} onChange={(e) => update('customer.companyName', e.target.value)} placeholder="Registered company / business name"/>
+              </label>
+            )}
+            <label>{form.customer?.customerType === 'business' ? 'Contact Person' : 'Customer Name'}
+              <input value={form.customer?.name || ''} onChange={(e) => update('customer.name', e.target.value)} placeholder={form.customer?.customerType === 'business' ? 'Company contact' : 'Customer name'}/>
             </label>
 
             <label>Phone
@@ -659,8 +678,8 @@ export function InvoiceRoutePage() {
               <textarea value={form.customer?.address || ''} onChange={(e) => update('customer.address', e.target.value)} placeholder="Billing address"/>
             </label>
 
-            {form.invoiceType === 'gst' && (
-              <label>Customer GSTIN (optional — B2B only)
+            {form.customer?.customerType === 'business' && form.invoiceType === 'gst' && (
+              <label>Company GSTIN (if registered)
                 <input value={form.customer?.gstin || ''} onChange={(e) => update('customer.gstin', e.target.value.toUpperCase())} placeholder="Leave blank for walk-in customer"/>
               </label>
             )}
@@ -736,11 +755,11 @@ export function InvoiceRoutePage() {
             <span className="billing-kicker">INVOICE DETAILS</span>
             <h3>Document Details</h3>
             <div className="invoice-registration-mode" role="status" aria-live="polite">
-              <strong>{form.invoiceType === 'gst' ? 'GST Tax Invoice' : 'Normal Invoice — No GST'}</strong>
+              <strong>{form.customer?.customerType === 'business' ? 'Company Invoice (B2B)' : 'Simple Service Bill (B2C)'}</strong>
               <span>{gstConfig?.registered
-                ? 'Company GSTIN is registered in Settings. GST applies based on the classified items and place of supply.'
+                ? 'Workshop GST registered: GST applies to taxable parts and labour in both billing styles.'
                 : gstConfig
-                  ? 'Company has no GSTIN. GST tax cannot be charged.'
+                  ? 'Workshop is not GST registered: tax collection is disabled for both styles.'
                   : 'Checking Company GST settings…'}</span>
             </div>
             <label>Date
