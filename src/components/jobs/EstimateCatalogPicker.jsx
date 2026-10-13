@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { serviceService } from '../../services/service.service';
 import { stockService } from '../../services/stock.service';
 
@@ -15,7 +15,7 @@ const priceOf = (row, kind) => Number(
     : row.price ?? row.defaultPrice ?? 0
 );
 
-export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelect, invalid = false }) {
+export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelect, onAddNew, invalid = false }) {
   const id = useId();
   const [opened, setOpened] = useState(false);
   const [results, setResults] = useState([]);
@@ -67,6 +67,13 @@ export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelec
     });
     setOpened(false);
     setActive(-1);
+  };
+
+  const addNew = () => {
+    if (disabled || !onAddNew) return;
+    setOpened(false);
+    setActive(-1);
+    onAddNew(value.trim());
   };
 
   const keyDown = (event) => {
@@ -146,7 +153,15 @@ export function EstimateCatalogPicker({ kind, value, disabled, onChange, onSelec
                     <b>{money.format(priceOf(row, kind))}</b>
                   </button>
                 );
-              }) : <p>No matches. Enter a custom {isPart ? 'part' : 'work description'} above.</p>}
+              }) : <p>No matches. You can enter a custom {isPart ? 'part' : 'work description'} or create a new catalogue entry.</p>}
+          {onAddNew && <button type="button" className="job-quick-catalog-add-new"
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={addNew} aria-label={isPart ? 'Add new spare part to catalogue' : 'Add new work to catalogue'}>
+            <Plus size={16} aria-hidden="true"/>
+            <span><strong>{isPart ? 'Add New Spare Part' : 'Add New Work'}</strong>
+              <small>{value.trim() ? 'Create “' + value.trim() + '” in the catalogue' : 'Create a catalogue item and use it in this estimate'}</small>
+            </span>
+          </button>}
         </div>
       )}
     </div>
