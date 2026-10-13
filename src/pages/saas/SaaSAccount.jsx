@@ -3,20 +3,25 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ChevronRight, FilePenLine, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
+import { settingsService } from '../../services/settings.service';
 import { storageHistoryService } from '../../services/storageHistory.service';
 import { AccountHeader, AccountOverview } from '../../components/account';
 import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
 import '../../styles/account-billing.css';
 import '../../styles/account-dashboard.css';
+import '../../styles/account-overview-refined.css';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 const dateTime = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const iso = (value) => new Date(value).toISOString().slice(0, 10);
 
-function BillingView({ billing, storage, onSeatsChange, onOpenTemplates }) {
-  const estimate = useMemo(() => saasAccountService.calculateMonthlyEstimate(billing), [billing]);
-  const todayStorage = storageDayCharge(storage.usedGb);
+function BillingView({ billing, storage, onOpenTemplates }) {
+  const estimate = useMemo(() => billing ? saasAccountService.calculateMonthlyEstimate(billing) : null, [billing]);
+  const plan = billing?.plan;
+  const nextRenewal = plan?.nextBillingDate ? date.format(new Date(plan.nextBillingDate)) : '—';
+  const actualUsers = billing?.usage?.seatsUsed;
+  const seats = Number(plan?.includedSeats || 0);
   return (
     <div className="saas-grid">
       <section className="saas-card saas-wide saas-template-entry">
@@ -24,43 +29,76 @@ function BillingView({ billing, storage, onSeatsChange, onOpenTemplates }) {
           <div><span className="saas-kicker">DOCUMENTS</span><h2>Invoice & Estimate Templates</h2></div>
           <FilePenLine size={22}/>
         </div>
-        <p className="saas-muted">Choose a ready-made PDF style or create your own custom invoice / estimate template.</p>
-        <button className="saas-button" onClick={onOpenTemplates}>
-          <FilePenLine size={17}/>Open Template Designer
+        <p className="saas-muted">Configure invoice and estimate styles and company document details.</p>
+        <button type="button" className="saas-button" onClick={onOpenTemplates}>
+          <FilePenLine size={17}/> Open Template Designer
         </button>
       </section>
       <section className="saas-card saas-plan-card">
-        <div className="saas-card-head"><div><span className="saas-kicker">CURRENT PLAN</span><h2>{billing.plan.name}</h2></div><span className="saas-status">{billing.plan.status}</span></div>
-        <div className="saas-price">{money.format(billing.plan.basePrice)}<span>/month</span></div>
+        <div className="saas-card-head">
+          <div><span className="saas-kicker">SUBSCRIPTION</span>
+            <h2>{plan?.name || 'Subscription unavailable'}</h2></div>
+          <span className="saas-status">{plan?.status || 'Unavailable'}</span>
+        </div>
+        <div className="saas-price">
+          {plan?.basePrice == null ? '—' : money.format(plan.basePrice)}
+          <span>{plan?.billingCycle ? '/' + plan.billingCycle : 'No active recurring charge'}</span>
+        </div>
         <div className="saas-details-grid">
-          <div><span>Media storage</span><strong>Unlimited</strong></div>
-          <div><span>Storage billing</span><strong>₹{STORAGE_PRICE_PER_GB_DAY} / GB / day</strong></div>
-          <div><span>Included users</span><strong>{billing.plan.includedSeats}</strong></div>
-          <div><span>Next bill</span><strong>{date.format(new Date(billing.plan.nextBillingDate))}</strong></div>
+          <div><span>Included users</span><strong>{plan?.includedSeats ?? '—'}</strong></div>
+          <div><span>Billing renewal</span><strong>{nextRenewal}</strong></div>
+          <div><span>Active accounts</span><strong>{actualUsers ?? '—'}</strong></div>
+          <div><span>Current media</span><strong>{storage?.usedGb == null ? '—' : storage.usedGb + ' GB'}</strong></div>
         </div>
+        {billing?.billingNote && <p className="saas-muted saas-billing-note">{billing.billingNote}</p>}
       </section>
-
       <section className="saas-card">
-        <div className="saas-card-head"><div><span className="saas-kicker">CURRENT ESTIMATE</span><h2>{money.format(estimate.total + todayStorage)}</h2></div><ReceiptText size={22} /></div>
-        <div className="saas-breakdown">
-          <div><span>Plan</span><strong>{money.format(estimate.base)}</strong></div>
-          <div><span>Storage today ({storage.usedGb} GB × ₹{STORAGE_PRICE_PER_GB_DAY})</span><strong>{money.format(todayStorage)}</strong></div>
-          <div><span>Extra users ({estimate.extraSeats})</span><strong>{money.format(estimate.seatCharge)}</strong></div>
-          <div><span>GST estimate</span><strong>{money.format(estimate.tax)}</strong></div>
-          <div className="total"><span>Current estimate</span><strong>{money.format(estimate.total + todayStorage)}</strong></div>
+        <div className="saas-card-head"><div>
+          <span className="saas-kicker">PLAN ESTIMATE</span><h2>Estimated monthly amount</h2>
+        </div><ReceiptText size={22}/></div>
+        {estimate ? (
+          <div className="saas-breakdown">
+            <div><span>Plan base</span><strong>{money.format(estimate.base)}</strong></div>
+            <div><span>Seats above plan ({estimate.extraSeats})</span>
+              <strong>{plan?.extraSeatRate == null ? 'Not configured' : money.format(estimate.seatCharge)}</strong></div>
+            <div><span>Estimated GST (18%)</span><strong>{money.format(estimate.tax)}</strong></div>
+            <div className="total"><span>Indicative subtotal</span><strong>{money.format(estimate.total)}</strong></div>
+          </div>
+        ) : <p className="saas-muted">
+          No verified subscription rate is configured. Plan charges cannot be estimated.
+        </p>}
+        <p className="saas-muted">Estimates are informational only; this is not an issued subscription invoice.</p>
+      </section>
+      <section className="saas-card">
+        <div className="saas-card-head"><div><span className="saas-kicker">USER ACCESS</span>
+          <h2>Active login accounts</h2></div><Users size={22}/></div>
+        <div className="saas-account-readonly-users">
+          <strong>{actualUsers ?? '—'}</strong>
+          <span>Actual active users from your company</span>
         </div>
+        {seats > 0 && actualUsers != null && (
+          <div className="saas-meter"><div style={{
+            width: Math.min(100, Math.max(0, Number(actualUsers) / seats * 100)) + '%',
+          }}/></div>
+        )}
+        <p className="saas-muted">
+          User count updates automatically when staff accounts are activated/deactivated.
+          It cannot be edited manually.
+        </p>
       </section>
-
-      <section className="saas-card">
-        <div className="saas-card-head"><div><span className="saas-kicker">USAGE</span><h2>Account users</h2></div><Users size={22} /></div>
-        <label className="saas-field"><span>Active users</span><input type="number" min="1" value={billing.usage.seatsUsed} onChange={(e) => onSeatsChange(Number(e.target.value))} /></label>
-        <div className="saas-meter"><div style={{ width: `${Math.min(100, (billing.usage.seatsUsed / billing.plan.includedSeats) * 100)}%` }} /></div>
-        <p className="saas-muted">Storage has no fixed limit. Usage is billed daily at ₹{STORAGE_PRICE_PER_GB_DAY} per GB.</p>
-      </section>
-
       <section className="saas-card saas-wide">
-        <div className="saas-card-head"><div><span className="saas-kicker">BILL HISTORY</span><h2>Subscription invoices</h2></div><CalendarDays size={22} /></div>
-        <div className="saas-table-wrap"><table className="saas-table"><thead><tr><th>Invoice</th><th>Period</th><th>Amount</th><th>Status</th><th>Paid</th></tr></thead><tbody>{billing.invoices.map((item) => <tr key={item.id}><td>{item.id}</td><td>{item.period}</td><td>{money.format(item.amount)}</td><td><span className="saas-status">{item.status}</span></td><td>{date.format(new Date(item.paidAt))}</td></tr>)}</tbody></table></div>
+        <div className="saas-card-head"><div><span className="saas-kicker">BILL HISTORY</span>
+          <h2>Subscription invoices</h2></div><CalendarDays size={22}/></div>
+        {billing?.invoices?.length ? (
+          <div className="saas-table-wrap"><table className="saas-table">
+            <thead><tr><th>Invoice</th><th>Period</th><th>Amount</th><th>Status</th><th>Paid</th></tr></thead>
+            <tbody>{billing.invoices.map((item) => <tr key={item.id}>
+              <td>{item.id}</td><td>{item.period || '—'}</td><td>{money.format(item.amount)}</td>
+              <td>{item.status || '—'}</td>
+              <td>{item.paidAt ? date.format(new Date(item.paidAt)) : '—'}</td>
+            </tr>)}</tbody>
+          </table></div>
+        ) : <p className="saas-muted">No verified subscription invoices available.</p>}
       </section>
     </div>
   );
@@ -211,58 +249,74 @@ export function SaaSAccount({ section = 'billing' }) {
   const navigate = useNavigate();
   const [billing, setBilling] = useState(null);
   const [storage, setStorage] = useState(null);
-  const [error, setError] = useState('');
+  const [company, setCompany] = useState(null);
+  const [companyError, setCompanyError] = useState('');
+  const [sourceErrors, setSourceErrors] = useState({});
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    Promise.all([saasAccountService.getSubscriptionBilling(), saasAccountService.getStorageAccount()])
-      .then(([billingData, storageData]) => { setBilling(billingData); setStorage(storageData); storageHistoryService.recordTodayStorageSnapshot(storageData); })
-      .catch(() => setError('Could not load SaaS account data.'));
-  }, []);
+  const load = async () => {
+    setLoading(true);
+    const [bill, media, companyResult] = await Promise.allSettled([
+      saasAccountService.getSubscriptionBilling(),
+      saasAccountService.getStorageAccount(),
+      settingsService.getSettings('company'),
+    ]);
+    const errors = {};
+    if (bill.status === 'fulfilled') setBilling(bill.value);
+    else { errors.billing = bill.reason?.message || 'Unable to load billing.'; setBilling(null); }
+    if (media.status === 'fulfilled') {
+      setStorage(media.value);
+      storageHistoryService.recordTodayStorageSnapshot(media.value).catch(() => {});
+    } else { errors.storage = media.reason?.message || 'Unable to load media storage.'; setStorage(null); }
+    if (companyResult.status === 'fulfilled') {
+      setCompany(companyResult.value); setCompanyError('');
+    } else {
+      setCompany(null);
+      setCompanyError(companyResult.reason?.message || 'Company details unavailable.');
+    }
+    setSourceErrors(errors);
+    setLoading(false);
+  };
 
-  const seats = async (value) => setBilling(await saasAccountService.updateSeatCount(value));
-  if (error) return <div className="saas-page"><div className="saas-error">{error}</div></div>;
-  if (!billing || !storage) return <div className="saas-page"><div className="saas-loading">Loading account…</div></div>;
+  useEffect(() => { load(); }, []);
 
-  billing.usage.storageUsedGb = storage.usedGb;
+  const saveCompany = async (nextCompany) => {
+    const updated = await settingsService.updateSettings('company', nextCompany);
+    setCompany((current) => ({ ...current, ...nextCompany, ...updated }));
+    return updated;
+  };
 
   return (
     <div className="saas-page account-billing-page">
       <AccountHeader
-        title={
-          section === 'overview'
-            ? 'Account Overview'
-            : section === 'storage'
-              ? 'Media Storage'
-              : 'Billing & Plan'
-        }
-        subtitle={
-          section === 'overview'
-            ? 'Subscription, users, storage, documents and account controls in one place.'
-            : section === 'storage'
-              ? 'Unlimited photo storage with usage history and daily billing snapshots.'
-              : 'Manage subscription billing, account usage, storage and document templates.'
-        }
+        title={section === 'overview' ? 'Account Overview'
+          : section === 'storage' ? 'Media Storage' : 'Billing & Plan'}
+        subtitle={section === 'overview'
+          ? 'Your company account, users, billing, settings and security in one place.'
+          : section === 'storage'
+            ? 'Manage uploaded media and inspect recorded usage.'
+            : 'Verified subscription information and account usage.'}
         active={section}
         onNavigate={navigate}
       />
-
+      {loading && <div className="saas-loading" role="status">Loading account information…</div>}
+      {Object.keys(sourceErrors).length > 0 && (
+        <div className="saas-error" role="alert">
+          Some account data could not load: {Object.keys(sourceErrors).join(', ')}.
+          <button type="button" className="saas-retry" onClick={load}>Retry</button>
+        </div>
+      )}
       {section === 'overview' ? (
-        <AccountOverview
-          billing={billing}
-          storage={storage}
-          formatMoney={(value) => money.format(value || 0)}
-          formatDate={(value) => date.format(value)}
-          onNavigate={navigate}
-        />
+        <AccountOverview billing={billing} storage={storage}
+          company={company} companyError={companyError}
+          onSaveCompany={saveCompany} onReload={load} loading={loading}
+          onNavigate={navigate}/>
       ) : section === 'storage' ? (
-        <StorageView storage={storage} setStorage={setStorage} />
+        storage ? <StorageView storage={storage} setStorage={setStorage}/>
+          : !loading && <div className="saas-error">Storage information unavailable. Retry loading your account.</div>
       ) : (
-        <BillingView
-          billing={billing}
-          storage={storage}
-          onSeatsChange={seats}
-          onOpenTemplates={() => navigate('/account/templates')}
-        />
+        <BillingView billing={billing} storage={storage}
+          onOpenTemplates={() => navigate('/account/templates')}/>
       )}
     </div>
   );
