@@ -10,7 +10,7 @@ import {
   profileCustomerType, profileMoney,
 } from './customerProfile.utils';
 import { customerContactLinks } from '../../components/jobs/customerContact.utils';
-import { ArrowLeft, Pencil, ChevronRight, Wallet, RefreshCw } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
@@ -364,7 +364,6 @@ export const CustomerDetails = () => {
         <h2>Customer profile unavailable</h2>
         <p>{loadError || 'The customer does not exist or you do not have access.'}</p>
         <div>
-          <button type="button" onClick={() => navigate('/customers')}><ArrowLeft size={16}/> All Customers</button>
           <button type="button" onClick={loadCustomerData}>Retry</button>
         </div>
       </div>
@@ -408,14 +407,6 @@ export const CustomerDetails = () => {
       {loadError && <div className="customer-profile-partial-error" role="status">{loadError} <button type="button" onClick={loadCustomerData}>Retry</button></div>}
 
       {/* Clean customer identity header — never show a raw internal UUID. */}
-      <nav className="customer-profile-breadcrumb" aria-label="Customer profile navigation">
-        <button type="button" onClick={() => navigate('/customers')}>
-          <ArrowLeft size={16} aria-hidden="true"/> Customers
-        </button>
-        <ChevronRight size={14} aria-hidden="true"/>
-        <span aria-current="page">{customer.name || 'Customer Profile'}</span>
-      </nav>
-
       <header className="customer-profile-header customer-profile-hero">
         <div className="customer-profile-hero__main">
           <div className="customer-profile-identity">

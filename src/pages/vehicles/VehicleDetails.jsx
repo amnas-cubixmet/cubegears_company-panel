@@ -243,7 +243,7 @@ export const VehicleDetails = () => {
               <User size={16}/>
               <div>
                 <strong>{customer?.name || vehicle.customerName || 'Unknown Customer'}</strong>
-                <span>{customer?.phone || vehicle.customerId || 'No contact'}</span>
+                <span>{customer?.phone || 'No contact number'}</span>
               </div>
             </button>
 
