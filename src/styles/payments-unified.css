@@ -7,7 +7,7 @@
 .payments-page .payments-primary-btn,.payments-page .payments-secondary-btn {
   display:inline-flex;justify-content:center;align-items:center;gap:8px;
   min-height:44px;padding:9px 16px;border-radius:10px;
-  font:700 13px/1.4 inherit;cursor:pointer;text-decoration:none;
+  font-family:inherit;font-size:13px;font-weight:700;line-height:1.4;cursor:pointer;text-decoration:none;
 }
 .payments-page .payments-primary-btn {background:var(--primary);color:#fff;border:1px solid var(--primary)}
 .payments-page .payments-secondary-btn {background:var(--surface);color:var(--text-primary);border:1px solid var(--border)}
