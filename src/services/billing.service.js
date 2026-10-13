@@ -269,9 +269,9 @@ const safePdfName = (value) => String(value || 'invoice')
  * Download a PDF created from the saved, tenant-authorized invoice.
  * Do not use window.print() or unsaved editor state for financial documents.
  */
-export const downloadBillingPdf = async (document) => {
-  const documentId = typeof document === 'object' ? document?.id : document;
-  const number = typeof document === 'object' ? document?.number : '';
+export const downloadBillingPdf = async (savedInvoice) => {
+  const documentId = typeof savedInvoice === 'object' ? savedInvoice?.id : savedInvoice;
+  const number = typeof savedInvoice === 'object' ? savedInvoice?.number : '';
   if (!documentId) throw new Error('Save the invoice before downloading its PDF.');
   if (USE_MOCK_API) {
     throw new Error('Official invoice PDF download requires the connected Django backend.');
