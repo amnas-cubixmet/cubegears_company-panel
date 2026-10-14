@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { subscriptionApi } from '../services/razorpayCheckout.service';
+import apiClient from '../api/apiClient';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
@@ -8,25 +8,20 @@ import { getPermissionForPath, hasPermission } from '../utils/permissions';
 export const ProtectedRoute = () => {
   const { isAuthenticated, loading, user } = useAuth();
   const location = useLocation();
-  const [access, setAccess] = useState(null);
-  const [checkingPlan, setCheckingPlan] = useState(true);
-  const [planError, setPlanError] = useState('');
+  const [billing, setBilling] = useState(null);
+  const [billingError, setBillingError] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) { setCheckingPlan(false); setAccess(null); return; }
-    let active = true;
-    setCheckingPlan(true);
-    subscriptionApi.access().then((state) => {
-      if (!active) return;
-      setAccess(state);
-      setPlanError('');
-    }).catch((error) => {
-      if (!active) return;
-      setAccess(null);
-      setPlanError(error?.message || 'Unable to verify your subscription.');
-    }).finally(() => { if (active) setCheckingPlan(false); });
-    return () => { active = false; };
-  }, [isAuthenticated, location.pathname]);
+    if (!isAuthenticated || loading) return;
+    let cancelled = false;
+    setBilling(null);
+    apiClient.get('/saas/payments/access').then((data) => {
+      if (!cancelled) { setBilling(data); setBillingError(false); }
+    }).catch(() => {
+      if (!cancelled) setBillingError(true);
+    });
+    return () => { cancelled = true; };
+  }, [isAuthenticated, loading, user?.id]);
 
   if (loading) {
     return (
@@ -52,22 +47,14 @@ export const ProtectedRoute = () => {
     return <Navigate to={`/login?next=${next}`} replace />;
   }
 
-  if (checkingPlan) return <div role="status" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>Checking subscription…</div>;
-
-  if (planError) return (
-    <div role="alert" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', gap: 12, padding: 24 }}>
-      <p>{planError}</p>
-      <button type="button" onClick={() => window.location.reload()}>Retry subscription check</button>
-    </div>
-  );
-
-  if (access?.enforcementEnabled && !access.allowed && location.pathname !== '/subscribe') {
-    return <Navigate to="/subscribe" replace />;
+  if (billingError) {
+    return <div role="alert" style={{ padding: 40 }}>Cannot verify subscription access. Please check your connection and reload.</div>;
   }
-
-  // The checkout is a focused, full-page experience without the dashboard layout.
-  if (location.pathname === '/subscribe') {
-    return <Outlet />;
+  if (!billing) {
+    return <div role="status" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>Checking subscription…</div>;
+  }
+  if (billing.required && !billing.paid) {
+    return <Navigate to="/plans" replace />;
   }
 
   const requiredPermission = getPermissionForPath(location.pathname);
