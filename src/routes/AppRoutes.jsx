@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
+import { SubscriptionCheckout } from '../pages/saas/SubscriptionCheckout';
 
 import { Login } from '../pages/auth/Login';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
@@ -62,6 +63,7 @@ export const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<RootRedirect />} />
     <Route path="/login" element={<Login />} />
+    <Route path="/plans" element={<SubscriptionCheckout />} />
     <Route path="/signup" element={<Navigate to="/login" replace />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
