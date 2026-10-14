@@ -9,21 +9,9 @@ export const DEFAULT_QC_ITEMS = [
 
 const STATUS = new Set(['Pending', 'Pass', 'Fail']);
 
-// Keep the inspector already recorded on a QC, otherwise use the authenticated
-// account name. Never substitute a job-assigned mechanic or fake default name.
-export const resolveQcInspector = (savedInspector, loggedInName = '') => {
-  const existing = String(savedInspector || '').trim();
-  if (existing && existing !== 'Unassigned') return existing;
-  return String(loggedInName || '').trim();
-};
-
-// For an editable QC, the acting account is authoritative. For completed
-// read-only QC, keep the inspector who last saved that QC result.
-export const qcInspectorForMode = (savedInspector, loggedInName = '', canEdit = false) =>
-  canEdit ? String(loggedInName || '').trim() : resolveQcInspector(savedInspector, loggedInName);
-
-export const makeQcDraft = (qc = {}, loggedInName = '') => ({
-  inspector: resolveQcInspector(qc?.inspector, loggedInName),
+export const makeQcDraft = (qc = {}) => ({
+  inspector: String(qc?.inspector === 'Unassigned' ? '' : (qc?.inspector || '')).trim(),
+  inspectorId: String(qc?.inspectorId || ''),
   testDriveNotes: String(qc?.testDriveNotes || ''),
   checklist: (Array.isArray(qc?.checklist) && qc.checklist.length
     ? qc.checklist
@@ -86,6 +74,7 @@ export const qcHasErrors = (errors) =>
 
 export const qcPayload = (draft, status) => ({
   inspector: draft.inspector.trim(),
+  inspectorId: String(draft.inspectorId || ''),
   testDriveNotes: draft.testDriveNotes.trim(),
   checklist: draft.checklist.map((item) => ({
     id: item.id,

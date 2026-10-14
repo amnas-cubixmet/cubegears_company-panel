@@ -1438,6 +1438,11 @@ export function JobCardWorkspace() {
       {activeTab === 'qc' && (
         <JobQualityCheckPanel
           job={job}
+          staff={staff}
+          onStaffCreated={(newInspector) => setStaff((current) => [
+            newInspector,
+            ...current.filter((person) => String(person.id) !== String(newInspector.id)),
+          ])}
           canEdit={currentStage === 'qc' && !activeTabLocked && !activeTabComplete}
           onSaved={() => refreshJobWorkflow()}
           onCompleted={() => refreshJobWorkflow('qc')}
