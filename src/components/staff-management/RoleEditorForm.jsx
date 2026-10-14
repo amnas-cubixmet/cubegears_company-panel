@@ -53,18 +53,10 @@ export const RoleEditorForm = ({
             />
           </label>
 
-          <label className="role-editor-field is-wide">
-            <span>Branch Scope *</span>
-            <select
-              required
-              value={formData.branchScope}
-              onChange={(event) => setFormData((current) => ({ ...current, branchScope: event.target.value }))}
-            >
-              <option value="Assigned Branch Only">Assigned Branch Only</option>
-              <option value="Selected Branches">Selected Branches</option>
-              <option value="All Permitted Company Branches">All Permitted Company Branches</option>
-            </select>
-          </label>
+          <div className="role-editor-field is-wide">
+            <span>Access scope</span>
+            <p role="note">Permissions apply within this company. Branch-specific restrictions are not available yet.</p>
+          </div>
         </div>
       </section>
 

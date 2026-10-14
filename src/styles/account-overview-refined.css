@@ -1,0 +1,281 @@
+/* Account overview: desktop-first CRM settings, readable on mobile. */
+.saas-page.account-billing-page{padding:20px 22px 70px;gap:16px;min-width:0}
+.saas-page.account-billing-page *{box-sizing:border-box}
+.saas-page .account-dashboard-header h1{font-size:25px;line-height:1.3;letter-spacing:-.035em}
+.saas-page .account-dashboard-header p{font-size:12px;line-height:1.55}
+.saas-page .account-dashboard-tabs{
+  display:flex;align-items:center;gap:5px;padding:6px;
+  overflow-x:auto;scrollbar-width:none;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface);
+}
+.saas-page .account-dashboard-tabs::-webkit-scrollbar{display:none}
+.saas-page .account-dashboard-tabs button{
+  flex:1 0 auto;min-height:43px;height:auto;padding:10px 13px;
+  white-space:nowrap;font-size:12px;font-weight:600;gap:8px;border-radius:9px;
+}
+.saas-page .account-dashboard-tabs button.is-active{
+  background:var(--primary-soft);color:var(--primary);
+}
+.saas-page .account-dashboard-tabs svg{width:16px;height:16px}
+.saas-page .saas-grid{gap:14px}
+.saas-page .saas-card{padding:19px;border-radius:14px}
+.saas-page .saas-card h2{font-size:17px}
+.saas-page .saas-kicker{font-size:10px}
+.saas-page .saas-details-grid span,
+.saas-page .saas-breakdown span{font-size:12px}
+.saas-page .saas-details-grid strong,
+.saas-page .saas-breakdown strong{font-size:13px}
+.saas-page .saas-muted{font-size:12px;line-height:1.6}
+.saas-page .saas-button{font-size:12px;min-height:42px;font-weight:600}
+.saas-page .saas-status{font-size:11px}
+.saas-page .saas-table :is(th,td){font-size:12px;padding:12px 14px}
+.saas-page .saas-field span{font-size:12px}
+.saas-page .saas-field input{font-size:13px}
+.saas-page .saas-account-readonly-users{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 0;
+}
+.saas-page .saas-account-readonly-users strong{
+  font-size:29px;color:var(--text-primary);line-height:1.2;
+}
+.saas-page .saas-account-readonly-users span{
+  color:var(--text-secondary);font-size:12px;line-height:1.5;
+}
+.saas-page .saas-billing-note{
+  border-left:3px solid var(--primary);
+  background:var(--surface-2);border-radius:7px;padding:12px 13px;
+}
+.saas-page .saas-error{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px}
+.saas-page .saas-retry{
+  min-height:35px;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface-2);color:var(--text-primary);
+  padding:6px 12px;font-size:12px;cursor:pointer;
+}
+.account-overview-refined{display:flex;flex-direction:column;gap:15px}
+.account-overview-refined .account-overview-welcome{
+  display:flex;align-items:center;gap:15px;flex-wrap:wrap;
+  padding:20px;border:1px solid var(--border);border-radius:15px;
+  background:var(--surface);min-width:0;
+}
+.account-overview-refined .account-overview-avatar{
+  display:grid;place-items:center;flex:0 0 59px;width:59px;height:59px;
+  background:var(--primary-soft);border-radius:15px;color:var(--primary);
+  font-size:22px;font-weight:700;letter-spacing:-.03em;
+}
+.account-overview-refined .account-overview-welcome__details{
+  flex:1 1 230px;min-width:0;
+}
+.account-overview-refined .account-overview-eyebrow{
+  font-size:10px;font-weight:700;color:var(--primary);
+  letter-spacing:.085em;
+}
+.account-overview-refined .account-overview-welcome h2{
+  margin:5px 0;font-size:21px;line-height:1.3;font-weight:700;
+  overflow-wrap:anywhere;color:var(--text-primary);
+}
+.account-overview-refined .account-overview-welcome p{
+  margin:0;font-size:12px;color:var(--text-secondary);
+  line-height:1.55;overflow-wrap:anywhere;
+}
+.account-overview-refined .account-overview-refresh{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:40px;padding:10px 14px;
+  border:1px solid var(--border);border-radius:10px;
+  background:var(--surface-2);color:var(--text-primary);
+  font-size:12px;font-weight:600;cursor:pointer;
+}
+.account-overview-refined .account-overview-stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+}
+.account-overview-refined .account-overview-stats article{
+  min-height:105px;padding:16px;gap:12px;border-radius:13px;
+}
+.account-overview-refined .account-overview-stats span{
+  font-size:11px;font-weight:600;
+}
+.account-overview-refined .account-overview-stats strong{
+  display:block;margin-top:11px;font-size:20px;line-height:1.2;
+  font-weight:700;overflow-wrap:anywhere;white-space:normal;
+}
+.account-overview-refined .account-overview-stats small{
+  font-size:11px;line-height:1.4;margin-top:7px;
+}
+.account-overview-refined .account-overview-stats i{
+  width:39px;height:39px;flex-basis:39px;border-radius:11px;
+}
+.account-overview-refined .account-overview-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+}
+.account-overview-refined .account-overview-panel{
+  padding:19px;border-radius:14px;min-width:0;
+}
+.account-overview-refined .account-overview-panel>header{
+  gap:12px;align-items:flex-start;padding-bottom:14px;
+}
+.account-overview-refined .account-overview-panel h2{
+  display:flex;align-items:center;gap:9px;margin:0;
+  color:var(--text-primary);font-size:16px;font-weight:700;
+}
+.account-overview-refined .account-overview-panel p{
+  margin:6px 0 0;color:var(--text-secondary);font-size:12px;line-height:1.55;
+}
+.account-overview-refined .account-overview-rows{gap:0;margin-top:8px}
+.account-overview-refined .account-overview-rows>div{
+  background:transparent;border-bottom:1px solid var(--border);
+  min-height:43px;padding:10px 0;border-radius:0;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:11px;
+}
+.account-overview-refined .account-overview-rows>div:last-child{border-bottom:0}
+.account-overview-refined .account-overview-rows span{
+  display:inline-flex;align-items:center;gap:7px;flex:0 0 42%;
+  min-width:0;color:var(--text-secondary);font-size:12px;
+  line-height:1.4;
+}
+.account-overview-refined .account-overview-rows strong{
+  font-size:12px;font-weight:650;line-height:1.55;
+  color:var(--text-primary);min-width:0;text-align:right;
+  overflow-wrap:anywhere;
+}
+.account-overview-refined .account-overview-edit{
+  min-height:37px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--primary);
+  border-radius:9px;padding:8px 11px;font-size:12px;font-weight:600;cursor:pointer;
+}
+.account-overview-refined .account-overview-company-form{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;margin-top:15px;
+}
+.account-overview-refined .account-overview-company-form>label{
+  display:flex;flex-direction:column;gap:7px;font-size:12px;
+  font-weight:600;color:var(--text-secondary);min-width:0;
+}
+.account-overview-refined .account-overview-company-form .is-wide{grid-column:1/-1}
+.account-overview-refined .account-overview-company-form :is(input,textarea){
+  width:100%;min-width:0;min-height:42px;padding:10px 12px;
+  border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text-primary);
+  font-size:13px;font-weight:400;font-family:inherit;
+}
+.account-overview-refined .account-overview-company-form textarea{
+  resize:vertical;min-height:100px;
+}
+.account-overview-refined .account-overview-form-actions{
+  grid-column:1/-1;display:flex;justify-content:flex-end;gap:9px;
+}
+.account-overview-refined .account-overview-form-actions button{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:42px;padding:10px 16px;font-size:12px;font-weight:600;
+  border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text-primary);cursor:pointer;
+}
+.account-overview-refined .account-overview-form-actions button.is-primary{
+  background:var(--primary);color:#fff;border-color:var(--primary);
+}
+.account-overview-refined .account-overview-shortcuts{
+  display:flex;flex-direction:column;gap:15px;padding:19px;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+}
+.account-overview-refined .account-overview-shortcuts>header h2{
+  font-size:16px;font-weight:700;margin:0;color:var(--text-primary)
+}
+.account-overview-refined .account-overview-shortcuts>header p{
+  font-size:12px;color:var(--text-secondary);margin:6px 0 0
+}
+.account-overview-refined .account-overview-shortcut-grid{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;
+}
+.account-overview-refined .account-overview-shortcut-grid button{
+  position:relative;min-width:0;min-height:135px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  padding:15px;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface-2);text-align:left;
+  color:var(--text-primary);cursor:pointer;
+}
+.account-overview-refined .account-overview-shortcut-grid button:hover{
+  border-color:var(--primary);
+}
+.account-overview-refined .account-overview-shortcut-grid i{
+  display:grid;place-items:center;width:35px;height:35px;border-radius:10px;
+  background:var(--primary-soft);color:var(--primary);font-style:normal;
+}
+.account-overview-refined .account-overview-shortcut-grid strong{
+  font-size:12px;font-weight:700;line-height:1.4;
+}
+.account-overview-refined .account-overview-shortcut-grid span{
+  font-size:11px;line-height:1.4;color:var(--text-muted);
+}
+.account-overview-refined .account-overview-shortcut-grid .account-overview-arrow{
+  position:absolute;right:12px;top:16px;color:var(--text-muted)
+}
+.account-overview-refined .account-overview-footer-note,
+.account-overview-refined .account-overview-info{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:11px;line-height:1.55;color:var(--text-muted);
+  margin:0;overflow-wrap:anywhere;
+}
+.account-overview-refined .account-overview-warning{
+  margin:12px 0;padding:10px 12px;border-radius:9px;
+  border:1px solid var(--danger);color:var(--danger);
+  font-size:12px;line-height:1.5;
+}
+.account-overview-refined .account-overview-success{
+  margin:0;padding:10px 12px;border-radius:9px;
+  border:1px solid var(--border);color:var(--success);
+  font-size:12px;line-height:1.5;
+}
+.account-overview-refined button:focus-visible{
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+@media(max-width:1150px){
+  .account-overview-refined .account-overview-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .account-overview-refined .account-overview-shortcut-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:850px){
+  .saas-page.account-billing-page{padding:15px 15px 92px}
+  .account-overview-refined .account-overview-grid{grid-template-columns:1fr}
+  .saas-page .account-dashboard-tabs button{flex:0 0 auto}
+}
+@media(max-width:550px){
+  .saas-page.account-billing-page{padding:12px 12px 90px;gap:12px}
+  .saas-page .account-dashboard-header h1{font-size:22px}
+  .account-overview-refined{gap:11px}
+  .account-overview-refined .account-overview-welcome{padding:14px;gap:10px}
+  .account-overview-refined .account-overview-avatar{
+    width:47px;height:47px;flex-basis:47px;font-size:18px
+  }
+  .account-overview-refined .account-overview-welcome h2{font-size:18px}
+  .account-overview-refined .account-overview-refresh{width:100%;min-height:44px}
+  .account-overview-refined .account-overview-stats{gap:9px}
+  .account-overview-refined .account-overview-stats article{padding:12px;min-height:107px}
+  .account-overview-refined .account-overview-stats strong{font-size:17px}
+  .account-overview-refined .account-overview-stats i{
+    width:32px;height:32px;flex-basis:32px;
+  }
+  .account-overview-refined .account-overview-panel{padding:14px}
+  .account-overview-refined .account-overview-panel h2{font-size:15px}
+  .account-overview-refined .account-overview-company-form{grid-template-columns:1fr}
+  .account-overview-refined .account-overview-shortcuts{padding:14px}
+  .account-overview-refined .account-overview-shortcut-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+  }
+  .account-overview-refined .account-overview-shortcut-grid button{
+    min-height:132px;padding:12px;
+  }
+  .account-overview-refined .account-overview-company-form :is(input,textarea){
+    font-size:16px;
+  }
+  .saas-page .saas-card{padding:15px}
+  .saas-page .saas-table :is(th,td){font-size:12px}
+}
+@media(max-width:350px){
+  .account-overview-refined .account-overview-stats{grid-template-columns:1fr}
+  .account-overview-refined .account-overview-shortcut-grid{grid-template-columns:1fr}
+  .account-overview-refined .account-overview-shortcut-grid button{min-height:105px}
+}
+
+.account-overview-refined .account-overview-company-form [aria-invalid="true"]{border-color:var(--danger);outline:1px solid var(--danger)}
+.account-overview-refined .account-overview-field-error{color:var(--danger);font-size:11px;line-height:1.45;font-weight:500}
+.account-overview-refined .account-overview-company-form input:focus-visible,.account-overview-refined .account-overview-company-form textarea:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+.account-overview-refined .account-overview-form-actions button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:550px){.account-overview-refined .account-overview-form-actions button{flex:1}}

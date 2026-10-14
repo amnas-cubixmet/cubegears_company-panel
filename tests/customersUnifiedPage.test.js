@@ -13,27 +13,27 @@ test('customers entry route renders one summary and directory page', () => {
   assert.match(routes, /path="\/customers\/:id" element={<CustomerDetails \/>}/);
 });
 
-test('customer tabs only show the unified All Customers directory', () => {
-  assert.match(tabs, /to="\/customers"/);
-  assert.match(tabs, /All Customers/);
-  for (const retired of ['/customers/overview', '/customers/all', '/customers/new',
-    '/customers/service-history', '/customers/outstanding', '/customers/reminders', '/customers/reports']) {
-    assert.doesNotMatch(tabs, new RegExp(retired));
-  }
-  assert.match(tabs, /<NavLink to="\/customers" end/);
-});
-
-test('main Customers page includes summary cards, filters and desktop/mobile lists', () => {
-  assert.match(directory, /Total Customers/);
-  assert.match(directory, /Active Customers/);
-  assert.match(directory, /New This Month/);
-  assert.match(directory, /Outstanding/);
-  assert.match(directory, /All Customers/);
+test('Customers page removes the purple All Customers tab and all four metric cards', () => {
+  assert.doesNotMatch(directory, /<CustomerManagementTabs \/>/);
+  assert.doesNotMatch(directory, /customers-summary-grid/);
+  assert.doesNotMatch(directory, /Total Customers/);
+  assert.doesNotMatch(directory, /Active Customers/);
+  assert.doesNotMatch(directory, /New This Month/);
+  assert.match(directory, /All Customers/); // the list heading remains
   assert.match(directory, /customer-directory-list-heading/);
   assert.match(directory, /desktop-customers-table/);
   assert.match(directory, /mobile-customers-cards/);
-  assert.equal((directory.match(/visibleCustomers\.map\(\(c\) => \(/g)||[]).length,2);
+  assert.equal((directory.match(/visibleCustomers\.map\(\(c\) => \(/g) || []).length, 2);
+  assert.match(tabs, /All Customers/); // standalone legacy component still exists
 });
+
+test('Customer financial values come from recorded invoice balances, not zero placeholders', () => {
+  assert.match(directory, /Promise\.allSettled/);
+  assert.match(directory, /customerInvoiceMoney\(invoiceRows\)/);
+  assert.match(directory, /formatCustomerMoney\(c\.outstanding\)/);
+  assert.match(directory, /moneyAvailable/);
+});
+
 
 test('customer search and status filters do not re-fetch all linked resources on each keystroke', () => {
   assert.match(directory, /useMemo\(\(\) =>/);

@@ -79,7 +79,7 @@ const TABS = [
   ['updates', 'Technician Updates'],
   ['qc', 'QC'],
   ['invoice', 'Invoice'],
-  ['activity', 'Activity']
+  ['activity', 'Full Log']
 ];
 
 const SECTION_DETAILS = {
@@ -92,7 +92,7 @@ const SECTION_DETAILS = {
   updates: 'Technician notes and work updates.',
   qc: 'Quality inspection and final checks.',
   invoice: 'Invoice, payments, balance and delivery.',
-  activity: 'Job Card activity and recorded events.'
+  activity: 'Complete recorded history of Job Card actions, staff and timestamps.'
 };
 const GUIDED_STAGES = ['overview', 'inspection', 'estimate', 'work', 'qc', 'invoice'];
 
@@ -128,6 +128,8 @@ export function JobCardWorkspace() {
   const [workflow, setWorkflow] = useState(null);
   const [jobInvoices, setJobInvoices] = useState([]);
   const [jobPayments, setJobPayments] = useState([]);
+  const [invoicePdfLoading, setInvoicePdfLoading] = useState(false);
+  const [invoicePdfError, setInvoicePdfError] = useState('');
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState('');
   const [staff, setStaff] = useState([]);
@@ -162,7 +164,7 @@ export function JobCardWorkspace() {
 
   const activeTab = useMemo(() => {
     const section = location.pathname.split('/').filter(Boolean).at(-1);
-    return TABS.some(([key]) => key === section) ? section : 'overview';
+    return section === 'full-log' ? 'activity' : TABS.some(([key]) => key === section) ? section : 'overview';
   }, [location.pathname]);
 
   useEffect(() => {
@@ -383,7 +385,7 @@ export function JobCardWorkspace() {
   const visibleTabs = TABS.filter(([key]) => GUIDED_STAGES.includes(key));
   const extraTabs = TABS.filter(([key]) => !GUIDED_STAGES.includes(key));
   const activeExtraTab = extraTabs.some(([key]) => key === activeTab);
-  const showWorkTools = activeTab === 'work' || activeExtraTab;
+  const showWorkTools = activeTab === 'work' || (activeExtraTab && activeTab !== 'activity');
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = Boolean(sectionComplete[activeTab]);
@@ -395,7 +397,7 @@ export function JobCardWorkspace() {
     if (!job?.id || !workflow) return;
     const pieces = location.pathname.split('/').filter(Boolean);
     const requested = pieces.length > 2 ? pieces[2] : null;
-    const supported = TABS.some(([key]) => key === requested);
+    const supported = requested === 'full-log' || TABS.some(([key]) => key === requested);
     if (!supported || isSectionLocked(requested)) {
       navigate('/jobs/' + job.id + '/' + currentStage, { replace: true });
     }
@@ -574,6 +576,9 @@ export function JobCardWorkspace() {
   };
 
   const setEstimateApproval = async (estimateKey, approvalStatus) => {
+    if (approvalStatus === 'Rejected') {
+      if (!await appConfirm('Reject the latest draft estimate? The customer will need a new estimate before work can begin.')) return;
+    }
     if (!USE_MOCK_API) {
       if (approvalStatus === 'Approved') return completeStage('estimate');
       setSaving(true);
@@ -582,7 +587,7 @@ export function JobCardWorkspace() {
         await jobService.rejectJobEstimate(job.id, estimateKey);
         await refreshJobWorkflow();
       } catch (e) {
-        setError(e?.response?.data?.detail || e?.message || 'Estimate decision could not be saved.');
+        setError(e?.response?.data?.estimate || e?.response?.data?.detail || e?.message || 'Estimate decision could not be saved.');
       } finally {
         setSaving(false);
       }
@@ -701,6 +706,19 @@ export function JobCardWorkspace() {
     navigate(`/invoices/new?kind=invoice&jobId=${encodeURIComponent(job.id)}`);
   };
 
+  const downloadJobInvoicePdf = async () => {
+    if (!linkedInvoice?.id || invoicePdfLoading) return;
+    setInvoicePdfError('');
+    setInvoicePdfLoading(true);
+    try {
+      await billingService.downloadPdf(linkedInvoice);
+    } catch (err) {
+      setInvoicePdfError(err?.message || 'Unable to download invoice PDF.');
+    } finally {
+      setInvoicePdfLoading(false);
+    }
+  };
+
   const recordPayment = async (event) => {
     event.preventDefault();
 
@@ -804,7 +822,7 @@ export function JobCardWorkspace() {
       return;
     }
     setError('');
-    navigate(`/jobs/${job.id}/${key}`);
+    navigate(`/jobs/${job.id}/${key === 'activity' ? 'full-log' : key}`);
   };
 
   if (loading) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Loading job card…</div>;
@@ -854,7 +872,7 @@ export function JobCardWorkspace() {
         refreshOnTab={activeTab}
       />
 
-      {activeTab !== 'overview' && !showWorkTools && (
+      {activeTab !== 'overview' && activeTab !== 'activity' && !showWorkTools && (
         <>
       <div className="job-workspace-toolbar">
         <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
@@ -893,7 +911,7 @@ export function JobCardWorkspace() {
           {visibleTabs.map(([key, label], index) => {
             const complete = Boolean(sectionComplete[key]);
             const locked = isSectionLocked(key);
-            const isActive = activeTab === key || (key === 'work' && activeExtraTab && !locked);
+            const isActive = activeTab === key || (key === 'work' && activeExtraTab && activeTab !== 'activity' && !locked);
             return (
               <button
                 type="button"
@@ -915,6 +933,16 @@ export function JobCardWorkspace() {
             );
           })}
         </nav>
+        <button
+          type="button"
+          className={['job-full-log-tab', activeTab === 'activity' ? 'is-active' : ''].join(' ')}
+          aria-current={activeTab === 'activity' ? 'page' : undefined}
+          onClick={() => openTab('activity')}
+          title="Full Job Card history"
+        >
+          <History size={16} aria-hidden="true" />
+          <span>Full Log</span>
+        </button>
       </div>
 
       {showWorkTools && (
@@ -929,7 +957,6 @@ export function JobCardWorkspace() {
               ['complaints', 'Complaints'],
               ['parts', 'Parts'],
               ['updates', 'Technician Updates'],
-              ['activity', 'Activity']
             ].map(([key, label]) => {
               const locked = isSectionLocked(key);
               const selected = activeTab === key;
@@ -960,10 +987,10 @@ export function JobCardWorkspace() {
           <h2>{activeTabLabel}</h2>
           <p>{SECTION_DETAILS[activeTab]}</p>
         </div>
-        <span className={'job-workspace-section-state ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-open')}>
+        {activeTab !== 'activity' && <span className={'job-workspace-section-state ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-open')}>
           {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
           {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
-        </span>
+        </span>}
         {!activeTabLocked && !activeTabComplete && activeTab === currentStage && activeTab !== 'qc' && (
           <button type="button" className="job-stage-complete-button" disabled={saving} onClick={() => completeStage(activeTab)}>
             <CheckCircle2 size={15} aria-hidden="true" />
@@ -972,7 +999,7 @@ export function JobCardWorkspace() {
         )}
       </section>
 
-      {!showWorkTools && (
+      {!showWorkTools && activeTab !== 'activity' && (
       <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
         <div>
           <strong>{activeTabLocked ? 'Stage locked' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
@@ -1429,14 +1456,23 @@ export function JobCardWorkspace() {
               <h2><ReceiptText size={18} aria-hidden="true" /> Invoice & Payment</h2>
               <p>Review the invoice, outstanding amount and vehicle delivery in one place.</p>
             </div>
-            <button
-              type="button"
-              onClick={() => linkedInvoice ? navigate('/invoices/' + linkedInvoice.id) : createInvoice()}
-              className="job-primary-action"
-            >
-              <ReceiptText size={15} aria-hidden="true" />
-              {linkedInvoice ? 'View Invoice' : 'Create Invoice'}
-            </button>
+            <div className="job-invoice-header-actions">
+              {linkedInvoice?.id && (
+                <button type="button" onClick={downloadJobInvoicePdf}
+                  disabled={invoicePdfLoading || billingLoading} className="job-invoice-download-button">
+                  <Download size={15} aria-hidden="true"/>
+                  {invoicePdfLoading ? 'Generating PDF…' : 'Download Invoice PDF'}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => linkedInvoice ? navigate('/invoices/' + linkedInvoice.id) : createInvoice()}
+                className="job-primary-action"
+              >
+                <ReceiptText size={15} aria-hidden="true" />
+                {linkedInvoice ? 'View Invoice' : 'Create Invoice'}
+              </button>
+            </div>
           </header>
 
           <div className="job-invoice-dashboard-stats">
@@ -1456,6 +1492,7 @@ export function JobCardWorkspace() {
             </div>
           </div>
 
+          {invoicePdfError && <p role="alert" className="job-invoice-inline-message is-error">{invoicePdfError}</p>}
           {billingLoading && <p className="job-invoice-inline-message" role="status">Loading invoice and payment records…</p>}
           {billingError && <div className="job-invoice-inline-message is-error" role="alert">
             {billingError}

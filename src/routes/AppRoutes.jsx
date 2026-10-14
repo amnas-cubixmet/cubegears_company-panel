@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 
 import { Login } from '../pages/auth/Login';
+import { Signup } from '../pages/auth/Signup';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
 import { SetupPassword } from '../pages/auth/SetupPassword';
@@ -62,6 +63,7 @@ export const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<RootRedirect />} />
     <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<Signup />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/setup-password" element={<SetupPassword />} />
@@ -166,6 +168,7 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id/qc" element={<JobDetails />} />
       <Route path="/jobs/:id/invoice" element={<JobDetails />} />
       <Route path="/jobs/:id/activity" element={<JobDetails />} />
+      <Route path="/jobs/:id/full-log" element={<JobDetails />} />
       <Route path="/jobs/:id/edit" element={<JobDetails />} />
       <Route path="/jobs/:id/status" element={<JobStatus />} />
 

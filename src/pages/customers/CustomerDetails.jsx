@@ -2,8 +2,15 @@ import { appConfirm } from '../../components/common/appDialogs';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { customerService } from '../../services/customer.service';
+import { paymentService } from '../../services/payment.service';
+import '../../styles/customer-profile-polished.css';
+import {
+  customerProfileFinancials, activeCustomerInvoices, customerInvoiceLabel,
+  customerInvoiceTotal, customerInvoiceBalance, customerVisitLabel,
+  profileCustomerType, profileMoney,
+} from './customerProfile.utils';
 import { customerContactLinks } from '../../components/jobs/customerContact.utils';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
@@ -22,6 +29,7 @@ import {
   Plus,
   Wrench,
   Edit,
+  Pencil,
   Archive,
   MoreVertical,
   Calendar,
@@ -65,20 +73,22 @@ export const CustomerDetails = () => {
 
   // New Vehicle form state
   const [vRegNo, setVRegNo] = useState('');
-  const [vMake, setVMake] = useState('Toyota');
-  const [vModel, setVModel] = useState('Innova 2.5V');
-  const [vType, setVType] = useState('MPV');
-  const [vFuel, setVFuel] = useState('Diesel');
+  const [vMake, setVMake] = useState('');
+  const [vModel, setVModel] = useState('');
+  const [vType, setVType] = useState('Car / SUV');
+  const [vFuel, setVFuel] = useState('Petrol');
   const [vTransmission, setVTransmission] = useState('Manual');
-  const [vYear, setVYear] = useState('2021');
-  const [vColor, setVColor] = useState('Silver Metallic');
+  const [vYear, setVYear] = useState('');
+  const [vColor, setVColor] = useState('');
   const [vVin, setVVin] = useState('');
-  const [vKm, setVKm] = useState('1,24,500 km');
+  const [vKm, setVKm] = useState('');
   const [vNotes, setVNotes] = useState('');
 
   // Record Payment form state
   const [payInvoiceNo, setPayInvoiceNo] = useState('');
   const [payAmount, setPayAmount] = useState('');
+  const [paymentSaving, setPaymentSaving] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
   const [payMethod, setPayMethod] = useState('UPI');
   const [payRef, setPayRef] = useState('');
   const [payNotes, setPayNotes] = useState('');
@@ -95,7 +105,7 @@ export const CustomerDetails = () => {
   const [editType, setEditType] = useState('Individual');
   const [editCompany, setEditCompany] = useState('');
   const [editGst, setEditGst] = useState('');
-  const [editBranch, setEditBranch] = useState('Main Garage Branch');
+  const [editBranch, setEditBranch] = useState('');
 
   // Customer Note form state
   const [newNoteText, setNewNoteText] = useState('');
@@ -111,6 +121,9 @@ export const CustomerDetails = () => {
   // Service History filter state
   const [serviceSearch, setServiceSearch] = useState('');
   const [serviceVehicleFilter, setServiceVehicleFilter] = useState('All');
+  const [invoicesAvailable, setInvoicesAvailable] = useState(false);
+  const [vehiclesAvailable, setVehiclesAvailable] = useState(false);
+  const [jobsAvailable, setJobsAvailable] = useState(false);
 
   useEffect(() => {
     loadCustomerData();
@@ -129,12 +142,12 @@ export const CustomerDetails = () => {
         setEditWhatsapp(cust.whatsapp || cust.phone || '');
         setEditEmail(cust.email || '');
         setEditAddress(cust.address || '');
-        setEditCity(cust.city || 'Kochi');
-        setEditState(cust.state || 'Kerala');
+        setEditCity(cust.city || '');
+        setEditState(cust.state || '');
         setEditPincode(cust.pincode || '');
-        setEditType(cust.customerType || 'Individual');
-        setEditCompany(cust.companyName || '');
-        setEditGst(cust.gstNo || '');
+        setEditType(profileCustomerType(cust.customerType || cust.customer_type));
+        setEditCompany(cust.companyName || cust.company_name || '');
+        setEditGst(cust.gstNo || cust.gstin || '');
         setEditBranch(cust.branchName || cust.branch || '');
         setDocuments(Array.isArray(cust.documents) ? cust.documents : []);
 
@@ -157,6 +170,9 @@ export const CustomerDetails = () => {
         setVehicles(rows(0));
         setJobs(rows(1));
         setInvoices(rows(2));
+        setVehiclesAvailable(result[0].status === 'fulfilled');
+        setJobsAvailable(result[1].status === 'fulfilled');
+        setInvoicesAvailable(result[2].status === 'fulfilled');
         setPayments(rows(3));
         setActivity(rows(4));
         if (result.some((entry) => entry.status === 'rejected')) {
@@ -176,9 +192,7 @@ export const CustomerDetails = () => {
     setTimeout(() => setToastMsg(''), 3000);
   };
 
-  const formatINR = (val) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
-  };
+  const formatINR = profileMoney;
 
   const handleTabClick = (tabId, event) => {
     setActiveTab(tabId);
@@ -190,18 +204,22 @@ export const CustomerDetails = () => {
   const handleAddVehicleSubmit = async (e) => {
     e.preventDefault();
     if (!vRegNo.trim()) return;
+    const odometer = Number(String(vKm || '0').replace(/,/g, '').trim());
+    if (!Number.isInteger(odometer) || odometer < 0) {
+      showToast('Enter a valid nonnegative odometer reading.');
+      return;
+    }
     await customerService.addCustomerVehicle(customer.id, {
-      regNo: vRegNo,
-      make: vMake,
-      model: vModel,
-      vehicleType: vType,
+      regNo: vRegNo.trim(),
+      make: vMake.trim(),
+      model: vModel.trim(),
       fuelType: vFuel,
       transmission: vTransmission,
-      year: vYear,
-      color: vColor,
-      vin: vVin,
-      kilometres: vKm,
-      notes: vNotes
+      year: vYear ? Number(vYear) : null,
+      color: vColor.trim(),
+      vin: vVin.trim(),
+      kilometres: odometer,
+      notes: vNotes.trim(),
     });
     showToast('New vehicle registered to customer.');
     setIsAddVehicleOpen(false);
@@ -211,23 +229,42 @@ export const CustomerDetails = () => {
 
   const handleRecordPaymentSubmit = async (e) => {
     e.preventDefault();
-    if (!payAmount || Number(payAmount) <= 0) return;
-
-    const newPayment = {
-      id: `PAY-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      invoiceNo: payInvoiceNo || (invoices[0]?.invoiceNo || 'INV-2026-092'),
-      method: payMethod,
-      amount: Number(payAmount),
-      reference: payRef || 'REF-ONLINE',
-      recordedBy: 'Current Staff'
-    };
-
-    setPayments([newPayment, ...payments]);
-    showToast(`Payment of ${formatINR(payAmount)} recorded successfully.`);
-    setIsRecordPaymentOpen(false);
-    setPayAmount('');
-    setPayRef('');
+    if (paymentSaving) return;
+    const selectedInvoice = activeCustomerInvoices(invoices).find(
+      (invoice) => String(invoice.id) === String(payInvoiceNo)
+    );
+    const amount = Number(payAmount);
+    const balance = Number(selectedInvoice?.balance ?? selectedInvoice?.balanceDue);
+    if (!selectedInvoice) return setPaymentError('Select an existing customer invoice.');
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(balance) || amount > balance) {
+      return setPaymentError('Enter a payment amount greater than zero and not exceeding the invoice balance.');
+    }
+    setPaymentSaving(true);
+    setPaymentError('');
+    try {
+      await paymentService.createPayment({
+        customer: customer.id,
+        invoice: selectedInvoice.id,
+        date: new Date().toISOString().slice(0, 10),
+        method: payMethod,
+        amount: amount.toFixed(2),
+        reference: payRef.trim(),
+        notes: payNotes.trim(),
+        status: 'Completed',
+      });
+      setIsRecordPaymentOpen(false);
+      setPayAmount('');
+      setPayInvoiceNo('');
+      setPayRef('');
+      setPayNotes('');
+      showToast('Payment saved successfully.');
+      await loadCustomerData();
+    } catch (err) {
+      setPaymentError(err?.response?.data?.message || err?.response?.data?.amount?.[0]
+        || err?.message || 'Unable to save payment. Please retry.');
+    } finally {
+      setPaymentSaving(false);
+    }
   };
 
   const handleEditCustomerSubmit = async (e) => {
@@ -241,10 +278,9 @@ export const CustomerDetails = () => {
       city: editCity,
       state: editState,
       pincode: editPincode,
-      customerType: editType,
+      customerType: editType === 'Business' ? 'business' : 'individual',
       companyName: editCompany,
-      gstNo: editGst,
-      branch: editBranch
+      gstin: editGst
     });
     setCustomer(updated);
     showToast('Customer profile updated.');
@@ -329,20 +365,22 @@ export const CustomerDetails = () => {
         <h2>Customer profile unavailable</h2>
         <p>{loadError || 'The customer does not exist or you do not have access.'}</p>
         <div>
-          <button type="button" onClick={() => navigate('/customers')}><ArrowLeft size={16}/> All Customers</button>
           <button type="button" onClick={loadCustomerData}>Retry</button>
         </div>
       </div>
     );
   }
 
-  // Financial calculations derived from actual invoices & payments
-  const totalBilled = invoices.reduce((acc, inv) => acc + Number(inv.totalAmount || 0), 0);
-  const totalPaid = payments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
-  const totalOutstanding = Math.max(0, totalBilled - totalPaid);
-  const lastVisitDate = customer.lastVisit || jobs[0]?.createdDate || '—';
+  // The invoice already includes its paid and remaining balance; counting
+  // separate payments again would double count receipts.
+  const { billed: totalBilled, paid: totalPaid, outstanding: totalOutstanding } =
+    customerProfileFinancials(invoices, invoicesAvailable);
+  const lastVisitDate = customerVisitLabel(customer, jobs);
   const contact = customerContactLinks({ customerPhone: customer.phone, customerWhatsapp: customer.whatsapp });
   const archived = String(customer.status || '').toLowerCase() === 'archived';
+  const payableInvoices = activeCustomerInvoices(invoices).filter(
+    (inv) => Number(inv.balance ?? inv.balanceDue ?? 0) > 0
+  );
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
@@ -369,234 +407,151 @@ export const CustomerDetails = () => {
 
       {loadError && <div className="customer-profile-partial-error" role="status">{loadError} <button type="button" onClick={loadCustomerData}>Retry</button></div>}
 
-      {/* 1. CUSTOMER PROFILE HEADER */}
-      <nav className="customer-profile-breadcrumb" aria-label="Customer profile navigation">
-        <button type="button" onClick={() => navigate('/customers')}><ArrowLeft size={16}/> All Customers</button>
-        <span aria-hidden="true">/</span>
-        <strong>{customer.name || 'Customer Profile'}</strong>
-      </nav>
-      <div className="customer-profile-header" style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        
-        {/* Top Header Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h1 style={{ fontSize: '19px', fontWeight: '800', color: 'var(--text-primary)', margin: 0, lineHeight: 1.2 }}>
-                  {customer.name}
-                </h1>
-                <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '6px', backgroundColor: archived ? 'var(--surface-2)' : 'var(--success-soft)', color: archived ? 'var(--text-muted)' : 'var(--success)' }}>
-                  {archived ? 'Archived' : 'Active'}
+      {/* Clean customer identity header — never show a raw internal UUID. */}
+      <header className="customer-profile-header customer-profile-hero">
+        <div className="customer-profile-hero__main">
+          <div className="customer-profile-identity">
+            <div className="customer-profile-avatar" aria-hidden="true">
+              {String(customer.name || 'C').trim().split(/\s+/).slice(0, 2)
+                .map((name) => name.charAt(0).toUpperCase()).join('')}
+            </div>
+            <div className="customer-profile-identity__text">
+              <span className="customer-profile-eyebrow">CUSTOMER PROFILE</span>
+              <div className="customer-profile-name-row">
+                <h1>{customer.name || 'Customer'}</h1>
+                <span className={'customer-profile-status ' + (archived ? 'is-archived' : 'is-active')}>
+                  <span aria-hidden="true"/> {archived ? 'Archived' : 'Active'}
                 </span>
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {customer.customerType || customer.customer_type || 'Individual'} · Customer Profile
-              </div>
+              <p>
+                {profileCustomerType(customer.customerType || customer.customer_type)}
+                <span aria-hidden="true"> · </span>
+                Last visit: {lastVisitDate}
+              </p>
             </div>
           </div>
 
-          {/* Desktop Right Action Bar */}
-          <div className="customer-profile-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button type="button" className="customer-profile-edit" onClick={() => setIsEditCustomerOpen(true)}>
-              <Pencil size={15}/> Edit Customer
+          <div className="customer-profile-actions">
+            <button type="button" className="customer-profile-action is-secondary"
+              onClick={() => setIsEditCustomerOpen(true)}>
+              <Pencil size={16} aria-hidden="true"/> Edit Profile
             </button>
-            <button
+            <button type="button" className="customer-profile-action is-secondary"
+              onClick={() => setIsAddVehicleOpen(true)}>
+              <Car size={16} aria-hidden="true"/> Add Vehicle
+            </button>
+            <button type="button" className="customer-profile-action is-primary"
               onClick={() => {
                 const targetVehicle = vehicles[0]?.regNo || '';
-                navigate(`/jobs/new?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
-              }}
-              style={{ height: '40px', padding: '0 14px', borderRadius: '10px', backgroundColor: 'var(--primary)', color: '#ffffff', border: 'none', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <Plus size={16} /> New Job Card
+                navigate('/jobs/new?customerId=' + customer.id +
+                  '&customerName=' + encodeURIComponent(customer.name) +
+                  '&vehicle=' + encodeURIComponent(targetVehicle));
+              }}>
+              <Plus size={17} aria-hidden="true"/> New Job Card
             </button>
-
-            <button
-              onClick={() => setIsAddVehicleOpen(true)}
-              style={{ height: '40px', padding: '0 14px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <Car size={16} /> Add Vehicle
-            </button>
-
-            <button
-              onClick={() => setIsMoreMenuOpen(true)}
-              style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-              title="More Actions"
-            >
-              <MoreVertical size={18} />
+            <button type="button" className="customer-profile-action is-icon"
+              title="More customer actions" aria-label="More customer actions"
+              onClick={() => setIsMoreMenuOpen(true)}>
+              <MoreVertical size={18} aria-hidden="true"/>
             </button>
           </div>
         </div>
 
-        {/* Contact Info & Meta Row */}
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '16px', fontSize: '12.5px', color: 'var(--text-secondary)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+        <div className="customer-profile-hero__contacts">
           {contact.callUrl ? (
-            <a className="customer-contact-action" href={contact.callUrl}>
-              <Phone size={14} /><strong>{customer.phone}</strong>
+            <a className="customer-contact-action is-call" href={contact.callUrl}>
+              <Phone size={16} aria-hidden="true"/>
+              <span>Call</span>
+              <strong>{customer.phone}</strong>
             </a>
-          ) : <span className="customer-contact-action is-unavailable"><Phone size={14}/> No phone number</span>}
-          {contact.whatsappUrl ? (
-            <a className="customer-contact-action is-whatsapp" href={contact.whatsappUrl}
-              target="_blank" rel="noopener noreferrer">
-              <MessageSquare size={14}/><span>WhatsApp</span>
-            </a>
-          ) : <span className="customer-contact-action is-unavailable"><MessageSquare size={14}/> WhatsApp unavailable</span>}
-          {customer.email && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Mail size={14} style={{ color: 'var(--text-muted)' }} />
-              <span>{customer.email}</span>
-            </div>
+          ) : (
+            <span className="customer-contact-action is-unavailable">
+              <Phone size={15} aria-hidden="true"/> No phone number
+            </span>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Building size={14} style={{ color: 'var(--text-muted)' }} />
-            <span>Branch: <strong style={{ color: 'var(--text-primary)' }}>{customer.branchName || customer.branch || '—'}</strong></span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
-            <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-            <span>Customer Since: <strong>{(customer.createdAt || customer.created_at) ? new Date(customer.createdAt || customer.created_at).toLocaleDateString('en-IN') : '—'}</strong></span>
-          </div>
+          {contact.whatsappUrl ? (
+            <a className="customer-contact-action is-whatsapp"
+              href={contact.whatsappUrl} target="_blank" rel="noopener noreferrer">
+              <MessageSquare size={16} aria-hidden="true"/> WhatsApp
+            </a>
+          ) : (
+            <span className="customer-contact-action is-unavailable">
+              <MessageSquare size={15} aria-hidden="true"/> WhatsApp unavailable
+            </span>
+          )}
+          {customer.email && (
+            <a className="customer-contact-action is-email" href={'mailto:' + customer.email}>
+              <Mail size={15} aria-hidden="true"/>
+              {customer.email}
+            </a>
+          )}
+          {customer.branchName && (
+            <span className="customer-profile-header-meta">
+              <Building size={15} aria-hidden="true"/> {customer.branchName}
+            </span>
+          )}
+          {(customer.createdAt || customer.created_at) && (
+            <span className="customer-profile-header-meta">
+              <Calendar size={15} aria-hidden="true"/>
+              Since {new Date(customer.createdAt || customer.created_at).toLocaleDateString('en-IN')}
+            </span>
+          )}
         </div>
-      </div>
+      </header>
 
-      {/* 2. SUMMARY KPI CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', gap: '10px' }} className="customer-profile-kpis customer-kpi-grid">
-        <style>{`
-          @media (max-width: 1024px) {
-            .customer-kpi-grid {
-              grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            }
-          }
-          @media (max-width: 600px) {
-            .customer-kpi-grid {
-              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-          }
-        `}</style>
-        
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Vehicles</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>{vehicles.length}</div>
-        </div>
+      <section className="customer-profile-kpis" aria-label="Customer overview statistics">
+        {[
+          { label: 'Vehicles', value: vehiclesAvailable ? String(vehicles.length) : '—',
+            icon: Car, tone: 'neutral' },
+          { label: 'Job Cards', value: jobsAvailable ? String(jobs.length) : '—',
+            icon: ClipboardCheck, tone: 'neutral' },
+          { label: 'Total Billed', value: formatINR(totalBilled),
+            icon: FileText, tone: 'blue' },
+          { label: 'Amount Paid', value: formatINR(totalPaid),
+            icon: CheckCircle2, tone: 'green' },
+          { label: 'Outstanding', value: formatINR(totalOutstanding),
+            icon: Wallet, tone: totalOutstanding > 0 ? 'danger' : 'neutral' },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <div className={'customer-profile-stat is-' + item.tone} key={item.label}>
+              <div className="customer-profile-stat__heading">
+                <span>{item.label}</span>
+                <Icon size={17} aria-hidden="true"/>
+              </div>
+              <strong title={item.value}>{item.value}</strong>
+            </div>
+          );
+        })}
+      </section>
 
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Jobs</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>{jobs.length}</div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Billed</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>{formatINR(totalBilled)}</div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Paid</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--success)', marginTop: '4px' }}>{formatINR(totalPaid)}</div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Outstanding</div>
-          <div style={{ fontSize: '18px', fontWeight: '800', color: totalOutstanding > 0 ? 'var(--danger)' : 'var(--text-primary)', marginTop: '4px' }}>
-            {formatINR(totalOutstanding)}
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Last Visit</div>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {lastVisitDate}
-          </div>
-        </div>
-      </div>
-
-      {/* 3. CUSTOMER HORIZONTAL TABS RAIL */}
-      <div className="customer-profile-tabs" style={{ width: '100%', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--surface)', borderRadius: '12px', overflow: 'hidden' }}>
-        <div
-          ref={tabRailRef}
-          style={{ display: 'flex', alignItems: 'center', gap: '4px', overflowX: 'auto', padding: '4px 8px', whiteSpace: 'nowrap' }}
-          className="customer-profile-tabs__rail scroll-hidden"
-        >
+      <nav className="customer-profile-tabs" aria-label="Customer details sections">
+        <div ref={tabRailRef} className="customer-profile-tabs__rail scroll-hidden" role="tablist">
           {tabs.map((t) => {
             const Icon = t.icon;
             const isActive = activeTab === t.id;
             return (
-              <button
-                key={t.id}
+              <button type="button" key={t.id}
+                id={'customer-tab-' + t.id}
+                role="tab" aria-selected={isActive}
+                aria-controls={'customer-profile-sections'}
                 onClick={(e) => handleTabClick(t.id, e)}
-                className={isActive ? 'is-active' : ''}
-                style={{
-                  padding: '10px 14px',
-                  fontSize: '13px',
-                  fontWeight: isActive ? '700' : '500',
-                  color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
-                  borderBottom: isActive ? '2px solid var(--primary)' : '2px solid transparent',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 160ms ease'
-                }}
-              >
-                <Icon size={15} />
-                {t.label}
+                className={isActive ? 'is-active' : ''}>
+                <Icon size={16} aria-hidden="true"/>
+                <span>{t.label}</span>
               </button>
             );
           })}
         </div>
-      </div>
+      </nav>
 
       {/* TAB CONTENT PANELS */}
-      <div className="customer-profile-content" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div id="customer-profile-sections" className="customer-profile-content" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         
         {/* 4. OVERVIEW TAB */}
         {activeTab === 'overview' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             
-            {/* Quick Actions Grid (2x2 Mobile) */}
-            <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>Quick Actions</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '10px' }} className="quick-actions-grid">
-                <style>{`
-                  @media (max-width: 767px) {
-                    .quick-actions-grid {
-                      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                    }
-                  }
-                `}</style>
-
-                <button
-                  onClick={() => {
-                    const targetVehicle = vehicles[0]?.regNo || '';
-                    navigate(`/jobs/new?customerId=${customer.id}&customerName=${encodeURIComponent(customer.name)}&vehicle=${encodeURIComponent(targetVehicle)}`);
-                  }}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--primary)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <Plus size={16} /> New Job Card
-                </button>
-
-                <button
-                  onClick={() => setIsAddVehicleOpen(true)}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <Car size={16} /> Add Vehicle
-                </button>
-
-                <button
-                  onClick={() => navigate(`/invoices/create?customerId=${customer.id}`)}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <FileText size={16} /> Create Invoice
-                </button>
-
-                <button
-                  onClick={() => setIsRecordPaymentOpen(true)}
-                  style={{ padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--success)', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                  <CreditCard size={16} /> Record Payment
-                </button>
-              </div>
-            </div>
-
             {/* Detailed Profile Information */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '14px' }} className="overview-details-grid">
               <style>{`
@@ -623,7 +578,7 @@ export const CustomerDetails = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>WhatsApp</span>
-                    <strong style={{ color: 'var(--success)' }}>{customer.whatsapp || customer.phone}</strong>
+                    <strong style={{ color: 'var(--success)' }}>{customer.whatsapp || customer.phone || '—'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Email</span>
@@ -631,7 +586,7 @@ export const CustomerDetails = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Customer Type</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{customer.customerType || 'Individual'}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{profileCustomerType(customer.customerType || customer.customer_type)}</strong>
                   </div>
                 </div>
               </div>
@@ -644,7 +599,7 @@ export const CustomerDetails = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Address</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{customer.address || 'Street 1, Main Road'}</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{customer.address || '—'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>City / State</span>
@@ -652,15 +607,15 @@ export const CustomerDetails = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Company / GST</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{customer.companyName || 'N/A'} {customer.gstNo ? `(${customer.gstNo})` : ''}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{customer.companyName || customer.company_name || '—'} {(customer.gstNo || customer.gstin) ? `(${customer.gstNo || customer.gstin})` : ''}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Primary Branch</span>
-                    <strong style={{ color: 'var(--text-primary)' }}>{customer.branch}</strong>
+                    <strong style={{ color: 'var(--text-primary)' }}>{customer.branchName || '—'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: 'var(--text-muted)' }}>Status</span>
-                    <span style={{ color: 'var(--success)', fontWeight: '700' }}>{customer.status || 'Active'}</span>
+                    <span style={{ color: 'var(--success)', fontWeight: '700' }}>{archived ? 'Archived' : 'Active'}</span>
                   </div>
                 </div>
               </div>
@@ -679,6 +634,7 @@ export const CustomerDetails = () => {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {!activity.length && <p className="customer-empty">No activity recorded yet.</p>}
                 {activity.slice(0, 5).map((act, idx) => (
                   <div key={idx} style={{ backgroundColor: 'var(--surface-2)', padding: '10px 12px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -688,7 +644,7 @@ export const CustomerDetails = () => {
                         <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{act.desc}</div>
                       </div>
                     </div>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{act.time}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{act.time || act.created_at || '—'}</span>
                   </div>
                 ))}
               </div>
@@ -729,7 +685,7 @@ export const CustomerDetails = () => {
                     <div>Type: <strong style={{ color: 'var(--text-primary)' }}>{v.vehicleType}</strong></div>
                     <div>Trans: <strong style={{ color: 'var(--text-primary)' }}>{v.transmission}</strong></div>
                     <div>Year: <strong style={{ color: 'var(--text-primary)' }}>{v.year}</strong></div>
-                    <div>Current KM: <strong style={{ color: 'var(--text-primary)' }}>{v.kilometres || '1,24,500 km'}</strong></div>
+                    <div>Current KM: <strong style={{ color: 'var(--text-primary)' }}>{v.kilometres || '—'}</strong></div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '8px', marginTop: '6px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
@@ -872,7 +828,7 @@ export const CustomerDetails = () => {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '8px', fontSize: '12.5px', color: 'var(--text-muted)' }}>
-                      <div>Technician: <strong style={{ color: 'var(--text-primary)' }}>{j.serviceAdvisor || 'Ajmal K'}</strong></div>
+                      <div>Technician: <strong style={{ color: 'var(--text-primary)' }}>{j.serviceAdvisor || j.assignedEmployeeName || '—'}</strong></div>
                       <div>
                         Labour: <strong>{formatINR((j.labourRecords || []).reduce((sum, item) => sum + Number(item.customerCharge || 0), 0))}</strong> • Parts: <strong>{formatINR((j.partsUsed || []).reduce((sum, item) => sum + Number(item.total || (Number(item.qty || 0) * Number(item.unitPrice || 0))), 0))}</strong> • <strong style={{ color: 'var(--primary)', fontSize: '14px' }}>Total: {formatINR(j.billing?.invoiceTotal || j.estimates?.at(-1)?.grandTotal || 0)}</strong>
                       </div>
@@ -920,7 +876,7 @@ export const CustomerDetails = () => {
               {invoices.map((inv, idx) => (
                 <div key={idx} style={{ backgroundColor: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{inv.invoiceNo}</strong> (Job #{inv.jobNumber})
+                    <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{customerInvoiceLabel(inv)}</strong> {inv.jobNumber ? `(Job ${inv.jobNumber})` : ''}
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                       Date: {inv.date} • Vehicle: {inv.vehicle}
                     </div>
@@ -930,8 +886,8 @@ export const CustomerDetails = () => {
                     <span style={{ fontSize: '11px', fontWeight: '700', color: inv.status === 'Paid' ? 'var(--success)' : 'var(--warning)' }}>
                       {inv.status}
                     </span>
-                    <strong style={{ fontSize: '15px', color: 'var(--primary)' }}>{formatINR(inv.totalAmount)}</strong>
-                    <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Balance: {formatINR(inv.balanceDue)}</div>
+                    <strong style={{ fontSize: '15px', color: 'var(--primary)' }}>{customerInvoiceTotal(inv)}</strong>
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>Balance: {customerInvoiceBalance(inv)}</div>
                   </div>
                 </div>
               ))}
@@ -948,7 +904,7 @@ export const CustomerDetails = () => {
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>All transactions recorded against customer invoices</p>
               </div>
               <button
-                onClick={() => setIsRecordPaymentOpen(true)}
+                onClick={() => { setPaymentError(''); setIsRecordPaymentOpen(true); }}
                 style={{ height: '38px', padding: '0 14px', borderRadius: '10px', backgroundColor: 'var(--success)', color: '#ffffff', border: 'none', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Plus size={15} /> Record Payment
@@ -962,11 +918,11 @@ export const CustomerDetails = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{p.method}</strong>
                       <span style={{ fontSize: '11px', padding: '2px 7px', borderRadius: '6px', backgroundColor: 'var(--surface-3)', color: 'var(--text-secondary)' }}>
-                        {p.invoiceNo}
+                        {p.invoiceNo || '—'}
                       </span>
                     </div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Date: {p.date} • Ref: {p.reference} • Recorded by: {p.recordedBy}
+                      Date: {p.date} • Ref: {p.reference} • Recorded by: {p.recordedBy || '—'}
                     </div>
                   </div>
                   <strong style={{ fontSize: '16px', color: 'var(--success)' }}>+{formatINR(p.amount)}</strong>
@@ -1062,9 +1018,9 @@ export const CustomerDetails = () => {
               {activity.map((act, idx) => (
                 <div key={idx} style={{ position: 'relative' }}>
                   <div style={{ position: 'absolute', left: '-22px', top: '4px', width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--primary)', border: '2px solid var(--surface)' }} />
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--primary)' }}>{act.time}</span>
-                  <h4 style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-primary)', margin: '2px 0' }}>{act.type}</h4>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>{act.desc}</p>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--primary)' }}>{act.time || act.created_at || '—'}</span>
+                  <h4 style={{ fontSize: '13.5px', fontWeight: '700', color: 'var(--text-primary)', margin: '2px 0' }}>{act.type || act.activity_type || 'Customer Activity'}</h4>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>{act.desc || act.description || '—'}</p>
                 </div>
               ))}
             </div>
@@ -1081,17 +1037,19 @@ export const CustomerDetails = () => {
         maxWidth="480px"
       >
         <form onSubmit={handleRecordPaymentSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <Select
-            label="Invoice"
-            value={payInvoiceNo}
-            onChange={(e) => setPayInvoiceNo(e.target.value)}
-          >
-            {invoices.map(inv => (
-              <option key={inv.invoiceNo} value={inv.invoiceNo}>
-                {inv.invoiceNo} ({inv.vehicle}) - Due: {formatINR(inv.balanceDue)}
+          {paymentError && <p className="customer-profile-form-error" role="alert">{paymentError}</p>}
+          <Select label="Invoice *" value={payInvoiceNo}
+            onChange={(event) => { setPayInvoiceNo(event.target.value); setPaymentError(''); }}>
+            <option value="">Select unpaid invoice</option>
+            {payableInvoices.map((inv) => (
+              <option key={inv.id} value={inv.id}>
+                {customerInvoiceLabel(inv)} — Due {customerInvoiceBalance(inv)}
               </option>
             ))}
           </Select>
+          {payableInvoices.length === 0 && (
+            <p className="customer-profile-form-info">No outstanding finalized invoices to pay.</p>
+          )}
 
           <AmountInput
             label="Payment Amount"
@@ -1130,11 +1088,9 @@ export const CustomerDetails = () => {
             placeholder="Received advance payment..."
           />
 
-          <button
-            type="submit"
-            style={{ height: '44px', borderRadius: '11px', border: 'none', backgroundColor: 'var(--success)', color: '#ffffff', fontWeight: '700', cursor: 'pointer', marginTop: '6px' }}
-          >
-            Confirm & Save Payment
+          <button type="submit" disabled={paymentSaving || payableInvoices.length === 0}
+            className="customer-profile-primary-action">
+            {paymentSaving ? 'Saving Payment…' : 'Confirm & Save Payment'}
           </button>
         </form>
       </ResponsiveModalSheet>
@@ -1150,8 +1106,8 @@ export const CustomerDetails = () => {
           <Input label="Registration Number" required icon={Car} value={vRegNo} onChange={(e) => setVRegNo(e.target.value)} placeholder="e.g. KL 10 AB 1234" />
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <Input label="Make" required value={vMake} onChange={(e) => setVMake(e.target.value)} placeholder="Toyota" />
-            <Input label="Model" required value={vModel} onChange={(e) => setVModel(e.target.value)} placeholder="Innova 2.5V" />
+            <Input label="Make" required value={vMake} onChange={(e) => setVMake(e.target.value)} placeholder="e.g. Toyota" />
+            <Input label="Model" required value={vModel} onChange={(e) => setVModel(e.target.value)} placeholder="e.g. Innova" />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -1176,11 +1132,11 @@ export const CustomerDetails = () => {
               <option value="Manual">Manual</option>
               <option value="Automatic">Automatic</option>
             </Select>
-            <Input label="Current Kilometres" value={vKm} onChange={(e) => setVKm(e.target.value)} placeholder="1,24,500 km" />
+            <Input label="Current Kilometres" value={vKm} onChange={(e) => setVKm(e.target.value)} placeholder="e.g. 124500" />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <Input label="Manufacturing Year" value={vYear} onChange={(e) => setVYear(e.target.value)} placeholder="2021" />
+            <Input label="Manufacturing Year" value={vYear} onChange={(e) => setVYear(e.target.value)} placeholder="e.g. 2021" />
             <Input label="VIN / Chassis Number" value={vVin} onChange={(e) => setVVin(e.target.value)} placeholder="MBJ11223344" />
           </div>
 
@@ -1212,18 +1168,13 @@ export const CustomerDetails = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <Select label="Customer Type" value={editType} onChange={(e) => setEditType(e.target.value)}>
               <option value="Individual">Individual</option>
-              <option value="Company/Fleet">Company / Fleet</option>
-              <option value="Insurance">Insurance</option>
-              <option value="Dealer/Partner">Dealer / Partner</option>
+              <option value="Business">Business</option>
             </Select>
 
-            <Select label="Branch" value={editBranch} onChange={(e) => setEditBranch(e.target.value)}>
-              <option value="Main Garage Branch">Main Garage Branch</option>
-              <option value="Kochi South Branch">Kochi South Branch</option>
-            </Select>
+
           </div>
 
-          {editType !== 'Individual' && (
+          {editType === 'Business' && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <Input label="Company Name" value={editCompany} onChange={(e) => setEditCompany(e.target.value)} />
               <Input label="GST Number" value={editGst} onChange={(e) => setEditGst(e.target.value)} />
@@ -1327,6 +1278,7 @@ export const CustomerDetails = () => {
           <button
             onClick={() => {
               setIsMoreMenuOpen(false);
+              setPaymentError('');
               setIsRecordPaymentOpen(true);
             }}
             style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)', backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', fontWeight: '600', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}

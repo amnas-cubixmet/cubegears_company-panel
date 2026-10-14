@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  makeQcDraft, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
+  makeQcDraft, resolveQcInspector, qcInspectorForMode, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
 } from '../src/components/jobs/qualityCheckValidation.js';
 
 const panel = readFileSync(new URL('../src/components/jobs/JobQualityCheckPanel.jsx', import.meta.url), 'utf8');
@@ -96,4 +96,65 @@ test('QC page cannot bypass its validation through the generic stage button', ()
   assert.match(workspace, /onCompleted=\{\(\) => refreshJobWorkflow\('qc'\)\}/);
   assert.match(workspace, /activeTab !== 'qc'/);
   assert.doesNotMatch(workspace, /setQcRoadTest|completeQc\('Pass'\)|updateQcItem/);
+});
+
+
+test('new Quality Check defaults inspector to the login account name', () => {
+  assert.equal(resolveQcInspector('', 'Shahin Rahman'), 'Shahin Rahman');
+  assert.equal(makeQcDraft({}, 'Shahin Rahman').inspector, 'Shahin Rahman');
+  assert.equal(makeQcDraft({ inspector: 'Unassigned' }, 'Shahin Rahman').inspector, 'Shahin Rahman');
+  const qc = makeQcDraft({ inspector: '', checklist: [{ item: 'Brakes', status: 'Pass' }] }, 'Shahin Rahman');
+  assert.equal(qc.inspector, 'Shahin Rahman');
+  assert.equal(qc.checklist[0].status, 'Pass');
+});
+
+test('saved inspector is not overwritten by a different logged-in user', () => {
+  assert.equal(resolveQcInspector('Afsal K', 'Shahin Rahman'), 'Afsal K');
+  assert.equal(makeQcDraft({ inspector: 'Afsal K' }, 'Shahin Rahman').inspector, 'Afsal K');
+  assert.equal(makeQcDraft({ inspector: 'Afsal K' }, '').inspector, 'Afsal K');
+  assert.equal(makeQcDraft({}, '').inspector, '');
+});
+
+test('QC inspector is displayed as plain authenticated text, not an input or editable field', () => {
+  assert.match(panel, /import \{ useAuth \} from '\.\.\/\.\.\/hooks\/useAuth';/);
+  assert.match(panel, /const \{ user \} = useAuth\(\)/);
+  assert.match(panel, /const loggedInName = String\(user\?\.name \|\| ''\)\.trim\(\)/);
+  assert.match(panel, /makeQcDraft\(savedQc, loggedInName\)/);
+  assert.match(panel, /if \(!loggedInName\) return;/);
+  assert.match(panel, /current\.inspector\s*\?\s*current : \{ \.\.\.current, inspector: loggedInName \}/);
+  assert.match(panel, /<output className="job-qc-inspector-name"/);
+  assert.doesNotMatch(panel, /onChange=\{\(event\) => change\(\{ inspector:/);
+  assert.match(panel, /Automatically assigned from your login/);
+  assert.match(panel, /Inspector recorded when this QC was saved/);
+  assert.doesNotMatch(panel, /<input id="job-qc-inspector"/);
+  assert.match(css, /\.job-qc-inspector-display \{/);
+  assert.match(css, /\.job-qc-inspector-name \{/);
+  assert.doesNotMatch(css, /\.job-qc-field input\[readonly\]/);
+});
+
+test('editable QC identifies the active logged-in user, even if prior inspector was saved', () => {
+  assert.equal(qcInspectorForMode('Previous Inspector', 'Logged In Inspector', true), 'Logged In Inspector');
+  assert.equal(qcInspectorForMode('Previous Inspector', 'Logged In Inspector', false), 'Previous Inspector');
+  assert.equal(qcInspectorForMode('', 'Logged In Inspector', true), 'Logged In Inspector');
+  assert.equal(qcInspectorForMode('Previous Inspector', '', true), '');
+});
+
+test('editable QC submits authenticated inspector, not an old saved inspector name', () => {
+  assert.match(panel, /const inspectorName = qcInspectorForMode\(draft\.inspector, loggedInName, canEdit\)/);
+  assert.match(panel, /const submissionDraft = \{ \.\.\.draft, inspector: inspectorName \}/);
+  assert.match(panel, /qcFormErrors\(submissionDraft, mode\)/);
+  assert.match(panel, /qcPayload\(submissionDraft, mode === 'Draft'/);
+  assert.match(panel, /<output className="job-qc-inspector-name"/);
+  assert.doesNotMatch(panel, /onChange=\{\(event\) => change\(\{ inspector:/);
+});
+
+
+test('QC inspector display has no input background and preserves saved-name semantics', () => {
+  assert.match(panel, /const inspectorName = qcInspectorForMode\(draft\.inspector, loggedInName, canEdit\)/);
+  assert.match(panel, /<output className="job-qc-inspector-name" aria-labelledby="job-qc-inspector-label">/);
+  assert.match(panel, /\{inspectorName \|\| 'Account name unavailable'\}/);
+  assert.match(css, /\.job-qc-inspector-display \{[\s\S]*?background:transparent!important/);
+  assert.match(css, /\.job-qc-inspector-name \{[\s\S]*?background:transparent/);
+  const missing = qcFormErrors({ ...passedDraft(), inspector: '' }, 'Pass');
+  assert.match(missing.inspector, /login account profile/);
 });

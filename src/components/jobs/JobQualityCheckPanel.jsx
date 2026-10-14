@@ -3,14 +3,15 @@ import { AlertCircle, CheckCircle2, ClipboardCheck, Save, ShieldCheck, XCircle }
 import { jobService } from '../../services/job.service';
 import { QcInspectorPicker } from './QcInspectorPicker';
 import { USE_MOCK_API } from '../../api/apiConfig';
+import { useAuth } from '../../hooks/useAuth';
 import {
-  makeQcDraft, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
+  makeQcDraft, qcInspectorForMode, qcFormErrors, qcHasErrors, qcPayload, qcSummary,
 } from './qualityCheckValidation';
 import '../../styles/job-quality-check.css';
 
 export function JobQualityCheckPanel({ job, staff = [], canEdit, onStaffCreated, onSaved, onCompleted }) {
   const original = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {};
-  const [draft, setDraft] = useState(() => makeQcDraft(original));
+  const [draft, setDraft] = useState(() => makeQcDraft(original, loggedInName));
   const [errors, setErrors] = useState(null);
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -21,11 +22,23 @@ export function JobQualityCheckPanel({ job, staff = [], canEdit, onStaffCreated,
 
   useEffect(() => {
     const savedQc = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {};
-    setDraft(makeQcDraft(savedQc));
+    setDraft(makeQcDraft(savedQc, loggedInName));
     setDirty(false);
     setErrors(null);
   }, [job?.id, job?.qc, job?.qualityCheck]);
 
+  // /auth/me may resolve after the QC page mounts. Fill only a blank inspector:
+  // never overwrite an existing saved name or unsaved checklist/notes.
+  useEffect(() => {
+    if (!loggedInName) return;
+    setDraft((current) => current.inspector
+      ? current : { ...current, inspector: loggedInName });
+  }, [loggedInName]);
+
+  // The current editor is always the authenticated inspector. Read-only QC
+  // retains the inspector who signed the previously saved result.
+  const inspectorName = qcInspectorForMode(draft.inspector, loggedInName, canEdit);
+  const submissionDraft = { ...draft, inspector: inspectorName };
   const summary = qcSummary(draft);
   const change = (update) => {
     setDraft((current) => ({ ...current, ...update }));
@@ -43,7 +56,7 @@ export function JobQualityCheckPanel({ job, staff = [], canEdit, onStaffCreated,
 
   const submit = async (mode) => {
     if (!canEdit || lockRef.current || busy) return;
-    const invalid = qcFormErrors(draft, mode);
+    const invalid = qcFormErrors(submissionDraft, mode);
     if (qcHasErrors(invalid)) {
       setErrors(invalid);
       setSuccess('');
@@ -60,7 +73,7 @@ export function JobQualityCheckPanel({ job, staff = [], canEdit, onStaffCreated,
     setServerError('');
     setSuccess('');
     try {
-      const qc = qcPayload(draft, mode === 'Draft' ? 'Pending' : mode);
+      const qc = qcPayload(submissionDraft, mode === 'Draft' ? 'Pending' : mode);
       await jobService.updateJob(job.id, USE_MOCK_API
         ? { qualityCheck: qc } : { qc });
 

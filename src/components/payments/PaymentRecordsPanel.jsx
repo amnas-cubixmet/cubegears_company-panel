@@ -30,14 +30,14 @@ export const PaymentRecordsPanel = ({
           <table className="payments-dashboard-table">
             <thead>
               <tr>
-                <th>Receipt</th>
+                <th>Payment ID</th>
                 <th>Customer / Invoice</th>
                 <th>Date</th>
                 <th>Method</th>
                 <th>Reference</th>
                 <th>Amount</th>
                 <th>Status</th>
-                <th aria-label="Open" />
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -45,8 +45,7 @@ export const PaymentRecordsPanel = ({
                 <tr key={row.id}>
                   <td>
                     <button type="button" onClick={() => onView(row)}>
-                      <strong>{row.receiptNo || row.id}</strong>
-                      <span>{row.id}</span>
+                      <strong title={String(row.receiptNo || row.id)}>{row.receiptNo || row.id}</strong>
                     </button>
                   </td>
                   <td>
@@ -63,8 +62,8 @@ export const PaymentRecordsPanel = ({
                     </span>
                   </td>
                   <td>
-                    <button type="button" className="payments-dashboard-view-btn" onClick={() => onView(row)} title="View payment">
-                      <Eye size={13} />
+                    <button type="button" className="payments-dashboard-view-btn" onClick={() => onView(row)} aria-label={'View payment ' + (row.receiptNo || row.id)}>
+                      <Eye size={14} aria-hidden="true" /> View
                     </button>
                   </td>
                 </tr>
@@ -78,7 +77,7 @@ export const PaymentRecordsPanel = ({
             <article key={row.id} className="payments-dashboard-mobile-card">
               <div className="payments-dashboard-mobile-head">
                 <div>
-                  <strong>{row.receiptNo || row.id}</strong>
+                  <strong title={String(row.receiptNo || row.id)}>{row.receiptNo || row.id}</strong>
                   <span>{row.customer || 'Customer'}</span>
                 </div>
                 <span className={'payments-dashboard-status ' + paymentStatusClass(row.status)}>
@@ -101,7 +100,7 @@ export const PaymentRecordsPanel = ({
               )}
 
               <button type="button" className="payments-dashboard-mobile-view" onClick={() => onView(row)}>
-                <Eye size={12} />
+                <Eye size={15} aria-hidden="true" />
                 View Payment
               </button>
             </article>

@@ -16,6 +16,12 @@ export const AccountHeader=({title,subtitle,active,onNavigate,actions})=><>
     {actions ? <div className="account-dashboard-actions">{actions}</div> : null}
   </header>
   <nav className="account-dashboard-tabs" aria-label="Account navigation">
-    {tabs.map(([key,label,path,Icon])=><button key={key} className={active===key?'is-active':''} onClick={()=>onNavigate(path)}><Icon size={13}/>{label}</button>)}
+    {tabs.map(([key,label,path,Icon])=><button
+      type="button"
+      key={key}
+      className={active===key?'is-active':''}
+      aria-current={active===key?'page':undefined}
+      onClick={()=>onNavigate(path)}
+    ><Icon size={15} aria-hidden="true"/>{label}</button>)}
   </nav>
 </>;

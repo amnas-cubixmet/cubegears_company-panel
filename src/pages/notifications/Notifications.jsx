@@ -7,7 +7,9 @@ import {
   Trash2,
   X
 } from 'lucide-react';
-import { resourceConfigs } from '../operations/resourceConfigs';
+import { notificationInboxService } from '../../services/notificationInbox.service';
+import { normalizeNotification, unreadNotificationCount } from '../../utils/notificationInbox';
+import { useNavigate } from 'react-router-dom';
 import {
   NotificationStats,
   NotificationToolbar,
@@ -15,41 +17,10 @@ import {
 } from '../../components/notifications';
 import '../../styles/notifications.css';
 
-const service = resourceConfigs.notifications.service;
+const service = notificationInboxService;
 const categories = ['All', 'Operational', 'Approvals & People', 'Finance', 'Stock', 'Website & Account'];
 const priorities = ['All', 'Critical', 'High', 'Normal', 'Low'];
-
-const iconFor = (category) => {
-  if (category === 'Finance') return '₹';
-  if (category === 'Stock') return 'ST';
-  if (category === 'Approvals & People') return 'HR';
-  if (category === 'Website & Account') return 'AC';
-  return 'OP';
-};
-
-const normalizeNotification = (row = {}) => {
-  const type = row.notification_type || row.notificationType || '';
-  const data = row.data || {};
-  const attendanceAlert = type.startsWith('attendance_');
-
-  return {
-    ...row,
-    title: row.title || 'Notification',
-    description: row.description || row.message || '',
-    category: row.category || (attendanceAlert ? 'Approvals & People' : 'Operational'),
-    priority:
-      row.priority ||
-      (['attendance_leave_request', 'attendance_overtime_request', 'attendance_missing_punch'].includes(type)
-        ? 'High'
-        : 'Normal'),
-    reference: row.reference || data.requestId || data.recordId || '',
-    status:
-      row.status ||
-      (row.is_read === true || row.isRead === true ? 'Read' : 'Unread'),
-    created: row.created || row.created_at || row.createdAt || '',
-    route: row.route || data.route || '',
-  };
-};
+const iconFor = (category) => ({ Finance: '₹', Stock: 'ST', 'Approvals & People': 'HR', 'Website & Account': 'AC' })[category] || 'OP';
 
 const timeLabel = (value) => {
   if (!value) return '—';
@@ -65,6 +36,7 @@ const timeLabel = (value) => {
 };
 
 export function Notifications() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
@@ -101,53 +73,47 @@ export function Notifications() {
     });
   }, [rows, query, category, priority, status]);
 
-  const unread = rows.filter((row) => row.status === 'Unread').length;
-  const high = rows.filter((row) => ['High', 'Critical'].includes(row.priority) && row.status !== 'Archived').length;
-  const today = new Date().toISOString().slice(0, 10);
+  const unread = unreadNotificationCount(rows);
+  const high = rows.filter((row) => ['High', 'Critical'].includes(row.priority)).length;
+  const today = new Date().toLocaleDateString('en-CA');
   const todayCount = rows.filter((row) => String(row.created || row.createdAt || '').slice(0, 10) === today).length;
 
   const updateStatus = async (row, nextStatus) => {
+    setError('');
     try {
-      const payload = nextStatus === 'Archived'
-        ? { is_read: true }
-        : { is_read: nextStatus === 'Read' };
-      const updatedRaw = await service.update(row.id, payload);
+      const updatedRaw = await service.setRead(row, nextStatus === 'Read');
       const updated = normalizeNotification({
-        ...row,
-        ...updatedRaw,
-        status: nextStatus,
+        ...row, ...updatedRaw, is_read: nextStatus === 'Read', status: nextStatus
       });
       setRows((old) => old.map((item) => item.id === row.id ? updated : item));
-      if (selected?.id === row.id) setSelected(updated);
-    } catch (e) {
-      setError(e?.message || 'Unable to update notification.');
-    }
+      setSelected((old) => old?.id === row.id ? updated : old);
+    } catch (e) { setError(e?.message || 'Unable to update notification.'); }
   };
 
-  const openNotification = async (row) => {
+  const openNotification = (row) => {
     setSelected(row);
-    if (row.status === 'Unread') await updateStatus(row, 'Read');
+    if (row.status === 'Unread') void updateStatus(row, 'Read');
   };
 
   const markAllRead = async () => {
     const unreadRows = rows.filter((row) => row.status === 'Unread');
-    try {
-      const updated = await Promise.all(
-        unreadRows.map((row) => service.update(row.id, { is_read: true })),
-      );
-      const updatedIds = new Set(updated.map((row) => row.id));
-      setRows((old) => old.map((row) =>
-        updatedIds.has(row.id) ? { ...row, status: 'Read', is_read: true } : row
-      ));
-    } catch (e) {
-      setError(e?.message || 'Unable to mark all as read.');
-    }
+    if (!unreadRows.length) return;
+    setError('');
+    const outcomes = await Promise.allSettled(unreadRows.map((row) => service.setRead(row, true)));
+    const succeeded = new Set(
+      unreadRows.filter((_, index) => outcomes[index].status === 'fulfilled').map((row) => row.id)
+    );
+    setRows((old) => old.map((row) =>
+      succeeded.has(row.id) ? normalizeNotification({ ...row, is_read: true }) : row));
+    setSelected((old) => old && succeeded.has(old.id)
+      ? normalizeNotification({ ...old, is_read: true }) : old);
+    if (succeeded.size !== unreadRows.length) setError('Some alerts could not be marked as read. Please try again.');
   };
 
   const remove = async (row) => {
     if (!await appConfirm('Delete this notification?')) return;
     try {
-      await service.remove(row.id);
+      await service.remove(row);
       setRows((old) => old.filter((item) => item.id !== row.id));
       if (selected?.id === row.id) setSelected(null);
     } catch (e) {
@@ -157,7 +123,7 @@ export function Notifications() {
 
   return (
     <div className="notifications-page">
-      <NotificationsHeader unread={unread} onMarkAll={markAllRead} />
+      <NotificationsHeader unread={unread} onMarkAll={markAllRead} onRefresh={load} loading={loading} />
 
       <NotificationStats
         unread={unread}
@@ -180,42 +146,45 @@ export function Notifications() {
         resultCount={filtered.length}
       />
 
-      {error && <div className="notifications-error">{error}</div>}
+      {error && <div className="notifications-error" role="alert">{error}</div>}
 
       <div className="notifications-layout">
         <section className="notifications-list">
-          {loading ? <div className="notifications-empty">Loading notifications…</div> : filtered.length ? filtered.map((row) => (
-            <article
-              key={row.id}
-              className={`notification-row ${row.status === 'Unread' ? 'is-unread' : ''}`}
-              onClick={() => openNotification(row)}
-            >
-              <div className={`notification-avatar priority-${String(row.priority || 'Normal').toLowerCase()}`}>{iconFor(row.category)}</div>
-
-              <div className="notification-copy">
-                <div className="notification-title-line">
-                  <strong>{row.title}</strong>
-                  {row.status === 'Unread' && <span className="unread-dot" aria-label="Unread"/>}
-                </div>
-                <p>{row.description || row.reference || 'System notification'}</p>
-                <div className="notification-meta">
-                  <span>{row.category || 'General'}</span>
-                  <span>{row.priority || 'Normal'}</span>
-                  {row.reference && <span>{row.reference}</span>}
-                </div>
-              </div>
-
+          {loading ? <div className="notifications-empty" role="status">Loading notifications…</div> : filtered.length ? filtered.map((row) => (
+            <article key={row.id} className={`notification-row ${row.status === 'Unread' ? 'is-unread' : ''} ${selected?.id === row.id ? 'is-selected' : ''}`}>
+              <button type="button" className="notification-row-open" onClick={() => openNotification(row)}
+                aria-label={`View notification: ${row.title}`} aria-current={selected?.id === row.id ? 'true' : undefined}>
+                <span className={`notification-avatar priority-${String(row.priority || 'Normal').toLowerCase()}`} aria-hidden="true">{iconFor(row.category)}</span>
+                <span className="notification-copy">
+                  <span className="notification-title-line">
+                    <strong>{row.title}</strong>
+                    {row.status === 'Unread' && <span className="unread-dot" aria-label="Unread"/>}
+                  </span>
+                  <span className="notification-description">{row.description || row.reference || 'System notification'}</span>
+                  <span className="notification-meta">
+                    <span>{row.category || 'General'}</span><span>{row.priority || 'Normal'}</span>
+                    {row.reference && <span>{String(row.reference)}</span>}
+                  </span>
+                </span>
+              </button>
               <div className="notification-side">
-                <time>{timeLabel(row.created || row.createdAt)}</time>
-                <div className="notification-actions" onClick={(e) => e.stopPropagation()}>
-                  <button title={row.status === 'Unread' ? 'Mark read' : 'Mark unread'} onClick={() => updateStatus(row, row.status === 'Unread' ? 'Read' : 'Unread')}>
-                    {row.status === 'Unread' ? <Check size={14}/> : <Bell size={14}/>}
+                <time dateTime={row.created || row.createdAt}>{timeLabel(row.created || row.createdAt)}</time>
+                <div className="notification-actions">
+                  <button type="button" aria-label={row.status === 'Unread' ? 'Mark read' : 'Mark unread'}
+                    title={row.status === 'Unread' ? 'Mark read' : 'Mark unread'}
+                    onClick={() => updateStatus(row, row.status === 'Unread' ? 'Read' : 'Unread')}>
+                    {row.status === 'Unread' ? <Check size={16}/> : <Bell size={16}/>}
                   </button>
-                  <button className="danger" title="Delete" onClick={() => remove(row)}><Trash2 size={14}/></button>
+                  <button type="button" className="danger" aria-label="Delete notification" title="Delete"
+                    onClick={() => remove(row)}><Trash2 size={16}/></button>
                 </div>
               </div>
             </article>
-          )) : <div className="notifications-empty">No notifications match your filters.</div>}
+          )) : <div className="notifications-empty">
+            <Bell size={25} aria-hidden="true"/>
+            <strong>No notifications found</strong>
+            <span>{rows.length ? 'Try another search or filter.' : 'New alerts will appear here.'}</span>
+          </div>}
         </section>
 
         <aside className={`notification-detail ${selected ? 'is-open' : ''}`}>
@@ -226,7 +195,7 @@ export function Notifications() {
                   <span>{selected.category || 'Notification'}</span>
                   <h2>{selected.title}</h2>
                 </div>
-                <button onClick={() => setSelected(null)}><X size={16}/></button>
+                <button type="button" onClick={() => setSelected(null)} aria-label="Close notification details"><X size={16}/></button>
               </div>
 
               <div className="notification-detail-body">
@@ -246,8 +215,12 @@ export function Notifications() {
               </div>
 
               <div className="notification-detail-actions">
-                {selected.status !== 'Archived' && <button onClick={() => updateStatus(selected, 'Archived')}>Archive</button>}
-                <button className="danger" onClick={() => remove(selected)}><Trash2 size={14}/>Delete</button>
+                {selected.status === 'Unread' && <button type="button" onClick={() => updateStatus(selected, 'Read')}>Mark read</button>}
+                {selected.status === 'Read' && <button type="button" onClick={() => updateStatus(selected, 'Unread')}>Mark unread</button>}
+                {typeof selected.route === 'string' && selected.route.startsWith('/') && !selected.route.startsWith('//') && (
+                  <button type="button" onClick={() => navigate(selected.route)}><ExternalLink size={14}/>Open related page</button>
+                )}
+                <button type="button" className="danger" onClick={() => remove(selected)}><Trash2 size={14}/>Delete</button>
               </div>
             </>
           ) : (
