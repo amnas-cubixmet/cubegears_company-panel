@@ -1,40 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-
-const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-const page = read('../src/pages/saas/PlanMarketplace.jsx');
-const account = read('../src/pages/saas/SaaSAccount.jsx');
+const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8');
+const account = read('../src/components/account/AccountHeader.jsx');
 const routes = read('../src/routes/AppRoutes.jsx');
-const service = read('../src/services/planCatalog.service.js');
+const wallet = read('../src/pages/saas/CreditWorkspace.jsx');
 
-test('workshop can compare plans and request monthly or yearly changes', () => {
-  assert.match(page, /monthly/);
-  assert.match(page, /yearly/);
-  assert.match(page, /includedStorageGb/);
-  assert.match(page, /maxBranches/);
-  assert.match(page, /maxUsers/);
-  assert.match(page, /requestChange/);
-  assert.match(page, /Confirm Plan Request/);
+test('account replaces subscription plan cards with credit wallet modules', () => {
+  assert.match(account, /Buy Credits/);
+  assert.match(account, /Features/);
+  assert.match(account, /Logs/);
+  assert.doesNotMatch(account, /Compare Plans|Subscription/);
+  assert.match(routes, /\/account\/credits\/buy/);
+  assert.match(wallet, /monthlyCredits/);
 });
 
-test('custom enquiries are sent to backend and never activate plans immediately', () => {
-  assert.match(page, /requestCustom/);
-  assert.match(page, /Contact for Custom Plan/);
-  assert.match(service, /apiClient.post\('\/saas\/billing\/change-requests'/);
-  assert.match(service, /apiClient.post\('\/saas\/billing\/custom-requests'/);
-  assert.doesNotMatch(service, /localStorage\.setItem/);
-});
-
-test('account uses plan comparison route and no longer advertises unlimited storage', () => {
-  assert.match(routes, /\/account\/plans/);
-  assert.match(account, /Compare \/ Change Plan/);
-  assert.match(account, /includedStorageGb/);
-  assert.match(account, /extraStorageRate/);
-  assert.doesNotMatch(account, /Unlimited storage/);
-});
-
-test('all plans visibly retain GST invoice capability', () => {
-  assert.match(page, /CGST, SGST and IGST/);
-  assert.match(page, /GST \/ CGST \/ SGST \/ IGST billing included/);
+test('inactive features cannot be billed by a fabricated frontend balance', () => {
+  assert.match(wallet, /creditWalletService\.enableFeature/);
+  assert.match(wallet, /creditWalletService\.disableFeature/);
+  assert.match(wallet, /No balance or payment has been assumed/);
 });
