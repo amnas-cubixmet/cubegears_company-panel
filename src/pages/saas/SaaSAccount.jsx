@@ -18,7 +18,7 @@ const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', 
 const dateTime = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const iso = (value) => new Date(value).toISOString().slice(0, 10);
 
-function BillingView({ billing, storage, onOpenTemplates }) {
+function BillingView({ billing, storage, onOpenTemplates, onOpenPlans }) {
   const estimate = useMemo(() => billing ? saasAccountService.calculateMonthlyEstimate(billing) : null, [billing]);
   const plan = billing?.plan;
   const nextRenewal = plan?.nextBillingDate ? date.format(new Date(plan.nextBillingDate)) : '—';
@@ -52,6 +52,7 @@ function BillingView({ billing, storage, onOpenTemplates }) {
           <div><span>Active accounts</span><strong>{actualUsers ?? '—'}</strong></div>
           <div><span>Current media</span><strong>{storage?.usedGb == null ? '—' : storage.usedGb + ' GB'}</strong></div>
         </div>
+        <button type="button" className="saas-button" onClick={onOpenPlans}>Compare / Change Plan <ChevronRight size={15}/></button>
         {billing?.billingNote && <p className="saas-muted saas-billing-note">{billing.billingNote}</p>}
       </section>
       <section className="saas-card">
@@ -357,7 +358,8 @@ export function SaaSAccount({ section = 'billing' }) {
           : !loading && <div className="saas-error">Storage information unavailable. Retry loading your account.</div>
       ) : (
         <BillingView billing={billing} storage={storage}
-          onOpenTemplates={() => navigate('/account/templates')}/>
+          onOpenTemplates={() => navigate('/account/templates')}
+          onOpenPlans={() => navigate('/account/plans')}/>
       )}
     </div>
   );
