@@ -4,12 +4,16 @@ import { readFileSync } from 'node:fs';
 
 const read = (path) => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 
-test('company signup is a public route connected to the Django endpoint', () => {
+test('company panel signup page and registration links are removed', () => {
   const routes = read('src/routes/AppRoutes.jsx');
-  const signup = read('src/pages/auth/Signup.jsx');
-  assert.match(routes, /path="\/signup" element={<Signup \/>}/);
-  assert.match(signup, /apiClient\.post\('\/auth\/signup'/);
-  assert.match(signup, /company's Super Admin/);
+  const login = read('src/pages/auth/Login.jsx');
+  assert.match(routes, /path="\/signup" element={<Navigate to="\/login" replace \/>}/);
+  assert.doesNotMatch(routes, /import \{ Signup \}/);
+  assert.doesNotMatch(routes, /element={<Signup/);
+  assert.doesNotMatch(login, /to="\/signup"/);
+  assert.doesNotMatch(login, /Create your company account/);
+  assert.match(routes, /path="\/forgot-password" element={<ForgotPassword \/>}/);
+  assert.match(routes, /path="\/setup-password" element={<SetupPassword \/>}/);
 });
 
 test('production disables mock auth and requires configured real backend', () => {
