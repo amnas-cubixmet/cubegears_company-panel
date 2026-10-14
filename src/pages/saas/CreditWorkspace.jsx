@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
+import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
 import { creditWalletService, notifyCreditChange, purchaseCredits } from '../../services/creditWallet.service';
 import { AccountHeader } from '../../components/account';
 import '../../styles/credit-wallet.css';
@@ -75,7 +75,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [title, subtitle] = sections[section] || sections.overview;
 
   return <div className="saas-page cg-credit-page">
-    <AccountHeader title={title} subtitle={subtitle} active={section === 'buy' ? 'credits-buy' : section === 'features' ? 'credits-features' : section === 'logs' ? 'credits-logs' : 'overview'} onNavigate={navigate}/>
+    <AccountHeader title={title} subtitle={subtitle} active={section === 'buy' ? 'credits-buy' : section === 'features' ? 'credits-features' : section === 'logs' ? 'credits-logs' : 'overview'} onNavigate={navigate} actions={<button type="button" className="cg-credit-refresh" disabled={loading || Boolean(busy)} onClick={load}><RefreshCcw size={16} aria-hidden="true"/> Refresh</button>}/>
     {error && <div className="cg-credit-alert error" role="alert">{error} <button type="button" onClick={load}>Retry</button></div>}
     {notice && <div className="cg-credit-alert success" role="status">{notice}</div>}
     {loading && <p role="status" className="cg-credit-status">Loading your company wallet…</p>}
@@ -113,10 +113,11 @@ export function CreditWorkspace({ section = 'overview' }) {
     {section === 'buy' && <section className="cg-credit-panel"><header><div><span>RAZORPAY TOP-UP</span><h2>Choose a credit package</h2></div><CreditCard size={22}/></header>
       <p>Package prices and credit amounts come from the server. No money or credits are created until Razorpay verifies a captured payment.</p>
       <div className="cg-credit-packages">{packages.filter(p => p.active).map((pack) => <article key={pack.id}>
-        <span>ONE-TIME TOP-UP</span><h3>{pack.name}</h3><strong>{credits(pack.credits)} <small>credits</small></strong><p>{money(pack.priceInr)} payable</p><button className="primary" type="button" disabled={busy !== '' || !wallet?.checkoutAvailable} onClick={() => buy(pack)}>{busy === `package:${pack.id}` ? 'Opening checkout…' : 'Buy Credits'} <ArrowRight size={16}/></button>
+        <span>ONE-TIME TOP-UP</span><h3>{pack.name}</h3><strong>{credits(pack.credits)} <small>credits</small></strong><p>{money(pack.priceInr)} payable</p><button className="primary" type="button" disabled={busy !== '' || !wallet?.checkoutAvailable || !wallet?.canManage} onClick={() => buy(pack)}>{busy === `package:${pack.id}` ? 'Opening checkout…' : 'Buy Credits'} <ArrowRight size={16}/></button>
       </article>)}</div>
       {!packages.some(p=>p.active) && !loading && <p className="cg-credit-empty">No credit packages have been published by the administrator.</p>}
       {wallet && !wallet.checkoutAvailable && <p className="cg-credit-note">Secure checkout is not configured on the backend yet. Buying credits is disabled.</p>}
+      {wallet && !wallet.canManage && <p className="cg-credit-note">Only a company billing administrator can purchase credits.</p>}
       <p className="cg-credit-note"><ShieldCheck size={16}/> UPI, bank cards and net banking are provided by Razorpay when enabled for your merchant account.</p>
     </section>}
 
