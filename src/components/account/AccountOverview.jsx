@@ -74,6 +74,7 @@ export function AccountOverview({
   ];
   const actions = [
     { title: 'Billing & Plan', description: 'Subscription and charges', href: '/account/billing', icon: ReceiptText },
+    { title: 'Compare Plans', description: 'Upgrade, downgrade, or request custom pricing', href: '/account/plans', icon: CreditCard },
     { title: 'Media Storage', description: 'Uploads and usage history', href: '/account/storage', icon: HardDrive },
     { title: 'Invoice Templates', description: 'Workshop document styling', href: '/account/templates', icon: FilePenLine },
     { title: 'Account Security', description: 'Password and sign-in', href: '/account/security', icon: ShieldCheck },

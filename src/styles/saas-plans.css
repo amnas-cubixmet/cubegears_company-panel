@@ -1,0 +1,39 @@
+.cg-plan-marketplace{gap:20px}
+.cg-plan-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.cg-plan-toolbar h2{font-size:21px;margin:0 0 6px;font-weight:750}
+.cg-plan-toolbar p{font-size:13px;color:var(--text-muted);margin:0;line-height:1.5}
+.cg-billing-switch{display:flex;gap:5px;border:1px solid var(--border);border-radius:11px;padding:4px;background:var(--surface);flex-shrink:0}
+.cg-billing-switch button{border:0;background:transparent;color:var(--text-primary);padding:9px 16px;border-radius:8px;cursor:pointer;font-size:13px}
+.cg-billing-switch button.active{background:var(--primary);color:white}
+.cg-plan-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cg-plan-card{min-width:0;display:flex;flex-direction:column;gap:13px;padding:22px;border:1px solid var(--border);border-radius:18px;background:var(--surface)}
+.cg-plan-card h3{margin:7px 0 0;font-size:20px;font-weight:750}
+.cg-plan-card header p{color:var(--text-muted);font-size:13px;line-height:1.5;min-height:36px;margin:6px 0 0}
+.cg-plan-price{font-size:28px;font-weight:750;letter-spacing:-.04em}
+.cg-plan-price small{font-size:12px;font-weight:400;letter-spacing:normal;color:var(--text-muted)}
+.cg-plan-promo{font-size:12px;color:var(--primary);font-weight:700}
+.cg-plan-limits{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.cg-plan-limits>div{display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:9px;padding:10px 8px;background:var(--surface-2)}
+.cg-plan-limits strong{font-size:15px}.cg-plan-limits span{font-size:11px;color:var(--text-muted)}
+.cg-plan-rate{font-size:12px;color:var(--text-muted);margin:0;line-height:1.5}
+.cg-plan-fixed-feature{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-primary)}
+.cg-plan-fixed-feature svg{color:var(--primary);flex-shrink:0}
+.cg-plan-toggle,.cg-plan-cancel{background:transparent;border:0;color:var(--primary);cursor:pointer;font-size:13px;font-weight:600;text-align:left;padding:6px 0;display:flex;align-items:center;gap:6px}
+.cg-feature-groups{max-height:340px;overflow:auto;display:grid;gap:12px;border:1px solid var(--border);border-radius:10px;padding:12px}
+.cg-feature-groups section h4{font-size:12px;margin:0 0 6px}
+.cg-feature{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 0}
+.cg-feature.enabled span{color:var(--primary)}.cg-feature.disabled{color:var(--text-muted);opacity:.7}
+.cg-plan-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;min-height:44px;padding:10px 16px;background:var(--primary);color:white;font-size:13px;font-weight:650;cursor:pointer;width:100%;margin-top:auto}
+.cg-plan-action:disabled{opacity:.55;cursor:not-allowed}
+.cg-plan-notice{font-size:12px;line-height:1.5;color:var(--text-muted)}
+.cg-plan-alert{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:10px;font-size:13px}
+.cg-plan-alert.error{background:#fee2e2;color:#991b1b}.cg-plan-alert.success{background:#dcfce7;color:#166534}
+.cg-custom-plan{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:24px;border:1px solid var(--border);border-radius:18px;background:var(--surface)}
+.cg-custom-plan h2{font-size:19px;margin:7px 0}.cg-custom-plan p{color:var(--text-muted);font-size:13px;margin:0;line-height:1.5}
+.cg-custom-form{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cg-custom-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600}
+.cg-custom-form input,.cg-custom-form textarea{width:100%;border:1px solid var(--border);background:var(--surface-2);color:var(--text-primary);border-radius:9px;padding:12px;font:inherit;font-size:13px}
+.cg-message-field,.cg-custom-form .cg-plan-action{grid-column:1/-1}
+.cg-plan-toggle:focus-visible,.cg-plan-action:focus-visible,.cg-billing-switch button:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+@media(max-width:1100px){.cg-plan-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:690px){.cg-plan-toolbar{align-items:stretch;flex-direction:column}.cg-plan-cards{grid-template-columns:1fr}.cg-plan-card{padding:18px}.cg-custom-form{grid-template-columns:1fr}.cg-plan-toolbar h2{font-size:19px}}
