@@ -894,30 +894,6 @@ export function JobCardWorkspace() {
         })}
       </section>}
 
-      <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
-        {visibleTabs.map(([key, label], index) => {
-          const completed = sectionComplete[key];
-          const TabIcon = TAB_ICONS[key];
-          return (
-            <button
-              type="button"
-              key={key}
-              onClick={() => openTab(key)}
-              aria-current={activeTab === key ? "page" : undefined}
-              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : ''].join(' ')}
-              title={label}
-            >
-              <span className="job-workflow-tab-number">{index + 1}</span>
-              <span className="job-workflow-tab-label"><TabIcon size={14} aria-hidden="true" />{label}</span>
-              {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
-            </button>
-          );
-        })}
-      </nav>
-
-        </>
-      )}
-
 
       <div className="job-simple-step-nav" aria-label="Job Card workflow">
         <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Main Job Card stages">
