@@ -1,0 +1,279 @@
+/*
+ * CubeGear Account UI v2 — common visual language for seven Account routes.
+ * Theme-aware, responsive and scoped: it must not change other workspaces or
+ * scale document/PDF preview canvases.
+ */
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) {
+  --account-accent: var(--primary);
+  --account-line: var(--border);
+  --account-ink: var(--text-primary);
+  --account-muted: var(--text-secondary);
+  --account-bg: var(--surface);
+  --account-quiet: var(--surface-2);
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  gap:18px;
+  color:var(--account-ink);
+}
+
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-height:115px;
+  min-width:0;
+  padding:22px 24px;
+  border:1px solid var(--account-line);
+  border-radius:18px;
+  background:linear-gradient(116deg, color-mix(in srgb, var(--primary) 9%,var(--surface)), var(--surface) 56%);
+  box-shadow:var(--shadow-sm);
+}
+
+.app-content .account-dashboard-title-row {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  flex:1 1 420px;
+  min-width:0;
+}
+.app-content .account-dashboard-title-copy {min-width:0;flex:1}
+.app-content .account-dashboard-icon {
+  flex:0 0 52px;
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  border-radius:15px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  border:1px solid color-mix(in srgb,var(--primary) 16%,var(--border));
+}
+.app-content .account-dashboard-eyebrow {
+  display:block;
+  margin:0 0 5px;
+  color:var(--primary);
+  font-size:10px;
+  font-weight:850;
+  line-height:1.3;
+  letter-spacing:.115em;
+}
+.app-content .account-dashboard-eyebrow span {padding:0 5px;opacity:.55}
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-header h1 {
+  font-size:clamp(22px,2.5vw,30px);
+  font-weight:800;
+  letter-spacing:-.035em;
+  line-height:1.2;
+  margin:0;
+}
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-header p {
+  margin:7px 0 0;
+  font-size:13px;
+  font-weight:450;
+  line-height:1.55;
+  color:var(--account-muted);
+  max-width:73ch;
+  overflow-wrap:anywhere;
+}
+.app-content .account-dashboard-header-trailing {
+  flex:0 1 auto;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+.app-content .account-dashboard-section-count {
+  flex:0 0 auto;
+  padding:8px 11px;
+  border-radius:9px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text-muted);
+  font-size:12px;
+  letter-spacing:.09em;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.app-content .account-dashboard-section-count span {opacity:.55;padding:0 2px}
+.app-content .account-dashboard-actions {display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-tabs {
+  display:flex;
+  gap:5px;
+  position:sticky;
+  top:0;
+  z-index:20;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  padding:7px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  scrollbar-width:none;
+  scroll-padding-inline:16px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  box-shadow:var(--shadow-sm);
+}
+.app-content .account-dashboard-tabs::-webkit-scrollbar {display:none}
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-tabs button {
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex:1 0 auto;
+  min-width:max-content;
+  min-height:44px;
+  padding:10px 14px;
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:var(--text-secondary);
+  font-size:12px;
+  font-weight:720;
+  line-height:1.3;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:background .14s ease,color .14s ease,border-color .14s ease;
+}
+.app-content .account-dashboard-tabs button svg {flex:0 0 auto}
+.app-content .account-dashboard-tabs button.is-active {
+  background:var(--primary-soft);
+  color:var(--primary);
+  border-color:color-mix(in srgb,var(--primary) 12%,var(--border));
+}
+.app-content .account-dashboard-tabs button:not(.is-active):hover {background:var(--surface-2);color:var(--text-primary)}
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) button:focus-visible,
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) a:focus-visible {
+  outline:2px solid var(--primary);
+  outline-offset:3px;
+}
+
+/* All cards get a consistent hierarchy while allowing specialized layouts. */
+.app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) :is(.cg-credit-panel,.cg-credit-metric,.saas-card,.template-settings-card,.template-preview-card,.account-security-card) {
+  min-width:0;
+  border-radius:16px;
+  border-color:var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.app-content .cg-credit-page {--c-ink:var(--text-primary);--c-muted:var(--text-muted);--c-blue:var(--primary)}
+.app-content .cg-credit-page :is(.cg-credit-panel,.cg-credit-metric:not(.primary),.cg-credit-packages article,.cg-credit-features article) {
+  background:var(--surface);
+  border-color:var(--border);
+  color:var(--text-primary);
+}
+.app-content .cg-credit-page .cg-credit-metric.primary {
+  background:linear-gradient(125deg,var(--primary),color-mix(in srgb,var(--primary) 72%,#0f172a));
+  border-color:transparent;
+  color:#fff;
+}
+.app-content .cg-credit-page .cg-credit-metric.primary > div,
+.app-content .cg-credit-page .cg-credit-metric.primary small {color:#eef2ff}
+.app-content .cg-credit-page .cg-credit-metric:not(.primary)>div {color:var(--text-muted)}
+.app-content .cg-credit-page .cg-credit-shortcuts button {
+  color:var(--text-primary);
+  background:var(--surface-2);
+  border-color:var(--border);
+}
+.app-content .cg-credit-page .cg-credit-inline,
+.app-content .cg-credit-page .cg-credit-log,
+.app-content .cg-credit-page .cg-credit-table-wrap :is(th,td) {border-color:var(--border)}
+.app-content .cg-credit-page .cg-credit-inline strong,
+.app-content .cg-credit-page .cg-credit-feature-cost b {color:var(--text-primary)}
+.app-content .cg-credit-page .cg-credit-feature-cost {gap:10px 18px}
+.app-content .cg-credit-page :is(.cg-credit-panel,.cg-credit-metric,.cg-credit-packages article,.cg-credit-features article) {overflow-wrap:anywhere}
+.app-content .cg-credit-page :is(.cg-credit-packages article,.cg-credit-features article) {border-radius:13px}
+.app-content .cg-credit-page .cg-credit-packages article {align-content:start}
+.app-content .cg-credit-page .cg-credit-packages article button {margin-top:auto}
+.app-content .cg-credit-page .cg-credit-packages article > strong {color:var(--text-primary)}
+.app-content .cg-credit-page .cg-credit-pill:not(.active) {background:var(--surface-2);color:var(--text-muted)}
+.app-content .cg-credit-page :is(.cg-credit-alert,.cg-credit-status) {margin:0}
+.app-content .cg-credit-page .cg-credit-alert {padding:15px 18px}
+.app-content .cg-credit-page .cg-credit-empty {line-height:1.7}
+.app-content .cg-credit-page .cg-credit-table-wrap {border:1px solid var(--border);border-radius:12px}
+.app-content .cg-credit-page .cg-credit-table-wrap table {margin:0}
+.app-content .cg-credit-page .cg-credit-table-wrap th {background:var(--surface-2);color:var(--text-muted)}
+.app-content .cg-credit-page .cg-credit-table-wrap tbody tr:hover {background:var(--surface-2)}
+.app-content .cg-credit-page .cg-credit-panel button.primary,
+.app-content .cg-credit-page .cg-credit-low button {background:var(--primary);color:#fff}
+.app-content .cg-credit-page .cg-credit-panel button.primary:hover:not(:disabled) {background:var(--primary-hover)}
+
+/* Storage, template controls and account security keep readable form sizes. */
+.app-content .account-billing-page .saas-storage-summary > div,
+.app-content .storage-history-page .storage-summary-grid .saas-card,
+.app-content .storage-day-page .storage-day-stats .saas-card {background:var(--surface-2);border-color:var(--border)}
+.app-content :is(.account-billing-page,.storage-history-page,.storage-day-page) :is(.saas-card,.storage-history-row) {overflow-wrap:anywhere}
+.app-content .document-templates-page .template-settings-title strong,
+.app-content .account-security-page .account-security-card-head strong {font-size:14px}
+.app-content .document-templates-page :is(.template-settings-title span,.template-control-grid small),
+.app-content .account-security-page :is(.account-security-card-head span,.account-security-info p) {font-size:12px;line-height:1.55}
+.app-content .account-security-page .account-security-form label {font-size:12px}
+.app-content .account-security-page .account-security-form input {font-size:14px}
+.app-content .account-security-page :is(.account-security-primary,.account-security-secondary) {min-height:44px;font-size:12px}
+.app-content .document-templates-page .template-save-button {min-height:44px;font-size:12px}
+.app-content :is(.account-billing-page,.document-templates-page,.account-security-page) :is(input,select,textarea) {max-width:100%}
+.app-content :is(.account-billing-page,.document-templates-page,.account-security-page) :is(.saas-error,.account-security-message) {overflow-wrap:anywhere}
+
+@media (max-width:1100px) {
+  .app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-tabs button {
+    flex:0 0 auto;
+  }
+}
+@media (max-width:768px) {
+  .app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-header {
+    align-items:flex-start;
+    padding:18px;
+    min-height:0;
+  }
+  .app-content .account-dashboard-title-row {gap:12px}
+  .app-content .account-dashboard-icon {width:44px;height:44px;flex-basis:44px;border-radius:12px}
+  .app-content .account-dashboard-section-count {display:none}
+  .app-content .account-dashboard-header-trailing:has(.account-dashboard-actions) {width:100%;justify-content:stretch}
+  .app-content .account-dashboard-header-trailing .account-dashboard-actions {width:100%}
+  .app-content .account-dashboard-header-trailing .account-dashboard-actions button {width:100%}
+  .app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-tabs {padding:5px}
+  .app-content .cg-credit-page .cg-credit-metrics {gap:10px}
+  .app-content .cg-credit-page .cg-credit-metric {padding:17px}
+  .app-content .cg-credit-page .cg-credit-panel {padding:18px}
+  .app-content .cg-credit-page .cg-credit-table-wrap {overflow-x:auto}
+  .app-content .account-security-page .account-security-grid,
+  .app-content .document-templates-page .template-preview-grid {grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px) {
+  .app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-header {
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
+    padding:16px;
+    border-radius:14px;
+  }
+  .app-content .account-dashboard-title-row {align-items:flex-start;flex-basis:auto}
+  .app-content .account-dashboard-title-copy {min-width:0}
+  .app-content .account-dashboard-eyebrow {font-size:9px}
+  .app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-header h1 {font-size:23px}
+  .app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-header p {font-size:12px}
+  .app-content .cg-credit-page .cg-credit-metrics {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-content .cg-credit-page .cg-credit-metric strong {font-size:clamp(22px,6vw,28px)}
+  .app-content .cg-credit-page .cg-credit-packages {grid-template-columns:1fr}
+  .app-content .cg-credit-page .cg-credit-feature-cost {display:grid;gap:8px}
+  .app-content .cg-credit-page .cg-credit-feature-footer {flex-direction:column;align-items:stretch}
+  .app-content .cg-credit-page .cg-credit-feature-footer button {width:100%}
+  .app-content .cg-credit-page .cg-credit-low {padding:14px}
+  .app-content .cg-credit-page .cg-credit-low button {margin:0;width:100%}
+  .app-content .account-billing-page .saas-storage-summary {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-content .account-security-page .account-security-flow {grid-template-columns:1fr}
+  .app-content :is(.document-templates-page,.account-security-page,.account-billing-page) :is(input,textarea,select) {font-size:16px}
+}
+@media (max-width:360px) {
+  .app-content .account-dashboard-icon {width:38px;height:38px;flex-basis:38px}
+  .app-content .account-dashboard-eyebrow {letter-spacing:.05em}
+  .app-content .cg-credit-page .cg-credit-metrics {grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce) {
+  .app-content .account-dashboard-tabs button {transition:none}
+}
