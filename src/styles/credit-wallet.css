@@ -59,3 +59,10 @@
 @media(max-width:1000px){.cg-credit-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.cg-credit-columns{grid-template-columns:minmax(0,1fr)}.cg-credit-shortcuts{grid-template-columns:1fr}.cg-credit-low{align-items:flex-start;flex-wrap:wrap}.cg-credit-low button{margin-left:34px}.cg-credit-panel{padding:17px}.cg-credit-metrics{gap:9px}.cg-credit-metric{padding:15px}.cg-credit-feature-footer{align-items:flex-start;flex-direction:column}.cg-credit-feature-footer button{width:100%;justify-content:center}}
 @media(max-width:420px){.cg-credit-metrics{grid-template-columns:1fr 1fr}.cg-credit-metric strong{font-size:23px}.cg-credit-metric small{font-size:10px}}
+
+.cg-credit-chip{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:6px 10px;border-radius:11px;border:1px solid #c4d7ff;background:#eef4ff;color:#1f4eb4;white-space:nowrap;font-size:13px;font-weight:850;cursor:pointer}
+.cg-credit-chip small{font-size:10px;font-weight:650}.cg-credit-chip em{font-size:9px;font-style:normal;color:#b45309;background:#fff0cc;padding:3px 5px;border-radius:5px}
+.cg-credit-chip.is-low{background:#fff8e7;border-color:#f0d99e;color:#924f14}
+.cg-credit-chip:hover,.cg-credit-chip:focus-visible{border-color:#326bed;outline-offset:3px}
+.mobile-header-actions .cg-credit-chip{min-height:32px;padding:5px 8px;font-size:11px}
+@media(max-width:420px){.mobile-header-actions .cg-credit-chip{gap:4px;padding:4px 6px}.mobile-header-actions .cg-credit-chip em{display:none}}
