@@ -66,8 +66,14 @@ export function Subscribe() {
       <div className="cg-subscribe-shell">
         <header className="cg-subscribe-head">
           <span className="cg-subscribe-label"><ShieldCheck size={16}/> CUBEGEAR SECURE BILLING</span>
-          <h1>{access?.status === 'active' ? 'Manage your subscription' : 'Choose your plan to continue'}</h1>
+          <h1>{access?.status === 'active' ? 'Manage your subscription' : access?.status === 'expired' ? 'Your plan has expired — renew access' : 'Choose your plan to continue'}</h1>
           <p>Pay securely through Razorpay. Your dashboard opens only after the backend confirms your payment.</p>
+          {access?.status === 'expired' && access.expiresAt && (
+            <div className="cg-subscribe-error" role="status">
+              Your previous plan ended on {new Date(access.expiresAt).toLocaleDateString('en-IN')}.
+              Choose a plan below and complete payment to reopen your dashboard.
+            </div>
+          )}
           {access?.status === 'active' && (
             <div className="cg-subscribe-active" role="status">
               <CheckCircle2 size={18}/> {access.plan} is active until {new Date(access.expiresAt).toLocaleDateString('en-IN')}.
