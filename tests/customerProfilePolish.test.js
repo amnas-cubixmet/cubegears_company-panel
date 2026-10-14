@@ -78,3 +78,16 @@ test('customer profile mobile layout has readable header, actions and stat cards
   assert.match(styles, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(styles, /min-height:43px/);
 });
+
+test('every Customer Details JSX icon/component has an imported or declared binding', () => {
+  const imports = [...profile.matchAll(/import\s*\{([^}]+)\}\s*from\s*['"][^'"]+['"]/g)]
+    .flatMap((match) => match[1].split(',').map((part) => part.trim().split(/\s+as\s+/).at(-1)));
+  const locals = [...profile.matchAll(/\b(?:const|let|function)\s+([A-Z][A-Za-z0-9]*)\b/g)]
+    .map((match) => match[1]);
+  const declared = new Set([...imports, ...locals]);
+  const jsxComponents = [...new Set([...profile.matchAll(/<([A-Z][A-Za-z0-9]*)\b/g)]
+    .map((match) => match[1]))];
+  assert.ok(jsxComponents.includes('Pencil'), 'the Edit Profile Pencil icon must remain present');
+  assert.ok(imports.includes('Pencil'), 'Pencil must be imported from lucide-react');
+  assert.deepEqual(jsxComponents.filter((tag) => !declared.has(tag)), []);
+});

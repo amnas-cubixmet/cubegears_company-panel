@@ -2,6 +2,9 @@ import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { staffService } from '../../services/staff.service';
+import { customerService } from '../../services/customer.service';
+import { vehicleService } from '../../services/vehicle.service';
+import { isRecordPath, recordBreadcrumbFallback, recordBreadcrumbLabel } from './breadcrumbRecordLabels';
 import '../../styles/breadcrumbs.css';
 
 const LABELS = {
@@ -91,6 +94,9 @@ export function AppBreadcrumbs() {
   const location = useLocation();
   const scrollRef = useRef(null);
   const [staffBreadcrumbLabel, setStaffBreadcrumbLabel] = useState('');
+  // Stable route-specific cache prevents briefly displaying the previous
+  // customer's/vehicle's name while navigating to a different record.
+  const [recordLabel, setRecordLabel] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -122,6 +128,31 @@ export function AppBreadcrumbs() {
     };
   }, [location.pathname]);
 
+  useEffect(() => {
+    const match = location.pathname.match(/^\/(customers|vehicles)\/([^/]+)(?:\/|$)/);
+    if (!match || !isRecordPath(match[1], match[2])) {
+      setRecordLabel(null);
+      return undefined;
+    }
+    let alive = true;
+    const kind = match[1];
+    const identifier = decodeURIComponent(match[2]);
+    const fallback = recordBreadcrumbFallback(kind);
+    setRecordLabel({ kind, identifier, label: fallback });
+    const fetchRecord = kind === 'customers'
+      ? customerService.getCustomerById(identifier)
+      : vehicleService.getVehicleById(identifier);
+    Promise.resolve(fetchRecord)
+      .then((record) => {
+        if (!alive) return;
+        setRecordLabel({ kind, identifier, label: recordBreadcrumbLabel(kind, record) });
+      })
+      .catch(() => {
+        if (alive) setRecordLabel({ kind, identifier, label: fallback });
+      });
+    return () => { alive = false; };
+  }, [location.pathname]);
+
   const items = useMemo(() => {
     const segments = location.pathname.split('/').filter(Boolean);
     if (!segments.length || location.pathname === '/dashboard') return [];
@@ -146,12 +177,16 @@ export function AppBreadcrumbs() {
         label:
           isStaffProfile && index === 2
             ? staffBreadcrumbLabel || 'Staff Profile'
-            : prettify(segment),
+            : index === 1 && isRecordPath(segments[0], segment)
+              ? (recordLabel?.kind === segments[0] && recordLabel?.identifier === decodeURIComponent(segment)
+                  ? recordLabel.label
+                  : recordBreadcrumbFallback(segments[0]))
+              : prettify(segment),
         href: buildHref(segments, index),
         current: index === segments.length - 1
       }))
     ];
-  }, [location.pathname, staffBreadcrumbLabel]);
+  }, [location.pathname, staffBreadcrumbLabel, recordLabel]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
