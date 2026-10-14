@@ -46,6 +46,7 @@ import './styles/account-workspace-unified.css';
 // Last shared layers: preserve regular text and a single clean search border.
 import './styles/form-typography.css';
 import './styles/form-controls-unified.css';
+import './styles/form-errors-unified.css';
 
 export function App() {
   return (
