@@ -70,3 +70,12 @@ test('security inputs remain accessible and support password managers', () => {
   assert.match(css, /font-weight:400/);
   assert.match(css, /\.account-security-form label>div:focus-within/);
 });
+
+test('Company tab is hidden without deleting existing company profile route', () => {
+  const routes = read('../src/routes/AppRoutes.jsx');
+  assert.doesNotMatch(tabs, /\['company','Company','\/account\/company'/);
+  assert.match(routes, /path="\/account\/company"/);
+  for (const path of ['/account', '/account/credits/buy', '/account/credits/features', '/account/storage', '/account/credits/logs']) {
+    assert.ok(tabs.includes(path), 'Expected credit wallet tab ' + path);
+  }
+});
