@@ -38,8 +38,8 @@ export const ForgotPassword = () => {
 
       setMessage(
         mode === 'magic'
-          ? 'A magic sign-in link has been sent to your registered email.'
-          : 'Password reset instructions have been sent to your registered email.',
+          ? 'If an eligible account exists, a sign-in link will be sent.'
+          : 'If an eligible account exists, password reset instructions will be sent.',
       );
       setIsError(false);
 

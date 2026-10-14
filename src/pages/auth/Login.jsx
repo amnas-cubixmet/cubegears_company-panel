@@ -59,7 +59,9 @@ export const Login = () => {
       const credentialError = getCredentialError(error);
 
       const hasFieldError = Boolean(backendFields.email || backendFields.password);
-      const isCredentialFailure = error?.status === 401;
+      const isCredentialFailure = [400, 401].includes(error?.status) &&
+        !hasFieldError &&
+        /invalid email or password|invalid credentials|no active account/i.test(credentialError);
       setFieldErrors({
         ...(backendFields.email ? { email: backendFields.email } : {}),
         ...(backendFields.password ? { password: backendFields.password } : {}),

@@ -11,6 +11,7 @@ const accountRoute = {
   permission: 'settings.manage',
   children: [
     { id: 'saas-plan', label: 'Plan & Usage', path: '/account/billing' },
+    { id: 'saas-marketplace', label: 'Change Plan', path: '/account/plans' },
     { id: 'saas-storage', label: 'Media Storage', path: '/account/storage' }
   ]
 };
