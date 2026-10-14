@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
-import { SubscriptionCheckout } from '../pages/saas/SubscriptionCheckout';
-import { PlanMarketplace } from '../pages/saas/PlanMarketplace';
+
+import { CreditWorkspace } from '../pages/saas/CreditWorkspace';
 
 import { Login } from '../pages/auth/Login';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
@@ -44,7 +44,7 @@ import { Notifications } from '../pages/notifications/Notifications';
 import { Settings } from '../pages/settings/Settings';
 import { Profile } from '../pages/profile/Profile';
 import { SaaSAccount } from '../pages/saas/SaaSAccount';
-import { Subscribe } from '../pages/saas/Subscribe';
+
 import { DocumentTemplates } from '../pages/saas/DocumentTemplates';
 import { StorageHistory } from '../pages/saas/StorageHistory';
 import { StorageDayDetails } from '../pages/saas/StorageDayDetails';
@@ -65,7 +65,7 @@ export const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<RootRedirect />} />
     <Route path="/login" element={<Login />} />
-    <Route path="/plans" element={<SubscriptionCheckout />} />
+    <Route path="/plans" element={<Navigate to="/account/credits/buy" replace />} />
     <Route path="/signup" element={<Navigate to="/login" replace />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
@@ -73,7 +73,7 @@ export const AppRoutes = () => (
     <Route path="/magic-link/verify" element={<MagicLinkVerify />} />
 
     <Route element={<ProtectedRoute />}>
-      <Route path="/subscribe" element={<Subscribe />} />
+      <Route path="/subscribe" element={<Navigate to="/account/credits/buy" replace />} />
       <Route path="/access-denied" element={<AccessDenied />} />
       <Route path="/dashboard" element={<Dashboard />} />
 
@@ -224,9 +224,13 @@ export const AppRoutes = () => (
 
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/account" element={<SaaSAccount section="overview" />} />
-      <Route path="/account/billing" element={<SaaSAccount section="billing" />} />
-      <Route path="/account/plans" element={<PlanMarketplace />} />
+      <Route path="/account" element={<CreditWorkspace section="overview" />} />
+      <Route path="/account/credits/buy" element={<CreditWorkspace section="buy" />} />
+      <Route path="/account/credits/features" element={<CreditWorkspace section="features" />} />
+      <Route path="/account/credits/logs" element={<CreditWorkspace section="logs" />} />
+      <Route path="/account/company" element={<SaaSAccount section="overview" />} />
+      <Route path="/account/billing" element={<Navigate to="/account" replace />} />
+      <Route path="/account/plans" element={<Navigate to="/account/credits/features" replace />} />
       <Route path="/account/storage" element={<SaaSAccount section="storage" />} />
       <Route path="/account/storage/history" element={<StorageHistory />} />
       <Route path="/account/storage/history/:date" element={<StorageDayDetails />} />
