@@ -3,6 +3,7 @@ import { ArrowLeft, Link2, Mail, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { getAuthErrorMessage, getAuthFieldErrors } from '../../utils/authErrors';
+import { isValidEmail, normalizeEmail } from '../../utils/validation';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
@@ -17,14 +18,14 @@ export const ForgotPassword = () => {
 
   const submit = async (event) => {
     event.preventDefault();
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = normalizeEmail(email);
 
     setMessage('');
     setFieldError('');
     setIsError(false);
     setPreviewUrl('');
 
-    if (!cleanEmail || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) {
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
       setFieldError(cleanEmail ? 'Enter a valid email address.' : 'Email address is required.');
       return;
     }

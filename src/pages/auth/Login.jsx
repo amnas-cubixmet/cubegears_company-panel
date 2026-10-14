@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getCredentialError, getAuthFieldErrors } from '../../utils/authErrors';
 import { getStaffLandingPath } from '../../utils/staffLanding';
+import { isValidEmail, normalizeEmail } from '../../utils/validation';
 import '../../styles/login-system.css';
 
 export const Login = () => {
@@ -34,11 +35,11 @@ export const Login = () => {
     event.preventDefault();
     if (loading) return;
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = normalizeEmail(email);
     const nextErrors = {};
 
     if (!cleanEmail) nextErrors.email = 'Email address is required.';
-    else if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) nextErrors.email = 'Enter a valid email address.';
+    else if (!isValidEmail(cleanEmail)) nextErrors.email = 'Enter a valid email address.';
     if (!password) nextErrors.password = 'Password is required.';
 
     if (Object.keys(nextErrors).length) {
@@ -57,17 +58,16 @@ export const Login = () => {
       const backendFields = getAuthFieldErrors(error);
       const credentialError = getCredentialError(error);
 
+      const hasFieldError = Boolean(backendFields.email || backendFields.password);
+      const isCredentialFailure = error?.status === 401;
       setFieldErrors({
         ...(backendFields.email ? { email: backendFields.email } : {}),
         ...(backendFields.password ? { password: backendFields.password } : {}),
-        ...(!backendFields.email && !backendFields.password
-          ? {
-              email: credentialError,
-              password: credentialError,
-            }
+        ...(!hasFieldError && isCredentialFailure
+          ? { email: credentialError, password: credentialError }
           : {}),
       });
-      setFormError(credentialError);
+      setFormError(hasFieldError ? '' : credentialError);
     }
   };
 

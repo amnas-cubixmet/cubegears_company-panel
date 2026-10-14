@@ -1,11 +1,8 @@
 const toMessage = (value) => {
-  if (Array.isArray(value)) return value.map(String).filter(Boolean).join(' ');
+  if (Array.isArray(value)) return value.map(toMessage).filter(Boolean).join(' ');
   if (typeof value === 'string') return value;
   if (value && typeof value === 'object') {
-    const nested = Object.values(value).flatMap((item) =>
-      Array.isArray(item) ? item : [item],
-    );
-    return nested.map(String).filter(Boolean).join(' ');
+    return Object.values(value).map(toMessage).filter(Boolean).join(' ');
   }
   return '';
 };
@@ -14,9 +11,12 @@ export const getAuthFieldErrors = (error) => {
   const payload = error?.data || error?.response?.data || {};
   const fields = {};
 
-  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
-    Object.entries(payload).forEach(([key, value]) => {
-      if (['message', 'error', 'detail'].includes(key)) return;
+  // Both plain DRF field errors and wrapped { errors: {...} } responses
+  // should appear next to the correct input, never as "[object Object]".
+  for (const source of [payload, payload?.errors, payload?.data?.errors]) {
+    if (!source || typeof source !== 'object' || Array.isArray(source)) continue;
+    Object.entries(source).forEach(([key, value]) => {
+      if (['message', 'error', 'detail', 'success', 'code', 'status', 'data', 'errors'].includes(key)) return;
       const message = toMessage(value);
       if (message) fields[key] = message;
     });

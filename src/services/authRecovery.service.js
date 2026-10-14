@@ -1,18 +1,20 @@
 import apiClient from '../api/apiClient';
+import { isValidEmail, normalizeEmail } from '../utils/validation';
 
 // Account recovery must always be checked by Django's User database.
 // Mock UI/data mode must never issue synthetic login or password reset tokens.
-const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
 
 export const requestPasswordReset = async (email) => {
   const cleanEmail = normalizeEmail(email);
   if (!cleanEmail) throw new Error('Email address is required.');
+  if (!isValidEmail(cleanEmail)) throw new Error('Enter a valid email address.');
   return apiClient.post('/auth/forgot-password', { email: cleanEmail });
 };
 
 export const requestMagicLink = async (email) => {
   const cleanEmail = normalizeEmail(email);
   if (!cleanEmail) throw new Error('Email address is required.');
+  if (!isValidEmail(cleanEmail)) throw new Error('Enter a valid email address.');
   return apiClient.post('/auth/magic-link', { email: cleanEmail });
 };
 

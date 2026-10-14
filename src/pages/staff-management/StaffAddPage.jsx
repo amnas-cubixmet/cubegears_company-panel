@@ -9,6 +9,7 @@ import { BranchCreateSheet } from '../../components/staff-management/BranchCreat
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import { showFormFieldError, showServerFormErrors } from '../../utils/formValidation';
+import { isValidEmail, normalizeEmail } from '../../utils/validation';
 
 const statusOptions = [
   'Active',
@@ -133,8 +134,8 @@ export const StaffAddPage = () => {
       return;
     }
 
-    const email = form.email.trim();
-    if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    const email = normalizeEmail(form.email);
+    if (email && !isValidEmail(email)) {
       showFormFieldError(formRef.current, 'email', 'Enter a valid staff email address.');
       setError('Enter a valid email to send the password setup link.');
       return;
@@ -163,6 +164,7 @@ export const StaffAddPage = () => {
     try {
       const created = await staffService.createStaff({
         ...form,
+        email,
         department: selectedTeam?.name || '',
         shift: '',
         teamId: form.teamId || null,
