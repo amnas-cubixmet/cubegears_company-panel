@@ -25,8 +25,8 @@ test('console and failed statuses tell admin how to recover without duplicate st
   assert.equal(staffInviteDeliveryMessage(undefined), '');
 });
 
-test('recovery page reports unregistered email as an inline field error', () => {
-  assert.match(forgot, /Password reset instructions have been sent to your registered email/);
+test('recovery page avoids account enumeration but still shows format errors inline', () => {
+  assert.match(forgot, /If an eligible account exists, password reset instructions will be sent/);
   assert.match(forgot, /setFieldError\(backend\.email \|\| ''\)/);
   assert.match(forgot, /setMessage\(backend\.email \? '' :/);
   assert.match(forgot, /auth-field-error/);
