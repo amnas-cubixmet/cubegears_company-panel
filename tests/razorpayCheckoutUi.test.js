@@ -27,7 +27,9 @@ test('subscription gate blocks dashboard before paid access; checkout remains vi
 
 test('subscription pricing, expiry and account payment history are server driven', () => {
   assert.match(subscribe, /plan\.accessDurationDays/);
-  assert.match(subscribe, /subscriptionApi\.order\(plan\.id, cycle\)/);
+  assert.match(subscribe, /plan\.checkoutPrice/);
+  assert.doesNotMatch(subscribe, /Monthly price|Yearly price/);
+  assert.match(subscribe, /subscriptionApi\.order\(plan\.id\)/);
   assert.match(subscribe, /result\?\.payment\?\.status !== 'captured'/);
   assert.match(subscribe, /subscriptionApi\.history\(\)/);
   assert.match(subscribe, /UPI, cards and net banking/);
