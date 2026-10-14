@@ -202,6 +202,28 @@
 .app-content .cg-credit-page .cg-credit-panel button.primary,
 .app-content .cg-credit-page .cg-credit-low button {background:var(--primary);color:#fff}
 .app-content .cg-credit-page .cg-credit-panel button.primary:hover:not(:disabled) {background:var(--primary-hover)}
+.app-content .cg-credit-page .cg-credit-refresh {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:42px;
+  padding:10px 14px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text-primary);
+  font-size:12px;
+  font-weight:750;
+  cursor:pointer;
+}
+.app-content .cg-credit-page .cg-credit-refresh:hover:not(:disabled) {
+  border-color:var(--primary);
+  color:var(--primary);
+  background:var(--primary-soft);
+}
+.app-content .cg-credit-page .cg-credit-refresh:disabled {opacity:.58;cursor:not-allowed}
+
 
 /* Storage, template controls and account security keep readable form sizes. */
 .app-content .account-billing-page .saas-storage-summary > div,
