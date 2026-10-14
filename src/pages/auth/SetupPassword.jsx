@@ -22,6 +22,7 @@ export const SetupPassword = () => {
   const [formError, setFormError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [done, setDone] = useState(false);
+  const [landingPath, setLandingPath] = useState('/access-denied');
 
   const clearField = (field) => {
     setFieldErrors((current) => {
@@ -64,8 +65,10 @@ export const SetupPassword = () => {
       if (refreshToken) localStorage.setItem('auth_refresh_token', refreshToken);
       if (user) localStorage.setItem('auth_user', JSON.stringify(user));
 
+      const destination = getStaffLandingPath(user);
+      setLandingPath(destination);
       setDone(true);
-      window.setTimeout(() => window.location.replace(getStaffLandingPath(user)), 700);
+      window.setTimeout(() => window.location.replace(destination), 700);
     } catch (error) {
       const backend = getAuthFieldErrors(error);
       setFieldErrors({
@@ -97,7 +100,7 @@ export const SetupPassword = () => {
               <span className="auth-success-icon"><CheckCircle2 size={24} /></span>
               <h1 className="login-title">Your account is ready</h1>
               <p className="login-description">{email ? email + ' is ready for normal email/password sign in.' : 'Password created successfully. Signing you in…'}</p>
-              <button type="button" className="login-submit" onClick={() => window.location.replace(getStaffLandingPath((() => { try { return JSON.parse(localStorage.getItem('auth_user') || 'null'); } catch { return null; } })()))}>Continue to Workspace</button>
+              <button type="button" className="login-submit" onClick={() => window.location.replace(landingPath)}>Continue to Workspace</button>
             </div>
           ) : (
             <>
