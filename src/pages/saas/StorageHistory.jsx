@@ -13,11 +13,18 @@ export function StorageHistory() {
   const [from, setFrom] = useState(daysAgo(6));
   const [to, setTo] = useState(toIso(new Date()));
   const [rows, setRows] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    storageHistoryService.getStorageHistory({ from, to }).then(setRows).finally(() => setLoading(false));
+    Promise.all([
+      storageHistoryService.getStorageHistory({ from, to }),
+      storageHistoryService.getStorageEvents({ from, to }).catch(() => ({ results: [] }))
+    ]).then(([history, activity]) => {
+      setRows(history);
+      setEvents(activity.results || []);
+    }).finally(() => setLoading(false));
   }, [from, to]);
 
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(rows), [rows]);
@@ -55,6 +62,21 @@ export function StorageHistory() {
         <section className="saas-card"><HardDrive size={20} /><span>Peak storage</span><strong>{summary.peakGb.toFixed(2)} GB</strong></section>
         <section className="saas-card"><IndianRupee size={20} /><span>Storage charge</span><strong>{money.format(summary.totalCharge)}</strong></section>
       </div>
+
+      <section className="saas-card saas-wide">
+        <div className="saas-card-head"><div><span className="saas-kicker">STORAGE ACTIVITY</span><h2>Upload and deletion log</h2></div><span>{events.length} recent events</span></div>
+        <div className="storage-history-list">
+          {events.map((event) => (
+            <div className="storage-history-row" key={event.id}>
+              <div className="storage-history-date"><strong>{event.eventType}</strong><span>{new Date(event.occurredAt).toLocaleString('en-IN')}</span></div>
+              <div><span>File</span><strong>{event.filename}</strong></div>
+              <div><span>Change</span><strong>{event.deltaBytes >= 0 ? '+' : '-'}{(Math.abs(event.deltaBytes) / (1024 * 1024)).toFixed(2)} MB</strong></div>
+              <div><span>After event</span><strong>{(event.storageAfterBytes / (1024 * 1024)).toFixed(2)} MB</strong></div>
+            </div>
+          ))}
+          {!events.length && <p className="saas-muted">No recorded storage changes in this date range.</p>}
+        </div>
+      </section>
 
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">DAILY BREAKDOWN</span><h2>{from} → {to}</h2></div><span>{rows.length} snapshots</span></div>
