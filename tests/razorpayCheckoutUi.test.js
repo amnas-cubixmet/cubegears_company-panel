@@ -18,12 +18,10 @@ test('checkout only submits server-created order and verifies Razorpay signature
   assert.doesNotMatch(checkout, /KEY_SECRET|key_secret|razorpay_secret/i);
 });
 
-test('subscription gate blocks dashboard before paid access; checkout remains visible', () => {
-  assert.match(guard, /apiClient\.get\('\/saas\/payments\/access'\)/);
-  assert.match(guard, /billing\.required && !billing\.paid/);
-  assert.match(guard, /Navigate to="\/plans"/);
-  assert.match(routes, /path="\/plans" element=\{<SubscriptionCheckout \/>\}/);
-  assert.match(routes, /path="\/subscribe" element=\{<Subscribe \/>\}/);
+test('credit-based access removes subscription paywall from workspace routes', () => {
+  assert.doesNotMatch(guard, /saas\/payments\/access|billing\.required/);
+  assert.match(routes, /path="\/plans" element=\{<Navigate to="\/account\/credits\/buy" replace \/>\}/);
+  assert.match(routes, /path="\/subscribe" element=\{<Navigate to="\/account\/credits\/buy" replace \/>\}/);
 });
 
 test('subscription pricing, expiry and account payment history are server driven', () => {
@@ -36,8 +34,6 @@ test('subscription pricing, expiry and account payment history are server driven
   assert.match(subscribe, /UPI, cards and net banking/);
 });
 
-test('backend payment-required responses redirect expired dashboard sessions', () => {
-  assert.match(client, /status === 402/);
-  assert.match(client, /SUBSCRIPTION_PAYMENT_REQUIRED/);
-  assert.match(client, /window\.location\.replace\('\/subscribe'\)/);
+test('credit-based workspace no longer routes to subscription renewal on HTTP 402', () => {
+  assert.doesNotMatch(client, /window\.location\.replace\('\/subscribe'\)/);
 });

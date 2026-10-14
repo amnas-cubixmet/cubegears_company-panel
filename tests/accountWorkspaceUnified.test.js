@@ -11,7 +11,7 @@ const templates = read('../src/pages/saas/DocumentTemplates.jsx');
 const security = read('../src/pages/account/AccountSecurity.jsx');
 
 test('all five Account pages use shared navigation with semantic active tab', () => {
-  for (const path of ['/account', '/account/billing', '/account/storage', '/account/templates', '/account/security']) {
+  for (const path of ['/account', '/account/credits/buy', '/account/credits/features', '/account/storage', '/account/credits/logs', '/account/templates', '/account/security']) {
     assert.ok(tabs.includes(path), 'Missing account route: ' + path);
   }
   assert.match(tabs, /aria-current=\{active===key\?'page':undefined\}/);
