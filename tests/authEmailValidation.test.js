@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { isValidEmail, normalizeEmail } from '../src/utils/validation.js';
+import { getAuthFieldErrors, getAuthErrorMessage } from '../src/utils/authErrors.js';
 
 const read = (path) => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 
@@ -44,4 +45,15 @@ test('login and recovery requests must not send stale tokens or redirect on expe
   assert.match(client, /token && !isPublicAuthRequest\(config\.url\)/);
   assert.match(client, /status === 401 && !isAuthRequest/);
   assert.match(client, /forgot-password\|reset-password\|setup-password/);
+});
+
+test('backend validation errors are mapped from both DRF and wrapped API payloads', () => {
+  assert.deepEqual(getAuthFieldErrors({ data: { email: ['Enter a valid email address.'] } }), {
+    email: 'Enter a valid email address.',
+  });
+  assert.deepEqual(getAuthFieldErrors({ data: { code: 'VALIDATION_ERROR', errors: { email: ['Invalid address.'], password: ['Too short.'] } } }), {
+    email: 'Invalid address.',
+    password: 'Too short.',
+  });
+  assert.equal(getAuthErrorMessage({ data: { message: 'Please try again.' } }), 'Please try again.');
 });
