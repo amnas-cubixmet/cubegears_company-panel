@@ -1,43 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-
 const text = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-const checkout = text('../src/services/razorpayCheckout.service.js');
-const subscribe = text('../src/pages/saas/Subscribe.jsx');
+const checkout = text('../src/services/creditWallet.service.js');
+const page = text('../src/pages/saas/CreditWorkspace.jsx');
 const guard = text('../src/routes/ProtectedRoute.jsx');
-const routes = text('../src/routes/AppRoutes.jsx');
-const client = text('../src/api/apiClient.js');
 
-test('checkout only submits server-created order and verifies Razorpay signature on backend', () => {
-  assert.match(checkout, /\/saas\/checkout\/orders/);
-  assert.match(checkout, /\/saas\/checkout\/verify/);
+test('credit checkout verifies captured payments without exposing secrets', () => {
   assert.match(checkout, /checkout\.razorpay\.com\/v1\/checkout\.js/);
-  assert.match(checkout, /order_id: order\.orderId/);
-  assert.match(checkout, /handler: async \(payment\)/);
-  assert.doesNotMatch(checkout, /KEY_SECRET|key_secret|razorpay_secret/i);
+  assert.match(checkout, /\/saas\/credits\/orders/);
+  assert.match(checkout, /\/saas\/credits\/verify/);
+  assert.match(checkout, /!confirmed\?\.credited/);
+  assert.doesNotMatch(checkout, /KEY_SECRET|razorpay_secret/i);
 });
 
-test('subscription gate blocks dashboard before paid access; checkout remains visible', () => {
-  assert.match(guard, /apiClient\.get\('\/saas\/payments\/access'\)/);
-  assert.match(guard, /billing\.required && !billing\.paid/);
-  assert.match(guard, /Navigate to="\/plans"/);
-  assert.match(routes, /path="\/plans" element=\{<SubscriptionCheckout \/>\}/);
-  assert.match(routes, /path="\/subscribe" element=\{<Subscribe \/>\}/);
+test('company can open its dashboard without fixed subscription plan', () => {
+  assert.doesNotMatch(guard, /billing\.required && !billing\.paid/);
+  assert.match(guard, /hasPermission\(user, requiredPermission\)/);
 });
 
-test('subscription pricing, expiry and account payment history are server driven', () => {
-  assert.match(subscribe, /plan\.accessDurationDays/);
-  assert.match(subscribe, /plan\.checkoutPrice/);
-  assert.doesNotMatch(subscribe, /Monthly price|Yearly price/);
-  assert.match(subscribe, /subscriptionApi\.order\(plan\.id\)/);
-  assert.match(subscribe, /result\?\.payment\?\.status !== 'captured'/);
-  assert.match(subscribe, /subscriptionApi\.history\(\)/);
-  assert.match(subscribe, /UPI, cards and net banking/);
-});
-
-test('backend payment-required responses redirect expired dashboard sessions', () => {
-  assert.match(client, /status === 402/);
-  assert.match(client, /SUBSCRIPTION_PAYMENT_REQUIRED/);
-  assert.match(client, /window\.location\.replace\('\/subscribe'\)/);
+test('wallet amount is always server-sourced and logs remain visible', () => {
+  assert.match(page, /wallet\?\.balance/);
+  assert.match(page, /creditWalletService\.logs/);
+  assert.match(page, /feature\.perStaffCredits/);
+  assert.doesNotMatch(page, /localStorage\.setItem/);
 });
