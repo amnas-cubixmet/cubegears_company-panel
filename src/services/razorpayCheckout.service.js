@@ -4,9 +4,7 @@ export const subscriptionApi = {
   access: () => apiClient.get('/saas/checkout/status'),
   plans: () => apiClient.get('/saas/plans'),
   history: () => apiClient.get('/saas/checkout/history'),
-  order: (planId, billingCycle) => apiClient.post('/saas/checkout/orders', {
-    plan_id: planId, billing_cycle: billingCycle
-  }),
+  order: (planId) => apiClient.post('/saas/checkout/orders', { plan_id: planId }),
   verify: (receipt) => apiClient.post('/saas/checkout/verify', receipt),
   orderStatus: (orderId) => apiClient.get(`/saas/checkout/orders/${encodeURIComponent(orderId)}`)
 };
