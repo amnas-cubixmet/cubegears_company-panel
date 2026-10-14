@@ -1,5 +1,5 @@
-import { routeConfig } from '../routes/routeConfig';
-import { getPermissionForPath, hasPermission } from './permissions';
+import { routeConfig } from '../routes/routeConfig.js';
+import { getPermissionForPath, hasPermission } from './permissions.js';
 
 /** Only send a signed-in staff member to an actual permitted workshop page. */
 export const getStaffLandingPath = (user, requestedPath = '') => {
