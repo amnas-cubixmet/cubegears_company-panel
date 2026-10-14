@@ -10,8 +10,9 @@ const select = readFileSync(new URL('../src/components/ui/Select.jsx', import.me
 test('global typography CSS is imported after legacy page styles', () => {
   const importedStyles = [...app.matchAll(/import ['"]\.\/styles\/([^'"]+\.css)['"];/g)]
     .map((match) => match[1]);
-  assert.equal(importedStyles.at(-2), 'form-typography.css');
-  assert.equal(importedStyles.at(-1), 'form-controls-unified.css');
+  assert.deepEqual(importedStyles.slice(-3), [
+    'form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css'
+  ]);
 });
 
 test('editable inputs, native selects and textareas use regular weight', () => {
