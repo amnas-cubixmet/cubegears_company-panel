@@ -48,7 +48,7 @@ export function PlanMarketplace() {
         if (!alive) return;
         if (catalog.status === 'rejected') setError(catalog.reason?.message || 'Plans could not load.');
         else setPlans(Array.isArray(catalog.value) ? catalog.value : []);
-        if (access.status === 'fulfilled') setCurrent(access.value?.plan || null);
+        if (access.status === 'fulfilled') setCurrent(access.value?.configured ? { key: access.value.plan, cycle: access.value.billingCycle } : null);
       }).finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
   }, []);
@@ -103,7 +103,7 @@ export function PlanMarketplace() {
     <div className="cg-plan-cards">
       {plans.map((plan) => <article className="cg-plan-card" key={plan.id}>
         <header>
-          <span className="saas-kicker">{current === plan.key ? 'YOUR CURRENT PLAN' : 'WORKSHOP SUBSCRIPTION'}</span>
+          <span className="saas-kicker">{current?.key === plan.key && current?.cycle === cycle ? 'YOUR CURRENT PLAN' : 'WORKSHOP SUBSCRIPTION'}</span>
           <h3>{plan.name}</h3>
           <p>{plan.description}</p>
         </header>
@@ -122,10 +122,10 @@ export function PlanMarketplace() {
         </button>
         {expanded === plan.id && <FeatureGroups items={plan.features}/>}
         {request === plan.id && <p className="cg-plan-notice">A plan-change enquiry will be sent to CubixGear. No payment is charged or activated automatically.</p>}
-        <button type="button" className="cg-plan-action" disabled={Boolean(action) || current === plan.key}
+        <button type="button" className="cg-plan-action" disabled={Boolean(action) || (current?.key === plan.key && current?.cycle === cycle)}
           onClick={() => request === plan.id ? submitPlan(plan) : setRequest(plan.id)}>
-          {current === plan.key ? 'Current Plan' : action === 'plan:' + plan.id ? 'Sending…' : request === plan.id ? 'Confirm Plan Request' : 'Request This Plan'}
-          {current !== plan.key && <ArrowRight size={16}/>}
+          {current?.key === plan.key && current?.cycle === cycle ? 'Current Plan' : action === 'plan:' + plan.id ? 'Sending…' : request === plan.id ? 'Confirm Plan Request' : 'Request This Plan'}
+          {!(current?.key === plan.key && current?.cycle === cycle) && <ArrowRight size={16}/>}
         </button>
         {request === plan.id && <button type="button" className="cg-plan-cancel" onClick={() => setRequest(null)}>Cancel</button>}
       </article>)}
