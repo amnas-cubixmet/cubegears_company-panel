@@ -87,8 +87,8 @@ export function StorageHistory() {
                 <div className="storage-history-date"><strong>{dayLabel.format(new Date(`${row.date}T12:00:00`))}</strong><span>{row.snapshotType === 'live' ? 'Live snapshot' : 'Daily closing snapshot'}</span></div>
                 <div><span>Stored</span><strong>{Number(row.usedGb).toFixed(2)} GB</strong></div>
                 <div><span>Files</span><strong>{row.fileCount}</strong></div>
-                <div><span>Rate</span><strong>₹{row.rate}/GB/day</strong></div>
-                <div><span>Charge</span><strong>{money.format(row.charge)}</strong></div>
+                <div><span>Rate</span><strong>{row.rate == null ? 'Not configured' : `₹${row.rate}/GB/day`}</strong></div>
+                <div><span>Charge</span><strong>{row.charge == null ? 'Not billed' : money.format(row.charge)}</strong></div>
                 <ChevronRight size={18} />
               </button>
             ))}
@@ -126,8 +126,8 @@ export function StorageDayDetail() {
       <div className="storage-summary-grid">
         <section className="saas-card"><HardDrive size={20} /><span>Stored</span><strong>{Number(snapshot.usedGb).toFixed(2)} GB</strong></section>
         <section className="saas-card"><Files size={20} /><span>Files</span><strong>{snapshot.fileCount}</strong></section>
-        <section className="saas-card"><IndianRupee size={20} /><span>Rate</span><strong>₹{snapshot.rate}/GB/day</strong></section>
-        <section className="saas-card"><IndianRupee size={20} /><span>Daily charge</span><strong>{money.format(snapshot.charge)}</strong></section>
+        <section className="saas-card"><IndianRupee size={20} /><span>Rate</span><strong>{snapshot.rate == null ? 'Not configured' : `₹${snapshot.rate}/GB/day`}</strong></section>
+        <section className="saas-card"><IndianRupee size={20} /><span>Daily charge</span><strong>{snapshot.charge == null ? 'Not billed' : money.format(snapshot.charge)}</strong></section>
       </div>
 
       <section className="saas-card saas-wide">
