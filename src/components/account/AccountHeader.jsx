@@ -1,5 +1,5 @@
 import React from 'react';
-import { FilePenLine, HardDrive, ReceiptText, Settings2, ShieldCheck, Coins, Zap, FileClock, CreditCard } from 'lucide-react';
+import { FilePenLine, HardDrive, Settings2, ShieldCheck, Coins, Zap, FileClock, CreditCard } from 'lucide-react';
 
 const tabs=[
  ['overview','Overview','/account',Coins],
@@ -7,7 +7,6 @@ const tabs=[
  ['credits-features','Features','/account/credits/features',Zap],
  ['storage','Storage','/account/storage',HardDrive],
  ['credits-logs','Logs','/account/credits/logs',FileClock],
- ['company','Company','/account/company',ReceiptText],
  ['templates','Templates','/account/templates',FilePenLine],
  ['security','Security','/account/security',ShieldCheck],
  ['settings','Settings','/settings',Settings2],
