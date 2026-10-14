@@ -58,7 +58,8 @@ test('upload/delete refresh authoritative media summary and handles errors',()=>
   assert.match(account, /No server-recorded events for this period/);
   assert.match(account, /Demo activity is stored in this browser/);
   assert.match(account, /if \(!USE_MOCK_API\) return;/);
-  assert.match(account, /row\.charge == null \? 'Not billed'/);
+  assert.match(account, /<div><span>Files<\/span><strong>\{row\.fileCount\}<\/strong><\/div>/);
+  assert.doesNotMatch(account, /Storage billing history|Estimated monthly extra|Extra GB rate/);
 });
 
 test('account UI responsive typography, form validation and keyboard focus',()=>{

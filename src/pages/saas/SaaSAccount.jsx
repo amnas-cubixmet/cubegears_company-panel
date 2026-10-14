@@ -117,7 +117,7 @@ function BillingView({ billing, storage, onOpenTemplates }) {
   );
 }
 
-function StorageView({ storage, setStorage, billing }) {
+function StorageView({ storage, setStorage }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [storageError, setStorageError] = useState('');
@@ -135,10 +135,6 @@ function StorageView({ storage, setStorage, billing }) {
   const [rangePreset, setRangePreset] = useState('7');
   const [to, setTo] = useState(iso(new Date()));
   const [from, setFrom] = useState(iso(new Date(Date.now() - 6 * 86400000)));
-  const storageRate = billing?.plan?.extraStorageRate;
-  const includedStorage = billing?.plan?.includedStorageGb;
-  const extraStorageGb = storageRate == null || includedStorage == null ? null : Math.max(0, Number(storage.usedGb || 0) - Number(includedStorage));
-  const monthlyExtra = extraStorageGb === null ? null : extraStorageGb * Number(storageRate);
 
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(history), [history]);
 
@@ -247,8 +243,8 @@ function StorageView({ storage, setStorage, billing }) {
         <div className="saas-card-head"><div><span className="saas-kicker">MEDIA STORAGE</span><h2>Media storage usage</h2></div><Infinity size={24} /></div>
         <div className="saas-storage-summary">
           <div><span>Currently stored</span><strong>{storage.usedGb} GB</strong></div>
-          <div><span>Extra GB rate</span><strong>{storageRate == null ? "Not configured" : money.format(storageRate) + " /GB/month"}</strong></div>
-          <div><span>Estimated monthly extra</span><strong>{monthlyExtra == null ? "Not configured" : money.format(monthlyExtra)}</strong></div>
+          <div><span>Uploaded files</span><strong>{storage.files.length}</strong></div>
+          <div><span>History</span><strong>Upload and delete events</strong></div>
         </div>
         <div className="saas-storage-actions">
           <select value={category} onChange={(e) => setCategory(e.target.value)}><option>Job Card</option><option>Inspection</option><option>Invoice</option><option>Delivery</option><option>General</option></select>
@@ -256,14 +252,13 @@ function StorageView({ storage, setStorage, billing }) {
           <button className="saas-button danger" disabled={!selected.length || storageBusy} onClick={() => remove(selected)}><Trash2 size={18} /> Delete selected</button>
         </div>
         <p className="saas-muted">
-          Current media usage is measured from your uploaded files. Extra-storage estimate is indicative only,
-          not a verified subscription charge.
+          Storage totals come from your uploaded files. Upload and deletion events are shown in Storage History.
         </p>
         {storageError && <p className="saas-error" role="alert">{storageError}</p>}
       </section>
 
       <section className="saas-card saas-wide storage-history-card">
-        <div className="saas-card-head"><div><span className="saas-kicker">USAGE INTERVAL</span><h2>Storage billing history</h2></div><IndianRupee size={22} /></div>
+        <div className="saas-card-head"><div><span className="saas-kicker">USAGE INTERVAL</span><h2>Storage usage history</h2></div><IndianRupee size={22} /></div>
         <div className="storage-range-toolbar">
           <div className="storage-range-presets">
             <button className={rangePreset === '7' ? 'active' : ''} onClick={() => choosePreset('7')}>Last 7 days</button>
@@ -281,7 +276,7 @@ function StorageView({ storage, setStorage, billing }) {
           <div><span>Days</span><strong>{summary.days}</strong></div>
           <div><span>Average storage</span><strong>{summary.averageGb.toFixed(2)} GB</strong></div>
           <div><span>Peak storage</span><strong>{summary.peakGb.toFixed(2)} GB</strong></div>
-          <div><span>Interval charge</span><strong>{USE_MOCK_API ? money.format(summary.totalCharge) : '—'}</strong></div>
+          <div><span>Snapshots</span><strong>{history.length}</strong></div>
         </div>
 
         {historyError && <p className="saas-error" role="alert">{historyError}</p>}
@@ -293,7 +288,7 @@ function StorageView({ storage, setStorage, billing }) {
             <button key={row.date} className="storage-history-row" onClick={() => navigate(`/account/storage/history/${row.date}`)}>
               <div><strong>{date.format(new Date(`${row.date}T00:00:00`))}</strong><span>{row.fileCount} files</span></div>
               <div><span>Stored</span><strong>{row.usedGb} GB</strong></div>
-              <div><span>Charge</span><strong>{row.charge == null ? 'Not billed' : money.format(row.charge)}</strong></div>
+              <div><span>Files</span><strong>{row.fileCount}</strong></div>
               <ChevronRight size={18} />
             </button>
           ))}
@@ -353,7 +348,7 @@ export function SaaSAccount({ section = 'billing' }) {
   const load = async () => {
     setLoading(true);
     const [bill, media, companyResult] = await Promise.allSettled([
-      saasAccountService.getSubscriptionBilling(),
+      section === 'billing' ? saasAccountService.getSubscriptionBilling() : Promise.resolve(null),
       saasAccountService.getStorageAccount(),
       settingsService.getSettings('company'),
     ]);
@@ -390,8 +385,8 @@ export function SaaSAccount({ section = 'billing' }) {
         subtitle={section === 'overview'
           ? 'Your company account, users, billing, settings and security in one place.'
           : section === 'storage'
-            ? 'Manage uploaded media and inspect recorded usage.'
-            : 'Verified subscription information and account usage.'}
+            ? 'Manage uploaded media and review server-recorded file activity.'
+            : 'Account information and usage.'}
         active={section}
         onNavigate={navigate}
       />
@@ -408,7 +403,7 @@ export function SaaSAccount({ section = 'billing' }) {
           onSaveCompany={saveCompany} onReload={load} loading={loading}
           onNavigate={navigate}/>
       ) : section === 'storage' ? (
-        storage ? <StorageView storage={storage} setStorage={setStorage} billing={billing}/>
+        storage ? <StorageView storage={storage} setStorage={setStorage}/>
           : !loading && <div className="saas-error">Storage information unavailable. Retry loading your account.</div>
       ) : (
         <BillingView billing={billing} storage={storage}
