@@ -13,11 +13,36 @@ export function StorageHistory() {
   const [from, setFrom] = useState(daysAgo(6));
   const [to, setTo] = useState(toIso(new Date()));
   const [rows, setRows] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [historyError, setHistoryError] = useState('');
+  const [eventsError, setEventsError] = useState('');
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
-    storageHistoryService.getStorageHistory({ from, to }).then(setRows).finally(() => setLoading(false));
+    Promise.allSettled([
+      storageHistoryService.getStorageHistory({ from, to }),
+      storageHistoryService.getStorageEvents({ from, to })
+    ]).then(([history, activity]) => {
+      if (!active) return;
+      if (history.status === 'fulfilled') {
+        setRows(Array.isArray(history.value) ? history.value : []);
+        setHistoryError('');
+      } else {
+        setRows([]);
+        setHistoryError(history.reason?.message || 'Could not load usage history.');
+      }
+      if (activity.status === 'fulfilled') {
+        setEvents(Array.isArray(activity.value?.results) ? activity.value.results : []);
+        setEventsError('');
+      } else {
+        setEvents([]);
+        setEventsError(activity.reason?.message || 'Could not load storage activity.');
+      }
+      setLoading(false);
+    });
+    return () => { active = false; };
   }, [from, to]);
 
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(rows), [rows]);
@@ -31,9 +56,9 @@ export function StorageHistory() {
     <div className="saas-page storage-history-page">
       <header className="saas-page-head storage-history-head">
         <div>
-          <span className="saas-kicker">STORAGE BILLING LEDGER</span>
+          <span className="saas-kicker">STORAGE ACTIVITY & HISTORY</span>
           <h1>Usage history</h1>
-          <p>Select an interval to review every daily storage snapshot and charge.</p>
+          <p>Review server-recorded uploads, deletions, usage snapshots, and verified charges when available.</p>
         </div>
       </header>
 
@@ -53,20 +78,38 @@ export function StorageHistory() {
         <section className="saas-card"><CalendarRange size={20} /><span>Interval</span><strong>{summary.days} days</strong></section>
         <section className="saas-card"><HardDrive size={20} /><span>Average stored</span><strong>{summary.averageGb.toFixed(2)} GB</strong></section>
         <section className="saas-card"><HardDrive size={20} /><span>Peak storage</span><strong>{summary.peakGb.toFixed(2)} GB</strong></section>
-        <section className="saas-card"><IndianRupee size={20} /><span>Storage charge</span><strong>{money.format(summary.totalCharge)}</strong></section>
+        <section className="saas-card"><IndianRupee size={20} /><span>Storage charge</span><strong>{rows.some((row) => row.charge != null) ? money.format(summary.totalCharge) : 'Not billed'}</strong></section>
       </div>
 
       <section className="saas-card saas-wide">
+        <div className="saas-card-head"><div><span className="saas-kicker">STORAGE ACTIVITY</span><h2>Upload and deletion log</h2></div><span>{events.length} recent events</span></div>
+        {eventsError && <p className="saas-error" role="alert">{eventsError}</p>}
+        {loading && <div className="saas-loading">Loading storage activity…</div>}
+        <div className="storage-history-list">
+          {events.map((event) => (
+            <div className="storage-history-row" key={event.id}>
+              <div className="storage-history-date"><strong>{event.eventType}</strong><span>{new Date(event.occurredAt).toLocaleString('en-IN')}</span></div>
+              <div><span>File</span><strong>{event.filename}</strong></div>
+              <div><span>Change</span><strong>{event.deltaBytes >= 0 ? '+' : '-'}{(Math.abs(event.deltaBytes) / (1024 * 1024)).toFixed(2)} MB</strong></div>
+              <div><span>After event</span><strong>{(event.storageAfterBytes / (1024 * 1024)).toFixed(2)} MB</strong></div>
+            </div>
+          ))}
+          {!loading && !eventsError && !events.length && <p className="saas-muted">No recorded storage changes in this date range.</p>}
+        </div>
+      </section>
+
+      <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">DAILY BREAKDOWN</span><h2>{from} → {to}</h2></div><span>{rows.length} snapshots</span></div>
-        {loading ? <div className="saas-loading">Loading usage history…</div> : (
+        {historyError && <p className="saas-error" role="alert">{historyError}</p>}
+        {loading ? <div className="saas-loading">Loading usage history…</div> : historyError ? null : (
           <div className="storage-history-list">
             {rows.map((row) => (
               <button key={row.date} className="storage-history-row" onClick={() => navigate(`/account/storage/history/${row.date}`)}>
-                <div className="storage-history-date"><strong>{dayLabel.format(new Date(`${row.date}T12:00:00`))}</strong><span>{row.snapshotType === 'live' ? 'Live snapshot' : 'Daily closing snapshot'}</span></div>
+                <div className="storage-history-date"><strong>{dayLabel.format(new Date(`${row.date}T12:00:00`))}</strong><span>{row.snapshotType === 'live' ? 'Live snapshot' : row.snapshotType === 'event-ledger' ? 'Recorded change' : 'Saved snapshot'}</span></div>
                 <div><span>Stored</span><strong>{Number(row.usedGb).toFixed(2)} GB</strong></div>
                 <div><span>Files</span><strong>{row.fileCount}</strong></div>
-                <div><span>Rate</span><strong>₹{row.rate}/GB/day</strong></div>
-                <div><span>Charge</span><strong>{money.format(row.charge)}</strong></div>
+                <div><span>Rate</span><strong>{row.rate == null ? 'Not configured' : `₹${row.rate}/GB/day`}</strong></div>
+                <div><span>Charge</span><strong>{row.charge == null ? 'Not billed' : money.format(row.charge)}</strong></div>
                 <ChevronRight size={18} />
               </button>
             ))}
@@ -104,8 +147,8 @@ export function StorageDayDetail() {
       <div className="storage-summary-grid">
         <section className="saas-card"><HardDrive size={20} /><span>Stored</span><strong>{Number(snapshot.usedGb).toFixed(2)} GB</strong></section>
         <section className="saas-card"><Files size={20} /><span>Files</span><strong>{snapshot.fileCount}</strong></section>
-        <section className="saas-card"><IndianRupee size={20} /><span>Rate</span><strong>₹{snapshot.rate}/GB/day</strong></section>
-        <section className="saas-card"><IndianRupee size={20} /><span>Daily charge</span><strong>{money.format(snapshot.charge)}</strong></section>
+        <section className="saas-card"><IndianRupee size={20} /><span>Rate</span><strong>{snapshot.rate == null ? 'Not configured' : `₹${snapshot.rate}/GB/day`}</strong></section>
+        <section className="saas-card"><IndianRupee size={20} /><span>Daily charge</span><strong>{snapshot.charge == null ? 'Not billed' : money.format(snapshot.charge)}</strong></section>
       </div>
 
       <section className="saas-card saas-wide">
