@@ -8,7 +8,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { storageHistoryService } from '../../services/storageHistory.service';
 import { AccountHeader, AccountOverview } from '../../components/account';
-import { STORAGE_PRICE_PER_GB_DAY, storageDayCharge } from '../../services/storagePricing';
 import '../../styles/account-billing.css';
 import '../../styles/account-dashboard.css';
 import '../../styles/account-overview-refined.css';
@@ -107,7 +106,7 @@ function BillingView({ billing, storage, onOpenTemplates, onOpenPlans }) {
   );
 }
 
-function StorageView({ storage, setStorage }) {
+function StorageView({ storage, setStorage, billing }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [storageError, setStorageError] = useState('');
@@ -122,7 +121,10 @@ function StorageView({ storage, setStorage }) {
   const [rangePreset, setRangePreset] = useState('7');
   const [to, setTo] = useState(iso(new Date()));
   const [from, setFrom] = useState(iso(new Date(Date.now() - 6 * 86400000)));
-  const todayCharge = storageDayCharge(storage.usedGb);
+  const storageRate = billing?.plan?.extraStorageRate;
+  const includedStorage = billing?.plan?.includedStorageGb;
+  const extraStorageGb = storageRate == null || includedStorage == null ? null : Math.max(0, Number(storage.usedGb || 0) - Number(includedStorage));
+  const monthlyExtra = extraStorageGb === null ? null : extraStorageGb * Number(storageRate);
 
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(history), [history]);
 
@@ -206,11 +208,11 @@ function StorageView({ storage, setStorage }) {
   return (
     <div className="saas-grid">
       <section className="saas-card saas-wide">
-        <div className="saas-card-head"><div><span className="saas-kicker">MEDIA STORAGE</span><h2>Unlimited storage</h2></div><Infinity size={24} /></div>
+        <div className="saas-card-head"><div><span className="saas-kicker">MEDIA STORAGE</span><h2>Media storage usage</h2></div><Infinity size={24} /></div>
         <div className="saas-storage-summary">
           <div><span>Currently stored</span><strong>{storage.usedGb} GB</strong></div>
-          <div><span>Rate</span><strong>₹{STORAGE_PRICE_PER_GB_DAY} / GB / day</strong></div>
-          <div><span>Today’s charge</span><strong>{money.format(todayCharge)}</strong></div>
+          <div><span>Extra GB rate</span><strong>{storageRate == null ? "Not configured" : money.format(storageRate) + " /GB/month"}</strong></div>
+          <div><span>Estimated monthly extra</span><strong>{monthlyExtra == null ? "Not configured" : money.format(monthlyExtra)}</strong></div>
         </div>
         <div className="saas-storage-actions">
           <select value={category} onChange={(e) => setCategory(e.target.value)}><option>Job Card</option><option>Inspection</option><option>Invoice</option><option>Delivery</option><option>General</option></select>
@@ -218,7 +220,7 @@ function StorageView({ storage, setStorage }) {
           <button className="saas-button danger" disabled={!selected.length || storageBusy} onClick={() => remove(selected)}><Trash2 size={18} /> Delete selected</button>
         </div>
         <p className="saas-muted">
-          Current media usage is measured from your uploaded files. Daily rate is indicative only,
+          Current media usage is measured from your uploaded files. Extra-storage estimate is indicative only,
           not a verified subscription charge.
         </p>
         {storageError && <p className="saas-error" role="alert">{storageError}</p>}
@@ -354,7 +356,7 @@ export function SaaSAccount({ section = 'billing' }) {
           onSaveCompany={saveCompany} onReload={load} loading={loading}
           onNavigate={navigate}/>
       ) : section === 'storage' ? (
-        storage ? <StorageView storage={storage} setStorage={setStorage}/>
+        storage ? <StorageView storage={storage} setStorage={setStorage} billing={billing}/>
           : !loading && <div className="saas-error">Storage information unavailable. Retry loading your account.</div>
       ) : (
         <BillingView billing={billing} storage={storage}
