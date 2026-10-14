@@ -20,8 +20,9 @@ const requestedMockMode =
  * - Set VITE_USE_MOCK_API=true only when you explicitly want demo/mock data.
  */
 export const USE_MOCK_API =
-  requestedMockMode === true ||
-  (!configuredBaseUrl && requestedMockMode !== false);
+  !import.meta.env.PROD &&
+  (requestedMockMode === true ||
+    (!configuredBaseUrl && requestedMockMode !== false));
 
 if (import.meta.env.PROD && !configuredBaseUrl && !USE_MOCK_API) {
   console.warn('[CubixGear] VITE_API_URL is missing. Real API mode has no backend URL.');

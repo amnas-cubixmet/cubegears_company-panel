@@ -3,14 +3,16 @@ import { Plus, ReceiptText } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 
-export const InvoiceListHeader = ({ activeTab, onCreate }) => {
+export const InvoiceListHeader = ({ activeTab, onCreate, onCreateCompany, onCreateIndividual, companyRegistered }) => {
   const { user } = useAuth();
 
   return (
     <header className="invoice-dashboard-header">
       <div>
-        <h1>Invoices & Estimates</h1>
-        <p>Create, manage, print and export workshop billing documents.</p>
+        <h1>{activeTab === 'estimate' ? 'Estimates' : 'Invoices'}</h1>
+        <p>{activeTab === 'estimate'
+          ? 'Prepare quotations, track approvals, and convert accepted estimates to invoices.'
+          : 'Manage customer invoices, payments, downloads and billing records.'}</p>
       </div>
 
       <div className="invoice-dashboard-header-actions">
@@ -19,12 +21,20 @@ export const InvoiceListHeader = ({ activeTab, onCreate }) => {
           <span>Billing & Sales</span>
         </div>
 
-        {hasPermission(user, 'invoices.create') && (
+        {hasPermission(user, 'invoices.create') && (activeTab === 'estimate' ? (
           <button type="button" className="bill-btn" onClick={onCreate}>
-            <Plus size={14} />
-            {activeTab === 'estimate' ? 'New Estimate' : 'New Invoice'}
+            <Plus size={14}/>New Estimate
           </button>
-        )}
+        ) : (
+          <>
+            <button type="button" className="bill-btn secondary" onClick={onCreateCompany || onCreate}>
+              <Plus size={14}/>{companyRegistered ? 'Company Tax Invoice' : 'Company Invoice'}
+            </button>
+            <button type="button" className="bill-btn" onClick={onCreateIndividual || onCreate}>
+              <Plus size={14}/>Simple Service Bill
+            </button>
+          </>
+        ))}
       </div>
     </header>
   );

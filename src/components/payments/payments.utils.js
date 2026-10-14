@@ -1,23 +1,21 @@
+const display = (value, fallback = '') => {
+  if (typeof value === 'string') return value.trim() || fallback;
+  if (typeof value === 'number') return String(value);
+  if (value && typeof value === 'object') return String(value.name || value.number || value.id || fallback);
+  return fallback;
+};
+
 export const normalizePaymentRow = (row = {}) => ({
   ...row,
-  receiptNo: row.receiptNo || row.receipt_no || row.reference || row.id || '—',
+  // Never use a UPI/bank transaction reference as a workshop receipt number.
+  receiptNo: display(row.receiptNo || row.receipt_no, '') || display(row.id, '—'),
   date: row.date || row.paymentDate || row.payment_date || '',
-  customer:
-    row.customerName ||
-    row.customer_name ||
-    (typeof row.customer === 'object' ? row.customer?.name : '') ||
-    row.customer ||
-    'Customer',
-  invoice:
-    row.invoiceNo ||
-    row.invoice_no ||
-    (typeof row.invoice === 'object' ? row.invoice?.number : '') ||
-    row.invoice ||
-    '',
-  method: row.method || row.paymentMethod || row.payment_method || 'Cash',
+  customer: display(row.customerName || row.customer_name || row.customer, 'Customer'),
+  invoice: display(row.invoiceNo || row.invoice_no || row.invoice, ''),
+  method: display(row.method || row.paymentMethod || row.payment_method, 'Cash'),
   amount: Number(row.amount || 0),
-  reference: row.reference || row.transactionRef || row.transaction_ref || '',
-  status: row.status || 'Completed',
+  reference: display(row.reference || row.transactionRef || row.transaction_ref, ''),
+  status: display(row.status, 'Completed'),
 });
 
 export const paymentStatusClass = (status = '') =>
@@ -25,11 +23,53 @@ export const paymentStatusClass = (status = '') =>
 
 export const formatPaymentDate = (value) => {
   if (!value) return '—';
-  const date = new Date(value.length === 10 ? value + 'T00:00:00' : value);
-  if (Number.isNaN(date.getTime())) return value;
+  const text = String(value);
+  const date = new Date(text.length === 10 ? text + 'T00:00:00' : text);
+  if (Number.isNaN(date.getTime())) return text;
   return date.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+    day: '2-digit', month: 'short', year: 'numeric'
   });
+};
+
+// Backend invoices have canonical balance and customerId; mock billing documents
+// use calculated totals and may have no persistent customer UUID.
+export const invoiceOutstanding = (invoice, calculateTotals) => {
+  if (!invoice) return 0;
+  const balance = invoice.balance;
+  if (balance != null && balance !== '') return Math.max(0, Number(balance) || 0);
+  if (invoice.total != null && invoice.total !== '') {
+    return Math.max(0, Number(invoice.total || 0) - Number(invoice.paid || 0));
+  }
+  return Math.max(0, Number(calculateTotals(invoice).balance) || 0);
+};
+
+export const payableInvoices = (invoices = [], calculateTotals) => invoices.filter(
+  (row) => row.kind === 'invoice' &&
+    ['finalized', 'issued'].includes(String(row.status || '').toLowerCase()) &&
+    invoiceOutstanding(row, calculateTotals) > 0
+);
+
+export const makePaymentPayload = (form, selectedInvoice, outstanding, mockMode = false) => {
+  if (!selectedInvoice) throw new Error('Select an invoice with an outstanding balance.');
+  const amount = Number(form.amount);
+  if (!Number.isFinite(amount) || amount <= 0)
+    throw new Error('Enter a valid payment amount greater than zero.');
+  if (!Number.isInteger(Math.round(amount * 100)) || Math.abs(Math.round(amount * 100) / 100 - amount) > 0.000001)
+    throw new Error('Payment amount cannot contain more than two decimal places.');
+  if (amount > outstanding + 0.000001)
+    throw new Error('Amount exceeds the outstanding invoice balance.');
+  if (!form.date) throw new Error('Payment date is required.');
+  if (!mockMode && !selectedInvoice.customerId)
+    throw new Error('Invoice has no linked customer ID. Check its customer record.');
+  const base = {
+    date: form.date,
+    amount: amount.toFixed(2),
+    method: form.method,
+    reference: form.reference.trim(),
+    status: 'Completed',
+  };
+  return mockMode
+    ? { ...base, customer: selectedInvoice.customer?.name || selectedInvoice.customerName || 'Customer',
+        invoice: selectedInvoice.number || selectedInvoice.id }
+    : { ...base, customer: selectedInvoice.customerId, invoice: selectedInvoice.id };
 };

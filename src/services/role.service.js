@@ -35,7 +35,7 @@ const normalizeRole = (role) => {
     description:
       role?.description ||
       (protectedRole ? 'Company owner with automatic full access.' : ''),
-    branchScope: role?.branchScope || 'Assigned Branch Only',
+    branchScope: 'All Company Branches',
     usersCount: Number.isFinite(parsedUsersCount) ? parsedUsersCount : 0
   };
 };

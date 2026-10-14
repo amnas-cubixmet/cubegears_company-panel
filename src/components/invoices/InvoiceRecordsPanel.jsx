@@ -82,13 +82,13 @@ export const InvoiceRecordsPanel = ({
                       </td>
                       <td>
                         <div className="invoice-dashboard-actions">
-                          <button type="button" title="View" onClick={() => onView(document)}><Eye size={13} /></button>
-                          <button type="button" title="PDF" onClick={() => onPdf(document)}><Download size={13} /></button>
+                          <button type="button" title="View" aria-label={`View ${document.number || document.id}`} onClick={() => onView(document)}><Eye size={13} /></button>
+                          <button type="button" title="PDF" aria-label={`Download PDF for ${document.number || document.id}`} onClick={() => onPdf(document)}><Download size={13} /></button>
                           {canEdit && document.status !== 'Converted' && (
-                            <button type="button" title="Edit" onClick={() => onEdit(document)}><Edit3 size={13} /></button>
+                            <button type="button" title="Edit" aria-label={`Edit ${document.number || document.id}`} onClick={() => onEdit(document)}><Edit3 size={13} /></button>
                           )}
                           {canDelete && (
-                            <button type="button" className="is-danger" title="Delete" onClick={() => onDelete(document)}><Trash2 size={13} /></button>
+                            <button type="button" className="is-danger" title="Delete" aria-label={`Delete ${document.number || document.id}`} onClick={() => onDelete(document)}><Trash2 size={13} /></button>
                           )}
                         </div>
                       </td>

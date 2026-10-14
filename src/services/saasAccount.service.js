@@ -75,6 +75,7 @@ const write = (key, value) => {
 const makeId = (prefix) => `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
 export const calculateMonthlyEstimate = (billing) => {
+  if (!billing?.billingDataAvailable && !USE_MOCK_API) return null;
   const { plan, usage } = billing;
   const extraStorageGb = Math.max(0, Number(usage.storageUsedGb || 0) - Number(plan.includedStorageGb || 0));
   const extraSeats = Math.max(0, Number(usage.seatsUsed || 0) - Number(plan.includedSeats || 0));
@@ -109,9 +110,10 @@ export const uploadMediaFiles = async (files, category = 'General') => {
     const form = new FormData();
     Array.from(files).forEach((file) => form.append('files', file));
     form.append('category', category);
-    return apiClient.post(`${API_ENDPOINTS.MEDIA_STORAGE}/files`, form, {
+    await apiClient.post(`${API_ENDPOINTS.MEDIA_STORAGE}/files`, form, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
+    return getStorageAccount();
   }
 
   const account = read(STORAGE_KEY, seedStorage);
@@ -132,7 +134,8 @@ export const uploadMediaFiles = async (files, category = 'General') => {
 
 export const deleteMediaFiles = async (ids) => {
   if (!USE_MOCK_API) {
-    return apiClient.post(`${API_ENDPOINTS.MEDIA_STORAGE}/files/delete`, { ids });
+    await apiClient.post(`${API_ENDPOINTS.MEDIA_STORAGE}/files/delete`, { ids });
+    return getStorageAccount();
   }
 
   const account = read(STORAGE_KEY, seedStorage);
@@ -150,12 +153,8 @@ export const updateStorageSettings = async (settings) => {
   return write(STORAGE_KEY, account);
 };
 
-export const updateSeatCount = async (seatsUsed) => {
-  if (!USE_MOCK_API) return apiClient.put(`${API_ENDPOINTS.SAAS_BILLING}/usage`, { seatsUsed });
-  const billing = read(BILLING_KEY, seedBilling);
-  billing.usage.seatsUsed = Math.max(1, Number(seatsUsed || 1));
-  return write(BILLING_KEY, billing);
-};
+// Seat usage is determined by active Django login accounts. Never permit
+// a manually typed seat count to modify SaaS billing usage.
 
 export const saasAccountService = {
   getSubscriptionBilling,
@@ -163,6 +162,5 @@ export const saasAccountService = {
   uploadMediaFiles,
   deleteMediaFiles,
   updateStorageSettings,
-  updateSeatCount,
   calculateMonthlyEstimate
 };

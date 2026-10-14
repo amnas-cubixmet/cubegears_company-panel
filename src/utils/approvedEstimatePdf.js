@@ -43,14 +43,17 @@ export const estimatePdfData = (job, estimate) => {
       type: item.type === 'Part' ? 'Part' : 'Work',
       quantity: safeAmount(item.quantity),
       unitPrice: safeAmount(item.unitPrice ?? item.price),
+      taxRate: safeAmount(item.taxRate),
+      hsnSac: safeText(item.hsnSac, ''),
     }));
   if (!items.length) throw new Error('The approved estimate does not have any line items.');
   const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
   const discount = safeAmount(pricing.discount ?? estimate.discount);
   const taxPercent = safeAmount(pricing.taxPercent ?? estimate.taxPercent);
   const taxable = Math.max(0, subtotal - discount);
-  const tax = taxable * taxPercent / 100;
-  const total = taxable + tax;
+  const gst = pricing.gst || null;
+  const tax = gst ? safeAmount(estimate.tax) : taxable * taxPercent / 100;
+  const total = gst ? safeAmount(estimate.total) : taxable + tax;
   const approvedDate = estimate.approved_at || estimate.approvedAt || '';
   const jobLabel = job.jobNumber || job.jobNo || job.number || '';
   const approvedBy = estimate.approvedBy || estimate.approved_by || '';
@@ -72,6 +75,7 @@ export const estimatePdfData = (job, estimate) => {
     taxPercent,
     tax,
     total,
+    gst,
   };
 };
 
@@ -257,7 +261,11 @@ const drawApprovedPages = (data) => {
     tableHeader(group.title);
     for (let i = 0; i < group.rows.length; i += 1) {
       const item = group.rows[i];
-      const lines = wrap(item.description, 640, 20);
+      const classification = data.gst?.mode === 'gst'
+        ? [item.hsnSac ? 'HSN/SAC: ' + item.hsnSac : '',
+          'GST: ' + item.taxRate + '%'].filter(Boolean).join(' · ')
+        : '';
+      const lines = wrap(item.description + (classification ? ' (' + classification + ')' : ''), 640, 20);
       const rowHeight = Math.max(53, lines.length * 29 + 21);
       if (y + rowHeight > HEIGHT - 175) {
         finishPage(); makePage(true); tableHeader(group.title + ' (cont.)');
@@ -279,7 +287,12 @@ const drawApprovedPages = (data) => {
   const totals = [
     ['Subtotal', data.subtotal],
     ['Discount', -data.discount],
-    ['Tax (' + data.taxPercent + '%)', data.tax],
+    ...(data.gst?.mode === 'gst' ? [
+      ['Taxable value', safeAmount(data.gst.taxable)],
+      ...(data.gst.taxMode === 'igst' ? [['IGST', safeAmount(data.gst.igst)]]
+        : [['CGST', safeAmount(data.gst.cgst)], ['SGST / UTGST', safeAmount(data.gst.sgst)]])
+    ] : data.gst?.mode === 'non_gst' ? [['GST (not registered)', 0]]
+      : [['Tax (' + data.taxPercent + '%)', data.tax]]),
   ];
   let totalY = y + 22;
   totals.forEach(([label, value]) => {

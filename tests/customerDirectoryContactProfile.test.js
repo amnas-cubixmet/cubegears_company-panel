@@ -51,8 +51,8 @@ test('whole customer card opens profile without hijacking edit, call or WhatsApp
 test('profile uses customer name, never displays raw UUID as ID text', () => {
   assert.doesNotMatch(list, /\{c\.email \|\| c\.id\}/);
   assert.doesNotMatch(profile, /Customer ID:.*customer\.id/);
-  assert.match(profile, /customer-profile-breadcrumb/);
-  assert.match(profile, /All Customers/);
+  assert.doesNotMatch(profile, /customer-profile-breadcrumb/);
+  assert.doesNotMatch(profile, /<ArrowLeft/);
   assert.match(profile, /customer-profile-action is-secondary/);
   assert.match(profile, /customerContactLinks/);
   assert.match(profile, /Promise\.allSettled/);

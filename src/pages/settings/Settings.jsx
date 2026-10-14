@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Bell, Boxes, Building2, Clock3, CreditCard, Plug, ShieldCheck, WalletCards } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { settingsService } from '../../services/settings.service';
@@ -9,6 +9,7 @@ import {
   SettingsSectionNav,
 } from '../../components/settings';
 import '../../styles/settings.css';
+import '../../styles/settings-ui-polish.css';
 
 const sections = [
   { id: 'company', label: 'Company & Locale', icon: Building2 },
@@ -57,52 +58,134 @@ export const Settings = () => {
   const navigate = useNavigate();
   const [active, setActive] = useState('company');
   const [data, setData] = useState({});
+  const [savedData, setSavedData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('success');
   const { themeMode, setThemeMode } = useContext(ThemeContext);
 
+  const loadSettings = async () => {
+    setLoading(true);
+    setLoadError('');
+    setMessage('');
+    try {
+      const incoming = await settingsService.getAllSettings();
+      if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
+        throw new Error('Invalid settings response.');
+      }
+      setData(incoming);
+      setSavedData(incoming);
+    } catch (error) {
+      setLoadError(error?.message || 'Could not load company settings.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    settingsService.getAllSettings().then(setData).finally(() => setLoading(false));
+    let mounted = true;
+    settingsService.getAllSettings()
+      .then((incoming) => {
+        if (!mounted) return;
+        if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
+          throw new Error('Invalid settings response.');
+        }
+        setData(incoming);
+        setSavedData(incoming);
+      })
+      .catch((error) => { if (mounted) setLoadError(error?.message || 'Could not load company settings.'); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
   }, []);
 
-  const update = (key, value) => setData((prev) => ({ ...prev, [active]: { ...(prev[active] || {}), [key]: value } }));
+  const dirtySections = useMemo(
+    () => sections.filter(({ id }) => {
+      const fields = schemas[id] || [];
+      return fields.some(([key, , type]) =>
+        (data[id]?.[key] ?? (type === 'checkbox' ? false : '')) !==
+        (savedData[id]?.[key] ?? (type === 'checkbox' ? false : ''))
+      );
+    }).map(({ id }) => id),
+    [data, savedData]
+  );
+  const dirty = dirtySections.includes(active);
+
+  const update = (key, value) => {
+    setMessage('');
+    setData((prev) => ({ ...prev, [active]: { ...(prev[active] || {}), [key]: value } }));
+  };
 
   const save = async () => {
+    if (saving || !dirty) return;
     setSaving(true);
     setMessage('');
     try {
-      await settingsService.updateSettings(active, data[active] || {});
-      setMessage('Settings saved successfully.');
+      const payload = data[active] || {};
+      const result = await settingsService.updateSettings(active, payload);
+      const saved = result && typeof result === 'object' && !Array.isArray(result) ? { ...payload, ...result } : payload;
+      setSavedData((prev) => ({ ...prev, [active]: saved }));
+      setData((prev) => ({ ...prev, [active]: saved }));
+      setMessage('Changes saved successfully.');
+      setMessageType('success');
     } catch (error) {
-      setMessage(error?.message || 'Unable to save settings.');
+      setMessage(error?.message || 'Unable to save settings. Please try again.');
+      setMessageType('error');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div className="crud-empty">Loading settings…</div>;
+  const reset = () => {
+    setData((prev) => ({ ...prev, [active]: { ...(savedData[active] || {}) } }));
+    setMessage('Changes for this section were discarded.');
+    setMessageType('info');
+  };
+
+  if (loading) return (
+    <div className="settings-page" role="status" aria-live="polite">
+      <div className="settings-loading">Loading company settings…</div>
+    </div>
+  );
+
+  if (loadError) return (
+    <div className="settings-page">
+      <div className="settings-load-error" role="alert">
+        <h2>Unable to load Settings</h2>
+        <p>{loadError}</p>
+        <button type="button" className="settings-primary-button" onClick={loadSettings}>Retry loading settings</button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="settings-page">
       <SettingsHeader
         saving={saving}
+        disabled={!dirty}
+        hasUnsaved={dirtySections.length > 0}
         onSave={save}
         onTemplates={() => navigate('/account/templates')}
       />
 
-      {message && <div className="settings-message">{message}</div>}
+      {message && (
+        <div className={`settings-message is-${messageType}`} role={messageType === 'error' ? 'alert' : 'status'}>
+          {message}
+        </div>
+      )}
 
       <div className="settings-dashboard-layout">
         <SettingsSectionNav
           sections={sections}
           active={active}
+          dirtySections={dirtySections}
           onChange={(id) => {
+            if (saving) return;
             setActive(id);
             setMessage('');
           }}
         />
-
         <SettingsEditor
           active={active}
           sections={sections}
@@ -111,9 +194,10 @@ export const Settings = () => {
           themeMode={themeMode}
           setThemeMode={setThemeMode}
           onUpdate={update}
-          onReset={() => settingsService.getAllSettings().then(setData)}
+          onReset={reset}
           onSave={save}
           saving={saving}
+          dirty={dirty}
         />
       </div>
     </div>

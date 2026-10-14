@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Download, Edit3, Eye, FileText, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
+import { INDIA_STATES } from '../../utils/indiaGst';
 import { customerService } from '../../services/customer.service';
 import {
   InvoiceFilterToolbar,
@@ -13,7 +14,7 @@ import {
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const itemTypes = ['Stock Part', 'Outside Purchase', 'Labour', 'Service', 'Consumable', 'Custom Item'];
-const emptyItem = () => ({ id: `ROW-${Date.now()}-${Math.random()}`, type: 'Labour', description: '', code: '', hsnCode: '', qty: 1, unit: 'PCS', purchasePrice: '', rate: '', taxRate: 18, discount: 0, inventoryId: '' });
+const emptyItem = () => ({ id: `ROW-${Date.now()}-${Math.random()}`, type: 'Labour', description: '', code: '', hsnCode: '', qty: 1, unit: 'PCS', purchasePrice: '', rate: '', taxRate: '', discount: 0, inventoryId: '' });
 const n = (value) => Number(value || 0);
 const inputNumber = (value) => (value === 0 || value === '0' || value == null ? '' : String(value));
 const parseDecimal = (value) => value === '' ? '' : value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
@@ -31,7 +32,9 @@ export function InvoiceRoutePage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const mode = resolveMode(location.pathname, id);
-  const kindFromUrl = new URLSearchParams(location.search).get('kind') === 'estimate' ? 'estimate' : 'invoice';
+  const params = new URLSearchParams(location.search);
+  const kindFromUrl = params.get('kind') === 'estimate' ? 'estimate' : 'invoice';
+  const newCustomerType = params.get('customerType') === 'business' ? 'business' : 'individual';
 
   const [documents, setDocuments] = useState([]);
   const [inventory, setInventory] = useState([]);
@@ -48,15 +51,35 @@ export function InvoiceRoutePage() {
   const [saving, setSaving] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState('');
+  const [gstConfig, setGstConfig] = useState(null);
 
   const loadList = async () => {
     setLoading(true);
     try {
-      const [docs, stock, customerRows] = await Promise.all([
+      const [docs, stock, customerRows, config] = await Promise.all([
         billingService.list(),
         billingService.inventory(),
-        customerService.getCustomers({ status: 'Active' })
+        customerService.getCustomers({ status: 'Active' }),
+        billingService.getGstContext().catch(() => null)
       ]);
+      setGstConfig(config);
+      if (mode === 'create' && config) {
+        setForm((draft) => ({
+          ...draft,
+          invoiceType: config.invoiceType || (config.registered ? 'gst' : 'regular'),
+          taxMode: 'none',
+          seller: {
+            ...draft.seller,
+            name: config.companyName || '',
+            address: config.companyAddress || '',
+            phone: config.companyPhone || '',
+            email: config.companyEmail || '',
+            state: config.companyState || '',
+            stateCode: config.supplierState || '',
+            gstin: config.gstin || ''
+          }
+        }));
+      }
       setDocuments(Array.isArray(docs) ? docs : []);
       setInventory(Array.isArray(stock) ? stock : []);
       setCustomers(Array.isArray(customerRows) ? customerRows : []);
@@ -71,11 +94,13 @@ export function InvoiceRoutePage() {
     if (!id) return;
     setLoading(true);
     try {
-      const [doc, stock, customerRows] = await Promise.all([
+      const [doc, stock, customerRows, config] = await Promise.all([
         billingService.get(id),
         billingService.inventory(),
-        customerService.getCustomers({ status: 'Active' })
+        customerService.getCustomers({ status: 'Active' }),
+        billingService.getGstContext().catch(() => null)
       ]);
+      setGstConfig(config);
       if (!doc) setError('Invoice / estimate not found.');
       else setForm(JSON.parse(JSON.stringify(doc)));
       setInventory(Array.isArray(stock) ? stock : []);
@@ -95,7 +120,8 @@ export function InvoiceRoutePage() {
       setSelectedCustomerId('');
       setSelectedVehicleId('');
       setCustomerVehicles([]);
-      setForm(blankBillingDocument(kindFromUrl));
+      const draft = blankBillingDocument(kindFromUrl);
+      setForm({ ...draft, customer: { ...draft.customer, customerType: newCustomerType } });
       loadList();
     } else loadDocument();
   }, [location.pathname, location.search, id]);
@@ -195,6 +221,8 @@ export function InvoiceRoutePage() {
       setForm((old) => ({
         ...old,
         customer: {
+          customerType: 'individual',
+          companyName: '',
           name: '',
           phone: '',
           email: '',
@@ -229,7 +257,9 @@ export function InvoiceRoutePage() {
       customer: {
         ...(old.customer || {}),
         id: customer.id,
-        name: displayName,
+        customerType: customer.customerType || customer.customer_type || (customer.companyName ? 'business' : 'individual'),
+        companyName: customer.companyName || customer.company_name || '',
+        name: customer.name || displayName,
         phone: customer.phone || '',
         email: customer.email || '',
         address: fullAddress,
@@ -298,16 +328,27 @@ export function InvoiceRoutePage() {
         unit: stock?.unit || 'PCS',
         purchasePrice: stock?.cost ? String(stock.cost) : '',
         rate: stock?.price ? String(stock.price) : '',
-        taxRate: stock?.taxRate ?? 18
+        taxRate: stock?.taxRate ?? stock?.tax_rate ?? ''
       } : row)
     }));
   };
 
   const validate = () => {
-    if (!form.customer?.name?.trim()) return 'Customer / company name is required.';
+    if (!gstConfig) return 'Unable to verify workshop GST registration. Reload the invoice and check Company Settings.';
+    const expected = gstConfig.registered ? 'gst' : 'regular';
+    if (form.invoiceType !== expected) return 'Invoice type must match the workshop GST registration in Company Settings.';
+    if (!['individual', 'business'].includes(form.customer?.customerType || 'individual')) return 'Choose Individual or Company billing.';
+    if (form.customer?.customerType === 'business' && !form.customer?.companyName?.trim()) return 'Company name is required for B2B billing.';
+    if (form.customer?.customerType !== 'business' && !form.customer?.name?.trim()) return 'Customer name is required.';
     if (!form.items?.length) return 'Add at least one item.';
     if (form.items.some((row) => !row.description?.trim() && row.type !== 'Stock Part')) return 'Enter an item / service description.';
-    if (form.invoiceType === 'gst' && form.items.some((row) => !String(row.hsnCode || '').trim())) return 'HSN / SAC is required for every GST invoice item.';
+    if (expected === 'gst') {
+      if (!gstConfig.supplierState) return 'Configure a valid GSTIN and supplier state in Company Settings.';
+      if (!form.customer?.placeOfSupply) return 'Select the legal place of supply (State/UT).';
+      if (form.items.some((row) => !String(row.hsnCode || '').trim() || String(row.taxRate ?? '').trim() === '')) {
+        return 'Enter HSN/SAC and the applicable GST percentage for every taxable invoice line.';
+      }
+    }
     return '';
   };
 
@@ -330,8 +371,7 @@ export function InvoiceRoutePage() {
     if (validation) return setError(validation);
     setSaving(true);
     try {
-      let current = form;
-      if (!current.id) current = await billingService.saveDraft(current);
+      const current = await billingService.saveDraft(form);
       const done = await billingService.finalize(current.id);
       navigate(`/invoices/${done.id}`, { replace: true });
     } catch (e) {
@@ -398,7 +438,10 @@ export function InvoiceRoutePage() {
     <div className="billing-page billing-list-dashboard invoice-dashboard">
       <InvoiceListHeader
         activeTab={activeTab}
+        companyRegistered={Boolean(gstConfig?.registered)}
         onCreate={() => navigate(`/invoices/new?kind=${activeTab}`)}
+        onCreateCompany={() => navigate('/invoices/new?kind=invoice&customerType=business')}
+        onCreateIndividual={() => navigate('/invoices/new?kind=invoice&customerType=individual')}
       />
 
       <InvoiceTabs
@@ -530,6 +573,7 @@ export function InvoiceRoutePage() {
           <p>{mode === 'edit' ? `Editing ID: ${id}` : 'Create a clean GST-ready invoice with transport and item tax details.'}</p>
         </div>
         <div className="billing-head-actions">
+          <button type="button" className="bill-btn secondary" onClick={() => navigate(`/invoices?kind=${form.kind === 'estimate' ? 'estimate' : 'invoice'}`)}>Back to List</button>
           <button className="bill-btn secondary" disabled={saving} onClick={save}>Save Draft</button>
           <button className="bill-btn secondary" type="button" disabled={!form.id || saving || pdfLoading}
             title={form.id ? 'Download saved invoice (unsaved edits are not included)' : 'Save Draft first to download PDF'}
@@ -544,35 +588,40 @@ export function InvoiceRoutePage() {
 
       {error && <div className="billing-error no-print">{error}</div>}
 
-      {loading && mode === 'edit' ? <div className="billing-empty">Loading…</div> : <>
+      {loading && (mode === 'edit' || mode === 'create') ? <div className="billing-empty">Loading company billing settings…</div> : <>
         <div className="invoice-source-grid no-print">
           <section className="billing-card invoice-seller-card">
             <span className="billing-kicker">SELLER / FROM</span>
             <h3>Business Details</h3>
+            <p className="invoice-registration-note">Workshop details and GSTIN come from Company Settings.</p>
 
             <label>Business Name
-              <input value={form.seller?.name || ''} onChange={(e) => update('seller.name', e.target.value)} placeholder="Business / company name"/>
+              <input value={form.seller?.name || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="Business / company name"/>
             </label>
             <label>Address
-              <textarea value={form.seller?.address || ''} onChange={(e) => update('seller.address', e.target.value)} placeholder="Registered / dispatch address"/>
+              <textarea value={form.seller?.address || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="Registered / dispatch address"/>
             </label>
             <div className="invoice-two-col">
               <label>Phone
-                <input value={form.seller?.phone || ''} onChange={(e) => update('seller.phone', e.target.value)} placeholder="+91"/>
+                <input value={form.seller?.phone || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="+91"/>
               </label>
               <label>Email
-                <input type="email" value={form.seller?.email || ''} onChange={(e) => update('seller.email', e.target.value)} placeholder="accounts@example.com"/>
+                <input type="email" value={form.seller?.email || ''} readOnly aria-readonly="true" title="Change workshop details in Company Settings" placeholder="accounts@example.com"/>
               </label>
             </div>
-            <label>GSTIN
-              <input value={form.seller?.gstin || ''} onChange={(e) => update('seller.gstin', e.target.value.toUpperCase())} placeholder="GSTIN"/>
-            </label>
+            {form.invoiceType === 'gst' ? (
+              <label>Workshop GSTIN (from Company Settings)
+                <input value={gstConfig?.gstin || form.seller?.gstin || ''} readOnly aria-readonly="true"/>
+              </label>
+            ) : (
+              <p className="invoice-registration-note">Workshop is not GST registered. No GST is charged on this invoice.</p>
+            )}
             <div className="invoice-two-col">
               <label>State
-                <input value={form.seller?.state || ''} onChange={(e) => update('seller.state', e.target.value)} placeholder="Kerala"/>
+                <input value={form.seller?.state || ''} readOnly aria-readonly="true" title="Change workshop state in Company Settings" placeholder="Kerala"/>
               </label>
               <label>State Code
-                <input value={form.seller?.stateCode || ''} onChange={(e) => update('seller.stateCode', e.target.value.replace(/\D/g,'').slice(0,2))} placeholder="32"/>
+                <input value={form.seller?.stateCode || ''} readOnly aria-readonly="true" title="State derives from Company Settings" placeholder="32"/>
               </label>
             </div>
           </section>
@@ -580,6 +629,20 @@ export function InvoiceRoutePage() {
           <section className="billing-card invoice-customer-card">
             <span className="billing-kicker">BILL TO</span>
             <h3>Customer Details</h3>
+            <label>Billing For
+              <select aria-label="Bill customer type" value={form.customer?.customerType || 'individual'}
+                onChange={(e) => setForm((old) => ({
+                  ...old,
+                  customer: {
+                    ...old.customer,
+                    customerType: e.target.value,
+                    ...(e.target.value === 'individual' ? { companyName: '', gstin: '' } : {})
+                  }
+                }))}>
+                <option value="individual">Individual — Simple Service Bill</option>
+                <option value="business">Company — Business Invoice</option>
+              </select>
+            </label>
 
             <label>Phone / Existing Customer
               <select
@@ -602,8 +665,13 @@ export function InvoiceRoutePage() {
               </div>
             )}
 
-            <label>Name
-              <input value={form.customer?.name || ''} onChange={(e) => update('customer.name', e.target.value)} placeholder="Customer / Company name"/>
+            {form.customer?.customerType === 'business' && (
+              <label>Company / Business Name
+                <input value={form.customer?.companyName || ''} onChange={(e) => update('customer.companyName', e.target.value)} placeholder="Registered company / business name"/>
+              </label>
+            )}
+            <label>{form.customer?.customerType === 'business' ? 'Contact Person' : 'Customer Name'}
+              <input value={form.customer?.name || ''} onChange={(e) => update('customer.name', e.target.value)} placeholder={form.customer?.customerType === 'business' ? 'Company contact' : 'Customer name'}/>
             </label>
 
             <label>Phone
@@ -618,9 +686,11 @@ export function InvoiceRoutePage() {
               <textarea value={form.customer?.address || ''} onChange={(e) => update('customer.address', e.target.value)} placeholder="Billing address"/>
             </label>
 
-            <label>GSTIN
-              <input value={form.customer?.gstin || ''} onChange={(e) => update('customer.gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
-            </label>
+            {form.customer?.customerType === 'business' && form.invoiceType === 'gst' && (
+              <label>Company GSTIN (if registered)
+                <input value={form.customer?.gstin || ''} onChange={(e) => update('customer.gstin', e.target.value.toUpperCase())} placeholder="Leave blank for walk-in customer"/>
+              </label>
+            )}
 
             <div className="invoice-two-col">
               <label>State
@@ -692,18 +762,26 @@ export function InvoiceRoutePage() {
           <section className="billing-card">
             <span className="billing-kicker">INVOICE DETAILS</span>
             <h3>Document Details</h3>
-            <label>Invoice Type
-              <select value={form.invoiceType} onChange={(e) => update('invoiceType', e.target.value)}>
-                <option value="regular">Regular Bill</option>
-                <option value="gst">GST Tax Invoice</option>
-              </select>
-            </label>
+            <div className="invoice-registration-mode" role="status" aria-live="polite">
+              <strong>{form.customer?.customerType === 'business' ? 'Company Invoice (B2B)' : 'Simple Service Bill (B2C)'}</strong>
+              <span>{gstConfig?.registered
+                ? 'Workshop GST registered: GST applies to taxable parts and labour in both billing styles.'
+                : gstConfig
+                  ? 'Workshop is not GST registered: tax collection is disabled for both styles.'
+                  : 'Checking Company GST settings…'}</span>
+            </div>
             <label>Date
               <input type="date" value={form.date || ''} onChange={(e) => update('date', e.target.value)}/>
             </label>
-            <label>Place of Supply
-              <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', e.target.value)} placeholder="32-Kerala"/>
-            </label>
+            {form.invoiceType === 'gst' && (
+              <label>Place of Supply — State / UT
+                <select value={String(form.customer?.placeOfSupply || '').slice(0, 2)}
+                  onChange={(e) => update('customer.placeOfSupply', e.target.value)}>
+                  <option value="">Select State / UT</option>
+                  {INDIA_STATES.map(([code, name]) => <option key={code} value={code}>{code} — {name}</option>)}
+                </select>
+              </label>
+            )}
             <div className="invoice-two-col">
               <label>Job Card No.
                 <input value={form.jobCardNo || ''} onChange={(e) => update('jobCardNo', e.target.value)} placeholder="JOB-2048"/>
@@ -721,13 +799,13 @@ export function InvoiceRoutePage() {
             <button className="bill-btn" onClick={() => update('items', [...form.items, emptyItem()])}><Plus size={16}/>Add Item</button>
           </div>
 
-          <div className="invoice-sale-head">
+          <div className={`invoice-sale-head ${form.invoiceType !== 'gst' ? 'invoice-no-gst' : ''}`}>
             <span>Item Name / Source</span>
-            <span>HSN / SAC</span>
+            {form.invoiceType === 'gst' && <span>HSN / SAC</span>}
             <span>Qty</span>
             <span>Unit</span>
             <span>Price / Unit</span>
-            <span>GST %</span>
+            {form.invoiceType === 'gst' && <span>GST %</span>}
             <span>Amount</span>
             <span></span>
           </div>
@@ -735,10 +813,10 @@ export function InvoiceRoutePage() {
           <div className="invoice-sale-editor">
             {form.items.map((row) => {
               const base = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
-              const rate = form.invoiceType === 'gst' && form.taxMode !== 'none' ? n(row.taxRate) : 0;
+              const rate = form.invoiceType === 'gst' && totals.taxMode !== 'unknown' ? n(row.taxRate) : 0;
               const lineAmount = base + (base * rate / 100);
 
-              return <div className="invoice-sale-row" key={row.id}>
+              return <div className={`invoice-sale-row ${form.invoiceType !== 'gst' ? 'invoice-no-gst' : ''}`} key={row.id}>
                 <div className="invoice-item-main-cell">
                   <select aria-label="Item source" value={row.type} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
                     {itemTypes.map((type) => <option key={type}>{type}</option>)}
@@ -751,13 +829,13 @@ export function InvoiceRoutePage() {
                     : <input aria-label="Item name" value={row.description || ''} onChange={(e) => updateItem(row.id, 'description', e.target.value)} placeholder="Item / service name"/>
                   }
                 </div>
-                <input aria-label="HSN or SAC" value={row.hsnCode || ''} onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value.replace(/[^0-9A-Za-z]/g, ''))} placeholder="HSN / SAC"/>
+                {form.invoiceType === 'gst' && <input aria-label="HSN or SAC" value={row.hsnCode || ''} onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value.replace(/[^0-9A-Za-z]/g, ''))} placeholder="HSN / SAC"/>}
                 <input className="plain-number-input" aria-label="Quantity" inputMode="decimal" value={inputNumber(row.qty) || '1'} onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
                 <select aria-label="Unit" value={row.unit || 'PCS'} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
                   {['PCS','NOS','SET','KG','LTR','MTR','BOX','PAIR','HRS','JOB'].map((unit) => <option key={unit}>{unit}</option>)}
                 </select>
                 <input className="plain-number-input" aria-label="Price per unit" inputMode="decimal" value={inputNumber(row.rate)} onChange={(e) => updateItem(row.id, 'rate', parseDecimal(e.target.value))} placeholder="₹ 0.00"/>
-                <input className="plain-number-input" aria-label="GST rate" inputMode="decimal" value={inputNumber(row.taxRate)} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder="18"/>
+                {form.invoiceType === 'gst' && <input className="plain-number-input" aria-label="GST rate" inputMode="decimal" value={row.taxRate ?? ''} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder="Applicable GST %"/>}
                 <strong className="billing-line-total">{money.format(lineAmount)}</strong>
                 <button aria-label="Remove item" className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
               </div>;
@@ -770,13 +848,12 @@ export function InvoiceRoutePage() {
             <span className="billing-kicker">PAYMENT & TERMS</span>
             <h3>Invoice Terms</h3>
             <div className="invoice-two-col">
-              {form.invoiceType === 'gst' && <label>Tax Type
-                <select value={form.taxMode} onChange={(e) => update('taxMode', e.target.value)}>
-                  <option value="igst">IGST</option>
-                  <option value="cgst_sgst">CGST + SGST</option>
-                  <option value="none">No Tax</option>
-                </select>
-              </label>}
+              {form.invoiceType === 'gst' && (
+                <div className="invoice-tax-mode-note">
+                  <strong>Tax type: {totals.taxMode === 'cgst_sgst' ? 'CGST + SGST' : totals.taxMode === 'igst' ? 'IGST' : 'Select place of supply'}</strong>
+                  <span>Automatically determined from workshop GSTIN and place of supply.</span>
+                </div>
+              )}
               <label>Payment Type
                 <select value={form.paymentType || 'Credit'} onChange={(e) => update('paymentType', e.target.value)}>
                   <option>Credit</option>
@@ -812,8 +889,12 @@ export function InvoiceRoutePage() {
             <h3>Invoice Summary</h3>
             <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal)}</strong></div>
             {totals.documentDiscount > 0 && <div><span>Discount</span><strong>- {money.format(totals.documentDiscount)}</strong></div>}
-            <div><span>Taxable Amount</span><strong>{money.format(totals.taxable)}</strong></div>
-            <div><span>GST</span><strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong></div>
+            <div><span>{form.invoiceType === 'gst' ? 'Taxable Amount' : 'Amount after Discount'}</span><strong>{money.format(totals.taxable)}</strong></div>
+            {form.invoiceType === 'gst' && <>
+              <div><span>CGST</span><strong>{money.format(totals.cgst)}</strong></div>
+              <div><span>SGST</span><strong>{money.format(totals.sgst)}</strong></div>
+              <div><span>IGST</span><strong>{money.format(totals.igst)}</strong></div>
+            </>}
             <div><span>Adjustment</span><strong>{money.format(totals.adjustment)}</strong></div>
             <div className="grand"><span>Total</span><strong>{money.format(totals.total)}</strong></div>
             <div><span>Received</span><strong>{money.format(totals.paid)}</strong></div>
@@ -864,13 +945,14 @@ function InvoicePrint({ doc, totals }) {
     .map((part) => part[0])
     .join('')
     .toUpperCase();
+  const isBusiness = doc.customer?.customerType === 'business';
   const documentTitle = doc.kind === 'estimate'
     ? 'Estimate / Quotation'
-    : doc.invoiceType === 'gst'
-      ? 'Tax Invoice'
-      : 'Invoice';
+    : isBusiness
+      ? (doc.invoiceType === 'gst' ? 'Tax Invoice' : 'Business Invoice')
+      : (doc.invoiceType === 'gst' ? 'Service Bill / Tax Invoice' : 'Service Bill');
 
-  return <section className="invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template">
+  return <section className={`invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template ${doc.invoiceType !== 'gst' ? 'invoice-no-gst' : ''} ${!isBusiness ? 'invoice-consumer-bill' : 'invoice-business-bill'}`}>
     <div className="invoice-creative-topbar">
       <span>ORIGINAL</span>
       <span>{doc.status || 'Draft'}</span>
@@ -886,13 +968,13 @@ function InvoicePrint({ doc, totals }) {
             {seller.phone && <span>Phone: {seller.phone}</span>}
             {seller.email && <span>Email: {seller.email}</span>}
           </div>
-          <span>GSTIN: {seller.gstin || 'Configure GSTIN'}{sellerState ? ` · ${sellerState}` : ''}</span>
+          {doc.invoiceType === 'gst' && <span>GSTIN: {seller.gstin || 'Not configured'}{sellerState ? ` · ${sellerState}` : ''}</span>}
         </div>
       </div>
 
       <div className="invoice-creative-docmeta">
         <span>{documentTitle}</span>
-        <strong>{doc.number || 'DRAFT'}</strong>
+        <strong>{isBusiness ? 'Invoice No.' : 'Bill No.'}: {doc.number || 'DRAFT'}</strong>
         <small>{doc.date || '—'}</small>
       </div>
     </div>
@@ -901,10 +983,11 @@ function InvoicePrint({ doc, totals }) {
 
     <div className="invoice-sale-info">
       <div>
-        <strong>Bill To</strong>
-        <b>{doc.customer?.name || '—'}</b>
+        <strong>{isBusiness ? 'Bill To · Company' : 'Customer'}</strong>
+        {isBusiness && <b>{doc.customer?.companyName || doc.customer?.name || '—'}</b>}
+        {(!isBusiness || (doc.customer?.name && doc.customer.name !== doc.customer.companyName)) && <span>{doc.customer?.name || 'Walk-in Customer'}</span>}
         <span>{doc.customer?.address || '—'}</span>
-        {doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
+        {isBusiness && doc.invoiceType === 'gst' && doc.customer?.gstin && <span>Customer GSTIN: {doc.customer.gstin}</span>}
         {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
       </div>
       <div>
@@ -914,19 +997,19 @@ function InvoicePrint({ doc, totals }) {
       </div>
       <div className="invoice-sale-info-right">
         <strong>{doc.kind === 'estimate' ? 'Estimate Details' : 'Invoice Details'}</strong>
-        <span>{doc.kind === 'estimate' ? 'Estimate No.' : 'Invoice No.'}: {doc.number || 'DRAFT'}</span>
+        <span>{doc.kind === 'estimate' ? 'Estimate No.' : (isBusiness ? 'Invoice No.' : 'Bill No.')}: {doc.number || 'DRAFT'}</span>
         <span>Date: {doc.date || '—'}</span>
-        <span>Place of Supply: {doc.customer?.placeOfSupply || doc.customer?.state || '—'}</span>
+        {doc.invoiceType === 'gst' && <span>Place of Supply: {doc.customer?.placeOfSupply || doc.customer?.state || '—'}</span>}
       </div>
     </div>
 
     <div className="invoice-sale-table">
       <div className="invoice-sale-table-head">
-        <span>#</span><span>Item Name</span><span>HSN / SAC</span><span>Quantity</span><span>Unit</span><span>Price / Unit</span><span>GST</span><span>Amount</span>
+        <span>#</span><span>Item Name</span>{doc.invoiceType === 'gst' && <span>HSN / SAC</span>}<span>Quantity</span><span>Unit</span><span>Price / Unit</span>{doc.invoiceType === 'gst' && <span>GST</span>}<span>Amount</span>
       </div>
       {rows.map((row, index) => {
         const taxable = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
-        const rate = doc.invoiceType === 'gst' && doc.taxMode !== 'none'
+        const rate = doc.invoiceType === 'gst'
           ? (row.taxRate === '' || row.taxRate == null
               ? (doc.taxMode === 'igst' ? n(doc.igstRate) : n(doc.cgstRate) + n(doc.sgstRate))
               : n(row.taxRate))
@@ -935,26 +1018,26 @@ function InvoicePrint({ doc, totals }) {
         return <div className="invoice-sale-table-row" key={row.id || index}>
           <span>{index + 1}</span>
           <strong>{row.description || row.code || 'Item'}</strong>
-          <span>{row.hsnCode || '—'}</span>
+          {doc.invoiceType === 'gst' && <span>{row.hsnCode || '—'}</span>}
           <span>{row.qty || 0}</span>
           <span>{row.unit || 'PCS'}</span>
           <span>{money.format(n(row.rate))}</span>
-          <span>{rate ? <>{money.format(tax)}<small>({rate}%)</small></> : '—'}</span>
+          {doc.invoiceType === 'gst' && <span>{rate ? <>{money.format(tax)}<small>({rate}%)</small></> : '—'}</span>}
           <strong>{money.format(taxable + tax)}</strong>
         </div>;
       })}
       <div className="invoice-sale-table-total">
-        <span></span><strong>Total</strong><span></span>
+        <span></span><strong>Total</strong>{doc.invoiceType === 'gst' && <span></span>}
         <strong>{rows.reduce((sum,row)=>sum+n(row.qty),0)}</strong>
         <span></span><span></span>
-        <strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong>
+        {doc.invoiceType === 'gst' && <strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong>}
         <strong>{money.format(totals.total - totals.adjustment)}</strong>
       </div>
     </div>
 
     <div className="invoice-sale-lower">
       <div className="invoice-sale-left">
-        {taxGroups.length > 0 && <div className="invoice-sale-tax-table">
+        {doc.invoiceType === 'gst' && taxGroups.length > 0 && <div className="invoice-sale-tax-table">
           <div className="head"><span>Tax type</span><span>Taxable amount</span><span>Rate</span><span>Tax amount</span></div>
           {taxGroups.map((group, index) => <div className="row" key={index}>
             <span>{group.type}</span>
@@ -965,7 +1048,7 @@ function InvoicePrint({ doc, totals }) {
         </div>}
 
         <div className="invoice-sale-blue-box">
-          <strong>{doc.kind === 'estimate' ? 'Estimate Amount In Words' : 'Invoice Amount In Words'}</strong>
+          <strong>{doc.kind === 'estimate' ? 'Estimate Amount In Words' : (isBusiness ? 'Invoice Amount In Words' : 'Bill Amount In Words')}</strong>
           <span>{amountToIndianWords(totals.total)}</span>
         </div>
 
@@ -982,7 +1065,9 @@ function InvoicePrint({ doc, totals }) {
 
       <div className="invoice-sale-amounts">
         <div className="title">Amounts</div>
-        <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal + totals.cgst + totals.sgst + totals.igst)}</strong></div>
+        <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal)}</strong></div>
+        {totals.documentDiscount > 0 && <div><span>Discount</span><strong>- {money.format(totals.documentDiscount)}</strong></div>}
+        {doc.invoiceType === 'gst' && <div><span>GST</span><strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong></div>}
         <div><span>Adjustment</span><strong>{money.format(totals.adjustment)}</strong></div>
         <div className="grand"><span>Total</span><strong>{money.format(totals.total)}</strong></div>
         <div><span>Received</span><strong>{money.format(totals.paid)}</strong></div>
