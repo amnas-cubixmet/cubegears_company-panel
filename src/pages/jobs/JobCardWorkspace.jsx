@@ -1,6 +1,6 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Camera,
   CheckCircle2,
   Clock3,
   FileText,
@@ -14,19 +14,33 @@ import {
   Trash2,
   UserRound,
   Wrench,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  Download,
+  LockKeyhole
 } from 'lucide-react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
+import { billingService } from '../../services/billing.service';
+import { paymentService } from '../../services/payment.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { staffService } from '../../services/staff.service';
 import { JobPartsWorkflow } from './JobPartsWorkflow';
 import { JobInspectionPanel } from '../../components/jobs/JobInspectionPanel';
+import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
+import { JobQualityCheckPanel } from '../../components/jobs/JobQualityCheckPanel';
+import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import { downloadApprovedEstimatePdf, latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
+import '../../styles/approved-estimate-pdf.css';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
-import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';
+import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
+import { JobTotalCostPanel } from '../../components/jobs/JobTotalCostPanel';
+import { JobActivityTimeline } from '../../components/jobs/JobActivityTimeline';
+import { JobWorkPhotoPanel } from '../../components/jobs/JobWorkPhotoPanel';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
+import { complaintStatusForJob, complaintStatusClass } from '../../components/jobs/complaintStatus';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -67,8 +81,22 @@ const TABS = [
   ['updates', 'Technician Updates'],
   ['qc', 'QC'],
   ['invoice', 'Invoice'],
-  ['activity', 'Activity']
+  ['activity', 'Full Log']
 ];
+
+const SECTION_DETAILS = {
+  overview: 'Customer, vehicle and technician at a glance.',
+  complaints: 'Customer concerns and work requests.',
+  inspection: 'Vehicle checks and inspection findings.',
+  estimate: 'Labour, parts, estimates and customer approval.',
+  work: 'Technician assignments and workshop work.',
+  parts: 'Spare parts request, issue and usage.',
+  updates: 'Technician notes and work updates.',
+  qc: 'Quality inspection and final checks.',
+  invoice: 'Invoice, payments, balance and delivery.',
+  activity: 'Complete recorded history of Job Card actions, staff and timestamps.'
+};
+const GUIDED_STAGES = ['overview', 'inspection', 'estimate', 'work', 'qc', 'invoice'];
 
 const TAB_ICONS = {
   overview: Gauge,
@@ -82,15 +110,6 @@ const TAB_ICONS = {
   invoice: ReceiptText,
   activity: Clock3,
 };
-
-const blankLabour = () => ({
-  service: '',
-  mechanicName: '',
-  estimatedHours: '',
-  hours: '',
-  rate: '',
-  internalCost: ''
-});
 
 const blankFinding = () => ({
   description: '',
@@ -108,6 +127,13 @@ export function JobCardWorkspace() {
   const workflowTabsRef = useRef(null);
 
   const [job, setJob] = useState(null);
+  const [workflow, setWorkflow] = useState(null);
+  const [jobInvoices, setJobInvoices] = useState([]);
+  const [jobPayments, setJobPayments] = useState([]);
+  const [invoicePdfLoading, setInvoicePdfLoading] = useState(false);
+  const [invoicePdfError, setInvoicePdfError] = useState('');
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState('');
   const [staff, setStaff] = useState([]);
   const [timerRefreshVersion, setTimerRefreshVersion] = useState(0);
   const [vehicleHistory, setVehicleHistory] = useState([]);
@@ -115,15 +141,17 @@ export function JobCardWorkspace() {
   const [saving, setSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [error, setError] = useState('');
+  const [pdfOffer, setPdfOffer] = useState(null);
+  const [pdfError, setPdfError] = useState('');
+  const [pdfFilename, setPdfFilename] = useState('');
 
   const [complaintText, setComplaintText] = useState('');
+  const [complaintFilter, setComplaintFilter] = useState('All');
   const [finding, setFinding] = useState(blankFinding());
-  const [labour, setLabour] = useState(blankLabour());
   const [updateNote, setUpdateNote] = useState('');
   const [updateType, setUpdateType] = useState('Work Update');
   const [estimateTax, setEstimateTax] = useState('18');
   const [estimateDiscount, setEstimateDiscount] = useState('0');
-  const [qcRoadTest, setQcRoadTest] = useState('');
   const [deliveryForm, setDeliveryForm] = useState({
     finalKm: '',
     customerSignature: '',
@@ -138,28 +166,59 @@ export function JobCardWorkspace() {
 
   const activeTab = useMemo(() => {
     const section = location.pathname.split('/').filter(Boolean).at(-1);
-    return TABS.some(([key]) => key === section) ? section : 'overview';
+    return section === 'full-log' ? 'activity' : TABS.some(([key]) => key === section) ? section : 'overview';
   }, [location.pathname]);
 
   useEffect(() => {
     const rail = workflowTabsRef.current;
-    const activeButton = rail?.querySelector('[aria-current="page"]');
+    const activeButton = rail?.querySelector('[aria-current="step"]');
     if (!rail || !activeButton || rail.scrollWidth <= rail.clientWidth) return;
     const left = activeButton.offsetLeft - rail.offsetLeft - (rail.clientWidth - activeButton.clientWidth) / 2;
     rail.scrollTo({ left: Math.max(0, left), behavior: 'instant' });
   }, [activeTab]);
+
+  const loadBilling = async () => {
+    if (!id) return;
+    setBillingLoading(true);
+    setBillingError('');
+    try {
+      const invoiceResponse = await billingService.list({ jobId: id });
+      const allInvoices = Array.isArray(invoiceResponse) ? invoiceResponse : invoiceResponse?.results || [];
+      const related = allInvoices.filter((row) =>
+        (row.kind || 'invoice') === 'invoice' &&
+        (String(row.sourceJobId || '') === String(id) ||
+         (job?.jobNumber && String(row.jobCardNo || '') === String(job.jobNumber)))
+      ).sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
+      const current = related.find((row) => row.status !== 'Cancelled') || related[0];
+      const paymentResponse = current ? await paymentService.getPayments({ invoice: current.id }) : [];
+      const allPayments = Array.isArray(paymentResponse) ? paymentResponse : paymentResponse?.results || [];
+      setJobInvoices(related);
+      setJobPayments(allPayments.filter((row) => String(row.invoice || '') === String(current?.id))
+        .sort((a, b) => String(b.created_at || b.date || '').localeCompare(String(a.created_at || a.date || ''))));
+    } catch (requestError) {
+      setBillingError(requestError?.message || 'Unable to load invoice and payment records.');
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'invoice' && job?.id) loadBilling();
+  }, [activeTab, job?.id, job?.jobNumber]);
 
   const load = async () => {
     setLoading(true);
     setError('');
 
     try {
-      const [data, staffData] = await Promise.all([
+      const [data, staffData, flow] = await Promise.all([
         jobService.getJobById(id),
-        staffService.getStaff()
+        staffService.getStaff(),
+        jobService.getJobWorkflow(id)
       ]);
 
       setJob(data || null);
+      setWorkflow(flow || null);
       setStaff(Array.isArray(staffData) ? staffData.filter((item) => item.employmentStatus === 'Active') : []);
 
       if (data?.vehicleReg) {
@@ -174,7 +233,6 @@ export function JobCardWorkspace() {
         customerSignature: data?.delivery?.acknowledgedBy || '',
         warrantyNotes: data?.delivery?.notes || ''
       });
-      setQcRoadTest(data?.qualityCheck?.testDriveNotes || '');
       setPaymentForm((old) => ({
         ...old,
         amount: '',
@@ -216,21 +274,6 @@ export function JobCardWorkspace() {
     }
   };
 
-  const setStatus = async (status) => {
-    if (status === normalizeJobStatus(job?.status)) return;
-    setSaving(true);
-    setError('');
-    try {
-      const updated = await jobService.updateJobStatus(job.id, status);
-      setJob(updated || { ...job, status });
-    } catch (requestError) {
-      const details = requestError?.response?.data;
-      setError(details?.status || details?.message || requestError?.message || 'Could not change Job Card status.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const assignTechnician = async (staffId) => {
     const selected = staff.find((item) => String(item.id) === String(staffId));
 
@@ -247,16 +290,25 @@ export function JobCardWorkspace() {
     });
   };
 
-  const complaints = job?.complaints || job?.customerComplaints || [];
+  const complaintSource = job?.complaints || job?.customerComplaints || [];
+  const complaints = Array.isArray(complaintSource) ? complaintSource : [];
+  const automaticComplaintStatus = complaintStatusForJob(job, workflow);
   const findings = job?.inspection?.findings || job?.vehicleInspection?.findings || job?.inspectionFindings || [];
   const inspectionChecks = job?.inspection?.checklist || {};
-  const labourRecords = job?.labourRecords || [];
+  const labourRecords = USE_MOCK_API ? (job?.labourRecords || []) : (job?.work || []);
   const parts = job?.partsUsed || [];
   const outsidePurchases = job?.outsidePurchases || [];
-  const estimates = job?.estimates || [];
+  const estimates = (job?.estimates || [])
+    .map((item) => ({
+      ...item,
+      approvalStatus: item.approvalStatus || (item.status === 'Draft' ? 'Pending' : item.status),
+      grandTotal: item.grandTotal ?? item.total,
+      taxAmount: item.taxAmount ?? item.tax,
+      version: USE_MOCK_API ? item.version : 'Estimate V' + (item.version || 1)
+    }))
+    .sort((a, b) => String(a.created_at || a.date || '').localeCompare(String(b.created_at || b.date || '')));
   const updates = job?.workUpdates || [];
-  const timeline = job?.timeline || [];
-  const qc = job?.qualityCheck || {
+  const qc = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {
     inspector: 'Unassigned',
     status: 'Pending',
     checklist: [],
@@ -289,55 +341,129 @@ export function JobCardWorkspace() {
   const estimateGrandTotal = taxable + estimateTaxAmount;
 
   const latestEstimate = estimates.at(-1) || null;
-  const invoiceTotal = cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0);
+  const linkedInvoice = jobInvoices.find((row) => row.status !== 'Cancelled') || null;
+  const invoiceTotal = linkedInvoice
+    ? cleanNumber(linkedInvoice.total)
+    : (USE_MOCK_API ? cleanNumber(job?.billing?.invoiceTotal || latestEstimate?.grandTotal || 0) : 0);
+  const invoicePaid = linkedInvoice ? cleanNumber(linkedInvoice.paid) : cleanNumber(job?.billing?.paidAmount || 0);
+  const invoiceBalance = Math.max(0, linkedInvoice ? cleanNumber(linkedInvoice.balance ?? (invoiceTotal - invoicePaid)) : invoiceTotal - invoicePaid);
+  const invoicePaymentStatus = linkedInvoice
+    ? (invoiceTotal <= 0 ? 'No amount due' : invoiceBalance <= 0 ? 'Paid' : invoicePaid > 0 ? 'Partially Paid' : 'Unpaid')
+    : (USE_MOCK_API ? job?.paymentStatus || 'Pending' : 'Not invoiced');
 
 
-  const sectionComplete = useMemo(() => ({
-    overview: Boolean(
-      job?.customerName &&
-      job?.vehicleReg &&
-      job?.assignedEmployeeId
-    ),
+  // The backend workflow endpoint is the single source of truth for
+  // persisted completion; visual checks below cover auxiliary sections only.
+  const coreStages = workflow?.stages || GUIDED_STAGES;
+  const coreCompleted = workflow?.completed || [];
+  const sectionComplete = {
+    overview: coreCompleted.includes('overview'),
+    inspection: coreCompleted.includes('inspection'),
+    estimate: coreCompleted.includes('estimate'),
+    work: coreCompleted.includes('work'),
+    qc: coreCompleted.includes('qc'),
+    invoice: coreCompleted.includes('invoice'),
     complaints: complaints.length > 0,
-    inspection: job?.inspection?.status === 'Completed' || job?.vehicleInspection?.status === 'Completed',
-    work: labourRecords.length > 0,
     parts: parts.length > 0 || outsidePurchases.length > 0,
-    estimate: estimates.some((item) => item.approvalStatus === 'Approved'),
     updates: updates.length > 0,
-    qc: qc?.status === 'Pass',
-    invoice: invoiceTotal > 0,
     activity: true
-  }), [
-    job?.customerName,
-    job?.vehicleReg,
-    job?.assignedEmployeeId,
-    complaints.length,
-    findings.length,
-    inspectionChecks,
-    labourRecords.length,
-    parts.length,
-    outsidePurchases.length,
-    estimates,
-    updates.length,
-    qc?.status,
-    invoiceTotal
-  ]);
-
-  const unlockedTabIndex = useMemo(() => {
-    let unlocked = 0;
-    for (let index = 0; index < TABS.length - 1; index += 1) {
-      const [key] = TABS[index];
-      if (!sectionComplete[key]) break;
-      unlocked = index + 1;
+  };
+  const currentStage = workflow?.current || 'overview';
+  const isSectionLocked = (key) => {
+    if (!workflow) return false;
+    if (coreStages.includes(key)) return workflow.locked?.includes(key) || false;
+    if (key === 'complaints') return false;
+    if (key === 'parts') {
+      // Parts can be prepared when the Estimate stage opens.
+      return ['overview', 'inspection'].includes(currentStage);
     }
-    return unlocked;
-  }, [sectionComplete]);
+    if (key === 'updates') {
+      return ['overview', 'inspection', 'estimate'].includes(currentStage);
+    }
+    return false;
+  };
+  // One compact main workflow for every Job Card route. Supporting sections
+  // remain accessible from More without becoming required approval stages.
+  const visibleTabs = TABS.filter(([key]) => GUIDED_STAGES.includes(key));
+  const extraTabs = TABS.filter(([key]) => !GUIDED_STAGES.includes(key));
+  const activeExtraTab = extraTabs.some(([key]) => key === activeTab);
+  const showWorkTools = activeTab === 'work' || (activeExtraTab && activeTab !== 'activity');
+  const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
+  const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
+  const activeTabComplete = Boolean(sectionComplete[activeTab]);
+  const activeTabLocked = isSectionLocked(activeTab);
+  const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
+  const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
   const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
   const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
   const activeTabComplete = sectionComplete[activeTab];
 
+  const completeStage = async (stage) => {
+    if (!workflow || saving) return;
+    const options = {};
+    if (stage === 'estimate') {
+      if (!await appConfirm('Confirm that the customer approved the latest estimate?')) return;
+      options.approveEstimate = true;
+    }
+    if (stage === 'work') {
+      if (!await appConfirm('Confirm all work is finished and mechanic timers are stopped?')) return;
+      options.confirmWorkDone = true;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      const result = await jobService.completeJobStage(job.id, stage, options);
+      if (result.job) setJob(result.job);
+      setWorkflow(result);
+      if (stage === 'estimate' && result.completed?.includes('estimate')) {
+        // Approval must succeed on the server before a PDF can be offered.
+        // Stay on Estimate until the user chooses Download or Continue.
+        const approvedJob = result.job || await jobService.getJobById(job.id);
+        const approvedEstimate = latestApprovedEstimate(approvedJob.estimates || []);
+        if (approvedEstimate) {
+          setPdfError('');
+          setPdfFilename('');
+          setPdfOffer({
+            job: approvedJob,
+            estimate: approvedEstimate,
+            nextStage: result.current || 'work',
+          });
+        } else {
+          setError('Estimate approved, but the approved PDF is not ready yet. Refresh the job card to download it.');
+        }
+      } else if (result.current && result.current !== stage) {
+        navigate('/jobs/' + job.id + '/' + result.current, { replace: true });
+      }
+    } catch (e) {
+      const details = e?.response?.data;
+      setError(details?.stage || details?.message || e?.message || 'Unable to complete this stage.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const continueAfterApproval = () => {
+    if (!pdfOffer) return;
+    const next = pdfOffer.nextStage || 'work';
+    setPdfOffer(null);
+    setPdfError('');
+    setPdfFilename('');
+    navigate('/jobs/' + job.id + '/' + next, { replace: true });
+  };
+
+  const downloadApprovalPdf = (approvedJob, approvedEstimate) => {
+    try {
+      const filename = downloadApprovedEstimatePdf(approvedJob, approvedEstimate);
+      setPdfError('');
+      setPdfFilename(filename);
+      return filename;
+    } catch (e) {
+      setPdfError(e?.message || 'Could not create the approved PDF.');
+      return null;
+    }
+  };
 
   const addComplaint = async () => {
     const description = complaintText.trim();
@@ -347,18 +473,15 @@ export function JobCardWorkspace() {
       id: `CMP-${Date.now()}`,
       description,
       wording: description,
-      status: 'Open',
+      status: automaticComplaintStatus,
       createdAt: new Date().toISOString()
     };
 
-    await persist({ complaints: [...complaints, record] });
-    setComplaintText('');
-  };
-
-  const updateComplaintStatus = async (complaintId, status) => {
-    await persist({
-      complaints: complaints.map((item) => item.id === complaintId ? { ...item, status } : item)
-    });
+    const updated = await persist({ complaints: [...complaints, record] });
+    if (updated) {
+      setComplaintText('');
+      setComplaintFilter('All');
+    }
   };
 
   const updateInspectionCheck = async (item, status) => {
@@ -389,28 +512,28 @@ export function JobCardWorkspace() {
     setFinding(blankFinding());
   };
 
-  const addLabour = async (event) => {
-    event.preventDefault();
-    if (!labour.service.trim()) return;
-
-    const record = {
-      id: `LAB-${Date.now()}`,
-      ...labour,
-      estimatedHours: cleanNumber(labour.estimatedHours),
-      hours: cleanNumber(labour.hours),
-      rate: cleanNumber(labour.rate),
-      internalCost: cleanNumber(labour.internalCost),
-      customerCharge: cleanNumber(labour.hours || labour.estimatedHours) * cleanNumber(labour.rate),
-      status: 'In Progress',
-      startedAt: new Date().toISOString()
-    };
-
-    await persist({ labourRecords: [...labourRecords, record] });
-    setLabour(blankLabour());
-  };
-
   const createEstimate = async (kind = 'Estimate') => {
     const nextVersion = estimates.length + 1;
+    if (!USE_MOCK_API) {
+      setSaving(true);
+      setError('');
+      try {
+        await jobService.createJobEstimate(job.id, {
+          version: nextVersion,
+          status: 'Draft',
+          items: [{ description: kind, quantity: 1 }],
+          subtotal: estimateSubtotal.toFixed(2),
+          tax: estimateTaxAmount.toFixed(2),
+          total: estimateGrandTotal.toFixed(2)
+        });
+        await refreshJobWorkflow();
+      } catch (e) {
+        setError(e?.response?.data?.detail || e?.message || 'Estimate could not be created.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const record = {
       id: `EST-${Date.now()}`,
       version: kind === 'Additional Work' ? `Additional Work V${nextVersion}` : `Estimate V${nextVersion}`,
@@ -437,6 +560,23 @@ export function JobCardWorkspace() {
   };
 
   const setEstimateApproval = async (estimateKey, approvalStatus) => {
+    if (approvalStatus === 'Rejected') {
+      if (!await appConfirm('Reject the latest draft estimate? The customer will need a new estimate before work can begin.')) return;
+    }
+    if (!USE_MOCK_API) {
+      if (approvalStatus === 'Approved') return completeStage('estimate');
+      setSaving(true);
+      setError('');
+      try {
+        await jobService.rejectJobEstimate(job.id, estimateKey);
+        await refreshJobWorkflow();
+      } catch (e) {
+        setError(e?.response?.data?.estimate || e?.response?.data?.detail || e?.message || 'Estimate decision could not be saved.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const nextEstimates = estimates.map((item) => (item.id || item.version) === estimateKey
       ? {
           ...item,
@@ -452,25 +592,6 @@ export function JobCardWorkspace() {
       approvalStatus,
       status: approvalStatus === 'Approved' ? 'Approved' : 'Estimate Pending'
     });
-  };
-
-  const addPhoto = async (file, stage = 'Inspection') => {
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const record = {
-        id: `PH-${Date.now()}`,
-        stage,
-        url: reader.result,
-        caption: `${stage} photo`,
-        uploadedBy: job.assignedEmployeeName || job.serviceAdvisor || 'Current User',
-        timestamp: new Date().toLocaleString('en-IN')
-      };
-
-      await persist({ photos: [record, ...(job.photos || [])] });
-    };
-    reader.readAsDataURL(file);
   };
 
   const addTechnicianUpdate = async (presetType) => {
@@ -490,52 +611,8 @@ export function JobCardWorkspace() {
 
     const patch = { workUpdates: [record, ...updates] };
     if (presetType === 'Work Started' || presetType === 'Resume') patch.status = 'In Progress';
-    await persist(patch);
-    setUpdateNote('');
-  };
-
-  const defaultChecklist = [
-    'Engine / Mechanical Check',
-    'Fluid Levels',
-    'Electrical / Warning Lights',
-    'Brake & Tyre Check',
-    'Road Test',
-    'Cleaning & Final Presentation'
-  ];
-
-  const qcChecklist = qc.checklist?.length
-    ? qc.checklist.map((item, index) => ({
-        ...item,
-        id: item.id || `QC-${index + 1}`
-      }))
-    : defaultChecklist.map((item, index) => ({
-        id: `QC-${index + 1}`,
-        item,
-        status: 'Pending',
-        remark: ''
-      }));
-
-  const updateQcItem = async (itemId, status) => {
-    await persist({
-      qualityCheck: {
-        ...qc,
-        checklist: qcChecklist.map((item) => item.id === itemId ? { ...item, status } : item)
-      }
-    });
-  };
-
-  const completeQc = async (status) => {
-    await persist({
-      qualityCheck: {
-        ...qc,
-        inspector: qc.inspector === 'Unassigned' ? (job.serviceAdvisor || 'Workshop Supervisor') : qc.inspector,
-        checkDate: new Date().toISOString().split('T')[0],
-        checklist: qcChecklist,
-        testDriveNotes: qcRoadTest,
-        status
-      },
-      status: status === 'Pass' ? 'Ready for Delivery' : 'QC'
-    });
+    const saved = await persist(patch);
+    if (saved) setUpdateNote('');
   };
 
   const saveCustomerFeedback = async () => {
@@ -613,6 +690,19 @@ export function JobCardWorkspace() {
     navigate(`/invoices/new?kind=invoice&jobId=${encodeURIComponent(job.id)}`);
   };
 
+  const downloadJobInvoicePdf = async () => {
+    if (!linkedInvoice?.id || invoicePdfLoading) return;
+    setInvoicePdfError('');
+    setInvoicePdfLoading(true);
+    try {
+      await billingService.downloadPdf(linkedInvoice);
+    } catch (err) {
+      setInvoicePdfError(err?.message || 'Unable to download invoice PDF.');
+    } finally {
+      setInvoicePdfLoading(false);
+    }
+  };
+
   const recordPayment = async (event) => {
     event.preventDefault();
 
@@ -624,6 +714,38 @@ export function JobCardWorkspace() {
 
     if (invoiceTotal <= 0) {
       setError('Create an estimate or invoice before recording payment.');
+      return;
+    }
+
+    if (paymentAmount > invoiceBalance) {
+      setError('Payment cannot exceed the outstanding invoice balance.');
+      return;
+    }
+
+    if (!USE_MOCK_API) {
+      if (!linkedInvoice?.id || !job?.customerId) {
+        setError('Create an invoice linked to this Job Card before recording payment.');
+        return;
+      }
+      setSaving(true);
+      setError('');
+      try {
+        const today = new Date();
+        const date = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+        await paymentService.createPayment({
+          invoice: linkedInvoice.id,
+          customer: job.customerId,
+          date,
+          amount: paymentAmount.toFixed(2),
+          method: paymentForm.method
+        });
+        setPaymentForm((old) => ({ ...old, amount: '' }));
+        await loadBilling();
+      } catch (requestError) {
+        setError(requestError?.message || 'Payment could not be recorded.');
+      } finally {
+        setSaving(false);
+      }
       return;
     }
 
@@ -659,6 +781,10 @@ export function JobCardWorkspace() {
   };
 
   const saveDelivery = async () => {
+    if (!USE_MOCK_API) {
+      await completeStage('invoice');
+      return;
+    }
     const nextDelivery = {
       ...(job.delivery || {}),
       finalKm: deliveryForm.finalKm,
@@ -675,8 +801,12 @@ export function JobCardWorkspace() {
   };
 
   const openTab = (key) => {
+    if (isSectionLocked(key)) {
+      setError('Complete the current Job Card stage to unlock this section.');
+      return;
+    }
     setError('');
-    navigate(`/jobs/${job.id}/${key}`);
+    navigate(`/jobs/${job.id}/${key === 'activity' ? 'full-log' : key}`);
   };
 
   if (loading) return <div className="rounded-2xl border border-line bg-surface p-8 text-center text-sm text-muted">Loading job card…</div>;
@@ -688,7 +818,7 @@ export function JobCardWorkspace() {
   );
 
   return (
-    <div className="job-management-page cg-job-detail flex w-full min-w-0 flex-col gap-4 pb-4">
+    <div className="job-management-page cg-job-detail job-workspace-dashboard flex w-full min-w-0 flex-col gap-4 pb-4">
       <JobBreadcrumbs current={TABS.find(([key]) => key === activeTab)?.[1] || "Overview"} jobLabel={jobDisplayLabel(job)} jobId={job.id} />
       <header className="job-detail-header flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
@@ -699,18 +829,24 @@ export function JobCardWorkspace() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            aria-label="Change Job Card status"
-            value={normalizeJobStatus(job.status)}
-            onChange={(e) => setStatus(e.target.value)}
-            disabled={saving}
-            className="h-10 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"
-          >
-            {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
-          </select>
-          <button type="button" onClick={createInvoice} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
-            <ReceiptText size={15}/>Create Invoice
-          </button>
+          {activeTab === 'overview' ? (
+            <span className="job-overview-status-badge">{normalizeJobStatus(job.status)}</span>
+          ) : (
+            <>
+              <select
+                aria-label="Job Card status"
+                value={normalizeJobStatus(job.status)}
+                disabled
+                title="Status advances only when the current workflow stage is completed"
+                className="h-10 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-content"
+              >
+                {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
+              </select>
+              <button type="button" onClick={() => openTab('invoice')} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
+                <ReceiptText size={15}/>{linkedInvoice ? 'View Invoice' : 'Create Invoice'}
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -779,10 +915,108 @@ export function JobCardWorkspace() {
         })}
       </nav>
 
-      <div className={`job-workflow-gate ${activeTabComplete ? 'is-complete' : 'is-pending'}`}>
+        </>
+      )}
+
+
+      <div className="job-simple-step-nav" aria-label="Job Card workflow">
+        <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Main Job Card stages">
+          {visibleTabs.map(([key, label], index) => {
+            const complete = Boolean(sectionComplete[key]);
+            const locked = isSectionLocked(key);
+            const isActive = activeTab === key || (key === 'work' && activeExtraTab && activeTab !== 'activity' && !locked);
+            return (
+              <button
+                type="button"
+                key={key}
+                onClick={() => openTab(key)}
+                disabled={locked}
+                aria-current={isActive ? 'step' : undefined}
+                className={['job-workflow-tab', isActive ? 'is-active' : '', complete ? 'is-complete' : '', locked ? 'is-locked' : ''].join(' ')}
+                title={locked ? label + ' – complete the previous stage first' : label}
+              >
+                <span className="job-workflow-tab-number" aria-hidden="true">{index + 1}</span>
+                <span className="job-workflow-tab-label">{label}</span>
+                {locked ? (
+                  <LockKeyhole size={13} className="job-workflow-tab-lock" aria-label="Locked" />
+                ) : complete && !isActive ? (
+                  <CheckCircle2 size={14} className="job-workflow-tab-check" aria-label="Completed" />
+                ) : null}
+              </button>
+            );
+          })}
+        </nav>
+        <button
+          type="button"
+          className={['job-full-log-tab', activeTab === 'activity' ? 'is-active' : ''].join(' ')}
+          aria-current={activeTab === 'activity' ? 'page' : undefined}
+          onClick={() => openTab('activity')}
+          title="Full Job Card history"
+        >
+          <History size={16} aria-hidden="true" />
+          <span>Full Log</span>
+        </button>
+      </div>
+
+      {showWorkTools && (
+        <div className="job-work-tools" aria-label="Work tools">
+          <div className="job-work-tools-copy">
+            <Wrench size={16} aria-hidden="true" />
+            <span>Work tools</span>
+          </div>
+          <nav className="job-work-tools-actions" aria-label="Work tools sections">
+            {[
+              ['work', 'Work details'],
+              ['complaints', 'Complaints'],
+              ['parts', 'Parts'],
+              ['updates', 'Technician Updates'],
+            ].map(([key, label]) => {
+              const locked = isSectionLocked(key);
+              const selected = activeTab === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={locked}
+                  onClick={() => openTab(key)}
+                  aria-current={selected ? 'page' : undefined}
+                  className={selected ? 'is-selected' : ''}
+                  title={locked ? 'Complete the required stage first' : label}
+                >
+                  {label}
+                  {locked && <LockKeyhole size={12} aria-label="Locked" />}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+
+      {activeTab !== 'overview' && activeTab !== 'inspection' && activeTab !== 'estimate' && (
+        <>
+      <section className="job-workspace-section-bar" aria-label={activeTabLabel + ' section'}>
+        <div className="job-workspace-section-icon"><ActiveSectionIcon size={17} aria-hidden="true"/></div>
+        <div className="job-workspace-section-title">
+          <h2>{activeTabLabel}</h2>
+          <p>{SECTION_DETAILS[activeTab]}</p>
+        </div>
+        {activeTab !== 'activity' && <span className={'job-workspace-section-state ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-open')}>
+          {activeTabLocked ? <LockKeyhole size={13} aria-hidden="true"/> : activeTabComplete ? <CheckCircle2 size={13} aria-hidden="true"/> : <Clock3 size={13} aria-hidden="true"/>}
+          {activeTabLocked ? 'Locked' : activeTabComplete ? 'Complete' : 'In progress'}
+        </span>}
+        {!activeTabLocked && !activeTabComplete && activeTab === currentStage && activeTab !== 'qc' && (
+          <button type="button" className="job-stage-complete-button" disabled={saving} onClick={() => completeStage(activeTab)}>
+            <CheckCircle2 size={15} aria-hidden="true" />
+            {saving ? 'Saving…' : activeTab === 'estimate' ? 'Approve & Continue' : activeTab === 'work' ? 'Finish Work & Continue' : activeTab === 'invoice' ? 'Finish Job Card' : 'Complete & Continue'}
+          </button>
+        )}
+      </section>
+
+      {!showWorkTools && activeTab !== 'activity' && (
+      <div className={'job-workflow-gate ' + (activeTabLocked ? 'is-locked' : activeTabComplete ? 'is-complete' : 'is-pending')}>
         <div>
-          <strong>{activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
-          <span>Move freely between job stages. Save the details you record.</span>
+          <strong>{activeTabLocked ? 'Stage locked' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
+          <span>{'Complete each stage to unlock the next. Finished stages remain accessible.'}</span>
         </div>
         {nextVisibleTab ? (
           <button type="button" disabled={saving} onClick={() => openTab(nextVisibleTab[0])}>
@@ -791,9 +1025,22 @@ export function JobCardWorkspace() {
           </button>
         ) : null}
       </div>
+      )}
+
+        </>
+      )}
 
       {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
+      {activeTabLocked ? (
+        <section className="job-workspace-locked-panel">
+          <LockKeyhole size={24} aria-hidden="true" />
+          <h3>{activeTabLabel} is locked</h3>
+          <p>Complete the current required stage to unlock this section.</p>
+          <button type="button" onClick={() => navigate('/jobs/' + job.id + '/' + currentStage, { replace: true })}>Go to current stage</button>
+        </section>
+      ) : (
+        <>
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 xl:col-span-2">
@@ -817,19 +1064,21 @@ export function JobCardWorkspace() {
               <Info label="Check-In" value={job.checkInTime || job.createdDate}/>
               <Info label="Branch" value={job.branch}/>
             </div>
-          </section>
-
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><Wrench size={16} className="text-primary"/>Assignment</div>
-            <label className="mt-4 block text-xs font-semibold text-secondary">Assigned Technician
-              <select value={job.assignedEmployeeId || ''} onChange={(e) => assignTechnician(e.target.value)} className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content">
-                <option value="">Unassigned</option>
-                {staff.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.designation}</option>)}
-              </select>
-            </label>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <Info label="Service Advisor" value={job.serviceAdvisor || '—'}/>
-              <Info label="Priority" value={job.priority || 'Medium'}/>
+            <div className="job-overview-intro-actions">
+              <button type="button" className="job-overview-secondary-action" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+                {showAdvanced ? 'Hide details' : 'More details'}
+              </button>
+              {sectionComplete.overview ? (
+                <button type="button" className="job-overview-main-action" onClick={() => openTab(currentStage)}>
+                  <CheckCircle2 size={16} aria-hidden="true" /> {currentStage === 'overview' ? 'Overview complete' : 'Go to current stage'}
+                  <ChevronRight size={15} aria-hidden="true" />
+                </button>
+              ) : (
+                <button type="button" className="job-overview-main-action" onClick={() => completeStage('overview')} disabled={saving || activeTabLocked}>
+                  <CheckCircle2 size={16} aria-hidden="true" /> {saving ? 'Saving…' : 'Complete & Continue'}
+                  <ChevronRight size={15} aria-hidden="true" />
+                </button>
+              )}
             </div>
           </section>
 
@@ -864,16 +1113,35 @@ export function JobCardWorkspace() {
                   className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"
                 />
               </label>
-
-              <button
-                type="button"
-                onClick={saveCustomerFeedback}
-                disabled={saving || !feedbackRating}
-                className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white disabled:opacity-50"
+              <select
+                id="job-overview-technician"
+                value={job.assignedEmployeeId || ''}
+                onChange={(event) => assignTechnician(event.target.value)}
+                disabled={saving}
+                className="job-overview-mechanic-select"
               >
-                Save Feedback
-              </button>
+                <option value="">Choose a mechanic (optional)</option>
+                {staff.map((item) => (
+                  <option key={item.id} value={item.id}>{item.name} · {item.designation || 'Workshop staff'}</option>
+                ))}
+              </select>
+              <div className="job-overview-assignment-foot">
+                <div><span>Service advisor</span><strong>{job.serviceAdvisor || 'Not assigned'}</strong></div>
+                <div><span>Priority</span><strong>{job.priority || 'Medium'}</strong></div>
+              </div>
+              <p className="job-overview-supporting-note">You can assign or change the mechanic later.</p>
+            </section>
+          </div>
+
+          <section className="job-overview-complaint" aria-label="Customer complaint">
+            <div>
+              <h3><FileText size={17} aria-hidden="true"/> Customer complaint</h3>
+              <p>{complaints[0]?.description || complaints[0]?.wording || 'No customer complaint added yet.'}</p>
+              {complaints.length > 1 && <span>{complaints.length} complaints recorded</span>}
             </div>
+            <button type="button" onClick={() => openTab('complaints')}>
+              {complaints.length ? 'View complaints' : 'Add complaint'} <ChevronRight size={15} aria-hidden="true"/>
+            </button>
           </section>
 
           <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
@@ -890,32 +1158,108 @@ export function JobCardWorkspace() {
                   </button>
                 ))}
               </div>
-            )}
-          </section>
+            </section>
+          )}
         </div>
       )}
 
       {activeTab === 'complaints' && (
-        <section className="job-panel job-complaints-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="job-panel-title text-sm font-extrabold text-content">Customer Complaints</div>
-          <div className="job-complaint-compose mt-3 flex flex-col gap-2 sm:flex-row">
-            <textarea value={complaintText} onChange={(e) => setComplaintText(e.target.value)} placeholder="Add complaint exactly as customer explains it..." className="min-h-20 flex-1 rounded-xl border border-line bg-surface-2 p-3 text-sm text-content"/>
-            <button type="button" onClick={addComplaint} disabled={!complaintText.trim() || saving} className="h-11 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white"><Plus size={15} className="inline"/> Add Complaint</button>
+        <section className="job-panel job-complaints-panel" aria-label="Customer Complaints">
+          <header className="job-complaints-head">
+            <div className="job-complaints-title">
+              <span className="job-complaints-icon" aria-hidden="true"><FileText size={18}/></span>
+              <div>
+                <h3>Customer Complaints</h3>
+                <p>Record customer concerns and keep their progress updated.</p>
+              </div>
+            </div>
+            <span className="job-complaints-total">{complaints.length} {complaints.length === 1 ? 'complaint' : 'complaints'}</span>
+          </header>
+
+          <div className="job-complaint-entry">
+            <label htmlFor="job-customer-complaint">Add Customer Complaint</label>
+            <div className="job-complaint-compose">
+              <textarea
+                id="job-customer-complaint"
+                value={complaintText}
+                onChange={(e) => setComplaintText(e.target.value)}
+                placeholder="Describe the issue as explained by the customer..."
+                maxLength={1000}
+                rows={3}
+                disabled={saving}
+              />
+              <button type="button" onClick={addComplaint} disabled={!complaintText.trim() || saving}>
+                <Plus size={16} aria-hidden="true"/>
+                {saving ? 'Saving…' : 'Add Complaint'}
+              </button>
+            </div>
+            <div className="job-complaint-entry-footer">
+              <span>Status updates automatically with Work and QC progress.</span>
+              <span>{complaintText.length}/1000</span>
+            </div>
           </div>
 
-          <div className="job-complaint-list mt-4 flex flex-col gap-2">
-            {complaints.map((item) => (
-              <div key={item.id} className="job-complaint-card flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold text-content">{item.description}</div>
-                  <div className="mt-1 text-[10px] text-muted">{item.relatedService || 'Not linked to work item'}</div>
+          <div className="job-complaints-list-header">
+            <div>
+              <h4>Complaint Records</h4>
+              <p>Complaint status updates automatically as this Job Card progresses.</p>
+            </div>
+            <div className="job-complaints-filters" role="group" aria-label="Filter complaints by status">
+              {['All', 'Open', 'In Progress', 'Completed'].map((filter) => {
+                const count = filter === 'All'
+                  ? complaints.length
+                  : complaints.filter(() => automaticComplaintStatus === filter).length;
+                return (
+                  <button
+                    type="button"
+                    key={filter}
+                    className={complaintFilter === filter ? 'is-active' : ''}
+                    aria-pressed={complaintFilter === filter}
+                    onClick={() => setComplaintFilter(filter)}
+                  >
+                    {filter} <span>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="job-complaint-list" aria-live="polite">
+            {complaints.map((item, index) => ({ item, index })).filter(() => complaintFilter === 'All' || automaticComplaintStatus === complaintFilter).map(({ item, index }) => (
+              <Link
+                key={item.id || index}
+                className="job-complaint-card job-complaint-card-link"
+                to={`/jobs/${encodeURIComponent(job.id)}/complaints/${encodeURIComponent(item.id != null ? String(item.id) : `row-${index}`)}${location.search}`}
+                aria-label={`Open complaint details: ${item.description || item.wording || `Complaint ${index + 1}`}`}
+              >
+                <div className="job-complaint-copy">
+                  <div className="job-complaint-description">{item.description || item.wording || 'Customer complaint'}</div>
+                  <p>{typeof item.relatedService === 'string' && item.relatedService.trim() ? item.relatedService : 'Customer reported issue'}</p>
                 </div>
-                <select aria-label={`Status for complaint ${item.description}`} value={item.status || 'Open'} onChange={(e) => updateComplaintStatus(item.id, e.target.value)} className="h-8 rounded-lg border border-line bg-surface px-2 text-[11px] font-semibold text-content">
-                  <option>Open</option><option>In Progress</option><option>Completed</option>
-                </select>
-              </div>
+                <div className="job-complaint-actions">
+                  <div className="job-complaint-status">
+                    <span className="job-complaint-status-label">Status · Auto</span>
+                    <span className={`job-complaint-auto-status ${complaintStatusClass(automaticComplaintStatus)}`}>
+                      {automaticComplaintStatus}
+                    </span>
+                  </div>
+                  <ChevronRight size={17} aria-hidden="true" className="job-complaint-card-arrow"/>
+                </div>
+              </Link>
             ))}
-            {!complaints.length ? <Empty text="No customer complaints recorded."/> : null}
+            {complaints.length === 0 ? (
+              <div className="job-complaint-empty">
+                <FileText size={24} aria-hidden="true"/>
+                <strong>No complaints recorded</strong>
+                <p>Add a customer complaint above to start tracking it.</p>
+              </div>
+            ) : !complaints.some(() => complaintFilter === 'All' || automaticComplaintStatus === complaintFilter) ? (
+              <div className="job-complaint-empty">
+                <FileText size={24} aria-hidden="true"/>
+                <strong>No {complaintFilter.toLowerCase()} complaints</strong>
+                <p>Choose All to view every customer complaint.</p>
+              </div>
+            ) : null}
           </div>
         </section>
       )}
@@ -923,10 +1267,12 @@ export function JobCardWorkspace() {
       {activeTab === 'inspection' && (
         <JobInspectionPanel
           job={job}
-          onChanged={async () => {
+          canCorrect={currentStage === 'estimate' && !activeTabLocked}
+          startEditing={new URLSearchParams(location.search).get('edit') === '1'}
+          onDoneEditing={() => navigate('/jobs/' + job.id + '/estimate')}
+          onChanged={async (operation) => {
             try {
-              const refreshed = await jobService.getJobById(id);
-              if (refreshed) setJob(refreshed);
+              await refreshJobWorkflow(operation === 'complete' ? 'inspection' : null);
             } catch (e) {
               setError(e?.message || 'Could not refresh job details.');
             }
@@ -935,8 +1281,12 @@ export function JobCardWorkspace() {
       )}
 
       {activeTab === 'work' && (
-        <div className="job-work-payroll-stack">
-          <OutsideLabourPanel jobId={job.id} />
+        <div className="job-work-payroll-stack job-work-simple">
+          <JobOutsideStaffSection
+            jobId={job.id}
+            onChanged={() => setTimerRefreshVersion((value) => value + 1)}
+          />
+
           <JobWorkerAssignments
             key={timerRefreshVersion}
             jobId={job.id}
@@ -951,273 +1301,342 @@ export function JobCardWorkspace() {
             onChanged={() => setTimerRefreshVersion((value) => value + 1)}
           />
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Labour & Work Items</div>
-            <div className="mt-3 flex flex-col gap-2">
-              {labourRecords.map((item)=>(
-                <div key={item.id} className="rounded-xl border border-line bg-surface-2 p-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
+          <section className="job-panel job-work-items-panel rounded-2xl border border-line bg-surface p-4" aria-label="Labour and Work Items">
+            <header className="job-work-items-head">
+              <div>
+                <h3>Labour & Work Items</h3>
+                <p>Saved work entries for this Job Card.</p>
+              </div>
+              <span className="job-work-items-count">
+                {labourRecords.length} {labourRecords.length === 1 ? 'entry' : 'entries'}
+              </span>
+            </header>
+            {labourRecords.length ? (
+              <div className="job-work-items-list">
+                {labourRecords.map((item) => (
+                  <div key={item.id} className="job-work-items-row">
                     <div>
-                      <div className="text-xs font-bold text-content">{item.service}</div>
-                      <div className="mt-1 text-[10px] text-muted">{item.mechanicName || 'Unassigned'} · Estimated {item.estimatedHours || 0}h · Actual {item.hours || 0}h</div>
+                      <strong>{item.service || 'Work item'}</strong>
+                      <span>{item.mechanicName || 'Unassigned'} · Estimated {item.estimatedHours || 0}h · Actual {item.hours || 0}h</span>
                     </div>
-                    <strong className="text-xs text-primary">{money.format(item.customerCharge || 0)}</strong>
+                    <strong className="job-work-items-price">{money.format(cleanNumber(item.customerCharge || 0))}</strong>
                   </div>
-                </div>
-              ))}
-              {!labourRecords.length ? <Empty text="No labour entries yet."/> : null}
-            </div>
-          </section>
-
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Add Labour</div>
-            <form onSubmit={addLabour} className="mt-3 flex flex-col gap-2">
-              <input value={labour.service} onChange={(e)=>setLabour({...labour,service:e.target.value})} placeholder="Labour / work item" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              <select value={labour.mechanicName} onChange={(e)=>setLabour({...labour,mechanicName:e.target.value})} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
-                <option value="">Technician</option>
-                {staff.map((item)=><option key={item.id} value={item.name}>{item.name}</option>)}
-              </select>
-              <div className="grid grid-cols-2 gap-2">
-                <input inputMode="decimal" value={labour.estimatedHours} onChange={(e)=>setLabour({...labour,estimatedHours:e.target.value})} placeholder="Est. hours" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-                <input inputMode="decimal" value={labour.hours} onChange={(e)=>setLabour({...labour,hours:e.target.value})} placeholder="Actual hours" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
+                ))}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input inputMode="decimal" value={labour.rate} onChange={(e)=>setLabour({...labour,rate:e.target.value})} placeholder="Rate / hour ₹" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-                <input inputMode="decimal" value={labour.internalCost} onChange={(e)=>setLabour({...labour,internalCost:e.target.value})} placeholder="Internal cost ₹" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              </div>
-              <button disabled={saving} className="h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Add Labour</button>
-            </form>
+            ) : (
+              <p className="job-work-items-empty">
+                No labour entries yet. Record internal work using Technician Work Timers above.
+              </p>
+            )}
           </section>
-          </div>
         </div>
       )}
 
       {activeTab === 'parts' && (
-        <JobPartsWorkflow jobId={job.id} assignedTo={job.assignedEmployeeName || ''} onJobUpdated={load}/>
+        <JobPartsWorkflow
+          jobId={job.id}
+          assignedTo={job.assignedEmployeeName || ''}
+          onJobUpdated={() => {
+            setTimerRefreshVersion((value) => value + 1);
+            return load();
+          }}
+        />
       )}
 
       {activeTab === 'estimate' && (
-        <div className="job-estimate-grid grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel job-estimate-history-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Estimate History</div>
-            <div className="job-estimate-history mt-3 flex flex-col gap-2">
-              {estimates.map((item)=>(
-                <div key={item.id || item.version} className="job-estimate-card rounded-xl border border-line bg-surface-2 p-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <div className="text-xs font-extrabold text-content">{item.version}</div>
-                      <div className="mt-1 text-[10px] text-muted">{item.date}</div>
-                    </div>
-                    <span className="rounded-full bg-surface px-2.5 py-1 text-[10px] font-bold text-primary">{item.approvalStatus}</span>
-                  </div>
-                  <div className="job-estimate-breakdown mt-3 grid grid-cols-2 gap-2 text-[11px] text-secondary">
-                    <div>Parts <strong className="float-right text-content">{money.format(item.partsTotal || 0)}</strong></div>
-                    <div>Labour <strong className="float-right text-content">{money.format(item.servicesTotal || 0)}</strong></div>
-                    <div>Tax <strong className="float-right text-content">{money.format(item.taxAmount || 0)}</strong></div>
-                    <div>Discount <strong className="float-right text-content">{money.format(item.discount || 0)}</strong></div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
-                    <strong className="text-sm text-content">{money.format(item.grandTotal || 0)}</strong>
-                    {item.approvalStatus === 'Pending' ? (
-                      <div className="flex gap-2">
-                        <button onClick={()=>setEstimateApproval(item.id || item.version,'Approved')} className="h-8 rounded-lg border-0 bg-emerald-600 px-3 text-[10px] font-bold text-white">Approve</button>
-                        <button onClick={()=>setEstimateApproval(item.id || item.version,'Rejected')} className="h-8 rounded-lg border-0 bg-red-500 px-3 text-[10px] font-bold text-white">Reject</button>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-              {!estimates.length ? <Empty text="No estimate created yet."/> : null}
-            </div>
-          </section>
-
-          <section className="job-panel job-current-estimate rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Current Estimate</div>
-            <div className="job-current-estimate__body mt-3 flex flex-col gap-2 text-xs">
-              <AmountRow label="Parts" value={partsTotal}/>
-              <AmountRow label="Outside Purchase" value={outsideTotal}/>
-              <AmountRow label="Labour" value={labourTotal}/>
-              <div className="grid grid-cols-2 gap-2 pt-2">
-                <label className="text-[10px] font-semibold text-muted">Tax %
-                  <input inputMode="decimal" value={estimateTax} onChange={(e)=>setEstimateTax(e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-line bg-surface-2 px-2 text-xs text-content"/>
-                </label>
-                <label className="text-[10px] font-semibold text-muted">Discount ₹
-                  <input inputMode="decimal" value={estimateDiscount} onChange={(e)=>setEstimateDiscount(e.target.value)} className="mt-1 h-9 w-full rounded-lg border border-line bg-surface-2 px-2 text-xs text-content"/>
-                </label>
-              </div>
-              <AmountRow label="Tax" value={estimateTaxAmount}/>
-              <div className="job-estimate-total mt-2 flex items-center justify-between rounded-xl bg-primary-soft p-3">
-                <span className="text-xs font-bold text-primary">Estimated Total</span>
-                <strong className="text-lg text-content">{money.format(estimateGrandTotal)}</strong>
-              </div>
-              <button onClick={()=>createEstimate('Estimate')} className="mt-2 h-10 rounded-xl border-0 bg-primary text-xs font-bold text-white">Create Estimate</button>
-              <button onClick={()=>createEstimate('Additional Work')} className="h-10 rounded-xl border border-line bg-surface text-xs font-bold text-content">Additional Work Approval</button>
-            </div>
-          </section>
-        </div>
+        <QuickEstimatePanel
+          job={job}
+          estimates={estimates}
+          findings={findings}
+          canEdit={currentStage === 'estimate' && !activeTabLocked}
+          onSaved={() => refreshJobWorkflow()}
+          onApprove={() => completeStage('estimate')}
+          onReject={(estimateId) => setEstimateApproval(estimateId, 'Rejected')}
+          onDownloadApproved={(approvedEstimate) => downloadApprovalPdf(job, approvedEstimate)}
+          onEditInspection={() => navigate('/jobs/' + job.id + '/inspection?edit=1')}
+          onGoToWork={() => navigate('/jobs/' + job.id + '/' + currentStage)}
+        />
       )}
 
       {activeTab === 'updates' && (
-        <section className="job-panel job-updates-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="job-updates-header flex flex-wrap items-center justify-between gap-3">
+        <section className="job-panel job-updates-panel">
+          <header className="job-updates-header">
             <div>
-              <div className="text-sm font-extrabold text-content">Technician Updates</div>
-              <div className="mt-1 text-xs text-muted">Track work start, pause/resume, notes, photos and completion.</div>
+              <h3>Technician Updates</h3>
+              <p>Record repair progress, notes, work photos and image captions.</p>
             </div>
-            <div className="job-update-actions flex flex-wrap gap-2">
-              {['Work Started','Pause','Resume','Completed Work'].map((type)=>(
-                <button key={type} onClick={()=>addTechnicianUpdate(type)} className="h-9 rounded-xl border border-line bg-surface-2 px-3 text-[11px] font-semibold text-content">{type}</button>
-              ))}
-            </div>
-          </div>
+            <span className="job-updates-count">{updates.length} updates</span>
+          </header>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 text-[11px] font-semibold text-content">
-              <Camera size={14}/>Add Work Photo
-              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e)=>addPhoto(e.target.files?.[0],'During Repair')}/>
-            </label>
-          </div>
-
-          <div className="job-update-compose mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[160px_minmax(0,1fr)_auto]">
-            <select value={updateType} onChange={(e)=>setUpdateType(e.target.value)} className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content">
-              <option>Work Update</option><option>Inspection</option><option>Parts Update</option><option>Customer Update</option><option>Issue Found</option>
-            </select>
-            <input value={updateNote} onChange={(e)=>setUpdateNote(e.target.value)} placeholder="Technician note..." className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-            <button onClick={()=>addTechnicianUpdate(updateType)} disabled={!updateNote.trim()} className="h-10 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">Add Update</button>
-          </div>
-
-          <div className="job-update-list mt-4 flex flex-col gap-2">
-            {updates.map((item)=>(
-              <div key={item.id} className="job-update-card rounded-xl border border-line bg-surface-2 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <strong className="text-xs text-content">{item.type || 'Update'}</strong>
-                  <span className="text-[10px] text-muted">{item.time || new Date(item.createdAt || Date.now()).toLocaleString('en-IN')}</span>
-                </div>
-                <div className="mt-1 text-[11px] text-secondary">{item.note}</div>
-                <div className="mt-1 text-[10px] text-muted">{item.staff || item.createdBy || 'Staff'}</div>
-              </div>
+          <div className="job-update-progress-actions" aria-label="Quick work progress">
+            {['Work Started', 'Pause', 'Resume', 'Completed Work'].map((type) => (
+              <button type="button" key={type} disabled={saving}
+                onClick={() => addTechnicianUpdate(type)}>
+                {type}
+              </button>
             ))}
           </div>
+
+          <div className="job-update-note-panel">
+            <h4>Add Technician Note</h4>
+            <div className="job-update-compose">
+              <select aria-label="Update type" value={updateType} disabled={saving}
+                onChange={(e) => setUpdateType(e.target.value)}>
+                <option>Work Update</option>
+                <option>Inspection</option>
+                <option>Parts Update</option>
+                <option>Customer Update</option>
+                <option>Issue Found</option>
+              </select>
+              <input aria-label="Technician note" value={updateNote} disabled={saving}
+                maxLength={2000} onChange={(e) => setUpdateNote(e.target.value)}
+                placeholder="Enter work progress or issue details..." />
+              <button type="button" disabled={!updateNote.trim() || saving}
+                onClick={() => addTechnicianUpdate(updateType)}>
+                {saving ? 'Saving…' : 'Add Update'}
+              </button>
+            </div>
+          </div>
+
+          <JobWorkPhotoPanel
+            jobId={job.id}
+            photos={(job.photos || []).filter((photo) => photo.photo_type !== 'inspection')}
+            disabled={saving}
+            onUploaded={async () => {
+              const refreshed = await jobService.getJobById(job.id);
+              if (refreshed) setJob(refreshed);
+            }}
+          />
+
+          <section className="job-update-history" aria-label="Technician update history">
+            <div className="job-update-history-heading">
+              <h4>Update History</h4>
+              <span>{updates.length} records</span>
+            </div>
+            <div className="job-update-list">
+              {updates.length ? updates.map((item, index) => (
+                <article key={item.id || index} className="job-update-card">
+                  <div className="job-update-card-top">
+                    <strong>{item.type || 'Work Update'}</strong>
+                    <time>{item.createdAt ? new Date(item.createdAt).toLocaleString('en-IN') : item.time || 'Recent'}</time>
+                  </div>
+                  <p>{item.note || 'Work status recorded'}</p>
+                  <small>{item.staff || item.createdBy || 'Staff'}</small>
+                </article>
+              )) : (
+                <div className="job-update-history-empty">
+                  No technician updates yet. Add the first note above.
+                </div>
+              )}
+            </div>
+          </section>
         </section>
       )}
 
       {activeTab === 'qc' && (
-        <div className="job-qc-grid grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="job-panel job-qc-checklist-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title flex items-center gap-2 text-sm font-extrabold text-content"><ShieldCheck size={16} className="text-primary"/>Quality Check</div>
-            <div className="job-qc-list mt-3 flex flex-col gap-2">
-              {qcChecklist.map((item)=>(
-                <div key={item.id} className="job-qc-row flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-2 p-3">
-                  <span className="text-xs font-semibold text-content">{item.item}</span>
-                  <select value={item.status || 'Pending'} onChange={(e)=>updateQcItem(item.id,e.target.value)} className="h-8 rounded-lg border border-line bg-surface px-2 text-[10px] font-bold text-content">
-                    <option>Pending</option><option>Pass</option><option>Fail</option>
-                  </select>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="job-panel job-qc-result-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title text-sm font-extrabold text-content">Road Test & Result</div>
-            <textarea value={qcRoadTest} onChange={(e)=>setQcRoadTest(e.target.value)} rows={5} placeholder="Road test notes / issues found..." className="mt-3 min-h-28 w-full rounded-xl border border-line bg-surface-2 p-3 text-xs text-content"/>
-            <div className="job-qc-actions mt-3 grid grid-cols-2 gap-2">
-              <button onClick={()=>completeQc('Pass')} className="h-10 rounded-xl border-0 bg-emerald-600 text-xs font-bold text-white">QC Passed</button>
-              <button onClick={()=>completeQc('Rework Required')} className="h-10 rounded-xl border-0 bg-red-500 text-xs font-bold text-white">QC Failed</button>
-            </div>
-            <div className="mt-3 rounded-xl bg-surface-2 p-3 text-xs text-secondary">Current: <strong className="text-content">{qc.status || 'Pending'}</strong></div>
-          </section>
-        </div>
+        <JobQualityCheckPanel
+          job={job}
+          staff={staff}
+          onStaffCreated={(newInspector) => setStaff((current) => [
+            newInspector,
+            ...current.filter((person) => String(person.id) !== String(newInspector.id)),
+          ])}
+          canEdit={currentStage === 'qc' && !activeTabLocked && !activeTabComplete}
+          onSaved={() => refreshJobWorkflow()}
+          onCompleted={() => refreshJobWorkflow('qc')}
+        />
       )}
 
       {activeTab === 'invoice' && (
-        <div className="job-invoice-grid grid grid-cols-1 gap-4 xl:grid-cols-2">
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="job-panel-title flex items-center gap-2 text-sm font-extrabold text-content"><FileText size={16} className="text-primary"/>Invoice & Payment</div>
-
-            <div className="job-invoice-metrics">
-              <Info label="Invoice No" value={job.billing?.invoiceNumber || 'Not generated'}/>
-              <Info label="Invoice Total" value={money.format(invoiceTotal)}/>
-              <Info label="Paid" value={money.format(job.billing?.paidAmount || 0)}/>
-              <Info label="Balance" value={money.format(Math.max(0, invoiceTotal - cleanNumber(job.billing?.paidAmount || 0)))}/>
-              <Info label="Payment Status" value={job.paymentStatus || 'Pending'}/>
-              <Info label="Method" value={job.billing?.paymentMethod || '—'}/>
+        <div className="job-invoice-dashboard">
+          <header className="job-invoice-dashboard-head">
+            <div>
+              <h2><ReceiptText size={18} aria-hidden="true" /> Invoice & Payment</h2>
+              <p>Review the invoice, outstanding amount and vehicle delivery in one place.</p>
             </div>
-
-            <div className="job-invoice-actions">
-              <button onClick={createInvoice} className="job-primary-action"><ReceiptText size={15}/>Create / Open Invoice</button>
-            </div>
-
-            <form className="job-payment-form" onSubmit={recordPayment}>
-              <div className="job-payment-form__title">Record Payment</div>
-              <div className="job-payment-form__grid">
-                <label>
-                  Amount
-                  <input
-                    inputMode="decimal"
-                    value={paymentForm.amount}
-                    onChange={(e)=>setPaymentForm({...paymentForm,amount:e.target.value})}
-                    placeholder="₹0"
-                  />
-                </label>
-                <label>
-                  Method
-                  <select value={paymentForm.method} onChange={(e)=>setPaymentForm({...paymentForm,method:e.target.value})}>
-                    <option>Cash</option>
-                    <option>Card</option>
-                    <option>UPI</option>
-                    <option>Bank</option>
-                  </select>
-                </label>
-              </div>
-              <button type="submit" disabled={saving || invoiceTotal <= 0} className="job-payment-submit">
-                Record Payment
+            <div className="job-invoice-header-actions">
+              {linkedInvoice?.id && (
+                <button type="button" onClick={downloadJobInvoicePdf}
+                  disabled={invoicePdfLoading || billingLoading} className="job-invoice-download-button">
+                  <Download size={15} aria-hidden="true"/>
+                  {invoicePdfLoading ? 'Generating PDF…' : 'Download Invoice PDF'}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => linkedInvoice ? navigate('/invoices/' + linkedInvoice.id) : createInvoice()}
+                className="job-primary-action"
+              >
+                <ReceiptText size={15} aria-hidden="true" />
+                {linkedInvoice ? 'View Invoice' : 'Create Invoice'}
               </button>
-            </form>
-
-            {job.billing?.payments?.length ? (
-              <div className="job-payment-history">
-                {job.billing.payments.slice(0, 4).map((payment) => (
-                  <div key={payment.id}>
-                    <span>{payment.date}</span>
-                    <strong>{money.format(payment.amount)} · {payment.method}</strong>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </section>
-
-          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
-            <div className="text-sm font-extrabold text-content">Delivery</div>
-            <div className="mt-3 flex flex-col gap-2">
-              <input value={deliveryForm.finalKm} onChange={(e)=>setDeliveryForm({...deliveryForm,finalKm:e.target.value})} placeholder="Final KM" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              <input value={deliveryForm.customerSignature} onChange={(e)=>setDeliveryForm({...deliveryForm,customerSignature:e.target.value})} placeholder="Customer acknowledgement / signature name" className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-xs text-content"/>
-              <textarea rows={4} value={deliveryForm.warrantyNotes} onChange={(e)=>setDeliveryForm({...deliveryForm,warrantyNotes:e.target.value})} placeholder="Warranty / service notes" className="rounded-xl border border-line bg-surface-2 p-3 text-xs text-content"/>
-              <button onClick={saveDelivery} className="h-10 rounded-xl border-0 bg-emerald-600 text-xs font-bold text-white">Mark Delivered</button>
             </div>
-          </section>
+          </header>
+
+          <div className="job-invoice-dashboard-stats">
+            {[
+              ['Invoice Total', invoiceTotal, 'total'],
+              ['Paid Amount', invoicePaid, 'paid'],
+              ['Balance Due', invoiceBalance, 'balance']
+            ].map(([label, amount, tone]) => (
+              <div className={'job-invoice-stat is-' + tone} key={label}>
+                <span>{label}</span>
+                <strong>{money.format(amount)}</strong>
+              </div>
+            ))}
+            <div className="job-invoice-stat is-status">
+              <span>Payment Status</span>
+              <strong>{invoicePaymentStatus}</strong>
+            </div>
+          </div>
+
+          {invoicePdfError && <p role="alert" className="job-invoice-inline-message is-error">{invoicePdfError}</p>}
+          {billingLoading && <p className="job-invoice-inline-message" role="status">Loading invoice and payment records…</p>}
+          {billingError && <div className="job-invoice-inline-message is-error" role="alert">
+            {billingError}
+            <button type="button" onClick={loadBilling}>Retry</button>
+          </div>}
+
+          <div className="job-invoice-dashboard-columns">
+            <section className="job-panel job-invoice-billing-card">
+              <div className="job-invoice-section-heading">
+                <div>
+                  <h3>Billing details</h3>
+                  <p>{linkedInvoice ? 'Linked to the official invoice record' : 'Create an invoice to start billing this job'}</p>
+                </div>
+                <span className="job-invoice-status-badge">{linkedInvoice?.status || 'Not invoiced'}</span>
+              </div>
+
+              <div className="job-invoice-details">
+                <div><span>Invoice Number</span><strong>{linkedInvoice?.number || (USE_MOCK_API ? job.billing?.invoiceNumber : '') || 'Not generated'}</strong></div>
+                <div><span>Customer</span><strong>{job.customerName || 'Walk-in'}</strong></div>
+                <div><span>Vehicle</span><strong>{job.vehicleReg || '—'}</strong></div>
+                <div><span>Payment Method</span><strong>{linkedInvoice?.paymentMode || (USE_MOCK_API ? job.billing?.paymentMethod : '') || '—'}</strong></div>
+              </div>
+
+              {jobInvoices.length > 1 && (
+                <div className="job-invoice-document-list">
+                  <h4>Other invoices for this Job Card</h4>
+                  {jobInvoices.filter((row) => row.id !== linkedInvoice?.id).map((row) => (
+                    <button key={row.id} type="button" onClick={() => navigate('/invoices/' + row.id)}>
+                      <span>{row.number || 'Invoice'} · {row.status}</span>
+                      <strong>{money.format(cleanNumber(row.total))}</strong>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {(!linkedInvoice && !USE_MOCK_API) ? (
+                <div className="job-invoice-empty">
+                  <FileText size={20} aria-hidden="true" />
+                  <strong>No invoice linked yet</strong>
+                  <p>Generate an invoice from this job before recording a payment.</p>
+                  <button type="button" onClick={createInvoice} className="job-primary-action">Create Invoice</button>
+                </div>
+              ) : (
+                <form className="job-payment-form" onSubmit={recordPayment}>
+                  <div className="job-payment-form__title">Record payment</div>
+                  <div className="job-payment-form__grid">
+                    <label>
+                      Amount (₹)
+                      <input
+                        inputMode="decimal"
+                        value={paymentForm.amount}
+                        onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                        placeholder="Enter amount"
+                        aria-label="Payment amount"
+                      />
+                    </label>
+                    <label>
+                      Payment method
+                      <select value={paymentForm.method} onChange={(e) => setPaymentForm({ ...paymentForm, method: e.target.value })}>
+                        <option>Cash</option><option>Card</option><option>UPI</option><option>Bank</option>
+                      </select>
+                    </label>
+                  </div>
+                  <button type="submit" disabled={saving || billingLoading || invoiceBalance <= 0} className="job-payment-submit">
+                    {saving ? 'Saving…' : 'Record Payment'}
+                  </button>
+                </form>
+              )}
+
+              {(USE_MOCK_API ? job.billing?.payments || [] : jobPayments).length > 0 && (
+                <div className="job-payment-history">
+                  <h4>Recent payments</h4>
+                  {(USE_MOCK_API ? job.billing?.payments || [] : jobPayments).slice(0, 4).map((payment) => (
+                    <div key={payment.id}>
+                      <span>{payment.date || 'Payment'}</span>
+                      <strong>{money.format(cleanNumber(payment.amount))} · {payment.method}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="job-panel job-invoice-delivery-card">
+              <div className="job-invoice-section-heading">
+                <div>
+                  <h3>Vehicle delivery</h3>
+                  <p>Confirm final handover details.</p>
+                </div>
+              </div>
+              {!USE_MOCK_API && (
+                <p className="job-invoice-inline-message">The backend currently supports delivery status, but not storing the KM, acknowledgement and warranty fields shown below.</p>
+              )}
+              <div className="job-invoice-delivery-fields">
+                <label>
+                  Final KM
+                  <input disabled={!USE_MOCK_API} value={deliveryForm.finalKm} onChange={(e) => setDeliveryForm({ ...deliveryForm, finalKm: e.target.value })} placeholder="Vehicle odometer" />
+                </label>
+                <label>
+                  Customer acknowledgement
+                  <input disabled={!USE_MOCK_API} value={deliveryForm.customerSignature} onChange={(e) => setDeliveryForm({ ...deliveryForm, customerSignature: e.target.value })} placeholder="Customer name" />
+                </label>
+                <label>
+                  Warranty / service notes
+                  <textarea disabled={!USE_MOCK_API} rows={3} value={deliveryForm.warrantyNotes} onChange={(e) => setDeliveryForm({ ...deliveryForm, warrantyNotes: e.target.value })} placeholder="Handover notes" />
+                </label>
+                <button type="button" disabled={saving || normalizeJobStatus(job.status) === 'Delivered'} onClick={saveDelivery} className="job-invoice-deliver-button">
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  {normalizeJobStatus(job.status) === 'Delivered' ? 'Vehicle Delivered' : 'Mark Delivered'}
+                </button>
+              </div>
+            </section>
+          </div>
         </div>
       )}
 
       {activeTab === 'activity' && (
-        <section className="job-panel job-activity-panel rounded-2xl border border-line bg-surface p-4">
-          <div className="job-panel-title text-sm font-extrabold text-content">Job Activity</div>
-          <div className="job-activity-timeline mt-4 border-l border-line pl-4">
-            {[...timeline, ...updates.map((item)=>({
-              time: item.time || new Date(item.createdAt || Date.now()).toLocaleString('en-IN'),
-              title: item.type || 'Work Update',
-              desc: item.note
-            }))].map((item,index)=>(
-              <div key={`${item.time}-${index}`} className="job-activity-item relative pb-5">
-                <span className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-primary ring-4 ring-surface"/>
-                <div className="text-[10px] font-semibold text-muted">{item.time}</div>
-                <div className="mt-1 text-xs font-extrabold text-content">{item.title}</div>
-                <div className="mt-1 text-[11px] text-secondary">{item.desc}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <JobActivityTimeline jobId={job.id} />
       )}
+        </>
+      )}
+
+      <ResponsiveModalSheet isOpen={Boolean(pdfOffer)}
+        onClose={continueAfterApproval}
+        title="Estimate Approved" maxWidth="480px">
+        <div className="job-approved-pdf-offer">
+          <div className="job-approved-pdf-offer-status">
+            <CheckCircle2 size={22} aria-hidden="true"/>
+            <div>
+              <strong>Customer estimate approved</strong>
+              <p>Approval is saved. Download the approved estimate PDF for your records or to share with the customer.</p>
+            </div>
+          </div>
+          {pdfError && <p className="job-approved-pdf-error" role="alert">{pdfError}</p>}
+          {pdfFilename && <p className="job-approved-pdf-success" role="status">PDF download started: {pdfFilename}</p>}
+          <div className="job-approved-pdf-offer-actions">
+            <button type="button" className="job-approved-pdf-download"
+              onClick={() => downloadApprovalPdf(pdfOffer.job, pdfOffer.estimate)}>
+              <Download size={16} aria-hidden="true"/> Download PDF
+            </button>
+            <button type="button" className="job-approved-pdf-continue"
+              onClick={continueAfterApproval}>
+              Continue to Work <ChevronRight size={16} aria-hidden="true"/>
+            </button>
+          </div>
+        </div>
+      </ResponsiveModalSheet>
 
     </div>
   );

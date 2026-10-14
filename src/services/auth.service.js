@@ -1,17 +1,9 @@
-import apiClient from '../api/axios';
-import { ENDPOINTS } from '../api/endpoints';
+import apiClient from '../api/apiClient';
 
+// Keep legacy auth callers on the real Django URLs and shared interceptors.
 export const authService = {
-  login: async (credentials) => {
-    return await apiClient.post(ENDPOINTS.AUTH.LOGIN, credentials);
-  },
-  forgotPassword: async (data) => {
-    return await apiClient.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, data);
-  },
-  resetPassword: async (data) => {
-    return await apiClient.post(ENDPOINTS.AUTH.RESET_PASSWORD, data);
-  },
-  getProfile: async () => {
-    return await apiClient.get(ENDPOINTS.AUTH.ME);
-  }
+  login: (credentials) => apiClient.post('/auth/login', credentials),
+  forgotPassword: (data) => apiClient.post('/auth/forgot-password', data),
+  resetPassword: (data) => apiClient.post('/auth/reset-password', data),
+  getProfile: () => apiClient.get('/auth/me')
 };

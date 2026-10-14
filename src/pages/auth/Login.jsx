@@ -3,6 +3,7 @@ import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getCredentialError, getAuthFieldErrors } from '../../utils/authErrors';
+import { getSafePostLoginDestination } from '../../utils/authorizedLanding';
 import '../../styles/login-system.css';
 
 export const Login = () => {
@@ -49,9 +50,8 @@ export const Login = () => {
     setFormError('');
 
     try {
-      await login({ email: cleanEmail, password });
-      const next = params.get('next');
-      navigate(next && next.startsWith('/') ? next : '/dashboard', { replace: true });
+      const signedInUser = await login({ email: cleanEmail, password });
+      navigate(getSafePostLoginDestination(params.get('next'), signedInUser), { replace: true });
     } catch (error) {
       const backendFields = getAuthFieldErrors(error);
       const credentialError = getCredentialError(error);
@@ -176,6 +176,10 @@ export const Login = () => {
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
+
+          <p className="login-description" style={{ textAlign: 'center', marginTop: '16px' }}>
+            New workshop? <Link to="/signup" className="login-forgot">Create your company account</Link>
+          </p>
 
           <div className="login-footer">
             <div className="login-secure">

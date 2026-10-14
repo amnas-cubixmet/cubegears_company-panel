@@ -1,3 +1,4 @@
+import { appConfirm, appAlert } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -340,7 +341,7 @@ export const ServiceList = () => {
   };
 
   const deleteService = async (service) => {
-    if (!window.confirm(`Delete service ${service.name}?`)) return;
+    if (!await appConfirm(`Delete service ${service.name}?`)) return;
     await serviceService.deleteService(service.id);
     await load();
   };
@@ -366,12 +367,12 @@ export const ServiceList = () => {
   };
 
   const deleteCategory = async (category) => {
-    if (!window.confirm(`Delete category ${category.name}?`)) return;
+    if (!await appConfirm(`Delete category ${category.name}?`)) return;
     try {
       await serviceService.deleteServiceCategory(category.id);
       await load();
     } catch (error) {
-      window.alert(error?.message || 'Unable to delete category.');
+      appAlert(error?.message || 'Unable to delete category.');
     }
   };
 

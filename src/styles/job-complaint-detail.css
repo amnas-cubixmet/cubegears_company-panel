@@ -1,0 +1,206 @@
+
+/* Complaint Records: the whole card opens details on click, tap or Enter.
+   Automatic status remains visible; there is no separate View control. */
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:100%;
+  min-width:0;
+  text-decoration:none!important;
+  color:inherit;
+  cursor:pointer;
+  transition:border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:hover {
+  border-color:var(--primary)!important;
+  background:var(--surface)!important;
+  box-shadow:0 2px 12px rgba(0,0,0,.05);
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:focus-visible {
+  outline:2px solid var(--primary);
+  outline-offset:2px;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-actions {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+  min-width:0;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-arrow {
+  display:block;
+  flex:0 0 17px;
+  color:var(--text-secondary);
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:hover .job-complaint-card-arrow,
+.cg-job-detail.job-workspace-dashboard .job-complaint-card-link:focus-visible .job-complaint-card-arrow {
+  color:var(--primary);
+}
+@media(max-width:767px) {
+  .cg-job-detail.job-workspace-dashboard .job-complaint-actions {
+    display:flex;
+    width:100%;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-complaint-status {
+    width:auto;
+    min-width:0;
+    flex:0 1 auto;
+  }
+}
+
+/* Dedicated complaint record detail screen. */
+.job-complaint-detail-page {
+  display:flex;flex-direction:column;gap:14px;min-width:0;width:100%;max-width:100%;
+}
+.job-complaint-detail-header,.job-complaint-detail-card {
+  width:100%;min-width:0;padding:17px;
+  border:1px solid var(--border);border-radius:12px;
+  background:var(--surface);box-shadow:var(--shadow-sm);
+}
+.job-complaint-detail-header {
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:14px;
+}
+.job-complaint-detail-title {
+  display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 220px;
+}
+.job-complaint-detail-title > div {min-width:0}
+.job-complaint-detail-icon {
+  display:grid;place-items:center;flex:0 0 42px;
+  width:42px;height:42px;border-radius:10px;
+  background:var(--primary-soft);color:var(--primary);
+}
+.job-complaint-detail-title h1 {
+  margin:0;font-size:19px;font-weight:750;
+  color:var(--text-primary);line-height:1.35;
+}
+.job-complaint-detail-title p {
+  margin:5px 0 0;color:var(--text-muted);
+  font-size:12px;line-height:1.5;
+}
+.job-complaint-detail-back {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:42px;padding:9px 13px;
+  border:1px solid var(--border);border-radius:9px;
+  background:var(--surface-2);color:var(--text-primary);
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+.job-complaint-detail-card {
+  display:flex;flex-direction:column;gap:15px;
+}
+.job-complaint-detail-section-heading {
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;min-width:0;
+}
+.job-complaint-detail-section-heading h2 {
+  margin:0;color:var(--text-primary);font-size:15px;font-weight:750;
+}
+.job-complaint-detail-section-heading p {
+  margin:5px 0 0;color:var(--text-muted);font-size:11px;line-height:1.55;
+}
+.job-complaint-detail-status {
+  display:inline-flex;align-items:center;gap:6px;
+  min-height:31px;padding:6px 11px;
+  border:1px solid var(--border);border-radius:99px;
+  background:var(--primary-soft);color:var(--primary);
+  font-size:11px;font-weight:700;
+}
+.job-complaint-detail-description {
+  margin:0;padding:15px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+  color:var(--text-primary);font-size:13px;font-weight:400;
+  line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap;
+}
+.job-complaint-detail-fields {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+.job-complaint-detail-fields > div {
+  display:flex;flex-direction:column;gap:7px;min-width:0;
+  padding:13px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);
+}
+.job-complaint-detail-fields span {
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--text-muted);font-size:11px;line-height:1.45;
+}
+.job-complaint-detail-fields strong {
+  color:var(--text-primary);font-size:13px;font-weight:650;
+  overflow-wrap:anywhere;line-height:1.5;
+}
+.job-complaint-detail-fields select {
+  display:block;width:100%;min-width:0;min-height:44px;
+  padding:0 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);
+  color:var(--text-primary);font-size:13px;font-weight:400;
+}
+.job-complaint-detail-fields small {
+  font-size:11px;line-height:1.5;color:var(--text-muted);
+}
+.job-complaint-detail-message,.job-complaint-detail-error {
+  margin:0;padding:17px;border:1px solid var(--border);
+  border-radius:11px;background:var(--surface);
+  color:var(--text-secondary);font-size:12px;line-height:1.55;
+}
+.job-complaint-detail-message strong {display:block;color:var(--text-primary)}
+.job-complaint-detail-message p {margin:7px 0 0}
+.job-complaint-detail-error {
+  border-color:var(--danger);color:var(--danger);
+}
+.job-complaint-detail-page :is(button,select):focus-visible {
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+@media(max-width:700px) {
+  .job-complaint-detail-page {gap:11px}
+  .job-complaint-detail-header,.job-complaint-detail-card {padding:12px}
+  .job-complaint-detail-title h1 {font-size:17px}
+  .job-complaint-detail-back {width:100%;min-height:44px}
+  .job-complaint-detail-fields {grid-template-columns:minmax(0,1fr);gap:9px}
+  .job-complaint-detail-fields select {font-size:16px}
+}
+
+
+/* Automatic complaint status (no editable dropdown). */
+.cg-job-detail.job-workspace-dashboard .job-complaint-status {
+  display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  min-width:135px;flex:0 1 155px;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-status-label {
+  color:var(--text-muted);font-size:11px;font-weight:650;
+}
+.cg-job-detail.job-workspace-dashboard .job-complaint-auto-status,
+.job-complaint-detail-auto-status {
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:34px;padding:7px 12px;
+  border-radius:9px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--text-secondary);
+  font-size:12px;font-weight:700;line-height:1.4;
+  white-space:nowrap;
+}
+:is(.job-complaint-auto-status,.job-complaint-detail-auto-status,.job-complaint-detail-status).is-progress {
+  border-color:var(--primary);
+  background:var(--primary-soft);color:var(--primary);
+}
+:is(.job-complaint-auto-status,.job-complaint-detail-auto-status,.job-complaint-detail-status).is-completed {
+  border-color:var(--border);background:var(--surface-2);
+  color:var(--text-primary);
+}
+:is(.job-complaint-auto-status,.job-complaint-detail-auto-status,.job-complaint-detail-status).is-open {
+  border-color:var(--border);background:var(--surface-2);
+  color:var(--text-secondary);
+}
+.job-complaint-detail-fields .job-complaint-detail-auto-status {
+  width:max-content;max-width:100%;overflow-wrap:anywhere;
+}
+@media(max-width:767px) {
+  .cg-job-detail.job-workspace-dashboard .job-complaint-status {
+    flex:0 1 auto;min-width:0;width:auto;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-complaint-actions {
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;flex-wrap:wrap;
+  }
+}

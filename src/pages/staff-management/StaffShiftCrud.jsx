@@ -1,3 +1,4 @@
+import { appConfirm, appAlert } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Building2, Clock3, Pencil, Plus, Save, Trash2, Users } from 'lucide-react';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
@@ -128,12 +129,12 @@ export const StaffShiftCrud = ({ staff = [] }) => {
   };
 
   const remove = async (shiftItem) => {
-    if (!window.confirm(`Delete "${shiftItem.name}"?`)) return;
+    if (!await appConfirm(`Delete "${shiftItem.name}"?`)) return;
     try {
       await staffManagementService.deleteShift(shiftItem.id);
       await load();
     } catch (err) {
-      window.alert(err?.message || 'Unable to delete shift.');
+      appAlert(err?.message || 'Unable to delete shift.');
     }
   };
 

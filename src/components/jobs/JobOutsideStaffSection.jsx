@@ -1,0 +1,78 @@
+import { useState } from 'react';
+import { HardHat, Plus, X } from 'lucide-react';
+import { OutsideLabourPanel } from './OutsideLabourPanel';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
+
+/**
+ * Add external workers to a specific Job Card without creating employees.
+ * Reuses Outside Labour's existing company-scoped Expenses APIs and payment rules.
+ */
+export function JobOutsideStaffSection({ jobId, onChanged }) {
+  const { user } = useAuth();
+  const canView = hasPermission(user, 'expenses.view');
+  const canCreate = hasPermission(user, 'expenses.create');
+  const [formOpen, setFormOpen] = useState(false);
+
+  const addStaff = () => {
+    if (!canView || !canCreate) return;
+    if (formOpen) {
+      setFormOpen(false);
+    } else {
+      setFormOpen(true);
+    }
+  };
+
+  return (
+    <section className="job-outside-staff" aria-label="Outside Staff">
+      <header className="job-outside-staff-head">
+        <span className="job-outside-staff-icon" aria-hidden="true"><HardHat size={18}/></span>
+        <div className="job-outside-staff-heading">
+          <h3>Outside Staff</h3>
+          <p>Add an external mechanic, painter or freelance worker to this Job Card.</p>
+        </div>
+        <div className="job-outside-staff-actions">
+          {canView && canCreate && (
+            <button
+              type="button"
+              className="job-outside-staff-add"
+              aria-expanded={formOpen}
+              onClick={addStaff}
+            >
+              {formOpen ? <X size={15} aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}
+              {formOpen ? 'Cancel' : 'Add Outside Staff'}
+            </button>
+          )}
+        </div>
+      </header>
+      <p className="job-outside-staff-description">
+        Outside workers are recorded here with their agreed charges and payment status.
+        They are not added to your regular staff attendance or payroll.
+      </p>
+      {!canView && (
+        <p className="job-outside-staff-permission" role="status">
+          Expenses View permission is required to see outside staff.
+        </p>
+      )}
+      {canView && !canCreate && (
+        <p className="job-outside-staff-permission" role="status">
+          Expenses Create permission is required to add outside staff.
+        </p>
+      )}
+      {canView && (
+        <div className="job-outside-staff-content">
+          <OutsideLabourPanel
+            jobId={jobId}
+            onChanged={onChanged}
+            formOpen={formOpen}
+            onFormOpenChange={setFormOpen}
+            hideToolbar
+            closeAfterSave
+            compactJobMode
+            showRecordsWhileEditing
+          />
+        </div>
+      )}
+    </section>
+  );
+}

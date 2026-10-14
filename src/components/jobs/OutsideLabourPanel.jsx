@@ -1,3 +1,4 @@
+import { appConfirm } from '../common/appDialogs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, ClipboardList, HardHat, Plus, RefreshCcw, Search, TrendingUp, Trash2, Wallet, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -35,6 +36,9 @@ export const OutsideLabourPanel = ({
   onFormOpenChange,
   refreshVersion = 0,
   hideToolbar = false,
+  closeAfterSave = false,
+  compactJobMode = false,
+  showRecordsWhileEditing = false,
 }) => {
   const { user } = useAuth();
   const formRef = useRef(null);
@@ -42,6 +46,8 @@ export const OutsideLabourPanel = ({
   const canCreate = hasPermission(user, 'expenses.create');
   const canDelete = hasPermission(user, 'expenses.delete');
   const [rows, setRows] = useState([]);
+  const [knownWorkers, setKnownWorkers] = useState([]);
+  const [workerOptionsOpen, setWorkerOptionsOpen] = useState(false);
   const [form, setForm] = useState(() => blank(jobId));
   const [payTarget, setPayTarget] = useState(null);
   const [payMethod, setPayMethod] = useState('Cash');
@@ -69,7 +75,18 @@ export const OutsideLabourPanel = ({
     setLoading(true);
     setError('');
     try {
-      setRows(await outsideLabourService.list(jobId ? { job: jobId } : {}));
+      const records = await outsideLabourService.list(jobId ? { job: jobId } : {});
+      setRows(records);
+      // Suggestions are sourced from company-scoped outside labour history, not regular employees.
+      if (jobId && canCreate) {
+        try {
+          setKnownWorkers(await outsideLabourService.list());
+        } catch {
+          setKnownWorkers(records);
+        }
+      } else {
+        setKnownWorkers(records);
+      }
     } catch (err) {
       setError(errorText(err));
     } finally {
@@ -103,6 +120,24 @@ export const OutsideLabourPanel = ({
       ].some((field) => String(field || '').toLowerCase().includes(term)))
     ));
   }, [rows, filter, search]);
+
+  const workerSuggestions = useMemo(() => {
+    const unique = new Map();
+    for (const record of knownWorkers) {
+      const name = String(record.workerName || '').trim();
+      const phone = String(record.workerPhone || '').trim();
+      if (!name) continue;
+      const key = name.toLocaleLowerCase() + '|' + phone;
+      if (!unique.has(key)) unique.set(key, { name, phone });
+    }
+    const query = form.workerName.trim().toLocaleLowerCase();
+    return [...unique.values()].filter((worker) => !query || worker.name.toLocaleLowerCase().includes(query)).slice(0, 8);
+  }, [knownWorkers, form.workerName]);
+
+  const selectWorker = (worker) => {
+    setForm((previous) => ({ ...previous, workerName: worker.name, workerPhone: worker.phone || previous.workerPhone }));
+    setWorkerOptionsOpen(false);
+  };
 
   const save = async (event) => {
     event.preventDefault();
@@ -146,7 +181,7 @@ export const OutsideLabourPanel = ({
         setNotice('Outside labour saved as Pending. Pay when money is actually given.');
       }
       setForm(blank(jobId));
-      if (controlledForm) onFormOpenChange?.(Boolean(jobId));
+      if (controlledForm) onFormOpenChange?.(closeAfterSave ? false : Boolean(jobId));
       else setShowForm(Boolean(jobId));
       await refresh();
       onChanged?.();
@@ -182,7 +217,7 @@ export const OutsideLabourPanel = ({
   };
 
   const remove = async (row) => {
-    if (!canDelete || !window.confirm('Remove this unpaid outside labour record?')) return;
+    if (!canDelete || !await appConfirm('Remove this unpaid outside labour record?')) return;
     setSaving(true);
     setError('');
     try {
@@ -205,6 +240,7 @@ export const OutsideLabourPanel = ({
 
   return (
     <section className="outside-labour-panel outside-labour-dashboard">
+      {!compactJobMode && (
       <header className="outside-labour-header">
         <div className="outside-labour-header-copy">
           <span className="outside-labour-title-icon" aria-hidden="true"><HardHat size={19}/></span>
@@ -232,7 +268,10 @@ export const OutsideLabourPanel = ({
           </div>
         )}
       </header>
+      )}
 
+      {!compactJobMode && (
+      <>
       <div className="dashboard-stats outside-labour-stats" aria-label="Outside Labour financial summary">
         {[
           { label: 'Customer Labour', value: totals.customer, Icon: ClipboardList, meta: 'Reference amount' },
@@ -254,6 +293,8 @@ export const OutsideLabourPanel = ({
         ))}
       </div>
       <small className="outside-labour-note">Customer Labour is reference-only, not an extra invoice item. Labour Margin excludes parts, tax and overheads.</small>
+      </>
+      )}
 
       {notice && <p className="outside-labour-notice" role="status">{notice}</p>}
       {error && <p className="outside-labour-error" role="alert">{error}</p>}
@@ -263,8 +304,8 @@ export const OutsideLabourPanel = ({
           <div className="outside-labour-form-heading">
             <span className="outside-labour-form-icon" aria-hidden="true"><Plus size={17}/></span>
             <div>
-              <h3>Add Outside Labour</h3>
-              <p>Enter the worker, vehicle job and manually agreed charges.</p>
+              <h3>{compactJobMode ? 'Add Outside Staff' : 'Add Outside Labour'}</h3>
+              <p>{compactJobMode ? 'Enter outside worker details and agreed charges.' : 'Enter the worker, vehicle job and manually agreed charges.'}</p>
             </div>
           </div>
           <div className="outside-labour-form-grid">
@@ -280,9 +321,35 @@ export const OutsideLabourPanel = ({
                 </select>
               </label>
             )}
-            <label>Worker Name *
-              <input name="workerName" required maxLength={160} value={form.workerName} onChange={(event) => set('workerName', event.target.value)} placeholder="Outside painter / mechanic"/>
-            </label>
+            <div className="outside-worker-picker">
+              <label htmlFor="outside-worker-name">Worker Name *</label>
+              <div className="outside-worker-search-field">
+                <Search size={16} aria-hidden="true"/>
+                <input id="outside-worker-name" name="workerName" required maxLength={160}
+                  autoComplete="off" role="combobox" aria-autocomplete="list"
+                  aria-expanded={workerOptionsOpen && workerSuggestions.length > 0}
+                  aria-controls="outside-worker-options"
+                  value={form.workerName}
+                  onFocus={() => setWorkerOptionsOpen(true)}
+                  onBlur={() => window.setTimeout(() => setWorkerOptionsOpen(false), 120)}
+                  onChange={(event) => { set('workerName', event.target.value); setWorkerOptionsOpen(true); }}
+                  placeholder="Search or enter new worker name"/>
+              </div>
+              {workerOptionsOpen && workerSuggestions.length > 0 && (
+                <div id="outside-worker-options" role="listbox" className="outside-worker-options">
+                  {workerSuggestions.map((worker) => (
+                    <button key={worker.name + worker.phone} type="button" role="option"
+                      aria-selected={form.workerName === worker.name}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => selectWorker(worker)}>
+                      <strong>{worker.name}</strong>
+                      {worker.phone && <small>{worker.phone}</small>}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <small>Choose an existing outside worker or type a new name to add one with this job.</small>
+            </div>
             <label>Phone (optional)
               <input name="workerPhone" type="tel" maxLength={30} value={form.workerPhone} onChange={(event) => set('workerPhone', event.target.value)} placeholder="Worker mobile"/>
             </label>
@@ -318,6 +385,7 @@ export const OutsideLabourPanel = ({
         </form>
       )}
 
+      {(!compactJobMode || !isFormOpen || showRecordsWhileEditing) && (
       <section className="outside-labour-records operations-card">
       <div className="outside-labour-list-head operations-header">
         <div><h3>Outside Labour Records</h3><span>{rows.length} total · {visibleRows.length} shown</span></div>
@@ -391,6 +459,7 @@ export const OutsideLabourPanel = ({
           ))}
         </div>}
       </section>
+      )}
     </section>
   );
 };

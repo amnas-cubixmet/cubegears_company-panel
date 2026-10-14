@@ -1,3 +1,4 @@
+import { appPrompt } from '../common/appDialogs';
 import React, { useState, useEffect } from 'react';
 import { commissionService } from '../../services/commission.service';
 import { usePayrollPeriod } from '../../context/PayrollPeriodContext';
@@ -84,11 +85,11 @@ export const CommissionManager = () => {
           <button
             type="button"
             onClick={async () => {
-              const staffName = prompt('Enter Staff Name:', 'Ajmal K');
+              const staffName = await appPrompt('Enter Staff Name:', 'Ajmal K');
               if (!staffName) return;
-              const amountStr = prompt('Enter Authorized Commission Amount (₹):', '500');
+              const amountStr = await appPrompt('Enter Authorized Commission Amount (₹):', '500');
               if (!amountStr) return;
-              const reason = prompt('Enter Reason / Job Card Ref:', 'JOB-0120 Engine Tuning');
+              const reason = await appPrompt('Enter Reason / Job Card Ref:', 'JOB-0120 Engine Tuning');
               
               await commissionService.createCommissionRecord({
                 staffId: 'EMP-0012',

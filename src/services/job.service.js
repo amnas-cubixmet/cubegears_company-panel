@@ -58,6 +58,150 @@ export const updateJob = async (id, data) => {
   return apiClient.patch(`${API_ENDPOINTS.JOBS}/${id}`, data);
 };
 
+const WORKFLOW_STAGES = ['overview', 'inspection', 'estimate', 'work', 'qc', 'invoice'];
+const STATUS_PROGRESS = {
+  New: 0, Inspection: 1, 'Estimate Pending': 2,
+  Approved: 3, 'In Progress': 3, 'Waiting for Parts': 3,
+  QC: 4, 'Ready for Delivery': 5, Delivered: 6
+};
+const NEXT_STATUS = {
+  overview: 'Inspection', inspection: 'Estimate Pending',
+  estimate: 'In Progress', work: 'QC',
+  qc: 'Ready for Delivery', invoice: 'Delivered'
+};
+
+const mockWorkflow = (job) => {
+  const completed = WORKFLOW_STAGES.slice(0, STATUS_PROGRESS[job?.status] || 0);
+  const current = WORKFLOW_STAGES.find((stage) => !completed.includes(stage)) || 'invoice';
+  return {
+    current,
+    completed,
+    locked: WORKFLOW_STAGES.slice(WORKFLOW_STAGES.indexOf(current) + 1),
+    stages: WORKFLOW_STAGES,
+    finished: completed.length === WORKFLOW_STAGES.length
+  };
+};
+
+export const getJobCostSummary = async (id) => {
+  if (USE_MOCK_API) {
+    return {
+      mechanicCost: '0.00', outsideStaffCost: '0.00', partsCost: '0.00',
+      totalCost: '0.00', outsidePending: '0.00',
+      unallocatedDailyWages: true, unapprovedMechanicWork: false, partsAtCurrentCost: false,
+      note: 'Demo mode does not have real payment or stock cost records.'
+    };
+  }
+  return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/cost-summary`);
+};
+
+export const uploadJobWorkPhoto = async (id, file, caption) => {
+  if (USE_MOCK_API) {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Could not read the selected image.'));
+      reader.readAsDataURL(file);
+    });
+    const job = getMockJobById(id);
+    const photo = {
+      id: `PH-${Date.now()}`, url: dataUrl, caption: String(caption || '').trim(),
+      photo_type: 'work_update', created_at: new Date().toISOString(),
+      uploaded_by: null, hasUpload: false
+    };
+    updateMockJob(id, { photos: [photo, ...(job?.photos || [])] });
+    return photo;
+  }
+  const form = new FormData();
+  form.append('image', file);
+  form.append('caption', caption || '');
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/photos/upload`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const getJobWorkPhotoBlob = async (id, photoId) => {
+  if (USE_MOCK_API) throw new Error('Demo photos are already available as data URLs.');
+  return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/photos/${photoId}/file`, {
+    responseType: 'blob'
+  });
+};
+
+export const getJobActivity = async (id) => {
+  if (USE_MOCK_API) {
+    const job = await getJobById(id);
+    return (job?.activities || job?.timeline || []).map((row, index) => ({
+      ...row,
+      id: row.id || `demo-${index}`,
+      event: row.event || row.title || 'Job Update',
+      description: row.description || row.desc || '',
+      actorName: row.actorName || 'Demo user',
+      created_at: row.created_at || row.createdAt || row.time || ''
+    }));
+  }
+  const data = await apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/activity`);
+  return Array.isArray(data) ? data : data?.results || [];
+};
+
+export const getJobWorkflow = async (id) => {
+  if (USE_MOCK_API) return mockWorkflow(await getJobById(id));
+  return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/workflow`);
+};
+
+export const completeJobStage = async (id, stage, options = {}) => {
+  if (USE_MOCK_API) {
+    const updated = await updateJobStatus(id, NEXT_STATUS[stage]);
+    return { ...mockWorkflow(updated), job: updated };
+  }
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/workflow`, { stage, ...options });
+};
+
+export const createJobEstimate = async (id, payload) => {
+  if (USE_MOCK_API) throw new Error('Use existing mock estimate workflow in demo mode.');
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/estimates`, payload);
+};
+
+export const saveQuickJobEstimate = async (id, payload, draftId = null) => {
+  if (USE_MOCK_API) {
+    await delay();
+    const job = getMockJobById(id);
+    const existing = [...(job?.estimates || [])];
+    const now = new Date().toISOString();
+    const subtotal = payload.lines.reduce(
+      (sum, item) => sum + Number(item.quantity) * Number(item.unitPrice), 0
+    );
+    const discount = Number(payload.discount) || 0;
+    const taxPercent = Number(payload.taxPercent) || 0;
+    const tax = (subtotal - discount) * taxPercent / 100;
+    const entry = {
+      id: draftId || `EST-${Date.now()}`,
+      version: draftId
+        ? existing.find((item) => String(item.id) === String(draftId))?.version || existing.length
+        : existing.length + 1,
+      status: 'Draft',
+      approvalStatus: 'Pending',
+      items: [...payload.lines.map((item) => ({ ...item })), {
+        _pricing: { taxPercent: String(taxPercent), discount: String(discount) }
+      }],
+      subtotal, tax, total: subtotal - discount + tax,
+      created_at: now, date: now
+    };
+    const next = draftId
+      ? existing.map((item) => String(item.id) === String(draftId) ? entry : item)
+      : [...existing, entry];
+    updateMockJob(id, { estimates: next, approvalStatus: 'Pending' });
+    return entry;
+  }
+  const base = `${API_ENDPOINTS.JOBS}/${id}/estimates/quick`;
+  return draftId
+    ? apiClient.patch(`${base}/${draftId}`, payload)
+    : apiClient.post(base, payload);
+};
+
+export const rejectJobEstimate = async (id, estimateId) => {
+  if (USE_MOCK_API) throw new Error('Use existing mock estimate workflow in demo mode.');
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/estimates/${estimateId}/decision`, { decision: 'Rejected' });
+};
+
 export const deleteJob = async (id) => {
   if (USE_MOCK_API) {
     await delay();
@@ -79,9 +223,18 @@ export const getVehicleHistory = async (registration) => {
 export const jobService = {
   getJobs,
   getJobById,
+  getJobCostSummary,
+  uploadJobWorkPhoto,
+  getJobWorkPhotoBlob,
   createJob,
   updateJobStatus,
   updateJob,
+  getJobWorkflow,
+  getJobActivity,
+  completeJobStage,
+  createJobEstimate,
+  saveQuickJobEstimate,
+  rejectJobEstimate,
   deleteJob,
   getVehicleHistory,
   getAll: getJobs,

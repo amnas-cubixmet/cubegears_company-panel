@@ -27,7 +27,7 @@ export const JobsHeader = ({ onNavigate }) => {
             className="jobs-secondary-button"
             onClick={() => onNavigate('/jobs/reports')}
           >
-            <History size={14} />
+            <History size={14} aria-hidden="true" />
             <span>Reports</span>
           </button>
         )}

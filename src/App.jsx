@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { PayrollPeriodProvider } from './context/PayrollPeriodContext';
 import { AppErrorBoundary } from './components/feedback/AppErrorBoundary';
 import { GlobalFormValidation } from './components/common/GlobalFormValidation';
+import { AppDialogHost } from './components/common/AppDialogHost';
 import './api/registerSaasEndpoints';
 import { AppRoutes } from './routes/AppRoutes';
 import './routes/saasRouteRegistration';
@@ -27,12 +28,24 @@ import './styles/staff-management.css';
 import './styles/payroll.css';
 import './styles/job-management.css';
 import './styles/customer-management.css';
-import './styles/stock-management.css';
 import './styles/jobs-dashboard-alignment.css';
 import './styles/outside-labour.css';
 import './styles/jobs-ops-polish.css';
 import './styles/outside-labour-dashboard.css';
 import './styles/form-validation.css';
+import './styles/job-invoice-dashboard.css';
+import './styles/job-workspace-dashboard.css';
+import './styles/job-parts-ui.css';
+import './styles/job-inspection-simple.css';
+import './styles/job-estimate-quick.css';
+import './styles/job-create-customer.css';
+import './styles/job-create-alignment.css';
+import './styles/job-complaint-detail.css';
+import './styles/billing-ui-unified.css';
+import './styles/account-workspace-unified.css';
+// Last shared layers: preserve regular text and a single clean search border.
+import './styles/form-typography.css';
+import './styles/form-controls-unified.css';
 
 export function App() {
   return (
@@ -40,6 +53,7 @@ export function App() {
       <BrowserRouter>
         <GlobalFormValidation />
         <ThemeProvider>
+          <AppDialogHost />
           <AuthProvider>
             <CompanyProvider>
               <PayrollPeriodProvider>

@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Bell, CalendarDays, ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
+import { Bell, BellRing, CalendarDays, ChevronDown, LogOut, Search, Settings, User } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearch } from '../common/GlobalSearch';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
+import { unreadNotificationCount } from '../../utils/notificationInbox';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 import { hasPermission } from '../../utils/permissions';
 import { staffService } from '../../services/staff.service';
@@ -48,7 +49,7 @@ export const Header = () => {
     const loadNotificationCount = async () => {
       try {
         const rows = await resourceConfigs.notifications.service.list();
-        if (mounted) setNotificationCount((Array.isArray(rows) ? rows : []).filter((row) => row.status === 'Unread').length);
+        if (mounted) setNotificationCount(unreadNotificationCount(rows));
       } catch {
         if (mounted) setNotificationCount(0);
       }
@@ -58,9 +59,11 @@ export const Header = () => {
       if (!event.key || event.key === 'cubixgear:notifications') loadNotificationCount();
     };
     window.addEventListener('storage', onStorage);
+    window.addEventListener('cubixgear:notifications-changed', loadNotificationCount);
     return () => {
       mounted = false;
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('cubixgear:notifications-changed', loadNotificationCount);
     };
   }, [location.pathname]);
 
@@ -133,8 +136,8 @@ export const Header = () => {
           </div>
 
           {canViewNotifications && (
-            <button type="button" className="header-icon-button has-notification-count" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
-              <Bell size={15}/>
+            <button type="button" className={`header-icon-button has-notification-count ${location.pathname === '/notifications' ? 'is-notifications-active' : ''}`} onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`} aria-current={location.pathname === '/notifications' ? 'page' : undefined}>
+              {notificationCount ? <BellRing size={19}/> : <Bell size={19}/>}
               {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
             </button>
           )}
@@ -174,10 +177,10 @@ export const Header = () => {
           </button>
 
           <div className="mobile-header-actions">
-            <button type="button" onClick={() => setSearchOpen((value) => !value)}><Search size={15}/></button>
+            <button type="button" onClick={() => setSearchOpen((value) => !value)} aria-label={searchOpen ? "Close workspace search" : "Open workspace search"} aria-expanded={searchOpen}><Search size={15}/></button>
             {canViewNotifications && (
-              <button type="button" className="mobile-notification-button" onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`}>
-                <Bell size={15}/>
+              <button type="button" className={`mobile-notification-button ${location.pathname === '/notifications' ? 'is-notifications-active' : ''}`} onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`} aria-current={location.pathname === '/notifications' ? 'page' : undefined}>
+                {notificationCount ? <BellRing size={19}/> : <Bell size={19}/>}
                 {notificationCount > 0 && <span className="header-notification-count">{notificationCount > 99 ? '99+' : notificationCount}</span>}
               </button>
             )}
@@ -194,7 +197,7 @@ export const Header = () => {
           </div>
         </div>
 
-        {searchOpen && <div className="mobile-search-wrap"><GlobalSearch isMobileView /></div>}
+        {searchOpen && <div className="mobile-search-wrap"><GlobalSearch isMobileView onMobileClose={() => setSearchOpen(false)} /></div>}
       </div>
     </header>
   );

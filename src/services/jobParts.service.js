@@ -82,6 +82,7 @@ const buildState = async (job) => {
     lines,
     transactions,
     purchaseOrders,
+    outsideParts: Array.isArray(job?.partsWorkflow?.outsideParts) ? job.partsWorkflow.outsideParts : [],
     canComplete: blocking.length === 0,
     blockingReasons: blocking
   };
@@ -89,11 +90,17 @@ const buildState = async (job) => {
 
 const persist = async (jobId, state) => {
   const cleanLines = state.lines.map(({ stockItem, qtyOnHand, availableQty, grossIssued, returnedQty, netIssued, pendingQty, stockState, ...line }) => line);
+  // Read the latest job when editing stock lines so a stock requirement
+  // never overwrites direct purchases saved through the outside-parts API.
+  const currentJob = await jobService.getJobById(jobId);
+  const previous = currentJob?.partsWorkflow || {};
   return jobService.updateJob(jobId, {
     partsWorkflow: {
+      ...previous,
       lines: cleanLines,
       transactions: state.transactions,
-      purchaseOrders: state.purchaseOrders
+      purchaseOrders: state.purchaseOrders,
+      outsideParts: previous.outsideParts || state.outsideParts || []
     }
   });
 };
@@ -375,6 +382,89 @@ export const cancelRequiredPart = async (jobId, lineId, reason) => {
   return getJobPartsWorkflow(jobId);
 };
 
+export const getOutsideJobParts = async (jobId) => {
+  if (!USE_MOCK_API) {
+    const result = await apiClient.get(`/job-cards/${jobId}/outside-parts`);
+    return Array.isArray(result?.items) ? result.items : [];
+  }
+  const job = await jobService.getJobById(jobId);
+  return job?.partsWorkflow?.outsideParts || [];
+};
+
+export const buyOutsideJobPart = async (jobId, payload) => {
+  if (!USE_MOCK_API) {
+    return apiClient.post(`/job-cards/${jobId}/outside-parts`, payload);
+  }
+  const job = await jobService.getJobById(jobId);
+  if (!job) throw new Error('Job Card not found.');
+  const workflow = job.partsWorkflow || {};
+  const previous = workflow.outsideParts || [];
+  const found = previous.find((entry) => entry.requestId === payload.requestId);
+  if (found) return found;
+  const requested = {
+    ...payload, id: `OUT-${Date.now()}`, status: 'Pending Approval',
+    quotedTotal: (Number(payload.quantity) * Number(payload.unitCost)).toFixed(2),
+    totalCost: '0.00', totalSelling: '0.00',
+    createdAt: now(), createdBy: 'Current User'
+  };
+  await jobService.updateJob(jobId, {
+    partsWorkflow: { ...workflow, outsideParts: [requested, ...previous] }
+  });
+  return requested;
+};
+
+export const decideOutsideJobPart = async (jobId, purchaseId, decision) => {
+  if (!USE_MOCK_API) {
+    return apiClient.post(`/job-cards/${jobId}/outside-parts/${purchaseId}/decision`, { decision });
+  }
+  const job = await jobService.getJobById(jobId);
+  const old = job?.partsWorkflow || {};
+  const purchase = old.outsideParts?.find((item) => item.id === purchaseId);
+  if (!purchase || purchase.status !== 'Pending Approval') throw new Error('Request is no longer pending approval.');
+  const changed = { ...purchase, status: decision === 'approve' ? 'Approved' : 'Rejected', decisionAt: now() };
+  await jobService.updateJob(jobId, {
+    partsWorkflow: { ...old, outsideParts: old.outsideParts.map((item) => item.id === purchaseId ? changed : item) }
+  });
+  return changed;
+};
+
+export const completeOutsideJobPart = async (jobId, purchaseId, form) => {
+  if (!USE_MOCK_API) {
+    const payload = new FormData();
+    payload.append('invoiceNo', form.invoiceNo);
+    payload.append('unitCost', String(form.unitCost));
+    payload.append('bill', form.bill);
+    return apiClient.post(`/job-cards/${jobId}/outside-parts/${purchaseId}/complete`, payload, {
+      headers: { 'Content-Type': undefined }
+    });
+  }
+  const job = await jobService.getJobById(jobId);
+  const old = job?.partsWorkflow || {};
+  const purchase = old.outsideParts?.find((item) => item.id === purchaseId);
+  if (!purchase || purchase.status !== 'Approved') throw new Error('Approval is required.');
+  if (!form.bill) throw new Error('Supplier invoice file is required.');
+  const qty = Number(purchase.quantity);
+  const actualCost = Number(form.unitCost);
+  if (qty * actualCost > Number(purchase.quotedTotal)) throw new Error('Actual amount exceeds approved quote.');
+  const result = {
+    ...purchase, status: 'Purchased', invoiceNo: form.invoiceNo,
+    unitCost: String(actualCost), totalCost: (qty * actualCost).toFixed(2),
+    totalSelling: (qty * Number(purchase.sellingPrice)).toFixed(2),
+    usedAt: now(), billId: 'demo-upload'
+  };
+  await jobService.updateJob(jobId, {
+    partsWorkflow: { ...old, outsideParts: old.outsideParts.map((item) => item.id === purchaseId ? result : item) }
+  });
+  return result;
+};
+
+export const downloadOutsidePartBill = async (jobId, purchaseId) => {
+  if (USE_MOCK_API) throw new Error('Supplier bill downloads are not available in demo mode.');
+  return apiClient.get(`/job-cards/${jobId}/outside-parts/${purchaseId}/bill`, {
+    responseType: 'blob'
+  });
+};
+
 export const jobPartsService = {
   get: getJobPartsWorkflow,
   addRequiredPart,
@@ -382,7 +472,12 @@ export const jobPartsService = {
   returnPart: returnJobParts,
   createOrder: createJobPurchaseOrder,
   inward: inwardPurchaseOrder,
-  cancelRequiredPart
+  cancelRequiredPart,
+  getOutsideJobParts,
+  buyOutsideJobPart,
+  decideOutsideJobPart,
+  completeOutsideJobPart,
+  downloadOutsidePartBill
 };
 
 export default jobPartsService;

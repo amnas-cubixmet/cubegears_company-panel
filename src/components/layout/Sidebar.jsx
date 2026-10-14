@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Laptop, LogOut, Moon, Sun } from 'lucide-rea
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
+import { unreadNotificationCount } from '../../utils/notificationInbox';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 import { hasPermission } from '../../utils/permissions';
 
@@ -26,7 +27,7 @@ export const Sidebar = () => {
     const loadNotificationCount = async () => {
       try {
         const rows = await resourceConfigs.notifications.service.list();
-        if (mounted) setNotificationCount((Array.isArray(rows) ? rows : []).filter((row) => row.status === 'Unread').length);
+        if (mounted) setNotificationCount(unreadNotificationCount(rows));
       } catch {
         if (mounted) setNotificationCount(0);
       }
@@ -37,10 +38,12 @@ export const Sidebar = () => {
       if (!event.key || event.key === 'cubixgear:notifications') loadNotificationCount();
     };
     window.addEventListener('storage', onStorage);
+    window.addEventListener('cubixgear:notifications-changed', loadNotificationCount);
 
     return () => {
       mounted = false;
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener('cubixgear:notifications-changed', loadNotificationCount);
     };
   }, [location.pathname]);
 

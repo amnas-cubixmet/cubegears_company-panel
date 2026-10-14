@@ -1,10 +1,13 @@
+import { appAlert } from '../../components/common/appDialogs';
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Search, History } from 'lucide-react';
+import { CheckCircle2, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { staffService } from '../../services/staff.service';
 import { payrollService } from '../../services/payroll.service';
 import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
+import { JobCustomerPicker } from '../../components/jobs/JobCustomerPicker';
+import { customerService } from '../../services/customer.service';
 import { showFormFieldError, showServerFormErrors } from '../../utils/formValidation';
 
 const nowLocal = () => {
@@ -19,6 +22,10 @@ export const JobCreatePage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [staff, setStaff] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerVehicles, setCustomerVehicles] = useState([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState(false);
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
@@ -27,6 +34,7 @@ export const JobCreatePage = () => {
     customerName: '',
     customerPhone: '',
     customerEmail: '',
+    customerAddress: '',
     vehicleReg: '',
     vehicleInfo: '',
     vin: '',
@@ -42,6 +50,62 @@ export const JobCreatePage = () => {
     branch: 'Main Garage Branch',
     notes: ''
   });
+
+  const chooseCustomer = (customer) => {
+    setSelectedCustomer(customer);
+    setSelectedVehicleId('');
+    setCustomerVehicles([]);
+    setHistory([]);
+    setError('');
+    setForm((old) => ({
+      ...old,
+      customerName: customer?.name || '',
+      customerPhone: customer?.phone || '',
+      customerEmail: customer?.email || '',
+      customerAddress: customer?.address || '',
+      vehicleReg: '', vehicleInfo: '', vin: '', kilometre: ''
+    }));
+  };
+
+  useEffect(() => {
+    if (!selectedCustomer?.id) {
+      setCustomerVehicles([]);
+      setSelectedVehicleId('');
+      return;
+    }
+    let active = true;
+    setVehiclesLoading(true);
+    customerService.getCustomerVehicles(selectedCustomer.id)
+      .then((response) => {
+        if (!active) return;
+        const vehicles = Array.isArray(response) ? response : response?.results || [];
+        setCustomerVehicles(vehicles);
+      })
+      .catch(() => {
+        if (active) {
+          setCustomerVehicles([]);
+          setError('Customer selected, but vehicle list could not be loaded. You can enter registration manually.');
+        }
+      })
+      .finally(() => { if (active) setVehiclesLoading(false); });
+    return () => { active = false; };
+  }, [selectedCustomer?.id]);
+
+  const chooseVehicle = (vehicleId) => {
+    setSelectedVehicleId(vehicleId);
+    const found = customerVehicles.find((item) => String(item.id) === String(vehicleId));
+    if (!found) {
+      setForm((old) => ({ ...old, vehicleReg: '', vehicleInfo: '', vin: '', kilometre: '' }));
+      return;
+    }
+    setForm((old) => ({
+      ...old,
+      vehicleReg: (found.regNo || found.registration || found.licensePlate || '').toUpperCase(),
+      vehicleInfo: found.makeModel || [found.make, found.model, found.variant].filter(Boolean).join(' '),
+      vin: found.vin || '',
+      kilometre: ''
+    }));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -63,15 +127,18 @@ export const JobCreatePage = () => {
       setHistoryLoading(true);
       try {
         const rows = await jobService.getVehicleHistory(form.vehicleReg);
-        setHistory(rows);
+        const matched = selectedCustomer?.id
+          ? rows.filter((row) => String(row.customerId || '') === String(selectedCustomer.id))
+          : rows;
+        setHistory(matched);
 
-        if (rows.length) {
-          const latest = rows[0];
+        if (matched.length) {
+          const latest = matched[0];
           setForm((old) => ({
             ...old,
-            customerName: old.customerName || latest.customerName || '',
-            customerPhone: old.customerPhone || latest.customerPhone || '',
-            customerEmail: old.customerEmail || latest.customerEmail || '',
+            customerName: selectedCustomer ? old.customerName : old.customerName || latest.customerName || '',
+            customerPhone: selectedCustomer ? old.customerPhone : old.customerPhone || latest.customerPhone || '',
+            customerEmail: selectedCustomer ? old.customerEmail : old.customerEmail || latest.customerEmail || '',
             vehicleInfo: old.vehicleInfo || latest.vehicleInfo || '',
             vin: old.vin || latest.vin || latest.vehicle?.vin || ''
           }));
@@ -85,10 +152,23 @@ export const JobCreatePage = () => {
     }, 350);
 
     return () => window.clearTimeout(timer);
-  }, [form.vehicleReg]);
+  }, [form.vehicleReg, selectedCustomer?.id]);
 
   const set = (key, value) => {
     setError('');
+    if (key === 'vehicleReg') {
+      const normalized = (number) => String(number || '').replace(/\s+/g, '').toUpperCase();
+      const matched = customerVehicles.find((vehicle) =>
+        normalized(vehicle.regNo || vehicle.registration || vehicle.licensePlate) === normalized(value)
+      );
+      setSelectedVehicleId(matched?.id || '');
+      setForm((old) => ({
+        ...old, vehicleReg: value,
+        vehicleInfo: matched ? matched.makeModel || [matched.make, matched.model].filter(Boolean).join(' ') : old.vehicleInfo,
+        vin: matched ? matched.vin || '' : old.vin
+      }));
+      return;
+    }
     setForm((old) => ({ ...old, [key]: value }));
   };
 
@@ -119,6 +199,7 @@ export const JobCreatePage = () => {
     try {
       const created = await jobService.createJob({
         ...form,
+        ...(selectedCustomer?.id ? { customer: selectedCustomer.id } : {}),
         checkInTime: form.jobDateTime,
         customerComplaints: form.complaint
           ? [{ id: `CMP-${Date.now()}`, description: form.complaint, wording: form.complaint, status: 'Open' }]
@@ -126,7 +207,7 @@ export const JobCreatePage = () => {
         complaints: form.complaint
           ? [{ id: `CMP-${Date.now()}`, description: form.complaint, wording: form.complaint, status: 'Open' }]
           : [],
-        vehicle: {
+        vehicle: selectedVehicleId || {
           registration: form.vehicleReg,
           makeModel: form.vehicleInfo,
           vin: form.vin
@@ -147,11 +228,11 @@ export const JobCreatePage = () => {
           await payrollService.createJobTimerAssignment(created.id, form.assignedEmployeeId);
         } catch (assignmentError) {
           console.warn('Job created; worker assignment needs confirmation.', assignmentError);
-          window.alert('Job Card created. Please verify worker assignment in Work & Labour.');
+          appAlert('Job Card created. Please verify worker assignment in Work & Labour.');
         }
       }
 
-      navigate(`/jobs/${created.id}/overview`, { replace: true });
+      navigate(`/jobs/${created.id}`, { replace: true });
     } catch (err) {
       showServerFormErrors(formRef.current, err, {
         customer_name: 'customerName', customer_phone: 'customerPhone',
@@ -169,33 +250,44 @@ export const JobCreatePage = () => {
   return (
     <div className="job-management-page job-create-page flex w-full min-w-0 flex-col gap-4">
       <JobBreadcrumbs current="New Job Card" />
-      <div className="job-create-header flex flex-wrap items-start justify-between gap-3">
+      <header className="job-create-header flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-content">New Job Card</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Record customer, vehicle, complaints and technician. Estimate, repair, QC and delivery are managed inside the Job Card.</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-content">Create Job Card</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted">Add customer and vehicle details, then create a Job Card to start inspection.</p>
           <div className="job-create-steps" aria-label="Job setup steps">
             <span><b>01</b> Customer</span><span><b>02</b> Vehicle</span><span><b>03</b> Assignment</span>
           </div>
         </div>
-      </div>
+      </header>
 
       {error ? <div role="alert" className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-xs font-bold text-red-600">{error}</div> : null}
 
       <form ref={formRef} onSubmit={submit} className="job-create-form flex flex-col gap-4">
         <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
-          <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">01</span> Job & Customer</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="job-create-section-heading">
+            <div>
+              <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">01</span> Customer & Job Details</h2>
+              <p>Select an existing customer or add a new one. Contact details fill automatically.</p>
+            </div>
+          </div>
+          <JobCustomerPicker selectedCustomer={selectedCustomer} onSelect={chooseCustomer}
+            disabled={saving} />
+          <div className="job-create-fields-grid mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className={labelClass}>Date / Time *
               <input name="jobDateTime" type="datetime-local" required value={form.jobDateTime} onChange={(e) => set('jobDateTime', e.target.value)} className={inputClass}/>
             </label>
             <label className={labelClass}>Customer Name *
-              <input name="customerName" required autoComplete="name" value={form.customerName} onChange={(e) => set('customerName', e.target.value)} placeholder="Customer name" className={inputClass}/>
+              <input name="customerName" required readOnly={Boolean(selectedCustomer)} autoComplete="name" value={form.customerName} onChange={(e) => set('customerName', e.target.value)} placeholder="Customer name" className={inputClass}/>
             </label>
             <label className={labelClass}>Phone *
-              <input name="customerPhone" required type="tel" autoComplete="tel" inputMode="tel" value={form.customerPhone} onChange={(e) => set('customerPhone', e.target.value)} placeholder="+91..." className={inputClass}/>
+              <input name="customerPhone" required readOnly={Boolean(selectedCustomer)} type="tel" autoComplete="tel" inputMode="tel" value={form.customerPhone} onChange={(e) => set('customerPhone', e.target.value)} placeholder="+91..." className={inputClass}/>
             </label>
             <label className={labelClass}>Email
-              <input name="customerEmail" type="email" autoComplete="email" value={form.customerEmail} onChange={(e) => set('customerEmail', e.target.value)} placeholder="Optional" className={inputClass}/>
+              <input name="customerEmail" readOnly={Boolean(selectedCustomer)} type="email" autoComplete="email" value={form.customerEmail} onChange={(e) => set('customerEmail', e.target.value)} placeholder="Optional" className={inputClass}/>
+            </label>
+            <label className={labelClass}>Customer Address
+              <input name="customerAddress" readOnly={Boolean(selectedCustomer)} value={form.customerAddress}
+                onChange={(e) => set('customerAddress', e.target.value)} placeholder="Optional" className={inputClass}/>
             </label>
             <label className={labelClass}>Branch
               <select value={form.branch} onChange={(e) => set('branch', e.target.value)} className={inputClass}>
@@ -211,12 +303,29 @@ export const JobCreatePage = () => {
         </section>
 
         <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
-          <div className="flex items-center gap-2">
-            <Search size={17} className="text-primary"/>
-            <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">02</span> Vehicle Details</h2>
+          <div className="job-create-section-heading">
+            <div>
+              <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">02</span> Vehicle Details</h2>
+              <p>Choose a saved vehicle or enter registration and vehicle information.</p>
+            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {selectedCustomer && (
+            <div className="job-customer-vehicles">
+              <label className={labelClass} htmlFor="job-new-vehicle-select">Select Customer Vehicle</label>
+              <select id="job-new-vehicle-select" value={selectedVehicleId} disabled={vehiclesLoading || saving}
+                className={inputClass} onChange={(event) => chooseVehicle(event.target.value)}>
+                <option value="">{vehiclesLoading ? 'Loading vehicles…' : 'New vehicle / Enter registration below'}</option>
+                {customerVehicles.map((vehicle) => (
+                  <option key={vehicle.id} value={vehicle.id}>
+                    {vehicle.regNo || vehicle.registration || vehicle.licensePlate} — {vehicle.makeModel || [vehicle.make, vehicle.model].filter(Boolean).join(' ')}
+                  </option>
+                ))}
+              </select>
+              <p>{customerVehicles.length ? customerVehicles.length + ' vehicle(s) linked to this customer.' : 'No saved vehicles. Enter a new registration below.'}</p>
+            </div>
+          )}
+          <div className="job-create-fields-grid mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             <label className={labelClass}>Registration Number *
               <input name="vehicleReg" required autoCapitalize="characters" autoComplete="off" value={form.vehicleReg} onChange={(e) => set('vehicleReg', e.target.value.toUpperCase())} placeholder="KL 07 AB 1234" className={inputClass}/>
             </label>
@@ -247,8 +356,13 @@ export const JobCreatePage = () => {
         </section>
 
         <section className="job-create-section rounded-2xl border border-line bg-surface p-4 md:p-5">
-          <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">03</span> Complaint & Assignment</h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="job-create-section-heading">
+            <div>
+              <h2 className="text-base font-extrabold text-content"><span className="job-create-title-step">03</span> Complaint & Assignment</h2>
+              <p>Describe the issue and optionally assign workshop staff.</p>
+            </div>
+          </div>
+          <div className="job-create-fields-grid job-create-assignment-grid mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className={labelClass + ' md:col-span-2'}>Customer Complaint
               <textarea rows={4} value={form.complaint} onChange={(e) => set('complaint', e.target.value)} placeholder="Record the customer's words separately..." className="mt-1 min-h-28 w-full rounded-xl border border-line bg-surface-2 p-3 text-sm text-content outline-none focus:border-primary"/>
             </label>
@@ -280,9 +394,9 @@ export const JobCreatePage = () => {
           </div>
         </section>
 
-        <div className="job-create-actions sticky bottom-0 z-20 flex gap-2 border-t border-line bg-surface/95 p-3 backdrop-blur md:static md:justify-end md:border-0 md:bg-transparent md:p-0">
+        <div className="job-create-actions sticky bottom-0 z-20 flex gap-2 border-t border-line bg-surface/95 p-3 backdrop-blur md:static md:justify-end md:border-0 md:bg-transparent md:p-0" aria-label="Job Card form actions">
           <button type="button" className="h-11 flex-1 rounded-xl border border-line bg-surface px-5 text-sm font-semibold text-content md:flex-none" onClick={() => navigate('/jobs')}>Cancel</button>
-          <button disabled={saving} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border-0 bg-primary px-5 text-sm font-bold text-white md:flex-none">
+          <button type="submit" disabled={saving} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border-0 bg-primary px-5 text-sm font-bold text-white md:flex-none">
             <CheckCircle2 size={17}/>{saving ? 'Creating…' : 'Create Job Card'}
           </button>
         </div>

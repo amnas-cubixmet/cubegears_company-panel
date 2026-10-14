@@ -1,3 +1,4 @@
+import { appConfirm, appPrompt } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, CalendarCheck2, CheckCircle2, ClipboardList, Clock3, History, Pencil, Plus, Wallet, WalletCards } from 'lucide-react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -120,9 +121,9 @@ export const DailyWageAccountPage = () => {
 
   const reverse = async (row) => {
     if (!canEdit || saving) return;
-    const reason = window.prompt('Reason for reversing this payment:');
+    const reason = await appPrompt('Reason for reversing this payment:');
     if (!reason?.trim()) return;
-    if (!window.confirm('Reverse this payment? Its amount will become payable again.')) return;
+    if (!await appConfirm('Reverse this payment? Its amount will become payable again.')) return;
     setSaving(true);
     setError('');
     try {

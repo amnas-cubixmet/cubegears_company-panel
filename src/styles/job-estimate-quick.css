@@ -1,0 +1,462 @@
+/* Simple Job Card Estimate — fast item entry and compact billing summary. */
+.cg-job-detail .job-quick-estimate {
+  display:flex;flex-direction:column;gap:14px;min-width:0;width:100%;
+  font-family:inherit;color:var(--text-primary);
+}
+.cg-job-detail .job-quick-estimate * {box-sizing:border-box}
+.cg-job-detail .job-quick-header,
+.cg-job-detail .job-quick-panel,
+.cg-job-detail .job-quick-history {
+  min-width:0;padding:17px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);box-shadow:var(--shadow-sm);
+}
+.cg-job-detail .job-quick-header {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.cg-job-detail .job-quick-header>div {flex:1 1 220px;min-width:0}
+.cg-job-detail .job-quick-eyebrow {display:block;margin-bottom:5px;color:var(--text-muted);font-size:11px;font-weight:650}
+.cg-job-detail .job-quick-header h2 {
+  display:flex;align-items:center;gap:9px;margin:0;
+  color:var(--text-primary);font-size:18px;font-weight:750;line-height:1.35;
+}
+.cg-job-detail .job-quick-header h2 svg {color:var(--primary)}
+.cg-job-detail .job-quick-header p,
+.cg-job-detail .job-quick-section-head p {
+  margin:5px 0 0;color:var(--text-muted);font-size:12px;line-height:1.5;
+}
+.cg-job-detail .job-quick-outline,
+.cg-job-detail .job-quick-add-actions button {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:41px;padding:0 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);color:var(--text-primary);
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+.cg-job-detail .job-quick-estimate button:disabled {opacity:.52;cursor:not-allowed}
+.cg-job-detail .job-quick-grid {
+  display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,.78fr);
+  gap:13px;align-items:start;
+}
+.cg-job-detail .job-quick-panel {display:flex;flex-direction:column;gap:16px}
+.cg-job-detail .job-quick-section-head {
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+.cg-job-detail .job-quick-section-head h3 {margin:0;font-size:14px;font-weight:750;line-height:1.4}
+.cg-job-detail .job-quick-count {
+  display:inline-flex;align-items:center;padding:5px 9px;
+  border-radius:99px;background:var(--surface-2);
+  color:var(--text-secondary);font-size:11px;font-weight:650;white-space:nowrap;
+}
+.cg-job-detail .job-quick-items {display:flex;flex-direction:column;gap:9px;min-width:0}
+.cg-job-detail .job-quick-line {
+  min-width:0;padding:13px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+}
+.cg-job-detail .job-quick-line-header {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.cg-job-detail .job-quick-line-header strong {font-size:12px;font-weight:750}
+.cg-job-detail .job-quick-line-header button {
+  display:grid;place-items:center;width:30px;height:30px;
+  border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);color:var(--text-secondary);cursor:pointer;
+}
+.cg-job-detail .job-quick-line-fields {
+  display:grid;grid-template-columns:minmax(0,1.1fr) minmax(90px,.64fr) 72px 112px;
+  gap:9px;align-items:end;
+}
+.cg-job-detail .job-quick-line-fields label,
+.cg-job-detail .job-quick-adjustments label {
+  display:flex;flex-direction:column;gap:6px;min-width:0;
+  color:var(--text-secondary);font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-quick-estimate :is(input,select) {
+  width:100%;min-width:0;max-width:100%;min-height:40px;
+  padding:9px 10px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);color:var(--text-primary);
+  font-family:inherit;font-size:13px;font-weight:500;
+}
+.cg-job-detail .job-quick-estimate :is(input,select):focus-visible,
+.cg-job-detail .job-quick-estimate button:focus-visible,
+.cg-job-detail .job-quick-history summary:focus-visible {
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+.cg-job-detail .job-quick-line-total {
+  display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:10px;
+  color:var(--text-muted);font-size:11px;
+}
+.cg-job-detail .job-quick-line-total strong {color:var(--text-primary);font-size:12px;font-variant-numeric:tabular-nums}
+.cg-job-detail .job-quick-add-actions {display:flex;flex-wrap:wrap;gap:8px}
+.cg-job-detail .job-quick-add-actions button {min-height:39px}
+.cg-job-detail .job-quick-amounts {margin:0;display:flex;flex-direction:column;gap:13px}
+.cg-job-detail .job-quick-amounts>div:not(.job-quick-adjustments) {
+  display:flex;justify-content:space-between;gap:12px;align-items:center;
+}
+.cg-job-detail .job-quick-amounts dt {color:var(--text-secondary);font-size:12px;font-weight:650}
+.cg-job-detail .job-quick-amounts dd {
+  margin:0;text-align:right;color:var(--text-primary);
+  font-size:13px;font-weight:750;font-variant-numeric:tabular-nums;
+}
+.cg-job-detail .job-quick-adjustments {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cg-job-detail .job-quick-grand-total {
+  padding:13px;border-radius:10px;background:var(--primary-soft);
+}
+.cg-job-detail .job-quick-grand-total dt {color:var(--primary);font-weight:750}
+.cg-job-detail .job-quick-grand-total dd {font-size:21px}
+.cg-job-detail .job-quick-actions {display:flex;flex-direction:column;gap:9px}
+.cg-job-detail .job-quick-actions button {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:43px;padding:9px 12px;border-radius:9px;
+  font-size:12px;font-weight:750;cursor:pointer;
+}
+.cg-job-detail .job-quick-primary {border:1px solid var(--border);background:var(--surface-2);color:var(--text-primary)}
+.cg-job-detail .job-quick-approve {border:1px solid var(--primary);background:var(--primary);color:#fff}
+.cg-job-detail .job-quick-actions small {text-align:center;font-size:11px;line-height:1.5;color:var(--text-muted)}
+.cg-job-detail .job-quick-invalid {margin:0;color:var(--danger);font-size:11px;line-height:1.4}
+.cg-job-detail .job-quick-warning,
+.cg-job-detail .job-quick-feedback {
+  margin:0;padding:11px 13px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);font-size:12px;color:var(--text-secondary);
+}
+.cg-job-detail .job-quick-warning {color:var(--danger);border-color:var(--danger)}
+.cg-job-detail .job-quick-history {padding:0;overflow:hidden}
+.cg-job-detail .job-quick-history summary {
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:15px 17px;list-style:none;cursor:pointer;
+  font-size:12px;font-weight:750;
+}
+.cg-job-detail .job-quick-history summary::-webkit-details-marker {display:none}
+.cg-job-detail .job-quick-history[open] summary svg {transform:rotate(180deg)}
+.cg-job-detail .job-quick-history-list {padding:10px 15px;border-top:1px solid var(--border)}
+.cg-job-detail .job-quick-history-list>div {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:10px;padding:11px 0;border-bottom:1px solid var(--border);font-size:12px;
+}
+.cg-job-detail .job-quick-history-list>div:last-child {border:0}
+.cg-job-detail .job-quick-history-list strong {font-variant-numeric:tabular-nums}
+.cg-job-detail .job-quick-history-list button {
+  min-height:33px;padding:0 10px;border:1px solid var(--border);
+  border-radius:8px;background:var(--surface-2);color:var(--text-primary);
+  font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-quick-history-list>p {font-size:12px;color:var(--text-muted)}
+@media(max-width:1020px){
+  .cg-job-detail .job-quick-grid {grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .cg-job-detail .job-quick-estimate {gap:10px}
+  .cg-job-detail .job-quick-header,.cg-job-detail .job-quick-panel {padding:13px}
+  .cg-job-detail .job-quick-header .job-quick-outline {width:100%}
+  .cg-job-detail .job-quick-line-fields {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cg-job-detail .job-quick-line-fields .job-quick-description {grid-column:1 / -1}
+  .cg-job-detail .job-quick-line {padding:11px}
+  .cg-job-detail .job-quick-estimate :is(input,select) {font-size:16px}
+}
+@media(max-width:380px){
+  .cg-job-detail .job-quick-line-fields {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cg-job-detail .job-quick-add-actions button {width:100%}
+  .cg-job-detail .job-quick-adjustments {gap:7px}
+}
+
+
+/* Separate, quickly editable Work and Part sections in the customer estimate. */
+.cg-job-detail .job-quick-work-parts {
+  gap:14px;
+}
+.cg-job-detail .job-quick-item-group {
+  display:flex;flex-direction:column;gap:11px;
+  min-width:0;padding:14px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:var(--surface);
+}
+.cg-job-detail .job-quick-group-heading {
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:10px;min-width:0;
+}
+.cg-job-detail .job-quick-group-heading>div {
+  flex:1 1 170px;min-width:0;
+}
+.cg-job-detail .job-quick-group-heading h4 {
+  display:flex;align-items:center;gap:8px;
+  margin:0;font-size:13px;font-weight:750;
+  color:var(--text-primary);line-height:1.45;
+}
+.cg-job-detail .job-quick-group-heading h4 svg {
+  flex:0 0 16px;color:var(--primary);
+}
+.cg-job-detail .job-quick-group-heading p {
+  margin:4px 0 0;color:var(--text-muted);
+  font-size:11px;line-height:1.4;
+}
+.cg-job-detail .job-quick-group-heading .job-quick-add-button,
+.cg-job-detail .job-quick-import {
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:40px;padding:8px 13px;
+  border:1px solid var(--primary);border-radius:9px;
+  background:var(--primary-soft);color:var(--primary);
+  font-family:inherit;font-size:12px;font-weight:750;
+  line-height:1.4;cursor:pointer;white-space:nowrap;
+}
+.cg-job-detail .job-quick-group-heading .job-quick-add-button:hover:not(:disabled),
+.cg-job-detail .job-quick-import:hover:not(:disabled) {
+  border-color:var(--primary);
+  filter:brightness(.98);
+}
+.cg-job-detail .job-quick-empty {
+  margin:0;padding:17px 12px;
+  border:1px dashed var(--border);border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text-muted);font-size:12px;line-height:1.55;
+}
+.cg-job-detail .job-quick-type-fixed {
+  display:flex;flex-direction:column;justify-content:flex-end;
+  gap:6px;min-width:0;
+  color:var(--text-secondary);font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-quick-type-fixed strong {
+  display:flex;align-items:center;
+  min-height:40px;padding:8px 10px;
+  border:1px solid var(--border);
+  border-radius:9px;background:var(--surface);
+  color:var(--text-secondary);
+  font-size:12px;font-weight:650;
+}
+.cg-job-detail .job-quick-import {
+  align-self:flex-start;
+  border-color:var(--border);
+  background:var(--surface-2);
+  color:var(--text-primary);
+}
+.cg-job-detail .job-quick-save-note {
+  margin:-2px 0 0;
+  color:var(--text-muted);font-size:11px;line-height:1.5;
+}
+@media(max-width:650px){
+  .cg-job-detail .job-quick-item-group {padding:11px;gap:10px}
+  .cg-job-detail .job-quick-group-heading .job-quick-add-button {
+    min-height:42px;
+  }
+  .cg-job-detail .job-quick-type-fixed strong {min-height:43px}
+  .cg-job-detail .job-quick-import {
+    align-self:stretch;
+    white-space:normal;
+  }
+}
+@media(max-width:380px){
+  .cg-job-detail .job-quick-group-heading .job-quick-add-button {
+    width:100%;
+  }
+}
+
+
+/* Estimate catalog search: single-border combobox with accessible result list. */
+.cg-job-detail .job-quick-name-field {
+  display:flex;flex-direction:column;gap:6px;
+  min-width:0;position:relative;
+  color:var(--text-secondary);font-size:11px;font-weight:650;
+}
+.cg-job-detail .job-quick-line:focus-within {
+  position:relative;z-index:12;
+}
+.cg-job-detail .job-quick-catalog {
+  position:relative;min-width:0;width:100%;
+}
+.cg-job-detail .job-quick-catalog-field {
+  display:flex;align-items:center;gap:8px;
+  min-height:42px;height:42px;
+  min-width:0;padding:0 11px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:9px;color:var(--text-muted);
+}
+.cg-job-detail .job-quick-catalog-field:focus-within {
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px var(--primary-soft);
+}
+.cg-job-detail .job-quick-catalog-field > svg {
+  display:block;flex:0 0 15px;width:15px;height:15px;
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field input {
+  display:block;flex:1 1 auto;width:100%;max-width:100%;min-width:0;
+  height:100%!important;min-height:0!important;
+  padding:0!important;margin:0!important;
+  outline:none!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;background:transparent!important;
+  color:var(--text-primary);font-size:13px;
+  text-overflow:ellipsis;font-weight:500;
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field input:is(:focus,:focus-visible) {
+  outline:none!important;border:0!important;box-shadow:none!important;
+}
+.cg-job-detail .job-quick-catalog-options {
+  position:absolute;top:calc(100% + 6px);left:0;right:0;
+  z-index:30;display:flex;flex-direction:column;gap:2px;
+  min-width:0;max-height:255px;overflow-x:hidden;overflow-y:auto;
+  padding:6px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface);
+  box-shadow:0 12px 25px rgba(0,0,0,.14);
+}
+.cg-job-detail .job-quick-catalog-options > p {
+  margin:0;padding:12px;
+  font-size:11px;line-height:1.5;
+  color:var(--text-secondary);
+}
+.cg-job-detail .job-quick-catalog-options > button {
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;gap:9px;min-height:48px;
+  padding:9px 10px;border:0;border-radius:8px;
+  color:var(--text-primary);background:transparent;text-align:left;
+  cursor:pointer;
+}
+.cg-job-detail .job-quick-catalog-options > button:hover,
+.cg-job-detail .job-quick-catalog-options > button.is-highlighted {
+  background:var(--primary-soft);
+}
+.cg-job-detail .job-quick-catalog-options > button span {min-width:0;flex:1}
+.cg-job-detail .job-quick-catalog-options > button strong {
+  display:block;font-size:12px;font-weight:750;
+  line-height:1.4;overflow-wrap:anywhere;
+}
+.cg-job-detail .job-quick-catalog-options > button small {
+  display:block;margin-top:4px;color:var(--text-muted);
+  font-size:11px;line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.cg-job-detail .job-quick-catalog-options > button b {
+  flex:0 0 auto;font-size:12px;font-weight:750;
+  color:var(--text-primary);white-space:nowrap;
+}
+.cg-job-detail .job-quick-catalog-selected {
+  display:block;overflow-wrap:anywhere;
+  color:var(--primary);font-size:10px;line-height:1.4;
+  font-weight:650;
+}
+@media(max-width:650px) {
+  .cg-job-detail .job-quick-catalog-field {height:44px;min-height:44px}
+  .cg-job-detail .job-quick-estimate .job-quick-catalog-field input {
+    font-size:16px!important;
+  }
+  .cg-job-detail .job-quick-catalog-options {max-height:220px}
+}
+
+
+/* Specific, accessible validation feedback for estimate Work/Part rows. */
+.cg-job-detail .job-quick-line.is-invalid{
+  border-color:var(--danger,#bc2532);
+  background:var(--surface-2);
+}
+.cg-job-detail .job-quick-estimate [aria-invalid="true"]{
+  border-color:var(--danger,#bc2532)!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--danger,#bc2532) 18%,transparent);
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field:has(input[aria-invalid="true"]){
+  border-color:var(--danger,#bc2532);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--danger,#bc2532) 18%,transparent);
+}
+.cg-job-detail .job-quick-field-error{
+  color:var(--danger,#bc2532);
+  font-size:11px;
+  font-weight:500;
+  line-height:1.45;
+  margin-top:2px;
+  overflow-wrap:anywhere;
+}
+.cg-job-detail .job-quick-invalid{
+  padding:11px 12px;
+  border:1px solid var(--danger,#bc2532);
+  background:var(--surface);
+  border-radius:9px;
+  font-size:12px;
+  font-weight:600;
+}
+.cg-job-detail .job-quick-line-fields label:has(.job-quick-field-error){
+  align-self:stretch;
+}
+
+
+/* Search & Select and persistent Add New actions for both Estimate sections. */
+.cg-job-detail .job-quick-group-actions{
+  display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;
+  min-width:0;
+}
+.cg-job-detail .job-quick-group-actions .job-quick-add-button{
+  min-height:40px;
+}
+.cg-job-detail .job-quick-group-actions .job-quick-add-button.is-catalog-add{
+  border-color:var(--primary);
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+.cg-job-detail .job-quick-group-actions .job-quick-add-button.is-catalog-add:hover:not(:disabled){
+  background:var(--primary-soft);
+  border-color:var(--primary);
+}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new{
+  display:flex;align-items:center;justify-content:flex-start;gap:10px;
+  margin-top:5px;padding:11px;
+  border:1px dashed var(--primary);
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new > svg{flex:0 0 17px}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new strong{
+  color:var(--primary);font-size:12px;
+}
+.cg-job-detail .job-quick-catalog-options > button.job-quick-catalog-add-new small{
+  color:var(--text-secondary);
+}
+.job-estimate-create-form{display:flex;flex-direction:column;gap:15px;min-width:0}
+.job-estimate-create-form *{box-sizing:border-box}
+.job-estimate-create-intro,.job-estimate-create-note{
+  margin:0;font-size:12px;line-height:1.6;color:var(--text-secondary);
+}
+.job-estimate-create-note{
+  padding:11px 12px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+}
+.job-estimate-create-form label{
+  display:flex;flex-direction:column;gap:7px;min-width:0;
+  font-size:12px;line-height:1.4;font-weight:600;color:var(--text-secondary);
+}
+.job-estimate-create-two{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;
+}
+.job-estimate-create-form :is(input,select){
+  width:100%;min-width:0;min-height:43px;
+  padding:10px 12px;border:1px solid var(--border);border-radius:10px;
+  background:var(--surface);color:var(--text-primary);
+  font-size:13px;font-weight:400;font-family:inherit;
+}
+.job-estimate-create-form :is(input,select):focus-visible{
+  outline:2px solid var(--primary);outline-offset:1px;
+}
+.job-estimate-create-form [aria-invalid="true"]{
+  border-color:var(--danger);
+}
+.job-estimate-create-form label small,.job-estimate-create-error{
+  font-size:11px;line-height:1.45;font-weight:500;color:var(--danger);
+}
+.job-estimate-create-error{
+  margin:0;padding:10px 12px;border:1px solid var(--danger);
+  border-radius:9px;background:var(--surface);font-size:12px;
+}
+.job-estimate-create-actions{
+  display:flex;align-items:center;justify-content:flex-end;gap:9px;
+  padding-top:8px;border-top:1px solid var(--border);
+}
+.job-estimate-create-actions button{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:44px;padding:0 16px;border-radius:10px;
+  font-size:12px;font-weight:600;cursor:pointer;
+}
+.job-estimate-create-actions .job-estimate-create-cancel{
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text-primary);
+}
+.job-estimate-create-actions .job-estimate-create-save{
+  background:var(--primary);border:1px solid var(--primary);color:#fff;
+}
+.job-estimate-create-actions button:disabled{opacity:.65;cursor:not-allowed}
+@media(max-width:650px){
+  .cg-job-detail .job-quick-group-actions{width:100%;justify-content:stretch}
+  .cg-job-detail .job-quick-group-actions .job-quick-add-button{
+    flex:1 1 120px;min-height:44px;width:auto;
+  }
+  .job-estimate-create-two{grid-template-columns:1fr;gap:13px}
+  .job-estimate-create-form :is(input,select){font-size:16px}
+  .job-estimate-create-actions button{flex:1}
+}

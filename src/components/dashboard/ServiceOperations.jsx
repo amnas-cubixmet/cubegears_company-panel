@@ -4,6 +4,7 @@ import { hasPermission } from '../../utils/permissions';
 import { ActiveRepairPanel } from './ActiveRepairPanel';
 import { BookingList } from './BookingList';
 import { JobDetailPanel } from './JobDetailPanel';
+import { dashboardText } from './dashboard.utils';
 
 export const ServiceOperations = ({
   data,
@@ -35,7 +36,7 @@ export const ServiceOperations = ({
     if (!query) return data?.bookings || [];
     return (data?.bookings || []).filter((booking) =>
       [booking.customer, booking.vehicle, booking.service, booking.id]
-        .some((value) => String(value || '').toLowerCase().includes(query)),
+        .some((value) => dashboardText(value, '').toLowerCase().includes(query)),
     );
   }, [data?.bookings, search]);
 

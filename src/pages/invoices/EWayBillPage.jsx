@@ -8,7 +8,11 @@ import {
   Printer,
   Download,
   Trash2,
-  Truck
+  RotateCcw,
+  Truck,
+  Search,
+  IndianRupee,
+  FileClock
 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -18,7 +22,9 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
+import { appConfirm } from '../../components/common/appDialogs';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
+import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const n = (value) => Number(value || 0);
@@ -60,6 +66,31 @@ export function EWayBillPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const canResetPrepared = form.status === 'Ready for API' && !form.ewayBillNo;
+
+  const [listQuery, setListQuery] = useState('');
+  const [listStatus, setListStatus] = useState('All');
+
+  const statuses = useMemo(
+    () => [...new Set(rows.map((row) => row.status).filter(Boolean))].sort(),
+    [rows],
+  );
+  const filteredRows = useMemo(() => {
+    const query = listQuery.trim().toLowerCase();
+    return rows.filter((row) => {
+      if (listStatus !== 'All' && row.status !== listStatus) return false;
+      if (!query) return true;
+      return [
+        row.documentNo, row.ewayBillNo, row.jobCardNo, row.documentType,
+        row.supplyType, row.from?.tradeName, row.from?.gstin,
+        row.to?.tradeName, row.to?.gstin, row.transport?.vehicleNo,
+      ].some((value) => String(value ?? '').toLowerCase().includes(query));
+    });
+  }, [rows, listQuery, listStatus]);
+  const totalDocumentValue = useMemo(
+    () => rows.reduce((total, row) => total + calculateEWayTotals(row).totalValue, 0),
+    [rows],
+  );
 
   const totals = useMemo(() => calculateEWayTotals(form), [form]);
 
@@ -107,13 +138,13 @@ export function EWayBillPage() {
                 id: `EWI-PREFILL-${index}-${Date.now()}`,
                 productName: item.description || 'Goods',
                 description: item.code || '',
-                hsnCode: '',
+                hsnCode: item.hsnCode || item.hsn_sac || '',
                 qty: Number(item.qty || 1),
-                unit: 'PCS',
+                unit: item.unit || 'PCS',
                 taxableValue: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) - Number(item.discount || 0)),
-                cgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.cgstRate || 0) : '',
-                sgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.sgstRate || 0) : '',
-                igstRate: invoice.taxMode === 'igst' ? Number(invoice.igstRate || 0) : '',
+                cgstRate: invoice.taxMode === 'cgst_sgst' ? Number(item.taxRate || 0) / 2 : '',
+                sgstRate: invoice.taxMode === 'cgst_sgst' ? Number(item.taxRate || 0) / 2 : '',
+                igstRate: invoice.taxMode === 'igst' ? Number(item.taxRate || 0) : '',
                 cessRate: ''
               }));
 
@@ -124,13 +155,23 @@ export function EWayBillPage() {
               documentDate: invoice.date || base.documentDate,
               invoiceId: invoice.id || '',
               jobCardNo: invoice.jobCardNo || '',
+              from: {
+                ...base.from,
+                gstin: invoice.seller?.gstin || '',
+                tradeName: invoice.seller?.name || '',
+                address: invoice.seller?.address || '',
+                place: invoice.seller?.city || '',
+                pincode: invoice.seller?.pincode || '',
+                stateCode: invoice.seller?.stateCode || String(invoice.seller?.gstin || '').slice(0, 2),
+              },
               to: {
                 ...base.to,
                 gstin: invoice.customer?.gstin || 'URP',
                 tradeName: invoice.customer?.name || '',
                 address: invoice.customer?.address || '',
-                place: invoice.customer?.placeOfSupply || '',
-                stateCode: invoice.customer?.stateCode || base.to.stateCode
+                place: invoice.customer?.city || '',
+                pincode: invoice.customer?.pincode || '',
+                stateCode: invoice.customer?.stateCode || String(invoice.customer?.gstin || '').slice(0, 2) || ''
               },
               items: goods.length ? goods : base.items,
               notes: invoice.number ? `Created from CubixGear invoice ${invoice.number}` : ''
@@ -184,6 +225,27 @@ export function EWayBillPage() {
     }
   };
 
+  const resetForm = async () => {
+    if (!await appConfirm('Reset unsaved changes? Saved E-Way Bill records will not be deleted.')) return;
+    setError('');
+    if (mode === 'edit') await loadOne();
+    else setForm(blankEWayBill());
+  };
+
+  const resetPrepared = async () => {
+    if (!canResetPrepared) return;
+    if (!await appConfirm('Reset this locally prepared record to Draft? This does not cancel a GST portal bill.')) return;
+    setSaving(true);
+    setError('');
+    try {
+      const result = await eWayBillService.resetDraft(form.id);
+      setForm(result);
+      navigate(`/invoices/e-way-bills/${result.id}/edit`, { replace: true });
+    } catch (e) {
+      setError(e?.message || 'Could not reset local draft.');
+    } finally { setSaving(false); }
+  };
+
   const remove = async () => {
     setSaving(true);
     try {
@@ -197,51 +259,103 @@ export function EWayBillPage() {
 
   if (mode === 'list') {
     return (
-      <div className="billing-page">
-        <header className="billing-page-head">
+      <div className="billing-page billing-list-dashboard invoice-dashboard billing-eway-list">
+        <header className="invoice-dashboard-header">
           <div>
-            <span className="billing-kicker">BILLING · GOODS MOVEMENT</span>
             <h1>E-Way Bills</h1>
-            <p>Create inward/outward transport documents for workshop goods movement.</p>
+            <p>Track workshop goods movement documents and preparation status.</p>
           </div>
-          <button className="bill-btn" onClick={() => navigate('/invoices/e-way-bills/new')}>
-            <Plus size={17}/>Create E-Way Bill
-          </button>
+          <div className="invoice-dashboard-header-actions">
+            <button type="button" className="bill-btn" onClick={() => navigate('/invoices/e-way-bills/new')}>
+              <Plus size={16} aria-hidden="true"/> New E-Way Bill
+            </button>
+          </div>
         </header>
 
-        <div className="billing-tabs">
-          <button onClick={() => navigate('/invoices?kind=invoice')}><FileText size={16}/>Invoices</button>
-          <button onClick={() => navigate('/invoices?kind=estimate')}><FileText size={16}/>Estimates</button>
-          <button className="active"><Truck size={16}/>E-Way Bills</button>
-        </div>
+        <InvoiceTabs
+          activeTab="eway"
+          onChange={(kind) => navigate(`/invoices?kind=${kind}`)}
+          onEWayBills={() => navigate('/invoices/e-way-bills')}
+        />
 
-        {error && <div className="billing-error">{error}</div>}
+        <section className="invoice-dashboard-stats" aria-label="E-Way Bill overview">
+          {[
+            { label: 'Total Documents', value: rows.length, meta: 'saved transport records', Icon: Truck },
+            { label: 'Draft', value: rows.filter((row) => row.status === 'Draft').length, meta: 'editable drafts', Icon: FileClock },
+            { label: 'Ready for API', value: rows.filter((row) => row.status === 'Ready for API').length, meta: 'not proof of NIC generation', Icon: CheckCircle2 },
+            { label: 'Total Goods Value', value: money.format(totalDocumentValue), meta: 'sum of document values', Icon: IndianRupee },
+          ].map(({ label, value, meta, Icon }) => (
+            <article key={label} className="invoice-dashboard-stat-card">
+              <div className="invoice-dashboard-stat-top">
+                <div>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </div>
+                <i aria-hidden="true"><Icon size={16}/></i>
+              </div>
+              <small>{meta}</small>
+            </article>
+          ))}
+        </section>
 
-        <section className="billing-card billing-list-card">
-          {loading ? <div className="billing-empty">Loading…</div> : (
+        <InvoiceFilterToolbar
+          query={listQuery}
+          onQueryChange={setListQuery}
+          status={listStatus}
+          onStatusChange={setListStatus}
+          statuses={statuses}
+          resultCount={filteredRows.length}
+          placeholder="Search document, sender, recipient, GSTIN or vehicle"
+        />
+
+        <p className="billing-eway-notice">
+          CubixGear drafts and “Ready for API” documents are not official GST portal E-Way Bills.
+          An official E-Way Bill number must be issued by the authorized NIC/GST system.
+        </p>
+
+        {error && <div className="billing-error" role="alert">{error}</div>}
+
+        <section className="billing-card billing-list-card billing-eway-records" aria-label="E-Way Bill records">
+          <header className="invoice-dashboard-section-title">
+            <div>
+              <h2>E-Way Bill Records</h2>
+              <p>Document numbers, movement details, values and current status.</p>
+            </div>
+            <span>{filteredRows.length} record{filteredRows.length === 1 ? '' : 's'}</span>
+          </header>
+
+          {loading ? (
+            <div className="billing-empty" role="status">Loading E-Way Bills…</div>
+          ) : filteredRows.length === 0 ? (
+            <div className="billing-empty">
+              <Search size={18} aria-hidden="true"/>
+              <span>{rows.length ? 'No E-Way Bills match these filters.' : 'No E-Way Bills yet. Create a draft to get started.'}</span>
+            </div>
+          ) : (
             <div className="billing-doc-list">
-              {rows.map((row) => {
+              {filteredRows.map((row) => {
                 const total = calculateEWayTotals(row).totalValue;
                 return (
                   <article className="billing-doc-row" key={row.id}>
                     <button type="button" className="billing-doc-main" onClick={() => navigate(`/invoices/e-way-bills/${row.id}`)}>
                       <strong>{row.documentNo || row.id}</strong>
-                      <span>{row.supplyType} · {row.from?.tradeName || 'From'} → {row.to?.tradeName || 'To'}</span>
+                      <span>{row.supplyType || 'Movement'} · {row.from?.tradeName || 'From'} → {row.to?.tradeName || 'To'}</span>
                     </button>
                     <div className="billing-doc-meta">
                       <span>{row.documentDate || '—'}</span>
                       <strong>{money.format(total)}</strong>
                     </div>
-                    <span className="billing-status">{row.status}</span>
+                    <span className="billing-status">{row.status === 'Ready for API' ? 'Prepared · Not generated' : (row.status || 'Draft')}</span>
                     <div className="billing-list-actions">
-                      <button aria-label="View" onClick={() => navigate(`/invoices/e-way-bills/${row.id}`)}><Eye size={16}/></button>
-                      <button aria-label="Edit" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/edit`)}><Edit3 size={16}/></button>
-                      <button aria-label="Delete" className="danger" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/delete`)}><Trash2 size={16}/></button>
+                      <button type="button" aria-label={`View ${row.documentNo || row.id}`} title="View" onClick={() => navigate(`/invoices/e-way-bills/${row.id}`)}><Eye size={16}/></button>
+                      {row.status === 'Draft' && !row.ewayBillNo && (
+                        <button type="button" aria-label={`Edit ${row.documentNo || row.id}`} title="Edit" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/edit`)}><Edit3 size={16}/></button>
+                      )}
+                      {row.status === 'Draft' && !row.ewayBillNo && <button type="button" aria-label={`Delete ${row.documentNo || row.id}`} title="Delete" className="danger" onClick={() => navigate(`/invoices/e-way-bills/${row.id}/delete`)}><Trash2 size={16}/></button>}
                     </div>
                   </article>
                 );
               })}
-              {!rows.length && <div className="billing-empty">No E-Way Bill drafts yet.</div>}
             </div>
           )}
         </section>
@@ -257,10 +371,11 @@ export function EWayBillPage() {
         </header>
         {error && <div className="billing-error">{error}</div>}
         <section className="billing-card">
-          <h3>Delete this local E-Way Bill draft?</h3>
+          <h3>{form.status === 'Draft' && !form.ewayBillNo ? 'Delete this local draft?' : 'Prepared or official records cannot be deleted'}</h3>
           <p>This only deletes the CubixGear record. It does not cancel an E-Way Bill already generated on the GST portal.</p>
           <div className="billing-head-actions">
-            <button className="bill-btn danger" disabled={saving} onClick={remove}><Trash2 size={16}/>{saving ? 'Deleting…' : 'Delete Draft'}</button>
+            {form.status === 'Draft' && !form.ewayBillNo && <button className="bill-btn danger" disabled={saving} onClick={remove}><Trash2 size={16}/>{saving ? 'Deleting…' : 'Delete Draft'}</button>}
+            <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}`)}>Back to record</button>
           </div>
         </section>
       </div>
@@ -279,18 +394,32 @@ export function EWayBillPage() {
             </div>
           </div>
           <div className="billing-head-actions">
-            <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit</button>
+            {form.status === 'Draft' && !form.ewayBillNo && <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit Draft</button>}
+            {canResetPrepared && <button className="bill-btn secondary" disabled={saving} onClick={resetPrepared}><RotateCcw size={16}/>Reset to Draft</button>}
             <button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print</button>
-            <button className="bill-btn" onClick={() => window.print()}><Download size={16}/>Download PDF</button>
+            <button className="bill-btn" onClick={() => window.print()}><Download size={16}/>Save as PDF</button>
             {form.status === 'Draft' && <button className="bill-btn" disabled={saving} onClick={submit}><CheckCircle2 size={16}/>Prepare for API</button>}
           </div>
         </div>
 
         {error && <div className="billing-error no-print">{error}</div>}
+        {!form.ewayBillNo && <div className="billing-card eway-safety-note no-print">Local preparation preview only — not a valid transport E-Way Bill. Obtain an official EBN from the GST portal when required.</div>}
         {loading ? <div className="billing-empty">Loading…</div> : <EWayBillPrint doc={form} totals={totals}/>}
       </div>
     );
   }
+
+  if (mode === 'edit' && !loading && form.status !== 'Draft') return (
+    <div className="billing-page">
+      <section className="billing-card">
+        <h2>This E-Way Bill is not editable</h2>
+        <p>Only drafts can be edited. Official bills must be managed through the GST portal.</p>
+        {canResetPrepared && <button className="bill-btn" onClick={resetPrepared} disabled={saving}><RotateCcw size={16}/>Reset local draft</button>}
+        <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}`)}>View record</button>
+      </section>
+      {error && <div className="billing-error">{error}</div>}
+    </div>
+  );
 
   return (
     <div className="billing-page">
@@ -304,7 +433,10 @@ export function EWayBillPage() {
               <Printer size={16}/>Preview
             </button>
             <button className="bill-btn" type="button" onClick={() => window.print()}>
-              <Download size={16}/>Download PDF
+              <Download size={16}/>Save as PDF
+            </button>
+            <button className="bill-btn secondary" disabled={saving} onClick={resetForm}>
+              <RotateCcw size={16}/>Reset Form
             </button>
             <button className="bill-btn secondary" disabled={saving} onClick={save}>
               Save Draft
@@ -318,6 +450,7 @@ export function EWayBillPage() {
 
       {error && <div className="billing-error no-print">{error}</div>}
 
+      <div className="billing-card eway-safety-note no-print">This form prepares information for the E-Way Bill system; it does not submit to NIC or issue an official EBN. <a href="https://ewaybillgst.gov.in/" target="_blank" rel="noopener noreferrer">Open official E-Way Bill portal</a>.</div>
       <div className="no-print grid gap-4">
         <section className="billing-card">
           <div className="mb-4">
@@ -759,7 +892,7 @@ function EWayBillPrint({ doc, totals }) {
       <div className="eway-official-top">
         <div>
           <h2>e-Way Bill</h2>
-          <span className="eway-local-badge">{ewbReady ? 'API GENERATED RECORD' : 'LOCAL PREVIEW · READY FOR NIC API'}</span>
+          <span className="eway-local-badge">{ewbReady ? 'API GENERATED RECORD' : 'LOCAL PREVIEW · NOT AN OFFICIAL E-WAY BILL'}</span>
         </div>
         <div className={`eway-qr-placeholder${qrImage || qrValue ? ' has-image' : ''}`} aria-label="E-Way Bill QR">
           <ScannableQRCode value={qrValue} image={qrImage} />

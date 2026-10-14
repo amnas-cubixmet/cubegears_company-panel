@@ -1,186 +1,249 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
-import { billingService, calculateDocumentTotals } from '../../services/billing.service';
+import { Search, AlertCircle, RefreshCw } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { billingService } from '../../services/billing.service';
 import { expenseService } from '../../services/expense.service';
-import { stockManagementService } from '../../services/stockManagement.service';
+import { stockCatalogService } from '../../services/stockCatalog.service';
 import { resourceConfigs } from '../operations/resourceConfigs';
 import {
-  ReportPeriodFilter,
-  ReportStats,
-  ReportTabs,
-  ReportsHeader,
-} from '../../components/reports';
+  buildReportSummary, invoiceAmounts, reportRows, reportMoney, reportPeriodOptions,
+  reportFilterOptions, reportChartBuckets, reportDate,
+} from './reportsDashboard.utils';
+import { ReportPerformanceChart, ReportExpenseCategoryChart } from '../../components/reports/ReportCharts';
+import { ReportPeriodFilter, ReportStats, ReportTabs, ReportsHeader } from '../../components/reports';
 import '../../styles/reports-dashboard.css';
+import '../../styles/reports-dashboard-polished.css';
 
 const paymentService = resourceConfigs.payments.service;
-const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
-const shortMoney = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
-const today = () => new Date().toISOString().slice(0, 10);
-const monthStart = () => {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
-};
-
-const inRange = (value, from, to) => {
-  if (!value) return false;
-  const date = String(value).slice(0, 10);
-  return (!from || date >= from) && (!to || date <= to);
-};
-
+const MONTHS = ['January','February','March','April','May','June',
+  'July','August','September','October','November','December'];
 const csvEscape = (value) => {
-  const text = String(value ?? '');
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  const txt = String(value ?? '');
+  return /[",\n]/.test(txt) ? '"' + txt.replace(/"/g, '""') + '"' : txt;
 };
-
+const objectLabel = (value) => typeof value === 'object' && value !== null
+  ? String(value.name || value.number || value.registration || '') : String(value ?? '');
+const noRecords = (columns, text = 'No records for this selection.') =>
+  <tr className="report-empty-row"><td colSpan={columns}>{text}</td></tr>;
 
 export function Reports() {
+  const [params, setParams] = useSearchParams();
+  const now = new Date();
+  const defaultYear = String(now.getFullYear());
+  const defaultMonth = MONTHS[now.getMonth()];
+  const month = params.get('month') || defaultMonth;
+  const year = params.get('year') || defaultYear;
+  const branch = params.get('branch') || 'All';
+  const staff = params.get('staff') || 'All';
+  const selectedWindow = reportPeriodOptions(year, MONTHS.indexOf(month) + 1);
+  const fallbackWindow = reportPeriodOptions(defaultYear, now.getMonth() + 1);
+  const from = params.has('from') ? params.get('from') || '' :
+    month === 'All' ? '' : (selectedWindow || fallbackWindow).from;
+  const to = params.has('to') ? params.get('to') || '' :
+    month === 'All' ? '' : (selectedWindow || fallbackWindow).to;
+
   const [tab, setTab] = useState('overview');
-  const [from, setFrom] = useState(monthStart());
-  const [to, setTo] = useState(today());
   const [query, setQuery] = useState('');
   const [invoices, setInvoices] = useState([]);
   const [payments, setPayments] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [stock, setStock] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [dataIssues, setDataIssues] = useState({});
+  const [availability, setAvailability] = useState({
+    invoices: false, payments: false, expenses: false, stock: false,
+  });
 
   const load = async () => {
     setLoading(true);
-    setError('');
-    try {
-      const [docs, paymentRows, expenseRows, stockRows] = await Promise.all([
-        billingService.list(),
-        paymentService.list(),
-        expenseService.getExpenses(),
-        stockManagementService.getItems()
-      ]);
-      setInvoices((Array.isArray(docs) ? docs : []).filter((row) => row.kind === 'invoice'));
-      setPayments(Array.isArray(paymentRows) ? paymentRows : []);
-      setExpenses(Array.isArray(expenseRows) ? expenseRows : []);
-      setStock(Array.isArray(stockRows) ? stockRows : []);
-    } catch (e) {
-      setError(e?.message || 'Unable to load report data.');
-    } finally {
-      setLoading(false);
-    }
+    const names = ['invoices', 'payments', 'expenses', 'stock'];
+    const results = await Promise.allSettled([
+      billingService.list(), paymentService.list(),
+      expenseService.getExpenses(), stockCatalogService.getItems(),
+    ]);
+    const issues = {};
+    const data = results.map((result, index) => {
+      if (result.status === 'rejected') {
+        issues[names[index]] = result.reason?.message || 'Unable to load';
+        return [];
+      }
+      if (!Array.isArray(result.value) && !Array.isArray(result.value?.results)) {
+        issues[names[index]] = 'Unexpected API response';
+        return [];
+      }
+      return reportRows(result.value);
+    });
+    setInvoices(data[0].filter((row) => String(row.kind || 'invoice').toLowerCase() === 'invoice'));
+    setPayments(data[1]);
+    setExpenses(data[2]);
+    setStock(data[3]);
+    setDataIssues(issues);
+    setAvailability(Object.fromEntries(names.map((name) => [name, !issues[name]])));
+    setLoading(false);
   };
-
   useEffect(() => { load(); }, []);
 
-  const report = useMemo(() => {
-    const invoiceRows = invoices.filter((row) => inRange(row.date, from, to));
-    const paymentRows = payments.filter((row) => inRange(row.date || row.paymentDate, from, to));
-    const expenseRows = expenses.filter((row) => inRange(row.expenseDate || row.date, from, to));
+  const filterOptions = useMemo(() =>
+    reportFilterOptions([invoices, payments, expenses]),
+  [invoices, payments, expenses]);
+  const years = useMemo(() => [...new Set([
+    Number(defaultYear), Number(year),
+    ...[invoices, payments, expenses].flatMap((rows) =>
+      rows.flatMap((item) => {
+        const date = String(item.date || item.paymentDate || item.expenseDate || '');
+        return /^\d{4}-/.test(date) ? [Number(date.slice(0, 4))] : [];
+      })),
+  ])].filter((item) => Number.isInteger(item) && item >= 2000 && item <= 2100)
+    .sort((a, b) => b - a).map(String), [defaultYear, year, invoices, payments, expenses]);
 
-    const sales = invoiceRows.reduce((sum, row) => sum + calculateDocumentTotals(row).total, 0);
-    const outstanding = invoiceRows.reduce((sum, row) => sum + calculateDocumentTotals(row).balance, 0);
-    const collected = paymentRows
-      .filter((row) => String(row.status || '').toLowerCase() === 'completed')
-      .reduce((sum, row) => sum + Number(row.amount || 0), 0);
-    const expenseTotal = expenseRows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
-    const stockValue = stock.reduce((sum, row) => sum + Number(row.onHand || 0) * Number(row.costPrice || 0), 0);
-    const lowStock = stock.filter((row) => Number(row.onHand || 0) - Number(row.reserved || 0) <= Number(row.minimumStock || 0));
+  const modifyParams = (updates, remove = []) => {
+    const next = new URLSearchParams(params);
+    remove.forEach((key) => next.delete(key));
+    Object.entries(updates).forEach(([key, value]) => next.set(key, String(value)));
+    setParams(next, { replace: true });
+  };
+  const chooseMonth = (value, targetYear = year) => {
+    if (value === 'Custom') {
+      modifyParams({ month: value, year: targetYear, from, to }); return;
+    }
+    if (value === 'All') {
+      modifyParams({ month: value, year: targetYear }, ['from', 'to']); return;
+    }
+    if (reportPeriodOptions(targetYear, MONTHS.indexOf(value) + 1)) {
+      modifyParams({ month: value, year: targetYear }, ['from', 'to']);
+    }
+  };
+  const customDate = (key, value) =>
+    modifyParams({ month: 'Custom', from, to, [key]: value });
 
-    const categoryMap = new Map();
-    expenseRows.forEach((row) => {
-      const key = row.category || 'Miscellaneous';
-      categoryMap.set(key, (categoryMap.get(key) || 0) + Number(row.amount || 0));
-    });
-
-    return {
-      invoiceRows,
-      paymentRows,
-      expenseRows,
-      sales,
-      outstanding,
-      collected,
-      expenseTotal,
-      netCash: collected - expenseTotal,
-      stockValue,
-      lowStock,
-      expenseCategories: Array.from(categoryMap.entries()).map(([category, total]) => ({ category, total })).sort((a, b) => b.total - a.total)
-    };
-  }, [invoices, payments, expenses, stock, from, to]);
-
+  const report = useMemo(() => buildReportSummary({
+    invoices, payments, expenses, stock, from, to, branch, staff,
+    available: availability,
+  }), [invoices, payments, expenses, stock, from, to, branch, staff, availability]);
+  const dateRangeValid = !from || !to || from <= to;
+  const activityDates = [...report.invoiceRows.map((r) => reportDate(r, 'invoice')),
+    ...report.paymentRows.map((r) => reportDate(r, 'payment')),
+    ...report.expenseRows.map((r) => reportDate(r, 'expense'))].filter(Boolean).sort();
+  const chartFrom = from || activityDates[0] || '';
+  const chartTo = to || activityDates[activityDates.length - 1] || '';
+  const buckets = useMemo(() => reportChartBuckets(report, chartFrom, chartTo),
+    [report, chartFrom, chartTo]);
+  const periodLabel = month === 'Custom' ? (from || 'Beginning') + ' – ' + (to || 'Today')
+    : month === 'All' ? 'All time' : month + ' ' + year;
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return report.invoiceRows;
-    return report.invoiceRows.filter((row) =>
-      [row.number, row.customer?.name, row.vehicle?.registration, row.status]
-        .some((value) => String(value || '').toLowerCase().includes(q))
-    );
-  }, [report.invoiceRows, query]);
+    return !q ? report.invoiceRows : report.invoiceRows.filter((item) =>
+      [item.number, item.customerName, item.customer?.name,
+        item.vehicle?.registration, item.status].some((v) =>
+        String(v || '').toLowerCase().includes(q)));
+  }, [query, report.invoiceRows]);
 
   const exportCsv = () => {
+    if (!availability.invoices) return;
     const rows = [
-      ['Invoice', 'Date', 'Customer', 'Vehicle', 'Status', 'Total', 'Balance'],
-      ...filteredRows.map((row) => {
-        const totals = calculateDocumentTotals(row);
+      ['Invoice', 'Date', 'Customer', 'Vehicle', 'Status', 'Total', 'Paid', 'Balance'],
+      ...filteredRows.map((item) => {
+        const amounts = invoiceAmounts(item);
         return [
-          row.number || row.id,
-          row.date || '',
-          row.customer?.name || '',
-          row.vehicle?.registration || '',
-          row.status || '',
-          totals.total,
-          totals.balance
+          item.number || '', reportDate(item, 'invoice'),
+          item.customerName || item.customer?.name || '',
+          item.vehicle?.registration || '', item.status,
+          amounts.total, amounts.paid, amounts.balance,
         ];
-      })
+      }),
     ];
     const csv = rows.map((row) => row.map(csvEscape).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `cubixgear-report-${from || 'all'}-${to || 'all'}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'cubixgear-report-' + (from || 'all') + '-' + (to || 'all') + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  if (loading) return <div className="reports-loading">Loading reports…</div>;
-
   return (
-    <div className="reports-page">
-      <ReportsHeader
-        onRefresh={load}
-        onCsv={exportCsv}
-        onPrint={() => window.print()}
-      />
-
-      <ReportPeriodFilter
-        from={from}
-        to={to}
-        onFrom={setFrom}
-        onTo={setTo}
-        onThisMonth={() => { setFrom(monthStart()); setTo(today()); }}
-        onAllTime={() => { setFrom(''); setTo(''); }}
-      />
-
-      {error && <div className="reports-error no-print">{error}</div>}
+    <div className="reports-page reports-page-polished">
+      <ReportsHeader onRefresh={load} onCsv={exportCsv} onPrint={() => window.print()}
+        loading={loading} periodLabel={periodLabel}/>
+      <ReportPeriodFilter from={from} to={to}
+        month={month} year={year} years={years}
+        branch={branch} staff={staff}
+        branches={filterOptions.branches} staffOptions={filterOptions.staff}
+        onMonth={chooseMonth} onYear={(value) => chooseMonth(month, value)}
+        onBranch={(value) => modifyParams({ branch: value })}
+        onStaff={(value) => modifyParams({ staff: value })}
+        onFrom={(value) => customDate('from', value)}
+        onTo={(value) => customDate('to', value)}
+        onThisMonth={() => chooseMonth(defaultMonth, defaultYear)}
+        onAllTime={() => chooseMonth('All')}/>
+      {!dateRangeValid && <div role="alert" className="reports-error no-print">
+        Start date must not be later than end date.
+      </div>}
+      {loading && <div className="reports-inline-loading" role="status">
+        <RefreshCw size={16} className="reports-spinning"/> Loading live report data…
+      </div>}
+      {Object.keys(dataIssues).length > 0 && (
+        <div role="alert" className="reports-error no-print">
+          <AlertCircle size={16}/> Some sources could not load: {Object.keys(dataIssues).join(', ')}.
+          Missing figures are shown as — instead of ₹0.
+          <button type="button" onClick={load}><RefreshCw size={14}/> Retry</button>
+        </div>
+      )}
+      {(staff !== 'All' || branch !== 'All') && (
+        <p className="reports-filter-notice no-print">
+          Only records attributed to the selected staff/branch are included. Untagged
+          transactions are excluded. Stock remains a company-wide snapshot.
+        </p>
+      )}
 
       <div className="report-print-sheet">
-        <div className="report-print-head">
-          <div><span>CUBIXGEAR</span><h2>Business Report</h2><p>{from || 'Beginning'} — {to || 'Today'}</p></div>
+        <header className="report-print-head">
+          <div><span>CUBIXGEAR</span><h2>Business Report</h2>
+            <p>{periodLabel} · {from || 'Beginning'} — {to || 'Today'}</p></div>
           <div><strong>Generated</strong><span>{new Date().toLocaleString('en-IN')}</span></div>
-        </div>
-
-        <ReportStats report={report} formatMoney={(value)=>shortMoney.format(value || 0)} />
-        <ReportTabs active={tab} onChange={setTab} />
+        </header>
+        <ReportStats report={report} formatMoney={reportMoney}/>
+        <ReportTabs active={tab} onChange={setTab}/>
+        {tab === 'overview' && (
+          <div className="reports-charts-grid">
+            <ReportPerformanceChart buckets={buckets} report={report}
+              from={chartFrom} to={chartTo}/>
+            <ReportExpenseCategoryChart rows={report.expenseCategories}
+              expensesAvailable={availability.expenses}/>
+          </div>
+        )}
 
         {(tab === 'overview' || tab === 'sales') && (
           <section className="report-panel">
             <div className="report-section-head">
-              <div><span>SALES</span><h3>Invoice Report</h3></div>
-              <label className="report-search no-print"><Search size={15}/><input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search invoice or customer…"/></label>
+              <div><span>SALES ANALYTICS</span><h3>Invoice Report</h3>
+                <p>{filteredRows.length} invoices in the selected period</p></div>
+              <label className="report-search no-print"><Search size={16}/>
+                <input aria-label="Search invoices" value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search invoice or customer…"/>
+              </label>
             </div>
             <div className="report-table-wrap">
               <table className="report-table">
-                <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Vehicle</th><th>Status</th><th>Total</th><th>Balance</th></tr></thead>
-                <tbody>{filteredRows.map((row)=>{
-                  const t=calculateDocumentTotals(row);
-                  return <tr key={row.id}><td>{row.number||row.id}</td><td>{row.date||'—'}</td><td>{row.customer?.name||'—'}</td><td>{row.vehicle?.registration||'—'}</td><td>{row.status||'—'}</td><td>{money.format(t.total)}</td><td>{money.format(t.balance)}</td></tr>;
-                })}</tbody>
+                <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Vehicle</th>
+                  <th>Status</th><th>Total</th><th>Balance</th></tr></thead>
+                <tbody>
+                  {filteredRows.map((item) => {
+                    const t = invoiceAmounts(item);
+                    return <tr key={item.id}>
+                      <td className="report-table-primary">{item.number || '—'}</td>
+                      <td>{reportDate(item, 'invoice') || '—'}</td>
+                      <td>{item.customerName || item.customer?.name || '—'}</td>
+                      <td>{item.vehicle?.registration || item.vehicleReg || '—'}</td>
+                      <td>{item.status || '—'}</td>
+                      <td>{reportMoney(t.total)}</td><td>{reportMoney(t.balance)}</td>
+                    </tr>;
+                  })}
+                  {!filteredRows.length && noRecords(7)}
+                </tbody>
               </table>
             </div>
           </section>
@@ -188,11 +251,26 @@ export function Reports() {
 
         {(tab === 'overview' || tab === 'payments') && (
           <section className="report-panel">
-            <div className="report-section-head"><div><span>COLLECTIONS</span><h3>Payment Report</h3></div></div>
+            <div className="report-section-head">
+              <div><span>COLLECTIONS</span><h3>Payment Report</h3>
+                <p>{report.paymentRows.length} completed payments</p></div>
+            </div>
             <div className="report-table-wrap">
               <table className="report-table">
-                <thead><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Invoice</th><th>Method</th><th>Status</th><th>Amount</th></tr></thead>
-                <tbody>{report.paymentRows.map((row)=><tr key={row.id}><td>{row.receiptNo||row.id}</td><td>{row.date||row.paymentDate||'—'}</td><td>{row.customer||row.customerName||'—'}</td><td>{row.invoice||row.invoiceId||'—'}</td><td>{row.method||row.paymentMethod||'—'}</td><td>{row.status||'—'}</td><td>{money.format(row.amount||0)}</td></tr>)}</tbody>
+                <thead><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Invoice</th>
+                  <th>Method</th><th>Status</th><th>Amount</th></tr></thead>
+                <tbody>
+                  {report.paymentRows.map((item) => <tr key={item.id}>
+                    <td className="report-table-primary">{item.receiptNo || item.reference || '—'}</td>
+                    <td>{reportDate(item, 'payment') || '—'}</td>
+                    <td>{item.customerName || objectLabel(item.customer) || '—'}</td>
+                    <td>{item.invoiceNo || objectLabel(item.invoice) || '—'}</td>
+                    <td>{item.method || item.paymentMethod || '—'}</td>
+                    <td>{item.status || 'Completed'}</td>
+                    <td>{reportMoney(item.amount)}</td>
+                  </tr>)}
+                  {!report.paymentRows.length && noRecords(7)}
+                </tbody>
               </table>
             </div>
           </section>
@@ -200,29 +278,55 @@ export function Reports() {
 
         {(tab === 'overview' || tab === 'expenses') && (
           <section className="report-panel">
-            <div className="report-section-head"><div><span>EXPENSES</span><h3>Expense Report</h3></div></div>
-            <div className="report-split">
-              <div className="report-table-wrap">
-                <table className="report-table">
-                  <thead><tr><th>Date</th><th>Expense</th><th>Category</th><th>Vendor</th><th>Status</th><th>Amount</th></tr></thead>
-                  <tbody>{report.expenseRows.map((row)=><tr key={row.id}><td>{row.expenseDate||row.date||'—'}</td><td>{row.title||'Expense'}</td><td>{row.category||'—'}</td><td>{row.vendor||'—'}</td><td>{row.status||'—'}</td><td>{money.format(row.amount||0)}</td></tr>)}</tbody>
-                </table>
-              </div>
-              <div className="report-category-list">
-                <h4>By Category</h4>
-                {report.expenseCategories.map((row)=><div key={row.category}><span>{row.category}</span><strong>{money.format(row.total)}</strong></div>)}
-              </div>
+            <div className="report-section-head">
+              <div><span>SPENDING</span><h3>Expense Report</h3>
+                <p>{report.expenseRows.length} recorded expenses</p></div>
+            </div>
+            <div className="report-table-wrap">
+              <table className="report-table">
+                <thead><tr><th>Date</th><th>Expense</th><th>Category</th>
+                  <th>Vendor</th><th>Status</th><th>Amount</th></tr></thead>
+                <tbody>
+                  {report.expenseRows.map((item) => <tr key={item.id}>
+                    <td>{reportDate(item, 'expense') || '—'}</td>
+                    <td className="report-table-primary">{item.title || item.description || 'Expense'}</td>
+                    <td>{item.category || '—'}</td><td>{item.vendor || '—'}</td>
+                    <td>{item.status || '—'}</td><td>{reportMoney(item.amount)}</td>
+                  </tr>)}
+                  {!report.expenseRows.length && noRecords(6)}
+                </tbody>
+              </table>
             </div>
           </section>
         )}
 
         {(tab === 'overview' || tab === 'stock') && (
           <section className="report-panel">
-            <div className="report-section-head"><div><span>INVENTORY</span><h3>Stock Report</h3></div></div>
+            <div className="report-section-head">
+              <div><span>INVENTORY SNAPSHOT</span><h3>Stock Report</h3>
+                <p>Current stock quantities and cost values, independent of the date range.</p></div>
+            </div>
             <div className="report-table-wrap">
               <table className="report-table">
-                <thead><tr><th>SKU</th><th>Item</th><th>Category</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Cost</th><th>Value</th></tr></thead>
-                <tbody>{stock.map((row)=>{const available=Number(row.onHand||0)-Number(row.reserved||0);const value=Number(row.onHand||0)*Number(row.costPrice||0);return <tr key={row.id}><td>{row.sku||'—'}</td><td>{row.partName||row.name||'—'}</td><td>{row.category||'—'}</td><td>{row.onHand||0}</td><td>{row.reserved||0}</td><td>{available}</td><td>{money.format(row.costPrice||0)}</td><td>{money.format(value)}</td></tr>;})}</tbody>
+                <thead><tr><th>SKU</th><th>Item</th><th>Category</th><th>On Hand</th>
+                  <th>Reserved</th><th>Available</th><th>Cost</th><th>Value</th></tr></thead>
+                <tbody>
+                  {report.stockRows.map((item) => {
+                    const available = Number(item.onHand || 0) - Number(item.reserved || 0);
+                    const value = Number(item.onHand || 0) * Number(item.costPrice || 0);
+                    return <tr key={item.id}>
+                      <td className="report-table-primary">{item.sku || '—'}</td>
+                      <td>{item.partName || item.name || '—'}</td>
+                      <td>{item.category || '—'}</td><td>{item.onHand || 0}</td>
+                      <td>{item.reserved || 0}</td><td>{available}</td>
+                      <td>{reportMoney(item.costPrice || 0)}</td><td>{reportMoney(value)}</td>
+                    </tr>;
+                  })}
+                  {!report.stockRows.length && noRecords(8,
+                    branch !== 'All' || staff !== 'All'
+                      ? 'Stock snapshot is not attributed by staff or branch. Select All to view.'
+                      : 'No stock items available.')}
+                </tbody>
               </table>
             </div>
           </section>
@@ -231,5 +335,4 @@ export function Reports() {
     </div>
   );
 }
-
 export default Reports;

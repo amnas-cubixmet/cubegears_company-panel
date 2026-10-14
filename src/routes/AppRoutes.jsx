@@ -1,7 +1,10 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
+import { useAuth } from '../hooks/useAuth';
+import { getDefaultAuthorizedRoute } from '../utils/authorizedLanding';
 
 import { Login } from '../pages/auth/Login';
+import { Signup } from '../pages/auth/Signup';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
 import { SetupPassword } from '../pages/auth/SetupPassword';
@@ -27,12 +30,12 @@ import { EditVehicle } from '../pages/vehicles/EditVehicle';
 import { ServiceList } from '../pages/services/ServiceList';
 import { JobList } from '../pages/jobs/JobList';
 import { JobCreatePage } from '../pages/jobs/JobCreatePage';
+import { JobComplaintDetails } from '../pages/jobs/JobComplaintDetails';
 import { OutsideLabourPage } from '../pages/jobs/OutsideLabourPage';
 import { JobDetails } from '../pages/jobs/JobDetails';
 import { JobStatus } from '../pages/jobs/JobStatus';
 import { JobReports } from '../pages/jobs/JobReports';
-import { StockManagement } from '../pages/stock/StockManagement';
-import { AddStockItem } from '../pages/stock/AddStockItem';
+import StockEasyPage from '../pages/stock/StockEasyPage';
 import { InvoiceList } from '../pages/invoices/InvoiceList';
 import { EWayBillPage } from '../pages/invoices/EWayBillPage';
 import { PaymentList } from '../pages/payments/PaymentList';
@@ -49,19 +52,19 @@ import { AccountSecurity } from '../pages/account/AccountSecurity';
 
 function RootRedirect() {
   const location = useLocation();
+  const { user, isAuthenticated, loading } = useAuth();
 
-  return (
-    <Navigate
-      to={`/dashboard${location.search}`}
-      replace
-    />
-  );
+  if (loading) return <div role="status" aria-live="polite">Loading CubixGear…</div>;
+
+  const destination = isAuthenticated ? getDefaultAuthorizedRoute(user) : '/login';
+  return <Navigate to={destination + location.search} replace />;
 }
 
 export const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<RootRedirect />} />
     <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<Signup />} />
     <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/setup-password" element={<SetupPassword />} />
@@ -122,16 +125,16 @@ export const AppRoutes = () => (
       <Route path="/payroll/approvals" element={<Navigate to="/payroll/daily-wages" replace />} />
       <Route path="/payroll/disbursal" element={<Navigate to="/payroll/daily-wages" replace />} />
 
-      <Route path="/customers" element={<Navigate to="/customers/overview" replace />} />
-      <Route path="/customers/overview" element={<CustomerManagement section="overview" />} />
-      <Route path="/customers/all" element={<CustomerList />} />
+      <Route path="/customers" element={<CustomerList />} />
+      <Route path="/customers/overview" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/all" element={<Navigate to="/customers" replace />} />
       <Route path="/customers/new" element={<AddCustomer />} />
       <Route path="/customers/add" element={<Navigate to="/customers/new" replace />} />
       <Route path="/customers/vehicles" element={<CustomerManagement section="vehicles" />} />
-      <Route path="/customers/service-history" element={<CustomerManagement section="service-history" />} />
-      <Route path="/customers/outstanding" element={<CustomerManagement section="outstanding" />} />
-      <Route path="/customers/reminders" element={<CustomerManagement section="reminders" />} />
-      <Route path="/customers/reports" element={<CustomerManagement section="reports" />} />
+      <Route path="/customers/service-history" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/outstanding" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/reminders" element={<Navigate to="/customers" replace />} />
+      <Route path="/customers/reports" element={<Navigate to="/customers" replace />} />
       <Route path="/customers/:id" element={<CustomerDetails />} />
       <Route path="/customers/:id/edit" element={<EditCustomer />} />
       <Route path="/customers/edit/:id" element={<EditCustomer />} />
@@ -157,6 +160,7 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id" element={<JobDetails />} />
       <Route path="/jobs/:id/overview" element={<JobDetails />} />
       <Route path="/jobs/:id/complaints" element={<JobDetails />} />
+      <Route path="/jobs/:id/complaints/:complaintId" element={<JobComplaintDetails />} />
       <Route path="/jobs/:id/inspection" element={<JobDetails />} />
       <Route path="/jobs/:id/work" element={<JobDetails />} />
       <Route path="/jobs/:id/parts" element={<JobDetails />} />
@@ -165,6 +169,7 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id/qc" element={<JobDetails />} />
       <Route path="/jobs/:id/invoice" element={<JobDetails />} />
       <Route path="/jobs/:id/activity" element={<JobDetails />} />
+      <Route path="/jobs/:id/full-log" element={<JobDetails />} />
       <Route path="/jobs/:id/edit" element={<JobDetails />} />
       <Route path="/jobs/:id/status" element={<JobStatus />} />
 
@@ -173,32 +178,8 @@ export const AppRoutes = () => (
       <Route path="/jobs/:id/history" element={<JobDetails />} />
       <Route path="/jobs/:id/*" element={<JobDetails />} />
 
-      <Route path="/stock" element={<Navigate to="/stock/overview" replace />} />
-      <Route path="/stock/overview" element={<StockManagement section="overview" />} />
-      <Route path="/stock/items" element={<StockManagement section="items" />} />
-      <Route path="/stock/add" element={<AddStockItem />} />
-      <Route path="/stock/items/:itemId" element={<StockManagement section="item-detail" />} />
-      <Route path="/stock/categories" element={<StockManagement section="categories" />} />
-      <Route path="/stock/movements" element={<StockManagement section="movements" />} />
-      <Route path="/stock/purchase-orders" element={<StockManagement section="purchase-orders" />} />
-      <Route path="/stock/suppliers" element={<StockManagement section="suppliers" />} />
-      <Route path="/stock/transfers" element={<StockManagement section="transfers" />} />
-      <Route path="/stock/adjustments" element={<StockManagement section="adjustments" />} />
-      <Route path="/stock/audit" element={<StockManagement section="audit" />} />
-      <Route path="/stock/reports" element={<StockManagement section="reports" />} />
-
-      <Route path="/stock/new" element={<Navigate to="/stock/add" replace />} />
-      <Route path="/stock/in" element={<Navigate to="/stock/movements" replace />} />
-      <Route path="/stock/issue" element={<Navigate to="/stock/movements" replace />} />
-      <Route path="/stock/return" element={<Navigate to="/stock/movements" replace />} />
-      <Route path="/stock/ledger" element={<Navigate to="/stock/movements" replace />} />
-      <Route path="/stock/reservations" element={<Navigate to="/stock/movements" replace />} />
-      <Route path="/stock/low-stock" element={<Navigate to="/stock/items" replace />} />
-      <Route path="/stock/purchases" element={<Navigate to="/stock/purchase-orders" replace />} />
-      <Route path="/stock/transfer" element={<Navigate to="/stock/transfers" replace />} />
-      <Route path="/stock/count" element={<Navigate to="/stock/audit" replace />} />
-      <Route path="/stock/:id/edit" element={<Navigate to="/stock/items" replace />} />
-      <Route path="/stock/:id/delete" element={<Navigate to="/stock/items" replace />} />
+      <Route path="/stock" element={<StockEasyPage />} />
+      <Route path="/stock/*" element={<Navigate to="/stock" replace />} />
 
       <Route path="/invoices" element={<InvoiceList />} />
       <Route path="/invoices/e-way-bills" element={<EWayBillPage />} />
