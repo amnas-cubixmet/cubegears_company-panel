@@ -69,7 +69,7 @@ export const StaffAddPage = () => {
         if (!alive) return;
 
         const activeRoles = (Array.isArray(roleRows) ? roleRows : []).filter(
-          (role) => role.status !== 'Inactive',
+          (role) => role.status !== 'Inactive' && !role.isProtected && !role.is_system,
         );
         const nextTeams = Array.isArray(teamRows) ? teamRows : [];
         const nextShifts = Array.isArray(shiftRows) ? shiftRows : [];
@@ -84,7 +84,7 @@ export const StaffAddPage = () => {
 
         setForm((current) => ({
           ...current,
-          role: current.role || activeRoles[0]?.name || 'Mechanic',
+          role: current.role || activeRoles[0]?.name || '',
           teamId: current.teamId || nextTeams[0]?.id || '',
           shiftId: current.shiftId || nextShifts[0]?.id || '',
           branchId: current.branchId || nextBranches[0]?.id || '',
@@ -130,6 +130,23 @@ export const StaffAddPage = () => {
     if (!form.name.trim() || !form.phone.trim()) {
       showFormFieldError(formRef.current, !form.name.trim() ? 'name' : 'phone', 'This field is required.');
       setError('Enter the staff name and phone number.');
+      return;
+    }
+
+    const email = form.email.trim();
+    if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      showFormFieldError(formRef.current, 'email', 'Enter a valid staff email address.');
+      setError('Enter a valid email to send the password setup link.');
+      return;
+    }
+    if (email && !canManageBranches) {
+      showFormFieldError(formRef.current, 'email', 'Only a company admin can create staff login accounts.');
+      setError('Ask a company admin to create the staff login.');
+      return;
+    }
+    if (email && !form.role.trim()) {
+      showFormFieldError(formRef.current, 'role', 'Choose a staff role for email login.');
+      setError('Select the permissions this staff account should have.');
       return;
     }
 
@@ -225,7 +242,7 @@ export const StaffAddPage = () => {
               </label>
 
               <label>
-                Email
+                Email (send password setup link)
                 <input
                   type="email"
                   name="email"
@@ -235,6 +252,10 @@ export const StaffAddPage = () => {
                 />
               </label>
 
+              <p className="staff-login-invite-hint">
+                Staff with an active email and a staff role receive a secure password setup invitation.
+                No email means a staff profile only, without login access.
+              </p>
               <label>
                 Designation
                 <input
@@ -246,6 +267,7 @@ export const StaffAddPage = () => {
               <label>
                 System Role
                 <select
+                  name="role"
                   value={form.role}
                   onChange={(event) => set('role', event.target.value)}
                 >
