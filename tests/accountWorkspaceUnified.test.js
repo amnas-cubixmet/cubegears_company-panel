@@ -79,3 +79,54 @@ test('Company tab is hidden without deleting existing company profile route', ()
     assert.ok(tabs.includes(path), 'Expected credit wallet tab ' + path);
   }
 });
+
+test('all visible Account tabs route to real pages; Settings is hidden from Account only', () => {
+  const routes = read('../src/routes/AppRoutes.jsx');
+  const expected = [
+    ['/account', 'overview'],
+    ['/account/credits/buy', 'credits-buy'],
+    ['/account/credits/features', 'credits-features'],
+    ['/account/storage', 'storage'],
+    ['/account/credits/logs', 'credits-logs'],
+    ['/account/templates', 'templates'],
+    ['/account/security', 'security'],
+  ];
+  for (const [path, key] of expected) {
+    assert.ok(tabs.includes(`['${key}'`), `Missing tab ${key}`);
+    assert.ok(tabs.includes(`'${path}'`), `Missing tab target ${path}`);
+    assert.ok(routes.includes(`path="${path}"`), `Missing matched route ${path}`);
+  }
+  assert.doesNotMatch(tabs, /\['settings','Settings','\/settings'/);
+  assert.match(routes, /path="\/settings"/);
+  assert.match(routes, /path="\/account\/billing" element=\{<Navigate to="\/account" replace \/>\}/);
+  assert.match(routes, /path="\/account\/plans" element=\{<Navigate to="\/account\/credits\/features" replace \/>\}/);
+});
+
+test('account route changes reset the actual dashboard scroll container to the top', () => {
+  const layout = read('../src/components/layout/DashboardLayout.jsx');
+  assert.match(layout, /useLayoutEffect\(\(\) =>/);
+  assert.match(layout, /location\.pathname\.startsWith\('\/account\/'\)/);
+  assert.match(layout, /scrollAreaRef\.current\.scrollTop = 0/);
+  assert.match(layout, /className="app-scroll-area" ref=\{scrollAreaRef\}/);
+  assert.match(tabs, /openTab\(path\)/);
+  assert.match(tabs, /nav\.scrollLeft = target/);
+  assert.match(tabs, /aria-current=\{active===key\?'page':undefined\}/);
+});
+
+test('credit, storage history, day details, templates and security share one sticky tab layout', () => {
+  const history = read('../src/pages/saas/StorageHistory.jsx');
+  const day = read('../src/pages/saas/StorageDayDetails.jsx');
+  const wallet = read('../src/pages/saas/CreditWorkspace.jsx');
+  for (const page of [history, day, wallet, saas, templates, security]) {
+    assert.match(page, /<AccountHeader/);
+  }
+  assert.match(history, /active="storage"/);
+  assert.match(day, /active="storage"/);
+  assert.match(day, /role="status">Loading storage snapshot/);
+  for (const scope of ['.saas-page.cg-credit-page', '.saas-page.storage-history-page', '.saas-page.storage-day-page']) {
+    assert.ok(css.includes(scope), `Missing account tab theme for ${scope}`);
+  }
+  assert.match(css, /position:sticky/);
+  assert.match(css, /overflow-x:auto/);
+  assert.match(css, /min-height:43px/);
+});

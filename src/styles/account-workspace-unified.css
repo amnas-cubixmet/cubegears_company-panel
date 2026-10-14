@@ -1,8 +1,8 @@
-/* Account workspace: shared design across Overview, Billing, Storage, Templates and Security.
+/* Account workspace: shared design across Credit Overview, Buy, Features, Logs, Storage, Templates and Security.
    Preserve feature API logic, invoice preview dimensions, storage figures and existing colors.
    Scoped to account routes; other Company Panel forms are unaffected. */
 
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) {
   width:100%;
   min-width:0;
   max-width:100%;
@@ -11,12 +11,12 @@
   gap:15px;
   color:var(--text-primary);
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) *,
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) *::before,
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) *::after {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) *,
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) *::before,
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) *::after {
   box-sizing:border-box;
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-header {
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
@@ -24,15 +24,15 @@
   gap:12px;
   min-width:0;
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header>div:first-child {min-width:0;flex:1 1 220px}
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header h1 {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-header>div:first-child {min-width:0;flex:1 1 220px}
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-header h1 {
   margin:0;
   font-size:clamp(20px,2vw,25px);
   line-height:1.3;
   letter-spacing:-.025em;
   font-weight:750;
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-header p {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-header p {
   margin:5px 0 0;
   max-width:72ch;
   font-size:12px;
@@ -40,12 +40,12 @@
   line-height:1.6;
   overflow-wrap:anywhere;
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-actions {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-actions {
   flex:0 1 auto;
   min-width:0;
   align-items:center;
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-tabs {
   display:flex;
   align-items:center;
   flex-wrap:nowrap;
@@ -55,13 +55,17 @@
   padding:6px;
   overflow-x:auto;
   scrollbar-width:none;
+  position:sticky;
+  top:0;
+  z-index:15;
+  scroll-padding-inline:12px;
   border:1px solid var(--border);
   border-radius:12px;
   background:var(--surface);
   box-shadow:var(--shadow-sm);
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs::-webkit-scrollbar {display:none}
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-tabs::-webkit-scrollbar {display:none}
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button {
   display:inline-flex;
   flex:1 0 auto;
   align-items:center;
@@ -80,16 +84,16 @@
   white-space:nowrap;
   cursor:pointer;
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button:hover {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button:hover {
   background:var(--surface-2);
   color:var(--text-primary);
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button.is-active {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button.is-active {
   color:var(--primary);
   background:var(--primary-soft);
 }
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button:focus-visible,
-:is(.saas-page.account-billing-page, .document-templates-page, .account-security-page) button:focus-visible {
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) .account-dashboard-tabs button:focus-visible,
+:is(.saas-page.account-billing-page, .saas-page.cg-credit-page, .saas-page.storage-history-page, .saas-page.storage-day-page, .document-templates-page, .account-security-page) button:focus-visible {
   outline:2px solid var(--primary);
   outline-offset:2px;
 }
@@ -314,8 +318,8 @@
   .document-templates-page .business-branding-layout {grid-template-columns:1fr}
 }
 @media(max-width:767px) {
-  :is(.saas-page.account-billing-page,.document-templates-page,.account-security-page) {gap:12px}
-  :is(.saas-page.account-billing-page,.document-templates-page,.account-security-page) .account-dashboard-tabs button {
+  :is(.saas-page.account-billing-page,.saas-page.cg-credit-page,.saas-page.storage-history-page,.saas-page.storage-day-page,.document-templates-page,.account-security-page) {gap:12px}
+  :is(.saas-page.account-billing-page,.saas-page.cg-credit-page,.saas-page.storage-history-page,.saas-page.storage-day-page,.document-templates-page,.account-security-page) .account-dashboard-tabs button {
     flex:0 0 auto;
     min-height:44px;
   }
