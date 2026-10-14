@@ -83,15 +83,6 @@ apiClient.interceptors.response.use(
     const originalRequest = error?.config;
     const isAuthRequest = isPublicAuthRequest(originalRequest?.url);
 
-    // Subscription expiration must be enforced by Django, not just route UI.
-    // When an already-open app receives HTTP 402, return to secure checkout.
-    if (
-      status === 402 &&
-      error?.response?.data?.code === 'SUBSCRIPTION_PAYMENT_REQUIRED' &&
-      window.location.pathname !== '/subscribe'
-    ) {
-      window.location.replace('/subscribe');
-    }
 
     if (
       status === 401 &&

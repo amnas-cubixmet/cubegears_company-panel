@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Clock, UserCheck, Users, DollarSign, UserPlus, Car, Wrench,
+  LayoutDashboard, Clock, UserCheck, Users, DollarSign, UserPlus, Car, Wrench, Coins,
   ClipboardList, Boxes, FileText, CreditCard, Receipt, BarChart3, Bell, Settings
 } from 'lucide-react';
 
@@ -12,6 +12,7 @@ export const ROUTE_SECTIONS = {
 };
 
 export const routeConfig = [
+  { id: 'credits', label: 'Credit Wallet', path: '/account', icon: Coins, section: ROUTE_SECTIONS.MAIN, mobilePrimary: false, permission: 'billing.view' },
   { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, section: ROUTE_SECTIONS.MAIN, mobilePrimary: true, permission: 'dashboard.view' },
   { id: 'jobs', label: 'Job Cards', path: '/jobs', icon: ClipboardList, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'jobs.view' },
   {

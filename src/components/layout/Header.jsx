@@ -8,6 +8,8 @@ import { unreadNotificationCount } from '../../utils/notificationInbox';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 import { hasPermission } from '../../utils/permissions';
 import { staffService } from '../../services/staff.service';
+import { CreditBalanceChip } from './CreditBalanceChip';
+import '../../styles/credit-wallet.css';
 
 const resolveStaticPageTitle = (pathname) => {
   if (pathname === '/dashboard') return 'Dashboard';
@@ -130,6 +132,8 @@ export const Header = () => {
             <GlobalSearch />
           </div>
 
+          <CreditBalanceChip />
+
           <div className="header-date">
             <CalendarDays size={13}/>
             <span>{dateLabel}</span>
@@ -177,6 +181,7 @@ export const Header = () => {
           </button>
 
           <div className="mobile-header-actions">
+            <CreditBalanceChip compact />
             <button type="button" onClick={() => setSearchOpen((value) => !value)} aria-label={searchOpen ? "Close workspace search" : "Open workspace search"} aria-expanded={searchOpen}><Search size={15}/></button>
             {canViewNotifications && (
               <button type="button" className={`mobile-notification-button ${location.pathname === '/notifications' ? 'is-notifications-active' : ''}`} onClick={() => navigate('/notifications')} aria-label={`Notifications, ${notificationCount} unread`} aria-current={location.pathname === '/notifications' ? 'page' : undefined}>

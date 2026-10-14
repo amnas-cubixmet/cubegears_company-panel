@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import apiClient from '../api/apiClient';
+import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
@@ -8,20 +7,6 @@ import { getPermissionForPath, hasPermission } from '../utils/permissions';
 export const ProtectedRoute = () => {
   const { isAuthenticated, loading, user } = useAuth();
   const location = useLocation();
-  const [billing, setBilling] = useState(null);
-  const [billingError, setBillingError] = useState(false);
-
-  useEffect(() => {
-    if (!isAuthenticated || loading) return;
-    let cancelled = false;
-    setBilling(null);
-    apiClient.get('/saas/payments/access').then((data) => {
-      if (!cancelled) { setBilling(data); setBillingError(false); }
-    }).catch(() => {
-      if (!cancelled) setBillingError(true);
-    });
-    return () => { cancelled = true; };
-  }, [isAuthenticated, loading, user?.id]);
 
   if (loading) {
     return (
@@ -45,16 +30,6 @@ export const ProtectedRoute = () => {
   if (!isAuthenticated) {
     const next = encodeURIComponent(`${location.pathname}${location.search}`);
     return <Navigate to={`/login?next=${next}`} replace />;
-  }
-
-  if (billingError) {
-    return <div role="alert" style={{ padding: 40 }}>Cannot verify subscription access. Please check your connection and reload.</div>;
-  }
-  if (!billing) {
-    return <div role="status" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>Checking subscription…</div>;
-  }
-  if (billing.required && !billing.paid) {
-    return <Navigate to="/plans" replace />;
   }
 
   const requiredPermission = getPermissionForPath(location.pathname);

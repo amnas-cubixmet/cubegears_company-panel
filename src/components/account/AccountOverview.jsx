@@ -5,6 +5,7 @@ import {
   ShieldCheck, Users,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { creditWalletService } from '../../services/creditWallet.service';
 import { validateCompanyDraft, formatCompanyApiError } from './companyAccountValidation';
 
 const display = (value) => value === null || value === undefined || value === '' ? '—' : String(value);
@@ -32,6 +33,12 @@ export function AccountOverview({
 }) {
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [creditOverview, setCreditOverview] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    creditWalletService.overview().then(data => { if (alive) setCreditOverview(data); }).catch(() => { if (alive) setCreditOverview(null); });
+    return () => { alive = false; };
+  }, [loading]);
   const [draft, setDraft] = useState({});
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
@@ -63,18 +70,19 @@ export function AccountOverview({
   };
 
   const cards = [
-    { label: 'Current Plan', value: display(billing?.plan?.name),
-      note: billing?.plan?.status || 'Unavailable', icon: CreditCard },
-    { label: 'Active Users', value: display(billing?.usage?.seatsUsed),
-      note: 'Active login accounts', icon: Users },
+    { label: 'Credit Balance', value: display(creditOverview?.balance),
+      note: 'Verified company wallet credits', icon: CreditCard },
+    { label: 'Active Users', value: display(creditOverview?.staffCount),
+      note: 'Active staff accounts', icon: Users },
     { label: 'Media Storage', value: storage?.usedGb == null ? '—' : storage.usedGb + ' GB',
       note: 'Stored media, current usage', icon: HardDrive },
-    { label: 'Next Renewal', value: fmtDate(billing?.plan?.nextBillingDate),
-      note: billing?.plan?.nextBillingDate ? 'From subscription record' : 'Not scheduled', icon: CalendarDays },
+    { label: '30-day Feature Estimate', value: creditOverview?.monthlyCredits == null ? '—' : display(creditOverview.monthlyCredits) + ' credits',
+      note: 'Depends on activated modules and staff count', icon: CalendarDays },
   ];
   const actions = [
-    { title: 'Billing & Plan', description: 'Subscription and charges', href: '/account/billing', icon: ReceiptText },
-    { title: 'Compare Plans', description: 'Upgrade, downgrade, or request custom pricing', href: '/account/plans', icon: CreditCard },
+    { title: 'Credit Wallet', description: 'Balance and credit purchase', href: '/account', icon: ReceiptText },
+    { title: 'Feature Controls', description: 'Activate or disable paid tools', href: '/account/credits/features', icon: CreditCard },
+    { title: 'Credit Logs', description: 'Verified credits and charges', href: '/account/credits/logs', icon: ReceiptText },
     { title: 'Media Storage', description: 'Uploads and usage history', href: '/account/storage', icon: HardDrive },
     { title: 'Invoice Templates', description: 'Workshop document styling', href: '/account/templates', icon: FilePenLine },
     { title: 'Account Security', description: 'Password and sign-in', href: '/account/security', icon: ShieldCheck },
