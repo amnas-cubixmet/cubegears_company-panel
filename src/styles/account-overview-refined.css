@@ -104,7 +104,7 @@
   width:39px;height:39px;flex-basis:39px;border-radius:11px;
 }
 .account-overview-refined .account-overview-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:14px;
 }
 .account-overview-refined .account-overview-panel{
   padding:19px;border-radius:14px;min-width:0;
