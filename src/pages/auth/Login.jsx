@@ -58,17 +58,16 @@ export const Login = () => {
       const backendFields = getAuthFieldErrors(error);
       const credentialError = getCredentialError(error);
 
+      const hasFieldError = Boolean(backendFields.email || backendFields.password);
+      const isCredentialFailure = error?.status === 401;
       setFieldErrors({
         ...(backendFields.email ? { email: backendFields.email } : {}),
         ...(backendFields.password ? { password: backendFields.password } : {}),
-        ...(!backendFields.email && !backendFields.password
-          ? {
-              email: credentialError,
-              password: credentialError,
-            }
+        ...(!hasFieldError && isCredentialFailure
+          ? { email: credentialError, password: credentialError }
           : {}),
       });
-      setFormError(credentialError);
+      setFormError(hasFieldError ? '' : credentialError);
     }
   };
 
