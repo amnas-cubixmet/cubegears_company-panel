@@ -24,8 +24,8 @@ export const ForgotPassword = () => {
     setIsError(false);
     setPreviewUrl('');
 
-    if (!cleanEmail) {
-      setFieldError('Email address is required.');
+    if (!cleanEmail || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) {
+      setFieldError(cleanEmail ? 'Enter a valid email address.' : 'Email address is required.');
       return;
     }
 
