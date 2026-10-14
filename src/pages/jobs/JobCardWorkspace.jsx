@@ -69,6 +69,8 @@ const normalizeJobStatus = (status) => {
 
 const INSPECTION_CHECKS = ['Tyres', 'Warning Lights', 'Battery', 'Engine Oil', 'Coolant', 'Brake Fluid'];
 
+const SIMPLE_TABS = ['overview', 'inspection', 'estimate', 'work', 'parts', 'invoice'];
+
 const TABS = [
   ['overview', 'Overview'],
   ['complaints', 'Complaints'],
@@ -393,28 +395,10 @@ export function JobCardWorkspace() {
   const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
   const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
-  useEffect(() => {
-    if (!job?.id || !workflow) return;
-    const pieces = location.pathname.split('/').filter(Boolean);
-    const requested = pieces.length > 2 ? pieces[2] : null;
-    const supported = requested === 'full-log' || TABS.some(([key]) => key === requested);
-    if (!supported || isSectionLocked(requested)) {
-      navigate('/jobs/' + job.id + '/' + currentStage, { replace: true });
-    }
-  }, [job?.id, workflow, location.pathname, currentStage, navigate]);
-
-  const refreshJobWorkflow = async (advanceFrom = null) => {
-    const [updated, flow] = await Promise.all([
-      jobService.getJobById(id),
-      jobService.getJobWorkflow(id)
-    ]);
-    setJob(updated);
-    setWorkflow(flow);
-    if (advanceFrom && flow.current !== advanceFrom) {
-      navigate('/jobs/' + id + '/' + flow.current, { replace: true });
-    }
-    return flow;
-  };
+  const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
+  const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
+  const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
+  const activeTabComplete = sectionComplete[activeTab];
 
   const completeStage = async (stage) => {
     if (!workflow || saving) return;
@@ -866,22 +850,11 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
-      <JobTotalCostPanel
-        jobId={job.id}
-        refreshVersion={timerRefreshVersion}
-        refreshOnTab={activeTab}
-      />
-
-      {activeTab !== 'overview' && activeTab !== 'activity' && !showWorkTools && (
-        <>
-      <div className="job-workspace-toolbar">
-        <span>Current status <strong>{normalizeJobStatus(job.status)}</strong></span>
-        <div className="job-workspace-toolbar-actions">
-          <span className="job-workspace-lock-note"><LockKeyhole size={14} aria-hidden="true"/> Next stage unlocks on completion</span>
-          <button type="button" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
-            {showAdvanced ? 'Simple view' : 'Show all details'}
-          </button>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2">
+        <span className="text-xs text-secondary">Current status: <strong className="text-content">{normalizeJobStatus(job.status)}</strong></span>
+        <button type="button" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-content" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+          {showAdvanced ? 'Simple view' : 'Show all details'}
+        </button>
       </div>
 
       <section className="job-detail-summary grid grid-cols-2 gap-2 md:grid-cols-3">
@@ -900,7 +873,47 @@ export function JobCardWorkspace() {
         ))}
       </section>
 
+      {showAdvanced && <section className="job-status-pipeline" aria-label="Job status progress">
+        {JOB_STATUSES.map((status, index) => {
+          const currentIndex = JOB_STATUSES.indexOf(normalizeJobStatus(job.status));
+          const state = index < currentIndex ? 'is-done' : index === currentIndex ? 'is-current' : 'is-next';
 
+          return (
+            <button
+              type="button"
+              key={status}
+              className={`job-status-step ${state}`}
+              onClick={() => setStatus(status)}
+              disabled={saving}
+              title={`Set status to ${status}`}
+            >
+              <span>{index + 1}</span>
+              <strong>{status}</strong>
+            </button>
+          );
+        })}
+      </section>}
+
+      <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
+        {visibleTabs.map(([key, label], index) => {
+          const completed = sectionComplete[key];
+          const TabIcon = TAB_ICONS[key];
+          return (
+            <button
+              type="button"
+              key={key}
+              onClick={() => openTab(key)}
+              aria-current={activeTab === key ? "page" : undefined}
+              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : ''].join(' ')}
+              title={label}
+            >
+              <span className="job-workflow-tab-number">{index + 1}</span>
+              <span className="job-workflow-tab-label"><TabIcon size={14} aria-hidden="true" />{label}</span>
+              {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
+            </button>
+          );
+        })}
+      </nav>
 
         </>
       )}
@@ -1005,10 +1018,10 @@ export function JobCardWorkspace() {
           <strong>{activeTabLocked ? 'Stage locked' : activeTabComplete ? 'Section complete' : 'Section in progress'}</strong>
           <span>{'Complete each stage to unlock the next. Finished stages remain accessible.'}</span>
         </div>
-        {nextVisibleTab && !activeTabLocked ? (
-          <button type="button" disabled={saving || isSectionLocked(nextVisibleTab[0])} onClick={() => openTab(nextVisibleTab[0])}>
+        {nextVisibleTab ? (
+          <button type="button" disabled={saving} onClick={() => openTab(nextVisibleTab[0])}>
             Next: {nextVisibleTab[1]}
-            {isSectionLocked(nextVisibleTab[0]) ? <LockKeyhole size={14} aria-hidden="true"/> : <ChevronRight size={14}/>}
+            <ChevronRight size={14} />
           </button>
         ) : null}
       </div>
@@ -1029,12 +1042,27 @@ export function JobCardWorkspace() {
       ) : (
         <>
       {activeTab === 'overview' && (
-        <div className="job-overview-simple">
-          <section className="job-overview-intro" aria-label="Job Card overview">
-            <div className="job-overview-intro-copy">
-              <span className="job-overview-eyebrow">Job Card · Step 1 of 6</span>
-              <h2>Job Overview</h2>
-              <p>Check the customer and vehicle details before starting inspection.</p>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-surface p-4 xl:col-span-2">
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-secondary">Customer complaint</div>
+              <p className="mt-1 break-words text-sm text-content">{complaints[0]?.description || complaints[0]?.wording || 'No complaint recorded yet.'}</p>
+            </div>
+            <button type="button" onClick={() => openTab('complaints')} className="rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-content">
+              {complaints.length ? 'View complaints' : 'Add complaint'}
+            </button>
+          </section>
+          <section className="job-panel rounded-2xl border border-line bg-surface p-4">
+            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><UserRound size={16} className="text-primary"/>Customer & Vehicle</div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+              <Info label="Customer" value={job.customerName}/>
+              <Info label="Phone" value={job.customerPhone}/>
+              <Info label="Registration" value={job.vehicleReg}/>
+              <Info label="Make / Model" value={job.vehicleInfo}/>
+              <Info label="VIN / Chassis" value={job.vin || job.vehicle?.vin || '—'}/>
+              <Info label="Service Type" value={job.serviceType || '—'}/>
+              <Info label="Check-In" value={job.checkInTime || job.createdDate}/>
+              <Info label="Branch" value={job.branch}/>
             </div>
             <div className="job-overview-intro-actions">
               <button type="button" className="job-overview-secondary-action" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
@@ -1054,37 +1082,36 @@ export function JobCardWorkspace() {
             </div>
           </section>
 
-          <div className="job-overview-primary-grid">
-            <section className="job-overview-card" aria-labelledby="job-overview-customer-heading">
-              <div className="job-overview-card-header">
-                <span className="job-overview-card-icon"><UserRound size={18} aria-hidden="true"/></span>
-                <div>
-                  <h3 id="job-overview-customer-heading">Customer & Vehicle</h3>
-                  <p>Basic job information</p>
-                </div>
-              </div>
-              <dl className="job-overview-detail-grid">
-                <div><dt>Customer name</dt><dd>{job.customerName || 'Not added'}</dd></div>
-                <div><dt>Phone number</dt><dd>{job.customerPhone || 'Not added'}</dd></div>
-                <div><dt>Vehicle number</dt><dd>{job.vehicleReg || 'Not added'}</dd></div>
-                <div><dt>Make / Model</dt><dd>{job.vehicleInfo || 'Not added'}</dd></div>
-                <div><dt>Service type</dt><dd>{job.serviceType || 'General Service'}</dd></div>
-                <div><dt>KM Reading</dt><dd>{job.kilometre === 0 || job.kilometre ? new Intl.NumberFormat('en-IN').format(Number(job.kilometre)) + ' km' : 'Not added'}</dd></div>
-                <div><dt>Fuel Level</dt><dd>{job.fuelLevel || 'Not added'}</dd></div>
-                <div><dt>VIN / Chassis</dt><dd>{job.vin || job.vehicle?.vin || 'Not added'}</dd></div>
-              </dl>
-            </section>
+          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
+            <div className="flex items-center gap-2 text-sm font-extrabold text-content">
+              <Star size={16} className="text-primary"/>
+              Customer Feedback
+            </div>
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[160px_minmax(0,1fr)_auto] md:items-end">
+              <label className="text-xs font-semibold text-secondary">
+                Rating
+                <select
+                  value={feedbackRating}
+                  onChange={(e) => setFeedbackRating(e.target.value)}
+                  className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"
+                >
+                  <option value="">Select rating</option>
+                  <option value="5">5 - Excellent</option>
+                  <option value="4">4 - Very Good</option>
+                  <option value="3">3 - Good</option>
+                  <option value="2">2 - Fair</option>
+                  <option value="1">1 - Poor</option>
+                </select>
+              </label>
 
-            <section className="job-overview-card" aria-labelledby="job-overview-assignment-heading">
-              <div className="job-overview-card-header">
-                <span className="job-overview-card-icon"><Wrench size={18} aria-hidden="true"/></span>
-                <div>
-                  <h3 id="job-overview-assignment-heading">Mechanic Assignment</h3>
-                  <p>Select who will handle this job</p>
-                </div>
-              </div>
-              <label className="job-overview-assignment-label" htmlFor="job-overview-technician">
-                Assigned mechanic
+              <label className="text-xs font-semibold text-secondary">
+                Customer Comment
+                <input
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="Customer feedback about this job / technician"
+                  className="mt-1 h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm text-content"
+                />
               </label>
               <select
                 id="job-overview-technician"
@@ -1117,48 +1144,19 @@ export function JobCardWorkspace() {
             </button>
           </section>
 
-          {showAdvanced && (
-            <section className="job-overview-more" aria-label="Additional job details">
-              <h3>Additional details</h3>
-              <dl className="job-overview-detail-grid">
-                <div><dt>Check-in</dt><dd>{job.checkInTime || job.createdDate || '—'}</dd></div>
-                <div><dt>Branch</dt><dd>{job.branch || '—'}</dd></div>
-                <div><dt>Estimate</dt><dd>{latestEstimate ? money.format(latestEstimate.grandTotal || 0) : 'Not created'}</dd></div>
-                <div><dt>Payment</dt><dd>{job.paymentStatus || 'Pending'}</dd></div>
-              </dl>
-              <div className="job-overview-more-grid">
-                <div className="job-overview-feedback">
-                  <h4><Star size={16} aria-hidden="true"/> Customer Feedback</h4>
-                  <div className="job-overview-feedback-fields">
-                    <label>Rating
-                      <select value={feedbackRating} onChange={(event) => setFeedbackRating(event.target.value)}>
-                        <option value="">Select rating</option>
-                        <option value="5">5 - Excellent</option>
-                        <option value="4">4 - Very Good</option>
-                        <option value="3">3 - Good</option>
-                        <option value="2">2 - Fair</option>
-                        <option value="1">1 - Poor</option>
-                      </select>
-                    </label>
-                    <label>Customer comment
-                      <input value={feedbackText} onChange={(event) => setFeedbackText(event.target.value)} placeholder="Customer feedback"/>
-                    </label>
-                    <button type="button" onClick={saveCustomerFeedback} disabled={saving || !feedbackRating}>Save Feedback</button>
-                  </div>
-                </div>
-                <div className="job-overview-history">
-                  <h4><History size={16} aria-hidden="true"/> Vehicle Service History</h4>
-                  {vehicleHistory.length === 0 ? (
-                    <p>No previous service records for this vehicle.</p>
-                  ) : (
-                    vehicleHistory.slice(0, 5).map((item) => (
-                      <button key={item.id} type="button" onClick={() => navigate(`/jobs/${item.id}`)}>
-                        <span><strong>{jobDisplayLabel(item)}</strong><small>{item.createdDate || 'Previous visit'}</small></span>
-                        <ChevronRight size={15} aria-hidden="true"/>
-                      </button>
-                    ))
-                  )}
-                </div>
+          <section className={showAdvanced ? "rounded-2xl border border-line bg-surface p-4 xl:col-span-2" : "hidden"}>
+            <div className="flex items-center gap-2 text-sm font-extrabold text-content"><History size={16} className="text-primary"/>Vehicle Service History</div>
+            {!vehicleHistory.length ? (
+              <div className="mt-3 rounded-xl border border-dashed border-line p-5 text-center text-xs text-muted">No previous job cards for this registration.</div>
+            ) : (
+              <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {vehicleHistory.slice(0, 6).map((item) => (
+                  <button key={item.id} onClick={() => navigate(`/jobs/${item.id}/overview`)} className="rounded-xl border border-line bg-surface-2 p-3 text-left">
+                    <div className="text-xs font-extrabold text-content">{jobDisplayLabel(item)}</div>
+                    <div className="mt-1 text-[10px] text-muted">{item.createdDate} · {item.status}</div>
+                    <div className="mt-2 line-clamp-2 text-[11px] text-secondary">{item.complaints?.[0]?.description || 'Service / repair visit'}</div>
+                  </button>
+                ))}
               </div>
             </section>
           )}
