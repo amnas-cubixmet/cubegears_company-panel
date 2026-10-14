@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CalendarDays, FileImage, HardDrive, IndianRupee } from 'lucide-react';
 import { storageHistoryService } from '../../services/storageHistory.service';
+import { AccountHeader } from '../../components/account';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -19,19 +20,20 @@ export function StorageDayDetails() {
       .finally(() => setLoading(false));
   }, [dateParam]);
 
-  if (loading) return <div className="saas-page"><div className="saas-loading">Loading storage snapshot…</div></div>;
-  if (!snapshot) return <div className="saas-page"><div className="saas-error">No storage snapshot found for this day.</div></div>;
-
   return (
     <div className="saas-page storage-day-page">
-      <header className="saas-page-head storage-day-head">
-        <div>
-          <span className="saas-kicker">STORAGE SNAPSHOT</span>
-          <h1>{date.format(new Date(`${snapshot.date}T00:00:00`))}</h1>
-          <p>Files and storage usage recorded for this billing day.</p>
-        </div>
-      </header>
-
+      <AccountHeader
+        title={snapshot ? date.format(new Date(`${snapshot.date}T00:00:00`)) : 'Storage Day Details'}
+        subtitle="Files, usage and activity for the selected day."
+        active="storage"
+        onNavigate={navigate}
+      />
+      {loading ? (
+        <div className="saas-loading" role="status">Loading storage snapshot…</div>
+      ) : !snapshot ? (
+        <div className="saas-error" role="alert">No storage snapshot found for this day.</div>
+      ) : (
+        <>
       <section className="storage-day-stats">
         <div className="saas-card storage-stat"><HardDrive size={20} /><span>Stored</span><strong>{snapshot.usedGb} GB</strong></div>
         <div className="saas-card storage-stat"><IndianRupee size={20} /><span>Daily charge</span><strong>{snapshot.charge == null ? "—" : money.format(snapshot.charge)}</strong></div>
@@ -53,6 +55,8 @@ export function StorageDayDetails() {
           </div>
         ) : <p className="saas-muted">No files were present in this snapshot.</p>}
       </section>
+        </>
+      )}
     </div>
   );
 }
