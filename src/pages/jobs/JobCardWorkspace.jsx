@@ -576,6 +576,9 @@ export function JobCardWorkspace() {
   };
 
   const setEstimateApproval = async (estimateKey, approvalStatus) => {
+    if (approvalStatus === 'Rejected') {
+      if (!await appConfirm('Reject the latest draft estimate? The customer will need a new estimate before work can begin.')) return;
+    }
     if (!USE_MOCK_API) {
       if (approvalStatus === 'Approved') return completeStage('estimate');
       setSaving(true);
@@ -584,7 +587,7 @@ export function JobCardWorkspace() {
         await jobService.rejectJobEstimate(job.id, estimateKey);
         await refreshJobWorkflow();
       } catch (e) {
-        setError(e?.response?.data?.detail || e?.message || 'Estimate decision could not be saved.');
+        setError(e?.response?.data?.estimate || e?.response?.data?.detail || e?.message || 'Estimate decision could not be saved.');
       } finally {
         setSaving(false);
       }
