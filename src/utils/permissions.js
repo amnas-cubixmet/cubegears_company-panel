@@ -1,9 +1,7 @@
 export const hasPermission = (user, permission) => {
   if (!permission) return true;
-  if (user?.is_superuser) return true;
 
   const role = user?.role;
-  if (typeof role === 'string' && role === 'SUPER_ADMIN') return true;
 
   const permissions =
     role && typeof role === 'object' && Array.isArray(role.permissions)
@@ -14,10 +12,8 @@ export const hasPermission = (user, permission) => {
 };
 
 export const getUserPermissions = (user) => {
-  if (user?.is_superuser) return ['*'];
 
   const role = user?.role;
-  if (typeof role === 'string' && role === 'SUPER_ADMIN') return ['*'];
 
   return role && typeof role === 'object' && Array.isArray(role.permissions)
     ? role.permissions
@@ -54,6 +50,8 @@ const SPECIAL_PATH_PERMISSIONS = [
   ['/account/storage', 'storage.view'],
   ['/account/templates', 'settings.view'],
   ['/account/security', 'settings.view'],
+  ['/account', 'settings.view'],
+  ['/staff', 'payroll.view'],
 ];
 
 const actionForCrudPath = (pathname, prefix) => {
