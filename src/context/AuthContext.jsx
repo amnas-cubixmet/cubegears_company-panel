@@ -85,22 +85,32 @@ export const AuthProvider = ({ children }) => {
       const response = await apiClient.post('/auth/login', credentials);
       const token = response?.access || response?.token || response?.accessToken || response?.access_token;
       const refreshToken = response?.refresh || response?.refreshToken || response?.refresh_token;
-      const resolvedUser = response?.user || response?.profile;
-
       if (!token) throw new Error('Login response did not include an access token.');
 
       localStorage.setItem('auth_token', token);
       if (refreshToken) {
         localStorage.setItem('auth_refresh_token', refreshToken);
-      }
-      if (resolvedUser) {
-        localStorage.setItem('auth_user', JSON.stringify(resolvedUser));
+      } else {
+        localStorage.removeItem('auth_refresh_token');
       }
 
-      setUser(resolvedUser || null);
+      const profile = response?.user || response?.profile || await apiClient.get('/auth/me');
+      if (!profile?.company?.id || !profile?.role || !Array.isArray(profile.role.permissions)) {
+        throw new Error('Login could not verify your workshop and permissions.');
+      }
+
+      localStorage.setItem('auth_user', JSON.stringify(profile));
+      setUser(profile);
       setIsAuthenticated(true);
 
-      return resolvedUser;
+      return profile;
+    } catch (error) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_refresh_token');
+      localStorage.removeItem('auth_user');
+      setUser(null);
+      setIsAuthenticated(false);
+      throw error;
     } finally {
       setLoading(false);
     }
