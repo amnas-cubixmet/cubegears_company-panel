@@ -3,16 +3,18 @@ import { routeConfig, mobileMoreRoutes, ROUTE_SECTIONS } from './routeConfig';
 
 const accountRoute = {
   id: 'saas-account',
-  label: 'SaaS Account',
+  label: 'Credits & Account',
   path: '/account',
   icon: Cloud,
   section: ROUTE_SECTIONS.ANALYTICS_SYSTEM,
   mobilePrimary: false,
   permission: 'settings.manage',
   children: [
-    { id: 'saas-plan', label: 'Plan & Usage', path: '/account/billing' },
-    { id: 'saas-marketplace', label: 'Change Plan', path: '/account/plans' },
-    { id: 'saas-storage', label: 'Media Storage', path: '/account/storage' }
+    { id: 'credits-overview', label: 'Credit Overview', path: '/account' },
+    { id: 'credits-buy', label: 'Buy Credits', path: '/account/credits/buy' },
+    { id: 'credits-features', label: 'Feature Controls', path: '/account/credits/features' },
+    { id: 'credits-storage', label: 'Storage', path: '/account/storage' },
+    { id: 'credits-logs', label: 'Credit Logs', path: '/account/credits/logs' }
   ]
 };
 
