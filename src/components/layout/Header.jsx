@@ -9,6 +9,7 @@ import { getUserRoleLabel } from '../../utils/authDisplay';
 import { hasPermission } from '../../utils/permissions';
 import { staffService } from '../../services/staff.service';
 import { CreditBalanceChip } from './CreditBalanceChip';
+import '../../styles/credit-wallet.css';
 
 const resolveStaticPageTitle = (pathname) => {
   if (pathname === '/dashboard') return 'Dashboard';
