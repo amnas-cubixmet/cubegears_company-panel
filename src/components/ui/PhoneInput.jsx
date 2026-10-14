@@ -22,6 +22,6 @@ export const PhoneInput = ({ label, error, helper, success, required = false, di
       </select>
       <input id={inputId} className="ui-input" type="tel" inputMode="tel" autoComplete="tel-national" required={required} disabled={disabled} aria-invalid={Boolean(error)} aria-describedby={message ? `${inputId}-message` : undefined} {...props} />
     </div>
-    {message && <span id={`${inputId}-message`} className={`ui-field__message${error ? ' ui-field__message--error' : success ? ' ui-field__message--success' : ''}`}>{message}</span>
+    {message && <span id={`${inputId}-message`} className={`ui-field__message${error ? ' ui-field__message--error' : success ? ' ui-field__message--success' : ''}`}>{message}</span>}
   </div>;
 };
