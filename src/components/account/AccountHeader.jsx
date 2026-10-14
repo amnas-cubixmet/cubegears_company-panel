@@ -16,6 +16,8 @@ const tabs=[
 
 export const AccountHeader=({title,subtitle,active,onNavigate,actions})=>{
   const location = useLocation();
+  const activeIndex = Math.max(0, tabs.findIndex(([key]) => key === active));
+  const ActiveIcon = tabs[activeIndex][3];
   const tabListRef = useRef(null);
 
   // Only scroll the tab strip horizontally. Calling scrollIntoView here would
@@ -39,8 +41,20 @@ export const AccountHeader=({title,subtitle,active,onNavigate,actions})=>{
 
   return <>
     <header className="account-dashboard-header">
-      <div><h1>{title}</h1><p>{subtitle}</p></div>
-      {actions ? <div className="account-dashboard-actions">{actions}</div> : null}
+      <div className="account-dashboard-title-row">
+        <span className="account-dashboard-icon" aria-hidden="true"><ActiveIcon size={21}/></span>
+        <div className="account-dashboard-title-copy">
+          <span className="account-dashboard-eyebrow">CUBEGEAR <span aria-hidden="true">/</span> ACCOUNT WORKSPACE</span>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
+        </div>
+      </div>
+      <div className="account-dashboard-header-trailing">
+        <span className="account-dashboard-section-count" aria-label={`Section ${activeIndex + 1} of ${tabs.length}`}>
+          {String(activeIndex + 1).padStart(2, '0')} <span aria-hidden="true">/</span> {String(tabs.length).padStart(2, '0')}
+        </span>
+        {actions ? <div className="account-dashboard-actions">{actions}</div> : null}
+      </div>
     </header>
     <nav ref={tabListRef} className="account-dashboard-tabs" aria-label="Account navigation">
       {tabs.map(([key,label,path,Icon])=><button
