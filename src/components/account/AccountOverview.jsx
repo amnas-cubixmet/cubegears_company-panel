@@ -9,9 +9,6 @@ import { creditWalletService } from '../../services/creditWallet.service';
 import { validateCompanyDraft, formatCompanyApiError } from './companyAccountValidation';
 
 const display = (value) => value === null || value === undefined || value === '' ? '—' : String(value);
-const fmtMoney = (value) => value === null || value === undefined
-  ? '—' : new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR',
-    maximumFractionDigits: 2 }).format(Number(value) || 0);
 const fmtDate = (value) => {
   if (!value) return '—';
   const parsed = new Date(value);
@@ -28,7 +25,7 @@ const EDIT_FIELDS = [
 ];
 
 export function AccountOverview({
-  billing, storage, company, companyError,
+  storage, company, companyError,
   onSaveCompany, onReload, loading, onNavigate,
 }) {
   const { user } = useAuth();
@@ -165,20 +162,6 @@ export function AccountOverview({
           )}
         </article>
 
-        <article className="account-overview-panel">
-          <header><div><h2><ReceiptText size={18}/> Subscription Summary</h2>
-            <p>Charges and usage from your current subscription.</p></div></header>
-          <div className="account-overview-rows">
-            <div><span>Current Plan</span><strong>{display(billing?.plan?.name)}</strong></div>
-            <div><span>Plan Status</span><strong>{display(billing?.plan?.status)}</strong></div>
-            <div><span>Base Amount</span><strong>{fmtMoney(billing?.plan?.basePrice)}</strong></div>
-            <div><span>Active Users</span><strong>{display(billing?.usage?.seatsUsed)}</strong></div>
-            <div><span>Included Seats</span><strong>{display(billing?.plan?.includedSeats)}</strong></div>
-            <div><span>Media Storage</span><strong>{storage?.usedGb == null ? '—' : storage.usedGb + ' GB'}</strong></div>
-          </div>
-          {billing?.billingNote && <p className="account-overview-info">{billing.billingNote}</p>}
-          {!billing && <p className="account-overview-info">Subscription information unavailable. Check account permissions.</p>}
-        </article>
       </div>
       <section className="account-overview-shortcuts">
         <header><h2>Manage Your Account</h2>
