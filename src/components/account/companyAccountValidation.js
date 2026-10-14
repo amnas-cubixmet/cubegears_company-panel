@@ -1,4 +1,4 @@
-import { isValidEmail, normalizeEmail } from '../../utils/validation';
+import { isValidEmail, normalizeEmail } from '../../utils/validation.js';
 
 export const companyFields = ['name', 'phone', 'email', 'gstNo', 'address'];
 
