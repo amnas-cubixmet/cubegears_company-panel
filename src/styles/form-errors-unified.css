@@ -1,0 +1,73 @@
+/*
+ * CubixGear form validation presentation.
+ * Keep a single red border on the visible control or control shell, never two.
+ * Native validation, Django field errors, and React aria-invalid all share
+ * this appearance. Loaded after the regular-input and search styles.
+ */
+:root {
+  --cg-inline-error-border: #dc2626;
+  --cg-inline-error-ring: 0 0 0 3px rgba(220,38,38,.13);
+}
+
+:is(body, #root) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select, textarea):is([aria-invalid="true"],[data-cg-error-active="true"]) {
+  border-color: var(--cg-inline-error-border) !important;
+  box-shadow: var(--cg-inline-error-ring) !important;
+}
+:is(body, #root) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"]):focus {
+  outline-color: var(--cg-inline-error-border) !important;
+  border-color: var(--cg-inline-error-border) !important;
+}
+
+/* For icon/combobox shells only the outer shell receives the red border. */
+:is(body, #root) :is(
+  [data-cg-input-shell],
+  .ui-input-shell,
+  .login-input-shell,
+  .outside-labour-search,
+  .job-customer-search,
+  .job-quick-catalog-field,
+  .global-search-field,
+  .crud-search,
+  .cg-inspection-search
+):has(:is(input,select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"])) {
+  border-color: var(--cg-inline-error-border) !important;
+  box-shadow: var(--cg-inline-error-ring) !important;
+}
+:is(body, #root) :is(
+  [data-cg-input-shell],
+  .ui-input-shell,
+  .login-input-shell,
+  .outside-labour-search,
+  .job-customer-search,
+  .job-quick-catalog-field,
+  .global-search-field,
+  .crud-search,
+  .cg-inspection-search
+) :is(input,select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"]) {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Generic generated errors are placed below the affected field, not in a toast. */
+:is(body,#root) .cg-inline-field-error {
+  display:block;
+  flex-basis:100%;
+  grid-column:1 / -1;
+  width:100%;
+  margin-top:5px;
+  color:var(--cg-inline-error-border);
+  font-size:12px;
+  line-height:1.45;
+  font-weight:500;
+  overflow-wrap:anywhere;
+}
+:is(body,#root) [data-cg-field-error="true"] .cg-inline-field-error {
+  color:var(--cg-inline-error-border);
+}
+@media(max-width:767px) {
+  :is(body,#root) .cg-inline-field-error {font-size:12px}
+}

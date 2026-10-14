@@ -188,8 +188,9 @@ export const JobCreatePage = () => {
         : !form.customerPhone.trim() ? 'customerPhone' : 'vehicleReg';
       const message = first === 'customerName' ? 'Enter the customer name.'
         : first === 'customerPhone' ? 'Enter the customer phone.' : 'Enter the vehicle registration.';
-      showFormFieldError(formRef.current, first, message);
-      setError(message);
+      // Field errors belong next to the input, not in a duplicate page alert.
+      const shownInline = showFormFieldError(formRef.current, first, message);
+      setError(shownInline ? '' : message);
       return;
     }
 
@@ -234,11 +235,12 @@ export const JobCreatePage = () => {
 
       navigate(`/jobs/${created.id}`, { replace: true });
     } catch (err) {
-      showServerFormErrors(formRef.current, err, {
+      const shownInline = showServerFormErrors(formRef.current, err, {
         customer_name: 'customerName', customer_phone: 'customerPhone',
         registration: 'vehicleReg', vehicle_registration: 'vehicleReg',
       });
-      setError(err?.message || 'Unable to create job card.');
+      // Non-field/network errors still need a visible page-level message.
+      setError(shownInline ? '' : (err?.message || 'Unable to create job card.'));
     } finally {
       setSaving(false);
     }
