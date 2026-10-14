@@ -1,7 +1,7 @@
 import { appConfirm } from '../../components/common/appDialogs';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, ChevronRight, FilePenLine, History, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
+import { CalendarDays, ChevronRight, FilePenLine, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { settingsService } from '../../services/settings.service';
 import { useAuth } from '../../hooks/useAuth';
@@ -115,6 +115,9 @@ function StorageView({ storage, setStorage, billing }) {
   const [selected, setSelected] = useState([]);
   const [category, setCategory] = useState('Job Card');
   const [history, setHistory] = useState([]);
+  const [serverEvents, setServerEvents] = useState([]);
+  const [eventError, setEventError] = useState('');
+  const [eventsLoading, setEventsLoading] = useState(!USE_MOCK_API);
   const [audit, setAudit] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cubixgear-storage-audit') || '[]'); } catch { return []; }
   });
@@ -139,9 +142,28 @@ function StorageView({ storage, setStorage, billing }) {
     }
   };
 
-  useEffect(() => { refreshHistory(); }, []);
+  const refreshEvents = async (start = from, end = to) => {
+    if (USE_MOCK_API) return;
+    setEventsLoading(true);
+    try {
+      const payload = await storageHistoryService.getStorageEvents({ from: start, to: end });
+      setServerEvents(Array.isArray(payload?.results) ? payload.results : []);
+      setEventError('');
+    } catch (error) {
+      setServerEvents([]);
+      setEventError(error?.message || 'Could not retrieve storage activity.');
+    } finally {
+      setEventsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshHistory();
+    refreshEvents();
+  }, []);
 
   const log = (action, details) => {
+    if (!USE_MOCK_API) return;
     const next = [{ id: Date.now(), at: new Date().toISOString(), action, details, user: user?.name || 'Local Account' }, ...audit].slice(0, 100);
     setAudit(next);
     localStorage.setItem('cubixgear-storage-audit', JSON.stringify(next));
@@ -158,6 +180,7 @@ function StorageView({ storage, setStorage, billing }) {
     setFrom(nextFrom);
     setTo(nextTo);
     refreshHistory(nextFrom, nextTo);
+    refreshEvents(nextFrom, nextTo);
   };
 
   const upload = async (event) => {
@@ -173,6 +196,7 @@ function StorageView({ storage, setStorage, billing }) {
       setStorage(next);
       await storageHistoryService.recordTodayStorageSnapshot(next);
       await refreshHistory();
+      await refreshEvents();
       log('UPLOAD', `${valid.length} photo(s) uploaded to ${category}`);
     } catch (error) {
       setStorageError(error?.message || 'Upload failed. Please retry.');
@@ -187,6 +211,7 @@ function StorageView({ storage, setStorage, billing }) {
       setStorage(next);
       await storageHistoryService.recordTodayStorageSnapshot(next);
       await refreshHistory();
+      await refreshEvents();
       log('DELETE', `${ids.length} photo(s) deleted`);
       setSelected((old) => old.filter((id) => !ids.includes(id)));
     } catch (error) {
@@ -237,7 +262,7 @@ function StorageView({ storage, setStorage, billing }) {
           <div className="storage-custom-range">
             <label><span>From</span><input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setRangePreset('custom'); }} /></label>
             <label><span>To</span><input type="date" value={to} onChange={(e) => { setTo(e.target.value); setRangePreset('custom'); }} /></label>
-            <button onClick={() => refreshHistory()}>Apply</button>
+            <button onClick={() => { refreshHistory(); refreshEvents(); }}>Apply</button>
           </div>
         </div>
 
@@ -257,7 +282,7 @@ function StorageView({ storage, setStorage, billing }) {
             <button key={row.date} className="storage-history-row" onClick={() => navigate(`/account/storage/history/${row.date}`)}>
               <div><strong>{date.format(new Date(`${row.date}T00:00:00`))}</strong><span>{row.fileCount} files</span></div>
               <div><span>Stored</span><strong>{row.usedGb} GB</strong></div>
-              <div><span>Charge</span><strong>{money.format(row.charge)}</strong></div>
+              <div><span>Charge</span><strong>{row.charge == null ? 'Not billed' : money.format(row.charge)}</strong></div>
               <ChevronRight size={18} />
             </button>
           ))}
@@ -281,9 +306,25 @@ function StorageView({ storage, setStorage, billing }) {
       </section>
 
       <section className="saas-card saas-wide">
-        <div className="saas-card-head"><div><span className="saas-kicker">LOCAL ACTIVITY</span><h2>Storage actions on this browser</h2></div><History size={22} /></div>
-        <p className="saas-muted">This activity list is stored only in this browser, not a server audit log.</p>
-        {audit.length ? <div className="saas-table-wrap"><table className="saas-table"><thead><tr><th>Date & time</th><th>Action</th><th>Details</th><th>User</th></tr></thead><tbody>{audit.map((item) => <tr key={item.id}><td>{dateTime.format(new Date(item.at))}</td><td>{item.action}</td><td>{item.details}</td><td>{item.user}</td></tr>)}</tbody></table></div> : <p className="saas-muted">No storage activity recorded yet.</p>}
+        <div className="saas-card-head"><div><span className="saas-kicker">{USE_MOCK_API ? 'LOCAL ACTIVITY' : 'SERVER AUDIT LOG'}</span><h2>{USE_MOCK_API ? 'Storage actions on this browser' : 'Recorded storage activity'}</h2></div><button className="saas-button" onClick={() => navigate('/account/storage/history')}>View full history <ChevronRight size={16} /></button></div>
+        <p className="saas-muted">{USE_MOCK_API ? 'Demo activity is stored in this browser.' : 'Upload and delete events are recorded in your company database. This shows up to 50 events for the selected date range.'}</p>
+        {USE_MOCK_API ? (
+          audit.length ? <div className="saas-table-wrap"><table className="saas-table"><thead><tr><th>Date & time</th><th>Action</th><th>Details</th><th>User</th></tr></thead><tbody>{audit.map((item) => <tr key={item.id}><td>{dateTime.format(new Date(item.at))}</td><td>{item.action}</td><td>{item.details}</td><td>{item.user}</td></tr>)}</tbody></table></div> : <p className="saas-muted">No local storage activity recorded yet.</p>
+        ) : eventsLoading ? (
+          <p className="saas-loading">Loading server storage activity…</p>
+        ) : eventError ? (
+          <p className="saas-error" role="alert">{eventError}</p>
+        ) : serverEvents.length ? (
+          <div className="saas-table-wrap"><table className="saas-table"><thead><tr><th>Date & time</th><th>Action</th><th>File</th><th>Storage change</th><th>Performed by</th></tr></thead><tbody>{serverEvents.map((event) => (
+            <tr key={event.id}>
+              <td>{dateTime.format(new Date(event.occurredAt))}</td>
+              <td>{event.eventType}</td>
+              <td>{event.filename}</td>
+              <td>{event.deltaBytes > 0 ? '+' : ''}{(event.deltaBytes / (1024 * 1024)).toFixed(2)} MB</td>
+              <td>{event.actor || 'System'}</td>
+            </tr>
+          ))}</tbody></table></div>
+        ) : <p className="saas-muted">No server-recorded events for this period.</p>}
       </section>
     </div>
   );

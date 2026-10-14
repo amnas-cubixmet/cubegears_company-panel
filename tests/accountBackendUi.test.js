@@ -53,7 +53,12 @@ test('upload/delete refresh authoritative media summary and handles errors',()=>
   assert.match(account, /setStorageError\(/);
   assert.match(account, /setHistoryError\(/);
   assert.match(account, /role="alert"/);
-  assert.match(account, /only in this browser, not a server audit log/);
+  assert.match(account, /SERVER AUDIT LOG/);
+  assert.match(account, /getStorageEvents\(/);
+  assert.match(account, /No server-recorded events for this period/);
+  assert.match(account, /Demo activity is stored in this browser/);
+  assert.match(account, /if \(!USE_MOCK_API\) return;/);
+  assert.match(account, /row\.charge == null \? 'Not billed'/);
 });
 
 test('account UI responsive typography, form validation and keyboard focus',()=>{

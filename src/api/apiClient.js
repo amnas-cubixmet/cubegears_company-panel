@@ -5,6 +5,11 @@ export const apiClient = axios.create(API_CONFIG);
 
 let refreshPromise = null;
 
+// Public authentication endpoints must not receive stale JWTs or trigger a
+// session redirect when the backend returns a login/recovery validation error.
+const isPublicAuthRequest = (url) =>
+  /\/auth\/(?:login|refresh|forgot-password|reset-password|setup-password|logout|magic-link(?:\/verify)?)(?:\/|\?|$)/.test(String(url || ''));
+
 const clearAuth = () => {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('auth_refresh_token');
@@ -61,7 +66,7 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token');
 
-    if (token) {
+    if (token && !isPublicAuthRequest(config.url)) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -76,9 +81,7 @@ apiClient.interceptors.response.use(
   async (error) => {
     const status = error?.response?.status;
     const originalRequest = error?.config;
-    const isAuthRequest =
-      originalRequest?.url?.includes('/auth/login') ||
-      originalRequest?.url?.includes('/auth/refresh');
+    const isAuthRequest = isPublicAuthRequest(originalRequest?.url);
 
     if (
       status === 401 &&
@@ -100,7 +103,7 @@ apiClient.interceptors.response.use(
         clearAuth();
         redirectToLogin();
       }
-    } else if (status === 401) {
+    } else if (status === 401 && !isAuthRequest) {
       clearAuth();
       redirectToLogin();
     }

@@ -111,7 +111,17 @@ export const summarizeStorageHistory = (rows = []) => {
   };
 };
 
+export const getStorageEvents = async ({ from, to, limit = 50 } = {}) => {
+  if (USE_MOCK_API) return { count: 0, results: [] };
+  const params = new URLSearchParams();
+  if (from) params.set('from', from);
+  if (to) params.set('to', to);
+  params.set('limit', String(limit));
+  return apiClient.get(`/saas/storage/events?${params.toString()}`);
+};
+
 export const storageHistoryService = {
+  getStorageEvents,
   getStorageHistory,
   getStorageDay,
   recordTodayStorageSnapshot,

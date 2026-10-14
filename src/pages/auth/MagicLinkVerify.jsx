@@ -2,21 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Link2, LoaderCircle, XCircle } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
+import { getStaffLandingPath } from '../../utils/staffLanding';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
-
-const verificationRequests = new Map();
-
-const verifyMagicLinkOnce = ({ token, email }) => {
-  if (!verificationRequests.has(token)) {
-    verificationRequests.set(
-      token,
-      verifyMagicLinkOnce({ token, email }),
-    );
-  }
-
-  return verificationRequests.get(token);
-};
 
 export const MagicLinkVerify = () => {
   const location = useLocation();
@@ -24,8 +12,7 @@ export const MagicLinkVerify = () => {
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const token = params.get('token') || '';
   const email = params.get('email') || '';
-  const next = params.get('next') || '/dashboard';
-  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
+  const next = params.get('next') || '';
   const [state, setState] = useState('loading');
   const [message, setMessage] = useState('Verifying your secure sign-in link…');
 
@@ -61,7 +48,7 @@ export const MagicLinkVerify = () => {
 
         setState('success');
         setMessage('Magic link verified. Redirecting to your workspace…');
-        window.setTimeout(() => navigate(safeNext, { replace: true }), 700);
+        window.setTimeout(() => navigate(getStaffLandingPath(result?.user, next), { replace: true }), 700);
       })
       .catch((error) => {
         if (!alive) return;
@@ -72,7 +59,7 @@ export const MagicLinkVerify = () => {
     return () => {
       alive = false;
     };
-  }, [token, email, safeNext, navigate]);
+  }, [token, email, next, navigate]);
 
   return (
     <main className="login-page auth-recovery-page">

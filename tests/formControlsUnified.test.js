@@ -10,7 +10,9 @@ const search = read('../src/components/jobs/OutsideLabourPanel.jsx');
 test('final global styles load after legacy modules and typography', () => {
   const imported = [...app.matchAll(/import ['"]\.\/styles\/([^'"]+\.css)['"];/g)]
     .map((match) => match[1]);
-  assert.deepEqual(imported.slice(-2), ['form-typography.css', 'form-controls-unified.css']);
+  assert.deepEqual(imported.slice(-3), [
+    'form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css'
+  ]);
 });
 
 test('Outside Labour search retains icon, editable search and accessible clear action', () => {

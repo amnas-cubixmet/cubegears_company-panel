@@ -98,6 +98,7 @@ export const ResetPassword = () => {
               <h1 className="login-title">Create a new password</h1>
               <p className="login-description">{email ? 'Resetting access for ' + email + '.' : 'Choose a strong password for your account.'}</p>
 
+              {(!token || (!uid && !email)) && <div className="auth-message is-error" role="alert">This reset link is incomplete. Request a new password reset email.</div>}
               {formError && <div className="auth-message is-error" role="alert">{formError}</div>}
               {fieldErrors.link && <div className="auth-message is-warning">{fieldErrors.link}</div>}
 

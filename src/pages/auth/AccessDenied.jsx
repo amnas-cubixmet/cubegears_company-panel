@@ -1,10 +1,13 @@
 import React from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { getStaffLandingPath } from '../../utils/staffLanding';
 
 export const AccessDenied = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const params = new URLSearchParams(location.search);
   const permission = params.get('permission') || 'required permission';
 
@@ -62,7 +65,7 @@ export const AccessDenied = () => {
 
         <button
           type="button"
-          onClick={() => navigate('/dashboard', { replace: true })}
+          onClick={() => navigate(getStaffLandingPath(user), { replace: true })}
           style={{
             width: '100%',
             minHeight: '44px',
@@ -75,7 +78,7 @@ export const AccessDenied = () => {
             cursor: 'pointer'
           }}
         >
-          Back to Dashboard
+          Go to My Workspace
         </button>
       </section>
     </div>

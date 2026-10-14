@@ -3,6 +3,7 @@ import { ArrowLeft, Link2, Mail, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { getAuthErrorMessage, getAuthFieldErrors } from '../../utils/authErrors';
+import { isValidEmail, normalizeEmail } from '../../utils/validation';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
@@ -17,15 +18,15 @@ export const ForgotPassword = () => {
 
   const submit = async (event) => {
     event.preventDefault();
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = normalizeEmail(email);
 
     setMessage('');
     setFieldError('');
     setIsError(false);
     setPreviewUrl('');
 
-    if (!cleanEmail) {
-      setFieldError('Email address is required.');
+    if (!cleanEmail || !isValidEmail(cleanEmail)) {
+      setFieldError(cleanEmail ? 'Enter a valid email address.' : 'Email address is required.');
       return;
     }
 
@@ -37,8 +38,8 @@ export const ForgotPassword = () => {
 
       setMessage(
         mode === 'magic'
-          ? 'If this account exists, a magic sign-in link has been sent.'
-          : 'If this account exists, password reset instructions have been sent.',
+          ? 'A magic sign-in link has been sent to your registered email.'
+          : 'Password reset instructions have been sent to your registered email.',
       );
       setIsError(false);
 
@@ -46,7 +47,8 @@ export const ForgotPassword = () => {
     } catch (error) {
       const backend = getAuthFieldErrors(error);
       setFieldError(backend.email || '');
-      setMessage(getAuthErrorMessage(error, 'Unable to send the email.'));
+      // Known email validation belongs below its input, not a duplicate banner.
+      setMessage(backend.email ? '' : getAuthErrorMessage(error, 'Unable to send the email.'));
       setIsError(true);
     } finally {
       setLoading(false);
@@ -85,9 +87,8 @@ export const ForgotPassword = () => {
 
           {message && <div className={'auth-message ' + (isError ? 'is-error' : 'is-success')}>{message}</div>}
           <p className="auth-recovery-privacy-note">
-            For security, we show the same confirmation whether an email is registered or not.
-            If no message arrives, check spam or ask your workshop admin to verify your account
-            and email delivery settings.
+            Use the email registered with your workshop account. If you cannot access it,
+            contact your workshop administrator.
           </p>
 
           <form className="login-form" onSubmit={submit} noValidate>

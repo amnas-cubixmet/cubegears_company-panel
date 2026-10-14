@@ -3,6 +3,8 @@ import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getCredentialError, getAuthFieldErrors } from '../../utils/authErrors';
+import { getStaffLandingPath } from '../../utils/staffLanding';
+import { isValidEmail, normalizeEmail } from '../../utils/validation';
 import '../../styles/login-system.css';
 
 export const Login = () => {
@@ -33,10 +35,11 @@ export const Login = () => {
     event.preventDefault();
     if (loading) return;
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = normalizeEmail(email);
     const nextErrors = {};
 
     if (!cleanEmail) nextErrors.email = 'Email address is required.';
+    else if (!isValidEmail(cleanEmail)) nextErrors.email = 'Enter a valid email address.';
     if (!password) nextErrors.password = 'Password is required.';
 
     if (Object.keys(nextErrors).length) {
@@ -49,24 +52,22 @@ export const Login = () => {
     setFormError('');
 
     try {
-      await login({ email: cleanEmail, password });
-      const next = params.get('next');
-      navigate(next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard', { replace: true });
+      const authenticatedUser = await login({ email: cleanEmail, password });
+      navigate(getStaffLandingPath(authenticatedUser, params.get('next')), { replace: true });
     } catch (error) {
       const backendFields = getAuthFieldErrors(error);
       const credentialError = getCredentialError(error);
 
+      const hasFieldError = Boolean(backendFields.email || backendFields.password);
+      const isCredentialFailure = error?.status === 401;
       setFieldErrors({
         ...(backendFields.email ? { email: backendFields.email } : {}),
         ...(backendFields.password ? { password: backendFields.password } : {}),
-        ...(!backendFields.email && !backendFields.password
-          ? {
-              email: credentialError,
-              password: credentialError,
-            }
+        ...(!hasFieldError && isCredentialFailure
+          ? { email: credentialError, password: credentialError }
           : {}),
       });
-      setFormError(credentialError);
+      setFormError(hasFieldError ? '' : credentialError);
     }
   };
 
@@ -176,10 +177,6 @@ export const Login = () => {
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
-
-          <p className="login-description" style={{ textAlign: 'center', marginTop: '16px' }}>
-            New workshop? <Link to="/signup" className="login-forgot">Create your company account</Link>
-          </p>
 
           <div className="login-footer">
             <div className="login-secure">
