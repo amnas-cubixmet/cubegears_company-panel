@@ -3,6 +3,7 @@ import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getCredentialError, getAuthFieldErrors } from '../../utils/authErrors';
+import { getStaffLandingPath } from '../../utils/staffLanding';
 import '../../styles/login-system.css';
 
 export const Login = () => {
@@ -37,6 +38,7 @@ export const Login = () => {
     const nextErrors = {};
 
     if (!cleanEmail) nextErrors.email = 'Email address is required.';
+    else if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) nextErrors.email = 'Enter a valid email address.';
     if (!password) nextErrors.password = 'Password is required.';
 
     if (Object.keys(nextErrors).length) {
@@ -49,9 +51,8 @@ export const Login = () => {
     setFormError('');
 
     try {
-      await login({ email: cleanEmail, password });
-      const next = params.get('next');
-      navigate(next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard', { replace: true });
+      const authenticatedUser = await login({ email: cleanEmail, password });
+      navigate(getStaffLandingPath(authenticatedUser, params.get('next')), { replace: true });
     } catch (error) {
       const backendFields = getAuthFieldErrors(error);
       const credentialError = getCredentialError(error);
