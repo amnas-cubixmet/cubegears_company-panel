@@ -69,3 +69,12 @@ test('account UI responsive typography, form validation and keyboard focus',()=>
   assert.match(css, /account-dashboard-tabs/);
   assert.match(css, /:focus-visible/);
 });
+
+test('account company overview no longer displays subscription summary', () => {
+  assert.doesNotMatch(overview, /Subscription Summary/);
+  assert.doesNotMatch(overview, /Charges and usage from your current subscription/);
+  assert.doesNotMatch(overview, /billing\?\.plan/);
+  assert.match(overview, /Company Information/);
+  assert.match(overview, /Credit Balance/);
+  assert.match(css, /grid-template-columns:minmax\(0,1fr\)/);
+});
