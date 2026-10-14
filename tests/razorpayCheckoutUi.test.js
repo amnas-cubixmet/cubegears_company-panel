@@ -7,6 +7,7 @@ const checkout = text('../src/services/razorpayCheckout.service.js');
 const subscribe = text('../src/pages/saas/Subscribe.jsx');
 const guard = text('../src/routes/ProtectedRoute.jsx');
 const routes = text('../src/routes/AppRoutes.jsx');
+const client = text('../src/api/apiClient.js');
 
 test('checkout only submits server-created order and verifies Razorpay signature on backend', () => {
   assert.match(checkout, /\/saas\/checkout\/orders/);
@@ -33,4 +34,10 @@ test('subscription pricing, expiry and account payment history are server driven
   assert.match(subscribe, /result\?\.payment\?\.status !== 'captured'/);
   assert.match(subscribe, /subscriptionApi\.history\(\)/);
   assert.match(subscribe, /UPI, cards and net banking/);
+});
+
+test('backend payment-required responses redirect expired dashboard sessions', () => {
+  assert.match(client, /status === 402/);
+  assert.match(client, /SUBSCRIPTION_PAYMENT_REQUIRED/);
+  assert.match(client, /window\.location\.replace\('\/subscribe'\)/);
 });
