@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Link2, Mail, RotateCcw } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { getAuthErrorMessage, getAuthFieldErrors } from '../../utils/authErrors';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
 export const ForgotPassword = () => {
-  const [mode, setMode] = useState('reset');
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState(searchParams.get('mode') === 'magic' ? 'magic' : 'reset');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
