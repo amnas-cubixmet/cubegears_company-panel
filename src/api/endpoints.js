@@ -15,6 +15,8 @@ export const API_ENDPOINTS = {
   NOTIFICATIONS: "/notifications",
   SETTINGS: "/settings",
   SAAS_BILLING: "/saas/billing",
+  SAAS_PLANS: "/saas/plans",
+  SAAS_PLAN_ACCESS: "/saas/plan-access",
   MEDIA_STORAGE: "/saas/storage"
 };
 
