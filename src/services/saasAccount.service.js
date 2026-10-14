@@ -82,7 +82,7 @@ export const calculateMonthlyEstimate = (billing) => {
   const storageCharge = extraStorageGb * Number(plan.extraStorageRate || 0);
   const seatCharge = extraSeats * Number(plan.extraSeatRate || 0);
   const subtotal = Number(plan.basePrice || 0) + storageCharge + seatCharge;
-  const tax = subtotal * 0.18;
+  const tax = subtotal * 0.18; // Indicative subscription tax only; issued invoices are server-calculated.
   return {
     base: Number(plan.basePrice || 0),
     extraStorageGb,

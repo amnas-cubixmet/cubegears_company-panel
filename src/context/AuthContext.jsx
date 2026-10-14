@@ -64,7 +64,9 @@ export const AuthProvider = ({ children }) => {
       const refreshToken = response?.refresh || response?.refreshToken || response?.refresh_token;
       const resolvedUser = response?.user || response?.profile;
 
-      if (!token) throw new Error('Login response did not include an access token.');
+      if (!token || !resolvedUser?.id || !resolvedUser?.email) {
+        throw new Error('Login response did not include a verified user session.');
+      }
 
       localStorage.setItem('auth_token', token);
       if (refreshToken) {

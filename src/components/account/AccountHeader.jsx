@@ -1,9 +1,10 @@
 import React from 'react';
-import { FilePenLine, HardDrive, ReceiptText, Settings2, ShieldCheck } from 'lucide-react';
+import { FilePenLine, HardDrive, ReceiptText, Settings2, ShieldCheck, Layers3 } from 'lucide-react';
 
 const tabs=[
  ['overview','Overview','/account',ReceiptText],
  ['billing','Billing','/account/billing',ReceiptText],
+ ['plans','Plans','/account/plans',Layers3],
  ['storage','Storage','/account/storage',HardDrive],
  ['templates','Templates','/account/templates',FilePenLine],
  ['security','Security','/account/security',ShieldCheck],
