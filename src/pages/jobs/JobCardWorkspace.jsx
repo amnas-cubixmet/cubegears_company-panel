@@ -395,11 +395,6 @@ export function JobCardWorkspace() {
   const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
   const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
-  const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
-  const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
-  const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
-  const activeTabComplete = sectionComplete[activeTab];
-
   const completeStage = async (stage) => {
     if (!workflow || saving) return;
     const options = {};
