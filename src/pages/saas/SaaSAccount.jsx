@@ -247,8 +247,8 @@ function StorageView({ storage, setStorage, billing }) {
         <div className="saas-card-head"><div><span className="saas-kicker">MEDIA STORAGE</span><h2>Media storage usage</h2></div><Infinity size={24} /></div>
         <div className="saas-storage-summary">
           <div><span>Currently stored</span><strong>{storage.usedGb} GB</strong></div>
-          <div><span>Extra GB rate</span><strong>{storageRate == null ? "Not configured" : money.format(storageRate) + " /GB/month"}</strong></div>
-          <div><span>Estimated monthly extra</span><strong>{monthlyExtra == null ? "Not configured" : money.format(monthlyExtra)}</strong></div>
+          <div><span>Current files</span><strong>{storage.files.length}</strong></div>
+          <div><span>Storage logs</span><button className="saas-button" onClick={() => navigate("/account/storage/history")}>View usage history</button></div>
         </div>
         <div className="saas-storage-actions">
           <select value={category} onChange={(e) => setCategory(e.target.value)}><option>Job Card</option><option>Inspection</option><option>Invoice</option><option>Delivery</option><option>General</option></select>
@@ -263,7 +263,7 @@ function StorageView({ storage, setStorage, billing }) {
       </section>
 
       <section className="saas-card saas-wide storage-history-card">
-        <div className="saas-card-head"><div><span className="saas-kicker">USAGE INTERVAL</span><h2>Storage billing history</h2></div><IndianRupee size={22} /></div>
+        <div className="saas-card-head"><div><span className="saas-kicker">USAGE INTERVAL</span><h2>Storage usage and file history</h2></div><IndianRupee size={22} /></div>
         <div className="storage-range-toolbar">
           <div className="storage-range-presets">
             <button className={rangePreset === '7' ? 'active' : ''} onClick={() => choosePreset('7')}>Last 7 days</button>
@@ -281,7 +281,7 @@ function StorageView({ storage, setStorage, billing }) {
           <div><span>Days</span><strong>{summary.days}</strong></div>
           <div><span>Average storage</span><strong>{summary.averageGb.toFixed(2)} GB</strong></div>
           <div><span>Peak storage</span><strong>{summary.peakGb.toFixed(2)} GB</strong></div>
-          <div><span>Interval charge</span><strong>{USE_MOCK_API ? money.format(summary.totalCharge) : '—'}</strong></div>
+          <div><span>Storage records</span><strong>{history.length}</strong></div>
         </div>
 
         {historyError && <p className="saas-error" role="alert">{historyError}</p>}
@@ -293,7 +293,7 @@ function StorageView({ storage, setStorage, billing }) {
             <button key={row.date} className="storage-history-row" onClick={() => navigate(`/account/storage/history/${row.date}`)}>
               <div><strong>{date.format(new Date(`${row.date}T00:00:00`))}</strong><span>{row.fileCount} files</span></div>
               <div><span>Stored</span><strong>{row.usedGb} GB</strong></div>
-              <div><span>Charge</span><strong>{row.charge == null ? 'Not billed' : money.format(row.charge)}</strong></div>
+              <div><span>Snapshot</span><strong>{row.snapshotType || 'Recorded'}</strong></div>
               <ChevronRight size={18} />
             </button>
           ))}
@@ -385,13 +385,13 @@ export function SaaSAccount({ section = 'billing' }) {
   return (
     <div className="saas-page account-billing-page">
       <AccountHeader
-        title={section === 'overview' ? 'Account Overview'
-          : section === 'storage' ? 'Media Storage' : 'Billing & Plan'}
+        title={section === 'overview' ? 'Company Profile'
+          : section === 'storage' ? 'Media Storage' : 'Company Profile'}
         subtitle={section === 'overview'
-          ? 'Your company account, users, billing, settings and security in one place.'
+          ? 'Your company contact information, users, wallet and security.'
           : section === 'storage'
             ? 'Manage uploaded media and inspect recorded usage.'
-            : 'Verified subscription information and account usage.'}
+            : 'Company profile and media settings.'}
         active={section}
         onNavigate={navigate}
       />
