@@ -1,9 +1,11 @@
+import { isValidEmail, normalizeEmail } from '../../utils/validation';
+
 export const companyFields = ['name', 'phone', 'email', 'gstNo', 'address'];
 
 export const normalizeCompanyDraft = (draft = {}) => ({
   name: String(draft.name || '').trim(),
   phone: String(draft.phone || '').trim(),
-  email: String(draft.email || '').trim(),
+  email: normalizeEmail(draft.email),
   gstNo: String(draft.gstNo || '').trim().toUpperCase(),
   address: String(draft.address || '').trim(),
 });
@@ -14,7 +16,7 @@ export const validateCompanyDraft = (input = {}) => {
   if (!draft.name) errors.name = 'Enter a workshop / company name.';
   else if (draft.name.length > 180) errors.name = 'Company name must be 180 characters or fewer.';
   if (draft.phone.length > 30) errors.phone = 'Phone number must be 30 characters or fewer.';
-  if (draft.email.length > 254 || (draft.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email))) {
+  if (draft.email && !isValidEmail(draft.email)) {
     errors.email = 'Enter a valid company email address.';
   }
   if (draft.gstNo && !/^[0-9]{2}[A-Z0-9]{13}$/.test(draft.gstNo)) {
