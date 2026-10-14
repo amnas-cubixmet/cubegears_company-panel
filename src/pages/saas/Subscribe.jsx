@@ -13,7 +13,6 @@ export function Subscribe() {
   const [plans, setPlans] = useState([]);
   const [access, setAccess] = useState(null);
   const [history, setHistory] = useState([]);
-  const [cycle, setCycle] = useState('monthly');
   const [workingId, setWorkingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,7 +45,7 @@ export function Subscribe() {
     setError('');
     setNotice('');
     try {
-      const order = await subscriptionApi.order(plan.id, cycle);
+      const order = await subscriptionApi.order(plan.id);
       const result = await openRazorpayCheckout(order);
       if (!result?.access?.allowed || result?.payment?.status !== 'captured') {
         throw new Error('Your payment is pending verification. Check payment history.');
@@ -84,17 +83,11 @@ export function Subscribe() {
           <div className="cg-subscribe-message">No active plans are published. Contact CubeGear support.</div>
         )}
 
-        <div className="cg-subscribe-controls">
-          <span>Billing option</span>
-          <div className="cg-subscribe-segments" role="group" aria-label="Billing option">
-            <button type="button" aria-pressed={cycle === 'monthly'} className={cycle === 'monthly' ? 'active' : ''} onClick={() => setCycle('monthly')}>Monthly price</button>
-            <button type="button" aria-pressed={cycle === 'yearly'} className={cycle === 'yearly' ? 'active' : ''} onClick={() => setCycle('yearly')}>Yearly price</button>
-          </div>
-        </div>
+        <p className="cg-subscribe-trust">One-time package payment. Access validity and pricing are configured by CubeGear for each plan; no automatic subscription deductions.</p>
 
         <section className="cg-subscribe-plans" aria-label="Subscription plans">
           {plans.map((plan) => {
-            const amount = cycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
+            const amount = plan.checkoutPrice;
             const busy = workingId === plan.id;
             const features = (plan.features || []).filter((f) => f.enabled).slice(0, 8);
             return (
