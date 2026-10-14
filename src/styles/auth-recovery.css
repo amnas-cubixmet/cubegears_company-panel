@@ -84,3 +84,11 @@
   background:rgba(6,78,59,.16);
   color:#a7f3d0;
 }
+
+
+.auth-recovery-privacy-note {
+  margin: 10px 0 0;
+  color: var(--text-muted, #94a3b8);
+  font-size: 12px;
+  line-height: 1.55;
+}
