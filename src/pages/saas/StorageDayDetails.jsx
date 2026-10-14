@@ -34,9 +34,9 @@ export function StorageDayDetails() {
 
       <section className="storage-day-stats">
         <div className="saas-card storage-stat"><HardDrive size={20} /><span>Stored</span><strong>{snapshot.usedGb} GB</strong></div>
-        <div className="saas-card storage-stat"><IndianRupee size={20} /><span>Daily charge</span><strong>{money.format(snapshot.charge)}</strong></div>
+        <div className="saas-card storage-stat"><IndianRupee size={20} /><span>Daily charge</span><strong>{snapshot.charge == null ? "—" : money.format(snapshot.charge)}</strong></div>
         <div className="saas-card storage-stat"><FileImage size={20} /><span>Files</span><strong>{snapshot.fileCount}</strong></div>
-        <div className="saas-card storage-stat"><CalendarDays size={20} /><span>Rate</span><strong>₹{snapshot.rate} / GB / day</strong></div>
+        <div className="saas-card storage-stat"><CalendarDays size={20} /><span>Rate</span><strong>{snapshot.rate == null ? "Not billed" : "₹" + snapshot.rate + "/GB/day"}</strong></div>
       </section>
 
       <section className="saas-card saas-wide">
