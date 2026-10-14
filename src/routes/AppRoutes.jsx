@@ -42,6 +42,7 @@ import { Notifications } from '../pages/notifications/Notifications';
 import { Settings } from '../pages/settings/Settings';
 import { Profile } from '../pages/profile/Profile';
 import { SaaSAccount } from '../pages/saas/SaaSAccount';
+import { Subscribe } from '../pages/saas/Subscribe';
 import { DocumentTemplates } from '../pages/saas/DocumentTemplates';
 import { StorageHistory } from '../pages/saas/StorageHistory';
 import { StorageDayDetails } from '../pages/saas/StorageDayDetails';
@@ -69,6 +70,7 @@ export const AppRoutes = () => (
     <Route path="/magic-link/verify" element={<MagicLinkVerify />} />
 
     <Route element={<ProtectedRoute />}>
+      <Route path="/subscribe" element={<Subscribe />} />
       <Route path="/access-denied" element={<AccessDenied />} />
       <Route path="/dashboard" element={<Dashboard />} />
 
