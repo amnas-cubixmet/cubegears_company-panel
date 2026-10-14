@@ -178,6 +178,9 @@ export const Login = () => {
           </form>
 
           <p className="login-description" style={{ textAlign: 'center', marginTop: '16px' }}>
+            <Link to="/forgot-password?mode=magic" className="login-forgot">Email me a one-time sign-in link</Link>
+          </p>
+          <p className="login-description" style={{ textAlign: 'center', marginTop: '10px' }}>
             New workshop? <Link to="/signup" className="login-forgot">Create your company account</Link>
           </p>
 
