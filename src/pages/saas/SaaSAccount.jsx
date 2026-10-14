@@ -1,7 +1,7 @@
 import { appConfirm } from '../../components/common/appDialogs';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, ChevronRight, FilePenLine, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
+import { CalendarDays, ChevronRight, CreditCard, FilePenLine, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { settingsService } from '../../services/settings.service';
 import { useAuth } from '../../hooks/useAuth';
@@ -17,7 +17,8 @@ const date = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', 
 const dateTime = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const iso = (value) => new Date(value).toISOString().slice(0, 10);
 
-function BillingView({ billing, storage, onOpenTemplates, onOpenPlans }) {
+function BillingView({ billing, storage, onOpenTemplates }) {
+  const navigate = useNavigate();
   const estimate = useMemo(() => billing ? saasAccountService.calculateMonthlyEstimate(billing) : null, [billing]);
   const plan = billing?.plan;
   const nextRenewal = plan?.nextBillingDate ? date.format(new Date(plan.nextBillingDate)) : '—';
@@ -33,6 +34,16 @@ function BillingView({ billing, storage, onOpenTemplates, onOpenPlans }) {
         <p className="saas-muted">Configure invoice and estimate styles and company document details.</p>
         <button type="button" className="saas-button" onClick={onOpenTemplates}>
           <FilePenLine size={17}/> Open Template Designer
+        </button>
+      </section>
+      <section className="saas-card saas-wide">
+        <div className="saas-card-head">
+          <div><span className="saas-kicker">RAZORPAY SUBSCRIPTION</span><h2>Manage your plan and payment history</h2></div>
+          <CreditCard size={22}/>
+        </div>
+        <p className="saas-muted">Select a plan, complete a secure one-time Razorpay payment, renew access, or review previous payments.</p>
+        <button type="button" className="saas-button" onClick={() => navigate('/subscribe')}>
+          Open subscription &amp; payments <ChevronRight size={17}/>
         </button>
       </section>
       <section className="saas-card saas-plan-card">

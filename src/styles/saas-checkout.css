@@ -1,0 +1,33 @@
+.cg-subscribe{min-height:100dvh;background:linear-gradient(150deg,#f5f7ff 0%,#edf5f8 50%,#fff 100%);color:#17233b;padding:48px 24px;font-family:Inter,system-ui,sans-serif}
+.cg-subscribe-shell{max-width:1150px;margin:0 auto}.cg-subscribe-head{text-align:center;margin-bottom:32px}
+.cg-subscribe-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#1b65c9;letter-spacing:.12em}
+.cg-subscribe-head h1{font-size:clamp(30px,4vw,50px);font-weight:800;letter-spacing:-.05em;margin:12px auto;max-width:700px}
+.cg-subscribe-head p{color:#586981;max-width:670px;margin:auto;line-height:1.7}
+.cg-subscribe-controls{display:flex;align-items:center;justify-content:center;gap:16px;margin:24px auto;font-weight:600}
+.cg-subscribe-segments{display:flex;background:#e4ebf5;border-radius:12px;padding:4px;gap:4px}
+.cg-subscribe-segments button{border:0;padding:10px 16px;border-radius:9px;cursor:pointer;color:#45607d;background:transparent;font:inherit}
+.cg-subscribe-segments button.active{background:#fff;color:#164bb2;box-shadow:0 2px 8px #142b4d15}
+.cg-subscribe-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px;align-items:stretch}
+.cg-subscribe-plan{background:#fff;border:1px solid #dce5ef;border-radius:20px;padding:28px;box-shadow:0 10px 40px #1232580a;display:flex;flex-direction:column;gap:14px}
+.cg-subscribe-plan-name{font-size:21px;font-weight:800}.cg-subscribe-plan p{margin:0;color:#69788e;line-height:1.6}
+.cg-subscribe-price{font-size:34px;font-weight:800;letter-spacing:-.04em}
+.cg-subscribe-price small{display:block;font-size:12px;font-weight:500;color:#78869d;letter-spacing:0}
+.cg-subscribe-validity{display:flex;gap:8px;align-items:center;font-size:13px;color:#2863b5;font-weight:700}
+.cg-subscribe-details{font-size:12px;color:#556a82;background:#f3f7ff;padding:10px 12px;border-radius:9px}
+.cg-subscribe-pay{width:100%;background:#1d5fdd;color:#fff;border:0;padding:15px;border-radius:11px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px}
+.cg-subscribe-pay:disabled{opacity:.55;cursor:not-allowed}.cg-subscribe-pay:not(:disabled):hover{background:#144bb4}
+.cg-subscribe-plan ul{list-style:none;padding:12px 0 0;margin:0;border-top:1px solid #edf0f4;display:grid;gap:11px}
+.cg-subscribe-plan li{display:flex;align-items:center;gap:9px;color:#42546d;font-size:13px}.cg-subscribe-plan li svg{color:#208c61;flex-shrink:0}
+.cg-subscribe-note{color:#9b5e14}.cg-subscribe-trust{display:flex;gap:8px;align-items:center;justify-content:center;color:#61728b;font-size:12px;margin:28px auto;text-align:center;max-width:750px;line-height:1.7}
+.cg-subscribe-active,.cg-subscribe-error,.cg-subscribe-message{margin:20px auto;padding:14px 18px;border-radius:12px;max-width:820px}
+.cg-subscribe-active{background:#e5f8ed;color:#175f3c;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.cg-subscribe-active button{border:0;background:#126b44;color:white;border-radius:8px;display:inline-flex;gap:6px;align-items:center;padding:8px;cursor:pointer}
+.cg-subscribe-error{background:#fff0ed;color:#9b302b}.cg-subscribe-message{background:#fff;color:#65738c;text-align:center}
+.cg-subscribe-history{margin-top:36px;background:white;border:1px solid #dce5ef;border-radius:20px;padding:22px}
+.cg-subscribe-history-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.cg-subscribe-history-head span{font-size:11px;font-weight:800;letter-spacing:.1em;color:#4477c7}
+.cg-subscribe-history-head h2{font-size:21px;margin:5px 0 0}.cg-subscribe-history-head button{border:1px solid #dce5ef;border-radius:9px;background:#fff;display:flex;gap:8px;align-items:center;padding:10px;cursor:pointer}
+.cg-subscribe-table-wrap{overflow-x:auto}.cg-subscribe-history table{width:100%;border-collapse:collapse;margin-top:20px;min-width:600px;text-align:left}
+.cg-subscribe-history th,.cg-subscribe-history td{padding:14px 12px;border-bottom:1px solid #e8edf3;font-size:13px}
+.cg-subscribe-history th{color:#5c6d83;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.cg-subscribe-paid{color:#127a4b;font-weight:800}
+@media(max-width:640px){.cg-subscribe{padding:28px 14px}.cg-subscribe-controls{flex-direction:column}.cg-subscribe-plan{padding:20px}.cg-subscribe-history{padding:16px}}
