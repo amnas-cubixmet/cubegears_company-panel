@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { CheckCircle2, Eye, EyeOff, Lock } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
+import { getDefaultAuthorizedRoute } from '../../utils/authorizedLanding';
 import { getAuthErrorMessage, getAuthFieldErrors } from '../../utils/authErrors';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
@@ -21,6 +22,7 @@ export const SetupPassword = () => {
   const [formError, setFormError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [done, setDone] = useState(false);
+  const [destination, setDestination] = useState('/login');
 
   const clearField = (field) => {
     setFieldErrors((current) => {
@@ -56,15 +58,19 @@ export const SetupPassword = () => {
       const accessToken = result?.access || result?.token || result?.accessToken || result?.access_token;
       const refreshToken = result?.refresh || result?.refreshToken || result?.refresh_token;
       const user = result?.user || result?.profile;
+      if (!accessToken) throw new Error('Password saved, but automatic login could not be completed.');
+      if (!user?.company?.id || !user?.role || !Array.isArray(user.role.permissions)) {
+        throw new Error('Password saved, but the company account could not be verified. Sign in normally.');
+      }
 
-      if (!accessToken) throw new Error('Password was saved, but automatic sign-in could not be completed.');
-
+      const nextDestination = getDefaultAuthorizedRoute(user);
       localStorage.setItem('auth_token', accessToken);
       if (refreshToken) localStorage.setItem('auth_refresh_token', refreshToken);
-      if (user) localStorage.setItem('auth_user', JSON.stringify(user));
-
+      else localStorage.removeItem('auth_refresh_token');
+      localStorage.setItem('auth_user', JSON.stringify(user));
+      setDestination(nextDestination);
       setDone(true);
-      window.setTimeout(() => window.location.replace('/dashboard'), 700);
+      window.setTimeout(() => window.location.replace(nextDestination), 700);
     } catch (error) {
       const backend = getAuthFieldErrors(error);
       setFieldErrors({
@@ -96,7 +102,7 @@ export const SetupPassword = () => {
               <span className="auth-success-icon"><CheckCircle2 size={24} /></span>
               <h1 className="login-title">Your account is ready</h1>
               <p className="login-description">{email ? email + ' is ready for normal email/password sign in.' : 'Password created successfully. Signing you in…'}</p>
-              <button type="button" className="login-submit" onClick={() => window.location.replace('/dashboard')}>Open Dashboard</button>
+              <button type="button" className="login-submit" onClick={() => window.location.replace(destination)}>Open Company Panel</button>
             </div>
           ) : (
             <>
