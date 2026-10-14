@@ -19,10 +19,10 @@ test('checkout only submits server-created order and verifies Razorpay signature
 });
 
 test('subscription gate blocks dashboard before paid access; checkout remains visible', () => {
-  assert.match(guard, /subscriptionApi\.access\(\)/);
-  assert.match(guard, /access\?\.enforcementEnabled && !access\.allowed/);
-  assert.match(guard, /Navigate to="\/subscribe"/);
-  assert.match(guard, /location\.pathname === '\/subscribe'/);
+  assert.match(guard, /apiClient\.get\('\/saas\/payments\/access'\)/);
+  assert.match(guard, /billing\.required && !billing\.paid/);
+  assert.match(guard, /Navigate to="\/plans"/);
+  assert.match(routes, /path="\/plans" element=\{<SubscriptionCheckout \/>\}/);
   assert.match(routes, /path="\/subscribe" element=\{<Subscribe \/>\}/);
 });
 

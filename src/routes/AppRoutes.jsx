@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 import { SubscriptionCheckout } from '../pages/saas/SubscriptionCheckout';
+import { PlanMarketplace } from '../pages/saas/PlanMarketplace';
 
 import { Login } from '../pages/auth/Login';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
