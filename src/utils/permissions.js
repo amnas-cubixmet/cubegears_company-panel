@@ -3,9 +3,8 @@ export const hasPermission = (user, permission) => {
 
   const role = user?.role;
 
-  const permissions = Array.isArray(user?.effectivePermissions)
-    ? user.effectivePermissions
-    : role && typeof role === 'object' && Array.isArray(role.permissions)
+  const permissions =
+    role && typeof role === 'object' && Array.isArray(role.permissions)
       ? role.permissions
       : [];
 
@@ -16,11 +15,9 @@ export const getUserPermissions = (user) => {
 
   const role = user?.role;
 
-  return Array.isArray(user?.effectivePermissions)
-    ? user.effectivePermissions
-    : role && typeof role === 'object' && Array.isArray(role.permissions)
-      ? role.permissions
-      : [];
+  return role && typeof role === 'object' && Array.isArray(role.permissions)
+    ? role.permissions
+    : [];
 };
 
 const CRUD_PREFIXES = {

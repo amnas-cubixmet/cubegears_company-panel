@@ -1,7 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
-import { useAuth } from '../hooks/useAuth';
-import { getDefaultAuthorizedRoute } from '../utils/authorizedLanding';
 
 import { Login } from '../pages/auth/Login';
 import { Signup } from '../pages/auth/Signup';
@@ -52,12 +50,13 @@ import { AccountSecurity } from '../pages/account/AccountSecurity';
 
 function RootRedirect() {
   const location = useLocation();
-  const { user, isAuthenticated, loading } = useAuth();
 
-  if (loading) return <div role="status" aria-live="polite">Loading CubixGear…</div>;
-
-  const destination = isAuthenticated ? getDefaultAuthorizedRoute(user) : '/login';
-  return <Navigate to={destination + location.search} replace />;
+  return (
+    <Navigate
+      to={`/dashboard${location.search}`}
+      replace
+    />
+  );
 }
 
 export const AppRoutes = () => (

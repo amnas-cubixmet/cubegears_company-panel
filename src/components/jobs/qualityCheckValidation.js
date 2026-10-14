@@ -9,21 +9,21 @@ export const DEFAULT_QC_ITEMS = [
 
 const STATUS = new Set(['Pending', 'Pass', 'Fail']);
 
-// Saved staff selection wins over login fallback, including legacy name-only QC records.
-export const resolveQcInspector = (saved = '', loginName = '') => {
-  const stored = String(saved || '').trim();
-  return stored && stored !== 'Unassigned'
-    ? stored
-    : String(loginName || '').trim();
+// Keep the inspector already recorded on a QC, otherwise use the authenticated
+// account name. Never substitute a job-assigned mechanic or fake default name.
+export const resolveQcInspector = (savedInspector, loggedInName = '') => {
+  const existing = String(savedInspector || '').trim();
+  if (existing && existing !== 'Unassigned') return existing;
+  return String(loggedInName || '').trim();
 };
 
-// Editable QC uses the selected inspector; read-only QC shows the recorded inspector.
-export const qcInspectorForMode = (saved, loginName, canEdit) =>
-  canEdit ? resolveQcInspector(saved, loginName) : resolveQcInspector(saved, '');
+// For an editable QC, the acting account is authoritative. For completed
+// read-only QC, keep the inspector who last saved that QC result.
+export const qcInspectorForMode = (savedInspector, loggedInName = '', canEdit = false) =>
+  canEdit ? String(loggedInName || '').trim() : resolveQcInspector(savedInspector, loggedInName);
 
-export const makeQcDraft = (qc = {}, loginName = '') => ({
-  inspector: resolveQcInspector(qc?.inspector, loginName),
-  inspectorId: String(qc?.inspectorId || ''),
+export const makeQcDraft = (qc = {}, loggedInName = '') => ({
+  inspector: resolveQcInspector(qc?.inspector, loggedInName),
   testDriveNotes: String(qc?.testDriveNotes || ''),
   checklist: (Array.isArray(qc?.checklist) && qc.checklist.length
     ? qc.checklist
@@ -86,7 +86,6 @@ export const qcHasErrors = (errors) =>
 
 export const qcPayload = (draft, status) => ({
   inspector: draft.inspector.trim(),
-  inspectorId: String(draft.inspectorId || ''),
   testDriveNotes: draft.testDriveNotes.trim(),
   checklist: draft.checklist.map((item) => ({
     id: item.id,

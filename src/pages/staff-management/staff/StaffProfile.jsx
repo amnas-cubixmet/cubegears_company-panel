@@ -22,7 +22,7 @@ import {
   WalletCards,
   Wrench,
 } from 'lucide-react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   StaffAttendanceCalendar,
   StaffAvatar,
@@ -164,7 +164,6 @@ const normalizeActivity = (item = {}) => ({
 });
 
 export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { staffId: routeStaffId } = useParams();
   const staffId = staffIdProp || routeStaffId;
@@ -431,7 +430,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   return (
     <div className="staff-profile staff360">
       {toastMsg && <div className="staff360-toast">{toastMsg}</div>}
-      {location.state?.invitationQueued && <div className="staff-directory-message" role="status">{location.state.invitationQueued}</div>}
 
       <div className="staff-profile-topbar">
         <button type="button" onClick={goBack} aria-label="Back to staff">

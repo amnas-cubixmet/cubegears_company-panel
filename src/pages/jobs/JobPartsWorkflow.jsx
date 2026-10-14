@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import { stockService } from '../../services/stock.service';
 import { jobPartsService } from '../../services/jobParts.service';
-import { OutsidePartsPanel } from '../../components/jobs/OutsidePartsPanel';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -212,8 +213,6 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
           <Metric label="Pending Quantity" value={loading ? '—' : summary.pending} tone="amber" />
         </div>
       </div>
-
-      <OutsidePartsPanel jobId={jobId}/>
 
       <div className="job-parts-main-card rounded-xl border border-cg-border bg-cg-surface shadow-sm">
         <div className="job-parts-toolbar border-b border-cg-border p-3 md:p-4">

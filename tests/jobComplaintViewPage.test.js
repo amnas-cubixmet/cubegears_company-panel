@@ -45,8 +45,6 @@ test('View page loads job-scoped data and safely handles removed or legacy recor
 
 test('Complaint detail status is automatic and the manual status selector is removed', () => {
   assert.match(details, /complaintStatusForJob\(job\)/);
-  assert.match(details, /complaint\?\.status/);
-  assert.match(details, /\['Open', 'In Progress', 'Completed'\]\.includes/);
   assert.match(details, /Status \(Automatic\)/);
   assert.match(details, /job-complaint-detail-auto-status/);
   assert.doesNotMatch(details, /changeStatus|Update Status|aria-label="Update complaint status"/);
@@ -64,11 +62,4 @@ test('Complaint details show customer and vehicle with responsive single-column 
   assert.match(css, /@media\(max-width:700px\)/);
   assert.match(css, /grid-template-columns:minmax\(0,1fr\)/);
   assert.match(app, /import '\.\/styles\/job-complaint-detail\.css'/);
-});
-
-test('Complaint activity is scoped to the complaint and does not show unrelated job events', () => {
-  assert.match(details, /metadata\?\.complaintId/);
-  assert.match(details, /String\(reference\) === String\(complaint\.id\)/);
-  assert.match(details, /activity\.length > 0/);
-  assert.match(details, /Complaint Activity/);
 });

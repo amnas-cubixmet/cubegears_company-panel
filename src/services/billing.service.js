@@ -145,7 +145,7 @@ export const blankBillingDocument = (kind = 'invoice') => {
     status: 'Draft',
     date: today(),
     seller: { name: 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '' },
-    customer: { customerType: 'individual', companyName: '', name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
+    customer: { name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
     vehicle: { registration: '', makeModel: '', odometer: '', vin: '', ...(prefill?.vehicle || {}) },
     jobCardNo: prefill?.jobNumber || prefill?.jobId || '',
     sourceJobId: prefill?.jobId || '',

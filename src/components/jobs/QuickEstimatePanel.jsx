@@ -152,25 +152,13 @@ export function QuickEstimatePanel({
     }
   };
   const approve = async () => {
-    if (busy || !latest || changed || stale || latest.status !== 'Draft') return;
+    if (busy || !latest || changed || stale) return;
     setBusy(true);
     setFeedback('');
     try {
       await onApprove?.(latest);
     } catch (err) {
       setFeedback(err?.message || 'Unable to approve estimate.');
-    } finally {
-      setBusy(false);
-    }
-  };
-  const reject = async () => {
-    if (!canEdit || busy || !latest || changed || stale || latest.status !== 'Draft') return;
-    setBusy(true);
-    setFeedback('');
-    try {
-      await onReject?.(latest.id);
-    } catch (err) {
-      setFeedback(err?.message || 'Unable to reject estimate.');
     } finally {
       setBusy(false);
     }
@@ -357,9 +345,6 @@ export function QuickEstimatePanel({
       {stale && <p className="job-quick-warning" role="status">
         Inspection has changed. Save a revised estimate before approval.
       </p>}
-      {latest?.status === 'Rejected' && <p className="job-quick-warning" role="status">
-        Estimate V{latest.version} was rejected. Update the items and save a new draft to request approval again.
-      </p>}
       {feedback && <p className="job-quick-feedback" role="status">{feedback}</p>}
 
       <div className="job-quick-grid">
@@ -430,9 +415,6 @@ export function QuickEstimatePanel({
           <div className="job-quick-section-head">
             <div><h3>Estimate Total</h3><p>Final calculation</p></div>
           </div>
-          {latest && <p className="job-quick-save-note" role="status">
-            Estimate V{String(latest.version || '1').replace(/^Estimate V/i, '')} · {latest.status || 'Draft'}
-          </p>}
           <dl className="job-quick-amounts">
             <div><dt>Work & Labour</dt><dd>{money(amount.work)}</dd></div>
             <div><dt>Spare Parts</dt><dd>{money(amount.parts)}</dd></div>
@@ -471,16 +453,10 @@ export function QuickEstimatePanel({
                 {busy ? 'Please wait…' : 'Save Draft'}
               </button>
               <button type="button" className="job-quick-approve"
-                disabled={busy || !latest || changed || stale || latest.status !== 'Draft'}
+                disabled={busy || !latest || changed || stale || latest.status === 'Rejected'}
                 onClick={approve}>
                 <CheckCircle2 size={16} aria-hidden="true"/> Approve & Continue
               </button>
-              {latest?.status === 'Draft' && (
-                <button type="button" className="job-quick-outline"
-                  disabled={busy || changed || stale} onClick={reject}>
-                  Reject Estimate
-                </button>
-              )}
               <small>Save changes first. Approval unlocks Work & Labour.</small>
             </div>
           ) : (
@@ -513,6 +489,8 @@ export function QuickEstimatePanel({
               <span>{'Estimate V' + (typeof item.version === 'number' ? item.version : String(item.version || ''))}</span>
               <strong>{money(item.total ?? item.grandTotal)}</strong>
               <span>{item.approvalStatus || item.status || 'Draft'}</span>
+              {canEdit && item.id === latest?.id && item.status === 'Draft' &&
+                <button type="button" disabled={busy} onClick={() => onReject?.(item.id)}>Reject</button>}
             </div>
           )) : <p>No previous estimates.</p>}
         </div>

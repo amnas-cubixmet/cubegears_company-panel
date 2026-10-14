@@ -3,7 +3,7 @@ import { Plus, ReceiptText } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 
-export const InvoiceListHeader = ({ activeTab, onCreate, onCreateCompany, onCreateIndividual, companyRegistered }) => {
+export const InvoiceListHeader = ({ activeTab, onCreate }) => {
   const { user } = useAuth();
 
   return (
@@ -21,20 +21,12 @@ export const InvoiceListHeader = ({ activeTab, onCreate, onCreateCompany, onCrea
           <span>Billing & Sales</span>
         </div>
 
-        {hasPermission(user, 'invoices.create') && (activeTab === 'estimate' ? (
+        {hasPermission(user, 'invoices.create') && (
           <button type="button" className="bill-btn" onClick={onCreate}>
-            <Plus size={14}/>New Estimate
+            <Plus size={14} />
+            {activeTab === 'estimate' ? 'New Estimate' : 'New Invoice'}
           </button>
-        ) : (
-          <>
-            <button type="button" className="bill-btn secondary" onClick={onCreateCompany || onCreate}>
-              <Plus size={14}/>{companyRegistered ? 'Company Tax Invoice' : 'Company Invoice'}
-            </button>
-            <button type="button" className="bill-btn" onClick={onCreateIndividual || onCreate}>
-              <Plus size={14}/>Simple Service Bill
-            </button>
-          </>
-        ))}
+        )}
       </div>
     </header>
   );
