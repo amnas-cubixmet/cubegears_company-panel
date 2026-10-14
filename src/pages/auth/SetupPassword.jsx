@@ -3,6 +3,7 @@ import { CheckCircle2, Eye, EyeOff, Lock } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { getAuthErrorMessage, getAuthFieldErrors } from '../../utils/authErrors';
+import { getStaffLandingPath } from '../../utils/staffLanding';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
@@ -64,7 +65,7 @@ export const SetupPassword = () => {
       if (user) localStorage.setItem('auth_user', JSON.stringify(user));
 
       setDone(true);
-      window.setTimeout(() => window.location.replace('/dashboard'), 700);
+      window.setTimeout(() => window.location.replace(getStaffLandingPath(user)), 700);
     } catch (error) {
       const backend = getAuthFieldErrors(error);
       setFieldErrors({
@@ -96,13 +97,14 @@ export const SetupPassword = () => {
               <span className="auth-success-icon"><CheckCircle2 size={24} /></span>
               <h1 className="login-title">Your account is ready</h1>
               <p className="login-description">{email ? email + ' is ready for normal email/password sign in.' : 'Password created successfully. Signing you in…'}</p>
-              <button type="button" className="login-submit" onClick={() => window.location.replace('/dashboard')}>Open Dashboard</button>
+              <button type="button" className="login-submit" onClick={() => window.location.replace(getStaffLandingPath((() => { try { return JSON.parse(localStorage.getItem('auth_user') || 'null'); } catch { return null; } })()))}>Continue to Workspace</button>
             </div>
           ) : (
             <>
               <h1 className="login-title">Create your password</h1>
               <p className="login-description">{email ? 'Set the password for ' + email + '. You can use this email and password to sign in later.' : 'Secure your new CubixGear workshop account before signing in.'}</p>
 
+              {(!uid || !token) && <div className="auth-message is-error" role="alert">This setup link is incomplete. Ask your administrator to resend the invitation.</div>}
               {formError && <div className="auth-message is-error" role="alert">{formError}</div>}
               {fieldErrors.link && <div className="auth-message is-warning">{fieldErrors.link}</div>}
 
