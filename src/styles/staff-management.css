@@ -6290,3 +6290,18 @@
     padding-inline: 8px;
   }
 }
+
+
+/* Staff invitation guidance is part of the form, not an extra grid field. */
+.staff-add-page .staff-login-invite-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+}
