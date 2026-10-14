@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
@@ -140,7 +141,7 @@ export const VehicleDetails = () => {
   const latestJob = history[0] || null;
 
   const removeVehicle = async () => {
-    if (!vehicle || !window.confirm(`Delete vehicle ${vehicle.registration}?`)) return;
+    if (!vehicle || !await appConfirm(`Delete vehicle ${vehicle.registration}?`)) return;
     await vehicleService.deleteVehicle(vehicle.id);
     navigate('/vehicles');
   };
@@ -242,7 +243,7 @@ export const VehicleDetails = () => {
               <User size={16}/>
               <div>
                 <strong>{customer?.name || vehicle.customerName || 'Unknown Customer'}</strong>
-                <span>{customer?.phone || vehicle.customerId || 'No contact'}</span>
+                <span>{customer?.phone || 'No contact number'}</span>
               </div>
             </button>
 

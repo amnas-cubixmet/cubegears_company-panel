@@ -75,17 +75,36 @@ export const getStockItemById = async (id) => {
 export const receiveStock = async (payload) => {
   if (USE_MOCK_API) {
     await delay();
+    const item = getMockStockItemById(payload.itemId);
+    if (!item) throw new Error('Select a valid product.');
+    const qty = Number(payload.quantity);
+    const price = payload.costPrice === undefined ? Number(item.costPrice) : Number(payload.costPrice);
+    const selling = payload.sellingPrice === undefined ? Number(item.sellingPrice) : Number(payload.sellingPrice);
+    if (!Number.isFinite(qty) || qty <= 0 || !Number.isFinite(price) || price < 0 ||
+        !Number.isFinite(selling) || selling < 0) {
+      throw new Error('Enter valid quantity, purchase cost and selling price.');
+    }
+    const differs = price !== Number(item.costPrice) || selling !== Number(item.sellingPrice);
+    if (differs && !['keep_existing', 'apply_new'].includes(payload.priceMode)) {
+      throw new Error('Choose whether the new prices should apply to the old stock.');
+    }
     addMockStockMovement({
       type: 'Stock In',
       itemId: payload.itemId,
-      partName: payload.partName,
-      sku: payload.sku,
-      qty: Number(payload.quantity || 1),
+      partName: item.partName,
+      sku: item.sku,
+      qty,
+      unitCost: price,
+      unitSellingPrice: selling,
       supplier: payload.supplier,
-      jobRef: payload.invoiceNo || 'REC-BATCH',
+      jobRef: payload.invoiceNo || '',
       notes: payload.notes
     });
-    return Promise.resolve({ success: true });
+    if (payload.priceMode === 'apply_new') {
+      item.costPrice = price;
+      item.sellingPrice = selling;
+    }
+    return { success: true };
   }
   return apiClient.post(`${API_ENDPOINTS.STOCK}/in`, payload);
 };
@@ -94,7 +113,7 @@ export const issueStock = async (payload) => {
   if (USE_MOCK_API) {
     await delay();
     addMockStockMovement({
-      type: 'Job Issue',
+      type: payload.jobId ? 'Job Issue' : 'Internal Use',
       itemId: payload.itemId,
       partName: payload.partName,
       sku: payload.sku,

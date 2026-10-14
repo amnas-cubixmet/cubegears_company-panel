@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calculator, RefreshCw } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
@@ -8,47 +8,83 @@ const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2
 }).format(Number(value) || 0);
 
-export function JobTotalCostPanel({ jobId, refreshVersion = 0 }) {
+export function JobTotalCostPanel({ jobId, refreshVersion = 0, refreshOnTab = '' }) {
   const { user } = useAuth();
   const permitted = ['jobs.view', 'payroll.view', 'expenses.view', 'stock.view']
     .every((code) => hasPermission(user, code));
-  const [summary, setSummary] = useState(null);
+  const [costState, setCostState] = useState({ jobId: null, data: null });
+  // Never show the previous Job Card's financial figures during navigation.
+  const summary = costState.jobId === jobId ? costState.data : null;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [reload, setReload] = useState(0);
   useEffect(() => {
     if (!jobId || !permitted) {
-      setSummary(null);
-      return;
+      setCostState({ jobId: null, data: null });
+      setError('');
+      setLoading(false);
+      return undefined;
     }
+
     let active = true;
-    setLoading(true);
-    setError('');
-    jobService.getJobCostSummary(jobId)
-      .then((data) => { if (active) setSummary(data); })
-      .catch((err) => {
-        if (!active) return;
-        setError(err?.response?.data?.detail || err?.message || 'Unable to load job cost summary.');
-        setSummary(null);
-      })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [jobId, refreshVersion, permitted, reload]);
+    let inFlight = false;
+    let lastRequestAt = 0;
+
+    const loadCosts = async () => {
+      if (!active || inFlight) return;
+      inFlight = true;
+      lastRequestAt = Date.now();
+      setLoading(true);
+      setError('');
+      try {
+        const data = await jobService.getJobCostSummary(jobId);
+        if (active) setCostState({ jobId, data });
+      } catch (err) {
+        if (active) {
+          setError(err?.response?.data?.detail || err?.message || 'Unable to update job costs.');
+          // Keep the latest successful figures visible during temporary outages.
+        }
+      } finally {
+        inFlight = false;
+        if (active) setLoading(false);
+      }
+    };
+
+    // Load immediately on Job change, entering the Work tab, or after
+    // Mechanic / Outside Staff / Parts mutations update refreshVersion.
+    void loadCosts();
+
+    if (refreshOnTab !== 'work') {
+      return () => { active = false; };
+    }
+
+    // Sync changes made by another worker/browser while this Work page
+    // is visible. No network polling when the document is in the background.
+    const syncWhenVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - lastRequestAt < 3000) return;
+      void loadCosts();
+    };
+    const intervalId = window.setInterval(syncWhenVisible, 30000);
+    window.addEventListener('focus', syncWhenVisible);
+    document.addEventListener('visibilitychange', syncWhenVisible);
+
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', syncWhenVisible);
+      document.removeEventListener('visibilitychange', syncWhenVisible);
+    };
+  }, [jobId, refreshVersion, refreshOnTab, permitted]);
 
   return (
-    <section className="job-total-cost-panel" aria-label="Job Card total cost">
+    <section className="job-total-cost-panel is-global" aria-label="Job Card total cost">
       <header className="job-total-cost-heading">
         <div>
           <h3><Calculator size={18} aria-hidden="true" /> Total Cost</h3>
           <p>Recorded direct costs for this Job Card, not customer charges or invoice totals.</p>
         </div>
-        {permitted && (
-          <button type="button" onClick={() => setReload((old) => old + 1)}
-            disabled={loading} aria-label="Refresh job total costs" className="job-total-cost-refresh">
-            <RefreshCw size={15} aria-hidden="true"/> Refresh
-          </button>
-        )}
+        {permitted && <span className="job-total-cost-auto-note">Updates automatically</span>}
       </header>
 
       {!permitted ? (
@@ -61,10 +97,10 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0 }) {
         <>
           <div className="job-total-cost-grid" aria-busy={loading}>
             {[
+              { label: 'Total Cost', value: summary?.totalCost, desc: 'Direct recorded cost', primary: true },
               { label: 'Mechanic Cost', value: summary?.mechanicCost, desc: 'Approved worker charges' },
               { label: 'Outside Staff Cost', value: summary?.outsideStaffCost, desc: 'Agreed worker charges' },
-              { label: 'Parts Cost', value: summary?.partsCost, desc: 'Net issued stock at purchase cost' },
-              { label: 'Total Cost', value: summary?.totalCost, desc: 'Direct recorded cost', primary: true }
+              { label: 'Parts Cost', value: summary?.partsCost, desc: 'Issued stock + outside purchases' }
             ].map(({ label, value, desc, primary }) => (
               <div key={label} className={primary ? 'job-total-cost-card is-primary' : 'job-total-cost-card'}>
                 <span>{label}</span>
@@ -75,6 +111,9 @@ export function JobTotalCostPanel({ jobId, refreshVersion = 0 }) {
           </div>
           {!!summary && (
             <div className="job-total-cost-footnotes">
+              {Number(summary.outsidePartsCost || 0) > 0 && (
+                <p>Includes outside-shop parts: <strong>{money(summary.outsidePartsCost)}</strong> (already counted in Parts Cost).</p>
+              )}
               {Number(summary.outsidePending || 0) > 0 && (
                 <p>Outside Staff payment pending: <strong>{money(summary.outsidePending)}</strong> (already included in total).</p>
               )}

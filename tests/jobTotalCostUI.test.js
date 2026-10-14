@@ -8,15 +8,14 @@ const workspace = read('../src/pages/jobs/JobCardWorkspace.jsx');
 const service = read('../src/services/job.service.js');
 const styles = read('../src/styles/job-workspace-dashboard.css');
 
-test('Work page shows total cost directly below Outside Staff', () => {
-  const work = workspace.slice(
-    workspace.indexOf("{activeTab === 'work' && ("),
-    workspace.indexOf("{activeTab === 'parts' && (")
-  );
-  const outside = work.indexOf('<JobOutsideStaffSection');
-  const total = work.indexOf('<JobTotalCostPanel');
-  const mechanic = work.indexOf('<JobWorkTimerPanel');
-  assert.ok(outside >= 0 && total > outside && mechanic > total);
+test('Total Cost is visible once in the shared Job Card header, before every tab', () => {
+  const top = workspace.indexOf('<JobTotalCostPanel');
+  const header = workspace.indexOf('<header className="job-detail-header');
+  const nav = workspace.indexOf('<div className="job-simple-step-nav"');
+  const work = workspace.indexOf("{activeTab === 'work' && (");
+  assert.ok(header >= 0 && top > header && nav > top && work > nav);
+  assert.equal(workspace.split('<JobTotalCostPanel').length - 1, 1);
+  assert.match(workspace, /refreshOnTab=\{activeTab\}/);
 });
 
 test('Total direct cost is fetched from backend, never customer charge or estimate price', () => {
@@ -35,8 +34,10 @@ test('Cost details are restricted to users with required finance and stock permi
 });
 
 test('Summary updates when mechanic or outside worker changes, with proper warning notes', () => {
-  assert.match(workspace, /<JobTotalCostPanel jobId=\{job\.id\} refreshVersion=\{timerRefreshVersion\}/);
+  assert.match(workspace, /<JobTotalCostPanel[\s\S]*?refreshVersion=\{timerRefreshVersion\}[\s\S]*?refreshOnTab=\{activeTab\}/);
   assert.match(workspace, /<JobOutsideStaffSection\s+jobId=\{job\.id\}\s+onChanged=/);
+  assert.match(workspace, /<JobPartsWorkflow[\s\S]*?onJobUpdated=\{\(\) => \{\s*setTimerRefreshVersion/);
+  assert.match(component, /\[jobId, refreshVersion, refreshOnTab, permitted\]/);
   assert.match(component, /summary\.unallocatedDailyWages/);
   assert.match(component, /summary\.partsAtCurrentCost/);
   assert.match(component, /outsidePending/);
@@ -45,4 +46,13 @@ test('Summary updates when mechanic or outside worker changes, with proper warni
 test('Total cost uses responsive mobile grid', () => {
   assert.match(styles, /\.job-total-cost-grid/);
   assert.match(styles, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
+
+test('global cost is mobile friendly and includes outside-shop purchases without double counting', () => {
+  assert.match(styles, /\.job-total-cost-panel\.is-global/);
+  assert.match(styles, /@media \(max-width:900px\)/);
+  assert.match(styles, /@media \(max-width:540px\)/);
+  assert.match(component, /summary\.outsidePartsCost/);
+  assert.match(component, /already counted in Parts Cost/);
+  assert.match(component, /'jobs\.view', 'payroll\.view', 'expenses\.view', 'stock\.view'/);
 });

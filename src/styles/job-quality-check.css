@@ -1,0 +1,202 @@
+.cg-job-detail .job-qc-layout{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,370px);
+  gap:16px;min-width:0;align-items:start;
+}
+.cg-job-detail .job-qc-layout *{box-sizing:border-box}
+.cg-job-detail .job-qc-card{
+  min-width:0;padding:18px;border:1px solid var(--border);
+  background:var(--surface);border-radius:16px;
+  box-shadow:0 1px 3px rgba(15,23,42,.03);
+}
+.cg-job-detail .job-qc-heading{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:10px;flex-wrap:wrap;margin-bottom:16px;
+}
+.cg-job-detail .job-qc-heading-title{display:flex;align-items:center;gap:11px;min-width:0}
+.cg-job-detail .job-qc-symbol{
+  width:40px;height:40px;display:grid;place-items:center;flex:0 0 40px;
+  border-radius:11px;background:var(--primary-soft);color:var(--primary)
+}
+.cg-job-detail .job-qc-heading h2{
+  margin:0;color:var(--text-primary);font-size:16px;font-weight:700;line-height:1.35
+}
+.cg-job-detail .job-qc-heading p{
+  margin:4px 0 0;color:var(--text-secondary);font-size:12px;line-height:1.5
+}
+.cg-job-detail .job-qc-count{
+  border-radius:999px;padding:7px 10px;
+  background:var(--surface-2);color:var(--text-secondary);
+  font-size:11px;font-weight:600;white-space:nowrap
+}
+.cg-job-detail .job-qc-progress{
+  display:flex;flex-wrap:wrap;gap:7px;padding-bottom:14px;
+  margin-bottom:8px;border-bottom:1px solid var(--border)
+}
+.cg-job-detail .job-qc-progress span{
+  font-size:11px;font-weight:600;padding:6px 9px;border-radius:8px;
+  background:var(--surface-2);color:var(--text-secondary)
+}
+.cg-job-detail .job-qc-progress .job-qc-progress-pass{
+  background:var(--success-soft);color:var(--success)
+}
+.cg-job-detail .job-qc-progress .job-qc-progress-fail{
+  background:var(--danger-soft);color:var(--danger)
+}
+.cg-job-detail .job-qc-checks{display:flex;flex-direction:column;gap:8px}
+.cg-job-detail .job-qc-check{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(124px,160px);
+  gap:12px;align-items:center;min-width:0;padding:12px;
+  border:1px solid var(--border);background:var(--surface-2);
+  border-radius:12px
+}
+.cg-job-detail .job-qc-check.is-invalid{
+  border-color:var(--danger);background:var(--surface)
+}
+.cg-job-detail .job-qc-check-description{
+  display:flex;align-items:center;gap:10px;min-width:0
+}
+.cg-job-detail .job-qc-check-index{
+  font-size:11px;font-variant-numeric:tabular-nums;
+  color:var(--text-muted);font-weight:600;flex-shrink:0
+}
+.cg-job-detail .job-qc-check-description label{
+  font-size:12px;font-weight:600;line-height:1.5;color:var(--text-primary);
+  overflow-wrap:anywhere;cursor:pointer
+}
+.cg-job-detail .job-qc-check-control{
+  display:flex;flex-direction:column;gap:5px;min-width:0
+}
+.cg-job-detail .job-qc-check select,
+.cg-job-detail .job-qc-field :is(input,textarea){
+  width:100%;min-width:0;min-height:43px;padding:10px 12px;
+  border:1px solid var(--border);border-radius:9px;
+  background:var(--surface);color:var(--text-primary);
+  font-size:13px;font-weight:400;font-family:inherit
+}
+.cg-job-detail .job-qc-field textarea{
+  min-height:128px;resize:vertical;line-height:1.6
+}
+.cg-job-detail .job-qc-check :is(select,input):focus-visible,
+.cg-job-detail .job-qc-field :is(input,textarea):focus-visible{
+  outline:2px solid var(--primary);outline-offset:2px
+}
+.cg-job-detail .job-qc-layout [aria-invalid="true"]{
+  border-color:var(--danger)!important;
+  box-shadow:0 0 0 1px var(--danger)
+}
+.cg-job-detail .job-qc-field{
+  display:flex;flex-direction:column;gap:7px;min-width:0;margin-bottom:15px;
+  position:relative
+}
+.cg-job-detail .job-qc-field>label{
+  font-size:12px;font-weight:600;color:var(--text-secondary)
+}
+.cg-job-detail .job-qc-field>label span{color:var(--danger)}
+.cg-job-detail .job-qc-field>small{
+  font-size:11px;font-weight:400;line-height:1.5;color:var(--text-muted)
+}
+.cg-job-detail .job-qc-field .job-qc-field-error,
+.cg-job-detail .job-qc-check-control .job-qc-field-error{
+  color:var(--danger);font-size:11px;font-weight:500;line-height:1.45;
+  overflow-wrap:anywhere
+}
+.cg-job-detail .job-qc-character-count{
+  font-size:10px;color:var(--text-muted);align-self:flex-end
+}
+.cg-job-detail .job-qc-error,.cg-job-detail .job-qc-success{
+  display:flex;align-items:flex-start;gap:8px;
+  margin:10px 0;padding:12px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface-2);
+  font-size:12px;font-weight:500;line-height:1.5;overflow-wrap:anywhere
+}
+.cg-job-detail .job-qc-error{color:var(--danger);border-color:var(--danger)}
+.cg-job-detail .job-qc-success{color:var(--success)}
+.cg-job-detail .job-qc-error svg,.cg-job-detail .job-qc-success svg{flex:0 0 auto}
+.cg-job-detail .job-qc-submit-actions{
+  display:flex;flex-direction:column;gap:10px;padding-top:12px
+}
+.cg-job-detail .job-qc-submit-actions button{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:44px;padding:10px 13px;border-radius:10px;
+  border:1px solid var(--border);font-size:12px;font-weight:600;
+  font-family:inherit;cursor:pointer
+}
+.cg-job-detail .job-qc-submit-actions button:disabled{
+  cursor:not-allowed;opacity:.55
+}
+.cg-job-detail .job-qc-save{
+  background:var(--surface-2);color:var(--text-primary)
+}
+.cg-job-detail .job-qc-decision-actions{
+  display:grid;grid-template-columns:1fr 1fr;gap:9px
+}
+.cg-job-detail .job-qc-pass{background:var(--success);color:#fff;border-color:var(--success)}
+.cg-job-detail .job-qc-fail{background:var(--danger);color:#fff;border-color:var(--danger)}
+.cg-job-detail .job-qc-hint{
+  margin:0;font-size:11px;color:var(--text-secondary);line-height:1.6
+}
+.cg-job-detail .job-qc-current{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding-top:13px;margin-top:10px;border-top:1px solid var(--border);
+  font-size:12px;color:var(--text-secondary)
+}
+.cg-job-detail .job-qc-current strong{
+  color:var(--text-primary);font-size:12px;overflow-wrap:anywhere;text-align:right
+}
+@media(max-width:920px){
+  .cg-job-detail .job-qc-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:520px){
+  .cg-job-detail .job-qc-card{padding:13px;border-radius:13px}
+  .cg-job-detail .job-qc-heading h2{font-size:15px}
+  .cg-job-detail .job-qc-check{
+    grid-template-columns:1fr;gap:8px;padding:11px
+  }
+  .cg-job-detail .job-qc-check-control{padding-left:25px}
+  .cg-job-detail .job-qc-check select,
+  .cg-job-detail .job-qc-field :is(input,textarea){font-size:16px}
+  .cg-job-detail .job-qc-decision-actions{gap:7px}
+  .cg-job-detail .job-qc-submit-actions button{min-height:46px}
+}
+@media(max-width:350px){
+  .cg-job-detail .job-qc-decision-actions{grid-template-columns:1fr}
+}
+
+/* Inspector is authenticated server-side. Display the name as plain text,
+   never as a disabled/read-only input or a background-filled field. */
+.cg-job-detail .job-qc-inspector-display {
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  gap:5px;
+}
+.cg-job-detail .job-qc-inspector-label {
+  font-size:12px;
+  font-weight:600;
+  line-height:1.45;
+  color:var(--text-secondary);
+}
+.cg-job-detail .job-qc-inspector-label span {color:var(--danger)}
+.cg-job-detail .job-qc-inspector-name {
+  display:block;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  color:var(--text-primary);
+  font-size:14px;
+  font-weight:600;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.cg-job-detail .job-qc-inspector-display > small {
+  margin:0;
+  font-size:11px;
+  line-height:1.5;
+  color:var(--text-muted);
+}

@@ -1,3 +1,4 @@
+import { appAlert } from '../common/appDialogs';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PhotoCaptureUpload } from '../common/PhotoCaptureUpload';
@@ -67,7 +68,7 @@ export function JobPhotoEnhancer() {
         });
       } catch (error) {
         console.error('Job photo upload failed', error);
-        window.alert('Photo upload failed. Job card was not created. Please retry.');
+        appAlert('Photo upload failed. Job card was not created. Please retry.');
       } finally {
         setUploading(false);
       }

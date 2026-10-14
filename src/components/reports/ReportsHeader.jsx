@@ -1,12 +1,28 @@
 import React from 'react';
 import { Download, FileSpreadsheet, Printer, RefreshCw } from 'lucide-react';
 
-export const ReportsHeader=({onRefresh,onCsv,onPrint})=><header className="reports-dashboard-header no-print">
-  <div><h1>Business Reports</h1><p>Sales, collections, expenses and stock performance in one place.</p></div>
-  <div className="reports-dashboard-actions">
-    <button onClick={onRefresh}><RefreshCw size={13}/>Refresh</button>
-    <button onClick={onCsv}><FileSpreadsheet size={13}/>CSV</button>
-    <button onClick={onPrint}><Printer size={13}/>Print</button>
-    <button className="is-primary" onClick={onPrint}><Download size={13}/>PDF</button>
-  </div>
-</header>;
+export const ReportsHeader = ({ onRefresh, onCsv, onPrint, loading = false, periodLabel }) => (
+  <header className="reports-dashboard-header no-print">
+    <div className="reports-dashboard-header__title">
+      <span className="reports-dashboard-eyebrow">WORKSHOP ANALYTICS</span>
+      <h1>Business Reports</h1>
+      <p>Financial performance, collections, expenses and stock insights.</p>
+      {periodLabel && <span className="reports-dashboard-period-badge">{periodLabel}</span>}
+    </div>
+    <div className="reports-dashboard-actions">
+      <button type="button" onClick={onRefresh} disabled={loading}>
+        <RefreshCw size={16} className={loading ? 'reports-spinning' : ''}/> {loading ? 'Refreshing…' : 'Refresh'}
+      </button>
+      <button type="button" onClick={onCsv} disabled={loading}>
+        <FileSpreadsheet size={16}/> Export CSV
+      </button>
+      <button type="button" onClick={onPrint} disabled={loading}>
+        <Printer size={16}/> Print
+      </button>
+      <button type="button" className="is-primary" onClick={onPrint} disabled={loading}
+        title="Opens your browser Print dialog. Choose Save as PDF.">
+        <Download size={16}/> Save as PDF
+      </button>
+    </div>
+  </header>
+);

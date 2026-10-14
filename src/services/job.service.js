@@ -94,6 +94,54 @@ export const getJobCostSummary = async (id) => {
   return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/cost-summary`);
 };
 
+export const uploadJobWorkPhoto = async (id, file, caption) => {
+  if (USE_MOCK_API) {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Could not read the selected image.'));
+      reader.readAsDataURL(file);
+    });
+    const job = getMockJobById(id);
+    const photo = {
+      id: `PH-${Date.now()}`, url: dataUrl, caption: String(caption || '').trim(),
+      photo_type: 'work_update', created_at: new Date().toISOString(),
+      uploaded_by: null, hasUpload: false
+    };
+    updateMockJob(id, { photos: [photo, ...(job?.photos || [])] });
+    return photo;
+  }
+  const form = new FormData();
+  form.append('image', file);
+  form.append('caption', caption || '');
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${id}/photos/upload`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+};
+
+export const getJobWorkPhotoBlob = async (id, photoId) => {
+  if (USE_MOCK_API) throw new Error('Demo photos are already available as data URLs.');
+  return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/photos/${photoId}/file`, {
+    responseType: 'blob'
+  });
+};
+
+export const getJobActivity = async (id) => {
+  if (USE_MOCK_API) {
+    const job = await getJobById(id);
+    return (job?.activities || job?.timeline || []).map((row, index) => ({
+      ...row,
+      id: row.id || `demo-${index}`,
+      event: row.event || row.title || 'Job Update',
+      description: row.description || row.desc || '',
+      actorName: row.actorName || 'Demo user',
+      created_at: row.created_at || row.createdAt || row.time || ''
+    }));
+  }
+  const data = await apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/activity`);
+  return Array.isArray(data) ? data : data?.results || [];
+};
+
 export const getJobWorkflow = async (id) => {
   if (USE_MOCK_API) return mockWorkflow(await getJobById(id));
   return apiClient.get(`${API_ENDPOINTS.JOBS}/${id}/workflow`);
@@ -176,10 +224,13 @@ export const jobService = {
   getJobs,
   getJobById,
   getJobCostSummary,
+  uploadJobWorkPhoto,
+  getJobWorkPhotoBlob,
   createJob,
   updateJobStatus,
   updateJob,
   getJobWorkflow,
+  getJobActivity,
   completeJobStage,
   createJobEstimate,
   saveQuickJobEstimate,

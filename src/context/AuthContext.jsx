@@ -8,7 +8,7 @@ const MOCK_USER = {
   id: 'USR_101',
   name: 'Alex Rivera',
   email: 'admin@cubixgear.com',
-  role: 'SUPER_ADMIN',
+  role: { code: 'SUPER_ADMIN', name: 'Super Admin', permissions: ['*'] },
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
 };
 

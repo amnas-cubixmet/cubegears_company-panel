@@ -100,8 +100,8 @@ export const UserRoles = () => {
     event.preventDefault();
     if (saving || editingRole?.isProtected) return;
 
-    if (!formData.name.trim() || !formData.branchScope) {
-      setError('Role Name and Branch Scope are required.');
+    if (!formData.name.trim()) {
+      setError('Role Name is required.');
       return;
     }
 

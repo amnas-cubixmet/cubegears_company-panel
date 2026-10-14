@@ -1,3 +1,4 @@
+import { appConfirm } from '../../components/common/appDialogs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -337,7 +338,7 @@ export const ExpenseList = () => {
   };
 
   const removeExpense = async (expense) => {
-    if (!window.confirm(`Delete expense ${expense.id}?`)) return;
+    if (!await appConfirm(`Delete expense ${expense.id}?`)) return;
     await expenseService.deleteExpense(expense.id);
     if (isDetail) navigate('/expenses');
     else await load();

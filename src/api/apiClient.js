@@ -5,6 +5,9 @@ export const apiClient = axios.create(API_CONFIG);
 
 let refreshPromise = null;
 
+const isPublicAuthUrl = (url = '') =>
+  /\/auth\/(?:login|signup|forgot-password|reset-password|setup-password|magic-link(?:\/verify)?|refresh)(?:[/?#]|$)/.test(String(url));
+
 const clearAuth = () => {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('auth_refresh_token');
@@ -61,7 +64,7 @@ apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token');
 
-    if (token) {
+    if (token && !isPublicAuthUrl(config.url)) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -76,15 +79,13 @@ apiClient.interceptors.response.use(
   async (error) => {
     const status = error?.response?.status;
     const originalRequest = error?.config;
-    const isAuthRequest =
-      originalRequest?.url?.includes('/auth/login') ||
-      originalRequest?.url?.includes('/auth/refresh');
+    const isPublicAuthRequest = isPublicAuthUrl(originalRequest?.url);
 
     if (
       status === 401 &&
       originalRequest &&
       !originalRequest._cubixgearRetried &&
-      !isAuthRequest &&
+      !isPublicAuthRequest &&
       localStorage.getItem('auth_refresh_token')
     ) {
       originalRequest._cubixgearRetried = true;
@@ -100,7 +101,7 @@ apiClient.interceptors.response.use(
         clearAuth();
         redirectToLogin();
       }
-    } else if (status === 401) {
+    } else if (status === 401 && !isPublicAuthRequest) {
       clearAuth();
       redirectToLogin();
     }
