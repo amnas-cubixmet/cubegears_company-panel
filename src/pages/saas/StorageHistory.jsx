@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CalendarRange, ChevronRight, Files, HardDrive, IndianRupee } from 'lucide-react';
 import { storageHistoryService } from '../../services/storageHistory.service';
+import { AccountHeader } from '../../components/account';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const dayLabel = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -54,13 +55,12 @@ export function StorageHistory() {
 
   return (
     <div className="saas-page storage-history-page">
-      <header className="saas-page-head storage-history-head">
-        <div>
-          <span className="saas-kicker">STORAGE ACTIVITY & HISTORY</span>
-          <h1>Usage history</h1>
-          <p>Review server-recorded uploads, deletions, usage snapshots, and verified charges when available.</p>
-        </div>
-      </header>
+      <AccountHeader
+        title="Storage History"
+        subtitle="Review file uploads, deletions and daily storage usage."
+        active="storage"
+        onNavigate={navigate}
+      />
 
       <section className="saas-card saas-wide storage-filter-card">
         <div className="storage-range-presets">
