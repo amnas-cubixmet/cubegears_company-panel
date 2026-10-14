@@ -1,16 +1,7 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import apiClient from '../api/apiClient';
-import { USE_MOCK_API } from '../api/apiConfig';
 
 export const AuthContext = createContext(null);
-
-const MOCK_USER = {
-  id: 'USR_101',
-  name: 'Alex Rivera',
-  email: 'admin@cubixgear.com',
-  role: { code: 'SUPER_ADMIN', name: 'Super Admin', permissions: ['*'] },
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
-};
 
 const readStoredUser = () => {
   try {
@@ -22,19 +13,13 @@ const readStoredUser = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    if (USE_MOCK_API) return MOCK_USER;
-    return readStoredUser();
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (USE_MOCK_API) return true;
-    return Boolean(localStorage.getItem('auth_token'));
-  });
-  const [loading, setLoading] = useState(!USE_MOCK_API && Boolean(localStorage.getItem('auth_token')));
+  // Authentication always requires a real account and a valid Django JWT.
+  // Optional mock data for other modules must never grant a login session.
+  const [user, setUser] = useState(readStoredUser);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(localStorage.getItem('auth_token')));
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('auth_token')));
 
   useEffect(() => {
-    if (USE_MOCK_API) return;
-
     const token = localStorage.getItem('auth_token');
     if (!token) {
       setLoading(false);
@@ -74,14 +59,6 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
 
     try {
-      if (USE_MOCK_API) {
-        localStorage.setItem('auth_token', 'mock_jwt_token_2026');
-        localStorage.setItem('auth_user', JSON.stringify(MOCK_USER));
-        setUser(MOCK_USER);
-        setIsAuthenticated(true);
-        return MOCK_USER;
-      }
-
       const response = await apiClient.post('/auth/login', credentials);
       const token = response?.access || response?.token || response?.accessToken || response?.access_token;
       const refreshToken = response?.refresh || response?.refreshToken || response?.refresh_token;
@@ -108,10 +85,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (!USE_MOCK_API) {
-        const refresh = localStorage.getItem('auth_refresh_token');
-        await apiClient.post('/auth/logout', refresh ? { refresh } : {});
-      }
+      const refresh = localStorage.getItem('auth_refresh_token');
+      await apiClient.post('/auth/logout', refresh ? { refresh } : {});
     } catch {
       // Local logout must still succeed if the network/backend is unavailable.
     } finally {
@@ -124,7 +99,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = useMemo(
-    () => ({ user, isAuthenticated, loading, login, logout, isMockMode: USE_MOCK_API }),
+    () => ({ user, isAuthenticated, loading, login, logout, isMockMode: false }),
     [user, isAuthenticated, loading]
   );
 
