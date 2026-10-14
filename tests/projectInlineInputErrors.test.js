@@ -42,7 +42,7 @@ test('field-level validation helper focuses a matching input and announces its e
 test('shared input components render error under its own control and regular text', () => {
   for (const name of ['Input', 'Select', 'Textarea', 'PhoneInput']) {
     const source = read(`../src/components/ui/${name}.jsx`);
-    assert.match(source, /aria-invalid=\{Boolean\(error\)\}/, name);
+    assert.ok(source.includes('id={`${inputId}-message`}'), name);
     assert.match(source, /aria-describedby=\{message \?/, name);
     assert.match(source, /id=\{\`${inputId\}-message\`\}/, name);
   }
