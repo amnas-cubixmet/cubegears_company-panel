@@ -395,11 +395,6 @@ export function JobCardWorkspace() {
   const ActiveSectionIcon = TAB_ICONS[activeTab] || FileText;
   const activeTabLabel = TABS.find(([key]) => key === activeTab)?.[1] || 'Overview';
 
-  const visibleTabs = TABS.filter(([key]) => showAdvanced || SIMPLE_TABS.includes(key) || key === activeTab);
-  const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
-  const nextVisibleTab = visibleTabs[visibleTabIndex + 1] || null;
-  const activeTabComplete = sectionComplete[activeTab];
-
   const completeStage = async (stage) => {
     if (!workflow || saving) return;
     const options = {};
@@ -850,6 +845,12 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
+      <JobTotalCostPanel
+        jobId={job.id}
+        refreshVersion={timerRefreshVersion}
+        refreshOnTab={activeTab}
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2">
         <span className="text-xs text-secondary">Current status: <strong className="text-content">{normalizeJobStatus(job.status)}</strong></span>
         <button type="button" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-content" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
@@ -893,30 +894,6 @@ export function JobCardWorkspace() {
           );
         })}
       </section>}
-
-      <nav ref={workflowTabsRef} className="job-detail-tabs job-workflow-tabs" aria-label="Job card workflow">
-        {visibleTabs.map(([key, label], index) => {
-          const completed = sectionComplete[key];
-          const TabIcon = TAB_ICONS[key];
-          return (
-            <button
-              type="button"
-              key={key}
-              onClick={() => openTab(key)}
-              aria-current={activeTab === key ? "page" : undefined}
-              className={['job-workflow-tab', activeTab === key ? 'is-active' : '', completed ? 'is-complete' : ''].join(' ')}
-              title={label}
-            >
-              <span className="job-workflow-tab-number">{index + 1}</span>
-              <span className="job-workflow-tab-label"><TabIcon size={14} aria-hidden="true" />{label}</span>
-              {completed && activeTab !== key ? <CheckCircle2 size={12} className="job-workflow-tab-check" /> : null}
-            </button>
-          );
-        })}
-      </nav>
-
-        </>
-      )}
 
 
       <div className="job-simple-step-nav" aria-label="Job Card workflow">
@@ -1130,8 +1107,8 @@ export function JobCardWorkspace() {
                 <div><span>Priority</span><strong>{job.priority || 'Medium'}</strong></div>
               </div>
               <p className="job-overview-supporting-note">You can assign or change the mechanic later.</p>
-            </section>
-          </div>
+            </div>
+          </section>
 
           <section className="job-overview-complaint" aria-label="Customer complaint">
             <div>
@@ -1158,8 +1135,8 @@ export function JobCardWorkspace() {
                   </button>
                 ))}
               </div>
-            </section>
-          )}
+            )}
+          </section>
         </div>
       )}
 
