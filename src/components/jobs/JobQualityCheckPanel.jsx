@@ -10,6 +10,8 @@ import {
 import '../../styles/job-quality-check.css';
 
 export function JobQualityCheckPanel({ job, staff = [], canEdit, onStaffCreated, onSaved, onCompleted }) {
+  const { user } = useAuth();
+  const loggedInName = String(user?.name || '').trim();
   const original = (USE_MOCK_API ? job?.qualityCheck : job?.qc) || {};
   const [draft, setDraft] = useState(() => makeQcDraft(original, loggedInName));
   const [errors, setErrors] = useState(null);

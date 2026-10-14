@@ -9,8 +9,20 @@ export const DEFAULT_QC_ITEMS = [
 
 const STATUS = new Set(['Pending', 'Pass', 'Fail']);
 
-export const makeQcDraft = (qc = {}) => ({
-  inspector: String(qc?.inspector === 'Unassigned' ? '' : (qc?.inspector || '')).trim(),
+// Saved staff selection wins over login fallback, including legacy name-only QC records.
+export const resolveQcInspector = (saved = '', loginName = '') => {
+  const stored = String(saved || '').trim();
+  return stored && stored !== 'Unassigned'
+    ? stored
+    : String(loginName || '').trim();
+};
+
+// Editable QC uses the selected inspector; read-only QC shows the recorded inspector.
+export const qcInspectorForMode = (saved, loginName, canEdit) =>
+  canEdit ? resolveQcInspector(saved, loginName) : resolveQcInspector(saved, '');
+
+export const makeQcDraft = (qc = {}, loginName = '') => ({
+  inspector: resolveQcInspector(qc?.inspector, loginName),
   inspectorId: String(qc?.inspectorId || ''),
   testDriveNotes: String(qc?.testDriveNotes || ''),
   checklist: (Array.isArray(qc?.checklist) && qc.checklist.length
