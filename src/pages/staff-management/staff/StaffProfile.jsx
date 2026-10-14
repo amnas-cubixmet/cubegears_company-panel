@@ -22,7 +22,7 @@ import {
   WalletCards,
   Wrench,
 } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   StaffAttendanceCalendar,
   StaffAvatar,
@@ -31,6 +31,7 @@ import {
 } from '../../../components/staff-management';
 import { getEmployeeLabel } from '../../../components/staff-management/staffDisplay';
 import { useAuth } from '../../../hooks/useAuth';
+import { staffInviteDeliveryMessage } from '../../../utils/staffInviteDelivery';
 import { USE_MOCK_API } from '../../../api/apiConfig';
 import { hasPermission } from '../../../utils/permissions';
 import { attendanceManagerService } from '../../../services/attendanceManager.service';
@@ -165,6 +166,7 @@ const normalizeActivity = (item = {}) => ({
 
 export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { staffId: routeStaffId } = useParams();
   const staffId = staffIdProp || routeStaffId;
   const goBack = onBack || (() => navigate('/staff-management/staff'));
@@ -174,6 +176,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [loading, setLoading] = useState(true);
   const [toastMsg, setToastMsg] = useState('');
+  const [inviteNotice, setInviteNotice] = useState(() => staffInviteDeliveryMessage(location.state?.emailDeliveryStatus));
   const [error, setError] = useState('');
 
   const [roles, setRoles] = useState([]);
@@ -381,8 +384,11 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
       return;
     }
     try {
-      await staffService.sendLoginInvite(staff.id);
-      showToast('Login invite sent by email.');
+      const result = await staffService.sendLoginInvite(staff.id);
+      const info = staffInviteDeliveryMessage(result?.emailDeliveryStatus)
+        || result?.message || 'Invite request accepted by server.';
+      setInviteNotice(info);
+      showToast(info);
       await refreshAll();
     } catch (requestError) {
       showToast(requestError?.message || 'Unable to send invite.');
@@ -429,7 +435,13 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
   return (
     <div className="staff-profile staff360">
-      {toastMsg && <div className="staff360-toast">{toastMsg}</div>}
+      {toastMsg && <div className="staff360-toast" role="status">{toastMsg}</div>}
+      {inviteNotice && (
+        <div className="staff-directory-message" role="status">
+          <span>{inviteNotice}</span>
+          <button type="button" aria-label="Dismiss email delivery notice" onClick={() => setInviteNotice('')}>Dismiss</button>
+        </div>
+      )}
 
       <div className="staff-profile-topbar">
         <button type="button" onClick={goBack} aria-label="Back to staff">

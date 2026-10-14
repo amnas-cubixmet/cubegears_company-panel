@@ -84,6 +84,11 @@ export const ForgotPassword = () => {
           </div>
 
           {message && <div className={'auth-message ' + (isError ? 'is-error' : 'is-success')}>{message}</div>}
+          <p className="auth-recovery-privacy-note">
+            For security, we show the same confirmation whether an email is registered or not.
+            If no message arrives, check spam or ask your workshop admin to verify your account
+            and email delivery settings.
+          </p>
 
           <form className="login-form" onSubmit={submit} noValidate>
             <label>

@@ -161,7 +161,10 @@ export const StaffAddPage = () => {
         created?.wageSetupError && created?.id
           ? `/staff/${created.id}/wages`
           : created?.id ? `/staff-management/staff/${created.id}` : '/staff-management/staff',
-        { state: created?.wageSetupError ? { wageSetupError: created.wageSetupError } : undefined },
+        { state: {
+          ...(created?.wageSetupError ? { wageSetupError: created.wageSetupError } : {}),
+          ...(created?.emailDeliveryStatus ? { emailDeliveryStatus: created.emailDeliveryStatus } : {}),
+        } },
       );
     } catch (requestError) {
       showServerFormErrors(formRef.current, requestError, {
