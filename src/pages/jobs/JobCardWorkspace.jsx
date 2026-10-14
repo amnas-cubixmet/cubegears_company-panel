@@ -1106,8 +1106,8 @@ export function JobCardWorkspace() {
                 <div><span>Priority</span><strong>{job.priority || 'Medium'}</strong></div>
               </div>
               <p className="job-overview-supporting-note">You can assign or change the mechanic later.</p>
-            </section>
-          </div>
+            </div>
+          </section>
 
           <section className="job-overview-complaint" aria-label="Customer complaint">
             <div>
@@ -1134,8 +1134,8 @@ export function JobCardWorkspace() {
                   </button>
                 ))}
               </div>
-            </section>
-          )}
+            )}
+          </section>
         </div>
       )}
 
