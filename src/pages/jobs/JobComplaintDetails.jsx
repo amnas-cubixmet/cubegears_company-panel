@@ -57,14 +57,8 @@ export function JobComplaintDetails() {
   const complaints = useMemo(() => complaintList(job), [job]);
   const found = useMemo(() => findComplaint(complaints, complaintId), [complaints, complaintId]);
   const complaint = found?.entry;
-  const status = ['Open', 'In Progress', 'Completed'].includes(complaint?.status)
-    ? complaint.status
-    : complaintStatusForJob(job);
+  const status = complaintStatusForJob(job);
   const description = textValue(complaint?.description || complaint?.wording, 'No description recorded');
-  const activity = (Array.isArray(job?.activities) ? job.activities : []).filter((entry) => {
-    const reference = entry?.metadata?.complaintId || entry?.metadata?.complaint_id;
-    return reference != null && complaint?.id != null && String(reference) === String(complaint.id);
-  });
 
   return (
     <div className="job-complaint-detail-page">
@@ -147,20 +141,6 @@ export function JobComplaintDetails() {
               <div><span>Make / Model</span><strong>{textValue(job.vehicleInfo)}</strong></div>
             </div>
           </section>
-          {activity.length > 0 && (
-            <section className="job-complaint-detail-card" aria-label="Complaint activity">
-              <div className="job-complaint-detail-section-heading"><h2>Complaint Activity</h2></div>
-              <ul className="job-complaint-activity-list">
-                {activity.map((entry, index) => (
-                  <li key={entry.id || index}>
-                    <strong>{textValue(entry.event, 'Activity')}</strong>
-                    {entry.description && <p>{entry.description}</p>}
-                    {(entry.createdAt || entry.created_at) && <small>{new Date(entry.createdAt || entry.created_at).toLocaleString('en-IN')}</small>}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
         </>
       )}
     </div>

@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Link2, LoaderCircle, XCircle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
-import { getSafePostLoginDestination } from '../../utils/authorizedLanding';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
@@ -12,7 +11,8 @@ const verifyMagicLinkOnce = ({ token, email }) => {
   if (!verificationRequests.has(token)) {
     verificationRequests.set(
       token,
-      authRecoveryService.verifyMagicLink({ token, email }),    );
+      verifyMagicLinkOnce({ token, email }),
+    );
   }
 
   return verificationRequests.get(token);
@@ -20,11 +20,12 @@ const verifyMagicLinkOnce = ({ token, email }) => {
 
 export const MagicLinkVerify = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const token = params.get('token') || '';
   const email = params.get('email') || '';
   const next = params.get('next') || '/dashboard';
-  // Post-login destination is checked against real user permissions after verification.
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
   const [state, setState] = useState('loading');
   const [message, setMessage] = useState('Verifying your secure sign-in link…');
 
@@ -39,9 +40,7 @@ export const MagicLinkVerify = () => {
       };
     }
 
-    // Strip sensitive tokens from browser history before making the POST.
-    window.history.replaceState(window.history.state, '', '/magic-link/verify');
-    verifyMagicLinkOnce({ token, email })
+    authRecoveryService.verifyMagicLink({ token, email })
       .then((result) => {
         if (!alive) return;
 
@@ -50,10 +49,6 @@ export const MagicLinkVerify = () => {
           throw new Error('Magic link verification did not return an access token.');
         }
 
-        const profile = result?.user;
-        if (!profile?.company?.id || !profile?.role || !Array.isArray(profile.role.permissions)) {
-          throw new Error('The link is valid, but no authorized company workspace was found.');
-        }
         localStorage.setItem('auth_token', accessToken);
 
         if (result?.refresh) {
@@ -66,9 +61,7 @@ export const MagicLinkVerify = () => {
 
         setState('success');
         setMessage('Magic link verified. Redirecting to your workspace…');
-        const destination = getSafePostLoginDestination(next, profile);
-        // Reload the app to hydrate AuthContext from its verified session.
-        window.location.replace(destination);
+        window.setTimeout(() => navigate(safeNext, { replace: true }), 700);
       })
       .catch((error) => {
         if (!alive) return;
@@ -79,7 +72,7 @@ export const MagicLinkVerify = () => {
     return () => {
       alive = false;
     };
-  }, [token, email, next]);
+  }, [token, email, safeNext, navigate]);
 
   return (
     <main className="login-page auth-recovery-page">

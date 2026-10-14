@@ -69,7 +69,7 @@ export const StaffAddPage = () => {
         if (!alive) return;
 
         const activeRoles = (Array.isArray(roleRows) ? roleRows : []).filter(
-          (role) => role.status !== 'Inactive' && !role.isProtected && role.code !== 'SUPER_ADMIN',
+          (role) => role.status !== 'Inactive',
         );
         const nextTeams = Array.isArray(teamRows) ? teamRows : [];
         const nextShifts = Array.isArray(shiftRows) ? shiftRows : [];
@@ -84,7 +84,7 @@ export const StaffAddPage = () => {
 
         setForm((current) => ({
           ...current,
-          role: current.role || '',
+          role: current.role || activeRoles[0]?.name || 'Mechanic',
           teamId: current.teamId || nextTeams[0]?.id || '',
           shiftId: current.shiftId || nextShifts[0]?.id || '',
           branchId: current.branchId || nextBranches[0]?.id || '',
@@ -133,12 +133,6 @@ export const StaffAddPage = () => {
       return;
     }
 
-    if (form.email.trim() && !form.role) {
-      showFormFieldError(formRef.current, 'role', 'Choose a staff role.');
-      setError('Choose a staff login role before sending the password setup email.');
-      return;
-    }
-
     if (canManagePayroll && setSalaryNow &&
         (!Number.isFinite(Number(salary.dailyWageRate)) || Number(salary.dailyWageRate) <= 0)) {
       showFormFieldError(formRef.current, 'dailyWageRate', 'Enter a daily wage rate greater than zero.');
@@ -167,12 +161,7 @@ export const StaffAddPage = () => {
         created?.wageSetupError && created?.id
           ? `/staff/${created.id}/wages`
           : created?.id ? `/staff-management/staff/${created.id}` : '/staff-management/staff',
-        { state: {
-            ...(created?.wageSetupError ? { wageSetupError: created.wageSetupError } : {}),
-            ...(created?.loginStatus === 'Password Setup Pending'
-              ? { invitationQueued: 'Password setup email queued for ' + form.email.trim() + '. Please verify SMTP delivery.' }
-              : {}),
-          } },
+        { state: created?.wageSetupError ? { wageSetupError: created.wageSetupError } : undefined },
       );
     } catch (requestError) {
       showServerFormErrors(formRef.current, requestError, {
@@ -191,7 +180,7 @@ export const StaffAddPage = () => {
       <section className="staff-add-page__header">
         <div>
           <h2>Add Staff</h2>
-          <p>Create a staff profile with role, branch and daily wage. Active staff with email automatically receive a password setup link.</p>
+          <p>Create profile, role access, branch, team, shift and payroll setup together.</p>
         </div>
         <button className="staff-save-button" type="submit" disabled={saving || loadingOptions}>
           <Save size={15} />
@@ -233,15 +222,14 @@ export const StaffAddPage = () => {
               </label>
 
               <label>
-                Email (for staff login)
+                Email
                 <input
                   type="email"
                   name="email"
                       value={form.email}
                   onChange={(event) => set('email', event.target.value)}
-                  placeholder="staff@company.com"
+                  placeholder="name@company.com"
                 />
-                <small>A secure password setup link is emailed after creation. Admin never receives the staff password.</small>
               </label>
 
               <label>
@@ -255,11 +243,9 @@ export const StaffAddPage = () => {
               <label>
                 System Role
                 <select
-                  name="role"
                   value={form.role}
                   onChange={(event) => set('role', event.target.value)}
                 >
-                  <option value="">Select company staff role</option>
                   {roles.map((role) => (
                     <option key={role.id} value={role.name}>
                       {role.name}

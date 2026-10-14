@@ -3,5 +3,5 @@ import { hasPermission } from '../utils/permissions';
 
 export const usePermission = (requiredPermission) => {
   const { user } = useAuth();
-  return hasPermission(user, requiredPermission);
+  return hasPermission(user?.role, requiredPermission);
 };
