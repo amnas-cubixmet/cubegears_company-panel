@@ -845,6 +845,12 @@ export function JobCardWorkspace() {
         </div>
       </header>
 
+      <JobTotalCostPanel
+        jobId={job.id}
+        refreshVersion={timerRefreshVersion}
+        refreshOnTab={activeTab}
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2">
         <span className="text-xs text-secondary">Current status: <strong className="text-content">{normalizeJobStatus(job.status)}</strong></span>
         <button type="button" className="rounded-lg border border-line px-3 py-2 text-xs font-semibold text-content" onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
