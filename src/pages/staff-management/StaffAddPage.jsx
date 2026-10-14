@@ -84,7 +84,7 @@ export const StaffAddPage = () => {
 
         setForm((current) => ({
           ...current,
-          role: current.role || activeRoles[0]?.name || '',
+          role: current.role || '',
           teamId: current.teamId || nextTeams[0]?.id || '',
           shiftId: current.shiftId || nextShifts[0]?.id || '',
           branchId: current.branchId || nextBranches[0]?.id || '',
