@@ -7,12 +7,14 @@ import {
 } from '../../components/dashboard';
 import { Loader } from '../../components/common/Loader';
 import { useAuth } from '../../hooks/useAuth';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { getDashboardData } from '../../services/dashboard.service';
 import '../../styles/dashboard.css';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { can } = useFeatureAccess();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export const Dashboard = () => {
     <div className="dashboard-page">
       <DashboardStats data={data} />
 
-      <ServiceOperations
+      {can('jobs.view') && <ServiceOperations
         data={data}
         user={user}
         filterPeriod={filterPeriod}
@@ -50,7 +52,7 @@ export const Dashboard = () => {
         filterBranch={filterBranch}
         setFilterBranch={setFilterBranch}
         onNavigate={navigate}
-      />
+      />}
 
       <DashboardBottomGrid
         data={data}
