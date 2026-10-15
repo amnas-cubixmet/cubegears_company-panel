@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { billingService } from '../../services/billing.service';
 import { paymentService } from '../../services/payment.service';
 import { USE_MOCK_API } from '../../api/apiConfig';
@@ -122,6 +123,9 @@ export function JobCardWorkspace() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { can } = useFeatureAccess();
+  const hasInvoiceAccess = can('invoices.view');
+  const hasStockAccess = can('stock.view');
   const workflowTabsRef = useRef(null);
 
   const [job, setJob] = useState(null);
@@ -382,8 +386,10 @@ export function JobCardWorkspace() {
   };
   // One compact main workflow for every Job Card route. Supporting sections
   // remain accessible from More without becoming required approval stages.
-  const visibleTabs = TABS.filter(([key]) => GUIDED_STAGES.includes(key));
-  const extraTabs = TABS.filter(([key]) => !GUIDED_STAGES.includes(key));
+  const moduleTabAllowed = (key) => (key !== 'invoice' || hasInvoiceAccess) &&
+    (key !== 'parts' || hasStockAccess);
+  const visibleTabs = TABS.filter(([key]) => GUIDED_STAGES.includes(key) && moduleTabAllowed(key));
+  const extraTabs = TABS.filter(([key]) => !GUIDED_STAGES.includes(key) && moduleTabAllowed(key));
   const activeExtraTab = extraTabs.some(([key]) => key === activeTab);
   const showWorkTools = activeTab === 'work' || (activeExtraTab && activeTab !== 'activity');
   const visibleTabIndex = visibleTabs.findIndex(([key]) => key === activeTab);
@@ -814,6 +820,10 @@ export function JobCardWorkspace() {
   };
 
   const openTab = (key) => {
+    if ((key === 'invoice' && !hasInvoiceAccess) || (key === 'parts' && !hasStockAccess)) {
+      setError('This module must be activated in a company Feature Label and allowed by your role.');
+      return;
+    }
     if (isSectionLocked(key)) {
       setError('Complete the current Job Card stage to unlock this section.');
       return;
@@ -855,19 +865,19 @@ export function JobCardWorkspace() {
               >
                 {JOB_STATUSES.map((status) => <option key={status}>{status}</option>)}
               </select>
-              <button type="button" onClick={() => openTab('invoice')} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
+              {hasInvoiceAccess && <button type="button" onClick={() => openTab('invoice')} className="inline-flex h-10 items-center gap-2 rounded-xl border-0 bg-primary px-4 text-xs font-bold text-white">
                 <ReceiptText size={15}/>{linkedInvoice ? 'View Invoice' : 'Create Invoice'}
-              </button>
+              </button>}
             </>
           )}
         </div>
       </header>
 
-      <JobTotalCostPanel
+      {can('payroll.view') && can('expenses.view') && hasStockAccess && <JobTotalCostPanel
         jobId={job.id}
         refreshVersion={timerRefreshVersion}
         refreshOnTab={activeTab}
-      />
+      />}
 
       {activeTab !== 'overview' && activeTab !== 'activity' && !showWorkTools && (
         <>
@@ -954,7 +964,7 @@ export function JobCardWorkspace() {
               ['complaints', 'Complaints'],
               ['parts', 'Parts'],
               ['updates', 'Technician Updates'],
-            ].map(([key, label]) => {
+            ].filter(([key]) => moduleTabAllowed(key)).map(([key, label]) => {
               const locked = isSectionLocked(key);
               const selected = activeTab === key;
               return (
@@ -1331,7 +1341,7 @@ export function JobCardWorkspace() {
         </div>
       )}
 
-      {activeTab === 'parts' && (
+      {hasStockAccess && activeTab === 'parts' && (
         <JobPartsWorkflow
           jobId={job.id}
           assignedTo={job.assignedEmployeeName || ''}
@@ -1441,7 +1451,7 @@ export function JobCardWorkspace() {
         />
       )}
 
-      {activeTab === 'invoice' && (
+      {hasInvoiceAccess && activeTab === 'invoice' && (
         <div className="job-invoice-dashboard">
           <header className="job-invoice-dashboard-head">
             <div>
