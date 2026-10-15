@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { hasPermission } from '../../utils/permissions';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { ActiveRepairPanel } from './ActiveRepairPanel';
 import { BookingList } from './BookingList';
 import { JobDetailPanel } from './JobDetailPanel';
@@ -15,6 +15,7 @@ export const ServiceOperations = ({
   setFilterBranch,
   onNavigate,
 }) => {
+  const { can } = useFeatureAccess();
   const [search, setSearch] = useState('');
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
@@ -62,7 +63,7 @@ export const ServiceOperations = ({
             <option value="express">Express Bay</option>
           </select>
 
-          {hasPermission(user, 'jobs.create') && (
+          {can('jobs.create') && (
             <button type="button" className="dashboard-button is-primary" onClick={() => onNavigate('/jobs/new')}>
               <Plus size={14} />
               New Job Card
@@ -92,6 +93,7 @@ export const ServiceOperations = ({
           stockAlerts={data?.stockAlerts}
           onOpenJob={() => onNavigate(activeRepair?.id ? `/jobs/${activeRepair.id}` : '/jobs')}
           onReviewStock={() => onNavigate('/stock')}
+          canViewStock={can('stock.view')}
         />
       </div>
     </section>
