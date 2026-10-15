@@ -18,6 +18,7 @@ export function featureLabelStatus(bundle, wallet) {
   if (!wallet) return { label: 'Unavailable', message: 'Wallet information has not loaded.', allow: false };
   if (!wallet.canManage) return { label: 'Restricted', message: 'Only a billing administrator can activate labels.', allow: false };
 
+  if (bundle.canResume) return { label: 'Inactive', message: 'Resume your paid access without another charge.', allow: true };
   const price = Number(bundle.totalCredits);
   const balance = Number(wallet.balance);
   if (!Number.isFinite(price) || price <= 0) {

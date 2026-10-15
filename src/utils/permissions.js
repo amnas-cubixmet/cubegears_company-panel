@@ -1,6 +1,8 @@
 export const hasPermission = (user, permission) => {
   if (!permission) return true;
 
+  if (permission.startsWith('billing.')) return user?.isCompanyOwner === true;
+  if (Array.isArray(user?.effectivePermissions)) return user.effectivePermissions.includes(permission);
   const role = user?.role;
 
   const permissions =
@@ -12,7 +14,7 @@ export const hasPermission = (user, permission) => {
 };
 
 export const getUserPermissions = (user) => {
-
+  if (Array.isArray(user?.effectivePermissions)) return user.effectivePermissions;
   const role = user?.role;
 
   return role && typeof role === 'object' && Array.isArray(role.permissions)

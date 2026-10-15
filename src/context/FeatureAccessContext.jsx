@@ -19,6 +19,11 @@ export function moduleIsVisible(access, permission) {
   if (!access || access.unavailable) return false;
   const module = permission.split('.')[0];
   // Keep wallet, activation, security and account recovery reachable.
+  if (access.paidAccessRequired) {
+    if (module === 'billing' || module === 'company') return access.isCompanyOwner === true;
+    if (module === 'dashboard') return access.permissions.includes('dashboard.view');
+    return access.permissions.includes(permission);
+  }
   if (CORE_MODULES.has(module)) return true;
   if (module === 'dashboard') return access.enforced ? access.modules.length > 0 : true;
   // Paid workshop modules in label-only mode MUST belong to an activated
@@ -63,6 +68,8 @@ export function FeatureAccessProvider({ children }) {
         modules: response.enabledModules.filter(item => typeof item === 'string'),
         permissions: response.permissions.filter(item => typeof item === 'string'),
         canManageFeatures: response.canManageFeatures === true,
+        isCompanyOwner: response.isCompanyOwner === true,
+        paidAccessRequired: response.paidAccessRequired === true,
         unavailable: false,
       });
     } catch {

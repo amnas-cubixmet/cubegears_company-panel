@@ -17,8 +17,8 @@ const tabs=[
 
 export const AccountHeader=({title,subtitle,active,onNavigate,actions})=>{
   const location = useLocation();
-  const { can } = useFeatureAccess();
-  const visibleTabs = tabs.filter(tab => can(tab[4]));
+  const { can, isCompanyOwner } = useFeatureAccess();
+  const visibleTabs = tabs.filter(tab => isCompanyOwner && can(tab[4]));
   const activeIndex = Math.max(0, visibleTabs.findIndex(([key]) => key === active));
   const ActiveIcon = visibleTabs[activeIndex]?.[3] || Coins;
   const tabListRef = useRef(null);
