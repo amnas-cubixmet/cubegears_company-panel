@@ -16,3 +16,5 @@ Owners use a shared layout with a persistent sidebar on desktop and horizontally
 With no active modules, owners can open purchase/recovery routes, `/profile` and `/account/company`. Shop Details reads and updates only the tenant-scoped `/company/me` API; it does not mount paid settings, storage or billing services. Staff without an authorized module see a locked-access notice with refresh/sign-out. Unavailable access verification also displays this notice. Operational routes always keep their server-derived permission checks.
 
 Pair this UI with backend migration `companies.0004_lock_existing_company_modules`, which enables paid-module enforcement for existing companies while preserving purchases. This UI continues to use the authoritative backend policy and entitlements.
+
+Feature Controls lists all billable modules. Unpriced/unpublished modules show 0 credits and Price not set with activation disabled. They use read-only catalogue placeholders, never free purchases. A positive published per-user price is required for a new purchase.

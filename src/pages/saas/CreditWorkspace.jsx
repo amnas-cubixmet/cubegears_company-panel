@@ -242,23 +242,17 @@ export function CreditWorkspace({ section = 'overview' }) {
       <p className="cg-credit-note"><ShieldCheck size={16}/> UPI, bank cards and net banking are provided by Razorpay when enabled for your merchant account.</p>
     </section>}
 
-    {section === 'features' && account && <section className="cg-credit-panel" aria-label="Module catalogue">
-      <header><h2>All workshop modules</h2></header>
-      <p>Published prices appear in the packages below. Unpriced modules remain locked until the platform administrator publishes a price.</p>
-      <div className="cg-bundle-features">{account.modules.filter(module => module.billable).map(module => <span key={module.key}>{module.label}</span>)}</div>
-    </section>}
-
     {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Available modules">
-      <header><div><span>FEATURE LABELS</span><h2>Available module packages ({featureBundles.length})</h2></div><Coins size={22}/></header>
-      <p>Choose a package for your workshop. Prices are calculated by Django using only the published per-user credits and the company's active login count.</p>
+      <header><div><span>MODULE PRICING</span><h2>All workshop modules ({featureBundles.length})</h2></div><Coins size={22}/></header>
+      <p>Modules without a published price show 0 credits and remain locked. Prices use the published per-user rate and your company's active login count.</p>
       <div className="cg-bundle-grid">
         {featureBundles.map((bundle) => {
           const status = featureLabelStatus(bundle, wallet);
           const period = ({ permanent: 'lifetime', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
-          return <article key={bundle.id} className="cg-bundle-card">
+          return <article key={bundle.id ?? `unpriced:${bundle.key}`} className="cg-bundle-card">
             <div className="cg-bundle-head">
               <h3>{bundle.name}</h3>
-              <span className={bundle.active ? 'cg-credit-pill active' : 'cg-credit-pill'}>{bundle.active ? 'Active' : 'Inactive'}</span>
+              <span className={bundle.active ? 'cg-credit-pill active' : 'cg-credit-pill'}>{bundle.active ? 'Active' : bundle.purchaseDisabledReason === 'MODULE_PRICE_NOT_SET' ? 'Price not set' : 'Inactive'}</span>
             </div>
             <p>{bundle.description || 'Existing workshop features grouped into one package.'}</p>
             <div className="cg-bundle-price">

@@ -10,6 +10,7 @@ export function featureLabelStatus(bundle, wallet) {
     FEATURE_ENTITLEMENTS_NOT_ENABLED: 'Platform feature billing must be enabled before labels can be activated.',
     METERED_OPERATION_NOT_READY: 'Per-use operations are not metered on the backend yet.',
     FEATURE_LABEL_EMPTY: 'This label has no active existing features.',
+    MODULE_PRICE_NOT_SET: 'Price not set. Your SaaS administrator must publish a positive price before activation.',
     INVALID_USER_PRICE: 'The administrator must configure a positive per-user credit rate.',
   };
   if (!bundle.purchaseEnabled) {
