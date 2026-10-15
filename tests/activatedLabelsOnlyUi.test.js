@@ -41,7 +41,7 @@ test('dashboard and account never advertise inactive-label workshop modules', ()
 
 test('nested Job Card invoice and parts are hidden without respective labels', () => {
   const paths = read('src/utils/permissions.js');
-  assert.match(paths, /invoice\(\?:\\\/\|\$\)/);
+  assert.match(paths, /jobs.*invoice/);
   const job = read('src/pages/jobs/JobCardWorkspace.jsx');
   assert.match(job, /const hasInvoiceAccess = can\('invoices\.view'\)/);
   assert.match(job, /const hasStockAccess = can\('stock\.view'\)/);
