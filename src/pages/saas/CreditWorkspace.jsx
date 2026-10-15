@@ -209,8 +209,9 @@ export function CreditWorkspace({ section = 'overview' }) {
           <div className="cg-bundle-features">{bundle.features.map((item) => <span key={item.key}>{item.label}</span>)}</div>
           {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
           {!bundle.meteredReady && <small>Per-use tracking must be connected to the selected backend actions before purchasing is available.</small>}
+          {bundle.meteredReady && !bundle.purchaseEnabled && <small>Paid feature enforcement must be enabled by the CubeGear platform before labels can be purchased.</small>}
           <div className="cg-bundle-actions">
-            <button className="primary" type="button" disabled={busy !== '' || !wallet?.canManage || !bundle.meteredReady || bundle.active && bundle.billingType === 'permanent'} onClick={() => buyBundle(bundle)}>
+            <button className="primary" type="button" disabled={busy !== '' || !wallet?.canManage || !bundle.purchaseEnabled || bundle.active && bundle.billingType === 'permanent'} onClick={() => buyBundle(bundle)}>
               {busy === `bundle:${bundle.id}` ? 'Saving…' : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently' : bundle.active ? 'Extend access' : 'Activate label'}
             </button>
             {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage} onClick={() => stopBundle(bundle)}>Disable</button>}
