@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchWorkspace } from '../../services/globalSearch.service';
+import { getPermissionForPath } from '../../utils/permissions';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import { useAuth } from '../../hooks/useAuth';
 import {
   Search,
   X,
@@ -21,28 +24,42 @@ import {
 } from 'lucide-react';
 import '../../styles/global-search.css';
 
-const RECENT_SEARCHES_KEY = 'cubegears_recent_searches';
+const RECENT_SEARCHES_PREFIX = 'cubegears_recent_searches';
 
 export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { can, enforced } = useFeatureAccess();
+  const recentKey = `${RECENT_SEARCHES_PREFIX}:${user?.companyId || user?.company?.id || 'unknown'}:${user?.id || 'unknown'}`;
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [recentState, setRecentState] = useState({ key: '', items: [] });
+  const recentSearches = recentState.key === recentKey ? recentState.items : [];
+  // Search results and browser history must obey the same access check as routes.
+  const isVisibleResult = (item) => {
+    const path = item?.path || item?.route;
+    if (typeof path !== 'string' || !path.startsWith('/')) return false;
+    const permission = getPermissionForPath(path.split('?')[0].split('#')[0]);
+    return permission ? can(permission) : !enforced;
+  };
+  const visibleResults = results.filter(isVisibleResult);
+  const visibleRecentSearches = recentSearches.filter(isVisibleResult);
   const containerRef = useRef(null);
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
-      if (saved) setRecentSearches(JSON.parse(saved));
+      const saved = localStorage.getItem(recentKey);
+      const items = saved ? JSON.parse(saved) : [];
+      setRecentState({ key: recentKey, items: Array.isArray(items) ? items : [] });
     } catch (e) {
       console.error('Failed to load recent searches', e);
     }
-  }, []);
+  }, [recentKey]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -72,16 +89,16 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
   const saveRecentSearch = (item) => {
     try {
       const next = [item, ...recentSearches.filter((r) => r.id !== item.id)].slice(0, 5);
-      setRecentSearches(next);
-      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(next));
+      setRecentState({ key: recentKey, items: next });
+      localStorage.setItem(recentKey, JSON.stringify(next));
     } catch (e) {
       console.error('Failed to save recent search', e);
     }
   };
 
   const clearRecentSearches = () => {
-    setRecentSearches([]);
-    localStorage.removeItem(RECENT_SEARCHES_KEY);
+    setRecentState({ key: recentKey, items: [] });
+    localStorage.removeItem(recentKey);
   };
 
   const handleInputChange = (e) => {
@@ -111,6 +128,7 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
   };
 
   const handleSelectResult = (item) => {
+    if (!isVisibleResult(item)) return;
     saveRecentSearch(item);
     setIsOpen(false);
     setQuery('');
@@ -124,13 +142,13 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
     if (!isOpen) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1));
+      setSelectedIndex((prev) => Math.min(prev + 1, visibleResults.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
-    } else if (e.key === 'Enter' && selectedIndex >= 0 && selectedIndex < results.length) {
+    } else if (e.key === 'Enter' && selectedIndex >= 0 && selectedIndex < visibleResults.length) {
       e.preventDefault();
-      handleSelectResult(results[selectedIndex]);
+      handleSelectResult(visibleResults[selectedIndex]);
     }
   };
 
@@ -153,7 +171,7 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
     }
   };
 
-  const groupedResults = results.reduce((acc, current) => {
+  const groupedResults = visibleResults.reduce((acc, current) => {
     const groupName = current.group || current.type || 'Other';
     if (!acc[groupName]) acc[groupName] = [];
     acc[groupName].push(current);
@@ -200,20 +218,20 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
             </div>
           )}
 
-          {!loading && query.trim().length >= 2 && results.length === 0 && (
+          {!loading && query.trim().length >= 2 && visibleResults.length === 0 && (
             <div className="global-search-empty">
               <strong>No matching records found</strong>
               <span>Try a page, customer, phone, vehicle, job, invoice, payment, expense or stock item.</span>
             </div>
           )}
 
-          {!loading && query.trim().length < 2 && recentSearches.length > 0 && (
+          {!loading && query.trim().length < 2 && visibleRecentSearches.length > 0 && (
             <div className="global-search-group">
               <div className="global-search-group-head">
                 <span>Recent Searches</span>
                 <button type="button" onClick={clearRecentSearches}>Clear</button>
               </div>
-              {recentSearches.map((item) => (
+              {visibleRecentSearches.map((item) => (
                 <button key={item.id} type="button" className="global-search-result-row" onClick={() => handleSelectResult(item)}>
                   <span className="global-search-result-icon"><Clock size={14} /></span>
                   <span className="global-search-result-copy">
@@ -225,11 +243,11 @@ export const GlobalSearch = ({ isMobileView = false, onMobileClose = null }) => 
             </div>
           )}
 
-          {!loading && results.length > 0 && Object.keys(groupedResults).map((group) => (
+          {!loading && visibleResults.length > 0 && Object.keys(groupedResults).map((group) => (
             <div className="global-search-group" key={group}>
               <div className="global-search-group-title">{group} ({groupedResults[group].length})</div>
               {groupedResults[group].map((item) => {
-                const globalIdx = results.findIndex((r) => r.id === item.id);
+                const globalIdx = visibleResults.findIndex((r) => r.id === item.id);
                 return (
                   <button
                     key={item.id}
