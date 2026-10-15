@@ -49,6 +49,10 @@ export const ProtectedRoute = () => {
     return <Navigate to={featureAccess.canManageFeatures ? '/account/credits/features' : '/access-denied'} replace />;
   }
   const requiredPermission = getPermissionForPath(location.pathname);
+  // Nested Job Card sections require BOTH the Jobs label and their own
+  // Stock/Invoices label; knowing a URL must not bypass either subscription.
+  const nestedJobModule = /^\/jobs\/[^/]+\/(?:invoice|parts)(?:\/|$)/.test(location.pathname);
+  const missingJobAccess = nestedJobModule && !featureAccess.can('jobs.view');
   const staffProfileMatch = location.pathname.match(/^\/staff-management\/staff\/([^/]+)$/);
   const isOwnStaffProfile =
     Boolean(staffProfileMatch) &&
@@ -57,7 +61,8 @@ export const ProtectedRoute = () => {
   if (
     location.pathname !== '/access-denied' &&
     requiredPermission &&
-    (!moduleIsVisible(featureAccess, requiredPermission) || (!isOwnStaffProfile && !featureAccess.can(requiredPermission)))
+    (missingJobAccess || !moduleIsVisible(featureAccess, requiredPermission) ||
+      ((!isOwnStaffProfile || featureAccess.labelOnly) && !featureAccess.can(requiredPermission)))
   ) {
     return (
       <Navigate

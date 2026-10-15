@@ -75,6 +75,7 @@ export const getPermissionForPath = (pathname = '') => {
   // A Job Card has cross-module sections; its invoice screen is NOT covered
   // by the Jobs label alone. Direct deep-links also require invoice access.
   if (/^\/jobs\/[^/]+\/invoice(?:\/|$)/.test(pathname)) return 'invoices.view';
+  if (/^\/jobs\/[^/]+\/parts(?:\/|$)/.test(pathname)) return 'stock.view';
 
   const special = SPECIAL_PATH_PERMISSIONS
     .filter(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`))

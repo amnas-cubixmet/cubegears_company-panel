@@ -7,7 +7,7 @@ const workspace = read('../src/pages/jobs/JobCardWorkspace.jsx');
 const css = read('../src/styles/job-workspace-dashboard.css');
 
 const workStart = workspace.indexOf("{activeTab === 'work' && (");
-const partsStart = workspace.indexOf("{activeTab === 'parts' && (", workStart);
+const partsStart = workspace.indexOf("activeTab === 'parts' && (", workStart);
 const work = workspace.slice(workStart, partsStart);
 
 test('Outside Staff is the first feature in the Job Card Work stage', () => {
