@@ -51,7 +51,7 @@ const SPECIAL_PATH_PERMISSIONS = [
   ['/account/storage', 'storage.view'],
   ['/account/templates', 'settings.view'],
   ['/account/security', 'settings.view'],
-  ['/account', 'settings.view'],
+  ['/account', 'billing.view'],
   ['/staff', 'payroll.view'],
 ];
 
