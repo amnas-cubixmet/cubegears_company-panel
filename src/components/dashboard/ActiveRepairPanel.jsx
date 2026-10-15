@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, ArrowRight, Car, PackageSearch } from 'lucide-react';
 import { dashboardText } from './dashboard.utils';
 
-export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onReviewStock }) => (
+export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onReviewStock, canViewStock = false }) => (
   <aside className="repair-pane">
     <button
       type="button"
@@ -36,7 +36,7 @@ export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onRevi
       </div>
     </button>
 
-    <div className="insights-card">
+    {canViewStock && <div className="insights-card">
       <div className="insights-title"><Activity size={13} /><strong>Smart Insights</strong></div>
       <div className="insight-list">
         {(stockAlerts || []).slice(0, 2).map((alert) => (
@@ -50,6 +50,6 @@ export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onRevi
         ))}
       </div>
       <button type="button" className="dashboard-button is-primary full-width" onClick={onReviewStock}>Review Stock</button>
-    </div>
+    </div>}
   </aside>
 );
