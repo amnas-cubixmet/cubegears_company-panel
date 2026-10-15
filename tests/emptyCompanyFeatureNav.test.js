@@ -8,8 +8,8 @@ test('no active paid modules: core company/account settings stay accessible, wor
   const context = file('src/context/FeatureAccessContext.jsx');
   assert.match(context, /CORE_MODULES = new Set\(\['billing', 'settings', 'company'/);
   assert.match(context, /if \(CORE_MODULES\.has\(module\)\) return true/);
-  assert.match(context, /if \(module === 'dashboard'\) return access\.modules\.length > 0/);
-  assert.match(context, /return access\.modules\.includes\(module\)/);
+  assert.match(context, /if \(module === 'dashboard'\) return access\.enforced \? access\.modules\.length > 0 : true/);
+  assert.match(context, /return !access\.enforced \|\| access\.modules\.includes\(module\)/);
 });
 
 test('navigation is restricted by backend-derived user/tenant permissions', () => {
