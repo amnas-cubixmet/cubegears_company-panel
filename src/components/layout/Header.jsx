@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { GlobalSearch } from '../common/GlobalSearch';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 import { unreadNotificationCount } from '../../utils/notificationInbox';
+import { getStaffLandingPath } from '../../utils/staffLanding';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { staffService } from '../../services/staff.service';
@@ -25,7 +26,8 @@ const resolveStaticPageTitle = (pathname) => {
 
 export const Header = () => {
   const { user, logout } = useAuth();
-  const { can } = useFeatureAccess();
+  const { can, isCompanyOwner, permissions } = useFeatureAccess();
+  const homePath = getStaffLandingPath({ isCompanyOwner, effectivePermissions: permissions });
   const navigate = useNavigate();
   const location = useLocation();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -173,7 +175,7 @@ export const Header = () => {
 
       <div className="mobile-header">
         <div className="mobile-header-row">
-          <button type="button" className="mobile-brand" onClick={() => navigate('/dashboard')} aria-label="Go to dashboard">
+          <button type="button" className="mobile-brand" onClick={() => navigate(homePath)} aria-label="Go to workspace">
             <span>CG</span>
             <span className="mobile-brand-copy">
               <strong>CubixGear</strong>
