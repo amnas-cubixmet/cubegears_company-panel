@@ -5,7 +5,6 @@ export const InvoiceTabs = ({ activeTab, onChange, onEWayBills }) => (
   <nav className="invoice-dashboard-tabs" aria-label="Billing navigation">
     <button
       type="button"
-      type="button"
       className={activeTab === 'invoice' ? 'is-active' : ''}
       aria-current={activeTab === 'invoice' ? 'page' : undefined}
       onClick={() => onChange('invoice')}
@@ -15,7 +14,6 @@ export const InvoiceTabs = ({ activeTab, onChange, onEWayBills }) => (
     </button>
 
     <button
-      type="button"
       type="button"
       className={activeTab === 'estimate' ? 'is-active' : ''}
       aria-current={activeTab === 'estimate' ? 'page' : undefined}
