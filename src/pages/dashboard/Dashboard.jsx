@@ -8,13 +8,15 @@ import {
 import { Loader } from '../../components/common/Loader';
 import { useAuth } from '../../hooks/useAuth';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import { routeConfig } from '../../routes/routeConfig';
+import { hasPermission } from '../../utils/permissions';
 import { getDashboardData } from '../../services/dashboard.service';
 import '../../styles/dashboard.css';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { can } = useFeatureAccess();
+  const featureAccess = useFeatureAccess();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,8 +37,40 @@ export const Dashboard = () => {
   };
 
   useEffect(() => {
+    if (featureAccess.enforced) {
+      setLoading(false);
+      return;
+    }
     fetchDashboard();
-  }, [filterPeriod, filterBranch]);
+  }, [filterPeriod, filterBranch, featureAccess.enforced]);
+
+  if (featureAccess.enforced) {
+    const activeRoutes = routeConfig.filter(route =>
+      route.permission && featureAccess.modules.includes(route.permission.split('.')[0]) &&
+      hasPermission(user, route.permission)
+    );
+    return (
+      <div className="dashboard-page">
+        <section className="operations-card" aria-label="Activated company modules" style={{ padding: 24 }}>
+          <h1 style={{ fontSize: 24, margin: '0 0 8px' }}>Your active features</h1>
+          <p style={{ margin: '0 0 24px' }}>Only the features enabled for your company and allowed by your role are shown here.</p>
+          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))' }}>
+            {activeRoutes.map((route) => {
+              const Icon = route.icon;
+              return (
+                <button key={route.id} type="button" onClick={() => navigate(route.path)}
+                  className="dashboard-stat-card" style={{ textAlign: 'left', cursor: 'pointer', padding: 20 }}>
+                  <Icon size={24} aria-hidden="true" />
+                  <strong style={{ display: 'block', marginTop: 12, fontSize: 17 }}>{route.label}</strong>
+                  <span style={{ fontSize: 13 }}>Open feature →</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   if (loading) return <Loader />;
 

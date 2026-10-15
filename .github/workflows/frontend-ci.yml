@@ -21,7 +21,7 @@ jobs:
       - run: node --test tests/creditNavigation.test.js
       - run: node --test tests/razorpayGatewayDiagnostics.test.js
       - run: node --test tests/featureBundlesUi.test.js
-      - run: node --test tests/featureAccessUI.test.js
+      - run: node --test tests/featureEntitlementNavigation.test.js
       - run: node --test tests/accountSevenPagesUi.test.js
       - run: npm run build
         env:

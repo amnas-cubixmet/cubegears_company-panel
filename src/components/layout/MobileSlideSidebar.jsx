@@ -5,13 +5,14 @@ import { Laptop, LogOut, Moon, Sun, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { getUserRoleLabel } from '../../utils/authDisplay';
-import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import { hasPermission } from '../../utils/permissions';
+import { useFeatureAccess, moduleIsVisible } from '../../context/FeatureAccessContext';
 import '../../styles/mobile-slide-sidebar.css';
 
 export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { can } = useFeatureAccess();
+  const featureAccess = useFeatureAccess();
   const { themeMode, setThemeMode } = useTheme();
   const roleLabel = getUserRoleLabel(user);
   const activeItemRef = useRef(null);
@@ -77,13 +78,13 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
             <span>MENU</span>
             <strong>Workspace</strong>
           </div>
-          <small>{routeConfig.length} modules</small>
+          <small>{routeConfig.filter(route => hasPermission(user, route.permission) && moduleIsVisible(featureAccess, route.permission)).length} modules</small>
         </div>
 
         <nav className="mobile-drawer-nav" aria-label="Mobile navigation">
           {sections.map((section) => {
             const items = routeConfig.filter(
-              (route) => route.section === section && can(route.permission)
+              (route) => route.section === section && hasPermission(user, route.permission) && moduleIsVisible(featureAccess, route.permission)
             );
             if (!items.length) return null;
 

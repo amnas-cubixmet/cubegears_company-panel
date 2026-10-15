@@ -130,13 +130,11 @@ export function CreditWorkspace({ section = 'overview' }) {
       const result = feature.enabled
         ? await creditWalletService.disableFeature(feature.key)
         : await creditWalletService.enableFeature(feature.key);
-      setNotice(
-        feature.enabled
-          ? `${feature.label} switched off. Any already accrued postpaid usage remains payable.`
-          : result?.billingMode === 'monthly_postpaid'
-            ? `${feature.label} activated. Monthly credits accrue by usage and settle after month-end; nothing was debited today.`
-            : `${feature.label} activated. The server debited ${credits(result?.chargedCredits)} credits.`
-      );
+      setNotice(feature.enabled
+        ? `${feature.label} switched off. Any postpaid usage will be settled at the month-end.`
+        : result?.postpaid
+          ? `${feature.label} activated. Credits will be calculated from active time and settled monthly.`
+          : `${feature.label} activated. ${credits(result?.chargedCredits)} credits debited by the server.`);
       await load();
       notifyCreditChange();
     } catch (e) { setError(e?.message || 'Unable to change feature. Balance is unchanged unless the server confirms it.'); }
