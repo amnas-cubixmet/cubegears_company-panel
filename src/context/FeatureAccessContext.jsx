@@ -21,13 +21,14 @@ export function FeatureAccessProvider({ children }) {
     }
     setLoading(true);
     try {
-      const response = await apiClient.get('/saas/credits/entitlements');
-      if (typeof response?.enforced !== 'boolean' || !Array.isArray(response?.modules)) {
+      const response = await apiClient.get('/saas/credits/access');
+      if (typeof response?.enforcementEnabled !== 'boolean' || !Array.isArray(response?.enabledModules) || !Array.isArray(response?.permissions)) {
         throw new Error('Invalid entitlement response');
       }
       setAccess({
-        enforced: response.enforced,
-        modules: response.modules.filter((item) => typeof item === 'string'),
+        enforced: response.enforcementEnabled,
+        modules: response.enabledModules.filter((item) => typeof item === 'string'),
+        permissions: response.permissions.filter((item) => typeof item === 'string'),
         canManageFeatures: response.canManageFeatures === true,
         unavailable: false,
       });
