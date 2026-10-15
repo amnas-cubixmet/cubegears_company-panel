@@ -5,6 +5,7 @@ import {
   ShieldCheck, Users,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { creditWalletService } from '../../services/creditWallet.service';
 import { validateCompanyDraft, formatCompanyApiError } from './companyAccountValidation';
 
@@ -29,6 +30,7 @@ export function AccountOverview({
   onSaveCompany, onReload, loading, onNavigate,
 }) {
   const { user } = useAuth();
+  const { can } = useFeatureAccess();
   const [editing, setEditing] = useState(false);
   const [creditOverview, setCreditOverview] = useState(null);
   useEffect(() => {
@@ -77,13 +79,13 @@ export function AccountOverview({
       note: 'Depends on activated modules and staff count', icon: CalendarDays },
   ];
   const actions = [
-    { title: 'Credit Wallet', description: 'Balance and credit purchase', href: '/account', icon: ReceiptText },
-    { title: 'Feature Controls', description: 'Activate or disable paid tools', href: '/account/credits/features', icon: CreditCard },
-    { title: 'Credit Logs', description: 'Verified credits and charges', href: '/account/credits/logs', icon: ReceiptText },
-    { title: 'Media Storage', description: 'Uploads and usage history', href: '/account/storage', icon: HardDrive },
-    { title: 'Invoice Templates', description: 'Workshop document styling', href: '/account/templates', icon: FilePenLine },
-    { title: 'Account Security', description: 'Password and sign-in', href: '/account/security', icon: ShieldCheck },
-    { title: 'Company Settings', description: 'Workshop preferences', href: '/settings', icon: Settings2 },
+    { title: 'Credit Wallet', description: 'Balance and credit purchase', href: '/account', icon: ReceiptText, permission: 'billing.view' },
+    { title: 'Feature Controls', description: 'Activate or disable paid tools', href: '/account/credits/features', icon: CreditCard, permission: 'billing.view' },
+    { title: 'Credit Logs', description: 'Verified credits and charges', href: '/account/credits/logs', icon: ReceiptText, permission: 'billing.view' },
+    { title: 'Media Storage', description: 'Uploads and usage history', href: '/account/storage', icon: HardDrive, permission: 'storage.view' },
+    { title: 'Invoice Templates', description: 'Workshop document styling', href: '/account/templates', icon: FilePenLine, permission: 'settings.view' },
+    { title: 'Account Security', description: 'Password and sign-in', href: '/account/security', icon: ShieldCheck, permission: 'settings.view' },
+    { title: 'Company Settings', description: 'Workshop preferences', href: '/settings', icon: Settings2, permission: 'settings.view' },
   ];
 
   return (
@@ -117,7 +119,7 @@ export function AccountOverview({
           <header>
             <div><h2><Building2 size={18} aria-hidden="true"/> Company Information</h2>
               <p>Real company profile from your workshop account.</p></div>
-            {!editing && company && (
+            {!editing && company && can('company.manage') && (
               <button type="button" className="account-overview-edit" onClick={() => {
                 setSaveMessage('');setSaveError('');setFieldErrors({});setEditing(true);
               }}>Edit Details</button>
@@ -167,7 +169,7 @@ export function AccountOverview({
         <header><h2>Manage Your Account</h2>
           <p>Account settings, billing, files and security in one place.</p></header>
         <div className="account-overview-shortcut-grid">
-          {actions.map(({title,description,href,icon:Icon}) => (
+          {actions.filter(({permission}) => can(permission)).map(({title,description,href,icon:Icon}) => (
             <button type="button" key={href} onClick={()=>onNavigate(href)}>
               <i><Icon size={20}/></i>
               <strong>{title}</strong><span>{description}</span>
