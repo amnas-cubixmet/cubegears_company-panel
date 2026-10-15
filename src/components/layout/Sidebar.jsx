@@ -7,11 +7,12 @@ import { useTheme } from '../../hooks/useTheme';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 import { unreadNotificationCount } from '../../utils/notificationInbox';
 import { getUserRoleLabel } from '../../utils/authDisplay';
-import { hasPermission } from '../../utils/permissions';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 
 export const Sidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { can } = useFeatureAccess();
   const { themeMode, setThemeMode } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -81,7 +82,7 @@ export const Sidebar = () => {
         <div className="sidebar-sections">
           {sections.map((section) => {
             const items = routeConfig.filter(
-              (route) => route.section === section && hasPermission(user, route.permission)
+              (route) => route.section === section && can(route.permission)
             );
             if (!items.length) return null;
 
