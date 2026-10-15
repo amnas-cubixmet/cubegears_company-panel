@@ -9,8 +9,8 @@ test('server entitlements are loaded and invalid responses fail closed', () => {
   assert.match(source, /apiClient\.get\('\/saas\/credits\/entitlements'\)/);
   assert.match(source, /const LOCKED = Object\.freeze\(\{ enforced: true, modules: \[\]/);
   assert.match(source, /cubegear:credits-updated/);
-  assert.match(source, /error\?\.status === 404/);
-  assert.match(source, /setAccess\(LEGACY\)/);
+  assert.doesNotMatch(source, /error\?\.status === 404/);
+  assert.match(source, /setAccess\(LOCKED\)/);
   assert.match(source, /module === 'dashboard'\) return access\.modules\.length > 0/);
 });
 
