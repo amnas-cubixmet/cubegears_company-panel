@@ -66,3 +66,18 @@
 .cg-credit-chip:hover,.cg-credit-chip:focus-visible{border-color:#326bed;outline-offset:3px}
 .mobile-header-actions .cg-credit-chip{min-height:32px;padding:5px 8px;font-size:11px}
 @media(max-width:420px){.mobile-header-actions .cg-credit-chip{gap:4px;padding:4px 6px}.mobile-header-actions .cg-credit-chip em{display:none}}
+
+
+/* Admin-only, non-payment Razorpay integration diagnostics. */
+.cg-credit-gateway{margin-top:18px;padding:18px;border:1px solid #d2def2;border-radius:13px;background:#f8fbff}
+.cg-credit-gateway-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.cg-credit-gateway-head>div{flex:1 1 280px;min-width:0}
+.cg-credit-gateway-head strong{font-size:16px;color:var(--c-ink)}
+.cg-credit-gateway-head p{margin:8px 0;color:var(--c-ink);font-size:13px}
+.cg-credit-gateway-head small{display:block;color:var(--c-muted);line-height:1.5}
+.cg-credit-gateway-head button{min-height:42px;white-space:nowrap}
+.cg-credit-gateway-head button:disabled{cursor:not-allowed;opacity:.6}
+.cg-gateway-result{margin:12px 0 0;padding:12px;border-radius:8px;font-size:13px}
+.cg-gateway-result.ok{color:#166534;background:#eaf8ef}
+.cg-gateway-result.error{color:#991b1b;background:#fff0ed}
+@media(max-width:700px){.cg-credit-gateway-head button{width:100%}}
