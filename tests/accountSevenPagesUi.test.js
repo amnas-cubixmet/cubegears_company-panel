@@ -55,7 +55,7 @@ test('wallet keeps real payment guards, refresh and staff based charges', () => 
   assert.match(credit, /creditWalletService\.overview\(\)/);
   assert.match(credit, /purchaseCredits\(pack\.id\)/);
   assert.match(credit, /\!wallet\?\.checkoutAvailable \|\| \!wallet\?\.canManage/);
-  assert.match(credit, /onClick=\{load\}/);
+  assert.match(credit, /featureAccess\.refresh\(\)/);
   assert.match(credit, /feature\.perStaffCredits/);
   assert.match(credit, /feature\.monthlyCredits/);
   assert.match(credit, /creditWalletService\.disableFeature/);
