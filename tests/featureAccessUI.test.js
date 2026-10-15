@@ -14,7 +14,7 @@ const grid = read('../src/components/dashboard/DashboardBottomGrid.jsx');
 const creditUI = read('../src/pages/saas/CreditWorkspace.jsx');
 
 test('real Django access endpoint authorizes all tenant navigation; no local mock fallback', () => {
-  assert.match(access, /apiClient\.get\('\/saas\/credits\/entitlements'\)/);
+  assert.match(access, /apiClient\.get\('\/saas\/credits\/access'\)/);
   assert.match(access, /setAccess\(LOCKED\)/);
   assert.match(access, /response\.modules/);
   assert.match(access, /cubegear:credits-updated/);
