@@ -9,7 +9,7 @@ test('server entitlements must fail closed when API is unavailable', () => {
   assert.match(source, /apiClient\.get\('\/saas\/credits\/access'\)/);
   assert.match(source, /setAccess\(\{ \.\.\.LOCKED, userKey \}\)/);
   assert.doesNotMatch(source, /error\?\.status === 404/);
-  assert.match(source, /module === 'dashboard'\) return access\.modules\.length > 0/);
+  assert.match(source, /module === 'dashboard'\) return access\.enforced \? access\.modules\.length > 0 : true/);
 });
 
 test('dashboard shows only company-enabled and role-authorized modules', () => {
