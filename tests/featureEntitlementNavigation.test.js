@@ -13,7 +13,7 @@ test('server entitlements are loaded, are company-scoped and invalid responses f
   assert.match(source, /current\.permissions\.includes\(permission\)/);
   assert.match(source, /cubegear:credits-updated/);
   assert.doesNotMatch(source, /error\?\.status === 404/);
-  assert.match(source, /if \(module === 'dashboard'\) return access\.modules\.length > 0/);
+  assert.match(source, /if \(module === 'dashboard'\) return access\.enforced \? access\.modules\.length > 0 : true/);
 });
 
 test('desktop and mobile navigation use the same effective permission check', () => {
