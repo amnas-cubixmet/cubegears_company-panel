@@ -26,6 +26,7 @@ jobs:
       - run: node --test tests/emptyCompanyFeatureNav.test.js
       - run: node --test tests/accountSevenPagesUi.test.js
       - run: node --test tests/companyFeatureAccessUi.test.js
+      - run: node --test tests/activatedLabelsOnlyUi.test.js
       - run: npm run build
         env:
           # Harmless build-only placeholder; deployment must supply its real API URL.
