@@ -47,6 +47,7 @@ const SPECIAL_PATH_PERMISSIONS = [
   ['/notifications', 'notifications.view'],
   ['/settings', 'settings.view'],
   ['/account/billing', 'billing.view'],
+  ['/account/credits', 'billing.view'],
   ['/account/storage', 'storage.view'],
   ['/account/templates', 'settings.view'],
   ['/account/security', 'settings.view'],
