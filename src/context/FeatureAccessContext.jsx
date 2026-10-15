@@ -1,11 +1,13 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import apiClient from '../api/apiClient';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 // UI filtering only. Django tenant permissions and entitlements remain authoritative.
 const FeatureAccessContext = createContext(null);
 const LOCKED = Object.freeze({
-  enforced: true, modules: [], permissions: [], canManageFeatures: false, unavailable: true, userKey: '',
+  enforced: true, labelOnly: false, activeLabelModules: [], nextLabelExpiryAt: null,
+  modules: [], permissions: [], canManageFeatures: false, unavailable: true, userKey: '',
 });
 const CORE_MODULES = new Set(['billing', 'settings', 'company', 'storage', 'notifications', 'roles']);
 const userIdentity = (user) => user?.id
@@ -15,16 +17,19 @@ const userIdentity = (user) => user?.id
 export function moduleIsVisible(access, permission) {
   if (!permission) return true;
   if (!access || access.unavailable) return false;
-  if (!access.enforced) return true;
   const module = permission.split('.')[0];
-  // Keep billing and administration accessible without creating a paid-feature deadlock.
+  // Keep wallet, activation, security and account recovery reachable.
   if (CORE_MODULES.has(module)) return true;
-  if (module === 'dashboard') return access.modules.length > 0;
-  return access.modules.includes(module);
+  if (module === 'dashboard') return access.enforced ? access.modules.length > 0 : true;
+  // Paid workshop modules in label-only mode MUST belong to an activated
+  // company label AND the server-authorized role permission intersection.
+  if (access.labelOnly && !access.activeLabelModules.includes(module)) return false;
+  return !access.enforced || access.modules.includes(module);
 }
 
 export function FeatureAccessProvider({ children }) {
   const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
   const userKey = userIdentity(user);
   const [access, setAccess] = useState(LOCKED);
   const [loading, setLoading] = useState(false);
@@ -50,6 +55,11 @@ export function FeatureAccessProvider({ children }) {
         userKey,
         companyId: response.companyId,
         enforced: response.enforcementEnabled,
+        labelOnly: response.labelOnly === true,
+        activeLabelModules: Array.isArray(response.activeLabelModules)
+          ? response.activeLabelModules.filter(item => typeof item === 'string') : [],
+        nextLabelExpiryAt: typeof response.nextLabelExpiryAt === 'string'
+          ? response.nextLabelExpiryAt : null,
         modules: response.enabledModules.filter(item => typeof item === 'string'),
         permissions: response.permissions.filter(item => typeof item === 'string'),
         canManageFeatures: response.canManageFeatures === true,
@@ -71,9 +81,18 @@ export function FeatureAccessProvider({ children }) {
       window.removeEventListener('cubegear:credits-updated', refresh);
       window.removeEventListener('focus', refresh);
     };
-  }, [refresh]);
+  }, [refresh, location.pathname]);
 
   const current = access.userKey === userKey ? access : LOCKED;
+  // Time-limited labels disappear at expiry even if the browser stays open.
+  useEffect(() => {
+    if (!current.labelOnly || !current.nextLabelExpiryAt) return undefined;
+    const expiry = new Date(current.nextLabelExpiryAt).getTime();
+    if (!Number.isFinite(expiry)) return undefined;
+    const delay = Math.min(Math.max(expiry - Date.now() + 150, 0), 2147483647);
+    const id = window.setTimeout(refresh, delay);
+    return () => window.clearTimeout(id);
+  }, [current.labelOnly, current.nextLabelExpiryAt, refresh]);
   const checking = loading || (isAuthenticated && Boolean(userKey) && access.userKey !== userKey);
   const can = useCallback((permission) => {
     if (!permission) return true;
