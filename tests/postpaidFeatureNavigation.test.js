@@ -6,7 +6,7 @@ const read = (file) => readFileSync(new URL('../' + file, import.meta.url), 'utf
 
 test('server entitlements must fail closed when API is unavailable', () => {
   const source = read('src/context/FeatureAccessContext.jsx');
-  assert.match(source, /apiClient\.get\('\/saas\/credits\/entitlements'\)/);
+  assert.match(source, /apiClient\.get\('\/saas\/credits\/access'\)/);
   assert.match(source, /setAccess\(LOCKED\)/);
   assert.doesNotMatch(source, /error\?\.status === 404/);
   assert.match(source, /module === 'dashboard'\) return access\.modules\.length > 0/);
