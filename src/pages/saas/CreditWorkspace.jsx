@@ -6,6 +6,7 @@ import { AccountHeader } from '../../components/account';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { useAuth } from '../../hooks/useAuth';
 import { routeConfig } from '../../routes/routeConfig';
+import { featureLabelStatus } from '../../utils/featureActivation';
 import '../../styles/credit-wallet.css';
 
 const nf = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });
@@ -230,28 +231,48 @@ export function CreditWorkspace({ section = 'overview' }) {
     </section>}
 
     {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Paid feature labels">
-      <header><div><span>FEATURE LABELS</span><h2>Ready-to-use module packages</h2></div><Coins size={22}/></header>
-      <p>Buy a label to access the included existing modules together. Credits are deducted by the server, and your user role must still permit each module.</p>
+      <header><div><span>FEATURE LABELS</span><h2>Available module packages ({featureBundles.length})</h2></div><Coins size={22}/></header>
+      <p>Choose a package for your workshop. Prices are calculated by Django using only the published per-user credits and the company's active login count.</p>
       <div className="cg-bundle-grid">
-        {featureBundles.map((bundle) => <article key={bundle.id} className="cg-bundle-card">
-          <div className="cg-bundle-head"><h3>{bundle.name}</h3><span className={bundle.active ? 'cg-credit-pill active' : 'cg-credit-pill'}>{bundle.active ? 'Active' : 'Inactive'}</span></div>
-          <p>{bundle.description || 'A grouped package of existing CubeGear features.'}</p>
-          <div className="cg-bundle-price"><strong>{credits(bundle.priceCredits)}</strong> base credits <small>/ {({ permanent:'lifetime', monthly:'30 days', weekly:'7 days', daily:'24 hours', hourly:'hour', per_use:'use' })[bundle.billingType] || bundle.billingType}</small></div>
-          {(Number(bundle.perUserCredits) > 0 || Number(bundle.activationCredits) > 0) &&
-            <small>Activation: {credits(bundle.activationCredits)} cr · Per active login user: {credits(bundle.perUserCredits)} cr × {wallet?.userCount ?? '—'}. Total calculated by server.</small>}
-          <div className="cg-bundle-features">{bundle.features.map((item) => <span key={item.key}>{item.label}</span>)}</div>
-          {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
-          {!bundle.meteredReady && <small>Per-use tracking must be connected to the selected backend actions before purchasing is available.</small>}
-          {bundle.meteredReady && !bundle.purchaseEnabled && <small>Paid feature enforcement must be enabled by the CubeGear platform before labels can be purchased.</small>}
-          <div className="cg-bundle-actions">
-            <button className="primary" type="button" disabled={busy !== '' || !wallet?.canManage || !bundle.purchaseEnabled || bundle.active && bundle.billingType === 'permanent'} onClick={() => buyBundle(bundle)}>
-              {busy === `bundle:${bundle.id}` ? 'Saving…' : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently' : bundle.active ? 'Extend access' : 'Activate label'}
-            </button>
-            {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage} onClick={() => stopBundle(bundle)}>Disable</button>}
-          </div>
-        </article>)}
+        {featureBundles.map((bundle) => {
+          const status = featureLabelStatus(bundle, wallet);
+          const period = ({ permanent: 'lifetime', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
+          return <article key={bundle.id} className="cg-bundle-card">
+            <div className="cg-bundle-head">
+              <h3>{bundle.name}</h3>
+              <span className={bundle.active ? 'cg-credit-pill active' : 'cg-credit-pill'}>{bundle.active ? 'Active' : 'Inactive'}</span>
+            </div>
+            <p>{bundle.description || 'Existing workshop features grouped into one package.'}</p>
+            <div className="cg-bundle-price">
+              <span>Per user credits</span>
+              <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
+              <div className="cg-bundle-summary">
+                <span>{bundle.userCount ?? '—'} active login users</span>
+                <b>{credits(bundle.totalCredits)} credits total</b>
+              </div>
+            </div>
+            <div className="cg-bundle-feature-list">
+              <small>Included existing features</small>
+              <div className="cg-bundle-features">
+                {(bundle.features || []).map(item => <span key={item.key}>{item.label}</span>)}
+              </div>
+            </div>
+            {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
+            {status.message && <p className="cg-bundle-reason" role="status">{status.message}</p>}
+            <div className="cg-bundle-actions">
+              <button className="primary" type="button" disabled={busy !== '' || !status.allow}
+                onClick={() => buyBundle(bundle)}>
+                {busy === `bundle:${bundle.id}` ? 'Saving…'
+                  : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
+                  : bundle.active ? 'Extend access' : 'Activate label'}
+              </button>
+              {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage}
+                onClick={() => stopBundle(bundle)}>Switch Off</button>}
+            </div>
+          </article>;
+        })}
       </div>
-      {!featureBundles.length && !loading && <p className="cg-credit-empty">No paid feature labels are published yet. The platform admin can create them in /features/.</p>}
+      {!featureBundles.length && !loading && <p className="cg-credit-empty">No published feature labels. Ask the platform administrator to create a label in /features/bundles/add/.</p>}
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only a company billing admin can purchase feature labels.</p>}
     </section>}
 

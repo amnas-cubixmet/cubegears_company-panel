@@ -20,13 +20,19 @@ test('company can activate and disable real backend labels from Feature Controls
   assert.match(panel, /creditWalletService\.bundles\(\)/);
   assert.match(panel, /creditWalletService\.purchaseBundle\(bundle\.id\)/);
   assert.match(panel, /creditWalletService\.disableBundle\(bundle\.id\)/);
-  assert.match(panel, /bundle\.features\.map/);
+  assert.match(panel, /\(bundle\.features \|\| \[\]\)\.map/);
   assert.match(panel, /bundle\.validUntil/);
-  assert.match(panel, /!bundle\.meteredReady/);
+  assert.match(panel, /featureLabelStatus\(bundle, wallet\)/);
+  assert.match(panel, /bundle\.perUserCredits/);
+  assert.match(panel, /bundle\.totalCredits/);
+  assert.doesNotMatch(panel, /bundle\.priceCredits/);
+  assert.doesNotMatch(panel, /bundle\.activationCredits/);
 });
 
 test('UI informs users when metered backend events are not yet available', () => {
-  assert.match(panel, /Per-use tracking must be connected to the selected backend actions/);
+  const helper = read('../src/utils/featureActivation.js');
+  assert.match(helper, /METERED_OPERATION_NOT_READY/);
+  assert.match(helper, /FEATURE_ENTITLEMENTS_NOT_ENABLED/);
   assert.match(panel, /Only a company billing admin can purchase feature labels/);
   assert.match(panel, /Prepaid credits are not refunded/);
 });
