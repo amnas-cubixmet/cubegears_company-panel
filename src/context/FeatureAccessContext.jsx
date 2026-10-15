@@ -31,10 +31,15 @@ export function FeatureAccessProvider({ children }) {
         canManageFeatures: response.canManageFeatures === true,
         unavailable: false,
       });
-    } catch {
-      // A failed permission request must never unlock an account. Users retain
-      // the Feature Controls and credit/account paths for recovery.
-      setAccess(LOCKED);
+    } catch (error) {
+      if (error?.status === 404) {
+        // Old CubeGear backends do not have an entitlement endpoint and cannot
+        // enforce strict feature purchases yet. Preserve existing navigation
+        // until the backend deploys. Other failures continue to fail closed.
+        setAccess(LEGACY);
+      } else {
+        setAccess(LOCKED);
+      }
     } finally {
       setLoading(false);
     }
