@@ -3,6 +3,7 @@ import { Bell, Boxes, Building2, Clock3, CreditCard, Plug, ShieldCheck, WalletCa
 import { ThemeContext } from '../../context/ThemeContext';
 import { settingsService } from '../../services/settings.service';
 import { useNavigate } from 'react-router-dom';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import {
   SettingsEditor,
   SettingsHeader,
@@ -22,6 +23,8 @@ const sections = [
   { id: 'security', label: 'Roles & Security', icon: ShieldCheck },
   { id: 'integrations', label: 'Integrations', icon: Plug }
 ];
+
+const SETTINGS_SECTION_PERMISSIONS = { operations: 'jobs.view', billing: 'invoices.view', inventory: 'stock.view', attendance: 'attendance.manage', payroll: 'payroll.view' };
 
 const schemas = {
   company: [
@@ -56,6 +59,8 @@ const schemas = {
 
 export const Settings = () => {
   const navigate = useNavigate();
+  const { can } = useFeatureAccess();
+  const visibleSections = useMemo(() => sections.filter(section => !SETTINGS_SECTION_PERMISSIONS[section.id] || can(SETTINGS_SECTION_PERMISSIONS[section.id])), [can]);
   const [active, setActive] = useState('company');
   const [data, setData] = useState({});
   const [savedData, setSavedData] = useState({});
@@ -100,15 +105,19 @@ export const Settings = () => {
     return () => { mounted = false; };
   }, []);
 
+  useEffect(() => {
+    if (!visibleSections.some(section => section.id === active)) setActive('company');
+  }, [active, visibleSections]);
+
   const dirtySections = useMemo(
-    () => sections.filter(({ id }) => {
+    () => visibleSections.filter(({ id }) => {
       const fields = schemas[id] || [];
       return fields.some(([key, , type]) =>
         (data[id]?.[key] ?? (type === 'checkbox' ? false : '')) !==
         (savedData[id]?.[key] ?? (type === 'checkbox' ? false : ''))
       );
     }).map(({ id }) => id),
-    [data, savedData]
+    [data, savedData, visibleSections]
   );
   const dirty = dirtySections.includes(active);
 
@@ -177,7 +186,7 @@ export const Settings = () => {
 
       <div className="settings-dashboard-layout">
         <SettingsSectionNav
-          sections={sections}
+          sections={visibleSections}
           active={active}
           dirtySections={dirtySections}
           onChange={(id) => {
@@ -188,7 +197,7 @@ export const Settings = () => {
         />
         <SettingsEditor
           active={active}
-          sections={sections}
+          sections={visibleSections}
           schema={schemas[active] || []}
           data={data[active] || {}}
           themeMode={themeMode}
