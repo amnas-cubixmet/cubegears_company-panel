@@ -19,8 +19,8 @@ test('account navigation contains five credit tabs and no old subscription plans
 
 test('credits are always server-authoritative, not generated in local storage', () => {
   assert.match(client, /\/saas\/credits\/overview/);
-  assert.match(client, /\/saas\/credits\/orders/);
-  assert.match(client, /\/saas\/credits\/verify/);
+  assert.match(client, /\/saas\/credits\/checkout-links/);
+  assert.match(client, /hostedCheckoutStatus/);
   assert.match(client, /\/saas\/credits\/features\/enable/);
   assert.match(client, /\/saas\/credits\/logs/);
   assert.doesNotMatch(client, /localStorage\.(?:setItem|getItem)/);
@@ -33,5 +33,5 @@ test('credit purchases and feature actions require confirmation from backend', (
   assert.match(credit, /purchaseCredits\(pack\.id\)/);
   assert.match(credit, /creditWalletService\.enableFeature\(feature\.key\)/);
   assert.match(credit, /creditWalletService\.disableFeature\(feature\.key\)/);
-  assert.match(client, /if \(!confirmed\?\.credited\)/);
+  assert.match(credit, /payment\.credited === true && payment\.status === 'credited'/);
 });
