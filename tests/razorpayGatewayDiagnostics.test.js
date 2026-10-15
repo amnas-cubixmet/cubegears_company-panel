@@ -13,7 +13,7 @@ test('gateway status and read-only probe use the authenticated backend API', () 
 });
 
 test('test connection UI is available only to billing admins on Buy Credits', () => {
-  assert.match(page, /section === 'buy' \|\| !wallet\?\.canManage/);
+  assert.match(page, /section !== 'buy' \|\| !wallet\?\.canManage/);
   assert.match(page, /wallet\?\.canManage && <div className="cg-credit-gateway"/);
   assert.match(page, /Test API Connection/);
   assert.match(page, /!gateway\?\.probeAvailable/);
