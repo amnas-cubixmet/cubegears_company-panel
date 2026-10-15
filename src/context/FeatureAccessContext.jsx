@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import apiClient from '../api/apiClient';
 import { useAuth } from '../hooks/useAuth';
-import { hasPermission } from '../utils/permissions';
 
 // UI filtering only. Django tenant permissions and entitlements remain authoritative.
 const FeatureAccessContext = createContext(null);
@@ -79,11 +78,9 @@ export function FeatureAccessProvider({ children }) {
   const can = useCallback((permission) => {
     if (!permission) return true;
     if (!isAuthenticated || checking || current.unavailable || !moduleIsVisible(current, permission)) return false;
-    // The server already intersects RBAC with the company's paid entitlements.
-    return current.enforced
-      ? current.permissions.includes(permission)
-      : hasPermission(user, permission);
-  }, [isAuthenticated, checking, current, user]);
+    // Always trust the freshly verified server permission intersection, even when paid gating is off.
+    return current.permissions.includes(permission);
+  }, [isAuthenticated, checking, current]);
 
   const value = useMemo(() => ({ ...current, loading: checking, refresh, can }), [current, checking, refresh, can]);
   return <FeatureAccessContext.Provider value={value}>{children}</FeatureAccessContext.Provider>;
