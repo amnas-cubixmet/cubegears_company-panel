@@ -12,7 +12,7 @@ import {
   UserPlus,
   Wrench,
 } from 'lucide-react';
-import { hasPermission } from '../../utils/permissions';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 
 const actions = [
   ['New Customer', '/customers/new', UserPlus, 'customers.create'],
@@ -27,14 +27,16 @@ const actions = [
   ['Service Catalog', '/services', Plus, 'services.view'],
 ];
 
-export const QuickActionsPanel = ({ user, onNavigate }) => (
+export const QuickActionsPanel = ({ user, onNavigate }) => {
+  const { can } = useFeatureAccess();
+  return (
   <article className="dashboard-panel">
     <div className="panel-title"><h2>Quick Actions</h2><Wrench size={15} /></div>
     <div className="quick-actions quick-actions-expanded">
       {actions
         .filter(([label, , , permission]) =>
-          hasPermission(user, permission) &&
-          (label !== 'Add Outside Labour' || hasPermission(user, 'expenses.view'))
+          can(permission) &&
+          (label !== 'Add Outside Labour' || can('expenses.view'))
         )
         .map(([label, path, Icon]) => (
           <button key={label} type="button" onClick={() => onNavigate(path)}>
@@ -47,4 +49,5 @@ export const QuickActionsPanel = ({ user, onNavigate }) => (
         ))}
     </div>
   </article>
-);
+  );
+};

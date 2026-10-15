@@ -127,9 +127,16 @@ export function CreditWorkspace({ section = 'overview' }) {
   const toggle = async (feature) => {
     setBusy(`feature:${feature.key}`); setError(''); setNotice('');
     try {
-      if (feature.enabled) await creditWalletService.disableFeature(feature.key);
-      else await creditWalletService.enableFeature(feature.key);
-      setNotice(feature.enabled ? `${feature.label} switched off.` : `${feature.label} activated. The quoted first 30-day charge was debited by the server.`);
+      const result = feature.enabled
+        ? await creditWalletService.disableFeature(feature.key)
+        : await creditWalletService.enableFeature(feature.key);
+      setNotice(
+        feature.enabled
+          ? `${feature.label} switched off. Any already accrued postpaid usage remains payable.`
+          : result?.billingMode === 'monthly_postpaid'
+            ? `${feature.label} activated. Monthly credits accrue by usage and settle after month-end; nothing was debited today.`
+            : `${feature.label} activated. The server debited ${credits(result?.chargedCredits)} credits.`
+      );
       await load();
       notifyCreditChange();
     } catch (e) { setError(e?.message || 'Unable to change feature. Balance is unchanged unless the server confirms it.'); }
@@ -159,7 +166,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       </article>
       <article className="cg-credit-metric"><div><span>Active Features</span><Zap size={20}/></div><strong>{wallet?.activeFeatures ?? '—'}</strong><small>Modules currently switched on</small></article>
       <article className="cg-credit-metric"><div><span>Active Staff</span><Users size={20}/></div><strong>{wallet?.staffCount ?? '—'}</strong><small>Used for per-staff feature pricing</small></article>
-      <article className="cg-credit-metric"><div><span>Expected 30-day Charge</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits, subject to staff-count changes</small></article>
+      <article className="cg-credit-metric"><div><span>Estimated Monthly Features</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits / month; pending postpaid usage: {credits(wallet?.postpaidAccruedCredits)} credits</small></article>
     </div>
 
     {low && <div className="cg-credit-low" role="alert"><Coins size={20}/><div><strong>Your credit balance is running low.</strong><span>Buy more credits so paid modules can renew when due.</span></div><button onClick={() => navigate('/account/credits/buy')}>Buy Credits <ArrowRight size={16}/></button></div>}
@@ -219,18 +226,20 @@ export function CreditWorkspace({ section = 'overview' }) {
     </section>}
 
     {section === 'features' && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
-      <p>Each module has a separate activation charge, base period price, per-active-login-user price and optional per-employee charge. Daily, weekly and 30-day renewals deduct wallet credits on the backend. Feature access remains restricted by each user's role.</p>
+      <p>Each module uses the backend-configured credit price. Prepaid modules deduct credits on activation and renewal; monthly-postpaid modules record timed usage and debit only after month-end. Every staff member still requires their role permission.</p>
       <div className="cg-credit-features">{features.map((feature) => <article key={feature.key}>
         <div className="cg-credit-feature-main"><div><h3>{feature.label}</h3><p>{feature.description || 'Workshop management module'}</p></div><span className={feature.enabled ? 'cg-credit-pill active' : 'cg-credit-pill'}>{feature.enabled ? 'Active' : 'Off'}</span></div>
         <div className="cg-credit-feature-cost">
           <span>Activation: <b>{credits(feature.activationCredits)} cr</b></span>
-          <span>Base / {feature.billingPeriod}: <b>{credits(feature.baseCredits)} cr</b></span>
+          <span>Base / {feature.billingMode === 'monthly_postpaid' ? 'calendar month' : feature.billingPeriod}: <b>{credits(feature.baseCredits)} cr</b></span>
           <span>Per user: <b>{credits(feature.perUserCredits)} cr</b> × {feature.userCount ?? '—'}</span>
           <span>Per employee: <b>{credits(feature.perStaffCredits)} cr</b> × {feature.staffCount ?? '—'}</span>
           <span>Recurring / {feature.billingPeriod}: <b>{credits(feature.periodCredits)} cr</b></span>
           <span>Estimated / 30 days: <b>{credits(feature.monthlyCredits)} cr</b></span>
         </div>
-        <div className="cg-credit-feature-footer"><small>{feature.enabled ? `Next charge: ${when(feature.nextChargeAt)}` : 'Not enabled'} · {feature.userCount ?? '—'} users, {feature.staffCount ?? '—'} employees</small><button type="button" disabled={busy !== '' || !feature.available || !wallet?.canManage} className={feature.enabled ? 'secondary' : 'primary'} onClick={() => toggle(feature)}>{busy === `feature:${feature.key}` ? 'Saving…' : feature.enabled ? 'Switch Off' : 'Enable Feature'}</button></div>
+        <div className="cg-credit-feature-footer"><small>{feature.suspended ? 'Suspended — insufficient wallet credits'
+          : feature.enabled && feature.billingMode === 'monthly_postpaid' ? 'Metered each cycle · charged after month-end'
+          : feature.enabled ? `Next charge: ${when(feature.nextChargeAt)}` : 'Not enabled'} · {feature.userCount ?? '—'} users, {feature.staffCount ?? '—'} employees</small><button type="button" disabled={busy !== '' || !feature.available || !wallet?.canManage} className={feature.enabled ? 'secondary' : 'primary'} onClick={() => toggle(feature)}>{busy === `feature:${feature.key}` ? 'Saving…' : feature.enabled ? 'Switch Off' : 'Enable Feature'}</button></div>
       </article>)}</div>
       {!features.length && !loading && <p className="cg-credit-empty">No feature pricing has been configured by the administrator.</p>}
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only authorized company administrators can change paid features.</p>}
