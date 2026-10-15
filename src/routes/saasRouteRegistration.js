@@ -8,7 +8,7 @@ const accountRoute = {
   icon: Cloud,
   section: ROUTE_SECTIONS.ANALYTICS_SYSTEM,
   mobilePrimary: false,
-  permission: 'settings.manage',
+  permission: 'billing.view',
   children: [
     { id: 'credits-overview', label: 'Credit Overview', path: '/account' },
     { id: 'credits-buy', label: 'Buy Credits', path: '/account/credits/buy' },
