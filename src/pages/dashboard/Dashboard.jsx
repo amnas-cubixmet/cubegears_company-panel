@@ -17,6 +17,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const featureAccess = useFeatureAccess();
+  const can = (permission) => hasPermission(user, permission);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +47,9 @@ export const Dashboard = () => {
 
   if (featureAccess.enforced) {
     const activeRoutes = routeConfig.filter(route =>
-      route.permission && featureAccess.modules.includes(route.permission.split('.')[0]) &&
+      route.permission &&
+      !['dashboard', 'billing', 'settings', 'notifications'].includes(route.permission.split('.')[0]) &&
+      featureAccess.modules.includes(route.permission.split('.')[0]) &&
       hasPermission(user, route.permission)
     );
     return (

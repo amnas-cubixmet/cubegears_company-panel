@@ -17,6 +17,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [featureBundles, setFeatureBundles] = useState([]);
   const [features, setFeatures] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [monthlyStatements, setMonthlyStatements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
@@ -24,10 +25,10 @@ export function CreditWorkspace({ section = 'overview' }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [balance, bundles, catalog, history, labels] = await Promise.allSettled([
+    const [balance, bundles, catalog, history, labels, statements] = await Promise.allSettled([
       creditWalletService.overview(), creditWalletService.packages(),
       creditWalletService.features(), creditWalletService.logs(),
-      creditWalletService.bundles(),
+      creditWalletService.bundles(), creditWalletService.monthlyStatements(),
     ]);
     const problems = [];
     if (balance.status === 'fulfilled') setWallet(balance.value);
@@ -40,6 +41,13 @@ export function CreditWorkspace({ section = 'overview' }) {
     else { setLogs([]); problems.push('transaction logs'); }
     if (labels.status === 'fulfilled') setFeatureBundles(Array.isArray(labels.value) ? labels.value : []);
     else { setFeatureBundles([]); problems.push('paid feature labels'); }
+    if (statements.status === 'fulfilled') setMonthlyStatements(Array.isArray(statements.value) ? statements.value : []);
+    else {
+      setMonthlyStatements([]);
+      // Older backend deployments return 404 until the read-only statement
+      // endpoint ships. Wallet, feature activation and ledger remain usable.
+      if (statements.reason?.status !== 404) problems.push('monthly credit statements');
+    }
     setError(problems.length ? `Could not load ${problems.join(', ')}. No balance or payment has been assumed.` : '');
     setLoading(false);
   }, []);
@@ -132,7 +140,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         : await creditWalletService.enableFeature(feature.key);
       setNotice(feature.enabled
         ? `${feature.label} switched off. Any postpaid usage will be settled at the month-end.`
-        : result?.postpaid
+        : result?.billingMode === 'monthly_postpaid'
           ? `${feature.label} activated. Credits will be calculated from active time and settled monthly.`
           : `${feature.label} activated. ${credits(result?.chargedCredits)} credits debited by the server.`);
       await load();
@@ -171,7 +179,9 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {section === 'overview' && <div className="cg-credit-columns">
       <section className="cg-credit-panel"><header><div><span>WALLET OVERVIEW</span><h2>Your credits at a glance</h2></div><Wallet size={22}/></header>
-        <p>Buy credits as needed. You are not charged for a fixed subscription plan. Feature activation and renewals are recorded in the company ledger.</p>
+        <p>Buy wallet credits as needed. {wallet?.billingMode === 'monthly_postpaid'
+        ? 'Monthly feature usage and actual storage GB-time accumulate in the backend and settle after month-end.'
+        : 'Feature activation and renewals are recorded in the company wallet ledger.'}</p>
         <div className="cg-credit-actions"><button className="primary" onClick={() => navigate('/account/credits/buy')}><CreditCard size={17}/> Buy Credits</button><button onClick={() => navigate('/account/credits/features')}>Manage Features <ArrowRight size={16}/></button></div>
         <div className="cg-credit-inline"><span>Low credit alert threshold</span><strong>{credits(wallet?.lowThreshold)} credits</strong></div>
         <div className="cg-credit-inline"><span>Staff billing basis</span><strong>{wallet?.staffCount ?? '—'} active staff accounts</strong></div>
@@ -241,6 +251,21 @@ export function CreditWorkspace({ section = 'overview' }) {
       </article>)}</div>
       {!features.length && !loading && <p className="cg-credit-empty">No feature pricing has been configured by the administrator.</p>}
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only authorized company administrators can change paid features.</p>}
+    </section>}
+
+    {section === 'logs' && <section className="cg-credit-panel" aria-label="Monthly postpaid usage statements">
+      <header><div><span>MONTH-END FEATURE &amp; STORAGE BILLING</span><h2>Monthly usage statements</h2></div><Database size={22}/></header>
+      <p>Feature usage and storage GB-time are recorded by Django. Only completed calendar months can deduct wallet credits. Unpaid statements remain pending until there is sufficient balance.</p>
+      <div className="cg-credit-table-wrap"><table><thead><tr><th>Period</th><th>Features</th><th>Storage</th><th>Total credits</th><th>Status</th></tr></thead>
+        <tbody>
+          {monthlyStatements.map((row) => <tr key={row.id}>
+            <td><strong>{row.period}</strong></td><td>{credits(row.featureCredits)}</td>
+            <td>{credits(row.storageCredits)}</td><td><strong>{credits(row.totalCredits)}</strong></td>
+            <td><span className={row.status === 'paid' ? 'cg-credit-pill active' : 'cg-credit-pill'}>{row.status}</span></td>
+          </tr>)}
+          {!monthlyStatements.length && <tr><td colSpan={5} className="cg-credit-empty">No completed-month usage statements yet.</td></tr>}
+        </tbody></table></div>
+      <p className="cg-credit-note">Each statement is locked to the company and calendar month; wallet debits are recorded below with a unique reference.</p>
     </section>}
 
     {section === 'logs' && <section className="cg-credit-panel"><header><div><span>COMPANY AUDIT TRAIL</span><h2>Credit transaction log</h2></div><FileClock size={22}/></header>
