@@ -49,7 +49,8 @@ export const ProtectedRoute = () => {
   if (
     location.pathname !== '/access-denied' &&
     requiredPermission &&
-    (!moduleIsVisible(featureAccess, requiredPermission) || (!isOwnStaffProfile && !featureAccess.can(requiredPermission)))
+    (!moduleIsVisible(featureAccess, requiredPermission) ||
+      ((!isOwnStaffProfile || featureAccess.labelOnly) && !featureAccess.can(requiredPermission)))
   ) {
     return (
       <Navigate
