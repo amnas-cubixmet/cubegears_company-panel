@@ -22,7 +22,7 @@ test('Full Log has a visible dedicated tab beside the six workflow stages', () =
 });
 
 test('Full Log is not a seventh required stage and does not show stage status', () => {
-  assert.match(workspace, /const visibleTabs = TABS\.filter\(\(\[key\]\) => GUIDED_STAGES\.includes\(key\)\)/);
+  assert.match(workspace, /const visibleTabs = TABS\.filter\(\(\[key\]\) => GUIDED_STAGES\.includes\(key\) && moduleTabAllowed\(key\)\)/);
   assert.match(workspace, /const showWorkTools = activeTab === 'work' \|\| \(activeExtraTab && activeTab !== 'activity'\)/);
   assert.match(workspace, /activeTab !== 'activity' && !showWorkTools/);
   assert.match(workspace, /activeTab !== 'activity' && <span className=\{'job-workspace-section-state/);
