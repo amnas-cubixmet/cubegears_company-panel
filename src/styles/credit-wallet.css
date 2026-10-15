@@ -81,3 +81,21 @@
 .cg-gateway-result.ok{color:#166534;background:#eaf8ef}
 .cg-gateway-result.error{color:#991b1b;background:#fff0ed}
 @media(max-width:700px){.cg-credit-gateway-head button{width:100%}}
+
+
+/* Paid feature-label marketplace: select existing feature bundles by period. */
+.cg-bundle-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;margin-top:20px}
+.cg-bundle-card{min-width:0;display:flex;flex-direction:column;gap:13px;padding:20px;border:1px solid #dae3f3;border-radius:15px;background:#fff}
+.cg-bundle-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.cg-bundle-head h3{font-size:18px;font-weight:850;line-height:1.3;margin:0}
+.cg-bundle-card p{font-size:13px;line-height:1.5;color:var(--c-muted);margin:0}
+.cg-bundle-card>small{font-size:12px;color:var(--c-muted);line-height:1.5}
+.cg-bundle-price{font-size:13px;color:var(--c-muted)}
+.cg-bundle-price strong{font-size:29px;color:var(--c-ink);font-weight:850}
+.cg-bundle-price small{font-size:12px}
+.cg-bundle-features{display:flex;flex-wrap:wrap;gap:7px;align-content:start;flex:1}
+.cg-bundle-features span{font-size:12px;font-weight:700;color:#235aaf;background:#edf4ff;border-radius:9px;padding:7px 9px}
+.cg-bundle-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto}
+.cg-bundle-actions button{min-height:42px}
+.cg-bundle-actions button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:600px){.cg-bundle-grid{grid-template-columns:1fr}.cg-bundle-card{padding:16px}.cg-bundle-actions button{width:100%}}
