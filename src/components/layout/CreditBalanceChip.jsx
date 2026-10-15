@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Coins, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { creditWalletService } from '../../services/creditWallet.service';
 
 const format = (v) => new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(Number(v));
 
 export function CreditBalanceChip({ compact = false }) {
   const navigate = useNavigate();
+  const { isCompanyOwner, companyId } = useFeatureAccess();
   const [wallet, setWallet] = useState(null);
   const [offline, setOffline] = useState(false);
 
   useEffect(() => {
+    setWallet(null);
+    if (!isCompanyOwner) return undefined;
     let active = true;
     const refresh = async () => {
       try {
@@ -28,7 +32,9 @@ export function CreditBalanceChip({ compact = false }) {
       window.removeEventListener('cubegear:credits-updated', refresh);
       window.removeEventListener('focus', refresh);
     };
-  }, []);
+  }, [isCompanyOwner, companyId]);
+
+  if (!isCompanyOwner) return null;
 
   return <button
     className={`cg-credit-chip ${wallet?.lowBalance ? 'is-low' : ''}`}

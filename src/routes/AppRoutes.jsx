@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { getStaffLandingPath } from '../utils/staffLanding';
 import { ProtectedRoute } from './ProtectedRoute';
 
 import { CreditWorkspace } from '../pages/saas/CreditWorkspace';
@@ -52,10 +54,11 @@ import { AccountSecurity } from '../pages/account/AccountSecurity';
 
 function RootRedirect() {
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <Navigate
-      to={`/dashboard${location.search}`}
+      to={`${isAuthenticated ? getStaffLandingPath(user) : "/dashboard"}${location.search}`}
       replace
     />
   );

@@ -33,7 +33,7 @@ test('search filters results and stores history per company and login', () => {
 });
 
 test('account, settings, search and header share paid module access', () => {
-  assert.match(src('src/components/account/AccountHeader.jsx'), /visibleTabs = tabs\.filter\(tab => can\(tab\[4\]\)\)/);
+  assert.match(src('src/components/account/AccountHeader.jsx'), /visibleTabs = tabs\.filter\(tab => isCompanyOwner && can\(tab\[4\]\)\)/);
   assert.match(src('src/pages/saas/CreditWorkspace.jsx'), /featureAccess\.can\(route\.permission\)/);
   assert.match(src('src/components/layout/Header.jsx'), /canViewSettings = can\('settings\.view'\)/);
   assert.match(src('src/pages/settings/Settings.jsx'), /visibleSections = useMemo/);

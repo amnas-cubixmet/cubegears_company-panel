@@ -1,4 +1,6 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
+import { getStaffLandingPath } from '../../utils/staffLanding';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { staffService } from '../../services/staff.service';
@@ -91,6 +93,8 @@ const prettify = (value) => {
 const buildHref = (segments, index) => '/' + segments.slice(0, index + 1).join('/');
 
 export function AppBreadcrumbs() {
+  const { isCompanyOwner, permissions } = useFeatureAccess();
+  const homePath = getStaffLandingPath({ isCompanyOwner, effectivePermissions: permissions });
   const location = useLocation();
   const scrollRef = useRef(null);
   const [staffBreadcrumbLabel, setStaffBreadcrumbLabel] = useState('');
@@ -164,7 +168,7 @@ export function AppBreadcrumbs() {
 
     if (segments.length === 3 && segments[0] === 'staff' && segments[2] === 'wages') {
       return [
-        { label: 'Home', href: '/dashboard', current: false, home: true },
+        { label: 'Home', href: homePath, current: false, home: true },
         { label: 'Staff Management', href: '/staff-management/staff', current: false },
         { label: staffBreadcrumbLabel || 'Staff Profile', href: `/staff-management/staff/${segments[1]}`, current: false },
         { label: 'Wage Account', href: location.pathname, current: true },
@@ -172,7 +176,7 @@ export function AppBreadcrumbs() {
     }
 
     return [
-      { label: 'Home', href: '/dashboard', current: false, home: true },
+      { label: 'Home', href: homePath, current: false, home: true },
       ...segments.map((segment, index) => ({
         label:
           isStaffProfile && index === 2
@@ -186,7 +190,7 @@ export function AppBreadcrumbs() {
         current: index === segments.length - 1
       }))
     ];
-  }, [location.pathname, staffBreadcrumbLabel, recordLabel]);
+  }, [location.pathname, staffBreadcrumbLabel, recordLabel, homePath]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;

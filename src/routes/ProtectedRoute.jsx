@@ -37,7 +37,15 @@ export const ProtectedRoute = () => {
   if (featureAccess.loading) {
     return <div role="status" aria-live="polite" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>Checking feature access…</div>;
   }
-  if (featureAccess.enforced && location.pathname === '/dashboard' && featureAccess.modules.length === 0) {
+  const isAccountRoute = location.pathname === '/account' || location.pathname.startsWith('/account/');
+  if (isAccountRoute && !featureAccess.isCompanyOwner) {
+    return <Navigate to="/access-denied" replace />;
+  }
+  if (featureAccess.paidAccessRequired && featureAccess.modules.length === 0 &&
+      !isAccountRoute && !['/profile', '/access-denied'].includes(location.pathname)) {
+    return <Navigate to={featureAccess.isCompanyOwner ? '/account' : '/access-denied'} replace />;
+  }
+  if (featureAccess.enforced && location.pathname === '/dashboard'  && featureAccess.modules.length === 0) {
     return <Navigate to={featureAccess.canManageFeatures ? '/account/credits/features' : '/access-denied'} replace />;
   }
   const requiredPermission = getPermissionForPath(location.pathname);

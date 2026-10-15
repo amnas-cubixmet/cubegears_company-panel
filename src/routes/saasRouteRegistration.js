@@ -18,5 +18,11 @@ const accountRoute = {
   ]
 };
 
-if (!routeConfig.some((route) => route.id === accountRoute.id)) routeConfig.splice(routeConfig.length - 1, 0, accountRoute);
-if (!mobileMoreRoutes.some((route) => route.id === accountRoute.id)) mobileMoreRoutes.push(accountRoute);
+// The primary route already supplies SaaS Account. Enrich it instead of
+// registering a second entry for the same account URL on desktop/mobile.
+const existingAccountRoute = routeConfig.find(route => route.path === accountRoute.path);
+if (existingAccountRoute) existingAccountRoute.children = accountRoute.children;
+else routeConfig.splice(routeConfig.length - 1, 0, accountRoute);
+if (!mobileMoreRoutes.some(route => route.path === accountRoute.path)) {
+  mobileMoreRoutes.push(existingAccountRoute || accountRoute);
+}

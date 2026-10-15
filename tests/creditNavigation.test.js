@@ -14,7 +14,7 @@ test('account navigation contains five credit tabs and no old subscription plans
     assert.ok(nav.includes(`path: '${path}'`), `Missing ${path}`);
     assert.ok(routes.includes(`path="${path}"`), `Missing route ${path}`);
   }
-  assert.doesNotMatch(nav, /Change Plan|Plan & Usage|SaaS Account/);
+  assert.doesNotMatch(nav, /Change Plan|Plan & Usage/);
 });
 
 test('credits are always server-authoritative, not generated in local storage', () => {

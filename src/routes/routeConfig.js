@@ -12,7 +12,7 @@ export const ROUTE_SECTIONS = {
 };
 
 export const routeConfig = [
-  { id: 'credits', label: 'Credit Wallet', path: '/account', icon: Coins, section: ROUTE_SECTIONS.MAIN, mobilePrimary: false, permission: 'billing.view' },
+  { id: 'credits', label: 'SaaS Account', path: '/account', icon: Coins, section: ROUTE_SECTIONS.MAIN, mobilePrimary: false, permission: 'billing.view' },
   { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, section: ROUTE_SECTIONS.MAIN, mobilePrimary: true, permission: 'dashboard.view' },
   { id: 'jobs', label: 'Job Cards', path: '/jobs', icon: ClipboardList, section: ROUTE_SECTIONS.OPERATIONS, mobilePrimary: true, permission: 'jobs.view' },
   {
