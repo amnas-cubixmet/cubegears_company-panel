@@ -78,7 +78,7 @@ export const Dashboard = () => {
     <div className="dashboard-page">
       <DashboardStats data={data} />
 
-      <ServiceOperations
+      {can('jobs.view') && <ServiceOperations
         data={data}
         user={user}
         filterPeriod={filterPeriod}
@@ -86,7 +86,7 @@ export const Dashboard = () => {
         filterBranch={filterBranch}
         setFilterBranch={setFilterBranch}
         onNavigate={navigate}
-      />
+      />}
 
       <DashboardBottomGrid
         data={data}

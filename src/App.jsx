@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { FeatureAccessProvider } from './context/FeatureAccessContext';
 import { CompanyProvider } from './context/CompanyContext';
+import { FeatureAccessProvider } from './context/FeatureAccessContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PayrollPeriodProvider } from './context/PayrollPeriodContext';
 import { AppErrorBoundary } from './components/feedback/AppErrorBoundary';
