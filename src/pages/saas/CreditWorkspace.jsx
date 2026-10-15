@@ -127,9 +127,14 @@ export function CreditWorkspace({ section = 'overview' }) {
   const toggle = async (feature) => {
     setBusy(`feature:${feature.key}`); setError(''); setNotice('');
     try {
-      if (feature.enabled) await creditWalletService.disableFeature(feature.key);
-      else await creditWalletService.enableFeature(feature.key);
-      setNotice(feature.enabled ? `${feature.label} switched off.` : `${feature.label} activated. The quoted first 30-day charge was debited by the server.`);
+      const result = feature.enabled
+        ? await creditWalletService.disableFeature(feature.key)
+        : await creditWalletService.enableFeature(feature.key);
+      setNotice(feature.enabled
+        ? `${feature.label} switched off. Any postpaid usage will be settled at the month-end.`
+        : result?.postpaid
+          ? `${feature.label} activated. Credits will be calculated from active time and settled monthly.`
+          : `${feature.label} activated. ${credits(result?.chargedCredits)} credits debited by the server.`);
       await load();
       notifyCreditChange();
     } catch (e) { setError(e?.message || 'Unable to change feature. Balance is unchanged unless the server confirms it.'); }
