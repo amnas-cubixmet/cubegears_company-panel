@@ -14,6 +14,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const navigate = useNavigate();
   const [wallet, setWallet] = useState(null);
   const [packages, setPackages] = useState([]);
+  const [featureBundles, setFeatureBundles] = useState([]);
   const [features, setFeatures] = useState([]);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,9 +28,10 @@ export function CreditWorkspace({ section = 'overview' }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [balance, bundles, catalog, history] = await Promise.allSettled([
+    const [balance, bundles, catalog, history, labels] = await Promise.allSettled([
       creditWalletService.overview(), creditWalletService.packages(),
       creditWalletService.features(), creditWalletService.logs(),
+      creditWalletService.bundles(),
     ]);
     const problems = [];
     if (balance.status === 'fulfilled') setWallet(balance.value);
@@ -40,6 +42,8 @@ export function CreditWorkspace({ section = 'overview' }) {
     else { setFeatures([]); problems.push('feature prices'); }
     if (history.status === 'fulfilled') setLogs(Array.isArray(history.value) ? history.value : []);
     else { setLogs([]); problems.push('transaction logs'); }
+    if (labels.status === 'fulfilled') setFeatureBundles(Array.isArray(labels.value) ? labels.value : []);
+    else { setFeatureBundles([]); problems.push('paid feature labels'); }
     setError(problems.length ? `Could not load ${problems.join(', ')}. No balance or payment has been assumed.` : '');
     setLoading(false);
   }, []);
@@ -81,6 +85,30 @@ export function CreditWorkspace({ section = 'overview' }) {
       await load();
       notifyCreditChange();
     } catch (e) { setError(e?.message || 'Payment not confirmed. Review your transaction logs.'); }
+    finally { setBusy(''); }
+  };
+
+  const buyBundle = async (bundle) => {
+    setBusy(`bundle:${bundle.id}`); setError(''); setNotice('');
+    try {
+      const result = await creditWalletService.purchaseBundle(bundle.id);
+      setNotice(result?.chargedCredits === '0.00'
+        ? 'This feature label is already permanently active.'
+        : `${bundle.name} enabled. ${credits(result.chargedCredits)} credits charged by the server.`);
+      await load();
+      notifyCreditChange();
+    } catch (e) { setError(e?.message || 'Label purchase could not be verified.'); }
+    finally { setBusy(''); }
+  };
+
+  const stopBundle = async (bundle) => {
+    setBusy(`bundle:${bundle.id}`); setError(''); setNotice('');
+    try {
+      await creditWalletService.disableBundle(bundle.id);
+      setNotice(`${bundle.name} access disabled. Prepaid credits are not refunded.`);
+      await load();
+      notifyCreditChange();
+    } catch (e) { setError(e?.message || 'Could not disable this feature label.'); }
     finally { setBusy(''); }
   };
 
@@ -168,6 +196,29 @@ export function CreditWorkspace({ section = 'overview' }) {
       {wallet && !wallet.checkoutAvailable && <p className="cg-credit-note">Secure checkout is not configured on the backend yet. Buying credits is disabled.</p>}
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only a company billing administrator can purchase credits.</p>}
       <p className="cg-credit-note"><ShieldCheck size={16}/> UPI, bank cards and net banking are provided by Razorpay when enabled for your merchant account.</p>
+    </section>}
+
+    {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Paid feature labels">
+      <header><div><span>FEATURE LABELS</span><h2>Ready-to-use module packages</h2></div><Coins size={22}/></header>
+      <p>Buy a label to access the included existing modules together. Credits are deducted by the server, and your user role must still permit each module.</p>
+      <div className="cg-bundle-grid">
+        {featureBundles.map((bundle) => <article key={bundle.id} className="cg-bundle-card">
+          <div className="cg-bundle-head"><h3>{bundle.name}</h3><span className={bundle.active ? 'cg-credit-pill active' : 'cg-credit-pill'}>{bundle.active ? 'Active' : 'Inactive'}</span></div>
+          <p>{bundle.description || 'A grouped package of existing CubeGear features.'}</p>
+          <div className="cg-bundle-price"><strong>{credits(bundle.priceCredits)}</strong> credits <small>/ {({ permanent:'lifetime', weekly:'7 days', daily:'24 hours', hourly:'hour', per_use:'use' })[bundle.billingType] || bundle.billingType}</small></div>
+          <div className="cg-bundle-features">{bundle.features.map((item) => <span key={item.key}>{item.label}</span>)}</div>
+          {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
+          {!bundle.meteredReady && <small>Per-use tracking must be connected to the selected backend actions before purchasing is available.</small>}
+          <div className="cg-bundle-actions">
+            <button className="primary" type="button" disabled={busy !== '' || !wallet?.canManage || !bundle.meteredReady || bundle.active && bundle.billingType === 'permanent'} onClick={() => buyBundle(bundle)}>
+              {busy === `bundle:${bundle.id}` ? 'Saving…' : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently' : bundle.active ? 'Extend access' : 'Activate label'}
+            </button>
+            {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage} onClick={() => stopBundle(bundle)}>Disable</button>}
+          </div>
+        </article>)}
+      </div>
+      {!featureBundles.length && !loading && <p className="cg-credit-empty">No paid feature labels are published yet. The platform admin can create them in /features/.</p>}
+      {wallet && !wallet.canManage && <p className="cg-credit-note">Only a company billing admin can purchase feature labels.</p>}
     </section>}
 
     {section === 'features' && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
