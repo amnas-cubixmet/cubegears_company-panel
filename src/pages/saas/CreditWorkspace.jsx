@@ -42,7 +42,12 @@ export function CreditWorkspace({ section = 'overview' }) {
     if (labels.status === 'fulfilled') setFeatureBundles(Array.isArray(labels.value) ? labels.value : []);
     else { setFeatureBundles([]); problems.push('paid feature labels'); }
     if (statements.status === 'fulfilled') setMonthlyStatements(Array.isArray(statements.value) ? statements.value : []);
-    else { setMonthlyStatements([]); problems.push('monthly credit statements'); }
+    else {
+      setMonthlyStatements([]);
+      // Older backend deployments return 404 until the read-only statement
+      // endpoint ships. Wallet, feature activation and ledger remain usable.
+      if (statements.reason?.status !== 404) problems.push('monthly credit statements');
+    }
     setError(problems.length ? `Could not load ${problems.join(', ')}. No balance or payment has been assumed.` : '');
     setLoading(false);
   }, []);
