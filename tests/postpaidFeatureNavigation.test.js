@@ -7,20 +7,19 @@ const read = (file) => readFileSync(new URL('../' + file, import.meta.url), 'utf
 test('server entitlements must fail closed when API is unavailable', () => {
   const source = read('src/context/FeatureAccessContext.jsx');
   assert.match(source, /apiClient\.get\('\/saas\/credits\/access'\)/);
-  assert.match(source, /setAccess\(LOCKED\)/);
+  assert.match(source, /setAccess\(\{ \.\.\.LOCKED, userKey \}\)/);
   assert.doesNotMatch(source, /error\?\.status === 404/);
   assert.match(source, /module === 'dashboard'\) return access\.modules\.length > 0/);
 });
 
-test('dashboard shows only bought features and role-authorized modules', () => {
+test('dashboard shows only company-enabled and role-authorized modules', () => {
   const source = read('src/pages/dashboard/Dashboard.jsx');
-  assert.match(source, /const can = \(permission\) => hasPermission\(user, permission\)/);
-  assert.match(source, /featureAccess\.modules\.includes\(route\.permission\.split\('\.'\)\[0\]\)/);
-  assert.match(source, /hasPermission\(user, route\.permission\)/);
+  assert.match(source, /const can = featureAccess\.can/);
+  assert.match(source, /featureAccess\.can\(route\.permission\)/);
   assert.match(read('src/routes/ProtectedRoute.jsx'), /featureAccess\.modules\.length === 0/);
 });
 
-test('monthly billing statements are backend driven and visible beside wallet logs', () => {
+test('monthly billing statements remain backend driven beside wallet logs', () => {
   const service = read('src/services/creditWallet.service.js');
   const ui = read('src/pages/saas/CreditWorkspace.jsx');
   assert.match(service, /monthlyStatements: \(\) => apiClient\.get\('\/saas\/credits\/monthly-statements'\)/);

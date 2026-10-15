@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
-import { getPermissionForPath, hasPermission } from '../utils/permissions';
+import { getPermissionForPath } from '../utils/permissions';
 import { useFeatureAccess, moduleIsVisible } from '../context/FeatureAccessContext';
 
 export const ProtectedRoute = () => {
@@ -49,8 +49,7 @@ export const ProtectedRoute = () => {
   if (
     location.pathname !== '/access-denied' &&
     requiredPermission &&
-    !isOwnStaffProfile &&
-    (!hasPermission(user, requiredPermission) || !moduleIsVisible(featureAccess, requiredPermission))
+    (!moduleIsVisible(featureAccess, requiredPermission) || (!isOwnStaffProfile && !featureAccess.can(requiredPermission)))
   ) {
     return (
       <Navigate

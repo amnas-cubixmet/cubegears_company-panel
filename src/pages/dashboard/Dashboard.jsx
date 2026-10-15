@@ -9,7 +9,6 @@ import { Loader } from '../../components/common/Loader';
 import { useAuth } from '../../hooks/useAuth';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { routeConfig } from '../../routes/routeConfig';
-import { hasPermission } from '../../utils/permissions';
 import { getDashboardData } from '../../services/dashboard.service';
 import '../../styles/dashboard.css';
 
@@ -17,7 +16,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const featureAccess = useFeatureAccess();
-  const can = (permission) => hasPermission(user, permission);
+  const can = featureAccess.can;
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,8 +48,7 @@ export const Dashboard = () => {
     const activeRoutes = routeConfig.filter(route =>
       route.permission &&
       !['dashboard', 'billing', 'settings', 'notifications'].includes(route.permission.split('.')[0]) &&
-      featureAccess.modules.includes(route.permission.split('.')[0]) &&
-      hasPermission(user, route.permission)
+      featureAccess.can(route.permission)
     );
     return (
       <div className="dashboard-page">

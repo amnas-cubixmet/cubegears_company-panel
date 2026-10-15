@@ -29,16 +29,15 @@ const actions = [
 
 export const QuickActionsPanel = ({ user, onNavigate }) => {
   const { can } = useFeatureAccess();
+  const visibleActions = actions.filter(([label, , , permission]) =>
+    can(permission) && (label !== 'Add Outside Labour' || can('expenses.view'))
+  );
+  if (!visibleActions.length) return null;
   return (
   <article className="dashboard-panel">
     <div className="panel-title"><h2>Quick Actions</h2><Wrench size={15} /></div>
     <div className="quick-actions quick-actions-expanded">
-      {actions
-        .filter(([label, , , permission]) =>
-          can(permission) &&
-          (label !== 'Add Outside Labour' || can('expenses.view'))
-        )
-        .map(([label, path, Icon]) => (
+      {visibleActions.map(([label, path, Icon]) => (
           <button key={label} type="button" onClick={() => onNavigate(path)}>
             <span className="quick-action-leading">
               <Icon size={12} />

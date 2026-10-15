@@ -4,16 +4,15 @@ import { mobilePrimaryRoutes, mobileMoreRoutes } from '../../routes/routeConfig'
 import { MoreHorizontal } from 'lucide-react';
 import { MobileSlideSidebar } from './MobileSlideSidebar';
 import { useAuth } from '../../hooks/useAuth';
-import { hasPermission } from '../../utils/permissions';
-import { useFeatureAccess, moduleIsVisible } from '../../context/FeatureAccessContext';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import '../../styles/mobile-bottom-nav.css';
 
 export const MobileBottomNav = () => {
   const location = useLocation();
   const { user } = useAuth();
   const featureAccess = useFeatureAccess();
-  const visiblePrimaryRoutes = mobilePrimaryRoutes.filter((route) => hasPermission(user, route.permission) && moduleIsVisible(featureAccess, route.permission));
-  const visibleMoreRoutes = mobileMoreRoutes.filter((route) => hasPermission(user, route.permission) && moduleIsVisible(featureAccess, route.permission));
+  const visiblePrimaryRoutes = mobilePrimaryRoutes.filter((route) => featureAccess.can(route.permission));
+  const visibleMoreRoutes = mobileMoreRoutes.filter((route) => featureAccess.can(route.permission));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMoreActive = visibleMoreRoutes.some((route) => location.pathname.startsWith(route.path));
 

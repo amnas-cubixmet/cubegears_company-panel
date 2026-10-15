@@ -1,23 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { FilePenLine, HardDrive, ShieldCheck, Coins, Zap, FileClock, CreditCard } from 'lucide-react';
 
 // One shared navigation for every Account route. Settings remains available
 // outside Account; it is intentionally not a wallet tab.
 const tabs=[
- ['overview','Overview','/account',Coins],
- ['credits-buy','Buy Credits','/account/credits/buy',CreditCard],
- ['credits-features','Features','/account/credits/features',Zap],
- ['storage','Storage','/account/storage',HardDrive],
- ['credits-logs','Logs','/account/credits/logs',FileClock],
- ['templates','Templates','/account/templates',FilePenLine],
- ['security','Security','/account/security',ShieldCheck],
+ ['overview','Overview','/account',Coins,'billing.view'],
+ ['credits-buy','Buy Credits','/account/credits/buy',CreditCard,'billing.view'],
+ ['credits-features','Features','/account/credits/features',Zap,'billing.view'],
+ ['storage','Storage','/account/storage',HardDrive,'storage.view'],
+ ['credits-logs','Logs','/account/credits/logs',FileClock,'billing.view'],
+ ['templates','Templates','/account/templates',FilePenLine,'settings.view'],
+ ['security','Security','/account/security',ShieldCheck,'settings.view'],
 ];
 
 export const AccountHeader=({title,subtitle,active,onNavigate,actions})=>{
   const location = useLocation();
-  const activeIndex = Math.max(0, tabs.findIndex(([key]) => key === active));
-  const ActiveIcon = tabs[activeIndex][3];
+  const { can } = useFeatureAccess();
+  const visibleTabs = tabs.filter(tab => can(tab[4]));
+  const activeIndex = Math.max(0, visibleTabs.findIndex(([key]) => key === active));
+  const ActiveIcon = visibleTabs[activeIndex]?.[3] || Coins;
   const tabListRef = useRef(null);
 
   // Only scroll the tab strip horizontally. Calling scrollIntoView here would
@@ -51,13 +54,13 @@ export const AccountHeader=({title,subtitle,active,onNavigate,actions})=>{
       </div>
       <div className="account-dashboard-header-trailing">
         <span className="account-dashboard-section-count" aria-label={`Section ${activeIndex + 1} of ${tabs.length}`}>
-          {String(activeIndex + 1).padStart(2, '0')} <span aria-hidden="true">/</span> {String(tabs.length).padStart(2, '0')}
+          {String(activeIndex + 1).padStart(2, '0')} <span aria-hidden="true">/</span> {String(visibleTabs.length).padStart(2, '0')}
         </span>
         {actions ? <div className="account-dashboard-actions">{actions}</div> : null}
       </div>
     </header>
     <nav ref={tabListRef} className="account-dashboard-tabs" aria-label="Account navigation">
-      {tabs.map(([key,label,path,Icon])=><button
+      {visibleTabs.map(([key,label,path,Icon])=><button
         type="button"
         key={key}
         className={active===key?'is-active':''}
