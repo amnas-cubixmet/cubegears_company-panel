@@ -10,7 +10,7 @@ const LEGACY = Object.freeze({ enforced: false, modules: [], canManageFeatures: 
 
 export function FeatureAccessProvider({ children }) {
   const { isAuthenticated, user } = useAuth();
-  const [access, setAccess] = useState(LEGACY);
+  const [access, setAccess] = useState(LOCKED);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -32,14 +32,9 @@ export function FeatureAccessProvider({ children }) {
         unavailable: false,
       });
     } catch (error) {
-      if (error?.status === 404) {
-        // Old CubeGear backends do not have an entitlement endpoint and cannot
-        // enforce strict feature purchases yet. Preserve existing navigation
-        // until the backend deploys. Other failures continue to fail closed.
-        setAccess(LEGACY);
-      } else {
-        setAccess(LOCKED);
-      }
+      // A missing endpoint, network error or malformed entitlement response
+      // must NOT reveal workshop modules in paid-feature mode.
+      setAccess(LOCKED);
     } finally {
       setLoading(false);
     }
