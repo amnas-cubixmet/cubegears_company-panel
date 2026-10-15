@@ -70,6 +70,9 @@ export const getPermissionForPath = (pathname = '') => {
   if (!pathname || pathname === '/profile' || pathname === '/access-denied') {
     return null;
   }
+  // A Job Card has cross-module sections; its invoice screen is NOT covered
+  // by the Jobs label alone. Direct deep-links also require invoice access.
+  if (/^\/jobs\/[^/]+\/invoice(?:\/|$)/.test(pathname)) return 'invoices.view';
 
   const special = SPECIAL_PATH_PERMISSIONS
     .filter(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`))
