@@ -6,21 +6,23 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const service = read('../src/services/creditWallet.service.js');
 const page = read('../src/pages/saas/CreditWorkspace.jsx');
 
-test('gateway status and read-only probe use the authenticated backend API', () => {
-  assert.match(service, /gatewayStatus:.*saas\/credits\/gateway\/status/);
-  assert.match(service, /testGateway:.*saas\/credits\/gateway\/test/);
+test('normal Buy Credits uses authenticated hosted payment-link creation', () => {
+  assert.match(service, /createHostedCheckout:.*saas\/credits\/checkout-links/);
+  assert.match(service, /hostedCheckoutStatus:.*checkout-links/);
+  assert.match(service, /window\.location\.assign\(url\.href\)/);
+  assert.match(service, /url\.protocol !== 'https:'/);
   assert.doesNotMatch(service, /RAZORPAY_KEY_SECRET|RAZORPAY_WEBHOOK_SECRET/);
 });
 
-test('test connection UI is available only to billing admins on Buy Credits', () => {
-  assert.match(page, /section !== 'buy' \|\| !wallet\?\.canManage/);
-  assert.match(page, /wallet\?\.canManage && <div className="cg-credit-gateway"/);
-  assert.match(page, /Test API Connection/);
-  assert.match(page, /!gateway\?\.probeAvailable/);
+test('customer frontend has no gateway-test button or test credentials', () => {
+  assert.doesNotMatch(page, /Test API Connection|Razorpay test configuration|gatewayProbe/);
+  assert.match(page, /purchaseCredits\(pack\.id\)/);
+  assert.match(page, /Opening payment page/);
 });
 
-test('connection status is not treated as a successful payment or wallet credit', () => {
-  assert.match(page, /It does not create an order, debit money or add credits/);
-  assert.match(service, /if \(!confirmed\?\.credited\)/);
-  assert.match(service, /await creditWalletService\.verify\(payload\)/);
+test('wallet confirmation is fetched from Django after Razorpay return', () => {
+  assert.match(page, /credit_purchase/);
+  assert.match(page, /creditWalletService\.hostedCheckoutStatus\(purchaseId\)/);
+  assert.match(page, /payment\.credited === true && payment\.status === 'credited'/);
+  assert.match(page, /notifyCreditChange\(\)/);
 });
