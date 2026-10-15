@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
 import { creditWalletService, notifyCreditChange, purchaseCredits } from '../../services/creditWallet.service';
 import { AccountHeader } from '../../components/account';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import { useAuth } from '../../hooks/useAuth';
+import { routeConfig } from '../../routes/routeConfig';
 import '../../styles/credit-wallet.css';
 
 const nf = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });
@@ -12,6 +15,8 @@ const when = (value) => value ? new Date(value).toLocaleString('en-IN') : '—';
 
 export function CreditWorkspace({ section = 'overview' }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const featureAccess = useFeatureAccess();
   const [wallet, setWallet] = useState(null);
   const [packages, setPackages] = useState([]);
   const [featureBundles, setFeatureBundles] = useState([]);
@@ -150,6 +155,9 @@ export function CreditWorkspace({ section = 'overview' }) {
   };
 
   const low = wallet?.lowBalance === true;
+  const availableRoutes = routeConfig.filter(route => route.permission &&
+    !['billing', 'settings', 'dashboard', 'notifications', 'company', 'storage', 'roles'].includes(route.permission.split('.')[0]) &&
+    featureAccess.can(route.permission));
   const sections = {
     overview: ['Credit Overview', 'Track your live balance, active modules, staff charges and wallet usage.'],
     buy: ['Buy Credits', 'Add credits with secure Razorpay checkout. Only captured payments update your wallet.'],
@@ -159,7 +167,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [title, subtitle] = sections[section] || sections.overview;
 
   return <div className="saas-page cg-credit-page">
-    <AccountHeader title={title} subtitle={subtitle} active={section === 'buy' ? 'credits-buy' : section === 'features' ? 'credits-features' : section === 'logs' ? 'credits-logs' : 'overview'} onNavigate={navigate} actions={<button type="button" className="cg-credit-refresh" disabled={loading || Boolean(busy)} onClick={load}><RefreshCcw size={16} aria-hidden="true"/> Refresh</button>}/>
+    <AccountHeader title={title} subtitle={subtitle} active={section === 'buy' ? 'credits-buy' : section === 'features' ? 'credits-features' : section === 'logs' ? 'credits-logs' : 'overview'} onNavigate={navigate} actions={<button type="button" className="cg-credit-refresh" disabled={loading || Boolean(busy)} onClick={() => { load(); featureAccess.refresh(); }}><RefreshCcw size={16} aria-hidden="true"/> Refresh</button>}/>
     {error && <div className="cg-credit-alert error" role="alert">{error} <button type="button" onClick={load}>Retry</button></div>}
     {notice && <div className="cg-credit-alert success" role="status">{notice}</div>}
     {loading && <p role="status" className="cg-credit-status">Loading your company wallet…</p>}
@@ -177,6 +185,20 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {low && <div className="cg-credit-low" role="alert"><Coins size={20}/><div><strong>Your credit balance is running low.</strong><span>Buy more credits so paid modules can renew when due.</span></div><button onClick={() => navigate('/account/credits/buy')}>Buy Credits <ArrowRight size={16}/></button></div>}
 
+    {section === 'overview' && <section className="cg-credit-panel" aria-label="Company feature access">
+      <header><div><span>COMPANY ACCESS</span><h2>{user?.companyName || user?.company?.name || 'Your workshop'} — Available modules</h2></div><ShieldCheck size={22}/></header>
+      {featureAccess.unavailable ? <p role="alert">Company access could not be verified. Refresh to retry; unavailable modules stay locked.</p> : <>
+        <p>{featureAccess.enforced
+          ? 'Only company-enabled modules permitted for your login appear here, on the dashboard and in navigation.'
+          : 'Paid-feature enforcement is currently off. Visible modules follow your role permissions.'}</p>
+        {availableRoutes.length ? <div className="cg-credit-shortcuts">
+          {availableRoutes.map(route => { const Icon = route.icon; return <button key={route.id} type="button" onClick={() => navigate(route.path)}>
+            <Icon size={19}/><strong>{route.label}</strong><small>Open authorized module</small><ArrowRight size={16}/>
+          </button>; })}
+        </div> : <p className="cg-credit-empty">No workshop modules are available for this login. An authorized company admin can review Feature Controls.</p>}
+      </>}
+    </section>}
+
     {section === 'overview' && <div className="cg-credit-columns">
       <section className="cg-credit-panel"><header><div><span>WALLET OVERVIEW</span><h2>Your credits at a glance</h2></div><Wallet size={22}/></header>
         <p>Buy wallet credits as needed. {wallet?.billingMode === 'monthly_postpaid'
@@ -192,7 +214,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         <button className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View all logs <ArrowRight size={16}/></button>
       </section>
       <section className="cg-credit-panel cg-credit-wide"><header><div><span>MANAGE YOUR TOOLS</span><h2>Features and storage</h2></div><Zap size={22}/></header>
-        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small><ArrowRight size={16}/></button><button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small><ArrowRight size={16}/></button><button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small><ArrowRight size={16}/></button></div>
+        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small><ArrowRight size={16}/></button>{featureAccess.can('storage.view') && <button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small><ArrowRight size={16}/></button>}<button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small><ArrowRight size={16}/></button></div>
       </section>
     </div>}
 
@@ -273,7 +295,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         {logs.map(row => <tr key={row.id}><td>{when(row.createdAt)}</td><td><strong>{row.description}</strong><small>{row.kind}</small></td><td className={Number(row.delta)>=0?'positive':'negative'}>{Number(row.delta)>0?'+':''}{credits(row.delta)}</td><td>{credits(row.balanceAfter)}</td><td>{row.reference || '—'}</td></tr>)}
         {!logs.length && <tr><td colSpan={5} className="cg-credit-empty">No credit transactions recorded.</td></tr>}
       </tbody></table></div>
-      <p className="cg-credit-note">Logs are read-only and company-scoped. For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History <ArrowRight size={14}/></button>.</p>
+      <p className="cg-credit-note">Logs are read-only and company-scoped. {featureAccess.can('storage.view') && <>For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History <ArrowRight size={14}/></button>.</>}</p>
     </section>}
   </div>;
 }
