@@ -11,6 +11,7 @@ import '../../styles/mobile-slide-sidebar.css';
 export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { can } = useFeatureAccess();
   const { themeMode, setThemeMode } = useTheme();
   const roleLabel = getUserRoleLabel(user);
   const activeItemRef = useRef(null);
