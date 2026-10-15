@@ -21,10 +21,6 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [gateway, setGateway] = useState(null);
-  const [gatewayError, setGatewayError] = useState('');
-  const [gatewayProbe, setGatewayProbe] = useState(null);
-  const [gatewayBusy, setGatewayBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -50,40 +46,56 @@ export function CreditWorkspace({ section = 'overview' }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // Razorpay redirects back with a purchase ID. Confirm status with Django,
+  // which independently fetches the payment from Razorpay before adding credits.
   useEffect(() => {
-    if (section !== 'buy' || !wallet?.canManage) return;
-    let active = true;
-    creditWalletService.gatewayStatus()
-      .then((status) => {
-        if (active) { setGateway(status); setGatewayError(''); }
-      })
-      .catch(() => {
-        if (active) { setGateway(null); setGatewayError('Could not load Razorpay test configuration.'); }
-      });
-    return () => { active = false; };
-  }, [section, wallet?.canManage, wallet?.checkoutAvailable]);
-
-  const testGatewayConnection = async () => {
-    if (!gateway?.probeAvailable || gatewayBusy) return;
-    setGatewayBusy(true);
-    setGatewayProbe(null);
-    try {
-      const result = await creditWalletService.testGateway();
-      setGatewayProbe({ ok: result.ok === true, message: result.message || 'Test completed.' });
-    } catch (e) {
-      setGatewayProbe({ ok: false, message: e?.message || 'Razorpay test API connection failed.' });
-    } finally {
-      setGatewayBusy(false);
+    if (section !== 'buy') return undefined;
+    const purchaseId = new URLSearchParams(window.location.search).get('credit_purchase');
+    if (!purchaseId) return undefined;
+    if (!/^[a-f0-9-]{36}$/i.test(purchaseId)) {
+      setError('Invalid payment return reference.');
+      return undefined;
     }
-  };
+    let cancelled = false;
+    let pendingTimer = null;
+    let attempts = 0;
+    const checkPayment = async () => {
+      try {
+        const payment = await creditWalletService.hostedCheckoutStatus(purchaseId);
+        if (cancelled) return;
+        if (payment.credited === true && payment.status === 'credited') {
+          setNotice(`Payment verified. ${credits(payment.credits)} credits added to your wallet.`);
+          setError('');
+          window.history.replaceState({}, '', window.location.pathname);
+          await load();
+          notifyCreditChange();
+          return;
+        }
+        if (payment.status === 'refunded') {
+          setError('This payment was refunded. No credits are available from it.');
+          window.history.replaceState({}, '', window.location.pathname);
+          return;
+        }
+        attempts += 1;
+        setNotice('Payment confirmation pending. Only captured payments add credits.');
+        if (attempts < 12) pendingTimer = window.setTimeout(checkPayment, 3000);
+      } catch (e) {
+        if (!cancelled) setError(e?.message || 'Unable to verify payment. Please refresh this page.');
+      }
+    };
+    checkPayment();
+    return () => {
+      cancelled = true;
+      if (pendingTimer !== null) window.clearTimeout(pendingTimer);
+    };
+  }, [section, load]);
 
   const buy = async (pack) => {
     setBusy(`package:${pack.id}`); setError(''); setNotice('');
     try {
-      const receipt = await purchaseCredits(pack.id);
-      setNotice(`Payment verified. ${credits(receipt.credits)} credits added to your wallet.`);
-      await load();
-      notifyCreditChange();
+      await purchaseCredits(pack.id);
+      // The browser now leaves CubeGear for Razorpay. Credit confirmation happens
+      // only after the hosted page returns and the Django API verifies capture.
     } catch (e) { setError(e?.message || 'Payment not confirmed. Review your transaction logs.'); }
     finally { setBusy(''); }
   };
@@ -171,26 +183,8 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {section === 'buy' && <section className="cg-credit-panel"><header><div><span>RAZORPAY TOP-UP</span><h2>Choose a credit package</h2></div><CreditCard size={22}/></header>
       <p>Package prices and credit amounts come from the server. No money or credits are created until Razorpay verifies a captured payment.</p>
-      {wallet?.canManage && <div className="cg-credit-gateway" aria-label="Razorpay test connection">
-        <div className="cg-credit-gateway-head">
-          <div>
-            <strong>Razorpay integration</strong>
-            <p>{gateway
-              ? `Mode: ${gateway.mode} · Credentials: ${gateway.configured ? 'present' : 'missing'} · Webhook secret: ${gateway.webhookSecretPresent ? 'present' : 'missing'}`
-              : (gatewayError || 'Checking backend gateway settings…')}</p>
-            <small>A successful test checks API credentials only. It does not create an order, debit money or add credits.</small>
-          </div>
-          <button type="button" className="primary"
-            disabled={!gateway?.probeAvailable || gatewayBusy || busy !== ''}
-            onClick={testGatewayConnection}>
-            {gatewayBusy ? 'Testing connection…' : 'Test API Connection'}
-          </button>
-        </div>
-        {gatewayProbe && <p role={gatewayProbe.ok ? 'status' : 'alert'} className={gatewayProbe.ok ? 'cg-gateway-result ok' : 'cg-gateway-result error'}>{gatewayProbe.message}</p>}
-        {gateway?.mode === 'live' && <p className="cg-credit-note">The connection test is disabled for live keys. Use Razorpay test credentials during development.</p>}
-      </div>}
       <div className="cg-credit-packages">{packages.filter(p => p.active).map((pack) => <article key={pack.id}>
-        <span>ONE-TIME TOP-UP</span><h3>{pack.name}</h3><strong>{credits(pack.credits)} <small>credits</small></strong><p>{money(pack.priceInr)} payable</p><button className="primary" type="button" disabled={busy !== '' || !wallet?.checkoutAvailable || !wallet?.canManage} onClick={() => buy(pack)}>{busy === `package:${pack.id}` ? 'Opening checkout…' : 'Buy Credits'} <ArrowRight size={16}/></button>
+        <span>ONE-TIME TOP-UP</span><h3>{pack.name}</h3><strong>{credits(pack.credits)} <small>credits</small></strong><p>{money(pack.priceInr)} payable</p><button className="primary" type="button" disabled={busy !== '' || !wallet?.checkoutAvailable || !wallet?.canManage} onClick={() => buy(pack)}>{busy === `package:${pack.id}` ? 'Opening payment page…' : 'Buy Credits'} <ArrowRight size={16}/></button>
       </article>)}</div>
       {!packages.some(p=>p.active) && !loading && <p className="cg-credit-empty">No credit packages have been published by the administrator.</p>}
       {wallet && !wallet.checkoutAvailable && <p className="cg-credit-note">Secure checkout is not configured on the backend yet. Buying credits is disabled.</p>}
