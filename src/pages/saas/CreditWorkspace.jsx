@@ -140,7 +140,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const sections = {
     overview: ['Credit Overview', 'Track your live balance, active modules, staff charges and wallet usage.'],
     buy: ['Buy Credits', 'Add credits with secure Razorpay checkout. Only captured payments update your wallet.'],
-    features: ['Feature Controls', 'Activate approved modules using your wallet balance. Pricing is set by the platform admin.'],
+    features: ['Feature Controls', 'Activate modules with configurable period, activation and per-user rates.'],
     logs: ['Credit Activity Logs', 'Review wallet top-ups, feature debits, adjustments and renewals.'],
   };
   const [title, subtitle] = sections[section] || sections.overview;
@@ -199,7 +199,9 @@ export function CreditWorkspace({ section = 'overview' }) {
         {featureBundles.map((bundle) => <article key={bundle.id} className="cg-bundle-card">
           <div className="cg-bundle-head"><h3>{bundle.name}</h3><span className={bundle.active ? 'cg-credit-pill active' : 'cg-credit-pill'}>{bundle.active ? 'Active' : 'Inactive'}</span></div>
           <p>{bundle.description || 'A grouped package of existing CubeGear features.'}</p>
-          <div className="cg-bundle-price"><strong>{credits(bundle.priceCredits)}</strong> credits <small>/ {({ permanent:'lifetime', weekly:'7 days', daily:'24 hours', hourly:'hour', per_use:'use' })[bundle.billingType] || bundle.billingType}</small></div>
+          <div className="cg-bundle-price"><strong>{credits(bundle.priceCredits)}</strong> base credits <small>/ {({ permanent:'lifetime', monthly:'30 days', weekly:'7 days', daily:'24 hours', hourly:'hour', per_use:'use' })[bundle.billingType] || bundle.billingType}</small></div>
+          {(Number(bundle.perUserCredits) > 0 || Number(bundle.activationCredits) > 0) &&
+            <small>Activation: {credits(bundle.activationCredits)} cr · Per active login user: {credits(bundle.perUserCredits)} cr × {wallet?.userCount ?? '—'}. Total calculated by server.</small>}
           <div className="cg-bundle-features">{bundle.features.map((item) => <span key={item.key}>{item.label}</span>)}</div>
           {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
           {!bundle.meteredReady && <small>Per-use tracking must be connected to the selected backend actions before purchasing is available.</small>}
@@ -217,11 +219,18 @@ export function CreditWorkspace({ section = 'overview' }) {
     </section>}
 
     {section === 'features' && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
-      <p>Each feature costs a fixed amount plus an administrator-set amount per active staff member for every 30-day billing period. Enabling charges the first period upfront; turning off prevents future renewal, not refunds already charged.</p>
+      <p>Each module has a separate activation charge, base period price, per-active-login-user price and optional per-employee charge. Daily, weekly and 30-day renewals deduct wallet credits on the backend. Feature access remains restricted by each user's role.</p>
       <div className="cg-credit-features">{features.map((feature) => <article key={feature.key}>
         <div className="cg-credit-feature-main"><div><h3>{feature.label}</h3><p>{feature.description || 'Workshop management module'}</p></div><span className={feature.enabled ? 'cg-credit-pill active' : 'cg-credit-pill'}>{feature.enabled ? 'Active' : 'Off'}</span></div>
-        <div className="cg-credit-feature-cost"><span>Base: <b>{credits(feature.baseCredits)} cr</b></span><span>Per staff: <b>{credits(feature.perStaffCredits)} cr</b></span><span>Total / 30 days: <b>{credits(feature.monthlyCredits)} cr</b></span></div>
-        <div className="cg-credit-feature-footer"><small>{feature.enabled ? `Next charge: ${when(feature.nextChargeAt)}` : 'Not enabled'} · {feature.staffCount ?? '—'} staff</small><button type="button" disabled={busy !== '' || !feature.available || !wallet?.canManage} className={feature.enabled ? 'secondary' : 'primary'} onClick={() => toggle(feature)}>{busy === `feature:${feature.key}` ? 'Saving…' : feature.enabled ? 'Switch Off' : 'Enable Feature'}</button></div>
+        <div className="cg-credit-feature-cost">
+          <span>Activation: <b>{credits(feature.activationCredits)} cr</b></span>
+          <span>Base / {feature.billingPeriod}: <b>{credits(feature.baseCredits)} cr</b></span>
+          <span>Per user: <b>{credits(feature.perUserCredits)} cr</b> × {feature.userCount ?? '—'}</span>
+          <span>Per employee: <b>{credits(feature.perStaffCredits)} cr</b> × {feature.staffCount ?? '—'}</span>
+          <span>Recurring / {feature.billingPeriod}: <b>{credits(feature.periodCredits)} cr</b></span>
+          <span>Estimated / 30 days: <b>{credits(feature.monthlyCredits)} cr</b></span>
+        </div>
+        <div className="cg-credit-feature-footer"><small>{feature.enabled ? `Next charge: ${when(feature.nextChargeAt)}` : 'Not enabled'} · {feature.userCount ?? '—'} users, {feature.staffCount ?? '—'} employees</small><button type="button" disabled={busy !== '' || !feature.available || !wallet?.canManage} className={feature.enabled ? 'secondary' : 'primary'} onClick={() => toggle(feature)}>{busy === `feature:${feature.key}` ? 'Saving…' : feature.enabled ? 'Switch Off' : 'Enable Feature'}</button></div>
       </article>)}</div>
       {!features.length && !loading && <p className="cg-credit-empty">No feature pricing has been configured by the administrator.</p>}
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only authorized company administrators can change paid features.</p>}
