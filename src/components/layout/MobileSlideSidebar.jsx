@@ -5,7 +5,7 @@ import { Laptop, LogOut, Moon, Sun, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { getUserRoleLabel } from '../../utils/authDisplay';
-import { hasPermission } from '../../utils/permissions';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import '../../styles/mobile-slide-sidebar.css';
 
 export const MobileSlideSidebar = ({ isOpen, onClose }) => {
@@ -82,7 +82,7 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
         <nav className="mobile-drawer-nav" aria-label="Mobile navigation">
           {sections.map((section) => {
             const items = routeConfig.filter(
-              (route) => route.section === section && hasPermission(user, route.permission)
+              (route) => route.section === section && can(route.permission)
             );
             if (!items.length) return null;
 
