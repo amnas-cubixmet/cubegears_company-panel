@@ -162,7 +162,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const sections = {
     overview: ['Credit Overview', 'Track your live balance, active modules, staff charges and wallet usage.'],
     buy: ['Buy Credits', 'Add credits with secure Razorpay checkout. Only captured payments update your wallet.'],
-    features: ['Feature Controls', 'Activate modules with configurable period, activation and per-user rates.'],
+    features: ['Feature Controls', 'Activate Feature Labels to unlock workshop modules for your company.'],
     logs: ['Credit Activity Logs', 'Review wallet top-ups, feature debits, adjustments and renewals.'],
   };
   const [title, subtitle] = sections[section] || sections.overview;
@@ -179,9 +179,9 @@ export function CreditWorkspace({ section = 'overview' }) {
         <strong>{credits(wallet?.balance)}</strong>
         <small>{wallet ? (low ? 'Low balance — top up to avoid module interruption' : 'Verified company wallet balance') : 'Awaiting backend wallet'}</small>
       </article>
-      <article className="cg-credit-metric"><div><span>Active Features</span><Zap size={20}/></div><strong>{wallet?.activeFeatures ?? '—'}</strong><small>Modules currently switched on</small></article>
+      <article className="cg-credit-metric"><div><span>Active Modules</span><Zap size={20}/></div><strong>{featureAccess.labelOnly ? featureAccess.activeLabelModules.length : wallet?.activeFeatures ?? '—'}</strong><small>{featureAccess.labelOnly ? 'Modules in your active Feature Labels' : 'Modules currently switched on'}</small></article>
       <article className="cg-credit-metric"><div><span>Active Staff</span><Users size={20}/></div><strong>{wallet?.staffCount ?? '—'}</strong><small>Used for per-staff feature pricing</small></article>
-      <article className="cg-credit-metric"><div><span>Estimated Monthly Features</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits / month; pending postpaid usage: {credits(wallet?.postpaidAccruedCredits)} credits</small></article>
+      {!featureAccess.labelOnly && <article className="cg-credit-metric"><div><span>Estimated Monthly Features</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits / month; pending postpaid usage: {credits(wallet?.postpaidAccruedCredits)} credits</small></article>}
     </div>
 
     {low && <div className="cg-credit-low" role="alert"><Coins size={20}/><div><strong>Your credit balance is running low.</strong><span>Buy more credits so paid modules can renew when due.</span></div><button onClick={() => navigate('/account/credits/buy')}>Buy Credits <ArrowRight size={16}/></button></div>}
@@ -207,7 +207,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         : 'Feature activation and renewals are recorded in the company wallet ledger.'}</p>
         <div className="cg-credit-actions"><button className="primary" onClick={() => navigate('/account/credits/buy')}><CreditCard size={17}/> Buy Credits</button><button onClick={() => navigate('/account/credits/features')}>Manage Features <ArrowRight size={16}/></button></div>
         <div className="cg-credit-inline"><span>Low credit alert threshold</span><strong>{credits(wallet?.lowThreshold)} credits</strong></div>
-        <div className="cg-credit-inline"><span>Staff billing basis</span><strong>{wallet?.staffCount ?? '—'} active staff accounts</strong></div>
+        <div className="cg-credit-inline"><span>Staff billing basis</span><strong>{wallet?.userCount ?? '—'} active login accounts</strong></div>
       </section>
       <section className="cg-credit-panel"><header><div><span>RECENT ACTIVITY</span><h2>Latest wallet changes</h2></div><FileClock size={22}/></header>
         {logs.slice(0,5).map((row) => <div className="cg-credit-log" key={row.id}><div className={Number(row.delta) >= 0 ? 'in' : 'out'}>{Number(row.delta) >= 0 ? <ArrowDownLeft size={17}/> : <ArrowUpRight size={17}/>}</div><div><strong>{row.description}</strong><small>{when(row.createdAt)}</small></div><b>{Number(row.delta) > 0 ? '+' : ''}{credits(row.delta)}</b></div>)}
@@ -276,7 +276,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only a company billing admin can purchase feature labels.</p>}
     </section>}
 
-    {section === 'features' && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
+    {section === 'features' && !featureAccess.labelOnly && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
       <p>Each module uses the backend-configured credit price. Prepaid modules deduct credits on activation and renewal; monthly-postpaid modules record timed usage and debit only after month-end. Every staff member still requires their role permission.</p>
       <div className="cg-credit-features">{features.map((feature) => <article key={feature.key}>
         <div className="cg-credit-feature-main"><div><h3>{feature.label}</h3><p>{feature.description || 'Workshop management module'}</p></div><span className={feature.enabled ? 'cg-credit-pill active' : 'cg-credit-pill'}>{feature.enabled ? 'Active' : 'Off'}</span></div>
