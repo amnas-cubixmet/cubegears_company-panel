@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { FeatureAccessProvider } from './context/FeatureAccessContext';
 import { CompanyProvider } from './context/CompanyContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PayrollPeriodProvider } from './context/PayrollPeriodContext';
@@ -57,11 +58,13 @@ export function App() {
         <ThemeProvider>
           <AppDialogHost />
           <AuthProvider>
+            <FeatureAccessProvider>
             <CompanyProvider>
               <PayrollPeriodProvider>
                 <AppRoutes />
               </PayrollPeriodProvider>
             </CompanyProvider>
+            </FeatureAccessProvider>
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
