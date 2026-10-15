@@ -194,7 +194,7 @@ export function CreditWorkspace({ section = 'overview' }) {
     {low && <div className="cg-credit-low" role="alert"><Coins size={20}/><div><strong>Your credit balance is running low.</strong><span>Buy more credits so paid modules can renew when due.</span></div><button onClick={() => navigate('/account/credits/buy')}>Buy Credits <ArrowRight size={16}/></button></div>}
 
     {section === 'overview' && featureAccess.paidAccessRequired && featureAccess.modules.length === 0 &&
-      <div className="cg-credit-low" role="status"><Zap size={20}/><div><strong>Welcome — activate your workshop modules</strong><span>Start by buying credits and selecting features. Your dashboard unlocks after activation.</span></div><button onClick={() => navigate('/account/credits/features')}>Choose Features <ArrowRight size={16}/></button></div>}
+      <div className="cg-credit-low" role="status"><Zap size={20}/><div><strong>Welcome — activate your workshop modules</strong><span>Start by buying credits and selecting features. Only modules activated by the owner become available.</span></div><button onClick={() => navigate('/account/credits/features')}>Choose Features <ArrowRight size={16}/></button></div>}
 
     {section === 'overview' && <section className="cg-credit-panel" aria-label="Company feature access">
       <header><div><span>COMPANY ACCESS</span><h2>{user?.companyName || user?.company?.name || 'Your workshop'} — Available modules</h2></div><ShieldCheck size={22}/></header>

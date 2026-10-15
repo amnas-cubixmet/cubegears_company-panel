@@ -1,0 +1,21 @@
+.saas-account-shell{height:100dvh;display:flex;flex-direction:column;background:var(--app-bg,#f7f9fc);color:var(--text-primary,#16213a)}
+.saas-account-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px max(24px,calc((100vw - 1220px)/2));background:var(--surface,#fff);border-bottom:1px solid var(--border-color,#e2e8f0);flex-shrink:0}
+.saas-account-brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+.saas-account-brand>span{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#5145ed;color:white}
+.saas-account-brand strong{font-size:16px}.saas-account-brand small,.saas-account-identity small{display:block;font-size:12px;color:var(--text-secondary,#64748b);margin-top:3px}
+.saas-account-identity{display:flex;align-items:center;gap:20px}.saas-account-identity strong{font-size:13px}
+.saas-account-identity button,.saas-workspace-notice button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 14px;border:1px solid var(--border-color,#dce3ef);border-radius:10px;background:var(--surface,#fff);color:inherit;cursor:pointer;font-weight:600}
+.saas-account-content{width:100%;max-width:1270px;box-sizing:border-box;margin:0 auto;padding:28px 24px;flex:1;min-height:0;overflow:auto}
+.saas-account-content .saas-page{max-width:none}
+.saas-workspace-notice{min-height:100dvh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:var(--app-bg,#f7f9fc);color:var(--text-primary,#16213a)}
+.saas-workspace-notice section{max-width:480px;padding:32px;border:1px solid var(--border-color,#e2e8f0);border-radius:20px;background:var(--surface,#fff);text-align:center}
+.saas-workspace-notice h1{font-size:23px;margin:18px 0 10px}.saas-workspace-notice p{font-size:14px;line-height:1.65;color:var(--text-secondary,#64748b)}
+.saas-workspace-notice section>div{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:20px}
+@media(max-width:600px){.saas-account-topbar{padding:12px 16px}.saas-account-identity{gap:10px}.saas-account-identity>div{display:none}.saas-account-content{padding:18px 12px}.saas-account-brand strong{font-size:14px}.saas-workspace-notice section{padding:24px}}
+
+.saas-account-content>.app-content{padding:0;min-width:0}
+@media(max-width:600px){
+  .saas-account-shell .saas-account-content .cg-credit-page .account-dashboard-header{min-height:0}
+  .saas-account-shell .saas-account-content .account-dashboard-title-row{flex:0 0 auto}
+  .saas-account-shell .saas-account-content .account-dashboard-header-trailing{flex:0 0 auto}
+}

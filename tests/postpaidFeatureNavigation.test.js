@@ -16,7 +16,7 @@ test('dashboard shows only company-enabled and role-authorized modules', () => {
   const source = read('src/pages/dashboard/Dashboard.jsx');
   assert.match(source, /const can = featureAccess\.can/);
   assert.match(source, /featureAccess\.can\(route\.permission\)/);
-  assert.match(read('src/routes/ProtectedRoute.jsx'), /featureAccess\.modules\.length === 0/);
+  assert.match(read('src/routes/ProtectedRoute.jsx'), /setupRedirect\(featureAccess, location\.pathname\)/);
 });
 
 test('monthly billing statements remain backend driven beside wallet logs', () => {

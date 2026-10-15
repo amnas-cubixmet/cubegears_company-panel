@@ -1,6 +1,8 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { SaaSAccountLayout, WorkspaceAccessNotice } from '../components/layout/SaaSAccountLayout';
+import { isAccountPath, isAccountOnly, setupRedirect } from '../utils/accountWorkspace';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { getPermissionForPath } from '../utils/permissions';
 import { useFeatureAccess, moduleIsVisible } from '../context/FeatureAccessContext';
@@ -37,16 +39,15 @@ export const ProtectedRoute = () => {
   if (featureAccess.loading) {
     return <div role="status" aria-live="polite" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>Checking feature access…</div>;
   }
-  const isAccountRoute = location.pathname === '/account' || location.pathname.startsWith('/account/');
+  if (featureAccess.unavailable) return <WorkspaceAccessNotice unavailable onRetry={featureAccess.refresh} />;
+  const isAccountRoute = isAccountPath(location.pathname);
+  const setupTarget = setupRedirect(featureAccess, location.pathname);
+  if (setupTarget) return <Navigate to={setupTarget} replace />;
+  if (isAccountOnly(featureAccess) && !featureAccess.isCompanyOwner) {
+    return <WorkspaceAccessNotice onRetry={featureAccess.refresh} />;
+  }
   if (isAccountRoute && !featureAccess.isCompanyOwner) {
     return <Navigate to="/access-denied" replace />;
-  }
-  if (featureAccess.paidAccessRequired && featureAccess.modules.length === 0 &&
-      !isAccountRoute && !['/profile', '/access-denied'].includes(location.pathname)) {
-    return <Navigate to={featureAccess.isCompanyOwner ? '/account' : '/access-denied'} replace />;
-  }
-  if (featureAccess.enforced && location.pathname === '/dashboard'  && featureAccess.modules.length === 0) {
-    return <Navigate to={featureAccess.canManageFeatures ? '/account/credits/features' : '/access-denied'} replace />;
   }
   const requiredPermission = getPermissionForPath(location.pathname);
   // Nested Job Card sections require BOTH the Jobs label and their own
@@ -71,6 +72,8 @@ export const ProtectedRoute = () => {
       />
     );
   }
+
+  if (isAccountRoute) return <SaaSAccountLayout><Outlet /></SaaSAccountLayout>;
 
   return (
     <DashboardLayout>

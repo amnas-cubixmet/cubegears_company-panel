@@ -26,7 +26,7 @@ test('desktop and mobile navigation use the same effective permission check', ()
 
 test('dashboard and direct routes block disabled workshop modules', () => {
   const guard = file('src/routes/ProtectedRoute.jsx');
-  assert.match(guard, /featureAccess\.modules\.length === 0/);
+  assert.match(guard, /setupRedirect\(featureAccess, location\.pathname\)/);
   assert.match(guard, /featureAccess\.can\(requiredPermission\)/);
   assert.match(guard, /moduleIsVisible\(featureAccess, requiredPermission\)/);
   const dashboard = file('src/pages/dashboard/Dashboard.jsx');
