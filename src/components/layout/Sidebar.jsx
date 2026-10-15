@@ -7,8 +7,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 import { unreadNotificationCount } from '../../utils/notificationInbox';
 import { getUserRoleLabel } from '../../utils/authDisplay';
-import { hasPermission } from '../../utils/permissions';
-import { useFeatureAccess, moduleIsVisible } from '../../context/FeatureAccessContext';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 
 export const Sidebar = () => {
   const location = useLocation();
@@ -83,7 +82,7 @@ export const Sidebar = () => {
         <div className="sidebar-sections">
           {sections.map((section) => {
             const items = routeConfig.filter(
-              (route) => route.section === section && hasPermission(user, route.permission) && moduleIsVisible(featureAccess, route.permission)
+              (route) => route.section === section && featureAccess.can(route.permission)
             );
             if (!items.length) return null;
 
