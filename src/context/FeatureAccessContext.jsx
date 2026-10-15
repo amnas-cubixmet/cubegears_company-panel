@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import apiClient from '../api/apiClient';
 import { useLocation } from 'react-router-dom';
+import { isAccountOnly } from '../utils/accountWorkspace';
 import { useAuth } from '../hooks/useAuth';
 
 // UI filtering only. Django tenant permissions and entitlements remain authoritative.
@@ -18,6 +19,7 @@ export function moduleIsVisible(access, permission) {
   if (!permission) return true;
   if (!access || access.unavailable) return false;
   const module = permission.split('.')[0];
+  if (isAccountOnly(access)) return module === 'billing' && access.isCompanyOwner === true;
   // Keep wallet, activation, security and account recovery reachable.
   if (access.paidAccessRequired) {
     if (module === 'billing' || module === 'company') return access.isCompanyOwner === true;

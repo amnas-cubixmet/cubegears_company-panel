@@ -22,7 +22,7 @@ test('navigation is restricted by backend-derived user/tenant permissions', () =
 
 test('empty workshop dashboard redirects manager to feature activation', () => {
   const guard = file('src/routes/ProtectedRoute.jsx');
-  assert.match(guard, /featureAccess\.modules\.length === 0/);
-  assert.match(guard, /'\/account\/credits\/features'/);
+  assert.match(guard, /setupRedirect\(featureAccess, location\.pathname\)/);
+  assert.match(file('src/utils/accountWorkspace.js'), /'\/account'/);
   assert.match(guard, /moduleIsVisible\(featureAccess, requiredPermission\)/);
 });
