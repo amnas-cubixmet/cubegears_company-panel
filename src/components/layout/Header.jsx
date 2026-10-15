@@ -6,7 +6,7 @@ import { GlobalSearch } from '../common/GlobalSearch';
 import { resourceConfigs } from '../../pages/operations/resourceConfigs';
 import { unreadNotificationCount } from '../../utils/notificationInbox';
 import { getUserRoleLabel } from '../../utils/authDisplay';
-import { hasPermission } from '../../utils/permissions';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { staffService } from '../../services/staff.service';
 import { CreditBalanceChip } from './CreditBalanceChip';
 import '../../styles/credit-wallet.css';
@@ -25,6 +25,7 @@ const resolveStaticPageTitle = (pathname) => {
 
 export const Header = () => {
   const { user, logout } = useAuth();
+  const { can } = useFeatureAccess();
   const navigate = useNavigate();
   const location = useLocation();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -41,8 +42,8 @@ export const Header = () => {
     .map((part) => part[0])
     .join('')
     .toUpperCase() || 'CG';
-  const canViewNotifications = hasPermission(user, 'notifications.view');
-  const canViewSettings = hasPermission(user, 'settings.view');
+  const canViewNotifications = can('notifications.view');
+  const canViewSettings = can('settings.view');
   const desktopProfileRef = useRef(null);
   const mobileProfileRef = useRef(null);
 
