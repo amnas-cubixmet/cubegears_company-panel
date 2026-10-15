@@ -61,6 +61,11 @@ const alwaysAvailable = new Set(['billing', 'settings', 'company', 'storage', 'n
 export function moduleIsVisible(access, permission) {
   if (!access?.enforced || !permission) return true;
   const module = permission.split('.')[0];
+  // When NO paid module is active, the only visible navigation is credits /
+  // feature activation. Settings, notifications and the dashboard must not
+  // look like usable workshop features before a company activates a module.
+  // This is UX-only; Django still authorizes every API independently.
+  if (access.modules.length === 0) return module === 'billing';
   if (module === 'dashboard') return access.modules.length > 0;
   if (alwaysAvailable.has(module)) return true;
   return access.modules.includes(module);
