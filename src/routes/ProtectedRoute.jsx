@@ -73,7 +73,7 @@ export const ProtectedRoute = () => {
     );
   }
 
-  if (isAccountRoute) return <SaaSAccountLayout><Outlet /></SaaSAccountLayout>;
+  if (isAccountRoute || featureAccess.isCompanyOwner) return <SaaSAccountLayout><Outlet /></SaaSAccountLayout>;
 
   return (
     <DashboardLayout>

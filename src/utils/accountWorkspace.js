@@ -1,7 +1,7 @@
-// A locked company can only use the owner purchase/recovery workspace.
+// Owner identity and shop details remain available before module activation.
 export const PURCHASE_ACCOUNT_PATHS = new Set([
   '/account', '/account/credits/buy', '/account/credits/features', '/account/credits/logs',
-  '/account/billing', '/account/plans',
+  '/account/billing', '/account/plans', '/profile', '/account/company',
 ]);
 
 export const isAccountPath = (pathname = '') => pathname === '/account' || pathname.startsWith('/account/');

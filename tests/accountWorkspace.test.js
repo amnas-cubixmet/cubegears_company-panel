@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { isAccountOnly, setupRedirect } from '../src/utils/accountWorkspace.js';
 const owner = { enforced:true, paidAccessRequired:true, modules:[], isCompanyOwner:true, unavailable:false };
 
-test('unactivated owner can only open the account purchase workspace', () => {
+test('unactivated owner can open account, own profile and shop details', () => {
   assert.equal(isAccountOnly(owner), true);
-  for (const path of ['/account', '/account/', '/account/credits/buy', '/account/credits/features', '/account/credits/logs']) {
+  for (const path of ['/account', '/account/', '/account/credits/buy', '/account/credits/features', '/account/credits/logs', '/profile', '/account/company']) {
     assert.equal(setupRedirect(owner, path), null, path);
   }
-  for (const path of ['/dashboard', '/profile', '/settings', '/jobs/123', '/staff-management/roles', '/account/company', '/account/storage', '/account/templates', '/account/security', '/access-denied']) {
+  for (const path of ['/dashboard', '/settings', '/jobs/123', '/staff-management/roles', '/account/storage', '/account/templates', '/account/security', '/access-denied']) {
     assert.equal(setupRedirect(owner, path), '/account', path);
   }
 });

@@ -2,18 +2,20 @@ import React from 'react';
 import { Settings, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { getUserRoleLabel } from '../../utils/authDisplay';
 
 export const Profile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const featureAccess = useFeatureAccess();
   const roleLabel = getUserRoleLabel(user);
 
   return (
     <div className="profile-page-simple">
       <header className="profile-page-head">
         <div><span className="profile-kicker">ACCOUNT</span><h1>Profile</h1><p>Your workshop account and role information.</p></div>
-        <button type="button" className="profile-settings-btn" onClick={() => navigate('/settings')}><Settings size={16}/> Settings</button>
+        {featureAccess.can('settings.view') && <button type="button" className="profile-settings-btn" onClick={() => navigate('/settings')}><Settings size={16}/> Settings</button>}
       </header>
       <section className="profile-card-simple">
         <div className="profile-avatar-large">{user?.avatar ? <img src={user.avatar} alt="Profile"/> : <User size={30}/>}</div>

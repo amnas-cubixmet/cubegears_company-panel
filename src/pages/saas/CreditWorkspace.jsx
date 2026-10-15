@@ -53,7 +53,7 @@ export function CreditWorkspace({ section = 'overview' }) {
     if (history.status === 'fulfilled') setLogs(Array.isArray(history.value) ? history.value : []);
     else { setLogs([]); problems.push('transaction logs'); }
     if (labels.status === 'fulfilled') setFeatureBundles(Array.isArray(labels.value) ? labels.value : []);
-    else { setFeatureBundles([]); problems.push('paid feature labels'); }
+    else { setFeatureBundles([]); problems.push('module prices'); }
     if (statements.status === 'fulfilled') setMonthlyStatements(Array.isArray(statements.value) ? statements.value : []);
     else {
       setMonthlyStatements([]);
@@ -126,7 +126,7 @@ export function CreditWorkspace({ section = 'overview' }) {
     try {
       const result = await creditWalletService.purchaseBundle(bundle.id);
       setNotice(result?.chargedCredits === '0.00'
-        ? 'Your purchased feature label is active. No additional credits charged.'
+        ? 'Your purchased module access is active. No additional credits charged.'
         : `${bundle.name} enabled. ${credits(result.chargedCredits)} credits charged by the server.`);
       await load();
       notifyCreditChange();
@@ -141,7 +141,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       setNotice(`${bundle.name} access disabled. Prepaid credits are not refunded.`);
       await load();
       notifyCreditChange();
-    } catch (e) { setError(e?.message || 'Could not disable this feature label.'); }
+    } catch (e) { setError(e?.message || 'Could not disable this module access.'); }
     finally { setBusy(''); }
   };
 
@@ -169,7 +169,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const sections = {
     overview: ['SaaS Account', 'Track your live balance, active modules, staff charges and wallet usage.'],
     buy: ['Buy Credits', 'Add credits with secure Razorpay checkout. Only captured payments update your wallet.'],
-    features: ['Feature Controls', 'Activate Feature Labels to unlock workshop modules for your company.'],
+    features: ['Feature Controls', 'Activate modules to unlock them for your company.'],
     logs: ['Credit Activity Logs', 'Review wallet top-ups, feature debits, adjustments and renewals.'],
   };
   const [title, subtitle] = sections[section] || sections.overview;
@@ -186,7 +186,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         <strong>{credits(wallet?.balance)}</strong>
         <small>{wallet ? (low ? 'Low balance — top up to avoid module interruption' : 'Verified company wallet balance') : 'Awaiting backend wallet'}</small>
       </article>
-      <article className="cg-credit-metric"><div><span>Active Modules</span><Zap size={20}/></div><strong>{featureAccess.labelOnly ? featureAccess.activeLabelModules.length : wallet?.activeFeatures ?? '—'}</strong><small>{featureAccess.labelOnly ? 'Modules in your active Feature Labels' : 'Modules currently switched on'}</small></article>
+      <article className="cg-credit-metric"><div><span>Active Modules</span><Zap size={20}/></div><strong>{featureAccess.labelOnly ? featureAccess.activeLabelModules.length : wallet?.activeFeatures ?? '—'}</strong><small>{featureAccess.labelOnly ? 'Modules in your active purchases' : 'Modules currently switched on'}</small></article>
       <article className="cg-credit-metric"><div><span>Active Staff</span><Users size={20}/></div><strong>{wallet?.staffCount ?? '—'}</strong><small>Used for per-staff feature pricing</small></article>
       {!featureAccess.labelOnly && <article className="cg-credit-metric"><div><span>Estimated Monthly Features</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits / month; pending postpaid usage: {credits(wallet?.postpaidAccruedCredits)} credits</small></article>}
     </div>
@@ -248,7 +248,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       <div className="cg-bundle-features">{account.modules.filter(module => module.billable).map(module => <span key={module.key}>{module.label}</span>)}</div>
     </section>}
 
-    {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Paid feature labels">
+    {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Available modules">
       <header><div><span>FEATURE LABELS</span><h2>Available module packages ({featureBundles.length})</h2></div><Coins size={22}/></header>
       <p>Choose a package for your workshop. Prices are calculated by Django using only the published per-user credits and the company's active login count.</p>
       <div className="cg-bundle-grid">
@@ -282,7 +282,7 @@ export function CreditWorkspace({ section = 'overview' }) {
                 onClick={() => buyBundle(bundle)}>
                 {busy === `bundle:${bundle.id}` ? 'Saving…'
                   : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
-                  : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate label'}
+                  : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
               </button>
               {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage}
                 onClick={() => stopBundle(bundle)}>Switch Off</button>}
@@ -290,8 +290,8 @@ export function CreditWorkspace({ section = 'overview' }) {
           </article>;
         })}
       </div>
-      {!featureBundles.length && !loading && <p className="cg-credit-empty">No published feature labels. Ask the platform administrator to create a label in /features/bundles/add/.</p>}
-      {wallet && !wallet.canManage && <p className="cg-credit-note">Only the company account owner can purchase feature labels.</p>}
+      {!featureBundles.length && !loading && <p className="cg-credit-empty">No modules are published yet. Module pricing is managed by your SaaS administrator.</p>}
+      {wallet && !wallet.canManage && <p className="cg-credit-note">Only the company account owner can purchase module access.</p>}
     </section>}
 
     {section === 'features' && !featureAccess.labelOnly && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>

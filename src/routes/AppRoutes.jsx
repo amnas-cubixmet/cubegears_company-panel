@@ -1,3 +1,4 @@
+import { OwnerCompanyProfile } from '../pages/saas/OwnerCompanyProfile';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getStaffLandingPath } from '../utils/staffLanding';
@@ -231,7 +232,7 @@ export const AppRoutes = () => (
       <Route path="/account/credits/buy" element={<CreditWorkspace section="buy" />} />
       <Route path="/account/credits/features" element={<CreditWorkspace section="features" />} />
       <Route path="/account/credits/logs" element={<CreditWorkspace section="logs" />} />
-      <Route path="/account/company" element={<SaaSAccount section="overview" />} />
+      <Route path="/account/company" element={<OwnerCompanyProfile />} />
       <Route path="/account/billing" element={<Navigate to="/account" replace />} />
       <Route path="/account/plans" element={<Navigate to="/account/credits/features" replace />} />
       <Route path="/account/storage" element={<SaaSAccount section="storage" />} />
