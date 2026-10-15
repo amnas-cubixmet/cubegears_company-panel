@@ -2,6 +2,8 @@ import apiClient from '../api/apiClient';
 
 export const creditWalletService = {
   overview: () => apiClient.get('/saas/credits/overview'),
+  gatewayStatus: () => apiClient.get('/saas/credits/gateway/status'),
+  testGateway: () => apiClient.post('/saas/credits/gateway/test', {}),
   packages: () => apiClient.get('/saas/credits/packages'),
   features: () => apiClient.get('/saas/credits/features'),
   logs: (limit = 100) => apiClient.get(`/saas/credits/logs?limit=${limit}`),
