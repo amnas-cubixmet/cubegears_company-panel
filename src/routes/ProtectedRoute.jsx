@@ -3,9 +3,11 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { getPermissionForPath, hasPermission } from '../utils/permissions';
+import { useFeatureAccess, moduleIsVisible } from '../context/FeatureAccessContext';
 
 export const ProtectedRoute = () => {
   const { isAuthenticated, loading, user } = useAuth();
+  const featureAccess = useFeatureAccess();
   const location = useLocation();
 
   if (loading) {
@@ -32,6 +34,12 @@ export const ProtectedRoute = () => {
     return <Navigate to={`/login?next=${next}`} replace />;
   }
 
+  if (featureAccess.loading) {
+    return <div role="status" aria-live="polite" style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>Checking feature access…</div>;
+  }
+  if (featureAccess.enforced && location.pathname === '/dashboard' && featureAccess.modules.length === 0) {
+    return <Navigate to={featureAccess.canManageFeatures ? '/account/credits/features' : '/access-denied'} replace />;
+  }
   const requiredPermission = getPermissionForPath(location.pathname);
   const staffProfileMatch = location.pathname.match(/^\/staff-management\/staff\/([^/]+)$/);
   const isOwnStaffProfile =
@@ -42,7 +50,7 @@ export const ProtectedRoute = () => {
     location.pathname !== '/access-denied' &&
     requiredPermission &&
     !isOwnStaffProfile &&
-    !hasPermission(user, requiredPermission)
+    (!hasPermission(user, requiredPermission) || !moduleIsVisible(featureAccess, requiredPermission))
   ) {
     return (
       <Navigate
