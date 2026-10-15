@@ -3,11 +3,16 @@ import { ShieldAlert } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getStaffLandingPath } from '../../utils/staffLanding';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import { routeConfig } from '../../routes/routeConfig';
 
 export const AccessDenied = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const access = useFeatureAccess();
+  const firstAllowedRoute = routeConfig.find(route => route.path !== '/dashboard' && access.can(route.permission));
+  const landing = access.labelOnly ? firstAllowedRoute?.path || '/profile' : getStaffLandingPath(user);
   const params = new URLSearchParams(location.search);
   const permission = params.get('permission') || 'required permission';
 
@@ -48,7 +53,7 @@ export const AccessDenied = () => {
           fontSize: '13px',
           lineHeight: 1.6
         }}>
-          Your current role does not have permission to open this page.
+          This module is not activated for your company, or your staff role does not allow it.
         </p>
 
         <div style={{
@@ -65,7 +70,7 @@ export const AccessDenied = () => {
 
         <button
           type="button"
-          onClick={() => navigate(getStaffLandingPath(user), { replace: true })}
+          onClick={() => navigate(landing, { replace: true })}
           style={{
             width: '100%',
             minHeight: '44px',
