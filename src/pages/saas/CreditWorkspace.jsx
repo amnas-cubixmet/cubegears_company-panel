@@ -228,6 +228,7 @@ export function CreditWorkspace({ section = 'overview' }) {
           <span>Per user: <b>{credits(feature.perUserCredits)} cr</b> × {feature.userCount ?? '—'}</span>
           <span>Per employee: <b>{credits(feature.perStaffCredits)} cr</b> × {feature.staffCount ?? '—'}</span>
           <span>Recurring / {feature.billingPeriod}: <b>{credits(feature.periodCredits)} cr</b></span>
+          <span>Estimated / 30 days: <b>{credits(feature.monthlyCredits)} cr</b></span>
         </div>
         <div className="cg-credit-feature-footer"><small>{feature.enabled ? `Next charge: ${when(feature.nextChargeAt)}` : 'Not enabled'} · {feature.userCount ?? '—'} users, {feature.staffCount ?? '—'} employees</small><button type="button" disabled={busy !== '' || !feature.available || !wallet?.canManage} className={feature.enabled ? 'secondary' : 'primary'} onClick={() => toggle(feature)}>{busy === `feature:${feature.key}` ? 'Saving…' : feature.enabled ? 'Switch Off' : 'Enable Feature'}</button></div>
       </article>)}</div>
