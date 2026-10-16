@@ -13,15 +13,18 @@ import {
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getJobs = async (params) => {
-  if (USE_MOCK_API) {
+  // Staff Profile requests real assignments even when unrelated workspaces
+  // have mock mode enabled; this flag is never passed to the backend.
+  const { liveOnly = false, ...query } = params || {};
+  if (USE_MOCK_API && !liveOnly) {
     await delay();
     let result = getMockJobs();
-    if (params?.status) {
-      result = result.filter(j => j.status === params.status);
+    if (query.status) {
+      result = result.filter(j => j.status === query.status);
     }
     return Promise.resolve(result);
   }
-  const response = await apiClient.get(API_ENDPOINTS.JOBS, { params });
+  const response = await apiClient.get(API_ENDPOINTS.JOBS, { params: query });
   return Array.isArray(response) ? response : response?.results || [];
 };
 
