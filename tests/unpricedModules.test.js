@@ -5,6 +5,7 @@ import { featureLabelStatus } from '../src/utils/featureActivation.js';
 test('zero-priced catalogue placeholders never offer activation even with wallet credits', () => {
   const result = featureLabelStatus({id:null, perUserCredits:'0.00', totalCredits:'0.00', purchaseEnabled:false, purchaseDisabledReason:'MODULE_PRICE_NOT_SET'}, {canManage:true, balance:'1000'});
   assert.equal(result.allow, false);
+  assert.equal(result.label, 'Price not set');
   assert.match(result.message, /Price not set/);
 });
 

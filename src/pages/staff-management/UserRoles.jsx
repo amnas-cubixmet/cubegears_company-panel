@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   RoleCardGrid,
   RoleEditorForm,
@@ -7,7 +7,7 @@ import {
 } from '../../components/staff-management';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import {
-  ROLE_PERMISSION_MODULES,
+  companyPermissionModules,
   createPermissionMatrix,
 } from '../../config/rolePermissions';
 import { roleService } from '../../services/role.service';
@@ -21,7 +21,9 @@ const createInitialForm = () => ({
 });
 
 export const UserRoles = () => {
-  const { isCompanyOwner } = useFeatureAccess();
+  const featureAccess = useFeatureAccess();
+  const { isCompanyOwner } = featureAccess;
+  const availableModules = useMemo(() => companyPermissionModules(featureAccess.can), [featureAccess.can]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,7 +85,7 @@ export const UserRoles = () => {
   };
 
   const handleSelectAllModule = (moduleKey, enableAll) => {
-    const module = ROLE_PERMISSION_MODULES.find((item) => item.key === moduleKey);
+    const module = availableModules.find((item) => item.key === moduleKey);
     const nextPermissions = Object.fromEntries(
       (module?.actions || []).map((action) => [action, enableAll]),
     );
@@ -204,7 +206,7 @@ export const UserRoles = () => {
           editingRole={editingRole}
           formData={formData}
           setFormData={setFormData}
-          modules={ROLE_PERMISSION_MODULES}
+          modules={availableModules}
           saving={saving}
           onSubmit={handleSaveRole}
           onCancel={() => {

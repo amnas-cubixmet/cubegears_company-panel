@@ -9,14 +9,14 @@ test('SaaS owner Account retains Storage tab and all nested log pages', () => {
   const routes = code('src/routes/AppRoutes.jsx');
   const access = code('src/context/FeatureAccessContext.jsx');
   const workspace = code('src/utils/accountWorkspace.js');
-  assert.match(header, /\['storage','Storage','\/account\/storage',HardDrive,'storage\.view'\]/);
+  assert.match(header, /\['storage','Storage & Logs','\/account\/storage',HardDrive,'billing\.view'\]/);
   assert.match(header, /visibleTabs = tabs\.filter\(tab => isCompanyOwner && can\(tab\[4\]\)\)/);
   assert.match(routes, /path="\/account\/storage" element=\{<SaaSAccount section="storage"\s*\/>\}/);
   assert.match(routes, /path="\/account\/storage\/history"/);
   assert.match(routes, /path="\/account\/storage\/history\/:date"/);
   assert.match(access, /module === 'storage' && access\.isCompanyOwner/);
   assert.match(workspace, /'\/account\/storage'/);
-  assert.match(workspace, /safeStorageHistory/);
+  assert.match(workspace, /normalized\.startsWith\(\x27\/account\/storage\/history\/\x27\)/);
   assert.match(access, /billingHold: response\.billingHold === true/);
 });
 
@@ -40,8 +40,8 @@ test('owner cycle widget reads backend invoice dates and never computes payments
   const service = code('src/services/creditCycle.service.js');
   const overview = code('src/pages/saas/CreditWorkspace.jsx');
   const storage = code('src/pages/saas/SaaSAccount.jsx');
-  assert.match(service, /apiClient\.get\('\/saas\/credits\/cycle'\)/);
-  assert.match(service, /apiClient\.post\('\/saas\/credits\/cycle', \{\}\)/);
+  assert.match(service, /apiClient\.get\('\/saas\/credits\/billing-cycle'\)/);
+  assert.match(service, /apiClient\.post\('\/saas\/credits\/billing-cycle', \{\}\)/);
   assert.match(component, /cycle\.nextDueAt/);
   assert.match(component, /cycle\.amountDue/);
   assert.match(component, /cycle\.invoices/);

@@ -31,7 +31,7 @@ export function featureLabelStatus(bundle, wallet) {
     INVALID_USER_PRICE: 'The administrator must configure a positive per-user credit rate.',
   };
   if (!bundle.purchaseEnabled) {
-    return { label: 'Unavailable', message: reasons[bundle.purchaseDisabledReason] || 'Label activation is not available on the backend.', allow: false };
+    return { label: bundle.purchaseDisabledReason === 'MODULE_PRICE_NOT_SET' ? 'Price not set' : 'Unavailable', message: reasons[bundle.purchaseDisabledReason] || 'Label activation is not available on the backend.', allow: false };
   }
   if (!wallet) return { label: 'Unavailable', message: 'Wallet information has not loaded.', allow: false };
   if (!wallet.canManage) return { label: 'Restricted', message: 'Only a billing administrator can activate labels.', allow: false };

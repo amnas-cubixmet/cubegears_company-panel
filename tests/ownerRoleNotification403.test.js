@@ -18,7 +18,7 @@ test('header does not request denied notifications on render, route change or ev
 
 test('roles still use backend protections and owner-only edits', () => {
   const source = read('src/pages/staff-management/UserRoles.jsx');
-  assert.match(source, /const \{ isCompanyOwner \} = useFeatureAccess\(\)/);
+  assert.match(source, /const \{ isCompanyOwner \} = featureAccess/);
   assert.match(source, /if \(!isCompanyOwner \|\| saving \|\| role\.isProtected/);
   assert.match(source, /await roleService\.deleteRole\(role\.id\)/);
   assert.match(source, /await appConfirm/);
