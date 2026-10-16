@@ -30,11 +30,23 @@ test('staff cannot redirect into unauthorised routes after login', () => {
   assert.equal(getStaffLandingPath(member(['jobs.view', 'jobs.create']), '/jobs/new'), '/jobs/new');
 });
 
-test('password setup and magic link honour current role instead of forcing Dashboard', () => {
+test('password setup, reset and magic link honour current role instead of forcing Dashboard', () => {
   assert.match(setup, /getStaffLandingPath\(user\)/);
+  assert.match(reset, /window\.location\.replace\(getStaffLandingPath\(user\)\)/);
   assert.match(magic, /getStaffLandingPath\(result\?\.user, next\)/);
   assert.match(login, /getStaffLandingPath\(authenticatedUser, params\.get\('next'\)\)/);
   assert.match(read('../src/pages/auth/AccessDenied.jsx'), /getStaffLandingPath\(user\)/);
+});
+
+test('password reset signs in only when Django returns a complete verified session', () => {
+  assert.match(reset, /authRecoveryService\.resetPassword\(/);
+  assert.match(reset, /typeof accessToken === 'string'/);
+  assert.match(reset, /typeof refreshToken === 'string'/);
+  assert.match(reset, /user\?\.id && user\?\.email/);
+  assert.match(reset, /localStorage\.setItem\('auth_token', accessToken\)/);
+  assert.match(reset, /localStorage\.setItem\('auth_refresh_token', refreshToken\)/);
+  assert.match(reset, /localStorage\.setItem\('auth_user', JSON\.stringify\(user\)\)/);
+  assert.match(reset, /setDone\(true\)/);
 });
 
 test('login and recovery forms show red input/link validation on failures', () => {
