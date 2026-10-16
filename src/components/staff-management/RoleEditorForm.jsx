@@ -45,6 +45,7 @@ export const RoleEditorForm = ({
 
           <p className="role-editor-field is-wide" role="note">
             Staff permissions apply only within this company. Paid modules also require an active company entitlement.
+            Branch-specific restrictions are not available yet.
           </p>
         </div>
       </section>
