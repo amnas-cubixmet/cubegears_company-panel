@@ -1,0 +1,141 @@
+/*
+ * CubeGears workshop shell — responsive readability pass.
+ * Presentation only: route checks, feature-label authorisation, billing and
+ * data fetching remain in their current components.
+ *
+ * Desktop: use readable typography instead of 7–11px navigation/card labels.
+ * Phone: safe-area bottom navigation, legible drawer and compact wallet cards.
+ */
+@media (min-width:1024px) {
+  .app-shell .sidebar-brand-copy strong {font-size:15px;letter-spacing:-.02em}
+  .app-shell .sidebar-brand-copy small {font-size:11px}
+  .app-shell .sidebar-section-title {font-size:10px;line-height:1.4}
+  .app-shell .sidebar-nav-item {height:42px}
+  .app-shell .sidebar-nav-label {font-size:13px;line-height:1.35}
+  .app-shell .sidebar-user-copy strong {font-size:12px}
+  .app-shell .sidebar-user-copy small {font-size:10px}
+  .app-shell .sidebar-logo {font-size:11px}
+  .app-shell .header-page-title {font-size:16px;letter-spacing:-.02em}
+  .app-shell .header-date {font-size:12px}
+  .app-shell .header-profile-copy strong {font-size:12px}
+  .app-shell .header-profile-copy small {font-size:10px}
+  .app-shell .header-search-wrap input {font-size:13px!important}
+  .app-shell .header-profile-menu button {font-size:13px}
+  .app-shell .app-content {font-size:14px;line-height:1.55}
+  .app-shell .app-content .account-dashboard-eyebrow {font-size:11px}
+  .app-shell .app-content .account-dashboard-header p {font-size:14px}
+  .app-shell .app-content .account-dashboard-tabs button {font-size:14px}
+  .app-shell .app-content .cg-credit-metric>div {font-size:13px}
+  .app-shell .app-content .cg-credit-metric strong {font-size:clamp(27px,2.7vw,38px)}
+  .app-shell .app-content .cg-credit-metric small {font-size:12px;line-height:1.6}
+  .app-shell .app-content .cg-credit-panel>header h2 {font-size:23px}
+  .app-shell .app-content .cg-credit-panel>header span {font-size:11px}
+  .app-shell .app-content .cg-credit-panel>p,
+  .app-shell .app-content .cg-credit-inline,
+  .app-shell .app-content .cg-credit-note {font-size:14px;line-height:1.65}
+  .app-shell .app-content .cg-credit-shortcuts strong {font-size:15px}
+  .app-shell .app-content .cg-credit-shortcuts small {font-size:13px}
+  .app-shell .app-content .cg-credit-log strong,
+  .app-shell .app-content .cg-credit-log>b {font-size:14px}
+  .app-shell .app-content .cg-credit-log small {font-size:12px}
+  .app-shell .app-content .cg-credit-table-wrap th {font-size:12px}
+  .app-shell .app-content .cg-credit-table-wrap td {font-size:13px}
+  .app-shell .app-content :is(.ui-page-header h1,.page-header h1) {font-size:24px}
+  .app-shell .app-content :is(.ui-page-header p,.ui-section__header p) {font-size:13px}
+  .app-shell .app-content .ui-table-wrap :is(th,td) {font-size:13px}
+  .app-shell .app-content :is(.ui-btn,.saas-button,.ui-button) {font-size:13px}
+}
+
+@media (max-width:767px) {
+  /* Allow all pages to scroll clear of the floating bar and device home area. */
+  .app-shell .app-content,
+  .app-shell .app-content.is-dashboard-content {
+    min-width:0;
+    padding:16px 13px calc(112px + env(safe-area-inset-bottom));
+  }
+  .app-shell .app-scroll-area {scroll-padding-bottom:calc(105px + env(safe-area-inset-bottom))}
+  .app-shell .mobile-header-row {min-height:62px;padding:10px 14px}
+  .app-shell .mobile-brand-copy strong {font-size:14px}
+  .app-shell .mobile-brand-copy small {font-size:11px}
+  .app-shell .mobile-header-actions>button,
+  .app-shell .mobile-profile-button {width:40px;height:40px;min-width:40px}
+  .app-shell .mobile-search-wrap {padding:10px 13px 12px}
+  .app-shell .mobile-bottom-nav {
+    left:10px;right:10px;bottom:max(9px,env(safe-area-inset-bottom));
+    min-height:72px;padding:7px;
+    border-radius:20px;
+    border:1px solid var(--border);
+    background:color-mix(in srgb,var(--surface) 95%,transparent);
+    box-shadow:0 12px 35px rgba(15,23,42,.17);
+  }
+  .app-shell .mobile-bottom-item {min-width:0;min-height:54px;height:54px;gap:4px;border-radius:14px;padding:5px 3px}
+  .app-shell .mobile-bottom-icon {width:32px;height:27px}
+  .app-shell .mobile-bottom-icon svg {width:21px;height:21px}
+  .app-shell .mobile-bottom-label {
+    max-width:100%;font-size:10px;line-height:1.2;
+    font-weight:750;letter-spacing:0;text-overflow:ellipsis;
+  }
+  .app-shell .mobile-bottom-item.is-active {background:var(--primary-soft)}
+  .app-shell .mobile-bottom-item:focus-visible {outline:2px solid var(--primary);outline-offset:2px}
+
+  /* More drawer retains ALL backend-authorized modules, not just quick links. */
+  .app-shell .mobile-drawer {width:min(92vw,365px);max-width:100vw}
+  .app-shell .mobile-drawer-head {min-height:68px}
+  .app-shell .mobile-drawer-brand-copy strong {font-size:15px}
+  .app-shell .mobile-drawer-brand-copy small {font-size:11px}
+  .app-shell .mobile-drawer-title-row span {font-size:10px}
+  .app-shell .mobile-drawer-title-row strong {font-size:15px}
+  .app-shell .mobile-drawer-title-row small {font-size:11px}
+  .app-shell .mobile-drawer-section-title {font-size:11px}
+  .app-shell .mobile-drawer-item {min-height:49px}
+  .app-shell .mobile-drawer-item-label {font-size:13px;line-height:1.35}
+  .app-shell .mobile-drawer-theme button {min-height:41px;font-size:11px}
+  .app-shell .mobile-drawer-user strong {font-size:13px}
+  .app-shell .mobile-drawer-user small {font-size:11px}
+  .app-shell .mobile-drawer-close {width:42px;height:42px}
+
+  /* Credit / account pages: fit the viewport and keep values readable. */
+  .app-shell .app-content :is(.cg-credit-page,.account-billing-page,.storage-history-page,.storage-day-page,.document-templates-page,.account-security-page) {width:100%;min-width:0;max-width:100%}
+  .app-shell .app-content .account-dashboard-header {gap:13px}
+  .app-shell .app-content .account-dashboard-header p {font-size:13px}
+  .app-shell .app-content .account-dashboard-tabs {border-radius:14px}
+  .app-shell .app-content .account-dashboard-tabs button {font-size:12px;min-height:45px}
+  .app-shell .app-content .cg-credit-metrics {gap:11px;margin:9px 0}
+  .app-shell .app-content .cg-credit-metric {padding:18px;gap:10px;border-radius:14px}
+  .app-shell .app-content .cg-credit-metric>div {font-size:12px}
+  .app-shell .app-content .cg-credit-metric strong {
+    font-size:clamp(22px,5.5vw,30px);overflow-wrap:anywhere;
+    font-variant-numeric:tabular-nums;
+  }
+  .app-shell .app-content .cg-credit-metric small {font-size:11px;line-height:1.45}
+  .app-shell .app-content .cg-credit-panel {padding:18px;border-radius:15px}
+  .app-shell .app-content .cg-credit-panel>header h2 {font-size:18px;line-height:1.3}
+  .app-shell .app-content .cg-credit-panel>p {font-size:13px;line-height:1.65}
+  .app-shell .app-content .cg-credit-shortcuts {gap:10px}
+  .app-shell .app-content .cg-credit-shortcuts button {min-height:100px;padding:15px;border-radius:12px}
+  .app-shell .app-content .cg-credit-shortcuts strong {font-size:14px}
+  .app-shell .app-content .cg-credit-shortcuts small {font-size:12px}
+  .app-shell .app-content .cg-credit-columns {gap:12px}
+  .app-shell .app-content .cg-credit-table-wrap {max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .app-shell .app-content .cg-credit-table-wrap th,
+  .app-shell .app-content .cg-credit-table-wrap td {font-size:12px}
+  .app-shell .app-content :is(button,a,input,select,textarea):focus-visible {
+    outline:2px solid var(--primary);outline-offset:2px;
+  }
+}
+@media (max-width:390px) {
+  .app-shell .app-content,
+  .app-shell .app-content.is-dashboard-content {
+    padding-inline:10px;
+    padding-bottom:calc(108px + env(safe-area-inset-bottom));
+  }
+  .app-shell .mobile-bottom-nav {left:6px;right:6px;padding:5px;min-height:68px}
+  .app-shell .mobile-bottom-item {padding-inline:1px;min-height:52px;height:52px}
+  .app-shell .mobile-bottom-label {font-size:9px}
+  .app-shell .app-content .cg-credit-metrics {grid-template-columns:minmax(0,1fr)}
+  .app-shell .app-content .cg-credit-metric {min-height:114px}
+}
+@media (prefers-reduced-motion:reduce) {
+  .app-shell .mobile-bottom-item,
+  .app-shell .mobile-bottom-icon {transition:none;transform:none}
+}
