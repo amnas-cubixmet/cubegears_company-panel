@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { routeConfig, ROUTE_SECTIONS } from '../../routes/routeConfig';
-import { Laptop, LogOut, Moon, Sun, X } from 'lucide-react';
+import { Laptop, LogOut, Moon, Sun, X, UserRound, Store } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { getUserRoleLabel } from '../../utils/authDisplay';
@@ -40,6 +40,8 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   }, [isOpen, location.pathname, location.search]);
 
   const sections = Object.values(ROUTE_SECTIONS);
+  const visibleRoutes = routeConfig.filter(route => featureAccess.can(route.permission) &&
+    (route.id !== 'credits' || featureAccess.isCompanyOwner));
   const isRouteActive = (route) => {
     if (route.path === '/dashboard') return location.pathname === '/dashboard';
     return location.pathname === route.path || location.pathname.startsWith(`${route.path}/`);
@@ -77,14 +79,25 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
             <span>MENU</span>
             <strong>Workspace</strong>
           </div>
-          <small>{routeConfig.filter(route => featureAccess.can(route.permission)).length} modules</small>
+          <small>{visibleRoutes.length} available pages</small>
         </div>
 
         <nav className="mobile-drawer-nav" aria-label="Mobile navigation">
+          <section className="mobile-drawer-section">
+            <div className="mobile-drawer-section-title">Your account</div>
+            <div className="mobile-drawer-items">
+              <NavLink to="/profile" onClick={onClose} className="mobile-drawer-item">
+                <span className="mobile-drawer-item-icon"><UserRound size={17}/></span>
+                <span className="mobile-drawer-item-label">Profile</span>
+              </NavLink>
+              {featureAccess.isCompanyOwner && <NavLink to="/account/company" onClick={onClose} className="mobile-drawer-item">
+                <span className="mobile-drawer-item-icon"><Store size={17}/></span>
+                <span className="mobile-drawer-item-label">Shop Details</span>
+              </NavLink>}
+            </div>
+          </section>
           {sections.map((section) => {
-            const items = routeConfig.filter(
-              (route) => route.section === section && featureAccess.can(route.permission)
-            );
+            const items = visibleRoutes.filter((route) => route.section === section);
             if (!items.length) return null;
 
             return (
