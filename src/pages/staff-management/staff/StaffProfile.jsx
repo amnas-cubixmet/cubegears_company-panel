@@ -31,18 +31,13 @@ import {
 } from '../../../components/staff-management';
 import { getEmployeeLabel } from '../../../components/staff-management/staffDisplay';
 import { useAuth } from '../../../hooks/useAuth';
+import { useFeatureAccess } from '../../../context/FeatureAccessContext';
 import { staffInviteDeliveryMessage } from '../../../utils/staffInviteDelivery';
-import { USE_MOCK_API } from '../../../api/apiConfig';
-import { hasPermission } from '../../../utils/permissions';
 import { attendanceManagerService } from '../../../services/attendanceManager.service';
 import { jobService } from '../../../services/job.service';
 import { roleService } from '../../../services/role.service';
 import { staffService } from '../../../services/staff.service';
 import { staffManagementService } from '../../../services/staffManagement.service';
-import {
-  staffJobAssignments,
-  staffPerformance,
-} from '../../../mock/staffManagement.mock';
 
 const money = (value) =>
   new Intl.NumberFormat('en-IN', {
@@ -171,6 +166,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   const staffId = staffIdProp || routeStaffId;
   const goBack = onBack || (() => navigate('/staff-management/staff'));
   const { user } = useAuth();
+  const { can } = useFeatureAccess();
 
   const [staff, setStaff] = useState(null);
   const [activeTab, setActiveTab] = useState('Overview');
@@ -186,6 +182,8 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   const [documents, setDocuments] = useState([]);
   const [activities, setActivities] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
+  const [jobsError, setJobsError] = useState('');
 
   const [attendanceMonth, setAttendanceMonth] = useState(currentMonthValue());
   const [attendanceCalendar, setAttendanceCalendar] = useState(null);
@@ -197,10 +195,19 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
     Boolean(user?.employeeProfileId) &&
     String(user.employeeProfileId) === String(staffId);
 
-  const canEdit = hasPermission(user, 'staff.edit');
-  const canManageAttendance = hasPermission(user, 'attendance.manage');
-  const canViewPayroll = hasPermission(user, 'payroll.view');
-  const canManagePayroll = hasPermission(user, 'payroll.edit');
+  const canEdit = can('staff.edit');
+  const canReadRoles = can('company.manage');
+  const canViewJobs = can('jobs.view');
+  const canManageAttendance = can('attendance.manage');
+  const canViewPayroll = can('payroll.view');
+  const canManagePayroll = can('payroll.edit');
+  const visibleTabs = TABS.filter(([tab]) =>
+    !['Assigned Work', 'Performance'].includes(tab) || canViewJobs
+  ).filter(([tab]) =>
+    tab !== 'Attendance' || canManageAttendance || isOwnProfile
+  ).filter(([tab]) =>
+    tab !== 'Payroll' || canViewPayroll || canManagePayroll || isOwnProfile
+  );
 
   const showToast = (message) => {
     setToastMsg(message);
@@ -217,13 +224,11 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
   const loadSupportData = async (profile) => {
     const tasks = [
-      roleService.getRoles(),
       staffManagementService.getTeams(),
       staffManagementService.getShifts(),
       staffManagementService.getSkills(),
       staffManagementService.getDocuments(),
       staffService.getActivities(profile.id),
-      jobService.getJobs(),
     ];
 
     const results = await Promise.allSettled(tasks);
@@ -232,12 +237,11 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
         ? results[index].value
         : fallback;
 
-    setRoles(Array.isArray(value(0)) ? value(0) : []);
-    setTeams(Array.isArray(value(1)) ? value(1) : []);
-    setShifts(Array.isArray(value(2)) ? value(2) : []);
-    setSkills(Array.isArray(value(3)) ? value(3) : []);
+    setTeams(Array.isArray(value(0)) ? value(0) : []);
+    setShifts(Array.isArray(value(1)) ? value(1) : []);
+    setSkills(Array.isArray(value(2)) ? value(2) : []);
 
-    const allDocuments = Array.isArray(value(4)) ? value(4) : [];
+    const allDocuments = Array.isArray(value(3)) ? value(3) : [];
     setDocuments(
       allDocuments
         .map(normalizeDocument)
@@ -247,41 +251,8 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
     );
 
     setActivities(
-      (Array.isArray(value(5)) ? value(5) : []).map(normalizeActivity),
+      (Array.isArray(value(4)) ? value(4) : []).map(normalizeActivity),
     );
-
-    const allJobs = Array.isArray(value(6)) ? value(6) : [];
-    if (USE_MOCK_API) {
-      setJobs(
-        staffJobAssignments
-          .filter((job) =>
-            String(job.staffId) ===
-            String(profile.employeeId || profile.id),
-          )
-          .map((job) => ({
-            ...job,
-            jobNumber: job.id,
-            labourTotal: 0,
-            customerRating: null,
-            customerFeedback: '',
-          })),
-      );
-    } else {
-      const linkedUser = profile.user;
-      setJobs(
-        allJobs.filter((job) =>
-          [
-            job.technician,
-            job.technicianId,
-            job.assignedEmployee,
-            job.assignedEmployeeId,
-            job.staffId,
-          ].some((value) =>
-            String(value || '') === String(linkedUser || profile.id),
-          ),
-        ),
-      );
-    }
 
   };
 
@@ -301,6 +272,50 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   useEffect(() => {
     refreshAll();
   }, [staffId]);
+
+  // Roles are administrator-only; ordinary staff must not make forbidden
+  // /roles/ requests on profile load.
+  useEffect(() => {
+    if (!staff?.id || !canReadRoles) {
+      setRoles([]);
+      return undefined;
+    }
+    let alive = true;
+    roleService.getRoles()
+      .then((rows) => { if (alive) setRoles(Array.isArray(rows) ? rows : []); })
+      .catch(() => { if (alive) setRoles([]); });
+    return () => { alive = false; };
+  }, [staff?.id, canReadRoles]);
+
+  // Jobs is a separate, optionally paid module: never request /jobs on a
+  // free Staff profile. Fetch real jobs only when a permitted work tab opens.
+  useEffect(() => {
+    if (!staff?.id || !canViewJobs || !['Assigned Work', 'Performance'].includes(activeTab)) {
+      setJobs([]);
+      setJobsError('');
+      setJobsLoading(false);
+      return undefined;
+    }
+    let alive = true;
+    setJobs([]);
+    setJobsError('');
+    setJobsLoading(true);
+    jobService.getJobs({ liveOnly: true })
+      .then((allJobs) => {
+        if (!alive) return;
+        const linkedUser = staff.user;
+        const matched = (Array.isArray(allJobs) ? allJobs : []).filter((job) =>
+          [job.technician, job.technicianId, job.assignedEmployee,
+           job.assignedEmployeeId, job.staffId].some((value) =>
+            String(value || '') === String(linkedUser || staff.id)
+          )
+        );
+        setJobs(matched);
+      })
+      .catch((err) => { if (alive) setJobsError(err?.message || 'Unable to load assigned work.'); })
+      .finally(() => { if (alive) setJobsLoading(false); });
+    return () => { alive = false; };
+  }, [staff?.id, staff?.user, activeTab, canViewJobs]);
 
   useEffect(() => {
     if (!staff || !canManageAttendance) {
@@ -339,17 +354,6 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   }, [attendanceEmployee]);
 
   const performance = useMemo(() => {
-    if (USE_MOCK_API) {
-      return staffPerformance[staff?.employeeId || staff?.id] || {
-        jobsCompleted: 0,
-        labourRevenue: 0,
-        productiveHours: 0,
-        utilization: 0,
-        comebackJobs: 0,
-        customerRating: 0,
-      };
-    }
-
     const completed = jobs.filter((job) => job.status === 'Delivered');
     const labourRevenue = completed.reduce(
       (sum, job) =>
@@ -503,7 +507,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
       <nav className="staff-profile-tabs staff360-tabs" aria-label="Staff profile sections">
         <div className="scroll-hidden">
-          {TABS.map(([tab, Icon]) => (
+          {visibleTabs.map(([tab, Icon]) => (
             <button
               type="button"
               key={tab}
@@ -664,7 +668,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
                     )}
                   </div>
 
-                  {!USE_MOCK_API && (
+                  {canViewJobs && (
                     <button type="button" onClick={() => navigate(`/jobs/${job.id}/overview`)}>
                       Open Job
                     </button>
