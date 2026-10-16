@@ -27,6 +27,8 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [features, setFeatures] = useState([]);
   const [logs, setLogs] = useState([]);
   const [monthlyStatements, setMonthlyStatements] = useState([]);
+  const [calendarBilling, setCalendarBilling] = useState(null);
+  const [cycleBusy, setCycleBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
@@ -34,13 +36,19 @@ export function CreditWorkspace({ section = 'overview' }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [balance, bundles, catalog, history, labels, statements, accountInfo, activity] = await Promise.allSettled([
+    const [balance, bundles, catalog, history, labels, statements, accountInfo, activity, calendarResult] = await Promise.allSettled([
       creditWalletService.overview(), creditWalletService.packages(),
       creditWalletService.features(), creditWalletService.logs(),
       creditWalletService.bundles(), creditWalletService.monthlyStatements(),
       creditWalletService.account(), creditWalletService.featureActivity(),
+      creditWalletService.calendarBilling(),
     ]);
     const problems = [];
+    if (calendarResult.status === 'fulfilled') setCalendarBilling(calendarResult.value);
+    else {
+      setCalendarBilling(null);
+      if (calendarResult.reason?.status !== 404) problems.push('calendar billing statement');
+    }
     if (accountInfo.status === 'fulfilled') setAccount(accountInfo.value);
     else { setAccount(null); problems.push('account details'); }
     if (activity.status === 'fulfilled') setFeatureActivity(activity.value);
@@ -207,6 +215,33 @@ export function CreditWorkspace({ section = 'overview' }) {
       <p>Collection day: {featureAccess.billingStatus.dueDay} of the next month. Outstanding: {credits(featureAccess.billingStatus.outstandingCredits)} credits.</p>
       {featureAccess.billingStatus.blocked && <p>Buy credits to settle outstanding usage. Storage logs and your account remain available.</p>}
       <button type="button" onClick={() => navigate('/account/credits/buy')}>Buy credits</button>
+    </section>}
+    {(section === 'overview' || section === 'logs') && calendarBilling?.enabled && <section className="cg-credit-panel" aria-label="Calendar month credit billing">
+      <header><div><span>CALENDAR MONTH BILLING</span><h2>{calendarBilling.restricted ? 'Payment overdue — workshop restricted' : 'Monthly usage & payment'}</h2></div><FileClock size={22}/></header>
+      <p>Usage is recorded from the 1st through the last day of each calendar month. Wallet settlement is due on the {calendarBilling.dueDay}th of the next month. The due day remains a grace day; overdue restrictions start the following day.</p>
+      <div className="cg-credit-inline"><span>Outstanding credits</span><strong>{credits(calendarBilling.amountDue)} credits</strong></div>
+      <div className="cg-credit-inline"><span>Next payment deadline</span><strong>{when(calendarBilling.nextDueAt)}</strong></div>
+      <div className="cg-credit-inline"><span>Postpaid usage with zero wallet balance</span><strong>{calendarBilling.allowZeroBalanceUsage ? 'Allowed until due date' : 'Disabled'}</strong></div>
+      {calendarBilling.restricted && <p role="alert">Only account access, credit top-ups and read-only billing/storage audit remain available until outstanding credits are settled.</p>}
+      <div className="cg-credit-actions">
+        <button className="primary" type="button" onClick={() => navigate('/account/credits/buy')}>Buy credits</button>
+        <button type="button" disabled={cycleBusy} onClick={async () => {
+          setCycleBusy(true);
+          try {
+            const updated = await creditWalletService.retryCalendarBilling();
+            setCalendarBilling(updated);
+            await featureAccess.refresh();
+            await load();
+          } catch (failure) {
+            setError(failure?.message || 'Could not retry the billing settlement.');
+          } finally { setCycleBusy(false); }
+        }}>{cycleBusy ? 'Checking…' : 'Retry settlement'}</button>
+        <button type="button" onClick={() => navigate('/account/storage/history')}>Storage usage logs</button>
+      </div>
+      <div className="cg-credit-table-wrap"><table><thead><tr><th>Usage month</th><th>Features</th><th>Storage</th><th>Total credits</th><th>Due date</th><th>Status</th></tr></thead>
+        <tbody>{(calendarBilling.statements || []).map(item => <tr key={item.id}><td>{item.month}</td><td>{credits(item.featureCredits)}</td><td>{credits(item.storageCredits)}</td><td>{credits(item.totalCredits)}</td><td>{when(item.dueAt)}</td><td>{item.status}</td></tr>)}
+        {!(calendarBilling.statements || []).length && <tr><td colSpan={6}>No finalized monthly usage statements yet.</td></tr>}</tbody>
+      </table></div>
     </section>}
     {error && <div className="cg-credit-alert error" role="alert">{error} <button type="button" onClick={load}>Retry</button></div>}
     {notice && <div className="cg-credit-alert success" role="status">{notice}</div>}
