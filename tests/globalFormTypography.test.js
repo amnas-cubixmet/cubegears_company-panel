@@ -4,14 +4,16 @@ import { readFileSync } from 'node:fs';
 
 const css = readFileSync(new URL('../src/styles/form-typography.css', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+const desktop = readFileSync(new URL('../src/styles/desktop-typography.css', import.meta.url), 'utf8');
 const input = readFileSync(new URL('../src/components/ui/Input.jsx', import.meta.url), 'utf8');
 const select = readFileSync(new URL('../src/components/ui/Select.jsx', import.meta.url), 'utf8');
 
 test('global typography CSS is imported after legacy page styles', () => {
   const importedStyles = [...app.matchAll(/import ['"]\.\/styles\/([^'"]+\.css)['"];/g)]
     .map((match) => match[1]);
-  assert.deepEqual(importedStyles.slice(-3), [
-    'form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css'
+  assert.deepEqual(importedStyles.slice(-4), [
+    'form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css',
+    'desktop-typography.css'
   ]);
 });
 
@@ -42,4 +44,30 @@ test('input and textarea placeholders and custom dropdowns are regular', () => {
 test('shared Input/Select components do not introduce font-medium', () => {
   assert.match(input, /text-\[13px\] font-normal text-content/);
   assert.match(select, /text-\[13px\] font-normal text-content/);
+});
+
+test('desktop text increase is restricted to 1024px and above', () => {
+  assert.match(desktop, /@media \(min-width: 1024px\)/);
+  assert.ok(!/@media \(max-width:/.test(desktop), 'Do not overwrite mobile layout typography');
+  assert.match(desktop, /#root :is\(\.app-shell, \.saas-account-shell, \.login-page\)/);
+  assert.match(desktop, /font-size: 15px/);
+  assert.match(desktop, /font-size: 14px/);
+  assert.match(desktop, /font-size: 13px/);
+  assert.doesNotMatch(desktop, /\bzoom\s*:/, 'Do not zoom or distort the page layout');
+  assert.doesNotMatch(desktop, /\btransform\s*:\s*scale\(/);
+});
+
+test('desktop typography includes owner, staff, and small data text', () => {
+  for (const selector of [
+    '.saas-owner-sidebar-group > a',
+    '.sidebar-nav a',
+    'table th',
+    'table td',
+    '.ui-label',
+    '.login-field-label',
+    '.cg-credit-note',
+    '.ui-page-header h1',
+  ]) {
+    assert.ok(desktop.includes(selector), selector);
+  }
 });
