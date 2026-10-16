@@ -16,6 +16,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: node --test tests/storageBillingCycleOwnerUI.test.js
       - run: node --test tests/mobileCreditChipCompact.test.js
       - run: node --test tests/freeCoreModulesUi.test.js tests/accountWorkspace.test.js tests/emptyCompanyFeatureNav.test.js
       - run: node --test tests/workspaceResponsivePolish.test.js

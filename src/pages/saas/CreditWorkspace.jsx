@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
 import { creditWalletService, notifyCreditChange, purchaseCredits } from '../../services/creditWallet.service';
 import { AccountHeader } from '../../components/account';
+import { CreditCycleCard } from '../../components/account/CreditCycleCard';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { useAuth } from '../../hooks/useAuth';
 import { routeConfig } from '../../routes/routeConfig';
@@ -277,6 +278,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       </div>
     </section>}
 
+    {section === 'overview' && <CreditCycleCard />}
     {section === 'overview' && <div className="cg-credit-columns">
       <section className="cg-credit-panel"><header><div><span>WALLET OVERVIEW</span><h2>Your credits at a glance</h2></div><Wallet size={22}/></header>
         <p>Buy wallet credits as needed. {wallet?.billingMode === 'monthly_postpaid'
@@ -311,7 +313,7 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Available modules">
       <header><div><span>MODULE PRICING</span><h2>Paid workshop modules ({paidBundles.length})</h2></div><Coins size={22}/></header>
-      <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. Published package prices are calculated per active login user.</p>
+      <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. In postpaid cycle mode, monthly labels start at zero upfront credits and bill the recorded active interval on the administrator's due date.</p>
       <div className="cg-bundle-grid">
         {paidBundles.map((bundle) => {
           const status = featureLabelStatus(bundle, wallet);
@@ -325,7 +327,7 @@ export function CreditWorkspace({ section = 'overview' }) {
             <div className="cg-bundle-price">
               {bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY'
                 ? <><span>Included free</span><strong>0 <small>credits — no purchase needed</small></strong></>
-                : <><span>Per user credits</span>
+                : <><span>{bundle.cyclePostpaid ? 'Monthly usage rate (deferred)' : 'Per user credits'}</span>
                   <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
                   <div className="cg-bundle-summary">
                     <span>{bundle.userCount ?? '—'} active login users</span>

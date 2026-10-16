@@ -42,6 +42,7 @@ export function StorageHistory() {
         setEventsError('');
       } else {
         setEvents([]);
+        setEventCount(0);
         setEventsError(activity.reason?.message || 'Could not load storage activity.');
       }
       setLoading(false);
@@ -60,6 +61,26 @@ export function StorageHistory() {
   };
 
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(rows), [rows]);
+
+  const showAllHistory = () => {
+    setFrom('');
+    setTo('');
+  };
+
+  const loadMore = async () => {
+    if (loadingMore || events.length >= eventCount) return;
+    setLoadingMore(true);
+    try {
+      const more = await storageHistoryService.getStorageEvents({ from, to, offset: events.length, limit: 50 });
+      setEvents((previous) => [...previous, ...(Array.isArray(more?.results) ? more.results : [])]);
+      setEventCount(Number(more?.count || 0));
+      setEventsError('');
+    } catch (exc) {
+      setEventsError(exc?.message || 'Could not load additional storage events.');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const preset = (days) => {
     setTo(toIso(new Date()));
@@ -80,6 +101,7 @@ export function StorageHistory() {
           <button onClick={() => preset(7)}>7 days</button>
           <button onClick={() => preset(30)}>30 days</button>
           <button onClick={() => preset(90)}>90 days</button>
+          <button onClick={showAllHistory}>All recorded activity</button>
         </div>
         <div className="storage-range-inputs">
           <label><span>From</span><input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} /></label>
@@ -95,7 +117,7 @@ export function StorageHistory() {
       </div>
 
       <section className="saas-card saas-wide">
-        <div className="saas-card-head"><div><span className="saas-kicker">STORAGE ACTIVITY</span><h2>Upload and deletion log</h2></div><span>{events.length} recent events</span></div>
+        <div className="saas-card-head"><div><span className="saas-kicker">STORAGE ACTIVITY</span><h2>Upload and deletion log</h2></div><span>{events.length} of {eventCount} recorded events</span></div>
         {eventsError && <p className="saas-error" role="alert">{eventsError}</p>}
         {loading && <div className="saas-loading">Loading storage activity…</div>}
         <div className="storage-history-list">
@@ -109,6 +131,9 @@ export function StorageHistory() {
           ))}
           {!loading && !eventsError && !events.length && <p className="saas-muted">No recorded storage changes in this date range.</p>}
         </div>
+        {events.length < eventCount && <button className="saas-button" type="button" disabled={loadingMore} onClick={loadMore}>
+          {loadingMore ? 'Loading…' : `Load 50 more file events (${eventCount - events.length} remaining)`}
+        </button>}
       </section>
 
       <section className="saas-card saas-wide">
