@@ -33,6 +33,6 @@ test('UI informs users when metered backend events are not yet available', () =>
   const helper = read('../src/utils/featureActivation.js');
   assert.match(helper, /METERED_OPERATION_NOT_READY/);
   assert.match(helper, /FEATURE_ENTITLEMENTS_NOT_ENABLED/);
-  assert.match(panel, /Only the company account owner can purchase feature labels/);
+  assert.match(panel, /Only the company account owner can purchase module access/);
   assert.match(panel, /Prepaid credits are not refunded/);
 });
