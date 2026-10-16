@@ -136,7 +136,10 @@ export const UserRoles = () => {
 
   const handleDeleteRole = async (role) => {
     if (!isCompanyOwner || saving || role.isProtected || Number(role.usersCount) > 0) return;
-    if (!window.confirm(`Delete role "${role.name}"? This cannot be undone.`)) return;
+    const confirmed = await appConfirm(`Delete role "${role.name}"? This cannot be undone.`, {
+      title: 'Delete Staff Role', confirmLabel: 'Delete Role', tone: 'danger',
+    });
+    if (!confirmed) return;
     setSaving(true);
     setError('');
     try {
