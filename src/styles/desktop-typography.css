@@ -141,16 +141,16 @@
   /* Tailwind typography utilities used in one-off forms and page headers. */
   #root :is(.app-shell, .saas-account-shell, .login-page) :is(
     .text-xs,
-    .text-\\[10px\\],
-    .text-\\[11px\\],
-    .text-\\[12px\\]
+    .text-\[10px\],
+    .text-\[11px\],
+    .text-\[12px\]
   ) {
     font-size: 13px;
   }
   #root :is(.app-shell, .saas-account-shell, .login-page) :is(
     .text-sm,
-    .text-\\[13px\\],
-    .text-\\[14px\\]
+    .text-\[13px\],
+    .text-\[14px\]
   ) {
     font-size: 14px;
   }
