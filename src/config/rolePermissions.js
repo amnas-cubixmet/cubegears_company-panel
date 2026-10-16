@@ -1,6 +1,5 @@
 export const ROLE_PERMISSION_MODULES = [
   { key: 'dashboard', label: 'Dashboard', actions: ['view'] },
-  { key: 'company', label: 'Company & Roles', actions: ['manage'] },
   { key: 'customers', label: 'Customers', actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'vehicles', label: 'Vehicles', actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'services', label: 'Services', actions: ['view', 'create', 'edit', 'delete'] },
@@ -15,7 +14,6 @@ export const ROLE_PERMISSION_MODULES = [
   { key: 'reports', label: 'Reports', actions: ['view'] },
   { key: 'notifications', label: 'Notifications', actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'settings', label: 'Settings', actions: ['view', 'manage'] },
-  { key: 'billing', label: 'Plan & Billing', actions: ['view', 'edit'] },
   { key: 'storage', label: 'Storage', actions: ['view', 'manage'] },
 ];
 

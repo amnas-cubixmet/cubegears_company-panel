@@ -43,7 +43,7 @@ export const StaffAddPage = () => {
     name: '',
     phone: '',
     email: '',
-    designation: 'Mechanic',
+    designation: '',
     role: '',
     teamId: '',
     shiftId: '',
@@ -273,6 +273,7 @@ export const StaffAddPage = () => {
                   value={form.role}
                   onChange={(event) => set('role', event.target.value)}
                 >
+                  <option value="">Select company-created role</option>
                   {roles.map((role) => (
                     <option key={role.id} value={role.name}>
                       {role.name}
@@ -280,6 +281,12 @@ export const StaffAddPage = () => {
                   ))}
                 </select>
               </label>
+              {!loadingOptions && roles.length === 0 && (
+                <p className="staff-login-invite-hint">
+                  No staff roles have been created for this company yet.
+                  {user?.isCompanyOwner ? ' Create one in Roles & Permissions before inviting staff with email login.' : ' Ask your company owner to create a role.'}
+                </p>
+              )}
 
               <label>
                 Employment Status

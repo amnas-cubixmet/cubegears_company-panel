@@ -6305,3 +6305,46 @@
   font-weight: 400;
   line-height: 1.55;
 }
+
+/* Company-owner role actions: real API editing and safe deletion. */
+.cg-staff-management .roles-dashboard-card-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 9px;
+  margin-top: auto;
+}
+.cg-staff-management .roles-dashboard-card-actions button {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--staff-border);
+  border-radius: 9px;
+  background: var(--staff-soft);
+  color: var(--text-secondary);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cg-staff-management .roles-dashboard-card-actions button:first-child:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.cg-staff-management .roles-dashboard-card-actions button:last-child:not(:first-child) {
+  color: var(--danger);
+}
+.cg-staff-management .roles-dashboard-card-actions button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.cg-staff-management .roles-dashboard-info {
+  padding: 12px 15px;
+  border-radius: 10px;
+  background: var(--staff-soft);
+  color: var(--text-secondary);
+}
+@media (max-width: 520px) {
+  .cg-staff-management .roles-dashboard-card-actions {
+    flex-direction: column;
+  }
+}

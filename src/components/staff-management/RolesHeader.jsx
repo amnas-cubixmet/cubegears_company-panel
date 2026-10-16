@@ -1,11 +1,11 @@
 import React from 'react';
 import { Plus, ShieldCheck } from 'lucide-react';
 
-export const RolesHeader = ({ onAdd }) => (
+export const RolesHeader = ({ onAdd, canManage = false }) => (
   <section className="roles-dashboard-header">
     <div>
       <h2>Company User Roles</h2>
-      <p>Configure custom roles, branch scope and module-level access.</p>
+      <p>Company Owner creates staff roles and chooses their module permissions.</p>
     </div>
 
     <div className="roles-dashboard-header-actions">
@@ -14,10 +14,12 @@ export const RolesHeader = ({ onAdd }) => (
         <span>RBAC</span>
       </div>
 
-      <button type="button" className="roles-primary-button" onClick={onAdd}>
-        <Plus size={14} />
-        Add New Role
-      </button>
+      {canManage && (
+        <button type="button" className="roles-primary-button" onClick={onAdd}>
+          <Plus size={14} />
+          Add New Role
+        </button>
+      )}
     </div>
   </section>
 );
