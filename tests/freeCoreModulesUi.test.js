@@ -7,8 +7,8 @@ const source = (file) => readFileSync(new URL('../' + file, import.meta.url), 'u
 
 const base = {
   enforced: true, paidAccessRequired: true, labelOnly: true,
-  modules: [], activeLabelModules: [], freeModules: ['billing','dashboard','settings','staff'],
-  permissions: ['billing.view','dashboard.view','settings.view','settings.manage','staff.view','staff.create'],
+  modules: [], activeLabelModules: [], freeModules: ['billing','dashboard','roles','settings','staff'],
+  permissions: ['billing.view','dashboard.view','settings.view','settings.manage','staff.view','staff.create','company.manage'],
   isCompanyOwner: true, unavailable: false,
 };
 
@@ -32,6 +32,17 @@ test('settings is free for permitted staff even with no paid module entitlement'
   assert.equal(setupRedirect(allowed, '/settings'), null);
   const denied = {...base, isCompanyOwner: false, permissions: []};
   assert.equal(isAccountOnly(denied), true);
+});
+
+test('roles are free but require the existing company-admin permission', () => {
+  const admin = {...base, isCompanyOwner: false, permissions: ['company.manage']};
+  // Roles are part of free core access; the role-management screen itself
+  // requires company.manage, enforced by Django on every role API request.
+  assert.equal(setupRedirect(admin, '/staff-management/roles'), null);
+  const staff = {...base, isCompanyOwner: false, permissions: ['staff.view']};
+  assert.equal(setupRedirect(staff, '/staff-management/roles'), null);
+  // Route guard must still reject this staff member for company.manage.
+  assert.match(source('src/routes/ProtectedRoute.jsx'), /featureAccess\.can\(requiredPermission\)/);
 });
 
 test('no free role permissions preserves safe account-only setup flow', () => {
@@ -81,6 +92,15 @@ test('free module cards appear on SaaS account and feature controls without purc
   assert.match(wallet, /!featureAccess\.freeModules\?\.includes/);
   assert.match(wallet, /features\.filter\(feature => !freeKeys\.includes\(feature\.key\)\)/);
   assert.match(wallet, /purchaseDisabledReason === 'FREE_MODULES_ONLY'/);
+  assert.match(wallet, /freeKeys = \['dashboard', 'settings', 'staff', 'roles', 'billing'\]/);
+  assert.match(wallet, /featureAccess\.freeModules\?\.includes\('roles'\)/);
+  assert.match(wallet, /featureAccess\.can\('company\.manage'\)/);
+  assert.match(wallet, /label: 'Roles & Permissions'/);
+  assert.match(wallet, /path: '\/staff-management\/roles'/);
+  const access = source('src/context/FeatureAccessContext.jsx');
+  assert.match(access, /'dashboard', 'settings', 'staff', 'roles', 'billing'/);
+  const pathPermissions = source('src/utils/permissions.js');
+  assert.match(pathPermissions, /\['\/staff-management\/roles', 'company\.manage'\]/);
 });
 
 test('existing route guard and mobile/desktop menus remain server authorized', () => {
