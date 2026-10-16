@@ -273,6 +273,12 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
     refreshAll();
   }, [staffId]);
 
+  useEffect(() => {
+    if (!canViewJobs && ['Assigned Work', 'Performance'].includes(activeTab)) {
+      setActiveTab('Overview');
+    }
+  }, [activeTab, canViewJobs]);
+
   // Roles are administrator-only; ordinary staff must not make forbidden
   // /roles/ requests on profile load.
   useEffect(() => {
@@ -625,7 +631,9 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
         {activeTab === 'Assigned Work' && (
           <div className="staff360-tab-stack">
-            <div className="staff360-work-summary">
+            {jobsLoading && <div className="staff-workshop-empty" role="status">Loading assigned work…</div>}
+            {jobsError && <div className="staff-directory-message is-error" role="alert">{jobsError}</div>}
+            {!jobsLoading && !jobsError && <div className="staff360-work-summary">
               <div><span>Total Assigned</span><strong>{jobs.length}</strong></div>
               <div><span>In Progress</span><strong>{jobs.filter((job) => job.status === 'In Progress').length}</strong></div>
               <div><span>Waiting Parts</span><strong>{jobs.filter((job) => job.status === 'Waiting for Parts' || job.status === 'Waiting Parts').length}</strong></div>
@@ -681,12 +689,15 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
                   No jobs are currently linked to this staff member.
                 </div>
               )}
-            </div>
+            </div>}
           </div>
         )}
 
         {activeTab === 'Performance' && (
           <div className="staff360-tab-stack">
+            {jobsLoading && <div className="staff-workshop-empty" role="status">Loading performance data…</div>}
+            {jobsError && <div className="staff-directory-message is-error" role="alert">{jobsError}</div>}
+            {!jobsLoading && !jobsError && <>
             <div className="staff360-metric-grid">
               <div><span>Jobs Completed</span><strong>{performance.jobsCompleted}</strong></div>
               <div><span>Labour Revenue</span><strong>{money(performance.labourRevenue)}</strong></div>
@@ -710,6 +721,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
                 <span>Completed jobs, labour value, comeback jobs and available customer ratings are used here.</span>
               </div>
             </div>
+            </>}
           </div>
         )}
 
