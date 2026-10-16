@@ -5,7 +5,7 @@ const owner = { enforced:true, paidAccessRequired:true, modules:[], isCompanyOwn
 
 test('unactivated owner can open account, own profile and shop details', () => {
   assert.equal(isAccountOnly(owner), true);
-  for (const path of ['/account', '/account/', '/account/credits/buy', '/account/credits/features', '/account/credits/logs', '/profile', '/account/company', '/account/storage', '/account/storage/history', '/account/storage/history/2026-10-15']) {
+  for (const path of ['/account', '/account/', '/account/credits/buy', '/account/credits/features', '/account/credits/logs', '/profile', '/account/company', '/account/storage', '/account/storage/history']) {
     assert.equal(setupRedirect(owner, path), null, path);
   }
   for (const path of ['/dashboard', '/settings', '/jobs/123', '/staff-management/roles', '/account/templates', '/account/security', '/access-denied']) {

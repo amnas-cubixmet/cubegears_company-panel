@@ -38,7 +38,7 @@ export function StorageHistory() {
       }
       if (activity.status === 'fulfilled') {
         setEvents(Array.isArray(activity.value?.results) ? activity.value.results : []);
-        setEventCount(Number(activity.value?.count || 0));
+        setEventCount(activity.value?.count || 0);
         setEventsError('');
       } else {
         setEvents([]);
@@ -49,6 +49,16 @@ export function StorageHistory() {
     });
     return () => { active = false; };
   }, [from, to]);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const payload = await storageHistoryService.getStorageEvents({from, to, offset:events.length});
+      setEvents(old => [...old, ...(payload.results || [])]);
+      setEventsError('');
+    } catch (error) { setEventsError(error.message); }
+    finally { setLoadingMore(false); }
+  };
 
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(rows), [rows]);
 
@@ -192,6 +202,7 @@ export function StorageDayDetail() {
           {!snapshot.files?.length && <p className="saas-muted">No file metadata was stored in this snapshot.</p>}
         </div>
       </section>
+      {events.length < eventCount && <button className="saas-button" disabled={loadingMore} onClick={loadMore}>Load more storage events ({events.length} / {eventCount})</button>}
     </div>
   );
 }
