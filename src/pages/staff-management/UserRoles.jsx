@@ -12,6 +12,7 @@ import {
 } from '../../config/rolePermissions';
 import { roleService } from '../../services/role.service';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import { appConfirm } from '../../components/common/appDialogs';
 
 const createInitialForm = () => ({
   name: '',
