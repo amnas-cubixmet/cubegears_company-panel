@@ -1,10 +1,12 @@
 import React from 'react';
-import { Building2, ShieldCheck, Users } from 'lucide-react';
+import { ShieldCheck, Users } from 'lucide-react';
 
 export const RoleCardGrid = ({
   roles,
   countPermissions,
   onOpen,
+  canManage = false,
+  onDelete,
 }) => (
   <section className="roles-dashboard-grid">
     {roles.map((role) => (
@@ -16,7 +18,7 @@ export const RoleCardGrid = ({
               <strong>{role.name}</strong>
               {role.isProtected && <span>Protected</span>}
             </div>
-            <p>{role.description || 'Company role with configurable module access.'}</p>
+            <p>{role.isProtected ? 'Protected workshop owner role' : role.code}</p>
           </div>
 
           <b className={(role.status || 'Active') === 'Active' ? 'is-active' : 'is-inactive'}>
@@ -31,20 +33,26 @@ export const RoleCardGrid = ({
             <strong>{role.usersCount || 0}</strong>
           </div>
           <div>
-            <Building2 size={13} />
-            <span>Branch Scope</span>
-            <strong>{role.branchScope || 'Assigned Branch Only'}</strong>
-          </div>
-          <div>
             <ShieldCheck size={13} />
             <span>Permissions</span>
             <strong>{countPermissions(role.permissions)} Enabled</strong>
           </div>
         </div>
 
-        <button type="button" onClick={() => onOpen(role)}>
-          {role.isProtected ? 'View Full Access' : 'Edit Role & Permissions'}
-        </button>
+        {canManage && (
+          <div className="roles-dashboard-card-actions">
+            <button type="button" onClick={() => onOpen(role)}>
+              {role.isProtected ? 'View Owner Role' : 'Edit Permissions'}
+            </button>
+            {!role.isProtected && (
+              <button type="button" disabled={Number(role.usersCount) > 0}
+                title={Number(role.usersCount) > 0 ? 'Reassign assigned staff before deleting this role' : undefined}
+                onClick={() => onDelete(role)}>
+                Delete
+              </button>
+            )}
+          </div>
+        )}
       </article>
     ))}
 
