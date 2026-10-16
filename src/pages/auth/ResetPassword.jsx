@@ -3,6 +3,7 @@ import { CheckCircle2, Eye, EyeOff, Lock } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { getAuthErrorMessage, getAuthFieldErrors } from '../../utils/authErrors';
+import { getStaffLandingPath } from '../../utils/staffLanding';
 import '../../styles/login-system.css';
 import '../../styles/auth-recovery.css';
 
@@ -21,6 +22,7 @@ export const ResetPassword = () => {
   const [formError, setFormError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [done, setDone] = useState(false);
+  const [doneMessage, setDoneMessage] = useState('');
 
   const clearField = (field) => {
     setFieldErrors((current) => {
@@ -52,7 +54,28 @@ export const ResetPassword = () => {
     setFormError('');
 
     try {
-      await authRecoveryService.resetPassword({ uid, token, email, password });
+      const result = await authRecoveryService.resetPassword({ uid, token, email, password });
+      const accessToken = result?.access;
+      const refreshToken = result?.refresh;
+      const user = result?.user;
+
+      // Django verifies the single-use reset token and normal login eligibility
+      // before issuing this session. Never manufacture a client-only login.
+      if (typeof accessToken === 'string' && accessToken &&
+          typeof refreshToken === 'string' && refreshToken &&
+          user?.id && user?.email) {
+        localStorage.setItem('auth_token', accessToken);
+        localStorage.setItem('auth_refresh_token', refreshToken);
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        // Reload the providers with the verified session, without leaving the
+        // reset token in the URL or requiring a second password entry.
+        window.location.replace(getStaffLandingPath(user));
+        return;
+      }
+
+      // Old API deployments or accounts blocked from sign-in may save the
+      // password without returning tokens. Never pretend they are signed in.
+      setDoneMessage(result?.message || 'Password updated. Please sign in to continue.');
       setDone(true);
     } catch (error) {
       const backend = getAuthFieldErrors(error);
@@ -90,7 +113,7 @@ export const ResetPassword = () => {
             <div className="auth-success-state">
               <span className="auth-success-icon"><CheckCircle2 size={24}/></span>
               <h1 className="login-title">Password updated</h1>
-              <p className="login-description">Your new password is ready. Sign in with the same account email and this new password.</p>
+              <p className="login-description">{doneMessage}</p>
               <button type="button" className="login-submit" onClick={goToLogin}>Go to Sign In</button>
             </div>
           ) : (
