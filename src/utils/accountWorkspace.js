@@ -6,9 +6,20 @@ export const PURCHASE_ACCOUNT_PATHS = new Set([
 
 export const isAccountPath = (pathname = '') => pathname === '/account' || pathname.startsWith('/account/');
 
+// Paid modules may be empty while the company still has FREE Dashboard/Staff
+// access. Trust only the permissions and free-module list verified by Django.
+export const hasFreeWorkspace = (access) => Boolean(
+  Array.isArray(access?.freeModules) && Array.isArray(access?.permissions)
+  && (
+    (access.freeModules.includes('dashboard') && access.permissions.includes('dashboard.view'))
+    || (access.freeModules.includes('staff') && access.permissions.includes('staff.view'))
+  )
+);
+
 export const isAccountOnly = (access) => Boolean(
   access && !access.unavailable && (access.enforced || access.paidAccessRequired || access.labelOnly)
   && Array.isArray(access.modules) && access.modules.length === 0
+  && !hasFreeWorkspace(access)
 );
 
 export function setupRedirect(access, pathname) {

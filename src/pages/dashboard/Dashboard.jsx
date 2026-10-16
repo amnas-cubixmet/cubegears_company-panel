@@ -37,46 +37,34 @@ export const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (featureAccess.enforced) {
-      setLoading(false);
-      return;
-    }
+    // Dashboard is a free module. Django strips data from paid modules the
+    // user's role has not purchased, and widgets have their own can() checks.
     fetchDashboard();
-  }, [filterPeriod, filterBranch, featureAccess.enforced]);
-
-  if (featureAccess.enforced) {
-    const activeRoutes = routeConfig.filter(route =>
-      route.permission &&
-      !['dashboard', 'billing', 'settings', 'notifications'].includes(route.permission.split('.')[0]) &&
-      featureAccess.can(route.permission)
-    );
-    return (
-      <div className="dashboard-page">
-        <section className="operations-card" aria-label="Activated company modules" style={{ padding: 24 }}>
-          <h1 style={{ fontSize: 24, margin: '0 0 8px' }}>Your active features</h1>
-          <p style={{ margin: '0 0 24px' }}>Only the features enabled for your company and allowed by your role are shown here.</p>
-          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))' }}>
-            {activeRoutes.map((route) => {
-              const Icon = route.icon;
-              return (
-                <button key={route.id} type="button" onClick={() => navigate(route.path)}
-                  className="dashboard-stat-card" style={{ textAlign: 'left', cursor: 'pointer', padding: 20 }}>
-                  <Icon size={24} aria-hidden="true" />
-                  <strong style={{ display: 'block', marginTop: 12, fontSize: 17 }}>{route.label}</strong>
-                  <span style={{ fontSize: 13 }}>Open feature →</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      </div>
-    );
-  }
+  }, [filterPeriod, filterBranch]);
 
   if (loading) return <Loader />;
 
   return (
     <div className="dashboard-page">
+      {/* Free Dashboard stays available; paid-module shortcuts are permission-filtered. */}
+      {featureAccess.enforced && <section className="operations-card" aria-label="Available company modules" style={{ padding: 20 }}>
+        <h1 style={{ fontSize: 22, margin: '0 0 8px' }}>Your available modules</h1>
+        <p>Dashboard and Staff Management are free. Other modules require an active Feature Label and your role permission.</p>
+        <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', marginTop: 14 }}>
+          {routeConfig.filter(route => route.permission &&
+            !['dashboard', 'billing', 'settings', 'notifications'].includes(route.permission.split('.')[0]) &&
+            featureAccess.can(route.permission)
+          ).map(route => {
+            const Icon = route.icon;
+            return <button key={route.id} type="button" className="dashboard-stat-card" onClick={() => navigate(route.path)}
+              style={{ textAlign: 'left', cursor: 'pointer', padding: 16 }}>
+              <Icon size={22} aria-hidden="true" />
+              <strong style={{ display: 'block', marginTop: 10, fontSize: 15 }}>{route.label}</strong>
+              <span style={{ fontSize: 12 }}>Open module →</span>
+            </button>;
+          })}
+        </div>
+      </section>}
       <DashboardStats data={data} />
 
       {can('jobs.view') && <ServiceOperations
