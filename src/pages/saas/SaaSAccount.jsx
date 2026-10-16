@@ -6,6 +6,7 @@ import { saasAccountService } from '../../services/saasAccount.service';
 import { settingsService } from '../../services/settings.service';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { useAuth } from '../../hooks/useAuth';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { storageHistoryService } from '../../services/storageHistory.service';
 import { CreditCycleCard } from '../../components/account/CreditCycleCard';
@@ -123,6 +124,8 @@ function StorageView({ storage, setStorage }) {
   const access = useFeatureAccess();
   const canManage = access.can('storage.manage');
   const navigate = useNavigate();
+  const { can } = useFeatureAccess();
+  const canManageStorage = can('storage.manage');
   const { user } = useAuth();
   const [storageError, setStorageError] = useState('');
   const [historyError, setHistoryError] = useState('');
@@ -197,6 +200,7 @@ function StorageView({ storage, setStorage }) {
   };
 
   const upload = async (event) => {
+    if (!canManageStorage) return setStorageError('Storage modification requires storage.manage permission.');
     const files = Array.from(event.target.files || []);
     const valid = files.filter((file) =>
       storage.settings.allowedTypes.includes(file.type) &&
@@ -217,6 +221,7 @@ function StorageView({ storage, setStorage }) {
   };
 
   const remove = async (ids) => {
+    if (!canManageStorage) return setStorageError('Storage modification requires storage.manage permission.');
     if (!ids.length || !await appConfirm(`Delete ${ids.length} photo(s)? This cannot be undone.`)) return;
     setStorageBusy(true); setStorageError('');
     try {
@@ -233,6 +238,7 @@ function StorageView({ storage, setStorage }) {
   };
 
   const setting = async (key, value) => {
+    if (!canManageStorage) return setStorageError('Storage settings require storage.manage permission.');
     setStorageBusy(true); setStorageError('');
     try {
       const next = await saasAccountService.updateStorageSettings({ [key]: value });
@@ -253,7 +259,7 @@ function StorageView({ storage, setStorage }) {
           <div><span>Uploaded files</span><strong>{storage.files.length}</strong></div>
           <div><span>History</span><strong>Upload and delete events</strong></div>
         </div>
-        {canManage && <div className="saas-storage-actions">
+        {canManageStorage && <div className="saas-storage-actions">
           <select value={category} onChange={(e) => setCategory(e.target.value)}><option>Job Card</option><option>Inspection</option><option>Invoice</option><option>Delivery</option><option>General</option></select>
           <label className="saas-button"><Upload size={18} /> {storageBusy ? 'Working…' : 'Upload photos'}<input hidden multiple disabled={storageBusy} type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} /></label>
           <button className="saas-button danger" disabled={!selected.length || storageBusy} onClick={() => remove(selected)}><Trash2 size={18} /> Delete selected</button>
@@ -309,18 +315,19 @@ function StorageView({ storage, setStorage }) {
 
       <section className="saas-card">
         <div className="saas-card-head"><div><span className="saas-kicker">STORAGE SETTINGS</span><h2>Upload policy</h2></div><ShieldCheck size={22} /></div>
+        {!canManageStorage && <p className="saas-muted">Usage and audit logs are included with your SaaS Account. Editing upload policies requires storage management access.</p>}
         {[
           ['autoCompress', 'Compress uploads'],
           ['keepOriginals', 'Keep original files'],
           ['allowStaffUpload', 'Staff can upload'],
           ['allowStaffDelete', 'Staff can delete']
-        ].map(([key, label]) => <label className="saas-toggle" key={key}><span>{label}</span><input type="checkbox" checked={Boolean(storage.settings[key])} disabled={storageBusy || !canManage} onChange={(e) => setting(key, e.target.checked)} /></label>)}
-        <label className="saas-field"><span>Auto-delete after days (0 = never)</span><input type="number" min="0" disabled={!canManage} value={storage.settings.retentionDays} onChange={(e) => setting('retentionDays', Number(e.target.value))} /></label>
+        ].map(([key, label]) => <label className="saas-toggle" key={key}><span>{label}</span><input type="checkbox" checked={Boolean(storage.settings[key])} disabled={storageBusy || !canManageStorage} onChange={(e) => setting(key, e.target.checked)} /></label>)}
+        <label className="saas-field"><span>Auto-delete after days (0 = never)</span><input type="number" min="0" disabled={!canManageStorage} value={storage.settings.retentionDays} onChange={(e) => setting('retentionDays', Number(e.target.value))} /></label>
       </section>
 
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">FILES</span><h2>Current uploaded photos</h2></div><span>{storage.files.length} files</span></div>
-        <div className="saas-media-list">{storage.files.map((file) => <article className="saas-media-row" key={file.id}><input type="checkbox" disabled={!canManage} checked={selected.includes(file.id)} onChange={(e) => setSelected((old) => e.target.checked ? [...old, file.id] : old.filter((id) => id !== file.id))} /><div className="saas-file-icon">IMG</div><div className="saas-file-main"><strong>{file.name}</strong><span>{file.category} · {file.sizeMb} MB · {file.uploadedBy}</span></div><span className="saas-file-date">{date.format(new Date(file.uploadedAt))}</span><button className="saas-icon-button" disabled={!canManage} aria-label={`Delete ${file.name}`} onClick={() => remove([file.id])}><Trash2 size={17} /></button></article>)}</div>
+        <div className="saas-media-list">{storage.files.map((file) => <article className="saas-media-row" key={file.id}>{canManageStorage && <input type="checkbox" checked={selected.includes(file.id)} onChange={(e) => setSelected((old) => e.target.checked ? [...old, file.id] : old.filter((id) => id !== file.id))} /> }<div className="saas-file-icon">IMG</div><div className="saas-file-main"><strong>{file.name}</strong><span>{file.category} · {file.sizeMb} MB · {file.uploadedBy}</span></div><span className="saas-file-date">{date.format(new Date(file.uploadedAt))}</span>{canManageStorage && <button className="saas-icon-button" aria-label={`Delete ${file.name}`} onClick={() => remove([file.id])}><Trash2 size={17} /></button>}</article>)}</div>
       </section>
 
       <section className="saas-card saas-wide">

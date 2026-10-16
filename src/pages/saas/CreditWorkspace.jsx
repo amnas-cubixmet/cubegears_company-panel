@@ -296,7 +296,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         <button className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View all logs <ArrowRight size={16}/></button>
       </section>
       <section className="cg-credit-panel cg-credit-wide"><header><div><span>MANAGE YOUR TOOLS</span><h2>Features and storage</h2></div><Zap size={22}/></header>
-        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small><ArrowRight size={16}/></button>{featureAccess.can('storage.view') && <button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small><ArrowRight size={16}/></button>}<button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small><ArrowRight size={16}/></button></div>
+        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small><ArrowRight size={16}/></button>{featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small><ArrowRight size={16}/></button>}<button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small><ArrowRight size={16}/></button></div>
       </section>
     </div>}
 
@@ -409,7 +409,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         {logs.map(row => <tr key={row.id}><td>{when(row.createdAt)}</td><td><strong>{row.description}</strong><small>{row.kind}</small></td><td className={Number(row.delta)>=0?'positive':'negative'}>{Number(row.delta)>0?'+':''}{credits(row.delta)}</td><td>{credits(row.balanceAfter)}</td><td>{row.reference || '—'}</td></tr>)}
         {!logs.length && <tr><td colSpan={5} className="cg-credit-empty">No credit transactions recorded.</td></tr>}
       </tbody></table></div>
-      <p className="cg-credit-note">Logs are read-only and company-scoped. {featureAccess.can('storage.view') && <>For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History <ArrowRight size={14}/></button>.</>}</p>
+      <p className="cg-credit-note">Logs are read-only and company-scoped. {featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <>For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History <ArrowRight size={14}/></button>.</>}</p>
     </section>}
   </div>;
 }
