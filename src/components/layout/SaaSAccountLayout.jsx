@@ -23,6 +23,7 @@ export function SaaSAccountLayout({ children }) {
   const scrollArea = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const accountLinks = access.billingStatus?.blocked ? ACCOUNT_LINKS.filter(link => link.path === '/account') : ACCOUNT_LINKS;
   const workshopLinks = routeConfig.filter(
     route => route.id !== 'credits' && access.can(route.permission)
   );
@@ -58,7 +59,7 @@ export function SaaSAccountLayout({ children }) {
     </NavLink>
   );
 
-  return <div className="saas-account-shell">
+  return <div className="saas-account-shell saas-payment-recovery-shell">
     <header className="saas-account-topbar">
       <div className="saas-account-topbar-start">
         <button
@@ -88,7 +89,7 @@ export function SaaSAccountLayout({ children }) {
         <div className="saas-owner-sidebar-scroll">
           <div className="saas-owner-sidebar-group">
             <p className="saas-owner-sidebar-heading">MY ACCOUNT</p>
-            {ACCOUNT_LINKS.map(sidebarLink)}
+            {accountLinks.map(sidebarLink)}
           </div>
           {workshopSections.map(({ section, links }) => <div key={section} className="saas-owner-sidebar-group">
             <p className="saas-owner-sidebar-heading">{section}</p>
@@ -114,12 +115,12 @@ export function SaaSAccountLayout({ children }) {
   </div>;
 }
 
-export function WorkspaceAccessNotice({ unavailable = false, onRetry }) {
+export function WorkspaceAccessNotice({ unavailable = false, onRetry, paymentOverdue = false }) {
   const { logout } = useAuth();
   return <div className="saas-workspace-notice"><section>
     <Wallet size={30} aria-hidden="true"/>
-    <h1>{unavailable ? 'Unable to verify company access' : 'Workshop access is not active'}</h1>
-    <p>{unavailable ? 'Refresh your company access to continue.' : 'Your company owner must activate a module and allow your staff role before you can open the workshop.'}</p>
+    <h1>{unavailable ? 'Unable to verify company access' : paymentOverdue ? 'Company payment is overdue' : 'Workshop access is not active'}</h1>
+    <p>{unavailable ? 'Refresh your company access to continue.' : paymentOverdue ? 'Contact your company owner to settle the outstanding usage payment.' : 'Your company owner must activate a module and allow your staff role before you can open the workshop.'}</p>
     <div><button type="button" onClick={onRetry}>Refresh access</button><button type="button" onClick={logout}>Sign out</button></div>
   </section></div>;
 }

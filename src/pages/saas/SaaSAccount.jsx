@@ -4,10 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ChevronRight, CreditCard, FilePenLine, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { settingsService } from '../../services/settings.service';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { storageHistoryService } from '../../services/storageHistory.service';
+import { CreditCycleCard } from '../../components/account/CreditCycleCard';
 import { AccountHeader, AccountOverview } from '../../components/account';
 import '../../styles/account-billing.css';
 import '../../styles/account-dashboard.css';
@@ -119,6 +121,8 @@ function BillingView({ billing, storage, onOpenTemplates }) {
 }
 
 function StorageView({ storage, setStorage }) {
+  const access = useFeatureAccess();
+  const canManage = access.can('storage.manage');
   const navigate = useNavigate();
   const { can } = useFeatureAccess();
   const canManageStorage = can('storage.manage');
@@ -130,6 +134,7 @@ function StorageView({ storage, setStorage }) {
   const [category, setCategory] = useState('Job Card');
   const [history, setHistory] = useState([]);
   const [serverEvents, setServerEvents] = useState([]);
+  const [eventCount, setEventCount] = useState(0);
   const [eventError, setEventError] = useState('');
   const [eventsLoading, setEventsLoading] = useState(!USE_MOCK_API);
   const [audit, setAudit] = useState(() => {
@@ -152,12 +157,13 @@ function StorageView({ storage, setStorage }) {
     }
   };
 
-  const refreshEvents = async (start = from, end = to) => {
+  const refreshEvents = async (start = from, end = to, append = false) => {
     if (USE_MOCK_API) return;
     setEventsLoading(true);
     try {
-      const payload = await storageHistoryService.getStorageEvents({ from: start, to: end });
-      setServerEvents(Array.isArray(payload?.results) ? payload.results : []);
+      const payload = await storageHistoryService.getStorageEvents({ from: start, to: end, offset: append ? serverEvents.length : 0 });
+      setServerEvents(old => append ? [...old, ...(payload?.results || [])] : (payload?.results || []));
+      setEventCount(payload?.count || 0);
       setEventError('');
     } catch (error) {
       setServerEvents([]);
@@ -245,6 +251,7 @@ function StorageView({ storage, setStorage }) {
 
   return (
     <div className="saas-grid">
+      <CreditCycleCard />
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">MEDIA STORAGE</span><h2>Media storage usage</h2></div><Infinity size={24} /></div>
         <div className="saas-storage-summary">
@@ -263,6 +270,11 @@ function StorageView({ storage, setStorage }) {
         {storageError && <p className="saas-error" role="alert">{storageError}</p>}
       </section>
 
+      {storage.billing && <section className="saas-card saas-wide"><h2>Storage billing</h2>
+        <p>{storage.billing.creditsPerGb} credits / GB / {storage.billing.period}. Free allowance: {storage.billing.includedGb} GB.</p>
+        <p>Meter interval: {storage.billing.meterIntervalSeconds} seconds. {storage.billing.active ? 'Billing enabled' : 'Billing disabled'}.</p>
+        <p>Deleting a file stops future storage use; previously recorded usage remains payable. Monthly charges and due dates appear in Account → Logs.</p>
+      </section>}
       <section className="saas-card saas-wide storage-history-card">
         <div className="saas-card-head"><div><span className="saas-kicker">USAGE INTERVAL</span><h2>Storage usage history</h2></div><IndianRupee size={22} /></div>
         <div className="storage-range-toolbar">
@@ -320,7 +332,7 @@ function StorageView({ storage, setStorage }) {
 
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">{USE_MOCK_API ? 'LOCAL ACTIVITY' : 'SERVER AUDIT LOG'}</span><h2>{USE_MOCK_API ? 'Storage actions on this browser' : 'Recorded storage activity'}</h2></div><button className="saas-button" onClick={() => navigate('/account/storage/history')}>View full history <ChevronRight size={16} /></button></div>
-        <p className="saas-muted">{USE_MOCK_API ? 'Demo activity is stored in this browser.' : 'Upload and delete events are recorded in your company database. This shows up to 50 events for the selected date range.'}</p>
+        <p className="saas-muted">{USE_MOCK_API ? 'Demo activity is stored in this browser.' : 'Upload and delete events are recorded in your company database. Browse recorded events for the selected date range. Deleted-file names remain in the log.'}</p>
         {USE_MOCK_API ? (
           audit.length ? <div className="saas-table-wrap"><table className="saas-table"><thead><tr><th>Date & time</th><th>Action</th><th>Details</th><th>User</th></tr></thead><tbody>{audit.map((item) => <tr key={item.id}><td>{dateTime.format(new Date(item.at))}</td><td>{item.action}</td><td>{item.details}</td><td>{item.user}</td></tr>)}</tbody></table></div> : <p className="saas-muted">No local storage activity recorded yet.</p>
         ) : eventsLoading ? (
@@ -338,6 +350,7 @@ function StorageView({ storage, setStorage }) {
             </tr>
           ))}</tbody></table></div>
         ) : <p className="saas-muted">No server-recorded events for this period.</p>}
+        {serverEvents.length < eventCount && <button className="saas-button" disabled={eventsLoading} onClick={() => refreshEvents(from, to, true)}>Load more storage events ({serverEvents.length} / {eventCount})</button>}
       </section>
     </div>
   );
@@ -357,7 +370,7 @@ export function SaaSAccount({ section = 'billing' }) {
     const [bill, media, companyResult] = await Promise.allSettled([
       section === 'billing' ? saasAccountService.getSubscriptionBilling() : Promise.resolve(null),
       saasAccountService.getStorageAccount(),
-      settingsService.getSettings('company'),
+      section === 'storage' ? Promise.resolve(null) : settingsService.getSettings('company'),
     ]);
     const errors = {};
     if (bill.status === 'fulfilled') setBilling(bill.value);
