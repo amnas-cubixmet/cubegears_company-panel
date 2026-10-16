@@ -9,7 +9,7 @@ const tabs=[
  ['overview','Overview','/account',Coins,'billing.view'],
  ['credits-buy','Buy Credits','/account/credits/buy',CreditCard,'billing.view'],
  ['credits-features','Features','/account/credits/features',Zap,'billing.view'],
- ['storage','Storage','/account/storage',HardDrive,'storage.view'],
+ ['storage','Storage & Logs','/account/storage',HardDrive,'billing.view'],
  ['credits-logs','Logs','/account/credits/logs',FileClock,'billing.view'],
  ['templates','Templates','/account/templates',FilePenLine,'settings.view'],
  ['security','Security','/account/security',ShieldCheck,'settings.view'],
@@ -18,6 +18,9 @@ const tabs=[
 export const AccountHeader=({title,subtitle,active,onNavigate,actions})=>{
   const location = useLocation();
   const { can, isCompanyOwner } = useFeatureAccess();
+  // Owner's storage usage/audit is part of their free SaaS Account.
+  // The server permits read-only storage endpoints via billing.view, but
+  // storage.manage remains a separate paid/role-gated permission.
   const visibleTabs = tabs.filter(tab => isCompanyOwner && can(tab[4]));
   const activeIndex = Math.max(0, visibleTabs.findIndex(([key]) => key === active));
   const ActiveIcon = visibleTabs[activeIndex]?.[3] || Coins;
