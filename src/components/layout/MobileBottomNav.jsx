@@ -1,20 +1,33 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { mobilePrimaryRoutes, mobileMoreRoutes } from '../../routes/routeConfig';
+import { routeConfig, mobilePrimaryRoutes } from '../../routes/routeConfig';
 import { MoreHorizontal } from 'lucide-react';
 import { MobileSlideSidebar } from './MobileSlideSidebar';
-import { useAuth } from '../../hooks/useAuth';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import '../../styles/mobile-bottom-nav.css';
 
 export const MobileBottomNav = () => {
   const location = useLocation();
-  const { user } = useAuth();
   const featureAccess = useFeatureAccess();
-  const visiblePrimaryRoutes = mobilePrimaryRoutes.filter((route) => featureAccess.can(route.permission));
-  const visibleMoreRoutes = mobileMoreRoutes.filter((route) => featureAccess.can(route.permission));
+  // Pin Account for company owners, even before their first paid label.
+  // Everything else still comes from Django's role/entitlement intersection.
+  const ownerAccount = routeConfig.find((route) => route.id === 'credits');
+  const primaryCandidates = [
+    ...(featureAccess.isCompanyOwner && ownerAccount && featureAccess.can(ownerAccount.permission) ? [ownerAccount] : []),
+    ...mobilePrimaryRoutes.filter((route) => featureAccess.can(route.permission)),
+  ];
+  // Four quick links + More fit comfortably on narrow mobile screens.
+  const visiblePrimaryRoutes = primaryCandidates.slice(0, 4);
+  const primaryIds = new Set(visiblePrimaryRoutes.map((route) => route.id));
+  const visibleMoreRoutes = routeConfig.filter((route) =>
+    !primaryIds.has(route.id)
+    && featureAccess.can(route.permission)
+    && (route.id !== 'credits' || featureAccess.isCompanyOwner)
+  );
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const isMoreActive = visibleMoreRoutes.some((route) => location.pathname.startsWith(route.path));
+  const isMoreActive = visibleMoreRoutes.some((route) =>
+    location.pathname === route.path || location.pathname.startsWith(`${route.path}/`)
+  ) || location.pathname === '/profile' || location.pathname === '/account/company';
 
   return (
     <>
@@ -40,6 +53,8 @@ export const MobileBottomNav = () => {
         <button
           type="button"
           onClick={() => setIsSidebarOpen(true)}
+          aria-label="Open all authorized pages"
+          aria-expanded={isSidebarOpen}
           className={`mobile-bottom-item mobile-more-button ${isMoreActive ? 'is-active' : ''}`}
         >
           <span className="mobile-bottom-icon">
