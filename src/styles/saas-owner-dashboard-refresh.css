@@ -1,0 +1,294 @@
+/*
+ * SaaS owner workspace refresh.
+ * Scoped to the owner shell so workshop dashboards, billing calculations,
+ * document previews, and feature permissions are not affected.
+ * Use theme variables to support both light and dark mode.
+ */
+.saas-account-shell {
+  --owner-shadow: 0 10px 34px color-mix(in srgb, var(--text-primary) 6%, transparent);
+  --owner-edge: color-mix(in srgb, var(--primary) 13%, var(--border));
+  background:var(--app-bg);
+}
+.saas-account-shell .saas-account-topbar {
+  min-height:76px;
+  padding:12px clamp(18px,2.4vw,40px);
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  box-shadow:0 3px 18px color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+.saas-account-shell .saas-account-brand {gap:12px}
+.saas-account-shell .saas-account-brand>span {
+  width:44px;height:44px;flex:0 0 44px;
+  border-radius:14px;
+  background:linear-gradient(145deg,var(--primary),color-mix(in srgb,var(--primary) 75%,#192c6b));
+  box-shadow:0 7px 18px color-mix(in srgb,var(--primary) 24%,transparent);
+}
+.saas-account-shell .saas-account-brand strong {font-size:17px;letter-spacing:-.035em}
+.saas-account-shell .saas-account-brand small {font-size:12px;margin-top:3px}
+.saas-account-shell .saas-account-identity {gap:13px;min-width:0}
+.saas-account-shell .saas-account-company-avatar {
+  width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;
+  border-radius:12px;border:1px solid var(--owner-edge);
+  background:var(--primary-soft);color:var(--primary);font-size:15px;font-weight:850;
+}
+.saas-account-shell .saas-account-identity>div {min-width:0}
+.saas-account-shell .saas-account-identity strong {
+  display:block;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:13px;font-weight:760;
+}
+.saas-account-shell .saas-account-identity small {font-size:12px}
+.saas-account-shell .saas-account-identity button {
+  min-height:40px;padding:9px 15px;border-color:var(--border);
+  border-radius:11px;background:var(--surface);font-size:13px;
+  transition:background .18s ease,border-color .18s ease;
+}
+.saas-account-shell .saas-account-identity button:hover {background:var(--surface-2);border-color:var(--border-strong)}
+.saas-account-shell .saas-account-identity button:focus-visible,
+.saas-account-shell .saas-owner-sidebar a:focus-visible {
+  outline:2px solid var(--primary);outline-offset:3px;
+}
+
+/* Remove the 1270px bottleneck: fill the space remaining after the sidebar. */
+.saas-account-shell .saas-account-body {min-width:0}
+.saas-account-shell .saas-account-content {
+  width:100%;max-width:none;margin:0;min-width:0;
+  padding:clamp(20px,2.5vw,38px);
+  background:
+    radial-gradient(ellipse 55% 26% at 80% 0%,color-mix(in srgb,var(--primary) 5%,transparent),transparent 100%),
+    var(--app-bg);
+}
+.saas-account-shell .saas-account-content>.app-content {
+  max-width:none;width:100%;margin:0;padding:0;min-width:0;
+}
+.saas-account-shell .saas-account-content .saas-page {
+  padding:0;max-width:none;width:100%;gap:20px;
+}
+
+/* Owner navigation: stable width and a clear visual hierarchy. */
+.saas-account-shell .saas-owner-sidebar {
+  width:250px;flex:0 0 250px;display:flex;flex-direction:column;
+  padding:24px 14px 18px;gap:16px;
+  border-right:1px solid var(--border);
+  background:var(--surface);
+}
+.saas-account-shell .saas-owner-nav-heading {display:grid;gap:5px;padding:0 13px 5px}
+.saas-account-shell .saas-owner-nav-heading>span {
+  font-size:10px;font-weight:850;letter-spacing:.15em;color:var(--primary);
+}
+.saas-account-shell .saas-owner-nav-heading small {font-size:12px;line-height:1.5;color:var(--text-muted)}
+.saas-account-shell .saas-owner-nav-links {display:grid;align-content:start;gap:5px;overflow-y:auto;min-height:0;scrollbar-width:thin}
+.saas-account-shell .saas-owner-sidebar a {
+  min-height:46px;padding:7px 10px;gap:11px;margin:0;border-radius:11px;
+  color:var(--text-secondary);font-size:13px;font-weight:640;
+  transition:background .17s ease,color .17s ease;
+}
+.saas-account-shell .saas-owner-sidebar a:hover {background:var(--surface-2);color:var(--text-primary)}
+.saas-account-shell .saas-owner-sidebar a.is-active {
+  background:var(--primary-soft);color:var(--primary);font-weight:760;
+}
+.saas-account-shell .saas-owner-link-icon {
+  width:31px;height:31px;flex:0 0 31px;display:grid;place-items:center;
+  border-radius:9px;color:var(--text-muted);
+}
+.saas-account-shell .saas-owner-sidebar a.is-active .saas-owner-link-icon {
+  background:color-mix(in srgb,var(--primary) 12%,transparent);color:var(--primary);
+}
+.saas-account-shell .saas-owner-nav-help {
+  margin-top:auto;display:flex;align-items:flex-start;gap:10px;
+  padding:15px 12px;border:1px solid var(--border);border-radius:13px;
+  background:var(--surface-2);color:var(--text-muted);font-size:11px;line-height:1.6;
+}
+.saas-account-shell .saas-owner-nav-help svg {color:var(--primary);flex:0 0 auto;margin-top:1px}
+
+/* Full-width account header is now a distinct hero, not another tiny card. */
+.saas-account-shell .saas-account-content .account-dashboard-header {
+  position:relative;isolation:isolate;overflow:hidden;
+  padding:clamp(24px,2.6vw,38px);
+  min-height:152px;align-items:center;border-radius:22px;
+  border:1px solid var(--owner-edge);
+  background:
+    radial-gradient(circle at 96% 12%,color-mix(in srgb,var(--primary) 18%,transparent),transparent 24%),
+    linear-gradient(105deg,color-mix(in srgb,var(--primary) 10%,var(--surface)),var(--surface) 60%);
+  box-shadow:var(--owner-shadow);
+}
+.saas-account-shell .saas-account-content .account-dashboard-header::before {
+  content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--primary);
+}
+.saas-account-shell .saas-account-content .account-dashboard-title-row {gap:21px}
+.saas-account-shell .saas-account-content .account-dashboard-icon {
+  flex:0 0 62px;width:62px;height:62px;border-radius:19px;
+  color:var(--primary);background:var(--primary-soft);border:1px solid var(--owner-edge);
+}
+.saas-account-shell .saas-account-content .account-dashboard-eyebrow {
+  font-size:11px;line-height:1.3;letter-spacing:.12em;
+}
+.saas-account-shell .saas-account-content .account-dashboard-header h1 {
+  font-size:clamp(29px,2.15vw,37px);line-height:1.14;font-weight:850;letter-spacing:-.045em;
+}
+.saas-account-shell .saas-account-content .account-dashboard-header p {
+  margin-top:10px;font-size:14px;max-width:68ch;line-height:1.65;
+}
+.saas-account-shell .saas-account-content .account-dashboard-section-count {
+  padding:10px 14px;font-size:12px;border-radius:11px;
+}
+.saas-account-shell .saas-account-content .cg-credit-refresh {min-height:43px;font-size:13px;border-radius:11px}
+
+/* More breathing room and clearer tab selection. */
+.saas-account-shell .saas-account-content .account-dashboard-tabs {
+  gap:8px;padding:8px;border:1px solid var(--border);border-radius:15px;
+  box-shadow:var(--owner-shadow);
+}
+.saas-account-shell .saas-account-content .account-dashboard-tabs button {
+  min-height:48px;padding:11px 16px;font-size:13px;font-weight:730;border-radius:10px;
+}
+.saas-account-shell .saas-account-content .account-dashboard-tabs button.is-active {
+  background:var(--primary-soft);box-shadow:inset 0 0 0 1px var(--owner-edge);
+}
+
+/* Wallet KPIs: generous numerals and meaningful depth at desktop size. */
+.saas-account-shell .saas-account-content .cg-credit-metrics {
+  gap:18px;margin:7px 0 3px;
+}
+.saas-account-shell .saas-account-content .cg-credit-metric {
+  position:relative;min-height:174px;gap:15px;overflow:hidden;
+  padding:24px;border:1px solid var(--border);border-radius:18px;
+  box-shadow:var(--owner-shadow);
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.saas-account-shell .saas-account-content .cg-credit-metric:not(.primary) {
+  background:var(--surface);
+}
+.saas-account-shell .saas-account-content .cg-credit-metric>div {
+  font-size:13px;line-height:1.35;font-weight:730;
+}
+.saas-account-shell .saas-account-content .cg-credit-metric>div svg {
+  width:34px;height:34px;padding:8px;flex:0 0 34px;
+  border-radius:11px;background:var(--primary-soft);color:var(--primary);
+}
+.saas-account-shell .saas-account-content .cg-credit-metric.primary {
+  background:linear-gradient(140deg,var(--primary),color-mix(in srgb,var(--primary) 62%,#101c47));
+  color:#fff;border-color:transparent;
+  box-shadow:0 15px 30px color-mix(in srgb,var(--primary) 22%,transparent);
+}
+.saas-account-shell .saas-account-content .cg-credit-metric.primary>div svg {
+  background:rgba(255,255,255,.18);color:#fff;
+}
+.saas-account-shell .saas-account-content .cg-credit-metric strong {
+  font-size:clamp(29px,2.45vw,39px);line-height:1.1;font-weight:840;
+  overflow-wrap:anywhere;font-variant-numeric:tabular-nums;
+}
+.saas-account-shell .saas-account-content .cg-credit-metric small {
+  font-size:12px;line-height:1.6;
+}
+.saas-account-shell .saas-account-content .cg-credit-metric.primary small {color:rgba(255,255,255,.85)}
+
+/* Company access cards and wallet panels. */
+.saas-account-shell .saas-account-content .cg-credit-panel {
+  margin-top:13px;padding:clamp(22px,2.2vw,30px);
+  border-radius:19px;border-color:var(--border);
+  background:var(--surface);box-shadow:var(--owner-shadow);
+}
+.saas-account-shell .saas-account-content .cg-credit-panel>header {
+  margin-bottom:16px;align-items:flex-start;
+}
+.saas-account-shell .saas-account-content .cg-credit-panel>header h2 {
+  margin-top:7px;font-size:clamp(19px,1.45vw,24px);line-height:1.27;
+}
+.saas-account-shell .saas-account-content .cg-credit-panel>header span {
+  color:var(--primary);font-size:11px;letter-spacing:.12em;
+}
+.saas-account-shell .saas-account-content .cg-credit-panel>header>svg {color:var(--primary);flex:0 0 auto}
+.saas-account-shell .saas-account-content .cg-credit-panel>p {
+  margin-bottom:18px;color:var(--text-secondary);font-size:13px;line-height:1.7;
+}
+.saas-account-shell .saas-account-content .cg-credit-shortcuts {
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr));gap:14px;
+}
+.saas-account-shell .saas-account-content .cg-credit-shortcuts button {
+  display:grid;grid-template-columns:1fr auto;
+  grid-template-areas:"icon arrow" "heading arrow" "help help";
+  align-content:start;align-items:center;gap:10px 8px;
+  min-height:160px;text-align:left;padding:20px;
+  border:1px solid var(--border);border-radius:15px;
+  background:var(--surface-2);color:var(--text-primary);
+  transition:border-color .18s ease,background .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.saas-account-shell .saas-account-content .cg-credit-shortcuts button>svg:first-child {
+  grid-area:icon;width:40px;height:40px;padding:10px;
+  border-radius:11px;background:var(--primary-soft);color:var(--primary);
+}
+.saas-account-shell .saas-account-content .cg-credit-shortcuts button>strong {
+  grid-area:heading;font-size:15px;font-weight:780;line-height:1.4;
+}
+.saas-account-shell .saas-account-content .cg-credit-shortcuts button>small {
+  grid-area:help;font-size:12px;line-height:1.5;color:var(--text-muted);
+}
+.saas-account-shell .saas-account-content .cg-credit-shortcuts button>svg:last-child:not(:first-child) {
+  grid-area:arrow;color:var(--primary);justify-self:end;
+}
+.saas-account-shell .saas-account-content .cg-credit-shortcuts button:hover {
+  border-color:var(--primary);background:color-mix(in srgb,var(--primary) 5%,var(--surface));
+  transform:translateY(-2px);box-shadow:var(--owner-shadow);
+}
+.saas-account-shell .saas-account-content .cg-credit-columns {gap:18px}
+.saas-account-shell .saas-account-content .cg-credit-columns>.cg-credit-panel {margin-top:0}
+.saas-account-shell .saas-account-content .cg-credit-actions button {min-height:44px;font-size:13px}
+.saas-account-shell .saas-account-content .cg-credit-note,
+.saas-account-shell .saas-account-content .cg-credit-inline {font-size:13px}
+
+/* Tablet and phones get actual reflow, not scaled-down desktop cards. */
+@media(max-width:1250px) {
+  .saas-account-shell .saas-owner-sidebar {width:226px;flex-basis:226px;padding-inline:10px}
+  .saas-account-shell .saas-account-content {padding:22px}
+  .saas-account-shell .saas-account-content .cg-credit-metrics {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px) {
+  .saas-account-shell .saas-account-content .account-dashboard-header {gap:16px}
+  .saas-account-shell .saas-account-content .account-dashboard-title-row {gap:13px}
+  .saas-account-shell .saas-account-content .cg-credit-columns {grid-template-columns:1fr}
+}
+@media(max-width:760px) {
+  .saas-account-shell .saas-account-topbar {min-height:66px;padding:10px 15px}
+  .saas-account-shell .saas-account-brand>span {width:38px;height:38px;flex-basis:38px}
+  .saas-account-shell .saas-account-company-avatar {display:none}
+  .saas-account-shell .saas-owner-sidebar {
+    flex-direction:row;align-items:center;gap:0;width:100%;flex:0 0 auto;
+    padding:9px 13px;border-right:0;border-bottom:1px solid var(--border);
+    max-height:none;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+  }
+  .saas-account-shell .saas-owner-sidebar::-webkit-scrollbar {display:none}
+  .saas-account-shell .saas-owner-nav-heading,
+  .saas-account-shell .saas-owner-nav-help {display:none}
+  .saas-account-shell .saas-owner-nav-links {display:flex;gap:5px;min-width:max-content;overflow:visible}
+  .saas-account-shell .saas-owner-sidebar a {white-space:nowrap;min-height:41px;padding:6px 11px}
+  .saas-account-shell .saas-owner-link-icon {width:26px;height:26px;flex-basis:26px}
+  .saas-account-shell .saas-account-content {padding:18px 14px}
+  .saas-account-shell .saas-account-content .account-dashboard-header {
+    min-height:0;padding:22px;border-radius:17px;
+  }
+  .saas-account-shell .saas-account-content .account-dashboard-icon {width:48px;height:48px;flex-basis:48px;border-radius:14px}
+  .saas-account-shell .saas-account-content .account-dashboard-header h1 {font-size:28px}
+  .saas-account-shell .saas-account-content .account-dashboard-header p {font-size:13px}
+  .saas-account-shell .saas-account-content .cg-credit-metric {min-height:155px;padding:18px}
+  .saas-account-shell .saas-account-content .cg-credit-panel {padding:19px}
+}
+@media(max-width:520px) {
+  .saas-account-shell .saas-account-identity {gap:6px}
+  .saas-account-shell .saas-account-identity button {min-height:40px;padding:8px 11px;font-size:12px}
+  .saas-account-shell .saas-account-content .account-dashboard-header {padding:20px 17px}
+  .saas-account-shell .saas-account-content .account-dashboard-title-row {gap:11px}
+  .saas-account-shell .saas-account-content .account-dashboard-header h1 {font-size:25px}
+  .saas-account-shell .saas-account-content .cg-credit-metrics {grid-template-columns:1fr;gap:11px}
+  .saas-account-shell .saas-account-content .cg-credit-metric {min-height:132px;padding:17px}
+  .saas-account-shell .saas-account-content .cg-credit-metric strong {font-size:29px}
+  .saas-account-shell .saas-account-content .cg-credit-shortcuts {grid-template-columns:1fr}
+  .saas-account-shell .saas-account-content .cg-credit-shortcuts button {min-height:134px;padding:17px}
+  .saas-account-shell .saas-account-content .cg-credit-panel {padding:17px}
+  .saas-account-shell .saas-account-content .cg-credit-panel>header h2 {font-size:19px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .saas-account-shell .saas-owner-sidebar a,
+  .saas-account-shell .saas-account-identity button,
+  .saas-account-shell .saas-account-content .cg-credit-metric,
+  .saas-account-shell .saas-account-content .cg-credit-shortcuts button {transition:none;transform:none}
+}
