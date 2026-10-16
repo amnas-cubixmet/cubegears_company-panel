@@ -9,11 +9,11 @@ const validation = read('../src/utils/formValidation.js');
 const global = read('../src/components/common/GlobalFormValidation.jsx');
 const jobCreate = read('../src/pages/jobs/JobCreatePage.jsx');
 
-test('red inline errors are the final CSS layer after all input/search styling', () => {
+test('red inline errors remain in the validation layer before desktop text-only styling', () => {
   const imports = [...app.matchAll(/import ['"]\.\/styles\/([^'"]+\.css)['"];/g)]
     .map((match) => match[1]);
-  assert.deepEqual(imports.slice(-3), [
-    'form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css'
+  assert.deepEqual(imports.slice(-4), [
+    'form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css', 'desktop-typography.css'
   ]);
 });
 
