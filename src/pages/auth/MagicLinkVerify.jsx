@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Link2, LoaderCircle, XCircle } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { getStaffLandingPath } from '../../utils/staffLanding';
 import '../../styles/login-system.css';
@@ -8,13 +8,13 @@ import '../../styles/auth-recovery.css';
 
 export const MagicLinkVerify = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const token = params.get('token') || '';
   const email = params.get('email') || '';
   const next = params.get('next') || '';
   const [state, setState] = useState('loading');
   const [message, setMessage] = useState('Verifying your secure sign-in link…');
+  const verificationRef = useRef(null);
 
   useEffect(() => {
     let alive = true;
@@ -27,28 +27,36 @@ export const MagicLinkVerify = () => {
       };
     }
 
-    authRecoveryService.verifyMagicLink({ token, email })
+    // StrictMode may replay the effect; keep one in-flight request for this
+    // single-use token, while allowing the active effect to handle the result.
+    if (!verificationRef.current || verificationRef.current.token !== token) {
+      verificationRef.current = {
+        token,
+        promise: authRecoveryService.verifyMagicLink({ token, email }),
+      };
+    }
+
+    verificationRef.current.promise
       .then((result) => {
         if (!alive) return;
 
-        const accessToken = result?.access || result?.token;
-        if (!accessToken) {
-          throw new Error('Magic link verification did not return an access token.');
+        const accessToken = result?.access;
+        const refreshToken = result?.refresh;
+        const user = result?.user;
+        if (typeof accessToken !== 'string' || !accessToken ||
+            typeof refreshToken !== 'string' || !refreshToken ||
+            !user?.id || !user?.email) {
+          throw new Error('Magic link verification did not return a complete login session.');
         }
 
         localStorage.setItem('auth_token', accessToken);
-
-        if (result?.refresh) {
-          localStorage.setItem('auth_refresh_token', result.refresh);
-        }
-
-        if (result?.user) {
-          localStorage.setItem('auth_user', JSON.stringify(result.user));
-        }
+        localStorage.setItem('auth_refresh_token', refreshToken);
+        localStorage.setItem('auth_user', JSON.stringify(user));
 
         setState('success');
         setMessage('Magic link verified. Redirecting to your workspace…');
-        window.setTimeout(() => navigate(getStaffLandingPath(result?.user, next), { replace: true }), 700);
+        // Reload the auth and feature-access providers for this verified user.
+        window.location.replace(getStaffLandingPath(user, next));
       })
       .catch((error) => {
         if (!alive) return;
@@ -59,7 +67,7 @@ export const MagicLinkVerify = () => {
     return () => {
       alive = false;
     };
-  }, [token, email, next, navigate]);
+  }, [token, email, next]);
 
   return (
     <main className="login-page auth-recovery-page">
