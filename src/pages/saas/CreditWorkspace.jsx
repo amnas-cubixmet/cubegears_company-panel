@@ -300,12 +300,14 @@ export function CreditWorkspace({ section = 'overview' }) {
             </div>
             <p>{bundle.description || 'Existing workshop features grouped into one package.'}</p>
             <div className="cg-bundle-price">
-              <span>Per user credits</span>
-              <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
-              <div className="cg-bundle-summary">
-                <span>{bundle.userCount ?? '—'} active login users</span>
-                <b>{credits(bundle.totalCredits)} credits total</b>
-              </div>
+              {bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY'
+                ? <><span>Included free</span><strong>0 <small>credits — no purchase needed</small></strong></>
+                : <><span>Per user credits</span>
+                  <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
+                  <div className="cg-bundle-summary">
+                    <span>{bundle.userCount ?? '—'} active login users</span>
+                    <b>{credits(bundle.totalCredits)} credits total</b>
+                  </div></>}
             </div>
             <div className="cg-bundle-feature-list">
               <small>Included existing features</small>
@@ -320,6 +322,7 @@ export function CreditWorkspace({ section = 'overview' }) {
                 onClick={() => buyBundle(bundle)}>
                 {busy === `bundle:${bundle.id}` ? 'Saving…'
                   : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
+                  : bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY' ? 'Included Free'
                   : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
               </button>
               {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage}
