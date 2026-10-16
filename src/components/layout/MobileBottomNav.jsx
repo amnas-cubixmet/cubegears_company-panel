@@ -6,6 +6,15 @@ import { MobileSlideSidebar } from './MobileSlideSidebar';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import '../../styles/mobile-bottom-nav.css';
 
+// Short labels fit four quick actions plus More on a 320–390px display.
+// Full module names remain available to screen readers and in the More drawer.
+const mobileLabels = {
+  credits: 'Account',
+  dashboard: 'Home',
+  jobs: 'Jobs',
+  stock: 'Stock',
+};
+
 export const MobileBottomNav = () => {
   const location = useLocation();
   const featureAccess = useFeatureAccess();
@@ -40,12 +49,13 @@ export const MobileBottomNav = () => {
             <NavLink
               key={route.id}
               to={route.path}
+              aria-label={route.label}
               className={`mobile-bottom-item ${isActive ? 'is-active' : ''}`}
             >
               <span className="mobile-bottom-icon">
                 <IconComp size={19} strokeWidth={isActive ? 2.2 : 1.8} />
               </span>
-              <span className="mobile-bottom-label">{route.label}</span>
+              <span className="mobile-bottom-label">{mobileLabels[route.id] || route.label}</span>
             </NavLink>
           );
         })}
