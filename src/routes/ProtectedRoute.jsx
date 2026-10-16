@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { WorkspaceAccessNotice } from '../components/layout/SaaSAccountLayout';
+import { SaaSAccountLayout, WorkspaceAccessNotice } from '../components/layout/SaaSAccountLayout';
 import { isAccountPath, isAccountOnly, setupRedirect } from '../utils/accountWorkspace';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { getPermissionForPath } from '../utils/permissions';
@@ -44,7 +44,7 @@ export const ProtectedRoute = () => {
   const setupTarget = setupRedirect(featureAccess, location.pathname);
   if (setupTarget) return <Navigate to={setupTarget} replace />;
   if (isAccountOnly(featureAccess) && !featureAccess.isCompanyOwner) {
-    return <WorkspaceAccessNotice onRetry={featureAccess.refresh} />;
+    return <WorkspaceAccessNotice onRetry={featureAccess.refresh} paymentOverdue={featureAccess.billingStatus?.blocked} />;
   }
   if (isAccountRoute && !featureAccess.isCompanyOwner) {
     return <Navigate to="/access-denied" replace />;
@@ -72,6 +72,8 @@ export const ProtectedRoute = () => {
       />
     );
   }
+
+  if (featureAccess.billingStatus?.blocked && featureAccess.isCompanyOwner) return <SaaSAccountLayout><Outlet /></SaaSAccountLayout>;
 
   // Match the original unified workshop layout from commit
   // 17f0448d: one header/sidebar/mobile navigation for owners and staff.

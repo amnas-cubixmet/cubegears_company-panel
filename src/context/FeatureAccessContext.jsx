@@ -19,6 +19,7 @@ export function moduleIsVisible(access, permission) {
   if (!permission) return true;
   if (!access || access.unavailable) return false;
   const module = permission.split('.')[0];
+  if (access.billingStatus?.blocked) return module === 'billing' && access.isCompanyOwner === true;
   if (isAccountOnly(access)) return module === 'billing' && access.isCompanyOwner === true;
   // The backend explicitly lists free modules. They still require the exact
   // tenant/role permission returned by Django; free != unrestricted access.
@@ -64,6 +65,7 @@ export function FeatureAccessProvider({ children }) {
       setAccess({
         userKey,
         companyId: response.companyId,
+        billingStatus: response.billingStatus || {enabled:false, blocked:false},
         enforced: response.enforcementEnabled,
         labelOnly: response.labelOnly === true,
         activeLabelModules: Array.isArray(response.activeLabelModules)
@@ -108,6 +110,11 @@ export function FeatureAccessProvider({ children }) {
     return () => window.clearTimeout(id);
   }, [current.labelOnly, current.nextLabelExpiryAt, refresh]);
   const checking = loading || (isAuthenticated && Boolean(userKey) && access.userKey !== userKey);
+  useEffect(() => {
+    if (!current.billingStatus?.enabled) return undefined;
+    const id = window.setInterval(refresh, 60000);
+    return () => window.clearInterval(id);
+  }, [current.billingStatus?.enabled, refresh]);
   const can = useCallback((permission) => {
     if (!permission) return true;
     if (!isAuthenticated || checking || current.unavailable || !moduleIsVisible(current, permission)) return false;

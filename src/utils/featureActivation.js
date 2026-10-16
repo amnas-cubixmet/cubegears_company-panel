@@ -11,6 +11,7 @@ export function featureLabelStatus(bundle, wallet) {
     METERED_OPERATION_NOT_READY: 'Per-use operations are not metered on the backend yet.',
     FEATURE_LABEL_EMPTY: 'This label has no active existing features.',
     FREE_MODULES_ONLY: 'These modules are already included free. No credits or activation required.',
+    POSTPAID_ENGINE_DISABLED: 'Monthly billing is not ready. Ask your SaaS administrator to enable metering and the payment schedule.',
     MODULE_PRICE_NOT_SET: 'Price not set. Your SaaS administrator must publish a positive price before activation.',
     INVALID_USER_PRICE: 'The administrator must configure a positive per-user credit rate.',
   };
@@ -25,6 +26,11 @@ export function featureLabelStatus(bundle, wallet) {
   const balance = Number(wallet.balance);
   if (!Number.isFinite(price) || price <= 0) {
     return { label: 'Unavailable', message: 'No verified server quote is available. Refresh the page.', allow: false };
+  }
+  if (bundle.billingMode === 'monthly_postpaid') {
+    return bundle.active
+      ? {label:'Active', message:'Usage is recorded and payable next month.', allow:false}
+      : {label:'Monthly postpaid', message:'No upfront deduction. Usage is collected on your monthly due date.', allow:true};
   }
   if (!Number.isFinite(balance) || balance < price) {
     return { label: 'Low credits', message: 'Buy credits before activating this label.', allow: false };

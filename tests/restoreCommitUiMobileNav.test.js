@@ -13,7 +13,7 @@ const access = source('src/context/FeatureAccessContext.jsx');
 const workspace = source('src/pages/saas/CreditWorkspace.jsx');
 
 test('restores the commit-era unified dashboard UI across owner and workshop pages', () => {
-  assert.doesNotMatch(protectedRoute, /<SaaSAccountLayout>/);
+  assert.match(protectedRoute, /if \(featureAccess\.billingStatus\?\.blocked && featureAccess\.isCompanyOwner\) return <SaaSAccountLayout>/);
   assert.match(protectedRoute, /return\s*\(\s*<DashboardLayout>/);
   assert.match(layout, /<Sidebar \/>/);
   assert.match(layout, /<Header \/>/);
