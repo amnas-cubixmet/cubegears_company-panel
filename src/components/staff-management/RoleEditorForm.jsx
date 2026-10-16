@@ -43,20 +43,9 @@ export const RoleEditorForm = ({
             </select>
           </label>
 
-          <label className="role-editor-field is-wide">
-            <span>Description</span>
-            <input
-              type="text"
-              value={formData.description}
-              onChange={(event) => setFormData((current) => ({ ...current, description: event.target.value }))}
-              placeholder="Brief summary of role responsibilities"
-            />
-          </label>
-
-          <div className="role-editor-field is-wide">
-            <span>Access scope</span>
-            <p role="note">Permissions apply within this company. Branch-specific restrictions are not available yet.</p>
-          </div>
+          <p className="role-editor-field is-wide" role="note">
+            Staff permissions apply only within this company. Paid modules also require an active company entitlement.
+          </p>
         </div>
       </section>
 
