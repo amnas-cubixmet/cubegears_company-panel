@@ -46,13 +46,19 @@ test('shared Input/Select components do not introduce font-medium', () => {
   assert.match(select, /text-\[13px\] font-normal text-content/);
 });
 
-test('desktop text increase is restricted to 1024px and above', () => {
+test('desktop readable text has a 16px minimum from 1024px onward', () => {
   assert.match(desktop, /@media \(min-width: 1024px\)/);
-  assert.ok(!/@media \(max-width:/.test(desktop), 'Do not overwrite mobile layout typography');
+  assert.ok(!/@media \(max-width:/.test(desktop), 'Do not override mobile or tablet CSS');
   assert.match(desktop, /#root :is\(\.app-shell, \.saas-account-shell, \.login-page\)/);
-  assert.match(desktop, /font-size: 15px/);
-  assert.match(desktop, /font-size: 14px/);
-  assert.match(desktop, /font-size: 13px/);
+  assert.match(desktop, /font-size: 16px !important/);
+  assert.doesNotMatch(desktop, /font-size:\s*(?:[0-9]|1[0-5])px\b/, 'No small sizes in desktop typography');
+  for (const selector of ['p, small, label, li, a, button', 'table th, table td', '::placeholder',
+    '.sidebar-nav-label', '.stat-label', '.stat-meta', '.cg-credit-pill',
+    '.login-field-label', '.saas-owner-sidebar-heading']) {
+    assert.ok(desktop.includes(selector), selector);
+  }
+  assert.match(desktop, /font-size: 26px/);
+  assert.match(desktop, /font-size: 18px !important/);
   assert.doesNotMatch(desktop, /\bzoom\s*:/, 'Do not zoom or distort the page layout');
   assert.doesNotMatch(desktop, /\btransform\s*:\s*scale\(/);
 });

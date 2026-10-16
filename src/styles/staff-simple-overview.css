@@ -1,0 +1,72 @@
+/* Compact real-data staff overview. No fake KPIs, mock teams or job cards. */
+.cg-staff-management .staff-simple-overview{display:grid;gap:20px;min-width:0;color:var(--text-primary,#172033)}
+.cg-staff-management .staff-simple-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.cg-staff-management .staff-simple-toolbar h2{font-size:20px;font-weight:750;line-height:1.3;margin:0 0 4px}
+.cg-staff-management .staff-simple-toolbar p,.cg-staff-management .staff-simple-list-head p{color:var(--text-muted,#64748b);margin:0}
+.cg-staff-management .staff-simple-toolbar-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.cg-staff-management .staff-simple-toolbar-actions button,
+.cg-staff-management .staff-simple-list-head button,
+.cg-staff-management .staff-simple-error button,
+.cg-staff-management .staff-simple-empty button{
+  min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:9px 14px;border-radius:10px;font-weight:650;cursor:pointer;
+  background:var(--surface,#fff);color:var(--text-primary,#172033);
+  border:1px solid var(--border,#dbe3ec);
+}
+.cg-staff-management .staff-simple-toolbar-actions .staff-simple-primary{
+  background:var(--primary,#2563eb);border-color:var(--primary,#2563eb);color:#fff
+}
+.cg-staff-management .staff-simple-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cg-staff-management .staff-simple-metrics article{
+  display:grid;gap:10px;background:var(--surface,#fff);padding:18px 20px;
+  border-radius:14px;border:1px solid var(--border,#dbe3ec);min-width:0
+}
+.cg-staff-management .staff-simple-metrics span{display:flex;align-items:center;gap:9px;color:var(--text-secondary,#475569)}
+.cg-staff-management .staff-simple-metrics strong{font-size:30px;line-height:1.15;font-variant-numeric:tabular-nums}
+.cg-staff-management .staff-simple-list{background:var(--surface,#fff);border:1px solid var(--border,#dbe3ec);border-radius:14px;min-width:0;overflow:hidden}
+.cg-staff-management .staff-simple-list-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:19px 20px 12px}
+.cg-staff-management .staff-simple-list-head h3{font-size:19px;margin:0 0 4px}
+.cg-staff-management .staff-simple-search{
+  display:flex;align-items:center;gap:10px;min-height:44px;margin:0 20px 12px;
+  border:1px solid var(--border,#dbe3ec);background:var(--surface-2,#f8fafc);
+  border-radius:10px;padding:0 13px;color:var(--text-muted,#64748b)
+}
+.cg-staff-management .staff-simple-search:focus-within{outline:2px solid var(--primary,#2563eb);outline-offset:2px}
+.cg-staff-management .staff-simple-search input{flex:1;min-width:0;border:0;box-shadow:none;outline:none;background:transparent;color:var(--text-primary,#172033);height:42px;padding:0}
+.cg-staff-management .staff-simple-rows{padding:0 10px 9px}
+.cg-staff-management .staff-simple-person{
+  display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  border:0;border-bottom:1px solid var(--border,#dbe3ec);background:transparent;
+  color:var(--text-primary,#172033);padding:12px 10px;cursor:pointer
+}
+.cg-staff-management .staff-simple-person:last-of-type{border-bottom:0}
+.cg-staff-management .staff-simple-person:hover{background:var(--surface-2,#f8fafc)}
+.cg-staff-management .staff-simple-avatar{
+  display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:12px;
+  background:var(--primary-soft,#dbeafe);color:var(--primary,#2563eb);font-weight:700
+}
+.cg-staff-management .staff-simple-person-details{display:grid;gap:3px;flex:1;min-width:0}
+.cg-staff-management .staff-simple-person-details strong,
+.cg-staff-management .staff-simple-person-details small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cg-staff-management .staff-simple-person-details small{color:var(--text-muted,#64748b)}
+.cg-staff-management .staff-simple-person-branch{flex:0 1 180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary,#475569)}
+.cg-staff-management .staff-simple-status{border:1px solid var(--border,#dbe3ec);background:var(--surface-2,#f8fafc);border-radius:99px;padding:5px 10px;white-space:nowrap}
+.cg-staff-management .staff-simple-empty{display:grid;gap:12px;place-items:center;text-align:center;padding:32px 18px;color:var(--text-muted,#64748b)}
+.cg-staff-management .staff-simple-error{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid #ef4444;background:rgba(239,68,68,.07);padding:12px 16px;border-radius:10px;color:var(--danger,#b91c1c)}
+.cg-staff-management .staff-simple-more{margin:0;padding:13px 10px;color:var(--text-muted,#64748b)}
+@media(max-width:800px){
+  .cg-staff-management .staff-simple-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cg-staff-management .staff-simple-person-branch{display:none}
+}
+@media(max-width:520px){
+  .cg-staff-management .staff-simple-toolbar-actions{width:100%}
+  .cg-staff-management .staff-simple-toolbar-actions button{flex:1}
+  .cg-staff-management .staff-simple-metrics{grid-template-columns:1fr 1fr;gap:8px}
+  .cg-staff-management .staff-simple-metrics article{padding:12px}
+  .cg-staff-management .staff-simple-metrics article:last-child{grid-column:1/-1}
+  .cg-staff-management .staff-simple-metrics strong{font-size:25px}
+  .cg-staff-management .staff-simple-list-head{padding:14px 12px}
+  .cg-staff-management .staff-simple-search{margin:0 12px 9px}
+  .cg-staff-management .staff-simple-person{gap:10px}
+  .cg-staff-management .staff-simple-person .staff-simple-status{display:none}
+}
