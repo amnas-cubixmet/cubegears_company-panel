@@ -33,7 +33,7 @@ test('staff cannot redirect into unauthorised routes after login', () => {
 test('password setup, reset and magic link honour current role instead of forcing Dashboard', () => {
   assert.match(setup, /getStaffLandingPath\(user\)/);
   assert.match(reset, /window\.location\.replace\(getStaffLandingPath\(user\)\)/);
-  assert.match(magic, /getStaffLandingPath\(result\?\.user, next\)/);
+  assert.match(magic, /getStaffLandingPath\(user, next\)/);
   assert.match(login, /getStaffLandingPath\(authenticatedUser, params\.get\('next'\)\)/);
   assert.match(read('../src/pages/auth/AccessDenied.jsx'), /getStaffLandingPath\(user\)/);
 });
@@ -47,6 +47,26 @@ test('password reset signs in only when Django returns a complete verified sessi
   assert.match(reset, /localStorage\.setItem\('auth_refresh_token', refreshToken\)/);
   assert.match(reset, /localStorage\.setItem\('auth_user', JSON\.stringify\(user\)\)/);
   assert.match(reset, /setDone\(true\)/);
+});
+
+test('magic link verification signs in once with the complete Django session', () => {
+  assert.match(magic, /useRef\(null\)/);
+  assert.match(magic, /verificationRef\.current\.promise/);
+  assert.match(magic, /typeof accessToken !== 'string'/);
+  assert.match(magic, /typeof refreshToken !== 'string'/);
+  assert.match(magic, /!user\?\.id \|\| !user\?\.email/);
+  assert.match(magic, /localStorage\.setItem\('auth_token', accessToken\)/);
+  assert.match(magic, /localStorage\.setItem\('auth_refresh_token', refreshToken\)/);
+  assert.match(magic, /localStorage\.setItem\('auth_user', JSON\.stringify\(user\)\)/);
+  assert.match(magic, /window\.location\.replace\(getStaffLandingPath\(user, next\)\)/);
+  assert.doesNotMatch(magic, /navigate\(getStaffLandingPath/);
+});
+
+test('setup password never auto logs in with incomplete or missing tokens', () => {
+  assert.match(setup, /typeof accessToken !== 'string'/);
+  assert.match(setup, /typeof refreshToken !== 'string'/);
+  assert.match(setup, /!user\?\.id \|\| !user\?\.email/);
+  assert.match(setup, /setLandingPath\('\/login'\)/);
 });
 
 test('login and recovery forms show red input/link validation on failures', () => {
