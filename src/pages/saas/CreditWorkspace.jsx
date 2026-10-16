@@ -163,6 +163,9 @@ export function CreditWorkspace({ section = 'overview' }) {
   };
 
   const low = wallet?.lowBalance === true;
+  // Never combine a lifetime charge with a daily/weekly/monthly rate into a
+  // fake "monthly total". Display each server-published label price separately.
+  const activeBundles = featureBundles.filter(bundle => bundle.active === true);
   const availableRoutes = routeConfig.filter(route => route.permission &&
     !['billing', 'dashboard', 'company', 'roles'].includes(route.permission.split('.')[0]) &&
     featureAccess.can(route.permission));
@@ -186,9 +189,11 @@ export function CreditWorkspace({ section = 'overview' }) {
         <strong>{credits(wallet?.balance)}</strong>
         <small>{wallet ? (low ? 'Low balance — top up to avoid module interruption' : 'Verified company wallet balance') : 'Awaiting backend wallet'}</small>
       </article>
-      <article className="cg-credit-metric"><div><span>Active Modules</span><Zap size={20}/></div><strong>{featureAccess.labelOnly ? featureAccess.activeLabelModules.length : wallet?.activeFeatures ?? '—'}</strong><small>{featureAccess.labelOnly ? 'Modules in your active purchases' : 'Modules currently switched on'}</small></article>
-      <article className="cg-credit-metric"><div><span>Active Staff</span><Users size={20}/></div><strong>{wallet?.staffCount ?? '—'}</strong><small>Used for per-staff feature pricing</small></article>
-      {!featureAccess.labelOnly && <article className="cg-credit-metric"><div><span>Estimated Monthly Features</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits / month; pending postpaid usage: {credits(wallet?.postpaidAccruedCredits)} credits</small></article>}
+      <article className="cg-credit-metric"><div><span>Available Modules</span><Zap size={20}/></div><strong>{featureAccess.unavailable ? '—' : availableRoutes.length}</strong><small>{featureAccess.labelOnly ? `${featureAccess.activeLabelModules.length} company-label modules; your role decides which you can open` : 'Workshop pages available to your login'}</small></article>
+      <article className="cg-credit-metric"><div><span>Active Staff</span><Users size={20}/></div><strong>{wallet?.staffCount ?? '—'}</strong><small>Staff accounts; published feature pricing uses active login users</small></article>
+      {featureAccess.labelOnly
+        ? <article className="cg-credit-metric"><div><span>Active Feature Labels</span><Coins size={20}/></div><strong>{activeBundles.length}</strong><small>See each activated label's price and renewal period below</small></article>
+        : <article className="cg-credit-metric"><div><span>Estimated Monthly Features</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits / month; pending postpaid usage: {credits(wallet?.postpaidAccruedCredits)} credits</small></article>}
     </div>
 
     {low && <div className="cg-credit-low" role="alert"><Coins size={20}/><div><strong>Your credit balance is running low.</strong><span>Buy more credits so paid modules can renew when due.</span></div><button onClick={() => navigate('/account/credits/buy')}>Buy Credits <ArrowRight size={16}/></button></div>}
@@ -208,6 +213,29 @@ export function CreditWorkspace({ section = 'overview' }) {
           </button>; })}
         </div> : <p className="cg-credit-empty">No workshop modules are available for this login. An authorized company admin can review Feature Controls.</p>}
       </>}
+    </section>}
+
+    {section === 'overview' && featureAccess.labelOnly && <section className="cg-credit-panel cg-credit-active-labels" aria-label="Activated feature label prices and status">
+      <header><div><span>ACTIVE LABELS &amp; BILLING</span><h2>Activated modules and their credit costs</h2></div><Coins size={22}/></header>
+      <p>Only purchased active labels unlock modules, and staff still need the correct role. Each price and billing period is set by your SaaS administrator; use Wallet Logs for actual debit history.</p>
+      {activeBundles.length ? <div className="cg-credit-active-label-grid">
+        {activeBundles.map(bundle => {
+          const period = ({ permanent: 'one-time', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
+          return <article key={bundle.id} className="cg-credit-active-label-card">
+            <div className="cg-credit-active-label-head"><strong>{bundle.name}</strong><span className="cg-credit-pill active">Enabled</span></div>
+            <div className="cg-credit-active-label-price">
+              <strong>{credits(bundle.totalCredits)} credits</strong>
+              <small>{bundle.billingType === 'permanent' ? 'Lifetime activation' : `Per ${period} activation or renewal`}</small>
+            </div>
+            <p>{credits(bundle.perUserCredits)} credits per active login user × {bundle.userCount ?? '—'} users</p>
+            <small>{bundle.validUntil ? `Valid until ${when(bundle.validUntil)}` : bundle.billingType === 'permanent' ? 'Permanent access until switched off' : 'See feature controls for renewal status'}</small>
+          </article>;
+        })}
+      </div> : <p className="cg-credit-empty">No active feature labels. Activate a published label to unlock paid workshop modules.</p>}
+      <div className="cg-credit-actions">
+        <button type="button" className="primary" onClick={() => navigate('/account/credits/features')}>View Prices &amp; Activation <ArrowRight size={16}/></button>
+        <button type="button" onClick={() => navigate('/account/credits/logs')}>Check Wallet Cash Flow <FileClock size={16}/></button>
+      </div>
     </section>}
 
     {section === 'overview' && <div className="cg-credit-columns">
