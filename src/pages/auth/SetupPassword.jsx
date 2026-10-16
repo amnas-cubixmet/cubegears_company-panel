@@ -23,6 +23,7 @@ export const SetupPassword = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [done, setDone] = useState(false);
   const [landingPath, setLandingPath] = useState('/access-denied');
+  const [doneMessage, setDoneMessage] = useState('');
 
   const clearField = (field) => {
     setFieldErrors((current) => {
@@ -59,14 +60,24 @@ export const SetupPassword = () => {
       const refreshToken = result?.refresh || result?.refreshToken || result?.refresh_token;
       const user = result?.user || result?.profile;
 
-      if (!accessToken) throw new Error('Password was saved, but automatic sign-in could not be completed.');
+      // A disabled company/role can have a completed password setup without
+      // being allowed to sign in. Never save or use a partial session.
+      if (typeof accessToken !== 'string' || !accessToken ||
+          typeof refreshToken !== 'string' || !refreshToken ||
+          !user?.id || !user?.email) {
+        setDoneMessage(result?.message || 'Password created. Sign in to continue.');
+        setLandingPath('/login');
+        setDone(true);
+        return;
+      }
 
       localStorage.setItem('auth_token', accessToken);
-      if (refreshToken) localStorage.setItem('auth_refresh_token', refreshToken);
-      if (user) localStorage.setItem('auth_user', JSON.stringify(user));
+      localStorage.setItem('auth_refresh_token', refreshToken);
+      localStorage.setItem('auth_user', JSON.stringify(user));
 
       const destination = getStaffLandingPath(user);
       setLandingPath(destination);
+      setDoneMessage('Password created successfully. Signing you in…');
       setDone(true);
       window.setTimeout(() => window.location.replace(destination), 700);
     } catch (error) {
@@ -99,8 +110,8 @@ export const SetupPassword = () => {
             <div className="auth-success-state">
               <span className="auth-success-icon"><CheckCircle2 size={24} /></span>
               <h1 className="login-title">Your account is ready</h1>
-              <p className="login-description">{email ? email + ' is ready for normal email/password sign in.' : 'Password created successfully. Signing you in…'}</p>
-              <button type="button" className="login-submit" onClick={() => window.location.replace(landingPath)}>Continue to Workspace</button>
+              <p className="login-description">{doneMessage}</p>
+              <button type="button" className="login-submit" onClick={() => window.location.replace(landingPath)}>{landingPath === '/login' ? 'Go to Sign In' : 'Continue to Workspace'}</button>
             </div>
           ) : (
             <>
