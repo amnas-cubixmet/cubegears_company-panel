@@ -64,7 +64,16 @@
 .cg-credit-chip small{font-size:10px;font-weight:650}.cg-credit-chip em{font-size:9px;font-style:normal;color:#b45309;background:#fff0cc;padding:3px 5px;border-radius:5px}
 .cg-credit-chip.is-low{background:#fff8e7;border-color:#f0d99e;color:#924f14}
 .cg-credit-chip:hover,.cg-credit-chip:focus-visible{border-color:#326bed;outline-offset:3px}
+.cg-credit-chip-value{display:inline-flex;align-items:baseline;gap:3px;min-width:0}
+.cg-credit-chip-mobile{display:none}
 .mobile-header-actions .cg-credit-chip{min-height:32px;padding:5px 8px;font-size:11px}
+@media(max-width:767px){
+  /* Only the narrow mobile header abbreviates 5+ digit amounts into K.
+     The button label/title retain the exact, full balance for accessibility. */
+  .mobile-header-actions .cg-credit-chip{max-width:100%;min-width:0;flex:0 1 auto}
+  .mobile-header-actions .cg-credit-chip-full{display:none}
+  .mobile-header-actions .cg-credit-chip-mobile{display:inline}
+}
 @media(max-width:420px){.mobile-header-actions .cg-credit-chip{gap:4px;padding:4px 6px}.mobile-header-actions .cg-credit-chip em{display:none}}
 
 
