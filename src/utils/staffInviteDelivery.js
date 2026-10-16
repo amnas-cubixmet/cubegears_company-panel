@@ -7,12 +7,14 @@ export const staffInviteDeliveryMessage = (status) => {
       return 'Staff saved, but email is going to the Django terminal (Console Email Backend). Configure SMTP in the backend .env, then use Send Login Invite.';
     case 'local_only':
       return 'Staff saved. Email was captured by the local test backend, not delivered to an inbox. Configure SMTP and resend.';
+    case 'pending':
+      return 'Staff saved. Invitation is waiting for the database transaction to commit, then Celery will queue it.';
     case 'disabled':
-      return 'Staff saved. Email sending is disabled. Configure SMTP, then resend the invitation.';
+      return 'Staff saved. Email sending is disabled. Enable email delivery, Redis and Celery Worker with SMTP, then resend the invitation.';
     case 'failed':
-      return 'Staff saved, but sending the invitation failed. Check SMTP settings and Django logs, then resend. Do not create the staff again.';
+      return 'Staff saved, but sending the invitation failed. Check Redis, Celery Worker and SMTP logs, then resend. Do not create the staff again.';
     case 'queued':
-      return 'Staff saved. Setup email is queued for delivery. If it does not arrive, check Django email settings and server logs.';
+      return 'Staff saved. Setup email is queued for delivery. If it does not arrive, check Celery Worker logs and SMTP settings.';
     case 'not_requested':
       return 'Staff saved without an email invite. Add a valid email and role to enable login.';
     default:
