@@ -45,8 +45,8 @@ const normalizeStaff = (staff = {}) => ({
 });
 
 export const staffService = {
-  getStaff: async () => {
-    if (!USE_MOCK_API) {
+  getStaff: async ({ liveOnly = false } = {}) => {
+    if (liveOnly || !USE_MOCK_API) {
       const rows = await apiClient.get('/employees');
       const list = Array.isArray(rows) ? rows : rows?.results || [];
       return list.map(normalizeStaff);

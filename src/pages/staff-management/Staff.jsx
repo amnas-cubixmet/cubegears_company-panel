@@ -28,7 +28,7 @@ export const Staff = () => {
     setLoading(true);
     setError('');
     try {
-      const data = await staffService.getStaff();
+      const data = await staffService.getStaff({ liveOnly: true });
       setStaffList(Array.isArray(data) ? data : []);
     } catch (requestError) {
       setError(requestError?.message || 'Unable to load staff.');
