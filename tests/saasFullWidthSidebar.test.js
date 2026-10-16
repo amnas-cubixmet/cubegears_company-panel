@@ -42,7 +42,7 @@ test('overview shows authorized module count and server-based price/cash-flow ra
   assert.match(workspace, /featureAccess\.can\(route\.permission\)/);
   assert.match(workspace, /featureAccess\.activeLabelModules\.length/);
   assert.match(workspace, /availableRoutes\.length/);
-  assert.match(workspace, /const activeBundles = featureBundles\.filter\(bundle => bundle\.active === true\)/);
+  assert.match(workspace, /const activeBundles = paidBundles\.filter\(bundle => bundle\.active === true\)/);
   assert.match(workspace, /Activated modules and their credit costs/);
   assert.match(workspace, /credits\(bundle\.totalCredits\)/);
   assert.match(workspace, /bundle\.billingType === 'permanent'/);
