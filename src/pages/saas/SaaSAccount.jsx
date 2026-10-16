@@ -7,6 +7,7 @@ import { settingsService } from '../../services/settings.service';
 import { useAuth } from '../../hooks/useAuth';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { storageHistoryService } from '../../services/storageHistory.service';
+import { CreditCycleCard } from '../../components/account/CreditCycleCard';
 import { AccountHeader, AccountOverview } from '../../components/account';
 import '../../styles/account-billing.css';
 import '../../styles/account-dashboard.css';
@@ -239,6 +240,7 @@ function StorageView({ storage, setStorage }) {
 
   return (
     <div className="saas-grid">
+      <CreditCycleCard />
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">MEDIA STORAGE</span><h2>Media storage usage</h2></div><Infinity size={24} /></div>
         <div className="saas-storage-summary">
