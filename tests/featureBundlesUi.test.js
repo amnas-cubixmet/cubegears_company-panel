@@ -20,7 +20,7 @@ test('company can activate and disable real backend labels from Feature Controls
   assert.match(panel, /creditWalletService\.bundles\(\)/);
   assert.match(panel, /creditWalletService\.purchaseBundle\(bundle\.id\)/);
   assert.match(panel, /creditWalletService\.disableBundle\(bundle\.id\)/);
-  assert.match(panel, /\(bundle\.features \|\| \[\]\)\.map/);
+  assert.match(panel, /\(bundle\.features \|\| \[\]\)\.filter\(item => !freeKeys\.includes\(item\.key\)\)\.map/);
   assert.match(panel, /bundle\.validUntil/);
   assert.match(panel, /featureLabelStatus\(bundle, wallet\)/);
   assert.match(panel, /bundle\.perUserCredits/);

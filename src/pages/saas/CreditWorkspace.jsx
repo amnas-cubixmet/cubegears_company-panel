@@ -165,19 +165,34 @@ export function CreditWorkspace({ section = 'overview' }) {
   const low = wallet?.lowBalance === true;
   // Never combine a lifetime charge with a daily/weekly/monthly rate into a
   // fake "monthly total". Display each server-published label price separately.
-  const activeBundles = featureBundles.filter(bundle => bundle.active === true);
-  const freeRoutes = routeConfig.filter(route =>
-    ['credits', 'dashboard', 'staff-management'].includes(route.id) &&
-    featureAccess.freeModules?.includes(route.permission.split('.')[0]) &&
-    featureAccess.can(route.permission)
+  const freeKeys = ['dashboard', 'settings', 'staff', 'roles', 'billing'];
+  // The server hides free-only labels; also guard stale cached API responses.
+  // Mixed labels remain visible for the paid modules they contain.
+  const paidBundles = featureBundles.filter(bundle =>
+    (bundle.features || []).some(item => !freeKeys.includes(item.key))
   );
+  const activeBundles = paidBundles.filter(bundle => bundle.active === true);
+  const freeRoutes = [
+    ...routeConfig.filter(route =>
+      ['credits', 'dashboard', 'settings', 'staff-management'].includes(route.id) &&
+      featureAccess.freeModules?.includes(route.permission.split('.')[0]) &&
+      featureAccess.can(route.permission)
+    ),
+    // Role management already lives under Staff Management and is guarded
+    // by Django's company.manage check. Free does not grant admin privileges.
+    ...(featureAccess.freeModules?.includes('roles') && featureAccess.can('company.manage')
+      ? [{ id: 'roles-permissions', label: 'Roles & Permissions', path: '/staff-management/roles',
+           icon: ShieldCheck, permission: 'company.manage' }]
+      : []),
+  ];
   const availableRoutes = routeConfig.filter(route => route.permission &&
-    !['billing', 'dashboard', 'company', 'roles'].includes(route.permission.split('.')[0]) &&
+    !['billing', 'company', 'roles'].includes(route.permission.split('.')[0]) &&
+    !featureAccess.freeModules?.includes(route.permission.split('.')[0]) &&
     featureAccess.can(route.permission));
   const sections = {
     overview: ['SaaS Account', 'Track your live balance, active modules, staff charges and wallet usage.'],
     buy: ['Buy Credits', 'Add credits with secure Razorpay checkout. Only captured payments update your wallet.'],
-    features: ['Feature Controls', 'Dashboard, Staff Management and SaaS Account are free. Activate labels for other modules.'],
+    features: ['Feature Controls', 'Dashboard, Settings, Staff Management, Roles & Permissions and SaaS Account are free. Activate labels for paid modules.'],
     logs: ['Credit Activity Logs', 'Review wallet top-ups, feature debits, adjustments and renewals.'],
   };
   const [title, subtitle] = sections[section] || sections.overview;
@@ -208,7 +223,7 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {(section === 'overview' || section === 'features') && <section className="cg-credit-panel" aria-label="Free modules">
       <header><div><span>INCLUDED — NO CREDITS</span><h2>Free modules for your company</h2></div><ShieldCheck size={22}/></header>
-      <p>Dashboard, Staff Management and SaaS Account have no feature activation or credit charge. Login and role permissions still apply. Other modules require an active paid Feature Label.</p>
+      <p>Dashboard, Settings, Staff Management, Roles & Permissions and SaaS Account have no feature activation or credit charge. Login and role permissions still apply. Other modules require an active paid Feature Label.</p>
       <div className="cg-credit-shortcuts">
         {freeRoutes.map(route => { const Icon = route.icon; return <button type="button" key={route.id} onClick={() => navigate(route.path)}>
           <Icon size={19}/><strong>{route.label}</strong><small>Free • allowed by your role</small><ArrowRight size={16}/>
@@ -233,7 +248,7 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {section === 'overview' && featureAccess.labelOnly && <section className="cg-credit-panel cg-credit-active-labels" aria-label="Activated feature label prices and status">
       <header><div><span>ACTIVE LABELS &amp; BILLING</span><h2>Activated modules and their credit costs</h2></div><Coins size={22}/></header>
-      <p>Only purchased active labels unlock paid modules; Dashboard, Staff Management and SaaS Account are free. Staff still need their role permissions. Wallet Logs show actual debits.</p>
+      <p>Only purchased active labels unlock paid modules; Dashboard, Settings, Staff Management, Roles & Permissions and SaaS Account are free. Staff still need their role permissions. Wallet Logs show actual debits.</p>
       {activeBundles.length ? <div className="cg-credit-active-label-grid">
         {activeBundles.map(bundle => {
           const period = ({ permanent: 'one-time', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
@@ -287,10 +302,10 @@ export function CreditWorkspace({ section = 'overview' }) {
     </section>}
 
     {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Available modules">
-      <header><div><span>MODULE PRICING</span><h2>All workshop modules ({featureBundles.length})</h2></div><Coins size={22}/></header>
+      <header><div><span>MODULE PRICING</span><h2>Paid workshop modules ({paidBundles.length})</h2></div><Coins size={22}/></header>
       <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. Published package prices are calculated per active login user.</p>
       <div className="cg-bundle-grid">
-        {featureBundles.map((bundle) => {
+        {paidBundles.map((bundle) => {
           const status = featureLabelStatus(bundle, wallet);
           const period = ({ permanent: 'lifetime', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
           return <article key={bundle.id ?? `unpriced:${bundle.key}`} className="cg-bundle-card">
@@ -312,7 +327,7 @@ export function CreditWorkspace({ section = 'overview' }) {
             <div className="cg-bundle-feature-list">
               <small>Included existing features</small>
               <div className="cg-bundle-features">
-                {(bundle.features || []).map(item => <span key={item.key}>{item.label}</span>)}
+                {(bundle.features || []).filter(item => !freeKeys.includes(item.key)).map(item => <span key={item.key}>{item.label}</span>)}
               </div>
             </div>
             {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
@@ -331,13 +346,13 @@ export function CreditWorkspace({ section = 'overview' }) {
           </article>;
         })}
       </div>
-      {!featureBundles.length && !loading && <p className="cg-credit-empty">No modules are published yet. Module pricing is managed by your SaaS administrator.</p>}
+      {!paidBundles.length && !loading && <p className="cg-credit-empty">No paid modules are published yet. Module pricing is managed by your SaaS administrator.</p>}
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only the company account owner can purchase module access.</p>}
     </section>}
 
     {section === 'features' && !featureAccess.labelOnly && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
       <p>Each module uses the backend-configured credit price. Prepaid modules deduct credits on activation and renewal; monthly-postpaid modules record timed usage and debit only after month-end. Every staff member still requires their role permission.</p>
-      <div className="cg-credit-features">{features.map((feature) => <article key={feature.key}>
+      <div className="cg-credit-features">{features.filter(feature => !freeKeys.includes(feature.key)).map((feature) => <article key={feature.key}>
         <div className="cg-credit-feature-main"><div><h3>{feature.label}</h3><p>{feature.description || 'Workshop management module'}</p></div><span className={feature.enabled ? 'cg-credit-pill active' : 'cg-credit-pill'}>{feature.enabled ? 'Active' : 'Off'}</span></div>
         <div className="cg-credit-feature-cost">
           <span>Activation: <b>{credits(feature.activationCredits)} cr</b></span>
