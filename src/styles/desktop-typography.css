@@ -224,4 +224,51 @@
   #root .app-shell :is(.operations-header h2, .dashboard-panel h2) {
     font-size: 18px !important;
   }
+  /*
+   * 16px nav labels need more room than the original 208px rail.
+   * Keep collapsed navigation narrow, but do not crop expanded labels.
+   */
+  #root .app-shell .app-sidebar:not(.is-collapsed) {
+    width: clamp(258px, 20vw, 284px);
+    flex: 0 0 clamp(258px, 20vw, 284px);
+    min-width: clamp(258px, 20vw, 284px);
+  }
+
+  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav {
+    padding-inline: 12px;
+  }
+
+  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-section-title {
+    padding-inline: 12px;
+    margin: 0;
+    line-height: 1.4;
+    letter-spacing: .07em;
+    white-space: normal;
+    overflow-wrap: normal;
+    text-overflow: clip;
+  }
+
+  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav-item {
+    height: auto;
+    min-height: 46px;
+    padding: 10px 12px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav-label {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+    flex: 1 1 auto;
+  }
+
+  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav-icon {
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+
 }
