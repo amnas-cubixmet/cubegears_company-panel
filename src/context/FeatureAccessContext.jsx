@@ -9,6 +9,7 @@ const FeatureAccessContext = createContext(null);
 const LOCKED = Object.freeze({
   enforced: true, labelOnly: false, activeLabelModules: [], nextLabelExpiryAt: null,
   modules: [], permissions: [], freeModules: [], canManageFeatures: false, unavailable: true, userKey: '',
+  billingHold: false, billingCycle: null,
 });
 const CORE_MODULES = new Set(['billing', 'settings', 'company', 'storage', 'notifications', 'roles']);
 const userIdentity = (user) => user?.id
@@ -19,7 +20,8 @@ export function moduleIsVisible(access, permission) {
   if (!permission) return true;
   if (!access || access.unavailable) return false;
   const module = permission.split('.')[0];
-  if (isAccountOnly(access)) return module === 'billing' && access.isCompanyOwner === true;
+  if (isAccountOnly(access)) return access.isCompanyOwner === true &&
+    (module === 'billing' || (module === 'storage' && access.permissions.includes(permission)));
   // The backend explicitly lists free modules. They still require the exact
   // tenant/role permission returned by Django; free != unrestricted access.
   if (access.freeModules?.includes(module)) return access.permissions.includes(permission);
@@ -79,6 +81,9 @@ export function FeatureAccessProvider({ children }) {
           ? response.freeModules.filter(item => ['dashboard', 'settings', 'staff', 'roles', 'billing'].includes(item)) : [],
         permissions: response.permissions.filter(item => typeof item === 'string'),
         canManageFeatures: response.canManageFeatures === true,
+        billingHold: response.billingHold === true,
+        billingCycle: response.billingCycle && typeof response.billingCycle === 'object'
+          ? response.billingCycle : null,
         isCompanyOwner: response.isCompanyOwner === true,
         paidAccessRequired: response.paidAccessRequired === true,
         unavailable: false,
