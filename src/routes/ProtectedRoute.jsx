@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { SaaSAccountLayout, WorkspaceAccessNotice } from '../components/layout/SaaSAccountLayout';
+import { WorkspaceAccessNotice } from '../components/layout/SaaSAccountLayout';
 import { isAccountPath, isAccountOnly, setupRedirect } from '../utils/accountWorkspace';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { getPermissionForPath } from '../utils/permissions';
@@ -73,8 +73,9 @@ export const ProtectedRoute = () => {
     );
   }
 
-  if (isAccountRoute || featureAccess.isCompanyOwner) return <SaaSAccountLayout><Outlet /></SaaSAccountLayout>;
-
+  // Match the original unified workshop layout from commit
+  // 17f0448d: one header/sidebar/mobile navigation for owners and staff.
+  // The latest account-only, label and role guards above remain authoritative.
   return (
     <DashboardLayout>
       <Outlet />

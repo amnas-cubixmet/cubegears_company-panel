@@ -42,7 +42,10 @@ export const DashboardLayout = ({ children }) => {
         </main>
       </div>
 
-      {!isInvoiceWorkspace && <MobileBottomNav />}
+      {/* Keep mobile navigation available on every protected workspace route,
+          including invoice and estimate pages; document previews still omit
+          the nonessential footer. */}
+      <MobileBottomNav />
     </div>
   );
 };
