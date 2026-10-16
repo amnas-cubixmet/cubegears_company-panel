@@ -50,6 +50,12 @@ export const Header = () => {
   const mobileProfileRef = useRef(null);
 
   useEffect(() => {
+    // Notifications can be a paid/disabled module for strict tenants.
+    // Never request its API while Django says notifications.view is denied.
+    if (!canViewNotifications) {
+      setNotificationCount(0);
+      return undefined;
+    }
     let mounted = true;
     const loadNotificationCount = async () => {
       try {
@@ -70,7 +76,7 @@ export const Header = () => {
       window.removeEventListener('storage', onStorage);
       window.removeEventListener('cubixgear:notifications-changed', loadNotificationCount);
     };
-  }, [location.pathname]);
+  }, [location.pathname, canViewNotifications]);
 
   useEffect(() => {
     let active = true;
