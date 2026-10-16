@@ -112,3 +112,16 @@
 .cg-bundle-marketplace .cg-bundle-actions button.primary{min-width:135px}
 .cg-bundle-marketplace .cg-bundle-actions button.secondary{border:1px solid var(--border,#dce5f0);border-radius:9px;background:transparent;padding:10px 14px;color:var(--text-primary,var(--c-ink));font-weight:700}
 @media(max-width:600px){.cg-bundle-marketplace .cg-bundle-card{padding:16px}.cg-bundle-summary{align-items:flex-start;flex-direction:column}}
+
+/* Keep disabled feature actions readable without implying they are enabled. */
+.app-content .cg-credit-page .cg-bundle-marketplace .cg-bundle-actions button:disabled{
+  opacity:1;background:var(--surface-soft,#eef2f6);color:var(--text-secondary,#475569);
+  border:1px solid var(--border,#cbd5e1);box-shadow:none;cursor:not-allowed;
+}
+.cg-bundle-marketplace .cg-bundle-card p,
+.cg-bundle-marketplace .cg-bundle-reason{font-size:14px!important;line-height:1.6!important}
+.cg-bundle-marketplace .cg-bundle-price>span,
+.cg-bundle-marketplace .cg-bundle-price small,
+.cg-bundle-marketplace .cg-bundle-summary,
+.cg-bundle-marketplace .cg-bundle-feature-list>small,
+.cg-bundle-marketplace .cg-bundle-features span{font-size:13px}

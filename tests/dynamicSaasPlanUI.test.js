@@ -29,8 +29,9 @@ test('custom enquiries are sent to backend and never activate plans immediately'
 test('account uses plan comparison route and no longer advertises unlimited storage', () => {
   assert.match(routes, /\/account\/plans/);
   assert.match(account, /Compare \/ Change Plan/);
-  assert.match(account, /includedStorageGb/);
-  assert.match(account, /extraStorageRate/);
+  assert.match(account, /navigate\('\/account\/plans'\)/);
+  assert.match(account, /storage\.billing\.includedGb/);
+  assert.match(account, /storage\.billing\.creditsPerGb/);
   assert.doesNotMatch(account, /Unlimited storage/);
 });
 

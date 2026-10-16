@@ -16,16 +16,16 @@ const creditUI = read('../src/pages/saas/CreditWorkspace.jsx');
 test('real Django access endpoint authorizes all tenant navigation; no local mock fallback', () => {
   assert.match(access, /apiClient\.get\('\/saas\/credits\/access'\)/);
   assert.match(access, /setAccess\(LOCKED\)/);
-  assert.match(access, /response\.modules/);
+  assert.match(access, /response\.enabledModules/);
   assert.match(access, /cubegear:credits-updated/);
   assert.doesNotMatch(access, /localStorage\.getItem\(['"]feature/);
 });
 
 test('backend entitlement is enforced at desktop/mobile navigation and route boundary', () => {
   assert.match(router, /useFeatureAccess/);
-  assert.match(router, /!can\(requiredPermission\)/);
-  assert.match(router, /!anyPaidModule && access\.enforcementEnabled/);
-  assert.match(router, /Open Feature Controls/);
+  assert.match(router, /!featureAccess\.can\(requiredPermission\)/);
+  assert.match(router, /setupRedirect\(featureAccess, location\.pathname\)/);
+  assert.match(router, /isAccountOnly\(featureAccess\)/);
   for (const widget of [sidebar, mobile, drawer]) {
     assert.match(widget, /useFeatureAccess/);
     assert.match(widget, /can\(route\.permission\)/);
