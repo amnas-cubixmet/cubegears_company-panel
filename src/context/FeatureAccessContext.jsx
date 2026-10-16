@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 const FeatureAccessContext = createContext(null);
 const LOCKED = Object.freeze({
   enforced: true, labelOnly: false, activeLabelModules: [], nextLabelExpiryAt: null,
-  modules: [], permissions: [], canManageFeatures: false, unavailable: true, userKey: '',
+  modules: [], permissions: [], freeModules: [], canManageFeatures: false, unavailable: true, userKey: '',
 });
 const CORE_MODULES = new Set(['billing', 'settings', 'company', 'storage', 'notifications', 'roles']);
 const userIdentity = (user) => user?.id
@@ -20,14 +20,17 @@ export function moduleIsVisible(access, permission) {
   if (!access || access.unavailable) return false;
   const module = permission.split('.')[0];
   if (isAccountOnly(access)) return module === 'billing' && access.isCompanyOwner === true;
+  // The backend explicitly lists free modules. They still require the exact
+  // tenant/role permission returned by Django; free != unrestricted access.
+  if (access.freeModules?.includes(module)) return access.permissions.includes(permission);
   // Keep wallet, activation, security and account recovery reachable.
   if (access.paidAccessRequired) {
-    if (module === 'billing' || module === 'company') return access.isCompanyOwner === true;
-    if (module === 'dashboard') return access.permissions.includes('dashboard.view');
+    if (module === 'billing') return access.isCompanyOwner === true;
+    if (module === 'company' || module === 'dashboard') return access.permissions.includes(permission);
     return access.permissions.includes(permission);
   }
   if (CORE_MODULES.has(module)) return true;
-  if (module === 'dashboard') return access.enforced ? access.modules.length > 0 : true;
+  if (module === 'dashboard') return access.permissions.includes('dashboard.view');
   // Paid workshop modules in label-only mode MUST belong to an activated
   // company label AND the server-authorized role permission intersection.
   if (access.labelOnly && !access.activeLabelModules.includes(module)) return false;
@@ -68,6 +71,8 @@ export function FeatureAccessProvider({ children }) {
         nextLabelExpiryAt: typeof response.nextLabelExpiryAt === 'string'
           ? response.nextLabelExpiryAt : null,
         modules: response.enabledModules.filter(item => typeof item === 'string'),
+        freeModules: Array.isArray(response.freeModules)
+          ? response.freeModules.filter(item => ['dashboard', 'staff', 'billing'].includes(item)) : [],
         permissions: response.permissions.filter(item => typeof item === 'string'),
         canManageFeatures: response.canManageFeatures === true,
         isCompanyOwner: response.isCompanyOwner === true,
