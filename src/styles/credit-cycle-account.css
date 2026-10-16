@@ -1,0 +1,20 @@
+/* Account-scoped billing history only. Theme-safe, responsive and readable. */
+.cg-cycle-card{margin-top:16px}
+.cg-cycle-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:15px 0}
+.cg-cycle-stats>div{display:grid;gap:7px;padding:15px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2)}
+.cg-cycle-stats span{font-size:12px;color:var(--text-muted)}
+.cg-cycle-stats strong{font-size:15px;color:var(--text-primary);font-weight:760;overflow-wrap:anywhere}
+.cg-cycle-warning{display:flex;gap:10px;align-items:flex-start;padding:14px;border:1px solid var(--border);background:var(--surface-2);border-radius:11px;line-height:1.55;color:var(--text-primary);margin:12px 0}
+.cg-cycle-warning svg{flex:0 0 auto;color:var(--primary)}
+.cg-cycle-error{color:var(--danger,#c23a44);font-size:13px}
+.cg-cycle-actions{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.cg-cycle-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px}
+.cg-cycle-scroll{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+.cg-cycle-scroll table{width:100%;min-width:600px;border-collapse:collapse}
+.cg-cycle-scroll th,.cg-cycle-scroll td{font-size:13px;color:var(--text-secondary);padding:11px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.cg-cycle-breakdown{margin-top:15px;border-top:1px solid var(--border);padding:15px 0 2px}
+.cg-cycle-breakdown summary{cursor:pointer;display:flex;gap:8px;align-items:center;font-weight:700}
+.cg-cycle-breakdown>div{padding:12px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.cg-cycle-breakdown p{display:flex;gap:6px;align-items:center;margin:6px 0}
+@media(max-width:1050px){.cg-cycle-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.cg-cycle-stats{grid-template-columns:1fr}.cg-cycle-actions button{width:100%}.cg-cycle-card{padding:17px}}

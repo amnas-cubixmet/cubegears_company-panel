@@ -292,3 +292,29 @@
   .saas-account-shell .saas-account-content .cg-credit-metric,
   .saas-account-shell .saas-account-content .cg-credit-shortcuts button {transition:none;transform:none}
 }
+
+/* The overdue recovery shell uses the drawer's current markup. */
+.saas-payment-recovery-shell .saas-account-brand > span:not(.saas-account-logo) {
+  width:auto;height:auto;flex:0 1 auto;border-radius:0;background:none;box-shadow:none;min-width:0;
+}
+.saas-payment-recovery-shell .saas-owner-sidebar {padding:0;gap:0}
+@media(max-width:900px) {
+  .saas-payment-recovery-shell .saas-owner-sidebar:not(.is-open) {display:none}
+  .saas-payment-recovery-shell .saas-owner-sidebar.is-open {
+    display:flex;flex-direction:column;align-items:stretch;position:absolute;
+    width:min(320px,calc(100vw - 54px));height:100%;top:0;left:0;bottom:0;
+    padding:0;overflow:hidden;transform:none;visibility:visible;
+  }
+}
+@media(max-width:600px) {
+  .saas-payment-recovery-shell .saas-account-topbar-start {gap:8px}
+  .saas-payment-recovery-shell .saas-account-brand {gap:8px}
+  .saas-payment-recovery-shell .saas-account-brand strong {font-size:14px;white-space:nowrap}
+  .saas-payment-recovery-shell .saas-account-brand small {display:none}
+  .saas-payment-recovery-shell .account-dashboard-header {min-height:0;padding:18px}
+  .saas-payment-recovery-shell .account-dashboard-header h1 {font-size:24px}
+}
+@media(max-width:600px) {
+  #root .saas-payment-recovery-shell .account-dashboard-title-row,
+  #root .saas-payment-recovery-shell .account-dashboard-header-trailing {flex:0 0 auto}
+}

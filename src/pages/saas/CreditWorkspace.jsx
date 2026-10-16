@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
 import { creditWalletService, notifyCreditChange, purchaseCredits } from '../../services/creditWallet.service';
 import { AccountHeader } from '../../components/account';
+import { CreditCycleCard } from '../../components/account/CreditCycleCard';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { useAuth } from '../../hooks/useAuth';
 import { routeConfig } from '../../routes/routeConfig';
@@ -125,7 +126,9 @@ export function CreditWorkspace({ section = 'overview' }) {
     setBusy(`bundle:${bundle.id}`); setError(''); setNotice('');
     try {
       const result = await creditWalletService.purchaseBundle(bundle.id);
-      setNotice(result?.chargedCredits === '0.00'
+      setNotice(result?.billingMode === 'monthly_postpaid'
+        ? 'Module activated. Usage will be collected on your monthly due date.'
+        : result?.chargedCredits === '0.00'
         ? 'Your purchased module access is active. No additional credits charged.'
         : `${bundle.name} enabled. ${credits(result.chargedCredits)} credits charged by the server.`);
       await load();
@@ -199,6 +202,12 @@ export function CreditWorkspace({ section = 'overview' }) {
 
   return <div className="saas-page cg-credit-page">
     <AccountHeader title={title} subtitle={subtitle} active={section === 'buy' ? 'credits-buy' : section === 'features' ? 'credits-features' : section === 'logs' ? 'credits-logs' : 'overview'} onNavigate={navigate} actions={<button type="button" className="cg-credit-refresh" disabled={loading || Boolean(busy)} onClick={() => { load(); featureAccess.refresh(); }}><RefreshCcw size={16} aria-hidden="true"/> Refresh</button>}/>
+    {featureAccess.billingStatus?.enabled && <section className="cg-credit-alert" role="status">
+      <strong>{featureAccess.billingStatus.blocked ? 'Monthly payment overdue — workspace restricted.' : 'Monthly usage billing'}</strong>
+      <p>Collection day: {featureAccess.billingStatus.dueDay} of the next month. Outstanding: {credits(featureAccess.billingStatus.outstandingCredits)} credits.</p>
+      {featureAccess.billingStatus.blocked && <p>Buy credits to settle outstanding usage. Storage logs and your account remain available.</p>}
+      <button type="button" onClick={() => navigate('/account/credits/buy')}>Buy credits</button>
+    </section>}
     {error && <div className="cg-credit-alert error" role="alert">{error} <button type="button" onClick={load}>Retry</button></div>}
     {notice && <div className="cg-credit-alert success" role="status">{notice}</div>}
     {loading && <p role="status" className="cg-credit-status">Loading your company wallet…</p>}
@@ -251,7 +260,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       <p>Only purchased active labels unlock paid modules; Dashboard, Settings, Staff Management, Roles & Permissions and SaaS Account are free. Staff still need their role permissions. Wallet Logs show actual debits.</p>
       {activeBundles.length ? <div className="cg-credit-active-label-grid">
         {activeBundles.map(bundle => {
-          const period = ({ permanent: 'one-time', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
+          const period = bundle.billingMode === 'monthly_postpaid' ? 'calendar month' : ({ permanent: 'one-time', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
           return <article key={bundle.id} className="cg-credit-active-label-card">
             <div className="cg-credit-active-label-head"><strong>{bundle.name}</strong><span className="cg-credit-pill active">Enabled</span></div>
             <div className="cg-credit-active-label-price">
@@ -269,6 +278,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       </div>
     </section>}
 
+    {section === 'overview' && <CreditCycleCard />}
     {section === 'overview' && <div className="cg-credit-columns">
       <section className="cg-credit-panel"><header><div><span>WALLET OVERVIEW</span><h2>Your credits at a glance</h2></div><Wallet size={22}/></header>
         <p>Buy wallet credits as needed. {wallet?.billingMode === 'monthly_postpaid'
@@ -286,7 +296,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         <button className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View all logs <ArrowRight size={16}/></button>
       </section>
       <section className="cg-credit-panel cg-credit-wide"><header><div><span>MANAGE YOUR TOOLS</span><h2>Features and storage</h2></div><Zap size={22}/></header>
-        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small><ArrowRight size={16}/></button>{featureAccess.can('storage.view') && <button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small><ArrowRight size={16}/></button>}<button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small><ArrowRight size={16}/></button></div>
+        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small><ArrowRight size={16}/></button>{featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small><ArrowRight size={16}/></button>}<button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small><ArrowRight size={16}/></button></div>
       </section>
     </div>}
 
@@ -303,11 +313,11 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Available modules">
       <header><div><span>MODULE PRICING</span><h2>Paid workshop modules ({paidBundles.length})</h2></div><Coins size={22}/></header>
-      <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. Published package prices are calculated per active login user.</p>
+      <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. In postpaid cycle mode, monthly labels start at zero upfront credits and bill the recorded active interval on the administrator's due date.</p>
       <div className="cg-bundle-grid">
         {paidBundles.map((bundle) => {
           const status = featureLabelStatus(bundle, wallet);
-          const period = ({ permanent: 'lifetime', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
+          const period = bundle.billingMode === 'monthly_postpaid' ? 'calendar month' : ({ permanent: 'lifetime', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
           return <article key={bundle.id ?? `unpriced:${bundle.key}`} className="cg-bundle-card">
             <div className="cg-bundle-head">
               <h3>{bundle.name}</h3>
@@ -317,7 +327,7 @@ export function CreditWorkspace({ section = 'overview' }) {
             <div className="cg-bundle-price">
               {bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY'
                 ? <><span>Included free</span><strong>0 <small>credits — no purchase needed</small></strong></>
-                : <><span>Per user credits</span>
+                : <><span>{bundle.cyclePostpaid ? 'Monthly usage rate (deferred)' : 'Per user credits'}</span>
                   <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
                   <div className="cg-bundle-summary">
                     <span>{bundle.userCount ?? '—'} active login users</span>
@@ -333,12 +343,12 @@ export function CreditWorkspace({ section = 'overview' }) {
             {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
             {status.message && <p className="cg-bundle-reason" role="status">{status.message}</p>}
             <div className="cg-bundle-actions">
-              <button className="primary" type="button" disabled={busy !== '' || !status.allow}
+              <button className="primary" type="button" disabled={busy !== '' || !status.allow || featureAccess.billingStatus?.blocked}
                 onClick={() => buyBundle(bundle)}>
                 {busy === `bundle:${bundle.id}` ? 'Saving…'
                   : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
                   : bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY' ? 'Included Free'
-                  : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
+                  : bundle.billingMode === 'monthly_postpaid' ? (bundle.active ? 'Active' : 'Activate monthly billing') : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
               </button>
               {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage}
                 onClick={() => stopBundle(bundle)}>Switch Off</button>}
@@ -381,14 +391,15 @@ export function CreditWorkspace({ section = 'overview' }) {
     {section === 'logs' && <section className="cg-credit-panel" aria-label="Monthly postpaid usage statements">
       <header><div><span>MONTH-END FEATURE &amp; STORAGE BILLING</span><h2>Monthly usage statements</h2></div><Database size={22}/></header>
       <p>Feature usage and storage GB-time are recorded by Django. Only completed calendar months can deduct wallet credits. Unpaid statements remain pending until there is sufficient balance.</p>
-      <div className="cg-credit-table-wrap"><table><thead><tr><th>Period</th><th>Features</th><th>Storage</th><th>Total credits</th><th>Status</th></tr></thead>
+      <div className="cg-credit-table-wrap"><table><thead><tr><th>Period</th><th>Features</th><th>Storage</th><th>Total credits</th><th>Due date</th><th>Status</th></tr></thead>
         <tbody>
           {monthlyStatements.map((row) => <tr key={row.id}>
             <td><strong>{row.period}</strong></td><td>{credits(row.featureCredits)}</td>
             <td>{credits(row.storageCredits)}</td><td><strong>{credits(row.totalCredits)}</strong></td>
-            <td><span className={row.status === 'paid' ? 'cg-credit-pill active' : 'cg-credit-pill'}>{row.status}</span></td>
+            <td>{row.dueAt ? new Date(row.dueAt).toLocaleDateString() : '—'}</td>
+            <td><span className={row.status === 'paid' ? 'cg-credit-pill active' : 'cg-credit-pill'}>{row.overdue ? 'overdue' : row.status}</span></td>
           </tr>)}
-          {!monthlyStatements.length && <tr><td colSpan={5} className="cg-credit-empty">No completed-month usage statements yet.</td></tr>}
+          {!monthlyStatements.length && <tr><td colSpan={6} className="cg-credit-empty">No completed-month usage statements yet.</td></tr>}
         </tbody></table></div>
       <p className="cg-credit-note">Each statement is locked to the company and calendar month; wallet debits are recorded below with a unique reference.</p>
     </section>}
@@ -398,7 +409,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         {logs.map(row => <tr key={row.id}><td>{when(row.createdAt)}</td><td><strong>{row.description}</strong><small>{row.kind}</small></td><td className={Number(row.delta)>=0?'positive':'negative'}>{Number(row.delta)>0?'+':''}{credits(row.delta)}</td><td>{credits(row.balanceAfter)}</td><td>{row.reference || '—'}</td></tr>)}
         {!logs.length && <tr><td colSpan={5} className="cg-credit-empty">No credit transactions recorded.</td></tr>}
       </tbody></table></div>
-      <p className="cg-credit-note">Logs are read-only and company-scoped. {featureAccess.can('storage.view') && <>For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History <ArrowRight size={14}/></button>.</>}</p>
+      <p className="cg-credit-note">Logs are read-only and company-scoped. {featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <>For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History <ArrowRight size={14}/></button>.</>}</p>
     </section>}
   </div>;
 }

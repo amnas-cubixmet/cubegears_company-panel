@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import {
-  StaffManagementHeader,
-  StaffManagementTabs,
-} from '../../components/staff-management';
+import { StaffManagementHeader } from '../../components/staff-management';
 import { Staff } from '../staff-management/Staff';
 import { StaffProfile } from '../staff-management/staff/StaffProfile';
 import { StaffAddPage } from '../staff-management/StaffAddPage';
 import { UserRoles } from '../staff-management/UserRoles';
 import { WorkshopStaffSection } from '../staff-management/WorkshopStaffSection';
+import { SimpleStaffOverview } from '../staff-management/SimpleStaffOverview';
 import '../../styles/staff-management.css';
+import '../../styles/staff-simple-overview.css';
 
 const resolveSection = (pathname) => {
   if (pathname.endsWith('/overview')) return 'overview';
@@ -50,6 +49,7 @@ export const StaffManagement = () => {
         />
       );
     }
+    if (activeSection === 'overview') return <SimpleStaffOverview />;
     if (activeSection === 'staff') return <Staff />;
     if (activeSection === 'add') return <StaffAddPage />;
     if (activeSection === 'roles') return <UserRoles />;
@@ -59,7 +59,6 @@ export const StaffManagement = () => {
   return (
     <div className="staff-management-page cg-staff-management">
       <StaffManagementHeader />
-      <StaffManagementTabs />
 
       <main className="staff-management-content">
         {renderSection()}

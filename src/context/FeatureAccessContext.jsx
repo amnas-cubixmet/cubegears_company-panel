@@ -9,6 +9,7 @@ const FeatureAccessContext = createContext(null);
 const LOCKED = Object.freeze({
   enforced: true, labelOnly: false, activeLabelModules: [], nextLabelExpiryAt: null,
   modules: [], permissions: [], freeModules: [], canManageFeatures: false, unavailable: true, userKey: '',
+  billingHold: false, billingCycle: null,
 });
 const CORE_MODULES = new Set(['billing', 'settings', 'company', 'storage', 'notifications', 'roles']);
 const userIdentity = (user) => user?.id
@@ -19,10 +20,15 @@ export function moduleIsVisible(access, permission) {
   if (!permission) return true;
   if (!access || access.unavailable) return false;
   const module = permission.split('.')[0];
+  if (access.billingStatus?.blocked) return module === 'billing' && access.isCompanyOwner === true;
   if (isAccountOnly(access)) return module === 'billing' && access.isCompanyOwner === true;
   // The backend explicitly lists free modules. They still require the exact
   // tenant/role permission returned by Django; free != unrestricted access.
   if (access.freeModules?.includes(module)) return access.permissions.includes(permission);
+  // Storage history and settings live inside the owner's SaaS Account.
+  // The Django role/owner checks remain authoritative for every API request;
+  // this does not unlock Storage for staff or grant any missing permission.
+  if (module === 'storage' && access.isCompanyOwner) return access.permissions.includes(permission);
   // Keep wallet, activation, security and account recovery reachable.
   if (access.paidAccessRequired) {
     if (module === 'billing') return access.isCompanyOwner === true;
@@ -64,6 +70,7 @@ export function FeatureAccessProvider({ children }) {
       setAccess({
         userKey,
         companyId: response.companyId,
+        billingStatus: response.billingStatus || {enabled:false, blocked:false},
         enforced: response.enforcementEnabled,
         labelOnly: response.labelOnly === true,
         activeLabelModules: Array.isArray(response.activeLabelModules)
@@ -75,6 +82,9 @@ export function FeatureAccessProvider({ children }) {
           ? response.freeModules.filter(item => ['dashboard', 'settings', 'staff', 'roles', 'billing'].includes(item)) : [],
         permissions: response.permissions.filter(item => typeof item === 'string'),
         canManageFeatures: response.canManageFeatures === true,
+        billingHold: response.billingHold === true,
+        billingCycle: response.billingCycle && typeof response.billingCycle === 'object'
+          ? response.billingCycle : null,
         isCompanyOwner: response.isCompanyOwner === true,
         paidAccessRequired: response.paidAccessRequired === true,
         unavailable: false,
@@ -108,6 +118,11 @@ export function FeatureAccessProvider({ children }) {
     return () => window.clearTimeout(id);
   }, [current.labelOnly, current.nextLabelExpiryAt, refresh]);
   const checking = loading || (isAuthenticated && Boolean(userKey) && access.userKey !== userKey);
+  useEffect(() => {
+    if (!current.billingStatus?.enabled) return undefined;
+    const id = window.setInterval(refresh, 60000);
+    return () => window.clearInterval(id);
+  }, [current.billingStatus?.enabled, refresh]);
   const can = useCallback((permission) => {
     if (!permission) return true;
     if (!isAuthenticated || checking || current.unavailable || !moduleIsVisible(current, permission)) return false;
