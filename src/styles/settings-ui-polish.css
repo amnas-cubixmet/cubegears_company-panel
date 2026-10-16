@@ -330,3 +330,10 @@
   .settings-page .settings-footer-actions {flex-direction:column}
   .settings-page .settings-footer-actions button {width:100%}
 }
+
+/* A row's 310px flex basis becomes a height when the header stacks. */
+@media(max-width:760px) {
+  .settings-page .settings-dashboard-heading,
+  .settings-page .settings-theme > span,
+  .settings-page .settings-footer-hint {flex:0 1 auto;width:100%}
+}

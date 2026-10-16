@@ -1,0 +1,48 @@
+/* Shared phone/tablet text sizing. Desktop keeps its existing 16px scale.
+   Screen-only and scoped to application shells; document previews keep their
+   authored dimensions and print styles. Never resize every span/div or icon. */
+@media screen and (max-width: 1023px) {
+  #root :is(.app-shell, .saas-account-shell, .login-page) {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(p, label, li, button, table th, table td, summary, [role="tab"], [role="button"], [role="option"], .ui-label, .login-field-label):not(.template-preview *, .eway-print-sheet *, .report-print-sheet *, .invoice-print-sheet *) {
+    font-size: 14px !important;
+    line-height: 1.5;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]), textarea, select, [role="combobox"]) {
+    /* 16px avoids automatic input zoom on mobile Safari. */
+    font-size: 16px !important;
+    line-height: 1.5;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(.ui-badge, .ui-field__message, .auth-field-error, .sidebar-section-title, .mobile-bottom-label) {
+    font-size: 12px !important;
+    line-height: 1.4;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page) button {
+    min-height: 44px;
+  }
+
+  #root .app-shell :is(.mobile-bottom-item, .sidebar-nav-item) {
+    min-height: 44px;
+  }
+
+  #root .app-shell .mobile-bottom-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root :is(.app-shell, .saas-account-shell, .login-page) {
+    scroll-behavior: auto;
+  }
+}
