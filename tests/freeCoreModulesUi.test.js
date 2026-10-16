@@ -7,8 +7,8 @@ const source = (file) => readFileSync(new URL('../' + file, import.meta.url), 'u
 
 const base = {
   enforced: true, paidAccessRequired: true, labelOnly: true,
-  modules: [], activeLabelModules: [], freeModules: ['billing','dashboard','staff'],
-  permissions: ['billing.view','dashboard.view','staff.view','staff.create'],
+  modules: [], activeLabelModules: [], freeModules: ['billing','dashboard','settings','staff'],
+  permissions: ['billing.view','dashboard.view','settings.view','settings.manage','staff.view','staff.create'],
   isCompanyOwner: true, unavailable: false,
 };
 
@@ -16,6 +16,7 @@ test('free dashboard and staff keep owner out of paywall even with zero paid lab
   assert.equal(isAccountOnly(base), false);
   assert.equal(setupRedirect(base, '/dashboard'), null);
   assert.equal(setupRedirect(base, '/staff-management/overview'), null);
+  assert.equal(setupRedirect(base, '/settings'), null);
   assert.equal(setupRedirect(base, '/account'), null);
 });
 
@@ -23,6 +24,14 @@ test('free staff module is accessible by authorized staff without owner billing'
   const staff = {...base, isCompanyOwner: false, permissions: ['staff.view','staff.create']};
   assert.equal(isAccountOnly(staff), false);
   assert.equal(setupRedirect(staff, '/staff-management/overview'), null);
+});
+
+test('settings is free for permitted staff even with no paid module entitlement', () => {
+  const allowed = {...base, isCompanyOwner: false, permissions: ['settings.view']};
+  assert.equal(isAccountOnly(allowed), false);
+  assert.equal(setupRedirect(allowed, '/settings'), null);
+  const denied = {...base, isCompanyOwner: false, permissions: []};
+  assert.equal(isAccountOnly(denied), true);
 });
 
 test('no free role permissions preserves safe account-only setup flow', () => {
@@ -66,6 +75,11 @@ test('free module cards appear on SaaS account and feature controls without purc
   assert.match(wallet, /aria-label="Free modules"/);
   assert.match(wallet, /Free • allowed by your role/);
   assert.match(wallet, /section === 'features'/);
+  assert.match(wallet, /'credits', 'dashboard', 'settings', 'staff-management'/);
+  assert.match(wallet, /Paid workshop modules \(\$\{paidBundles.length\}\)/);
+  assert.match(wallet, /paidBundles\.map\(\(bundle\)/);
+  assert.match(wallet, /!featureAccess\.freeModules\?\.includes/);
+  assert.match(wallet, /features\.filter\(feature => !freeKeys\.includes\(feature\.key\)\)/);
   assert.match(wallet, /purchaseDisabledReason === 'FREE_MODULES_ONLY'/);
 });
 
