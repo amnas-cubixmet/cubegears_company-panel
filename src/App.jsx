@@ -50,6 +50,8 @@ import './styles/workspace-responsive-polish.css';
 import './styles/form-typography.css';
 import './styles/form-controls-unified.css';
 import './styles/form-errors-unified.css';
+// Shared desktop-only text sizing, imported last over legacy page styles.
+import './styles/desktop-typography.css';
 
 export function App() {
   return (

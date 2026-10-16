@@ -13,7 +13,7 @@ const route = source('src/routes/ProtectedRoute.jsx');
 test('responsive styles load after account theme without displacing final form rules', () => {
   const imports = [...app.matchAll(/import ['"]\.\/styles\/([^'"]+\.css)['"];/g)].map((match) => match[1]);
   assert.ok(imports.indexOf('workspace-responsive-polish.css') > imports.indexOf('account-ui-polish.css'));
-  assert.deepEqual(imports.slice(-3), ['form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css']);
+  assert.deepEqual(imports.slice(-4), ['form-typography.css', 'form-controls-unified.css', 'form-errors-unified.css', 'desktop-typography.css']);
 });
 
 test('desktop increases tiny sidebar, header, account and wallet text without scaling the app', () => {
