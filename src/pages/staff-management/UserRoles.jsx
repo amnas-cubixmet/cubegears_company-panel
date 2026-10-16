@@ -11,17 +11,16 @@ import {
   createPermissionMatrix,
 } from '../../config/rolePermissions';
 import { roleService } from '../../services/role.service';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 
 const createInitialForm = () => ({
   name: '',
-  description: '',
-  branchScope: 'Assigned Branch Only',
-  selectedBranches: ['Main Garage Branch'],
   status: 'Active',
   permissions: createPermissionMatrix(false),
 });
 
 export const UserRoles = () => {
+  const { isCompanyOwner } = useFeatureAccess();
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,6 +33,7 @@ export const UserRoles = () => {
   const loadRoles = async () => {
     setLoading(true);
     setError('');
+    setRoles([]);
 
     try {
       const data = await roleService.getRoles();
@@ -50,18 +50,18 @@ export const UserRoles = () => {
   }, []);
 
   const handleOpenAdd = () => {
+    if (!isCompanyOwner) return;
     setEditingRole(null);
     setFormData(createInitialForm());
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (role) => {
+    if (!isCompanyOwner) return;
     setEditingRole(role);
     setFormData({
       name: role.name || '',
-      description: role.description || '',
-      branchScope: role.branchScope || 'Assigned Branch Only',
-      selectedBranches: role.selectedBranches || ['Main Garage Branch'],
+      code: role.code,
       status: role.status || 'Active',
       permissions: role.permissions || createPermissionMatrix(false),
     });
@@ -98,7 +98,7 @@ export const UserRoles = () => {
 
   const handleSaveRole = async (event) => {
     event.preventDefault();
-    if (saving || editingRole?.isProtected) return;
+    if (!isCompanyOwner || saving || editingRole?.isProtected) return;
 
     if (!formData.name.trim()) {
       setError('Role Name is required.');
@@ -133,6 +133,22 @@ export const UserRoles = () => {
     }
   };
 
+  const handleDeleteRole = async (role) => {
+    if (!isCompanyOwner || saving || role.isProtected || Number(role.usersCount) > 0) return;
+    if (!window.confirm(`Delete role "${role.name}"? This cannot be undone.`)) return;
+    setSaving(true);
+    setError('');
+    try {
+      await roleService.deleteRole(role.id);
+      await loadRoles();
+      setToastMsg('Role deleted successfully.');
+    } catch (err) {
+      setError(err?.message || 'Unable to delete this role.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const countEnabledPermissions = (permissions) => {
     if (!permissions || typeof permissions !== 'object') return 0;
 
@@ -147,7 +163,12 @@ export const UserRoles = () => {
       {toastMsg && <div className="roles-dashboard-toast">{toastMsg}</div>}
       {error && <div className="roles-dashboard-error">{error}</div>}
 
-      <RolesHeader onAdd={handleOpenAdd} />
+      <RolesHeader onAdd={handleOpenAdd} canManage={isCompanyOwner} />
+      {!isCompanyOwner && (
+        <p role="note" className="roles-dashboard-info">
+          Only the company owner can create, edit or delete Roles & Permissions.
+        </p>
+      )}
 
       {loading ? (
         <div className="roles-dashboard-loading">Loading company roles…</div>
@@ -159,12 +180,14 @@ export const UserRoles = () => {
             roles={roles}
             countPermissions={countEnabledPermissions}
             onOpen={handleOpenEdit}
+            onDelete={handleDeleteRole}
+            canManage={isCompanyOwner}
           />
         </>
       )}
 
       <ResponsiveModalSheet
-        isOpen={isModalOpen}
+        isOpen={isCompanyOwner && isModalOpen}
         onClose={() => {
           if (saving) return;
           setIsModalOpen(false);
