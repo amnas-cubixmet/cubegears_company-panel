@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
 import { creditWalletService, notifyCreditChange, purchaseCredits } from '../../services/creditWallet.service';
 import { AccountHeader } from '../../components/account';
+import { CreditCycleCard } from '../../components/account/CreditCycleCard';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { useAuth } from '../../hooks/useAuth';
 import { routeConfig } from '../../routes/routeConfig';
@@ -269,6 +270,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       </div>
     </section>}
 
+    {section === 'overview' && <CreditCycleCard />}
     {section === 'overview' && <div className="cg-credit-columns">
       <section className="cg-credit-panel"><header><div><span>WALLET OVERVIEW</span><h2>Your credits at a glance</h2></div><Wallet size={22}/></header>
         <p>Buy wallet credits as needed. {wallet?.billingMode === 'monthly_postpaid'
