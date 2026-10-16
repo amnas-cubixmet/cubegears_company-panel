@@ -13,8 +13,8 @@ const mobileNav = read('src/components/layout/MobileBottomNav.jsx');
 test('desktop sidebar reserves space for all 16px labels and section headings', () => {
   assert.match(desktop, /@media \(min-width: 1024px\)/);
   assert.match(desktop, /\.app-sidebar:not\(\.is-collapsed\)/);
-  assert.match(desktop, /width: 284px/);
-  assert.match(desktop, /min-width: 258px/);
+  assert.match(desktop, /width: clamp\(258px, 20vw, 284px\)/);
+  assert.match(desktop, /min-width: clamp\(258px, 20vw, 284px\)/);
   assert.match(desktop, /\.sidebar-nav-label\s*\{[^}]*white-space: normal/);
   assert.match(desktop, /\.sidebar-section-title\s*\{[^}]*white-space: normal/);
   assert.match(desktop, /\.sidebar-nav-item\s*\{[^}]*min-height: 46px/);
