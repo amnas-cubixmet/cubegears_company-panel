@@ -229,9 +229,9 @@
    * Keep collapsed navigation narrow, but do not crop expanded labels.
    */
   #root .app-shell .app-sidebar:not(.is-collapsed) {
-    width: 284px;
-    flex: 0 0 284px;
-    min-width: 284px;
+    width: clamp(258px, 20vw, 284px);
+    flex: 0 0 clamp(258px, 20vw, 284px);
+    min-width: clamp(258px, 20vw, 284px);
   }
 
   #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav {
@@ -270,13 +270,5 @@
     flex-shrink: 0;
   }
 
-  /* Medium desktop layouts still leave the central content usable. */
-  @media (max-width: 1199px) {
-    #root .app-shell .app-sidebar:not(.is-collapsed) {
-      width: 258px;
-      min-width: 258px;
-      flex-basis: 258px;
-    }
-  }
 
 }
