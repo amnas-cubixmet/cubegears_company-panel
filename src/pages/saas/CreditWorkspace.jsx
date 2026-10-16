@@ -305,7 +305,7 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Available modules">
       <header><div><span>MODULE PRICING</span><h2>Paid workshop modules ({paidBundles.length})</h2></div><Coins size={22}/></header>
-      <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. Published package prices are calculated per active login user.</p>
+      <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. In postpaid cycle mode, monthly labels start at zero upfront credits and bill the recorded active interval on the administrator's due date.</p>
       <div className="cg-bundle-grid">
         {paidBundles.map((bundle) => {
           const status = featureLabelStatus(bundle, wallet);
@@ -319,7 +319,7 @@ export function CreditWorkspace({ section = 'overview' }) {
             <div className="cg-bundle-price">
               {bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY'
                 ? <><span>Included free</span><strong>0 <small>credits — no purchase needed</small></strong></>
-                : <><span>Per user credits</span>
+                : <><span>{bundle.cyclePostpaid ? 'Monthly usage rate (deferred)' : 'Per user credits'}</span>
                   <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
                   <div className="cg-bundle-summary">
                     <span>{bundle.userCount ?? '—'} active login users</span>
@@ -340,6 +340,7 @@ export function CreditWorkspace({ section = 'overview' }) {
                 {busy === `bundle:${bundle.id}` ? 'Saving…'
                   : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
                   : bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY' ? 'Included Free'
+                  : bundle.cyclePostpaid && bundle.active ? 'Active · billed monthly' : bundle.cyclePostpaid ? 'Activate · pay on due date'
                   : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
               </button>
               {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage}
