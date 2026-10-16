@@ -4,9 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, ChevronRight, CreditCard, FilePenLine, IndianRupee, Infinity, ReceiptText, ShieldCheck, Trash2, Upload, Users } from 'lucide-react';
 import { saasAccountService } from '../../services/saasAccount.service';
 import { settingsService } from '../../services/settings.service';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { useAuth } from '../../hooks/useAuth';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { USE_MOCK_API } from '../../api/apiConfig';
 import { storageHistoryService } from '../../services/storageHistory.service';
+import { CreditCycleCard } from '../../components/account/CreditCycleCard';
 import { AccountHeader, AccountOverview } from '../../components/account';
 import '../../styles/account-billing.css';
 import '../../styles/account-dashboard.css';
@@ -118,7 +121,11 @@ function BillingView({ billing, storage, onOpenTemplates }) {
 }
 
 function StorageView({ storage, setStorage }) {
+  const access = useFeatureAccess();
+  const canManage = access.can('storage.manage');
   const navigate = useNavigate();
+  const { can } = useFeatureAccess();
+  const canManageStorage = can('storage.manage');
   const { user } = useAuth();
   const [storageError, setStorageError] = useState('');
   const [historyError, setHistoryError] = useState('');
@@ -127,6 +134,7 @@ function StorageView({ storage, setStorage }) {
   const [category, setCategory] = useState('Job Card');
   const [history, setHistory] = useState([]);
   const [serverEvents, setServerEvents] = useState([]);
+  const [eventCount, setEventCount] = useState(0);
   const [eventError, setEventError] = useState('');
   const [eventsLoading, setEventsLoading] = useState(!USE_MOCK_API);
   const [audit, setAudit] = useState(() => {
@@ -149,12 +157,13 @@ function StorageView({ storage, setStorage }) {
     }
   };
 
-  const refreshEvents = async (start = from, end = to) => {
+  const refreshEvents = async (start = from, end = to, append = false) => {
     if (USE_MOCK_API) return;
     setEventsLoading(true);
     try {
-      const payload = await storageHistoryService.getStorageEvents({ from: start, to: end });
-      setServerEvents(Array.isArray(payload?.results) ? payload.results : []);
+      const payload = await storageHistoryService.getStorageEvents({ from: start, to: end, offset: append ? serverEvents.length : 0 });
+      setServerEvents(old => append ? [...old, ...(payload?.results || [])] : (payload?.results || []));
+      setEventCount(payload?.count || 0);
       setEventError('');
     } catch (error) {
       setServerEvents([]);
@@ -191,6 +200,7 @@ function StorageView({ storage, setStorage }) {
   };
 
   const upload = async (event) => {
+    if (!canManageStorage) return setStorageError('Storage modification requires storage.manage permission.');
     const files = Array.from(event.target.files || []);
     const valid = files.filter((file) =>
       storage.settings.allowedTypes.includes(file.type) &&
@@ -211,6 +221,7 @@ function StorageView({ storage, setStorage }) {
   };
 
   const remove = async (ids) => {
+    if (!canManageStorage) return setStorageError('Storage modification requires storage.manage permission.');
     if (!ids.length || !await appConfirm(`Delete ${ids.length} photo(s)? This cannot be undone.`)) return;
     setStorageBusy(true); setStorageError('');
     try {
@@ -227,6 +238,7 @@ function StorageView({ storage, setStorage }) {
   };
 
   const setting = async (key, value) => {
+    if (!canManageStorage) return setStorageError('Storage settings require storage.manage permission.');
     setStorageBusy(true); setStorageError('');
     try {
       const next = await saasAccountService.updateStorageSettings({ [key]: value });
@@ -239,6 +251,7 @@ function StorageView({ storage, setStorage }) {
 
   return (
     <div className="saas-grid">
+      <CreditCycleCard />
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">MEDIA STORAGE</span><h2>Media storage usage</h2></div><Infinity size={24} /></div>
         <div className="saas-storage-summary">
@@ -246,17 +259,22 @@ function StorageView({ storage, setStorage }) {
           <div><span>Uploaded files</span><strong>{storage.files.length}</strong></div>
           <div><span>History</span><strong>Upload and delete events</strong></div>
         </div>
-        <div className="saas-storage-actions">
+        {canManageStorage && <div className="saas-storage-actions">
           <select value={category} onChange={(e) => setCategory(e.target.value)}><option>Job Card</option><option>Inspection</option><option>Invoice</option><option>Delivery</option><option>General</option></select>
           <label className="saas-button"><Upload size={18} /> {storageBusy ? 'Working…' : 'Upload photos'}<input hidden multiple disabled={storageBusy} type="file" accept="image/jpeg,image/png,image/webp" onChange={upload} /></label>
           <button className="saas-button danger" disabled={!selected.length || storageBusy} onClick={() => remove(selected)}><Trash2 size={18} /> Delete selected</button>
-        </div>
+        </div>}
         <p className="saas-muted">
           Storage totals come from your uploaded files. Upload and deletion events are shown in Storage History.
         </p>
         {storageError && <p className="saas-error" role="alert">{storageError}</p>}
       </section>
 
+      {storage.billing && <section className="saas-card saas-wide"><h2>Storage billing</h2>
+        <p>{storage.billing.creditsPerGb} credits / GB / {storage.billing.period}. Free allowance: {storage.billing.includedGb} GB.</p>
+        <p>Meter interval: {storage.billing.meterIntervalSeconds} seconds. {storage.billing.active ? 'Billing enabled' : 'Billing disabled'}.</p>
+        <p>Deleting a file stops future storage use; previously recorded usage remains payable. Monthly charges and due dates appear in Account → Logs.</p>
+      </section>}
       <section className="saas-card saas-wide storage-history-card">
         <div className="saas-card-head"><div><span className="saas-kicker">USAGE INTERVAL</span><h2>Storage usage history</h2></div><IndianRupee size={22} /></div>
         <div className="storage-range-toolbar">
@@ -297,23 +315,24 @@ function StorageView({ storage, setStorage }) {
 
       <section className="saas-card">
         <div className="saas-card-head"><div><span className="saas-kicker">STORAGE SETTINGS</span><h2>Upload policy</h2></div><ShieldCheck size={22} /></div>
+        {!canManageStorage && <p className="saas-muted">Usage and audit logs are included with your SaaS Account. Editing upload policies requires storage management access.</p>}
         {[
           ['autoCompress', 'Compress uploads'],
           ['keepOriginals', 'Keep original files'],
           ['allowStaffUpload', 'Staff can upload'],
           ['allowStaffDelete', 'Staff can delete']
-        ].map(([key, label]) => <label className="saas-toggle" key={key}><span>{label}</span><input type="checkbox" checked={Boolean(storage.settings[key])} disabled={storageBusy} onChange={(e) => setting(key, e.target.checked)} /></label>)}
-        <label className="saas-field"><span>Auto-delete after days (0 = never)</span><input type="number" min="0" value={storage.settings.retentionDays} onChange={(e) => setting('retentionDays', Number(e.target.value))} /></label>
+        ].map(([key, label]) => <label className="saas-toggle" key={key}><span>{label}</span><input type="checkbox" checked={Boolean(storage.settings[key])} disabled={storageBusy || !canManageStorage} onChange={(e) => setting(key, e.target.checked)} /></label>)}
+        <label className="saas-field"><span>Auto-delete after days (0 = never)</span><input type="number" min="0" disabled={!canManageStorage} value={storage.settings.retentionDays} onChange={(e) => setting('retentionDays', Number(e.target.value))} /></label>
       </section>
 
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">FILES</span><h2>Current uploaded photos</h2></div><span>{storage.files.length} files</span></div>
-        <div className="saas-media-list">{storage.files.map((file) => <article className="saas-media-row" key={file.id}><input type="checkbox" checked={selected.includes(file.id)} onChange={(e) => setSelected((old) => e.target.checked ? [...old, file.id] : old.filter((id) => id !== file.id))} /><div className="saas-file-icon">IMG</div><div className="saas-file-main"><strong>{file.name}</strong><span>{file.category} · {file.sizeMb} MB · {file.uploadedBy}</span></div><span className="saas-file-date">{date.format(new Date(file.uploadedAt))}</span><button className="saas-icon-button" aria-label={`Delete ${file.name}`} onClick={() => remove([file.id])}><Trash2 size={17} /></button></article>)}</div>
+        <div className="saas-media-list">{storage.files.map((file) => <article className="saas-media-row" key={file.id}>{canManageStorage && <input type="checkbox" checked={selected.includes(file.id)} onChange={(e) => setSelected((old) => e.target.checked ? [...old, file.id] : old.filter((id) => id !== file.id))} /> }<div className="saas-file-icon">IMG</div><div className="saas-file-main"><strong>{file.name}</strong><span>{file.category} · {file.sizeMb} MB · {file.uploadedBy}</span></div><span className="saas-file-date">{date.format(new Date(file.uploadedAt))}</span>{canManageStorage && <button className="saas-icon-button" aria-label={`Delete ${file.name}`} onClick={() => remove([file.id])}><Trash2 size={17} /></button>}</article>)}</div>
       </section>
 
       <section className="saas-card saas-wide">
         <div className="saas-card-head"><div><span className="saas-kicker">{USE_MOCK_API ? 'LOCAL ACTIVITY' : 'SERVER AUDIT LOG'}</span><h2>{USE_MOCK_API ? 'Storage actions on this browser' : 'Recorded storage activity'}</h2></div><button className="saas-button" onClick={() => navigate('/account/storage/history')}>View full history <ChevronRight size={16} /></button></div>
-        <p className="saas-muted">{USE_MOCK_API ? 'Demo activity is stored in this browser.' : 'Upload and delete events are recorded in your company database. This shows up to 50 events for the selected date range.'}</p>
+        <p className="saas-muted">{USE_MOCK_API ? 'Demo activity is stored in this browser.' : 'Upload and delete events are recorded in your company database. Browse recorded events for the selected date range. Deleted-file names remain in the log.'}</p>
         {USE_MOCK_API ? (
           audit.length ? <div className="saas-table-wrap"><table className="saas-table"><thead><tr><th>Date & time</th><th>Action</th><th>Details</th><th>User</th></tr></thead><tbody>{audit.map((item) => <tr key={item.id}><td>{dateTime.format(new Date(item.at))}</td><td>{item.action}</td><td>{item.details}</td><td>{item.user}</td></tr>)}</tbody></table></div> : <p className="saas-muted">No local storage activity recorded yet.</p>
         ) : eventsLoading ? (
@@ -331,6 +350,7 @@ function StorageView({ storage, setStorage }) {
             </tr>
           ))}</tbody></table></div>
         ) : <p className="saas-muted">No server-recorded events for this period.</p>}
+        {serverEvents.length < eventCount && <button className="saas-button" disabled={eventsLoading} onClick={() => refreshEvents(from, to, true)}>Load more storage events ({serverEvents.length} / {eventCount})</button>}
       </section>
     </div>
   );
@@ -350,7 +370,7 @@ export function SaaSAccount({ section = 'billing' }) {
     const [bill, media, companyResult] = await Promise.allSettled([
       section === 'billing' ? saasAccountService.getSubscriptionBilling() : Promise.resolve(null),
       saasAccountService.getStorageAccount(),
-      settingsService.getSettings('company'),
+      section === 'storage' ? Promise.resolve(null) : settingsService.getSettings('company'),
     ]);
     const errors = {};
     if (bill.status === 'fulfilled') setBilling(bill.value);

@@ -139,3 +139,129 @@
   .app-shell .mobile-bottom-item,
   .app-shell .mobile-bottom-icon {transition:none;transform:none}
 }
+
+
+/*
+ * Mobile navigation readability: keep full section/route text visible in More
+ * and avoid clipping the wallet, search and profile row on small phones.
+ * The authenticated route list and its section grouping are unchanged.
+ */
+@media (max-width: 767px) {
+  .app-shell .mobile-header-row {
+    gap: 7px;
+    padding-inline: 10px;
+    min-width: 0;
+  }
+  .app-shell .mobile-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    overflow: hidden;
+  }
+  .app-shell .mobile-brand-copy {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .app-shell .mobile-brand-copy :is(strong, small) {
+    max-width: 100%;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .app-shell .mobile-header-actions {
+    flex: 0 0 auto;
+    min-width: 0;
+    gap: 6px;
+  }
+  .app-shell .mobile-header-actions :is(.cg-credit-chip, .mobile-profile-button) {
+    flex-shrink: 0;
+  }
+  .app-shell .mobile-header-actions > button,
+  .app-shell .mobile-profile-button {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+  .app-shell .mobile-drawer {
+    width: min(94vw, 390px);
+  }
+  .app-shell .mobile-drawer-section-title {
+    font-size: 12px;
+    letter-spacing: .06em;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+  .app-shell .mobile-drawer-item {
+    min-height: 46px;
+    height: auto;
+    padding-block: 9px;
+  }
+  .app-shell .mobile-drawer-item-label {
+    white-space: normal;
+    text-overflow: clip;
+    overflow: visible;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 390px) {
+  .app-shell .mobile-header-row {
+    gap: 5px;
+    padding-inline: 8px;
+  }
+  .app-shell .mobile-brand {
+    gap: 5px;
+  }
+  .app-shell .mobile-brand > span:first-child {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+  }
+  .app-shell .mobile-brand-copy strong {
+    font-size: 12px;
+    max-width: 90px;
+  }
+  .app-shell .mobile-brand-copy small {
+    display: none;
+  }
+  .app-shell .mobile-header-actions {
+    gap: 4px;
+  }
+  .app-shell .mobile-header-actions > button,
+  .app-shell .mobile-profile-button {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+  .app-shell .mobile-header-actions .cg-credit-chip {
+    gap: 3px;
+    padding: 4px 6px;
+    min-height: 34px;
+    max-width: 90px;
+    font-size: 11px;
+  }
+  .app-shell .mobile-header-actions .cg-credit-chip small {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  /* A notification bell is a fourth action; prioritize all controls
+     over the brand subtitle on very narrow phone widths. */
+  .app-shell .mobile-header-row:has(.mobile-notification-button) .mobile-brand-copy {
+    display: none;
+  }
+  .app-shell .mobile-drawer {
+    width: min(95vw, 340px);
+  }
+}
+
+@media (max-width: 320px) {
+  .app-shell .mobile-brand-copy {
+    display: none;
+  }
+}

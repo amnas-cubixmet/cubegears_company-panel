@@ -50,6 +50,16 @@ export function StorageHistory() {
     return () => { active = false; };
   }, [from, to]);
 
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const payload = await storageHistoryService.getStorageEvents({from, to, offset:events.length});
+      setEvents(old => [...old, ...(payload.results || [])]);
+      setEventsError('');
+    } catch (error) { setEventsError(error.message); }
+    finally { setLoadingMore(false); }
+  };
+
   const summary = useMemo(() => storageHistoryService.summarizeStorageHistory(rows), [rows]);
 
   const showAllHistory = () => {
