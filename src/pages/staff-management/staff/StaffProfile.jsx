@@ -633,7 +633,8 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
           <div className="staff360-tab-stack">
             {jobsLoading && <div className="staff-workshop-empty" role="status">Loading assigned work…</div>}
             {jobsError && <div className="staff-directory-message is-error" role="alert">{jobsError}</div>}
-            {!jobsLoading && !jobsError && <div className="staff360-work-summary">
+            {!jobsLoading && !jobsError && <>
+            <div className="staff360-work-summary">
               <div><span>Total Assigned</span><strong>{jobs.length}</strong></div>
               <div><span>In Progress</span><strong>{jobs.filter((job) => job.status === 'In Progress').length}</strong></div>
               <div><span>Waiting Parts</span><strong>{jobs.filter((job) => job.status === 'Waiting for Parts' || job.status === 'Waiting Parts').length}</strong></div>
@@ -689,7 +690,8 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
                   No jobs are currently linked to this staff member.
                 </div>
               )}
-            </div>}
+            </div>
+            </>}
           </div>
         )}
 
