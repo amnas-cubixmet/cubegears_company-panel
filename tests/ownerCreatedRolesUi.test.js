@@ -31,7 +31,8 @@ test('only backend-verified company owner can mutate tenant role settings', () =
   assert.match(header, /canManage &&/);
   assert.match(cards, /canManage &&/);
   assert.match(cards, /disabled=\{Number\(role\.usersCount\) > 0\}/);
-  assert.match(page, /window\.confirm/);
+  assert.match(page, /await appConfirm/);
+  assert.doesNotMatch(page, /window\.confirm/);
 });
 
 test('role editor removes fabricated branch scope and fake descriptions', () => {
