@@ -9,7 +9,7 @@ const tabs=[
  ['overview','Overview','/account',Coins,'billing.view'],
  ['credits-buy','Buy Credits','/account/credits/buy',CreditCard,'billing.view'],
  ['credits-features','Features','/account/credits/features',Zap,'billing.view'],
- ['storage','Storage','/account/storage',HardDrive,'storage.view'],
+ ['storage','Storage','/account/storage',HardDrive,'billing.view'],
  ['credits-logs','Logs','/account/credits/logs',FileClock,'billing.view'],
  ['templates','Templates','/account/templates',FilePenLine,'settings.view'],
  ['security','Security','/account/security',ShieldCheck,'settings.view'],
