@@ -3,15 +3,13 @@
  * Scope every rule to a desktop viewport and the app's three page shells.
  * Do not scale the viewport or modify mobile/tablet typography.
  *
- * Sizes:
- *  - Body / readable descriptions: 15px
- *  - Fields / nav / actions / table values: 14px
- *  - Muted metadata / table headings: 13px
- *  - Page / section headings: keep established hierarchy.
+ * Minimum readable text is 16px at desktop widths (1024px and above).
+ * Keep larger headings and monetary/stat values at their authored sizes;
+ * never zoom, scale or change mobile/tablet typography.
  */
 @media (min-width: 1024px) {
   #root :is(.app-shell, .saas-account-shell, .login-page) {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.55;
   }
 
@@ -23,7 +21,7 @@
     .ui-panel,
     .cg-credit-page
   ) {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   /* Global form controls and labels are readable across CRUD, billing,
@@ -40,7 +38,7 @@
     .ui-label,
     .login-field-label
   ) {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   #root :is(.app-shell, .saas-account-shell, .login-page) :is(
@@ -52,7 +50,7 @@
     .saas-button,
     .ui-tab
   ) {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   /* Compact table headers stay distinct from more legible data cells. */
@@ -61,14 +59,14 @@
     .ui-table th,
     .cg-credit-table-wrap th
   ) {
-    font-size: 13px;
+    font-size: 16px;
   }
   #root :is(.app-shell, .saas-account-shell) :is(
     table td,
     .ui-table td,
     .cg-credit-table-wrap td
   ) {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   /* Small labels and helper text were often only 10–12px. Avoid changing
@@ -86,7 +84,7 @@
     .cg-credit-note,
     .auth-field-error
   ) {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   /* Preserve existing heading hierarchy; only adjust common small section
@@ -114,7 +112,7 @@
     .header-profile-copy strong
   ),
   #root .saas-account-shell .saas-owner-sidebar-group > a {
-    font-size: 14px;
+    font-size: 16px;
   }
   #root .app-shell :is(
     .sidebar-section-title,
@@ -126,7 +124,7 @@
     .saas-owner-sidebar-foot,
     .saas-account-identity small
   ) {
-    font-size: 12px;
+    font-size: 16px;
   }
   #root .saas-account-shell :is(
     .saas-account-brand strong,
@@ -135,7 +133,7 @@
     .saas-account-content .cg-credit-note,
     .saas-account-content .cg-credit-inline
   ) {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   /* Tailwind typography utilities used in one-off forms and page headers. */
@@ -145,14 +143,14 @@
     .text-\[11px\],
     .text-\[12px\]
   ) {
-    font-size: 13px;
+    font-size: 16px;
   }
   #root :is(.app-shell, .saas-account-shell, .login-page) :is(
     .text-sm,
     .text-\[13px\],
     .text-\[14px\]
   ) {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   /* Existing search-field CSS uses !important; lift only its text size. */
@@ -160,6 +158,70 @@
     .outside-labour-search input,
     .header-search-wrap input
   ) {
-    font-size: 14px !important;
+    font-size: 16px !important;
+  }
+
+  /*
+   * Legacy styles still specify 8–15px for some text. Restrict the strong
+   * floor to readable text and metadata, not generic div/span/strong elements,
+   * since those also render intentionally large dashboard and wallet values.
+   */
+  #root { font-size: 16px; }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
+    p, small, label, li, a, button,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
+    textarea, select, option, table th, table td, caption, summary,
+    time, figcaption, blockquote, code,
+    [role="button"], [role="tab"], [role="option"],
+    [role="combobox"], [role="alert"], [role="status"], [role="menuitem"]
+  ) {
+    font-size: 16px !important;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
+    input, textarea
+  )::placeholder { font-size: 16px !important; }
+
+  /* Compact text selectors used throughout the dashboard, sidebar,
+     job cards, tables, credit pages, account sections and login flow. */
+  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
+    .text-xs, .text-sm,
+    .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\],
+    .text-\[12px\], .text-\[13px\], .text-\[14px\], .text-\[15px\],
+    .ui-badge, .ui-pagination, .ui-breadcrumb, .ui-label,
+    .ui-field__message, .ui-card__description, .ui-entity-card__meta,
+    .table-sub, .sidebar-nav-label, .sidebar-section-title,
+    .sidebar-user-copy strong, .sidebar-user-copy small,
+    .sidebar-brand-copy strong, .sidebar-brand-copy small,
+    .header-brand-name, .header-profile-copy strong,
+    .header-profile-copy small, .search-shortcut,
+    .stat-label, .stat-meta,
+    .job-meta-grid small, .job-meta-grid strong,
+    .repair-meta small, .repair-meta strong,
+    .repair-detail-grid span, .repair-detail-grid strong,
+    .progress-title-row, .progress-title-row span,
+    .progress-stage small, .progress-stage strong,
+    .insight-item span, .insight-item small,
+    .finance-list > div, .staff-copy strong, .staff-copy small,
+    .cg-credit-metric > div, .cg-credit-inline, .cg-credit-note,
+    .cg-credit-panel > header span, .cg-credit-feature-cost,
+    .cg-credit-log small, .cg-credit-log strong,
+    .cg-credit-shortcuts small, .cg-credit-shortcuts strong,
+    .cg-credit-packages article > span, .cg-credit-pill,
+    .cg-bundle-price, .cg-bundle-price small,
+    .cg-bundle-card > small, .cg-bundle-features span,
+    .cg-bundle-feature-list > small, .cg-bundle-reason,
+    .saas-owner-sidebar-heading, .saas-owner-sidebar-foot,
+    .saas-account-identity small, .saas-account-identity strong,
+    .login-brand-subtitle, .login-field-label, .login-forgot,
+    .auth-field-error, .auth-recovery-privacy-note, .auth-dev-link
+  ) {
+    font-size: 16px !important;
+  }
+
+  /* Dashboard section titles previously used 9–12px; retain hierarchy. */
+  #root .app-shell :is(.operations-header h2, .dashboard-panel h2) {
+    font-size: 18px !important;
   }
 }
