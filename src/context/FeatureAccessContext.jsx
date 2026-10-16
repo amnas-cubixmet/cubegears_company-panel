@@ -23,6 +23,10 @@ export function moduleIsVisible(access, permission) {
   // The backend explicitly lists free modules. They still require the exact
   // tenant/role permission returned by Django; free != unrestricted access.
   if (access.freeModules?.includes(module)) return access.permissions.includes(permission);
+  // Storage history and settings live inside the owner's SaaS Account.
+  // The Django role/owner checks remain authoritative for every API request;
+  // this does not unlock Storage for staff or grant any missing permission.
+  if (module === 'storage' && access.isCompanyOwner) return access.permissions.includes(permission);
   // Keep wallet, activation, security and account recovery reachable.
   if (access.paidAccessRequired) {
     if (module === 'billing') return access.isCompanyOwner === true;
