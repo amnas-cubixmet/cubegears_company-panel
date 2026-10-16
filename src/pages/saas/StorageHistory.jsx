@@ -177,7 +177,7 @@ export function StorageDayDetail() {
         <section className="saas-card"><HardDrive size={20} /><span>Stored</span><strong>{Number(snapshot.usedGb).toFixed(2)} GB</strong></section>
         <section className="saas-card"><Files size={20} /><span>Files</span><strong>{snapshot.fileCount}</strong></section>
         <section className="saas-card"><IndianRupee size={20} /><span>Rate</span><strong>₹{snapshot.rate}/GB/day</strong></section>
-        <section className="saas-card"><IndianRupee size={20} /><span>Daily charge</span><strong>{snapshot.charge == null ? "—" : money.format(snapshot.charge)}</strong></section>
+        <section className="saas-card"><IndianRupee size={20} /><span>Daily charge</span><strong>{snapshot.charge == null ? "—" : creditAmount(snapshot.charge)}</strong></section>
       </div>
 
       <section className="saas-card saas-wide">
