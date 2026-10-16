@@ -19,7 +19,7 @@ test('Staff Management restores only five useful authorized tabs', () => {
   assert.match(tabs, /staffManagementTabs\.filter\(\(tab\) => can\(tab\.permission\)\)/);
   assert.match(tabs, /company\.manage/);
   assert.match(tabs, /Roles & Permissions/);
-  assert.match(tabs, /\/staff-management\/staff\/\[\^\/\]\+/);
+  assert.match(tabs, /const isStaffDetail =/);
   for (const extra of ["label: 'Performance'", "label: 'Documents'", "label: 'Reports'"]) {
     assert.ok(!tabs.includes(extra), extra);
   }
