@@ -30,7 +30,8 @@ select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"]):focus {
   .job-quick-catalog-field,
   .global-search-field,
   .crud-search,
-  .cg-inspection-search
+  .cg-inspection-search,
+  .staff-simple-search
 ):has(:is(input,select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"])) {
   border-color: var(--cg-inline-error-border) !important;
   box-shadow: var(--cg-inline-error-ring) !important;
@@ -44,7 +45,8 @@ select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"]):focus {
   .job-quick-catalog-field,
   .global-search-field,
   .crud-search,
-  .cg-inspection-search
+  .cg-inspection-search,
+  .staff-simple-search
 ) :is(input,select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"]) {
   border: 0 !important;
   outline: 0 !important;

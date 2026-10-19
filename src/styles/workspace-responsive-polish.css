@@ -265,3 +265,20 @@
     display: none;
   }
 }
+
+/* Shared data tools: allow controls and dialog actions to reflow at zoom
+   and narrow widths without pushing their containers outside the page. */
+.data-table, .data-table__toolbar, .data-table__filter { min-width: 0; }
+.ui-modal__header, .ui-modal__footer { flex-wrap: wrap; }
+.ui-modal__header > h3 { min-width: 0; flex: 1 1 180px; overflow-wrap: anywhere; }
+.ui-modal__header > .ui-icon-button { flex: 0 0 auto; }
+.ui-modal__footer > button { max-width: 100%; white-space: normal; }
+
+@media (max-width: 767px) {
+  /* Icon actions need the same touch area as text buttons. */
+  .ui-icon-button { min-width: 44px; min-height: 44px; }
+  .ui-modal__footer { padding-bottom: max(15px, env(safe-area-inset-bottom)); }
+  .ui-modal__footer > button { flex: 1 1 120px; min-height: 44px; }
+  .data-table__filter { width: 100%; }
+  .data-table__filter select { width: 100%; }
+}

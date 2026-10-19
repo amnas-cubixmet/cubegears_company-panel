@@ -8,6 +8,8 @@ import { join } from 'node:path';
 import { once } from 'node:events';
 import { ROLE_PERMISSION_MODULES } from '../src/config/rolePermissions.js';
 import { dashboardMock } from '../src/mock/dashboard.mock.js';
+import { mockStaffList } from '../src/mock/staff.mock.js';
+import { customersMock } from '../src/mock/customers.mock.js';
 
 const port = Number(process.env.UI_TEST_PORT || 5184);
 const baseURL = `http://127.0.0.1:${port}`;
@@ -27,6 +29,8 @@ const bundles = [
 ];
 function fixture(path) {
   if(path==='/auth/me') return user;
+  if(path==='/employees') return mockStaffList.map(row => ({...row, photo:''}));
+  if(path==='/customers') return customersMock;
   if(path==='/saas/credits/access') return {companyId:'company-a',permissions,enabledModules:permissions.map(code=>code.split('.')[0]),freeModules:['dashboard','staff','settings','roles','billing'],enforcementEnabled:true,isCompanyOwner:true,canManageFeatures:true};
   if(path==='/dashboard') return structuredClone(dashboardMock);
   if(path==='/settings') return settings;
@@ -105,9 +109,22 @@ try {
           return nodes.filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+2).map(node=>node.className||node.tagName);
         });
         if(overflow.length)throw Error('Horizontal page overflow: '+overflow.join(', '));
+        if(profile.width < 768) {
+          const undersized = await page.locator('.ui-icon-button').evaluateAll(nodes => nodes
+            .filter(node => node.getClientRects().length)
+            .filter(node => { const rect=node.getBoundingClientRect(); return rect.width < 44 || rect.height < 44; })
+            .map(node => node.getAttribute('aria-label') || 'Unlabelled icon action'));
+          if(undersized.length) throw Error('Small touch controls: '+undersized.join(', '));
+        }
         if(['/login','/settings','/staff-management/add','/customers/new','/vehicles/new'].includes(path)){
           const sizes=await page.locator('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').evaluateAll(nodes=>nodes.filter(e=>e.getClientRects().length).map(e=>parseFloat(getComputedStyle(e).fontSize)));
           if(sizes.some(size=>size<16))throw Error('Form control text below 16px: '+sizes.join(','));
+        }
+        if(path==='/staff-management/overview') {
+          const input=page.locator('.staff-simple-search input');
+          const border=await input.evaluate(node=>getComputedStyle(node).borderTopWidth);
+          if(border !== '0px') throw Error('Nested staff search border: '+border);
+          await page.getByText('Ajmal K', {exact:true}).waitFor();
         }
         if(path==='/settings' && profile.width<=760){
           const gap=await page.evaluate(()=>{

@@ -70,3 +70,15 @@
   .cg-staff-management .staff-simple-person{gap:10px}
   .cg-staff-management .staff-simple-person .staff-simple-status{display:none}
 }
+
+/* Keep tab captions readable; match heights when mobile actions wrap. */
+#root .app-shell .cg-staff-management .staff-dashboard-tab span {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+@media(max-width:520px){
+  .cg-staff-management .staff-simple-toolbar-actions{align-items:stretch}
+  .cg-staff-management .staff-simple-toolbar-actions button{
+    flex:1 1 150px;min-height:44px;white-space:normal;
+  }
+}
