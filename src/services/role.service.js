@@ -1,4 +1,5 @@
 import apiClient from '../api/apiClient';
+import { isAssignableStaffRole } from '../utils/isAssignableStaffRole';
 import {
   permissionCodesToMatrix,
   permissionMatrixToCodes
@@ -59,12 +60,7 @@ export const roleService = {
   // the protected SUPER_ADMIN owner role or inactive roles in dropdowns.
   getAssignableRoles: async () => {
     const roles = await roleService.getRoles();
-    return roles.filter(role =>
-      role.isProtected !== true &&
-      role.is_system !== true &&
-      role.is_active !== false &&
-      role.status !== 'Inactive'
-    );
+    return roles.filter(isAssignableStaffRole);
   },
 
   previewLegacyRoles: async () => apiClient.get('/roles/legacy-presets/'),
