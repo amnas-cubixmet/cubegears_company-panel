@@ -36,7 +36,7 @@ function fixture(path) {
   if(path==='/settings') return settings;
   if(path.startsWith('/settings/')) return settings[path.split('/').pop()] || {};
   if(path==='/company/me') return user.company;
-  if(path==='/saas/credits/overview') return {balance:'0.00',canManage:true,checkoutAvailable:false};
+  if(path==='/saas/credits/overview') return {balance:'516500.00',canManage:true,checkoutAvailable:false};
   if(path==='/saas/credits/bundles') return bundles;
   if(path==='/saas/credits/billing-cycle') return {enabled:false};
   if(path==='/saas/credits/account') return {company:user.company,users:[]};
@@ -119,6 +119,17 @@ try {
         if(['/login','/settings','/staff-management/add','/customers/new','/vehicles/new'].includes(path)){
           const sizes=await page.locator('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').evaluateAll(nodes=>nodes.filter(e=>e.getClientRects().length).map(e=>parseFloat(getComputedStyle(e).fontSize)));
           if(sizes.some(size=>size<16))throw Error('Form control text below 16px: '+sizes.join(','));
+        }
+        if(profile.width < 1024) {
+          const wallet=page.locator('.mobile-header-actions > .cg-credit-chip');
+          if(await wallet.count()) {
+            const broken=await wallet.evaluate(node=>{
+              const icon=node.querySelector('svg').getBoundingClientRect();
+              const value=node.querySelector('.cg-credit-chip-mobile').getBoundingClientRect();
+              return node.scrollWidth > node.clientWidth + 1 || Math.abs((icon.top+icon.height/2)-(value.top+value.height/2)) > 8;
+            });
+            if(broken) throw Error('Wallet balance wraps or overflows');
+          }
         }
         if(path==='/staff-management/overview') {
           const input=page.locator('.staff-simple-search input');
