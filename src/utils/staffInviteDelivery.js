@@ -21,3 +21,15 @@ export const staffInviteDeliveryMessage = (status) => {
       return '';
   }
 };
+
+/** Read DRF validation errors from normalized or raw Axios responses. */
+export const staffInviteErrorMessage = (error) => {
+  const payload = error?.data || error?.response?.data;
+  const messages = (value) => {
+    if (typeof value === 'string') return value.trim();
+    if (Array.isArray(value)) return value.map(messages).filter(Boolean).join(' ');
+    if (value && typeof value === 'object') return Object.values(value).map(messages).filter(Boolean).join(' ');
+    return '';
+  };
+  return messages(payload) || error?.message || 'Unable to send invite. Please try again.';
+};

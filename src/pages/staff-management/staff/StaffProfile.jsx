@@ -32,7 +32,7 @@ import {
 import { getEmployeeLabel } from '../../../components/staff-management/staffDisplay';
 import { useAuth } from '../../../hooks/useAuth';
 import { useFeatureAccess } from '../../../context/FeatureAccessContext';
-import { staffInviteDeliveryMessage } from '../../../utils/staffInviteDelivery';
+import { staffInviteDeliveryMessage, staffInviteErrorMessage } from '../../../utils/staffInviteDelivery';
 import { attendanceManagerService } from '../../../services/attendanceManager.service';
 import { jobService } from '../../../services/job.service';
 import { roleService } from '../../../services/role.service';
@@ -174,6 +174,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   const [toastMsg, setToastMsg] = useState('');
   const [inviteNotice, setInviteNotice] = useState(() => staffInviteDeliveryMessage(location.state?.emailDeliveryStatus));
   const [error, setError] = useState('');
+  const [inviteError, setInviteError] = useState('');
 
   const [roles, setRoles] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -390,8 +391,10 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   }, [jobs, staff]);
 
   const handleSendInvite = async () => {
+    setInviteError('');
+    setInviteNotice('');
     if (!staff?.email) {
-      showToast('Add an email address before sending an invite.');
+      setInviteError('Add an email address before sending an invite.');
       return;
     }
     try {
@@ -402,7 +405,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
       showToast(info);
       await refreshAll();
     } catch (requestError) {
-      showToast(requestError?.message || 'Unable to send invite.');
+      setInviteError(staffInviteErrorMessage(requestError));
     }
   };
 
@@ -447,6 +450,12 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
   return (
     <div className="staff-profile staff360">
       {toastMsg && <div className="staff360-toast" role="status">{toastMsg}</div>}
+      {inviteError && (
+        <div className="staff-directory-message" role="alert">
+          <span>{inviteError}</span>
+          <button type="button" aria-label="Dismiss invite error" onClick={() => setInviteError('')}>Dismiss</button>
+        </div>
+      )}
       {inviteNotice && (
         <div className="staff-directory-message" role="status">
           <span>{inviteNotice}</span>

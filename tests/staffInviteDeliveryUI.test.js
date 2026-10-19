@@ -31,3 +31,15 @@ test('recovery page avoids account enumeration but still shows format errors inl
   assert.match(forgot, /setMessage\(backend\.email \? '' :/);
   assert.match(forgot, /auth-field-error/);
 });
+
+test('invite failures show DRF field messages in a persistent dismissible alert', async () => {
+  const { staffInviteErrorMessage } = await import('../src/utils/staffInviteDelivery.js');
+  assert.equal(staffInviteErrorMessage({ data: { role: ['A valid staff role is required.'] } }), 'A valid staff role is required.');
+  assert.equal(staffInviteErrorMessage({ response: { data: { status: ['Activate this employee before sending a login invitation.'] } } }), 'Activate this employee before sending a login invitation.');
+  assert.equal(staffInviteErrorMessage({ data: { errors: { email: ['Add an email.'] } } }), 'Add an email.');
+  assert.equal(staffInviteErrorMessage(new Error('Network Error')), 'Network Error');
+  assert.equal(staffInviteErrorMessage({}), 'Unable to send invite. Please try again.');
+  assert.match(profile, /setInviteError\(staffInviteErrorMessage\(requestError\)\)/);
+  assert.match(profile, /inviteError &&[\s\S]*?role="alert"/);
+  assert.match(profile, /aria-label="Dismiss invite error"/);
+});
