@@ -23,10 +23,10 @@ test('owner shell loads a theme-aware, full-width dashboard instead of a 1270px 
 
 test('owner sidebar keeps role-filtered navigation and the sign out action', () => {
   assert.match(layout, /access\.can\(route\.permission\)/);
-  assert.match(layout, /NavLink key=\{path\} to=\{path\}/);
+  assert.match(layout, /NavLink\s+key=\{path\}\s+to=\{path\}/);
   assert.match(layout, /end=\{path === '\/account'\}/);
-  assert.match(layout, /className="saas-owner-nav-links"/);
-  assert.match(layout, /className="saas-owner-nav-help"/);
+  assert.match(layout, /className="saas-owner-sidebar-scroll"/);
+  assert.match(layout, /className="saas-owner-sidebar-foot"/);
   assert.match(layout, /onClick=\{signOut\}/);
   assert.match(access, /const can = useCallback/);
 });

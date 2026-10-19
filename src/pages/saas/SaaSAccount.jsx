@@ -64,7 +64,7 @@ function BillingView({ billing, storage, onOpenTemplates }) {
           <div><span>Active accounts</span><strong>{actualUsers ?? '—'}</strong></div>
           <div><span>Current media</span><strong>{storage?.usedGb == null ? '—' : storage.usedGb + ' GB'}</strong></div>
         </div>
-        <button type="button" className="saas-button" onClick={onOpenPlans}>Compare / Change Plan <ChevronRight size={15}/></button>
+        <button type="button" className="saas-button" onClick={() => navigate('/account/plans')}>Compare / Change Plan <ChevronRight size={15}/></button>
         {billing?.billingNote && <p className="saas-muted saas-billing-note">{billing.billingNote}</p>}
       </section>
       <section className="saas-card">

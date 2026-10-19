@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { StaffManagementHeader } from '../../components/staff-management';
+import { StaffManagementHeader, StaffManagementTabs } from '../../components/staff-management';
 import { Staff } from '../staff-management/Staff';
 import { StaffProfile } from '../staff-management/staff/StaffProfile';
 import { StaffAddPage } from '../staff-management/StaffAddPage';
@@ -59,6 +59,7 @@ export const StaffManagement = () => {
   return (
     <div className="staff-management-page cg-staff-management">
       <StaffManagementHeader />
+      <StaffManagementTabs />
 
       <main className="staff-management-content">
         {renderSection()}

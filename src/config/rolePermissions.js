@@ -51,3 +51,8 @@ export const permissionActionLabel = (action) => {
   if (action === 'manage') return 'Manage';
   return action.charAt(0).toUpperCase() + action.slice(1);
 };
+
+// Render only actions authorized by the current company access response.
+export const companyPermissionModules = (can) => ROLE_PERMISSION_MODULES.map(module => ({
+  ...module, actions: module.actions.filter(action => can(`${module.key}.${action}`)),
+})).filter(module => module.actions.length > 0);

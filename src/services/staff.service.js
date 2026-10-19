@@ -22,6 +22,7 @@ const normalizeStaff = (staff = {}) => ({
   name: staff.name || '',
   branch: staff.branchName || staff.branch?.name || staff.branch || '',
   role: staff.role || staff.role_name || '',
+  roleId: staff.assignedRoleId || staff.roleId || '',
   department:
     staff.department ||
     staff.department_name ||
@@ -116,6 +117,7 @@ export const staffService = {
         email: staffData.email || '',
         designation: staffData.designation || '',
         role: staffData.role || '',
+        ...(staffData.roleId ? {roleId:staffData.roleId} : {}),
         department: staffData.department || '',
         joiningDate: staffData.joiningDate || null,
         employmentStatus: staffData.employmentStatus || 'Active',
@@ -190,6 +192,7 @@ export const staffService = {
         'email',
         'designation',
         'role',
+        'roleId',
         'department',
         'joiningDate',
         'employmentStatus',
