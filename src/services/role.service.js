@@ -54,6 +54,12 @@ export const roleService = {
     return list.map(normalizeRole);
   },
 
+  previewLegacyRoles: async () => apiClient.get('/roles/legacy-presets/'),
+
+  removeLegacyRoles: async (roleIds) => apiClient.post(
+    '/roles/legacy-presets/', { roleIds },
+  ),
+
   createRole: async (roleData) => {
     const created = await apiClient.post('/roles/', toApiPayload(roleData));
     return normalizeRole(created);
