@@ -23,6 +23,9 @@ const createInitialForm = () => ({
 export const UserRoles = () => {
   const { isCompanyOwner } = useFeatureAccess();
   const [roles, setRoles] = useState([]);
+  const [legacyPresetRoles, setLegacyPresetRoles] = useState([]);
+  const [cleanupBusy, setCleanupBusy] = useState(false);
+  const [cleanupError, setCleanupError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
@@ -39,6 +42,16 @@ export const UserRoles = () => {
     try {
       const data = await roleService.getRoles();
       setRoles(Array.isArray(data) ? data : []);
+      setLegacyPresetRoles([]);
+      setCleanupError('');
+      if (isCompanyOwner) {
+        try {
+          const preview = await roleService.previewLegacyRoles();
+          setLegacyPresetRoles(Array.isArray(preview?.roles) ? preview.roles : []);
+        } catch (previewError) {
+          setCleanupError(previewError?.message || 'Could not review historical signup roles.');
+        }
+      }
     } catch (err) {
       setError(err?.message || 'Unable to load roles.');
     } finally {
@@ -153,6 +166,26 @@ export const UserRoles = () => {
     }
   };
 
+  const handleCleanupOldRoles = async () => {
+    if (!isCompanyOwner || cleanupBusy || !legacyPresetRoles.length) return;
+    const confirmed = await appConfirm(
+      `Remove these ${legacyPresetRoles.length} old signup roles?\n\n${legacyPresetRoles.map(role => role.name).join('\n')}\n\nOnly unchanged, unassigned presets are eligible. This cannot be undone.`,
+      { title: 'Review old signup roles', confirmLabel: 'Remove Old Roles', tone: 'danger' },
+    );
+    if (!confirmed) return;
+    setCleanupBusy(true);
+    setCleanupError('');
+    try {
+      const result = await roleService.removeLegacyRoles(legacyPresetRoles.map(role => role.id));
+      await loadRoles();
+      setToastMsg(`Removed ${result?.count || 0} unused default roles. Custom and assigned roles were kept.`);
+    } catch (requestError) {
+      setCleanupError(requestError?.message || 'Cleanup failed. No roles were deleted; refresh the preview.');
+    } finally {
+      setCleanupBusy(false);
+    }
+  };
+
   const countEnabledPermissions = (permissions) => {
     if (!permissions || typeof permissions !== 'object') return 0;
 
@@ -166,12 +199,28 @@ export const UserRoles = () => {
     <div className="staff-roles roles-dashboard">
       {toastMsg && <div className="roles-dashboard-toast">{toastMsg}</div>}
       {error && <div className="roles-dashboard-error">{error}</div>}
+      {cleanupError && <div className="roles-dashboard-error" role="alert">{cleanupError}</div>}
 
       <RolesHeader onAdd={handleOpenAdd} canManage={isCompanyOwner} />
       {!isCompanyOwner && (
         <p role="note" className="roles-dashboard-info">
           Only the company owner can create, edit or delete Roles & Permissions.
         </p>
+      )}
+      {isCompanyOwner && legacyPresetRoles.length > 0 && (
+        <section className="roles-legacy-review" aria-label="Review old signup roles">
+          <div>
+            <h3>Old automatically created roles</h3>
+            <p>These {legacyPresetRoles.length} roles match the old signup defaults and have no assigned staff. Review them before removing. Protected, edited and custom roles will stay.</p>
+            <ul>
+              {legacyPresetRoles.map(role => <li key={role.id}>{role.name}</li>)}
+            </ul>
+          </div>
+          <button type="button" disabled={cleanupBusy || saving}
+            onClick={handleCleanupOldRoles}>
+            {cleanupBusy ? 'Removing…' : `Remove ${legacyPresetRoles.length} old default roles`}
+          </button>
+        </section>
       )}
 
       {loading ? (
