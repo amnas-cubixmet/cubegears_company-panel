@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import { useId } from "react";
 
 export const Checkbox = ({ label, checked = false, onChange, disabled = false, className = '', id, ...props }) => {
   const generatedId = useId();

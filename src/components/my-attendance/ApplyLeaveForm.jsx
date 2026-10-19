@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Paperclip } from 'lucide-react';
 
 /** CubixGear Daily Wage Only: every leave day is unpaid, no Leave Type field. */

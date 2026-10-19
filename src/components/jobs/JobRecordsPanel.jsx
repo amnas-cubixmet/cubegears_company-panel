@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Car, ChevronRight, User, Wrench } from 'lucide-react';
 import { jobDisplayLabel, statusClass } from './jobs.utils';
 import { JobCustomerContactActions } from './JobCustomerContactActions';

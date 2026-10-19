@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { FilePlus } from 'lucide-react';
 
 export const LeavePageHeader = ({ onApply, disabled = false }) => (

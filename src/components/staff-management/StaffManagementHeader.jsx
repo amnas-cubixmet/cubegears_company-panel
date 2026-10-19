@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const StaffManagementHeader = () => (
   <header className="staff-dashboard-header">

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { Download, Printer } from 'lucide-react';
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 

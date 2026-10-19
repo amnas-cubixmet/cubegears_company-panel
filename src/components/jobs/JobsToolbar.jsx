@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Search, X } from 'lucide-react';
 import { STATUS_OPTIONS } from './jobs.utils';
 

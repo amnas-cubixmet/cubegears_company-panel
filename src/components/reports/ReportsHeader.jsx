@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Download, FileSpreadsheet, Printer, RefreshCw } from 'lucide-react';
 
 export const ReportsHeader = ({ onRefresh, onCsv, onPrint, loading = false, periodLabel }) => (

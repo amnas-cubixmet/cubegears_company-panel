@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const months = [

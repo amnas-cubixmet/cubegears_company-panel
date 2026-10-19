@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, CheckCircle2, RefreshCw, ShieldCheck } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { resourceConfigs } from '../operations/resourceConfigs';
 import { billingService, calculateDocumentTotals } from '../../services/billing.service';

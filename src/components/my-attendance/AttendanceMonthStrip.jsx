@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { statusTone } from './attendance.utils';
 
 export const AttendanceMonthStrip = ({

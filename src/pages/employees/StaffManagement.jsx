@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { StaffManagementHeader, StaffManagementTabs } from '../../components/staff-management';
 import { Staff } from '../staff-management/Staff';

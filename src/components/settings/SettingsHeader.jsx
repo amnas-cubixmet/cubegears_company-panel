@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { FilePenLine, Save, Settings2 } from 'lucide-react';
 
 export const SettingsHeader = ({ saving, disabled, hasUnsaved, onSave, onTemplates }) => (

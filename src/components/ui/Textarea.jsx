@@ -1,4 +1,4 @@
-import React, { forwardRef, useId } from 'react';
+import { forwardRef, useId } from "react";
 import { Label } from './Label';
 
 export const Textarea = forwardRef(function Textarea({ label, error, helper, success, required = false, disabled = false, rows = 3, containerStyle, className = '', id, ...props }, ref) {

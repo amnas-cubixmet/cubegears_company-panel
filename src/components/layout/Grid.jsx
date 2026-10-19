@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const gridColumns = {
   1: 'grid-cols-1',

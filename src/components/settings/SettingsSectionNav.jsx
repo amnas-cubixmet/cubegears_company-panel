@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const SettingsSectionNav = ({ sections, active, dirtySections = [], onChange }) => (
   <aside className="settings-dashboard-sidebar">

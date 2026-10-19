@@ -1,5 +1,5 @@
 import { appAlert } from '../../components/common/appDialogs';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { jobService } from '../../services/job.service';

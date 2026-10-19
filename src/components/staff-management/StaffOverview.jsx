@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Plus, UsersRound } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';

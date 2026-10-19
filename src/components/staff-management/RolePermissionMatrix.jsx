@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { permissionActionLabel } from '../../config/rolePermissions';
 
 export const RolePermissionMatrix = ({

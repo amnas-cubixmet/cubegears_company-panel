@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const Table = ({ columns = [], data = [], renderRow, className = '' }) => (
   <div className={`w-full max-w-full overflow-x-auto rounded-card border border-line bg-surface [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`.trim()}>

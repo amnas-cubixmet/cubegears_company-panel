@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Eye, ReceiptText } from 'lucide-react';
 import { formatPaymentDate, paymentStatusClass } from './payments.utils';
 

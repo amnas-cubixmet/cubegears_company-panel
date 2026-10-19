@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AlertTriangle, CalendarCheck2, Clock3, Gauge } from 'lucide-react';
 import { minutesToHours } from './attendance.utils';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { MessageCircle, Phone } from 'lucide-react';
 import { customerContactLinks } from '../jobs/customerContact.utils';
 

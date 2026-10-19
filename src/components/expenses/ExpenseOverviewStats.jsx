@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AlertTriangle, Calendar, CheckCircle2, IndianRupee } from 'lucide-react';
 
 export const ExpenseOverviewStats=({currentMonthTotal,approvedTotal,pendingCount,todayTotal,formatMoney})=>{

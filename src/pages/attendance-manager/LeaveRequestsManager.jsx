@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, Clock3, X } from 'lucide-react';
 import { LeaveApprovalSheet } from '../../components/attendance-manager/LeaveApprovalSheet';
 import { attendanceManagerService } from '../../services/attendanceManager.service';

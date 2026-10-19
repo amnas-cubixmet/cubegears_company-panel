@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, CheckCircle2, HelpCircle, X } from 'lucide-react';
 import {
   subscribeAppDialogs, resolveAppDialog, cancelAppDialog,
@@ -60,7 +60,7 @@ export const AppDialogHost = () => {
       const focusable = [...(container.current?.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled])') || [])];
       if (!focusable.length) return;
       const index = focusable.indexOf(document.activeElement);
-      if (event.shiftKey && (index === 0 || index < 0)) {
+      if (event.shiftKey && (index <= 0)) {
         event.preventDefault();
         focusable[focusable.length - 1].focus();
       } else if (!event.shiftKey && index === focusable.length - 1) {

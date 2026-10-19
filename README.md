@@ -42,3 +42,29 @@ binary can be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
 The shared UI uses the existing 16px desktop text scale, 14px phone/tablet
 content and actions, 16px editable controls, and 12px compact navigation/status
 labels. Document previews and print layouts keep their authored styles.
+
+
+### Production verification
+
+Use Node.js 22 and install the locked dependencies with `npm ci`. Set
+`VITE_API_URL` to the deployed Django backend ending in `/api/v1` before
+building. Never put backend secrets in `VITE_` variables: they are public.
+
+```sh
+npm run check
+npm test
+npx playwright install chromium
+npm run build
+UI_PRODUCTION=1 npm run test:ui
+```
+
+The browser suite uses intercepted test fixtures and blocks write requests.
+It checks all registered route templates at desktop, tablet and phone sizes;
+it does not replace staging integration tests against Django, email, Celery
+or the payment gateway. CI runs lint, the full unit suite, browser checks
+and a production build with a non-live API placeholder.
+
+Pages are split into lazy-loaded chunks. Their loading boundary stays inside
+the page, so workshop navigation remains mounted while a chunk is fetched.
+Unused files are removed only after checking runtime imports and test/docs
+references; mock data still used by explicit demo mode or tests is retained.

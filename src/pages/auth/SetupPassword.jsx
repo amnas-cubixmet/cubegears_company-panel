@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import { CheckCircle2, Eye, EyeOff, Lock } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';

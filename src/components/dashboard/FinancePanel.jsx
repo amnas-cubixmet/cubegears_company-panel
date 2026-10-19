@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CircleDollarSign } from 'lucide-react';
 
 export const FinancePanel = ({ payments }) => (

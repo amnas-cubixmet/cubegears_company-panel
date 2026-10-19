@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Calendar, Clock, CheckCircle2, AlertTriangle, FileText, AlertCircle, TrendingUp, ShieldAlert } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Clock, CheckCircle2, AlertTriangle, FileText, AlertCircle, TrendingUp } from "lucide-react";
 
 export const AttendanceSummary = () => {
   const navigate = useNavigate();

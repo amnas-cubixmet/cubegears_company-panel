@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const MyAttendanceHeader = () => (
   <header className="my-attendance-dashboard-header">

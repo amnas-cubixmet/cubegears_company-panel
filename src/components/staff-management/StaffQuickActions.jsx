@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ArrowRight, BarChart3, FileText, Plus, ShieldCheck, UsersRound } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';

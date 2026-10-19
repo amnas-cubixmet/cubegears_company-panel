@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, Link2, LoaderCircle, XCircle } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CheckCircle2, LoaderCircle, XCircle } from "lucide-react";
 import { Link, useLocation } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { getStaffLandingPath } from '../../utils/staffLanding';

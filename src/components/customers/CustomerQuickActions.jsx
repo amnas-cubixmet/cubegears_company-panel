@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ArrowRight, BellRing, Car, ClipboardList, Plus, Users } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';

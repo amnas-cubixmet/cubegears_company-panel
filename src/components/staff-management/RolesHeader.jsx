@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Plus, ShieldCheck } from 'lucide-react';
 
 export const RolesHeader = ({ onAdd, canManage = false }) => (

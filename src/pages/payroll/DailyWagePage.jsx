@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Banknote, CalendarCheck2, CheckCircle2, Clock3, History, Search, Users, Wallet } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { dailyWageService } from '../../services/dailyWage.service';

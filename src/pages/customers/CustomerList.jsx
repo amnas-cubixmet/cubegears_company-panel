@@ -1,5 +1,5 @@
 import { appConfirm } from '../../components/common/appDialogs';
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Search } from '../../components/common/Search';
 import { Input } from '../../components/common/Input';
@@ -9,23 +9,7 @@ import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalShe
 import { customerService } from '../../services/customer.service';
 import { customerInvoiceMoney, customerStatusLabel, formatCustomerMoney } from './customerDirectoryMoney';
 import { CustomerContactActions } from '../../components/customers/CustomerContactActions';
-import {
-  Users,
-  Plus,
-  Filter,
-  MoreVertical,
-  Eye,
-  Edit,
-  Car,
-  FileText,
-  CreditCard,
-  Archive,
-  Phone,
-  MessageSquare,
-  Mail,
-  AlertTriangle,
-  ChevronRight
-} from 'lucide-react';
+import { Users, Plus, Filter, Edit, Phone, MessageSquare, Mail, AlertTriangle, ChevronRight } from "lucide-react";
 
 export const CustomerList = () => {
   const navigate = useNavigate();

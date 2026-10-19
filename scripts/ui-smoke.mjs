@@ -94,7 +94,7 @@ const profiles = process.env.UI_QUICK ? [{width:390,height:844,theme:'light'}] :
   {width:1440,height:1000,theme:'light'}, {width:768,height:1024,theme:'dark'},
   {width:390,height:844,theme:'light'}, {width:360,height:800,theme:'dark'},
 ];
-const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port),'--strictPort'],{
+const server=spawn(process.execPath,['node_modules/vite/bin/vite.js',...(process.env.UI_PRODUCTION ? ['preview'] : []),'--host','127.0.0.1','--port',String(port),'--strictPort'],{
   cwd:new URL('..',import.meta.url),env:{...process.env,VITE_API_URL:'http://127.0.0.1:8000/api/v1'},stdio:['ignore','pipe','pipe'],
 });
 let browser;
@@ -143,6 +143,7 @@ try {
           await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
           await page.waitForLoadState('networkidle');
         }
+        await page.locator('.route-loading').waitFor({state:'hidden',timeout:15000});
         await page.waitForFunction(()=>document.body.innerText.length>=20);
         if(path==='/plans' || path==='/signup') {
           const expected=path==='/plans'?'/account/credits/buy':'/login';

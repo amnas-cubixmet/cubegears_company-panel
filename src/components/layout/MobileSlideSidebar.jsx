@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 import { NavLink, useLocation } from 'react-router-dom';
 import { routeConfig, ROUTE_SECTIONS } from '../../routes/routeConfig';
 import { Laptop, LogOut, Moon, Sun, X, UserRound, Store } from 'lucide-react';

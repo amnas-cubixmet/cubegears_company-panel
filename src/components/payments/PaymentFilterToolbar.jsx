@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Filter, RefreshCw, RotateCcw, Search } from 'lucide-react';
 
 export const PaymentFilterToolbar = ({

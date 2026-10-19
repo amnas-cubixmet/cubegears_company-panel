@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ArrowRight, BarChart3, CalendarDays, ClipboardCheck, Clock3, Settings } from 'lucide-react';
 
 const actions = [

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AlertTriangle, CalendarClock, Car, ClipboardList } from 'lucide-react';
 
 export const VehicleOverviewStats = ({ metrics }) => {

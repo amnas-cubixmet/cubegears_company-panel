@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BadgeCheck, FileClock, IndianRupee, ReceiptText } from 'lucide-react';
 
 export const InvoiceOverviewStats = ({

@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useState } from "react";
 import { Label } from './Label';
 
 const DEFAULT_COUNTRIES = [

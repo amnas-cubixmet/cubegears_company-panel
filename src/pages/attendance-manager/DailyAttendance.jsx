@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { Edit3, MapPin, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { attendanceManagerService } from '../../services/attendanceManager.service';

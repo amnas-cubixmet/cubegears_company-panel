@@ -10,7 +10,7 @@ const css = read('../src/styles/job-complaint-detail.css');
 const app = read('../src/App.jsx');
 
 test('Complaint Records has a dedicated protected View route before wildcard', () => {
-  assert.match(routes, /import \{ JobComplaintDetails \} from '\.\.\/pages\/jobs\/JobComplaintDetails'/);
+  assert.match(routes, /lazyPage\(\(\) => import\('\.\.\/pages\/jobs\/JobComplaintDetails'\), 'JobComplaintDetails'\)/);
   const complaintDetail = routes.indexOf('path="/jobs/:id/complaints/:complaintId"');
   const catchAll = routes.indexOf('path="/jobs/:id/*"');
   assert.ok(complaintDetail >= 0 && complaintDetail < catchAll);

@@ -1,4 +1,4 @@
-import React, { forwardRef, useId } from 'react';
+import { forwardRef, useId } from "react";
 import { ChevronDown } from 'lucide-react';
 import { Label } from './Label';
 

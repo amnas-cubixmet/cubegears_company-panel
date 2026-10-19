@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CalendarDays, ClipboardList, Clock3, FileText, PieChart } from 'lucide-react';
 
 const tabs = [

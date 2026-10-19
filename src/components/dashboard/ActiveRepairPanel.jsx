@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Activity, ArrowRight, Car, PackageSearch } from 'lucide-react';
 import { dashboardText } from './dashboard.utils';
 

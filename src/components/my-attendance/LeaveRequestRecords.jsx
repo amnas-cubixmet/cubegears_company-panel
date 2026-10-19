@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CalendarDays, X } from 'lucide-react';
 
 const formatDate = (value) => {

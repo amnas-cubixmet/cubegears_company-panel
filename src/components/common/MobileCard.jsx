@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const MobileCard = ({ title, subtitle, badge, fields = [], actions }) => (
   <article className="flex min-w-0 flex-col gap-3 rounded-xl border border-line bg-surface p-3.5 shadow-sm">
