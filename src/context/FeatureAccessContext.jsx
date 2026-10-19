@@ -117,7 +117,11 @@ export function FeatureAccessProvider({ children }) {
     const id = window.setTimeout(refresh, delay);
     return () => window.clearTimeout(id);
   }, [current.labelOnly, current.nextLabelExpiryAt, refresh]);
-  const checking = loading || (isAuthenticated && Boolean(userKey) && access.userKey !== userKey);
+  // Only the first verification (or a tenant/user change) blocks the shell.
+  // Route/focus refreshes still fetch current server permissions, but keep the
+  // verified page mounted instead of replacing it with a full-page loader.
+  const checking = (loading && current.unavailable) ||
+    (isAuthenticated && Boolean(userKey) && access.userKey !== userKey);
   useEffect(() => {
     if (!current.billingStatus?.enabled) return undefined;
     const id = window.setInterval(refresh, 60000);

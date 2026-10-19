@@ -58,7 +58,7 @@ export const StaffManagement = () => {
 
   return (
     <div className="staff-management-page cg-staff-management">
-      <StaffManagementHeader />
+      {activeSection !== 'overview' && <StaffManagementHeader />}
       <StaffManagementTabs />
 
       <main className="staff-management-content">
