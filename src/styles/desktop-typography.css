@@ -1,274 +1,137 @@
-/*
- * CubixGear desktop typography uplift.
- * Scope every rule to a desktop viewport and the app's three page shells.
- * Do not scale the viewport or modify mobile/tablet typography.
- *
- * Minimum readable text is 16px at desktop widths (1024px and above).
- * Keep larger headings and monetary/stat values at their authored sizes;
- * never zoom, scale or change mobile/tablet typography.
- */
-@media (min-width: 1024px) {
+/* Final screen typography contract for every workshop, owner and auth page.
+   Regular weight is intentional. Hierarchy comes from size and spacing.
+   Exclude printable documents so their authored typography is preserved. */
+@media screen {
+  :root {
+    --cg-text-body: 14px;
+    --cg-text-small: 12px;
+    --cg-text-title: 24px;
+    --cg-text-section: 18px;
+  }
+
   #root :is(.app-shell, .saas-account-shell, .login-page) {
-    font-size: 16px;
+    font-size: var(--cg-text-body);
+    font-weight: 400;
     line-height: 1.55;
   }
 
-  #root :is(.app-shell, .saas-account-shell) :is(
-    .app-content,
-    .saas-account-content,
-    .ui-page-container,
-    .ui-card,
-    .ui-panel,
-    .cg-credit-page
+  #root :is(.app-shell, .saas-account-shell, .login-page) *:not(
+    .template-preview, .template-preview *,
+    .eway-print-sheet, .eway-print-sheet *,
+    .report-print-sheet, .report-print-sheet *,
+    .invoice-print-sheet, .invoice-print-sheet *
   ) {
-    font-size: 16px;
+    font-weight: 400 !important;
   }
 
-  /* Global form controls and labels are readable across CRUD, billing,
-     staff, jobs, login, and owner account screens. */
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    label,
-    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
-    textarea,
-    select,
-    [role="combobox"],
-    [role="option"],
-    .ui-input,
-    .ui-select,
-    .ui-label,
-    .login-field-label
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(p, label, li, button, table td, summary, [role="tab"], [role="button"],
+      [role="option"], .ui-label, .login-field-label, .text-sm):not(
+    .template-preview *, .eway-print-sheet *, .report-print-sheet *, .invoice-print-sheet *
   ) {
-    font-size: 16px;
+    font-size: var(--cg-text-body) !important;
+    line-height: 1.5;
   }
 
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    button,
-    [role="tab"],
-    [role="button"],
-    .ui-button,
-    .ui-btn,
-    .saas-button,
-    .ui-tab
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(small, table th, .text-xs, .ui-badge, .ui-field__message,
+      .ui-breadcrumb, .ui-pagination, .table-sub, .stat-label, .stat-meta,
+      .cg-credit-note, .cg-credit-pill, .sidebar-section-title,
+      .saas-owner-sidebar-heading, .auth-field-error):not(
+    .template-preview *, .eway-print-sheet *, .report-print-sheet *, .invoice-print-sheet *
   ) {
-    font-size: 16px;
+    font-size: var(--cg-text-small) !important;
+    line-height: 1.5;
   }
 
-  /* Compact table headers stay distinct from more legible data cells. */
-  #root :is(.app-shell, .saas-account-shell) :is(
-    table th,
-    .ui-table th,
-    .cg-credit-table-wrap th
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(h1, .ui-page-header h1):not(
+    .template-preview *, .eway-print-sheet *, .report-print-sheet *, .invoice-print-sheet *
   ) {
-    font-size: 16px;
-  }
-  #root :is(.app-shell, .saas-account-shell) :is(
-    table td,
-    .ui-table td,
-    .cg-credit-table-wrap td
-  ) {
-    font-size: 16px;
+    font-size: var(--cg-text-title) !important;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
   }
 
-  /* Small labels and helper text were often only 10–12px. Avoid changing
-     icon dimensions or spacing while lifting their typography. */
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    small,
-    .ui-field__message,
-    .ui-badge,
-    .ui-card__description,
-    .ui-entity-card__meta,
-    .ui-pagination,
-    .ui-breadcrumb,
-    .ui-alert,
-    .table-sub,
-    .cg-credit-note,
-    .auth-field-error
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(h2, .ui-card__title):not(
+    .template-preview *, .eway-print-sheet *, .report-print-sheet *, .invoice-print-sheet *
   ) {
-    font-size: 16px;
-  }
-
-  /* Preserve existing heading hierarchy; only adjust common small section
-     title variants instead of flattening all headings to the same size. */
-  #root :is(.app-shell, .saas-account-shell) :is(
-    .ui-page-header h1,
-    .page-header h1
-  ) {
-    font-size: 26px;
-  }
-  #root :is(.app-shell, .saas-account-shell) :is(
-    .ui-section__header h2,
-    .ui-card__title
-  ) {
-    font-size: 18px;
-  }
-
-  /* Desktop workshop navigation, top bar and searchable module lists. */
-  #root .app-shell :is(
-    .sidebar-nav a,
-    .sidebar-link,
-    .sidebar-item,
-    .sidebar-nav-item,
-    .header-profile-menu button,
-    .header-profile-copy strong
-  ),
-  #root .saas-account-shell .saas-owner-sidebar-group > a {
-    font-size: 16px;
-  }
-  #root .app-shell :is(
-    .sidebar-section-title,
-    .sidebar-user-copy small,
-    .header-profile-copy small
-  ),
-  #root .saas-account-shell :is(
-    .saas-owner-sidebar-heading,
-    .saas-owner-sidebar-foot,
-    .saas-account-identity small
-  ) {
-    font-size: 16px;
-  }
-  #root .saas-account-shell :is(
-    .saas-account-brand strong,
-    .saas-account-identity strong,
-    .saas-account-content .cg-credit-panel > p,
-    .saas-account-content .cg-credit-note,
-    .saas-account-content .cg-credit-inline
-  ) {
-    font-size: 16px;
-  }
-
-  /* Tailwind typography utilities used in one-off forms and page headers. */
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    .text-xs,
-    .text-\[10px\],
-    .text-\[11px\],
-    .text-\[12px\]
-  ) {
-    font-size: 16px;
-  }
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    .text-sm,
-    .text-\[13px\],
-    .text-\[14px\]
-  ) {
-    font-size: 16px;
-  }
-
-  /* Existing search-field CSS uses !important; lift only its text size. */
-  #root .app-shell :is(
-    .outside-labour-search input,
-    .header-search-wrap input
-  ) {
-    font-size: 16px !important;
-  }
-
-  /*
-   * Legacy styles still specify 8–15px for some text. Restrict the strong
-   * floor to readable text and metadata, not generic div/span/strong elements,
-   * since those also render intentionally large dashboard and wallet values.
-   */
-  #root { font-size: 16px; }
-
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    p, small, label, li, a, button,
-    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
-    textarea, select, option, table th, table td, caption, summary,
-    time, figcaption, blockquote, code,
-    [role="button"], [role="tab"], [role="option"],
-    [role="combobox"], [role="alert"], [role="status"], [role="menuitem"]
-  ) {
-    font-size: 16px !important;
-  }
-
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    input, textarea
-  )::placeholder { font-size: 16px !important; }
-
-  /* Compact text selectors used throughout the dashboard, sidebar,
-     job cards, tables, credit pages, account sections and login flow. */
-  #root :is(.app-shell, .saas-account-shell, .login-page) :is(
-    .text-xs, .text-sm,
-    .text-\[8px\], .text-\[9px\], .text-\[10px\], .text-\[11px\],
-    .text-\[12px\], .text-\[13px\], .text-\[14px\], .text-\[15px\],
-    .ui-badge, .ui-pagination, .ui-breadcrumb, .ui-label,
-    .ui-field__message, .ui-card__description, .ui-entity-card__meta,
-    .table-sub, .sidebar-nav-label, .sidebar-section-title,
-    .sidebar-user-copy strong, .sidebar-user-copy small,
-    .sidebar-brand-copy strong, .sidebar-brand-copy small,
-    .header-brand-name, .header-profile-copy strong,
-    .header-profile-copy small, .search-shortcut,
-    .stat-label, .stat-meta,
-    .job-meta-grid small, .job-meta-grid strong,
-    .repair-meta small, .repair-meta strong,
-    .repair-detail-grid span, .repair-detail-grid strong,
-    .progress-title-row, .progress-title-row span,
-    .progress-stage small, .progress-stage strong,
-    .insight-item span, .insight-item small,
-    .finance-list > div, .staff-copy strong, .staff-copy small,
-    .cg-credit-metric > div, .cg-credit-inline, .cg-credit-note,
-    .cg-credit-panel > header span, .cg-credit-feature-cost,
-    .cg-credit-log small, .cg-credit-log strong,
-    .cg-credit-shortcuts small, .cg-credit-shortcuts strong,
-    .cg-credit-packages article > span, .cg-credit-pill,
-    .cg-bundle-price, .cg-bundle-price small,
-    .cg-bundle-card > small, .cg-bundle-features span,
-    .cg-bundle-feature-list > small, .cg-bundle-reason,
-    .saas-owner-sidebar-heading, .saas-owner-sidebar-foot,
-    .saas-account-identity small, .saas-account-identity strong,
-    .login-brand-subtitle, .login-field-label, .login-forgot,
-    .auth-field-error, .auth-recovery-privacy-note, .auth-dev-link
-  ) {
-    font-size: 16px !important;
-  }
-
-  /* Dashboard section titles previously used 9–12px; retain hierarchy. */
-  #root .app-shell :is(.operations-header h2, .dashboard-panel h2) {
-    font-size: 18px !important;
-  }
-  /*
-   * 16px nav labels need more room than the original 208px rail.
-   * Keep collapsed navigation narrow, but do not crop expanded labels.
-   */
-  #root .app-shell .app-sidebar:not(.is-collapsed) {
-    width: clamp(258px, 20vw, 284px);
-    flex: 0 0 clamp(258px, 20vw, 284px);
-    min-width: clamp(258px, 20vw, 284px);
-  }
-
-  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav {
-    padding-inline: 12px;
-  }
-
-  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-section-title {
-    padding-inline: 12px;
-    margin: 0;
+    font-size: var(--cg-text-section) !important;
     line-height: 1.4;
-    letter-spacing: .07em;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  h3:not(.template-preview *, .eway-print-sheet *, .report-print-sheet *, .invoice-print-sheet *) {
+    font-size: 16px !important;
+    line-height: 1.4;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
+      textarea, select, [role="combobox"]) {
+    /* Retain 16px fields on all screens, including Safari's zoom threshold. */
+    font-size: 16px !important;
+    line-height: 1.5;
+  }
+
+  #root :is(.app-shell, .saas-account-shell, .login-page)
+  :is(input, textarea)::placeholder {
+    font-size: inherit;
+    font-weight: 400;
+  }
+
+  #root :is(.app-shell, .saas-account-shell)
+  :is(.sidebar-nav a, .sidebar-nav-label, .saas-owner-sidebar-group > a) {
+    font-size: var(--cg-text-body) !important;
+    line-height: 1.5;
+  }
+
+  /* Page families: dashboard / jobs / customers / staff / billing / settings.
+     Reflow header actions instead of compressing labels as text grows. */
+  #root :is(.app-shell, .saas-account-shell)
+  :is(.page-header, .ui-page-header, .crud-page-header, .settings-header,
+      .billing-page-head, .account-page-header, .jobs-header, .customers-header) {
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  #root :is(.app-shell, .saas-account-shell)
+  :is(.ui-button, .crud-button, .dashboard-button, .btn) {
+    min-height: 44px;
     white-space: normal;
-    overflow-wrap: normal;
-    text-overflow: clip;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  #root .app-shell .app-sidebar:not(.is-collapsed) {
+    width: clamp(240px, 18vw, 264px);
+    flex: 0 0 clamp(240px, 18vw, 264px);
+    min-width: clamp(240px, 18vw, 264px);
   }
 
   #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav-item {
     height: auto;
-    min-height: 46px;
+    min-height: 44px;
     padding: 10px 12px;
-    align-items: center;
     gap: 10px;
+  }
+
+  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-section-title {
+    white-space: normal;
+    overflow-wrap: break-word;
   }
 
   #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav-label {
     white-space: normal;
     overflow: visible;
-    text-overflow: clip;
-    line-height: 1.35;
     overflow-wrap: break-word;
     flex: 1 1 auto;
   }
+}
 
-  #root .app-shell .app-sidebar:not(.is-collapsed) .sidebar-nav-icon {
-    align-self: center;
-    flex-shrink: 0;
-  }
-
-
+@media screen and (max-width: 767px) {
+  :root { --cg-text-title: 22px; --cg-text-section: 17px; }
 }

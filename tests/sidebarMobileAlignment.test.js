@@ -10,14 +10,14 @@ const drawer = read('src/components/layout/MobileSlideSidebar.jsx');
 const mobileHeader = read('src/components/layout/Header.jsx');
 const mobileNav = read('src/components/layout/MobileBottomNav.jsx');
 
-test('desktop sidebar reserves space for all 16px labels and section headings', () => {
-  assert.match(desktop, /@media \(min-width: 1024px\)/);
+test('desktop sidebar reserves space for regular 14px labels and section headings', () => {
+  assert.match(desktop, /@media screen and \(min-width: 1024px\)/);
   assert.match(desktop, /\.app-sidebar:not\(\.is-collapsed\)/);
-  assert.match(desktop, /width: clamp\(258px, 20vw, 284px\)/);
-  assert.match(desktop, /min-width: clamp\(258px, 20vw, 284px\)/);
+  assert.match(desktop, /width: clamp\(240px, 18vw, 264px\)/);
+  assert.match(desktop, /min-width: clamp\(240px, 18vw, 264px\)/);
   assert.match(desktop, /\.sidebar-nav-label\s*\{[^}]*white-space: normal/);
   assert.match(desktop, /\.sidebar-section-title\s*\{[^}]*white-space: normal/);
-  assert.match(desktop, /\.sidebar-nav-item\s*\{[^}]*min-height: 46px/);
+  assert.match(desktop, /\.sidebar-nav-item\s*\{[^}]*min-height: 44px/);
   assert.match(sidebar, /<span className="sidebar-nav-label">\{route.label\}<\/span>/);
   assert.match(sidebar, /route\.section === section/);
   assert.match(sidebar, /featureAccess\.can\(route\.permission\)/);
