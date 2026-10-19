@@ -186,3 +186,43 @@
     line-height: 1.5;
   }
 }
+
+/* Consistent feedback colors in light/dark themes, including modal portals.
+   Explicit message variants only: warning/info alerts keep their own meaning. */
+@media screen {
+  :is(body, #root) :is(
+    .ui-alert--error, .form-error-box, .staff-directory-message.is-error,
+    .staff-crud-error, .staff-simple-error, .auth-message.is-error,
+    .login-error, .crud-error, .billing-error, .cg-cycle-error,
+    .job-qc-error, .job-work-photo-error, .job-approved-pdf-error,
+    .job-invoice-inline-message.is-error
+  ) {
+    color: var(--danger) !important;
+    background: var(--danger-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent) !important;
+  }
+  :is(body, #root) :is(
+    .ui-alert--success, .form-success-box, .staff-directory-message.is-success,
+    .auth-message.is-success, .login-success, .account-overview-success,
+    .job-qc-success, .job-work-photo-success, .job-approved-pdf-success,
+    .job-invoice-inline-message.is-success
+  ) {
+    color: var(--success) !important;
+    background: var(--success-soft) !important;
+    border: 1px solid color-mix(in srgb, var(--success) 35%, transparent) !important;
+  }
+  :is(body, #root) :is(
+    .ui-alert--error, .ui-alert--success, .form-error-box, .form-success-box,
+    .staff-directory-message.is-error, .staff-directory-message.is-success,
+    .auth-message.is-error, .auth-message.is-success
+  ) :is(strong, b, span, p, svg) {
+    color: inherit !important;
+  }
+  :is(body, #root) :is(
+    .cg-inline-field-error, .auth-field-error, .form-error,
+    .cubegears-error-text, .account-overview-field-error,
+    .job-qc-field-error, .job-quick-field-error
+  ) {
+    color: var(--danger) !important;
+  }
+}
