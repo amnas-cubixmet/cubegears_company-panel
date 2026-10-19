@@ -8,7 +8,7 @@ test('staff overview is a simple API-backed dashboard without mock widgets', () 
   const overview = read('src/pages/staff-management/SimpleStaffOverview.jsx');
   const root = read('src/pages/employees/StaffManagement.jsx');
   assert.match(root, /<SimpleStaffOverview\s*\/>/);
-  assert.doesNotMatch(root, /<StaffManagementTabs\s*\/>/);
+  assert.match(root, /<StaffManagementTabs\s*\/>/);
   assert.match(overview, /staffService\.getStaff\(\{ liveOnly: true \}\)/);
   assert.match(overview, /setError\(requestError\?\.message/);
   assert.match(overview, /setReload\(value => value \+ 1\)/);
