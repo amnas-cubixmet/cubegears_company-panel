@@ -832,7 +832,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
             onClose={() => setEditOpen(false)}
             staff={staff}
             roles={roles}
-            canAssignRole={hasPermission(user, 'company.manage')}
+            canAssignRole={can('company.manage')}
             teams={teams}
             shifts={shifts}
             skills={skills}
