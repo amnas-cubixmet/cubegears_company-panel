@@ -98,17 +98,29 @@
 /* Five-field feature labels: readable per-user pricing and clear activation state. */
 .cg-bundle-marketplace .cg-bundle-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:15px}
 .cg-bundle-marketplace .cg-bundle-card{background:var(--surface,#fff);border-color:var(--border,#d9e3ef);padding:22px;gap:15px}
-.cg-bundle-marketplace .cg-bundle-head h3{font-size:17px;line-height:1.4}
+.cg-bundle-marketplace .cg-bundle-head h3{font-size:18px;line-height:1.4}
 .cg-bundle-marketplace .cg-bundle-price{display:grid;gap:8px;border-block:1px solid var(--border,#e4eaf2);padding:16px 0}
-.cg-bundle-marketplace .cg-bundle-price>span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.cg-bundle-marketplace .cg-bundle-price>span{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 .cg-bundle-marketplace .cg-bundle-price strong{font-size:28px;letter-spacing:-.03em;line-height:1.2}
-.cg-bundle-marketplace .cg-bundle-price strong small{font-size:12px;font-weight:500;letter-spacing:0;color:var(--c-muted)}
-.cg-bundle-summary{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px}
+.cg-bundle-marketplace .cg-bundle-price strong small{font-size:14px;font-weight:500;letter-spacing:0;color:var(--c-muted)}
+.cg-bundle-summary{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;font-size:14px}
 .cg-bundle-summary b{color:var(--text-primary,var(--c-ink));font-weight:800}
 .cg-bundle-feature-list{display:grid;gap:10px}
-.cg-bundle-feature-list>small{font-size:11px;color:var(--c-muted);font-weight:750}
+.cg-bundle-feature-list>small{font-size:14px;color:var(--c-muted);font-weight:750}
 .cg-bundle-marketplace .cg-bundle-features{flex:initial}
-.cg-bundle-reason{border:1px solid var(--border,#dce5f0);background:var(--surface-soft,#f8fafc);padding:10px 12px;border-radius:10px;font-size:12px!important;line-height:1.6!important}
+.cg-bundle-reason{border:1px solid var(--border,#dce5f0);background:var(--surface-soft,#f8fafc);padding:10px 12px;border-radius:10px;font-size:14px!important;line-height:1.6!important}
 .cg-bundle-marketplace .cg-bundle-actions button.primary{min-width:135px}
 .cg-bundle-marketplace .cg-bundle-actions button.secondary{border:1px solid var(--border,#dce5f0);border-radius:9px;background:transparent;padding:10px 14px;color:var(--text-primary,var(--c-ink));font-weight:700}
 @media(max-width:600px){.cg-bundle-marketplace .cg-bundle-card{padding:16px}.cg-bundle-summary{align-items:flex-start;flex-direction:column}}
+
+/* Keep disabled feature actions readable without implying they are enabled. */
+.app-content .cg-credit-page .cg-bundle-marketplace .cg-bundle-actions button:disabled{
+  opacity:1;background:var(--surface-soft,#eef2f6);color:var(--text-secondary,#475569);
+  border:1px solid var(--border,#cbd5e1);box-shadow:none;cursor:not-allowed;
+}
+/* Shared readable type scale for priced and unavailable modules. */
+.cg-bundle-marketplace .cg-bundle-card p{font-size:14px;line-height:1.6}
+.cg-bundle-marketplace .cg-bundle-card>small,
+.cg-bundle-marketplace .cg-bundle-features span,
+.cg-bundle-marketplace .cg-credit-pill,
+.cg-bundle-marketplace .cg-bundle-actions button{font-size:14px;line-height:1.5}

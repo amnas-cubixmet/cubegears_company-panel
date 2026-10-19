@@ -46,6 +46,7 @@ import './styles/billing-ui-unified.css';
 import './styles/account-workspace-unified.css';
 import './styles/account-ui-polish.css';
 import './styles/workspace-responsive-polish.css';
+import './styles/responsive-typography.css';
 // Last shared layers: preserve regular text and a single clean search border.
 import './styles/form-typography.css';
 import './styles/form-controls-unified.css';

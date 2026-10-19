@@ -224,6 +224,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
 
   const loadSupportData = async (profile) => {
     const tasks = [
+      roleService.getAssignableRoles(),
       staffManagementService.getTeams(),
       staffManagementService.getShifts(),
       staffManagementService.getSkills(),
@@ -831,6 +832,7 @@ export const StaffProfile = ({ staffId: staffIdProp, onBack }) => {
             onClose={() => setEditOpen(false)}
             staff={staff}
             roles={roles}
+            canAssignRole={hasPermission(user, 'company.manage')}
             teams={teams}
             shifts={shifts}
             skills={skills}

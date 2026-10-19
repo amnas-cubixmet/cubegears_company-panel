@@ -45,6 +45,7 @@ export const StaffAddPage = () => {
     email: '',
     designation: '',
     role: '',
+    roleId: '',
     teamId: '',
     shiftId: '',
     branchId: '',
@@ -60,15 +61,17 @@ export const StaffAddPage = () => {
   useEffect(() => {
     let alive = true;
 
-    Promise.all([
-      roleService.getRoles(),
+    Promise.allSettled([
+      roleService.getAssignableRoles(),
       staffManagementService.getTeams(),
       staffManagementService.getShifts(),
       branchService.getBranches(),
     ])
-      .then(([roleRows, teamRows, shiftRows, branchRows]) => {
+      .then((results) => {
+        const [roleRows, teamRows, shiftRows, branchRows] = results.map(result => result.status === 'fulfilled' ? result.value : []);
         if (!alive) return;
 
+        if (results[0].status === 'rejected') setError(results[0].reason?.message || 'Could not load company-created staff roles.');
         const activeRoles = (Array.isArray(roleRows) ? roleRows : []).filter(
           (role) => role.status !== 'Inactive' && !role.isProtected && !role.is_system,
         );
@@ -86,6 +89,7 @@ export const StaffAddPage = () => {
         setForm((current) => ({
           ...current,
           role: current.role || activeRoles[0]?.name || '',
+          roleId: current.roleId || activeRoles[0]?.id || '',
           teamId: current.teamId || nextTeams[0]?.id || '',
           shiftId: current.shiftId || nextShifts[0]?.id || '',
           branchId: current.branchId || nextBranches[0]?.id || '',
@@ -267,15 +271,18 @@ export const StaffAddPage = () => {
               </label>
 
               <label>
-                System Role
+                Company Role
                 <select
                   name="role"
-                  value={form.role}
-                  onChange={(event) => set('role', event.target.value)}
+                  value={form.roleId}
+                  onChange={(event) => {
+                      const role = roles.find(item => String(item.id) === event.target.value);
+                      setForm(current => ({...current, roleId:role?.id || '', role:role?.name || ''}));
+                    }}
                 >
                   <option value="">Select company-created role</option>
                   {roles.map((role) => (
-                    <option key={role.id} value={role.name}>
+                    <option key={role.id} value={role.id}>
                       {role.name}
                     </option>
                   ))}

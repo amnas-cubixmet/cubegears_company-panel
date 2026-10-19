@@ -11,6 +11,7 @@ export const StaffProfileEditSheet = ({
   shifts,
   skills,
   onSave,
+  canAssignRole = false,
 }) => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({});
@@ -24,6 +25,7 @@ export const StaffProfileEditSheet = ({
       email: staff.email || '',
       designation: staff.designation || '',
       role: staff.role || '',
+      roleId: staff.roleId || (roles.filter(role => role.name === staff.role).length === 1 ? roles.find(role => role.name === staff.role).id : ''),
       teamId: staff.teamId || '',
       shiftId: staff.shiftId || '',
       employmentStatus: staff.employmentStatus || 'Active',
@@ -38,7 +40,7 @@ export const StaffProfileEditSheet = ({
         .filter((skill) => currentNames.has(skill.name))
         .map((skill) => String(skill.id)),
     );
-  }, [open, staff, skills]);
+  }, [open, staff, skills, roles]);
 
   const set = (key, value) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -58,7 +60,7 @@ export const StaffProfileEditSheet = ({
     setSaving(true);
     try {
       await onSave({
-        ...form,
+        ...Object.fromEntries(Object.entries(form).filter(([key]) => canAssignRole || !['role', 'roleId'].includes(key))),
         teamId: form.teamId || null,
         shiftId: form.shiftId || null,
         skillIds: skills
@@ -90,8 +92,8 @@ export const StaffProfileEditSheet = ({
 
           <label>
             Role
-            <select value={form.role || ''} onChange={(e) => set('role', e.target.value)}>
-              {roles.map((role) => <option key={role.id} value={role.name}>{role.name}</option>)}
+            <select disabled={!canAssignRole} value={form.roleId || ''} onChange={(e) => { const role = roles.find(item => String(item.id) === e.target.value); setForm(current => ({...current,roleId:role?.id || '',role:role?.name || ''})); }}>
+              {roles.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
             </select>
           </label>
 

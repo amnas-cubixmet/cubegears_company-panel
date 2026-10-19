@@ -135,7 +135,7 @@ export function CreditWorkspace({ section = 'overview' }) {
     try {
       const result = await creditWalletService.purchaseBundle(bundle.id);
       setNotice(result?.billingMode === 'monthly_postpaid'
-        ? 'Module activated. Usage will be collected on your monthly due date.'
+        ? 'Module activated; nothing was debited today. Usage will be collected on your monthly due date.'
         : result?.chargedCredits === '0.00'
         ? 'Your purchased module access is active. No additional credits charged.'
         : `${bundle.name} enabled. ${credits(result.chargedCredits)} credits charged by the server.`);
@@ -381,6 +381,7 @@ export function CreditWorkspace({ section = 'overview' }) {
               <button className="primary" type="button" disabled={busy !== '' || !status.allow || featureAccess.billingStatus?.blocked}
                 onClick={() => buyBundle(bundle)}>
                 {busy === `bundle:${bundle.id}` ? 'Saving…'
+                  : !status.allow && !bundle.active ? status.label
                   : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
                   : bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY' ? 'Included Free'
                   : bundle.billingMode === 'monthly_postpaid' ? (bundle.active ? 'Active' : 'Activate monthly billing') : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
