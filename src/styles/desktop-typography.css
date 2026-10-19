@@ -165,3 +165,24 @@
 @media screen and (max-width: 767px) {
   :root { --cg-text-title: 22px; --cg-text-section: 17px; }
 }
+
+/* Staff overview hierarchy: title above tabs, restrained medium emphasis. */
+@media screen {
+  #root .app-shell .cg-staff-management .staff-overview-page-heading {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  #root .app-shell .cg-staff-management .staff-overview-page-heading h1,
+  #root .app-shell .cg-staff-management .staff-simple-list-head h3,
+  #root .app-shell .cg-staff-management .staff-simple-metrics strong,
+  #root .app-shell .cg-staff-management .staff-dashboard-tab.active,
+  #root .app-shell .cg-staff-management .staff-dashboard-tab.active span {
+    font-weight: 500 !important;
+  }
+  #root .app-shell .cg-staff-management .staff-overview-page-heading p {
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+}
