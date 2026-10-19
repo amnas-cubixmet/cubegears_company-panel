@@ -10,6 +10,11 @@ import { ROLE_PERMISSION_MODULES } from '../src/config/rolePermissions.js';
 import { dashboardMock } from '../src/mock/dashboard.mock.js';
 import { mockStaffList } from '../src/mock/staff.mock.js';
 import { customersMock } from '../src/mock/customers.mock.js';
+import { vehiclesMock } from '../src/mock/vehicles.mock.js';
+import { jobsMock } from '../src/mock/jobs.mock.js';
+import { invoicesMock } from '../src/mock/invoices.mock.js';
+import { paymentsMock } from '../src/mock/payments.mock.js';
+import { expensesMock } from '../src/mock/expenses.mock.js';
 
 const port = Number(process.env.UI_TEST_PORT || 5184);
 const baseURL = `http://127.0.0.1:${port}`;
@@ -29,8 +34,38 @@ const bundles = [
 ];
 function fixture(path) {
   if(path==='/auth/me') return user;
+  if(path==='/billing/documents/gst-context') return {registered:false};
+  if(path.startsWith('/billing/documents')) {
+    const document={id:'INV-0001',number:'INV-0001',kind:'invoice',invoiceType:'regular',
+      status:'Draft',date:'2026-10-19',seller:{name:'Test Workshop'},
+      customer:{name:'Rahul Kumar'},vehicle:{registration:'KL10AB1234'},items:[],
+      discount:0,adjustment:0,taxMode:'none',paid:0};
+    return path==='/billing/documents'?[document]:document;
+  }
+  if(path.startsWith('/payroll/daily-wages/employees/')) return {
+    employee:mockStaffList[0], currentRate:600, currentBalance:600, totalEarned:600, totalPaid:0,
+    today:{date:'2026-10-19', finalized:true, attendance:'Full Day', totalWage:600, baseWage:600, extraEarnings:0},
+    rates:[],history:[],extras:[],payments:[],audit:[],
+  };
+  if(path.startsWith('/saas/storage/history/')) return {
+    date:'2026-10-19', usedGb:0, fileCount:0, files:[], charge:0, rate:null,
+  };
+  if(path.startsWith('/attendance-manager/staff-details/')) return {
+    staffInfo:{id:'EMP-0012', name:'Ajmal K', designation:'Mechanic', branch:'Main', shift:'General'},
+    attendanceSummary:{date:'2026-10-19', status:'Present', workedHours:'8h', lateMinutes:0, earlyExitMinutes:0},
+    sessions:[], correctionInfo:null, leaveInfo:null, auditHistory:[],
+  };
+  if(path==='/e-way-bills') return [];
+  if(path.startsWith('/e-way-bills/')) return {id:'EWB-001',status:'Draft',supplyType:'Outward',subSupplyType:'Supply',transactionType:'Regular',documentType:'Tax Invoice',documentNo:'INV-0001',documentDate:'2026-10-19',from:{tradeName:'Test Workshop',stateCode:'32'},to:{tradeName:'Test Customer',stateCode:'32'},items:[],transport:{mode:'Road',distanceKm:'10',vehicleNo:'KL10AB1234'}};
   if(path==='/employees') return mockStaffList.map(row => ({...row, photo:''}));
-  if(path==='/customers') return customersMock;
+  const records = {employees:mockStaffList, customers:customersMock, vehicles:vehiclesMock,
+    jobs:jobsMock, invoices:invoicesMock, payments:paymentsMock, expenses:expensesMock};
+  const [,resource,id,subresource] = path.split('/');
+  if(records[resource] && !subresource) {
+    if(!id) return records[resource];
+    const row=records[resource].find(row=>row.id===id);
+    if(row) return {...row, photo:'', ...(resource==='invoices'?{items:[],invoiceType:'non-gst'}:{})};
+  }
   if(path==='/saas/credits/access') return {companyId:'company-a',permissions,enabledModules:permissions.map(code=>code.split('.')[0]),freeModules:['dashboard','staff','settings','roles','billing'],enforcementEnabled:true,isCompanyOwner:true,canManageFeatures:true};
   if(path==='/dashboard') return structuredClone(dashboardMock);
   if(path==='/settings') return settings;
@@ -47,8 +82,14 @@ function fixture(path) {
   return [];
 }
 const source = readFileSync(new URL('../src/routes/AppRoutes.jsx', import.meta.url),'utf8');
-const paths = [...source.matchAll(/<Route path="([^"]+)" element=\{<([A-Za-z]+)/g)]
-  .filter(([,path,component])=>!path.includes(':') && !['Navigate','RootRedirect'].includes(component)).map(([,path])=>path).filter(path=>!process.env.UI_PATH_FILTER||path.includes(process.env.UI_PATH_FILTER));
+const sampleIds={staffId:'EMP-0012', complaintId:'CMP-01', ewbId:'EWB-001', date:'2026-10-19'};
+const templates=[...source.matchAll(/<Route path="([^"]+)"/g)].map(([,path])=>path);
+const paths=[...new Set(templates.map(path=>path.replace(/:([A-Za-z]+)/g,(_,key)=>{
+  if(sampleIds[key])return sampleIds[key];
+  if(path.startsWith('/staff/'))return 'EMP-0012';
+  return ({customers:'CUS-0001',vehicles:'VEH-0001',jobs:'JOB-00251',invoices:'INV-0001',
+    payments:'PAY-0001',expenses:'EXP-0001',services:'SVC-001',reports:'REP-001',notifications:'NOT-001'})[path.split('/')[1]] || 'fixture-id';
+}).replace('*','fixture-unknown')))].filter(path=>!process.env.UI_PATH_FILTER||path.includes(process.env.UI_PATH_FILTER));
 const profiles = process.env.UI_QUICK ? [{width:390,height:844,theme:'light'}] : [
   {width:1440,height:1000,theme:'light'}, {width:768,height:1024,theme:'dark'},
   {width:390,height:844,theme:'light'}, {width:360,height:800,theme:'dark'},
@@ -66,7 +107,7 @@ try {
   browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--use-gl=disabled']}: {})});
   const failures=[];
   let tested=0;
-  for(const profile of profiles) {
+  await Promise.all(profiles.map(async (profile) => {
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},colorScheme:profile.theme==='dark'?'dark':'light'});
     await context.addInitScript(({user,theme})=>{
       localStorage.setItem('auth_token','fixture-token');localStorage.setItem('auth_user',JSON.stringify(user));localStorage.setItem('cubegears-theme',theme);
@@ -86,19 +127,27 @@ try {
     page.setDefaultTimeout(5000);
     page.on('pageerror',error=>errors.push(error.message));
     page.on('console',message=>{if(message.type()==='error'&&message.text().includes('React render error'))errors.push(message.text());});
-    let reload=true;
+    let firstNavigation=true;
     for(const path of paths) {
       console.log(`Checking ${profile.width}px ${path}`);
       errors.length=0;
       try {
-        if(reload){await page.goto(baseURL+path,{waitUntil:'networkidle',timeout:15000});reload=false;}
-        else {
+        if(firstNavigation) {
+          await page.goto(baseURL+path,{waitUntil:'networkidle',timeout:15000});
+          firstNavigation=false;
+        } else {
           await page.evaluate(path=>{
             window.history.pushState({},'',path);
             window.dispatchEvent(new PopStateEvent('popstate'));
           },path);
           await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
           await page.waitForLoadState('networkidle');
+        }
+        await page.waitForFunction(()=>document.body.innerText.length>=20);
+        if(path==='/plans' || path==='/signup') {
+          const expected=path==='/plans'?'/account/credits/buy':'/login';
+          if(new URL(page.url()).pathname!==expected) throw Error('Redirect did not reach '+expected);
+          if(new URL(page.url()).searchParams.has('month')) throw Error('Payroll filters leaked into unrelated route');
         }
         const text=await page.locator('body').innerText();
         if(text.length<20)throw Error('Blank page');
@@ -165,16 +214,16 @@ try {
         }
         tested++;
       } catch(error) {
-        reload=true;
+        firstNavigation=true;
         const name=`${profile.width}-${profile.theme}-${path.replace(/\W+/g,'-')}`;
-        failures.push(`${profile.width}/${profile.theme} ${path}: ${error.message}`);
+        failures.push(`${profile.width}/${profile.theme} ${path} (at ${page.url()}): ${error.message}`);
         console.error(failures.at(-1));
         await page.screenshot({path:join(artifacts,name+'.png'),timeout:2000}).catch(()=>{});
       }
     }
     await context.close();
     console.log(`Checked ${paths.length} routes at ${profile.width}px (${profile.theme})`);
-  }
+  }));
   if(failures.length){console.error(failures.join('\n'));throw Error(`${failures.length} UI checks failed; screenshots: ${artifacts}`);}
   console.log(`PASS ${tested} page checks: ${paths.length} routes, ${profiles.length} viewport/theme profiles. API responses are test fixtures.`);
 } finally {await browser?.close();server.kill();}

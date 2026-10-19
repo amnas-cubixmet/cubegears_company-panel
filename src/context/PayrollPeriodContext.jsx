@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 const PayrollPeriodContext = createContext();
 
@@ -12,6 +12,9 @@ export const YEARS = [2024, 2025, 2026, 2027];
 
 export const PayrollPeriodProvider = ({ children }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { pathname } = useLocation();
+  const isPayrollPage = /^\/payroll\/(?:daily-wages(?:\/history)?|payments)\/?$/.test(pathname)
+    || /^\/staff\/[^/]+\/wages\/?$/.test(pathname);
 
   const currentMonthName = MONTHS[new Date().getMonth()] || 'September';
   const currentYearNum = new Date().getFullYear() || 2026;
@@ -34,6 +37,9 @@ export const PayrollPeriodProvider = ({ children }) => {
 
   // Sync state changes with URL query parameters so page refresh / direct links preserve filter state
   useEffect(() => {
+    // Global filter writes can race <Navigate> and strand unrelated routes
+    // on a blank page. Only canonical payroll pages own these query keys.
+    if (!isPayrollPage) return;
     const params = new URLSearchParams(searchParams);
     if (selectedMonth) params.set('month', selectedMonth);
     if (selectedYear) params.set('year', selectedYear.toString());
@@ -49,7 +55,7 @@ export const PayrollPeriodProvider = ({ children }) => {
     ) {
       setSearchParams(params, { replace: true });
     }
-  }, [selectedMonth, selectedYear, selectedBranch, selectedStaff]);
+  }, [selectedMonth, selectedYear, selectedBranch, selectedStaff, isPayrollPage, pathname, searchParams, setSearchParams]);
 
   const periodString = `${selectedMonth} ${selectedYear}`;
 
