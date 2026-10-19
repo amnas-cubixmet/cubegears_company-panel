@@ -65,10 +65,6 @@ export const SimpleStaffOverview = () => {
   return (
     <div className="staff-simple-overview">
       <header className="staff-simple-toolbar">
-        <div>
-          <h2>Staff Overview</h2>
-          <p>Current staff records from your workshop database.</p>
-        </div>
         <div className="staff-simple-toolbar-actions">
           {canManageRoles && (
             <button type="button" className="staff-simple-secondary" onClick={() => navigate('/staff-management/roles')}>
