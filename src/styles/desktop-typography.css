@@ -88,6 +88,36 @@
     line-height: 1.5;
   }
 
+  /* Sidebar section labels stay quiet; active links use color, not bold. */
+  #root .app-shell .sidebar-nav { padding: 16px 10px; }
+  #root .app-shell .sidebar-sections { gap: 20px; }
+  #root .app-shell .sidebar-section { gap: 6px; }
+  #root .app-shell .sidebar-section-title {
+    padding: 0 12px 2px;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+  }
+  #root .app-shell .sidebar-items { gap: 4px; }
+  #root .app-shell .sidebar-nav-item {
+    border-radius: 10px;
+    line-height: 1.5;
+  }
+  #root .app-shell .sidebar-nav-icon {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+  #root .app-shell .sidebar-nav-item.is-icon-only {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  #root .app-shell .sidebar-nav-item:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
   /* Page families: dashboard / jobs / customers / staff / billing / settings.
      Reflow header actions instead of compressing labels as text grows. */
   #root :is(.app-shell, .saas-account-shell)
