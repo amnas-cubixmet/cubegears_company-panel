@@ -54,10 +54,11 @@ export const roleService = {
     return list.map(normalizeRole);
   },
 
-  getAssignableRoles: async () => {
-    const rows = await apiClient.get('/roles/?assignable=1');
-    return (Array.isArray(rows) ? rows : rows?.results || []).map(normalizeRole);
-  },
+  previewLegacyRoles: async () => apiClient.get('/roles/legacy-presets/'),
+
+  removeLegacyRoles: async (roleIds) => apiClient.post(
+    '/roles/legacy-presets/', { roleIds },
+  ),
 
   createRole: async (roleData) => {
     const created = await apiClient.post('/roles/', toApiPayload(roleData));

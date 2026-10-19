@@ -6349,36 +6349,43 @@
   }
 }
 
-/* Compact responsive Staff tabs; never hide complete route names. */
-.cg-staff-management .staff-dashboard-tabs { padding: 6px; }
-.cg-staff-management .staff-dashboard-tabs__rail {
+/* Historic signup presets can be reviewed and removed by the company owner
+   only. This never edits the protected owner role or staff assignments. */
+.cg-staff-management .roles-legacy-review {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  border: 1px solid var(--staff-border);
+  background: var(--staff-soft);
+  border-radius: 12px;
+  padding: 18px 20px;
 }
-.cg-staff-management .staff-dashboard-tab {
-  flex: 0 0 auto;
-  min-width: max-content;
-  min-height: 44px;
-  height: auto;
-  padding: 10px 16px;
-  font-size: 14px;
-  line-height: 1.35;
+.cg-staff-management .roles-legacy-review > div { flex: 1 1 300px; min-width: 0; }
+.cg-staff-management .roles-legacy-review h3 {
+  font-size: 18px; font-weight: 750; margin: 0 0 7px;
 }
-.cg-staff-management .staff-dashboard-tab span {
-  overflow: visible;
-  text-overflow: clip;
+.cg-staff-management .roles-legacy-review p {
+  color: var(--text-secondary); margin: 0; line-height: 1.5;
 }
-@media (min-width: 1024px) {
-  .cg-staff-management .staff-dashboard-tab {
-    font-size: 16px !important;
-  }
+.cg-staff-management .roles-legacy-review ul {
+  display: flex; flex-wrap: wrap; gap: 7px; list-style: none;
+  padding: 0; margin: 12px 0 0;
+}
+.cg-staff-management .roles-legacy-review li {
+  background: var(--staff-surface); border: 1px solid var(--staff-border);
+  border-radius: 8px; padding: 6px 10px;
+}
+.cg-staff-management .roles-legacy-review button {
+  border-radius: 9px; background: var(--staff-surface); border: 1px solid var(--danger, #be123c);
+  color: var(--danger, #be123c); font: inherit; font-weight: 700;
+  min-height: 44px; padding: 10px 16px; cursor: pointer;
+}
+.cg-staff-management .roles-legacy-review button:disabled {
+  opacity: .5; cursor: not-allowed;
 }
 @media (max-width: 600px) {
-  .cg-staff-management .staff-dashboard-tab {
-    min-height: 42px;
-    padding-inline: 12px;
-    font-size: 14px;
-  }
+  .cg-staff-management .roles-legacy-review { padding: 14px; }
+  .cg-staff-management .roles-legacy-review button { width: 100%; }
 }
