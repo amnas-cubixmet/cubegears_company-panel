@@ -15,7 +15,8 @@ test('company roles come only from Django, with a separate old-seed preview', ()
 
 test('preview and cleanup controls are company-owner-only and explicitly confirmed', () => {
   const page = read('src/pages/staff-management/UserRoles.jsx');
-  assert.match(page, /const \{ isCompanyOwner \} = useFeatureAccess\(\)/);
+  assert.match(page, /const featureAccess = useFeatureAccess\(\)/);
+  assert.match(page, /const \{ isCompanyOwner \} = featureAccess;/);
   assert.match(page, /if \(isCompanyOwner\) \{\s*try \{\s*const preview = await roleService\.previewLegacyRoles\(\)/);
   assert.match(page, /if \(!isCompanyOwner \|\| cleanupBusy \|\| !legacyPresetRoles\.length\) return/);
   assert.match(page, /const confirmed = await appConfirm\(/);

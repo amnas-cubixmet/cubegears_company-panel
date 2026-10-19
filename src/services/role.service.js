@@ -1,4 +1,5 @@
 import apiClient from '../api/apiClient';
+import { isAssignableStaffRole } from '../utils/isAssignableStaffRole';
 import {
   permissionCodesToMatrix,
   permissionMatrixToCodes
@@ -52,6 +53,14 @@ export const roleService = {
     const rows = await apiClient.get('/roles/');
     const list = Array.isArray(rows) ? rows : rows?.results || [];
     return list.map(normalizeRole);
+  },
+
+  // Only real, active staff roles may be assigned to a staff account/profile.
+  // The backend scopes GET /roles/ to the logged-in company; never return
+  // the protected SUPER_ADMIN owner role or inactive roles in dropdowns.
+  getAssignableRoles: async () => {
+    const roles = await roleService.getRoles();
+    return roles.filter(isAssignableStaffRole);
   },
 
   previewLegacyRoles: async () => apiClient.get('/roles/legacy-presets/'),
