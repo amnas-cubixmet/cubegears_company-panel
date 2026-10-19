@@ -54,6 +54,19 @@ export const roleService = {
     return list.map(normalizeRole);
   },
 
+  // Only real, active staff roles may be assigned to a staff account/profile.
+  // The backend scopes GET /roles/ to the logged-in company; never return
+  // the protected SUPER_ADMIN owner role or inactive roles in dropdowns.
+  getAssignableRoles: async () => {
+    const roles = await roleService.getRoles();
+    return roles.filter(role =>
+      role.isProtected !== true &&
+      role.is_system !== true &&
+      role.is_active !== false &&
+      role.status !== 'Inactive'
+    );
+  },
+
   previewLegacyRoles: async () => apiClient.get('/roles/legacy-presets/'),
 
   removeLegacyRoles: async (roleIds) => apiClient.post(
