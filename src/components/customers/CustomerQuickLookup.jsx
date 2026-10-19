@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ChevronRight, ClipboardList, Search, Wrench } from 'lucide-react';
 
 export const CustomerQuickLookup = ({

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { HardHat, Plus, RefreshCcw, X } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OutsideLabourPanel } from '../../components/jobs/OutsideLabourPanel';

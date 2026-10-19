@@ -1,4 +1,4 @@
-import React, { forwardRef, useId } from 'react';
+import { forwardRef, useId } from "react";
 import { Label } from './Label';
 
 export const Input = forwardRef(function Input({ label, error, helper, success, required = false, disabled = false, icon: Icon, rightIcon: RightIcon, containerStyle, style, className = '', id, ...props }, ref) {

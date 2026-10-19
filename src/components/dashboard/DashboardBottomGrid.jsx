@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { FinancePanel } from './FinancePanel';
 import { QuickActionsPanel } from './QuickActionsPanel';
 import { WorkshopStaffPanel } from './WorkshopStaffPanel';

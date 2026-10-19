@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AlertTriangle, CalendarDays, ClockAlert, UserRoundMinus } from 'lucide-react';
 
 export const AttendanceAttentionPanel = ({

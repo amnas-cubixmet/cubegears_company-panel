@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Clock3, LogIn, LogOut, MapPin, Repeat2 } from 'lucide-react';
 import { attendanceService } from '../../services/attendance.service';
 

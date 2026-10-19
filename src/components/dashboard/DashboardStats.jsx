@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AlertTriangle, Car, CheckCircle2, Wrench } from 'lucide-react';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 

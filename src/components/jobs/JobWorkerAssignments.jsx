@@ -1,5 +1,5 @@
 import { appConfirm } from '../common/appDialogs';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { Plus, Trash2, UsersRound } from 'lucide-react';
 import { payrollService } from '../../services/payroll.service';
 import { useAuth } from '../../hooks/useAuth';

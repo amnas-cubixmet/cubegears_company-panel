@@ -1,21 +1,7 @@
 import { appConfirm } from '../../components/common/appDialogs';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import {
-  BarChart3,
-  Calendar,
-  CheckCircle2,
-  CircleDollarSign,
-  Edit3,
-  Eye,
-  FileText,
-  IndianRupee,
-  Layers3,
-  Receipt,
-  Trash2,
-  Upload,
-  WalletCards
-} from 'lucide-react';
+import { BarChart3, Calendar, CheckCircle2, CircleDollarSign, Edit3, FileText, IndianRupee, Layers3, Receipt, Trash2, Upload, WalletCards } from "lucide-react";
 import { expenseService } from '../../services/expense.service';
 import {
   ExpenseListView,

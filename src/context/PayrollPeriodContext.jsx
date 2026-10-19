@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
 import { useLocation, useSearchParams } from 'react-router-dom';
 
 const PayrollPeriodContext = createContext();

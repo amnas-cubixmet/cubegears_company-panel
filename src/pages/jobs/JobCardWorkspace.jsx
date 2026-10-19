@@ -1,24 +1,6 @@
 import { appConfirm } from '../../components/common/appDialogs';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  CheckCircle2,
-  Clock3,
-  FileText,
-  Gauge,
-  History,
-  PackageSearch,
-  Plus,
-  ReceiptText,
-  ShieldCheck,
-  Star,
-  Trash2,
-  UserRound,
-  Wrench,
-  ChevronRight,
-  ChevronDown,
-  Download,
-  LockKeyhole
-} from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CheckCircle2, Clock3, FileText, Gauge, History, PackageSearch, Plus, ReceiptText, ShieldCheck, Star, UserRound, Wrench, ChevronRight, Download, LockKeyhole } from "lucide-react";
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';

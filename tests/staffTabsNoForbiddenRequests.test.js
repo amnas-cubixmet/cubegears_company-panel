@@ -23,8 +23,11 @@ test('Staff Management restores only five useful authorized tabs', () => {
   for (const extra of ["label: 'Performance'", "label: 'Documents'", "label: 'Reports'"]) {
     assert.ok(!tabs.includes(extra), extra);
   }
-  assert.match(styles, /min-width: max-content/);
-  assert.match(styles, /overflow-x: auto/);
+  // The current rail fits its container while its non-wrapping tab items
+  // can scroll on phones. The old max-content rail overflowed the page.
+  assert.match(styles, /\.staff-dashboard-tabs__rail\s*\{[^}]*min-width:\s*0/);
+  assert.match(styles, /\.staff-dashboard-tabs__rail\s*\{[^}]*overflow-x:\s*auto/);
+  assert.match(styles, /\.staff-dashboard-tab\s*\{[^}]*flex:\s*1 0 96px/);
 });
 
 test('Staff profile does not call paid Jobs from its default free overview', () => {

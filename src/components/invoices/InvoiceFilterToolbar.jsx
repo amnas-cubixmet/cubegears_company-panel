@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Filter, Search } from 'lucide-react';
 
 export const InvoiceFilterToolbar = ({

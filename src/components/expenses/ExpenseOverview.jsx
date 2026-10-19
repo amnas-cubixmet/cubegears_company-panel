@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ReceiptText, Tags, Workflow } from 'lucide-react';
 
 export const ExpenseOverview=({expenses,categoryTotals,formatMoney,onOpen})=><section className="expense-dashboard-bottom-grid">

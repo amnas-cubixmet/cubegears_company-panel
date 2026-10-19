@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Search } from 'lucide-react';
 
 export const ServiceFilterToolbar = ({ query,onQueryChange,categoryFilter,onCategoryChange,statusFilter,onStatusChange,categories }) => (

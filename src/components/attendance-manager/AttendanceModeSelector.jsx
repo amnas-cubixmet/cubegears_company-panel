@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Clock3, LogIn, Repeat2, TimerReset } from 'lucide-react';
 
 const modes = [

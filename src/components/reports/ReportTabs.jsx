@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BarChart3, IndianRupee, LayoutDashboard, Package, WalletCards } from 'lucide-react';
 const tabs = [
   ['overview', 'Overview', LayoutDashboard],

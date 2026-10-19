@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from "react";
 import { WalletCards } from 'lucide-react';
 import { payTypeLabel } from '../payroll/payTypes';
 

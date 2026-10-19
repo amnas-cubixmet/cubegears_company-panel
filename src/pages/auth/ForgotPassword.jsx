@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { ArrowLeft, Link2, Mail, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { authRecoveryService } from '../../services/authRecovery.service';

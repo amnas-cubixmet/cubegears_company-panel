@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CalendarDays, UserCheck, UserPlus, Users } from 'lucide-react';
 
 export const StaffOverviewStats = ({ overview }) => {

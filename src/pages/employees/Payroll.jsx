@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Table } from '../../components/common/Table';
 import { MobileCard } from '../../components/common/MobileCard';
 import { Badge } from '../../components/common/Badge';

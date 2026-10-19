@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { AccountHeader } from '../../components/account';
 import { Eye, EyeOff, KeyRound, Link2, Lock, ShieldCheck } from 'lucide-react';

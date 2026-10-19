@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AlertTriangle, FileWarning, UserMinus, UserX, Wrench } from 'lucide-react';
 
 export const StaffAttentionPanel = ({

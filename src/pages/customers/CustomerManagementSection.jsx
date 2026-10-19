@@ -1,10 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import {
-  Users, UserPlus, Repeat2, Car, IndianRupee, Search, Phone, MessageSquare,
-  Wrench, FileText, AlertTriangle, CalendarClock, ClipboardList, ChevronRight,
-  Building2, Gauge, PackageCheck, TrendingUp, UserX
-} from 'lucide-react';
+import { Users, UserPlus, Repeat2, Car, IndianRupee, Phone, MessageSquare, Wrench, FileText, AlertTriangle, CalendarClock, ChevronRight, Building2, Gauge, PackageCheck, TrendingUp, UserX } from "lucide-react";
 import { CustomerOverview } from '../../components/customers/CustomerOverview';
 import { customerService } from '../../services/customer.service';
 

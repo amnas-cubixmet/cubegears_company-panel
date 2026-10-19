@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Activity, IndianRupee, Layers3, Wrench } from 'lucide-react';
 
 export const ServiceOverviewStats = ({ metrics, formatMoney }) => {

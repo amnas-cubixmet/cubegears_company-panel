@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const FormPage = ({ title, description, children, className = '', style = {} }) => {
   return (

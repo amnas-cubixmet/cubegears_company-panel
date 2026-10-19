@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Car, IndianRupee, Repeat2, Users } from 'lucide-react';
 
 export const CustomerOverviewStats = ({ metrics, formatMoney }) => {

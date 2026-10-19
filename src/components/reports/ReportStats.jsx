@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { TrendingUp, IndianRupee, Package, ReceiptText, WalletCards, Landmark } from 'lucide-react';
 
 export const ReportStats = ({ report, formatMoney }) => {

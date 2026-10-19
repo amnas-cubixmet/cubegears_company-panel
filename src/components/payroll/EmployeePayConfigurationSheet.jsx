@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { Save, WalletCards } from 'lucide-react';
 import { ResponsiveModalSheet } from '../common/ResponsiveModalSheet';
 import { dailyWageService } from '../../services/dailyWage.service';

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { UsersRound } from 'lucide-react';
 
 export const CustomerManagementHeader = () => (

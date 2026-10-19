@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FormPage } from '../../components/common/forms/FormPage';
 import { FormSection } from '../../components/common/forms/FormSection';

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Clock3, UserCheck, Users, UserX } from 'lucide-react';
 
 export const AttendanceStats = ({ stats }) => {

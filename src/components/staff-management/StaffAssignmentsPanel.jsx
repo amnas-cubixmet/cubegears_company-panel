@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Briefcase } from 'lucide-react';
 
 export const StaffAssignmentsPanel = ({ assignments, staff }) => (

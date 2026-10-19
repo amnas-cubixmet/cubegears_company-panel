@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { FormPage } from '../../components/common/forms/FormPage';
 import { FormSection } from '../../components/common/forms/FormSection';
@@ -10,7 +10,7 @@ import { PhoneInput } from '../../components/common/PhoneInput';
 import { Checkbox } from '../../components/common/Checkbox';
 import { customerService } from '../../services/customer.service';
 import { CustomerManagementTabs } from '../../components/customers/CustomerManagementTabs';
-import { User, Phone, Mail, MapPin, Building, FileText, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Building, CheckCircle2 } from "lucide-react";
 
 export const AddCustomer = () => {
   const navigate = useNavigate();

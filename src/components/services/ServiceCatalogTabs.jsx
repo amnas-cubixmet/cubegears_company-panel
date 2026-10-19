@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Layers3, Wrench } from 'lucide-react';
 
 export const ServiceCatalogTabs = ({ activeView, onChange }) => (

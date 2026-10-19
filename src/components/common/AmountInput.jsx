@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { IndianRupee } from 'lucide-react';
 
 export const AmountInput = ({

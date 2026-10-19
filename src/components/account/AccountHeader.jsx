@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 import { useLocation } from 'react-router-dom';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { FilePenLine, HardDrive, ShieldCheck, Coins, Zap, FileClock, CreditCard } from 'lucide-react';

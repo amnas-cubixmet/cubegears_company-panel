@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Car, History, WalletCards, Wrench } from 'lucide-react';
 import { jobMoney } from './jobs.utils';
 

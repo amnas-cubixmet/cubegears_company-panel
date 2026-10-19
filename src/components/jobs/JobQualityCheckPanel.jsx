@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 import { AlertCircle, CheckCircle2, ClipboardCheck, Save, ShieldCheck, XCircle } from 'lucide-react';
 import { jobService } from '../../services/job.service';
 import { USE_MOCK_API } from '../../api/apiConfig';

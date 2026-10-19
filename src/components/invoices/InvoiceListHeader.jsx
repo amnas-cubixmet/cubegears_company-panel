@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Plus, ReceiptText } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';

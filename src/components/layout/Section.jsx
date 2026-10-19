@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const Section = ({ title, description, children, className = '' }) => (
   <section className={['ui-section flex w-full min-w-0 flex-col gap-3', className].join(' ').trim()}>

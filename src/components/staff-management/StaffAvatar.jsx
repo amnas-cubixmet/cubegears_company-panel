@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 import { getStaffInitials } from './staffDisplay';
 
 export const StaffAvatar = ({ staff, size = 'md', className = '' }) => {

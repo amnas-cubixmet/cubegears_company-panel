@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Banknote, CheckCircle2, Clock3, RotateCcw } from 'lucide-react';
 
 export const PaymentOverviewStats = ({ payments, formatMoney }) => {

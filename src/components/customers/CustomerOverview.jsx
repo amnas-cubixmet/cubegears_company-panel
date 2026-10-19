@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { CustomerOutstandingPanel } from './CustomerOutstandingPanel';
 import { CustomerOverviewStats } from './CustomerOverviewStats';
 import { CustomerQuickActions } from './CustomerQuickActions';

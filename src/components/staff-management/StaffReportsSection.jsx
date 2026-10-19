@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Activity, Building2, Download, FileText, Users } from 'lucide-react';
 import { getEmployeeLabel } from './staffDisplay';
 

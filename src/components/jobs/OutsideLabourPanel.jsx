@@ -1,5 +1,5 @@
 import { appConfirm } from '../common/appDialogs';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, ClipboardList, HardHat, Plus, RefreshCcw, Search, TrendingUp, Trash2, Wallet, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';

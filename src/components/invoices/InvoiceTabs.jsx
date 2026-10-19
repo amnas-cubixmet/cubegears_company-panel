@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { FileText, ReceiptText, Truck } from 'lucide-react';
 
 export const InvoiceTabs = ({ activeTab, onChange, onEWayBills }) => (

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useMemo, useState } from 'react';
+import { createContext, useCallback, useMemo, useState } from "react";
 import { useAuth } from '../hooks/useAuth';
 
 export const CompanyContext = createContext(null);

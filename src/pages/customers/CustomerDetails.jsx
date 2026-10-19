@@ -1,5 +1,5 @@
 import { appConfirm } from '../../components/common/appDialogs';
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from 'react-router-dom';
 import { customerService } from '../../services/customer.service';
 import { paymentService } from '../../services/payment.service';
@@ -16,34 +16,7 @@ import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
 import { AmountInput } from '../../components/common/AmountInput';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
-import {
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  Car,
-  ClipboardCheck,
-  FileText,
-  CreditCard,
-  Clock,
-  Plus,
-  Wrench,
-  Edit,
-  Pencil,
-  Archive,
-  MoreVertical,
-  Calendar,
-  Building,
-  CheckCircle2,
-  AlertTriangle,
-  MessageSquare,
-  Search,
-  Tag,
-  ShieldCheck,
-  Check,
-  Trash2,
-  Upload
-} from 'lucide-react';
+import { User, Phone, Mail, MapPin, Car, ClipboardCheck, FileText, CreditCard, Clock, Plus, Wrench, Edit, Pencil, Archive, MoreVertical, Calendar, Building, CheckCircle2, MessageSquare, Trash2, Upload } from "lucide-react";
 
 export const CustomerDetails = () => {
   const { id } = useParams();

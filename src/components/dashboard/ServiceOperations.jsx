@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { Plus } from 'lucide-react';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { ActiveRepairPanel } from './ActiveRepairPanel';

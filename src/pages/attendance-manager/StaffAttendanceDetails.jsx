@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Calendar, Shield, Plus, CheckCircle2, AlertCircle, FileText, User, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { Clock, Plus, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { attendanceManagerService } from '../../services/attendanceManager.service';
 import { overtimeService } from '../../services/overtime.service';
 import { AddOvertimeSheet } from '../../components/payroll/AddOvertimeSheet';

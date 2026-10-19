@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BarChart3, Layers3, LayoutDashboard, ReceiptText } from 'lucide-react';
 
 const tabs=[['overview','Overview',LayoutDashboard],['expenses','All Expenses',ReceiptText],['categories','Categories',Layers3],['reports','Reports',BarChart3]];

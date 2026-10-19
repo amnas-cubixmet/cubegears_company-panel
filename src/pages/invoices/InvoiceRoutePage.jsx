@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Download, Edit3, Eye, FileText, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { customerService } from '../../services/customer.service';

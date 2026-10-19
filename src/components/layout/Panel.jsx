@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const Panel = ({ children, className = '', ...props }) => (
   <section
