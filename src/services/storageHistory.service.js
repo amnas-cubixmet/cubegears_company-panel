@@ -121,7 +121,18 @@ export const getStorageEvents = async ({ from, to, limit = 50, offset = 0 } = {}
   return apiClient.get(`/saas/storage/events?${params.toString()}`);
 };
 
+export const getStorageIntervalLogs = async ({ from, to, limit = 50, offset = 0 } = {}) => {
+  if (USE_MOCK_API) return { count: 0, results: [] };
+  const params = new URLSearchParams();
+  if (from) params.set('from', from);
+  if (to) params.set('to', to);
+  params.set('limit', String(limit));
+  params.set('offset', String(offset));
+  return apiClient.get(`/saas/storage/interval-logs?${params.toString()}`);
+};
+
 export const storageHistoryService = {
+  getStorageIntervalLogs,
   getStorageEvents,
   getStorageHistory,
   getStorageDay,

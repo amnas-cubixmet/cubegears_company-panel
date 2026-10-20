@@ -136,6 +136,10 @@ function StorageView({ storage, setStorage }) {
   const [eventCount, setEventCount] = useState(0);
   const [eventError, setEventError] = useState('');
   const [eventsLoading, setEventsLoading] = useState(!USE_MOCK_API);
+  const [intervalLogs, setIntervalLogs] = useState([]);
+  const [intervalCount, setIntervalCount] = useState(0);
+  const [intervalError, setIntervalError] = useState('');
+  const [intervalsLoading, setIntervalsLoading] = useState(!USE_MOCK_API);
   const [audit, setAudit] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cubixgear-storage-audit') || '[]'); } catch { return []; }
   });
@@ -172,9 +176,28 @@ function StorageView({ storage, setStorage }) {
     }
   };
 
+  const refreshIntervals = async (start = from, end = to, append = false) => {
+    if (USE_MOCK_API) return;
+    setIntervalsLoading(true);
+    try {
+      const payload = await storageHistoryService.getStorageIntervalLogs({
+        from: start, to: end, offset: append ? intervalLogs.length : 0,
+      });
+      setIntervalLogs(old => append ? [...old, ...(payload?.results || [])] : (payload?.results || []));
+      setIntervalCount(Number(payload?.count || 0));
+      setIntervalError('');
+    } catch (error) {
+      if (!append) setIntervalLogs([]);
+      setIntervalError(error?.message || 'Could not load interval logs.');
+    } finally {
+      setIntervalsLoading(false);
+    }
+  };
+
   useEffect(() => {
     refreshHistory();
     refreshEvents();
+    refreshIntervals();
   }, []);
 
   const log = (action, details) => {
@@ -196,6 +219,7 @@ function StorageView({ storage, setStorage }) {
     setTo(nextTo);
     refreshHistory(nextFrom, nextTo);
     refreshEvents(nextFrom, nextTo);
+    refreshIntervals(nextFrom, nextTo);
   };
 
   const upload = async (event) => {
@@ -271,7 +295,7 @@ function StorageView({ storage, setStorage }) {
 
       {storage.billing && <section className="saas-card saas-wide"><h2>Storage billing</h2>
         <p>{storage.billing.creditsPerGb} credits / GB / {storage.billing.period}. Free allowance: {storage.billing.includedGb} GB.</p>
-        <p>Meter interval: {storage.billing.meterIntervalSeconds} seconds. {storage.billing.active ? 'Billing enabled' : 'Billing disabled'}.</p>
+        <p>Billing meter interval: {storage.billing.meterIntervalHours ?? (Number(storage.billing.meterIntervalSeconds || 0) / 3600)} hours. {storage.billing.active ? 'Billing enabled' : 'Billing disabled'}. Read-only monitoring has a separate schedule.</p>
         <p>Deleting a file stops future storage use; previously recorded usage remains payable. Monthly charges and due dates appear in Account → Logs.</p>
       </section>}
       <section className="saas-card saas-wide storage-history-card">
@@ -285,7 +309,7 @@ function StorageView({ storage, setStorage }) {
           <div className="storage-custom-range">
             <label><span>From</span><input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setRangePreset('custom'); }} /></label>
             <label><span>To</span><input type="date" value={to} onChange={(e) => { setTo(e.target.value); setRangePreset('custom'); }} /></label>
-            <button onClick={() => { refreshHistory(); refreshEvents(); }}>Apply</button>
+            <button onClick={() => { refreshHistory(); refreshEvents(); refreshIntervals(); }}>Apply</button>
           </div>
         </div>
 
@@ -310,6 +334,41 @@ function StorageView({ storage, setStorage }) {
             </button>
           ))}
         </div>
+      </section>
+
+      <section className="saas-card saas-wide storage-interval-card">
+        <div className="saas-card-head">
+          <div><span className="saas-kicker">SAVED INTERVALS</span><h2>Storage interval logs</h2></div>
+          <span>{intervalLogs.length} of {intervalCount} recorded readings</span>
+        </div>
+        <p className="saas-muted">Actual monitoring checkpoints and billing meter readings. Monitoring does not debit credits, and missed scheduler intervals are not invented.</p>
+        {intervalError && <p className="saas-error" role="alert">{intervalError}</p>}
+        {intervalsLoading && <p className="saas-loading" role="status">Loading recorded intervals…</p>}
+        <div className="saas-table-wrap">
+          <table className="saas-table">
+            <thead><tr><th scope="col">Recorded at</th><th scope="col">Source</th><th scope="col">Storage</th><th scope="col">Files</th><th scope="col">Interval / covered</th><th scope="col">Accrued credits</th></tr></thead>
+            <tbody>
+              {intervalLogs.map(row => (
+                <tr key={row.id}>
+                  <td>{new Date(row.sampledAt).toLocaleString('en-IN')}</td>
+                  <td>{row.source === 'monitoring' ? 'Monitoring' : row.source === 'monthly_meter' ? 'Monthly meter' : 'Legacy meter'}</td>
+                  <td>{Number(row.usedGb || 0).toFixed(3)} GB</td>
+                  <td>{row.fileCount ?? '—'}</td>
+                  <td>{row.intervalSeconds != null ? `${Number(row.intervalSeconds / 3600).toFixed(2)} h interval` : row.coveredSeconds != null ? `${Number(row.coveredSeconds / 3600).toFixed(2)} h covered` : '—'}</td>
+                  <td>{row.accruedCredits == null ? 'Not billed' : `${row.accruedCredits} credits`}</td>
+                </tr>
+              ))}
+              {!intervalsLoading && !intervalError && !intervalLogs.length && (
+                <tr><td colSpan={6}>No saved observations yet. Enable interval monitoring in Billing Settings and start the worker and scheduler.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {intervalLogs.length < intervalCount && (
+          <button type="button" className="saas-button" disabled={intervalsLoading} onClick={() => refreshIntervals(from, to, true)}>
+            Load more intervals
+          </button>
+        )}
       </section>
 
       <section className="saas-card">
