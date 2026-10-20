@@ -1,0 +1,43 @@
+/* Reuse one saved template design system across draft and finalized previews.
+ * Legal/GST invoice content remains authoritative from Django invoice records.
+ */
+.invoice-print-sheet.invoice-creative-template {
+  --invoice-accent: #0b7997;
+  --invoice-pale: #eaf6f8;
+  --invoice-ink: #17212b;
+  --invoice-border: #d9e5eb;
+  background: #fff;
+  color: #1e293b;
+  border-top: 4px solid var(--invoice-accent);
+}
+.invoice-print-sheet.invoice-accent-blue { --invoice-accent: #2263d8; --invoice-pale: #eef4fe; }
+.invoice-print-sheet.invoice-accent-graphite { --invoice-accent: #334155; --invoice-pale: #f1f5f9; }
+.invoice-print-sheet.invoice-style-classic { border: 2px solid var(--invoice-ink); border-top-width: 5px; border-radius: 3px; box-shadow: none; }
+.invoice-print-sheet.invoice-style-minimal { border: 1px solid #e2e8f0; border-top: 2px solid var(--invoice-ink); border-radius: 0; box-shadow: none; }
+.invoice-print-sheet.invoice-style-minimal .invoice-sale-blue-box,
+.invoice-print-sheet.invoice-style-minimal .invoice-sale-info>div,
+.invoice-print-sheet.invoice-style-minimal .invoice-creative-docmeta { background: #fff; }
+.invoice-print-sheet.invoice-creative-template .invoice-creative-mark { background: var(--invoice-accent); color: white; }
+.invoice-print-sheet.invoice-creative-template .invoice-creative-logo {
+  display: block; width: 46px; height: 46px; object-fit: contain;
+  border: 1px solid var(--invoice-border); border-radius: 9px; background: #fff; padding: 3px;
+}
+.invoice-print-sheet.invoice-creative-template .invoice-creative-title {
+  background: var(--invoice-pale); color: var(--invoice-accent);
+}
+.invoice-print-sheet.invoice-creative-template .invoice-creative-docmeta span,
+.invoice-print-sheet.invoice-creative-template .invoice-sale-info strong,
+.invoice-print-sheet.invoice-creative-template .invoice-sale-blue-box>strong { color: var(--invoice-accent); }
+.invoice-print-sheet.invoice-creative-template .invoice-sale-table-head,
+.invoice-print-sheet.invoice-creative-template .invoice-sale-amounts .title { background: var(--invoice-ink); }
+.invoice-print-sheet.invoice-style-classic .invoice-sale-table-head { background: var(--invoice-accent); }
+.invoice-print-sheet.invoice-density-compact .invoice-sale-table-head > *,
+.invoice-print-sheet.invoice-density-compact .invoice-sale-table-row > * { padding-top: 5px; padding-bottom: 5px; }
+.invoice-print-sheet.invoice-creative-template .invoice-bank-details { white-space: normal; overflow-wrap: anywhere; }
+.template-server-error { padding: 11px 14px; border: 1px solid #fecaca; border-radius: 9px; color: #991b1b; background: #fef2f2; font-size: 13px; }
+.template-server-note { margin: 0; border: 1px solid var(--border); background: var(--surface); padding: 12px 14px; border-radius: 10px; color: var(--text-muted); font-size: 13px; line-height: 1.5; }
+.template-server-loading { font-size: 13px; color: var(--text-muted); }
+.template-save-button:disabled { opacity: .6; cursor: wait; }
+@media print {
+  .invoice-print-sheet.invoice-creative-template { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

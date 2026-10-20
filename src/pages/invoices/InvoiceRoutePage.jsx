@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
+import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
+import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
 import {
   InvoiceFilterToolbar,
@@ -47,7 +49,18 @@ export function InvoiceRoutePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [documentAppearance, setDocumentAppearance] = useState(templateDefaults);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    loadDocumentTemplateSettings().then((next) => {
+      if (active) setDocumentAppearance(next);
+    }).catch(() => {
+      if (active) setDocumentAppearance(templateDefaults);
+    });
+    return () => { active = false; };
+  }, []);
 
   const loadList = async () => {
     setLoading(true);
@@ -99,6 +112,31 @@ export function InvoiceRoutePage() {
       loadList();
     } else loadDocument();
   }, [location.pathname, location.search, id]);
+
+  useEffect(() => {
+    if (mode !== 'create') return undefined;
+    let active = true;
+    // The seller is the actual workshop from Django, not editable template
+    // branding. This keeps the live preview consistent with the legal PDF.
+    billingService.getGstContext().then((context) => {
+      if (!active || !context) return;
+      setForm((old) => ({
+        ...old,
+        invoiceType: context.registered ? 'gst' : 'regular',
+        seller: {
+          ...old.seller,
+          name: context.companyName || old.seller?.name,
+          address: [context.companyAddress, context.companyCity, context.companyPincode].filter(Boolean).join(', '),
+          phone: context.companyPhone || '',
+          email: context.companyEmail || '',
+          gstin: context.gstin || '',
+          state: context.companyState || '',
+          stateCode: context.supplierState || '',
+        },
+      }));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [mode, location.search]);
 
   const totals = useMemo(() => calculateDocumentTotals(form), [form]);
 
@@ -517,7 +555,7 @@ export function InvoiceRoutePage() {
       )}
 
       {error && <div className="billing-error no-print">{error}</div>}
-      {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals}/>}
+      {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals} appearance={resolveDocumentAppearance(form.kind, documentAppearance, form.templateSnapshot, Boolean(form.finalizedAt || ['Finalized', 'Paid', 'Issued', 'Converted'].includes(form.status)))}/>}
     </div>
   );
 
@@ -822,7 +860,7 @@ export function InvoiceRoutePage() {
           </section>
         </div>
 
-        <InvoicePrint doc={form} totals={totals}/>
+        <InvoicePrint doc={form} totals={totals} appearance={resolveDocumentAppearance(form.kind, documentAppearance, form.templateSnapshot, Boolean(form.finalizedAt || ['Finalized', 'Paid', 'Issued', 'Converted'].includes(form.status)))}/>
       </>}
     </div>
   );
@@ -851,7 +889,9 @@ function amountToIndianWords(value) {
   return `${parts.join(' ')} Rupees only`;
 }
 
-function InvoicePrint({ doc, totals }) {
+function InvoicePrint({ doc, totals, appearance = templateDefaults }) {
+  const selected = appearance.selectedTemplate || 'modern';
+  const isCustom = selected === 'custom';
   const rows = doc.items || [];
   const taxGroups = totals.taxGroups || [];
 
@@ -871,15 +911,17 @@ function InvoicePrint({ doc, totals }) {
       ? 'Tax Invoice'
       : 'Invoice';
 
-  return <section className="invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template">
+  return <section className={`invoice-print-sheet invoice-sale-print invoice-reference-print invoice-creative-template invoice-style-${selected} invoice-accent-${appearance.accent || 'teal'} ${appearance.compactTable ? 'invoice-density-compact' : ''}`}>
     <div className="invoice-creative-topbar">
-      <span>ORIGINAL</span>
+      <span>{appearance.showOriginal !== false ? 'ORIGINAL' : ''}</span>
       <span>{doc.status || 'Draft'}</span>
     </div>
 
     <div className="invoice-creative-head">
       <div className="invoice-creative-brand">
-        <div className="invoice-creative-mark">{sellerInitials || 'CG'}</div>
+        {appearance.showBusinessLogo !== false && appearance.businessLogo
+          ? <img className="invoice-creative-logo" src={appearance.businessLogo} alt="Business logo"/>
+          : appearance.showSellerMark !== false && <div className="invoice-creative-mark">{sellerInitials || 'CG'}</div>}
         <div className="invoice-reference-company-copy">
           <strong>{sellerName}</strong>
           <span>{seller.address || 'Company address'}</span>
@@ -898,7 +940,9 @@ function InvoicePrint({ doc, totals }) {
       </div>
     </div>
 
-    <div className="invoice-sale-title invoice-creative-title">{documentTitle}</div>
+    <div className="invoice-sale-title invoice-creative-title">
+      {isCustom && appearance.customHeader ? appearance.customHeader : documentTitle}
+    </div>
 
     <div className="invoice-sale-info">
       <div>
@@ -908,11 +952,11 @@ function InvoicePrint({ doc, totals }) {
         {doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
         {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
       </div>
-      <div>
+      {appearance.customShowTransport !== false && <div>
         <strong>Transportation Details</strong>
         <span>Vehicle Number: {doc.transportation?.vehicleNo || doc.vehicle?.registration || '—'}</span>
         {doc.transportation?.transporterName && <span>Transporter: {doc.transportation.transporterName}</span>}
-      </div>
+      </div>}
       <div className="invoice-sale-info-right">
         <strong>{doc.kind === 'estimate' ? 'Estimate Details' : 'Invoice Details'}</strong>
         <span>{doc.kind === 'estimate' ? 'Estimate No.' : 'Invoice No.'}: {doc.number || 'DRAFT'}</span>
@@ -955,7 +999,7 @@ function InvoicePrint({ doc, totals }) {
 
     <div className="invoice-sale-lower">
       <div className="invoice-sale-left">
-        {taxGroups.length > 0 && <div className="invoice-sale-tax-table">
+        {appearance.customShowTaxTable !== false && taxGroups.length > 0 && <div className="invoice-sale-tax-table">
           <div className="head"><span>Tax type</span><span>Taxable amount</span><span>Rate</span><span>Tax amount</span></div>
           {taxGroups.map((group, index) => <div className="row" key={index}>
             <span>{group.type}</span>
@@ -975,10 +1019,19 @@ function InvoicePrint({ doc, totals }) {
           <span>{doc.paymentType || 'Credit'}</span>
         </div>
 
-        <div className="invoice-sale-blue-box">
+        {appearance.showTerms !== false && <div className="invoice-sale-blue-box">
           <strong>Terms and conditions</strong>
-          <span>{doc.termsAndConditions || 'All disputes under this document will be subject to local jurisdiction.'}</span>
-        </div>
+          <span>{doc.termsAndConditions || appearance.termsText || 'All disputes under this document will be subject to local jurisdiction.'}</span>
+        </div>}
+        {appearance.showBankDetails !== false && [appearance.bankName, appearance.bankAccountNumber, appearance.bankUpi].some(Boolean) && (
+          <div className="invoice-sale-blue-box invoice-bank-details">
+            <strong>Bank &amp; Payment Details</strong>
+            <span>{[appearance.bankName, appearance.bankAccountName, appearance.bankAccountNumber, appearance.bankIfsc, appearance.bankUpi].filter(Boolean).join(' · ')}</span>
+          </div>
+        )}
+        {isCustom && appearance.customFooter && <div className="invoice-sale-blue-box compact">
+          <span>{appearance.customFooter}</span>
+        </div>}
       </div>
 
       <div className="invoice-sale-amounts">
@@ -991,10 +1044,10 @@ function InvoicePrint({ doc, totals }) {
       </div>
     </div>
 
-    <div className="invoice-sale-sign">
+    {appearance.showSignature !== false && <div className="invoice-sale-sign">
       <span>For: {seller.name || 'CubixGear Workshop'}</span>
-      <strong>Authorized Signatory</strong>
-    </div>
+      <strong>{appearance.authorizedSignatory || 'Authorized Signatory'}</strong>
+    </div>}
   </section>;
 }
 

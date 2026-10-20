@@ -6,6 +6,7 @@ const INVENTORY_KEY = 'cubixgear:inventory';
 const STOCK_LEDGER_KEY = 'cubixgear:stock-ledger';
 const JOB_PREFILL_KEY = 'cubixgear:invoice-job-prefill';
 import { calculateEstimateIndiaGst } from '../utils/indiaGst';
+import { loadDocumentTemplateSettings, resolveDocumentAppearance } from './documentTemplates.service';
 
 const seedDocuments = [
   {
@@ -316,7 +317,11 @@ export const billingService = {
     if (!doc) throw new Error('Document not found.');
     if (doc.kind === 'invoice' && doc.status !== 'Finalized' && doc.status !== 'Paid') applyStockMovement(doc, 'issue');
     const status = doc.kind === 'estimate' ? 'Issued' : 'Finalized';
-    const nextDoc = { ...doc, status, finalizedAt: new Date().toISOString() };
+    const settings = await loadDocumentTemplateSettings();
+    const nextDoc = {
+      ...doc, status, finalizedAt: new Date().toISOString(),
+      templateSnapshot: resolveDocumentAppearance(doc.kind, settings),
+    };
     write(DOCS_KEY, docs.map((row) => row.id === documentId ? nextDoc : row));
     return clone(nextDoc);
   },
@@ -362,6 +367,7 @@ export const billingService = {
       status: _status,
       finalizedAt: _finalizedAt,
       cancelledAt: _cancelledAt,
+      templateSnapshot: _templateSnapshot,
       convertedAt: _convertedAt,
       convertedToInvoiceId: _convertedToInvoiceId,
       convertedToInvoiceNo: _convertedToInvoiceNo,
