@@ -50,7 +50,9 @@ test('account billing and storage preserve real data and controls', () => {
 });
 
 test('templates retain previews and editable company document fields', () => {
-  assert.match(templates, /localStorage\.setItem\(STORAGE_KEY/);
+  assert.match(templates, /saveDocumentTemplateSettings/);
+  assert.match(templates, /loadDocumentTemplateSettings/);
+  assert.doesNotMatch(templates, /localStorage/);
   assert.match(templates, /Invoice Template/);
   assert.match(templates, /Estimate Template/);
   assert.match(templates, /businessLogo/);
