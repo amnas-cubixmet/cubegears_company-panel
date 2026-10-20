@@ -37,6 +37,10 @@ export function featureLabelStatus(bundle, wallet) {
   if (!wallet.canManage) return { label: 'Restricted', message: 'Only a billing administrator can activate labels.', allow: false };
 
   if (bundle.canResume) return { label: 'Inactive', message: 'Resume your paid access without another charge.', allow: true };
+  const price = Number(bundle.totalCredits);
+  if (!Number.isFinite(price) || price <= 0) {
+    return { label: 'Unavailable', message: 'No verified server quote is available. Refresh the page.', allow: false };
+  }
   // The chosen rate unit can be 10 seconds, hourly, daily, weekly or 30 days.
   // It does not define the date of collection. A time-metered postpaid module
   // never needs an upfront wallet balance; the backend settles once monthly.
@@ -45,11 +49,7 @@ export function featureLabelStatus(bundle, wallet) {
       ? { label: 'Active', message: 'Active seconds are recorded. Payment is due next month.', allow: false }
       : { label: 'Deferred', message: 'Enable now; ON time is logged at the selected rate and settled next month.', allow: true };
   }
-  const price = Number(bundle.totalCredits);
   const balance = Number(wallet.balance);
-  if (!Number.isFinite(price) || price <= 0) {
-    return { label: 'Unavailable', message: 'No verified server quote is available. Refresh the page.', allow: false };
-  }
   if (!Number.isFinite(balance) || balance < price) {
     return { label: 'Low credits', message: 'Buy credits before activating this label.', allow: false };
   }
