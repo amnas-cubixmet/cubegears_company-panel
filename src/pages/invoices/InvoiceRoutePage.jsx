@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
+import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
+import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
 import {
   InvoiceFilterToolbar,
@@ -47,7 +49,18 @@ export function InvoiceRoutePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [documentAppearance, setDocumentAppearance] = useState(templateDefaults);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    loadDocumentTemplateSettings().then((next) => {
+      if (active) setDocumentAppearance(next);
+    }).catch(() => {
+      if (active) setDocumentAppearance(templateDefaults);
+    });
+    return () => { active = false; };
+  }, []);
 
   const loadList = async () => {
     setLoading(true);
@@ -517,7 +530,7 @@ export function InvoiceRoutePage() {
       )}
 
       {error && <div className="billing-error no-print">{error}</div>}
-      {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals}/>}
+      {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals} appearance={resolveDocumentAppearance(form.kind, documentAppearance, form.templateSnapshot, Boolean(form.finalizedAt || ['Finalized', 'Paid', 'Issued', 'Converted'].includes(form.status)))}/>}
     </div>
   );
 
@@ -822,7 +835,7 @@ export function InvoiceRoutePage() {
           </section>
         </div>
 
-        <InvoicePrint doc={form} totals={totals}/>
+        <InvoicePrint doc={form} totals={totals} appearance={resolveDocumentAppearance(form.kind, documentAppearance, form.templateSnapshot, Boolean(form.finalizedAt || ['Finalized', 'Paid', 'Issued', 'Converted'].includes(form.status)))}/>
       </>}
     </div>
   );
