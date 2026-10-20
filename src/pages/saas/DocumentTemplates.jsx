@@ -103,6 +103,7 @@ export function DocumentTemplates() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState(defaults);
   const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsReady, setSettingsReady] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsError, setSettingsError] = useState('');
   const [saved, setSaved] = useState(false);
@@ -137,6 +138,7 @@ export function DocumentTemplates() {
         businessAddress: savedSettings.businessAddress || company.address || '',
       });
       setProfileLoaded(true);
+      setSettingsReady(true);
       setSettingsError('');
     }).catch((error) => {
       if (alive) setSettingsError(error?.message || 'Unable to load company template settings.');
@@ -150,7 +152,7 @@ export function DocumentTemplates() {
   };
 
   const save = async () => {
-    if (savingSettings || settingsLoading) return;
+    if (savingSettings || settingsLoading || !settingsReady) return;
     setSavingSettings(true);
     setSettingsError('');
     try {
@@ -185,7 +187,7 @@ export function DocumentTemplates() {
         active="templates"
         onNavigate={navigate}
         actions={
-          <button className="template-save-button" type="button" disabled={settingsLoading || savingSettings} onClick={save}>
+          <button className="template-save-button" type="button" disabled={!settingsReady || settingsLoading || savingSettings} onClick={save}>
             {saved ? <Check size={15}/> : <Save size={15}/>}
             {savingSettings ? 'Saving…' : saved ? 'Saved' : 'Save Templates'}
           </button>
@@ -194,7 +196,7 @@ export function DocumentTemplates() {
 
       {settingsError && <p className="template-server-error" role="alert">{settingsError}</p>}
       {settingsLoading && <p className="template-server-loading" role="status">Loading saved company invoice templates…</p>}
-      <p className="template-server-note">Templates are saved per company on the server and used in new invoice and estimate previews, finalized documents and PDFs. Existing finalized documents keep their saved appearance.</p>
+      <p className="template-server-note">Templates are saved per company on the server and used in new invoice and estimate previews, finalized documents and PDFs. Existing finalized documents keep their saved appearance. Legal seller name and GST details come from Company Settings, not visual branding.</p>
       <section className="template-settings-card business-branding-card">
         <div className="template-settings-title">
           <Building2 size={18}/>
@@ -210,7 +212,7 @@ export function DocumentTemplates() {
               {settings.businessLogo ? <img src={settings.businessLogo} alt="Business logo"/> : <span>{(settings.businessName || 'CG').split(/\s+/).map((word) => word[0]).join('').slice(0, 2).toUpperCase()}</span>}
             </div>
             <div className="business-logo-actions">
-              <label className="template-upload-button"><ImagePlus size={15}/>Upload Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={uploadLogo}/></label>
+              <label className="template-upload-button"><ImagePlus size={15}/>Upload Logo<input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadLogo}/></label>
               {settings.businessLogo && <button type="button" className="template-remove-logo" onClick={() => update('businessLogo', '')}><Trash2 size={14}/>Remove</button>}
             </div>
             <small>PNG, JPG or WEBP, up to 250 KB. Saved securely with your company template settings.</small>
