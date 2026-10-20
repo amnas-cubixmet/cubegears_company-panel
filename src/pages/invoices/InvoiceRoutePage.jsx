@@ -941,7 +941,10 @@ function InvoicePrint({ doc, totals, appearance = templateDefaults }) {
     </div>
 
     <div className="invoice-sale-title invoice-creative-title">
-      {isCustom && appearance.customHeader ? appearance.customHeader : documentTitle}
+      {documentTitle}
+      {isCustom && appearance.customHeader &&
+        (doc.kind === 'invoice' && doc.invoiceType === 'gst' || !/tax invoice/i.test(appearance.customHeader)) &&
+        <small className="invoice-creative-subheading">{appearance.customHeader}</small>}
     </div>
 
     <div className="invoice-sale-info">
