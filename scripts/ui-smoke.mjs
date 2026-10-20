@@ -5,7 +5,6 @@ import { spawn } from 'node:child_process';
 import { readFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { once } from 'node:events';
 import { ROLE_PERMISSION_MODULES } from '../src/config/rolePermissions.js';
 import { dashboardMock } from '../src/mock/dashboard.mock.js';
 import { mockStaffList } from '../src/mock/staff.mock.js';
@@ -97,13 +96,27 @@ const profiles = process.env.UI_QUICK ? [{width:390,height:844,theme:'light'}] :
 const server=spawn(process.execPath,['node_modules/vite/bin/vite.js',...(process.env.UI_PRODUCTION ? ['preview'] : []),'--host','127.0.0.1','--port',String(port),'--strictPort'],{
   cwd:new URL('..',import.meta.url),env:{...process.env,VITE_API_URL:'http://127.0.0.1:8000/api/v1'},stdio:['ignore','pipe','pipe'],
 });
+// A Vite production preview can be ready without printing "Local:" on stdout.
+const startupErrors = [];
+server.stderr.on('data', data => startupErrors.push(data.toString()));
+const waitForServer = async () => {
+  const deadline = Date.now() + 60000;
+  while (Date.now() < deadline) {
+    if (server.exitCode !== null) {
+      throw Error(`Vite exited (${server.exitCode}): ${startupErrors.join('').slice(-2000)}`);
+    }
+    try {
+      const response = await fetch(baseURL, { signal: AbortSignal.timeout(2500) });
+      if (response.ok) return;
+    } catch { /* The preview server is still starting. */ }
+    await new Promise(resolve => setTimeout(resolve, 400));
+  }
+  throw Error(`Vite preview never served HTTP after 60s: ${startupErrors.join('').slice(-2000)}`);
+};
+
 let browser;
 try {
-  await Promise.race([
-    new Promise(resolve=>server.stdout.on('data',data=>{if(data.toString().includes('Local:'))resolve();})),
-    once(server,'exit').then(([code])=>{throw Error(`Vite exited (${code})`);}),
-    new Promise((_,reject)=>{const timer=setTimeout(()=>reject(Error('Vite startup timed out')),15000);timer.unref();}),
-  ]);
+  await waitForServer();
   browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--disable-gpu','--use-gl=disabled']}: {})});
   const failures=[];
   let tested=0;
