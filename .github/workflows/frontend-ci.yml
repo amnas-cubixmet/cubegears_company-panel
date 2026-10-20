@@ -1,5 +1,12 @@
 name: Company Panel CI
 
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main]
@@ -22,7 +29,17 @@ jobs:
         env:
           # Harmless build-only placeholder; deployment must supply its real API URL.
           VITE_API_URL: https://api.example.invalid/api/v1
+      - run: npm run check:bundle
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
         env:
           UI_PRODUCTION: '1'
+          UI_ARTIFACT_DIR: ${{ runner.temp }}/cubegears-ui-smoke
+      - name: Preserve UI failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-smoke-${{ github.run_id }}
+          path: ${{ runner.temp }}/cubegears-ui-smoke
+          if-no-files-found: ignore
+          retention-days: 7
