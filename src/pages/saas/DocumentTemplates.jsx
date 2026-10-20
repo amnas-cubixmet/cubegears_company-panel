@@ -2,47 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Check, FileText, ImagePlus, LayoutTemplate, ReceiptText, Save, Sparkles, Trash2 } from 'lucide-react';
 import { settingsService } from '../../services/settings.service';
+import { templateDefaults as defaults, loadDocumentTemplateSettings, saveDocumentTemplateSettings } from '../../services/documentTemplates.service';
 import { AccountHeader } from '../../components/account';
 import '../../styles/document-templates.css';
 import '../../styles/account-dashboard.css';
-
-const STORAGE_KEY = 'cubixgear:document-template-settings';
-
-const defaults = {
-  invoiceTemplate: 'modern',
-  estimateTemplate: 'modern',
-  accent: 'teal',
-  showOriginal: true,
-  showSellerMark: true,
-  compactTable: false,
-  customName: 'My Custom Template',
-  customHeader: 'Tax Invoice',
-  customFooter: 'Thank you for your business.',
-  customShowTransport: true,
-  customShowTaxTable: true,
-  businessLogo: '',
-  businessName: 'CubixGear Workshop',
-  businessLegalName: '',
-  businessGstin: '',
-  businessPhone: '',
-  businessEmail: '',
-  businessAddress: '',
-  businessState: 'Kerala',
-  businessStateCode: '32',
-  businessWebsite: '',
-  businessPan: '',
-  bankName: '',
-  bankAccountName: '',
-  bankAccountNumber: '',
-  bankIfsc: '',
-  bankUpi: '',
-  authorizedSignatory: '',
-  termsText: 'Goods once sold will not be taken back.',
-  showBusinessLogo: true,
-  showBankDetails: true,
-  showTerms: true,
-  showSignature: true
-};
 
 const templates = [
   {
@@ -72,14 +35,6 @@ const accents = [
   { id: 'blue', label: 'Blue' },
   { id: 'graphite', label: 'Graphite' }
 ];
-
-function readSettings() {
-  try {
-    return { ...defaults, ...(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')) };
-  } catch {
-    return defaults;
-  }
-}
 
 function Preview({ kind, settings }) {
   const selected = kind === 'invoice' ? settings.invoiceTemplate : settings.estimateTemplate;
@@ -146,7 +101,10 @@ function Preview({ kind, settings }) {
 
 export function DocumentTemplates() {
   const navigate = useNavigate();
-  const [settings, setSettings] = useState(readSettings);
+  const [settings, setSettings] = useState(defaults);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsError, setSettingsError] = useState('');
   const [saved, setSaved] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
@@ -165,32 +123,54 @@ export function DocumentTemplates() {
 
   useEffect(() => {
     let alive = true;
-    settingsService.getSettings('company').then((company) => {
-      if (!alive || !company) return;
-      setSettings((old) => ({
-        ...old,
-        businessName: old.businessName === defaults.businessName ? (company.name || old.businessName) : old.businessName,
-        businessGstin: old.businessGstin || company.gstNo || '',
-        businessPhone: old.businessPhone || company.phone || '',
-        businessEmail: old.businessEmail || company.email || '',
-        businessAddress: old.businessAddress || company.address || ''
-      }));
+    Promise.all([
+      loadDocumentTemplateSettings(),
+      settingsService.getSettings('company').catch(() => ({})),
+    ]).then(([savedSettings, company]) => {
+      if (!alive) return;
+      setSettings({
+        ...savedSettings,
+        businessName: savedSettings.businessName || company.name || defaults.businessName,
+        businessGstin: savedSettings.businessGstin || company.gstNo || '',
+        businessPhone: savedSettings.businessPhone || company.phone || '',
+        businessEmail: savedSettings.businessEmail || company.email || '',
+        businessAddress: savedSettings.businessAddress || company.address || '',
+      });
       setProfileLoaded(true);
-    }).catch(() => setProfileLoaded(true));
+      setSettingsError('');
+    }).catch((error) => {
+      if (alive) setSettingsError(error?.message || 'Unable to load company template settings.');
+    }).finally(() => { if (alive) setSettingsLoading(false); });
     return () => { alive = false; };
   }, []);
 
-  const update = (key, value) => setSettings((old) => ({ ...old, [key]: value }));
+  const update = (key, value) => {
+    setSaved(false);
+    setSettings((old) => ({ ...old, [key]: value }));
+  };
 
-  const save = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    setSaved(true);
+  const save = async () => {
+    if (savingSettings || settingsLoading) return;
+    setSavingSettings(true);
+    setSettingsError('');
+    try {
+      await saveDocumentTemplateSettings(settings);
+      setSaved(true);
+    } catch (error) {
+      setSaved(false);
+      setSettingsError(error?.message || 'Unable to save company invoice templates.');
+    } finally {
+      setSavingSettings(false);
+    }
   };
 
   const uploadLogo = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 250 * 1024) {
+      setSettingsError('Logo must be PNG, JPG or WEBP and at most 250 KB.');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => update('businessLogo', String(reader.result || ''));
     reader.readAsDataURL(file);
@@ -205,13 +185,16 @@ export function DocumentTemplates() {
         active="templates"
         onNavigate={navigate}
         actions={
-          <button className="template-save-button" onClick={save}>
+          <button className="template-save-button" type="button" disabled={settingsLoading || savingSettings} onClick={save}>
             {saved ? <Check size={15}/> : <Save size={15}/>}
-            {saved ? 'Saved' : 'Save Templates'}
+            {savingSettings ? 'Saving…' : saved ? 'Saved' : 'Save Templates'}
           </button>
         }
       />
 
+      {settingsError && <p className="template-server-error" role="alert">{settingsError}</p>}
+      {settingsLoading && <p className="template-server-loading" role="status">Loading saved company invoice templates…</p>}
+      <p className="template-server-note">Templates are saved per company on the server and used in new invoice and estimate previews, finalized documents and PDFs. Existing finalized documents keep their saved appearance.</p>
       <section className="template-settings-card business-branding-card">
         <div className="template-settings-title">
           <Building2 size={18}/>
@@ -230,7 +213,7 @@ export function DocumentTemplates() {
               <label className="template-upload-button"><ImagePlus size={15}/>Upload Logo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={uploadLogo}/></label>
               {settings.businessLogo && <button type="button" className="template-remove-logo" onClick={() => update('businessLogo', '')}><Trash2 size={14}/>Remove</button>}
             </div>
-            <small>PNG, JPG, WEBP or SVG. Saved in this browser for document use.</small>
+            <small>PNG, JPG or WEBP, up to 250 KB. Saved securely with your company template settings.</small>
           </div>
 
           <div className="business-fields-grid">
