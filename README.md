@@ -1,70 +1,42 @@
-# React + Vite
+# CubeGears — Company Panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Production-oriented React 19 + Vite 6 company/workshop management frontend for
+the CubeGears multi-tenant SaaS product. Django provides authentication,
+entitlements, payments, invoices, credits, storage and tenant-scoped APIs.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Node 22 is used in CI.
 
-## React Compiler
+```sh
+npm ci
+cp .env.example .env
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The local backend defaults to `http://127.0.0.1:8000/api/v1`.
+For staging/production, configure `VITE_API_URL` to the deployed Django
+`/api/v1` endpoint. Never place secrets in `VITE_*` variables.
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
-
-
-## Project validation
-
-Install with `npm ci`. Use `npm test` for every Node regression test and
-`npm run check` for source linting. `VITE_API_URL=https://your-api/api/v1 npm run verify`
-runs lint, every unit/source regression, and the production build. A production
-build requires an explicit Django API URL.
-
-For browser layout checks, install Chromium once with
-`npx playwright install --with-deps chromium`, then run `npm run test:ui`.
-The script starts its own local Vite server and discovers every static,
-non-redirect route from AppRoutes. It checks desktop (1440px), tablet (768px),
-phone (390px) and narrow phone (360px), including light and dark themes.
-It catches page/render errors, unexpected access denial, horizontal page
-overflow and undersized form text. Failures save screenshots under the system
-temporary directory `cubegears-ui-smoke`; CI uploads these when checks fail.
-
-These browser checks intercept API requests with isolated fixtures and reject
-writes. They do not validate live Django data, SMTP, payment capture, populated
-record detail routes, or every interactive workflow. Django tests run in the
-backend repository. For a focused local pass use `UI_QUICK=1 npm run test:ui`
-(phone only) or `UI_PATH_FILTER=/settings npm run test:ui`. A managed browser
-binary can be selected with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
-
-The shared UI uses the existing 16px desktop text scale, 14px phone/tablet
-content and actions, 16px editable controls, and 12px compact navigation/status
-labels. Document previews and print layouts keep their authored styles.
-
-
-### Production verification
-
-Use Node.js 22 and install the locked dependencies with `npm ci`. Set
-`VITE_API_URL` to the deployed Django backend ending in `/api/v1` before
-building. Never put backend secrets in `VITE_` variables: they are public.
+## Validation
 
 ```sh
 npm run check
 npm test
+VITE_API_URL=https://api.example.invalid/api/v1 npm run build
+npm run check:bundle
 npx playwright install chromium
-npm run build
 UI_PRODUCTION=1 npm run test:ui
 ```
 
-The browser suite uses intercepted test fixtures and blocks write requests.
-It checks all registered route templates at desktop, tablet and phone sizes;
-it does not replace staging integration tests against Django, email, Celery
-or the payment gateway. CI runs lint, the full unit suite, browser checks
-and a production build with a non-live API placeholder.
+The `example.invalid` build URL is for isolated CI/testing only; replace it
+with the real HTTPS backend during deployment. `npm run verify` combines
+lint, Node regression tests, build and bundle guardrails (API URL required).
 
-Pages are split into lazy-loaded chunks. Their loading boundary stays inside
-the page, so workshop navigation remains mounted while a chunk is fetched.
-Unused files are removed only after checking runtime imports and test/docs
-references; mock data still used by explicit demo mode or tests is retained.
+Browser smoke tests intercept API calls using isolated fixtures and block
+writes. They cover route layouts across desktop, tablet and phone but cannot
+verify real Django data, SMTP, payment capture or Celery workers. Use staging
+integration tests before production releases.
+
+See [production readiness and release checklist](docs/production-readiness.md)
+and [SaaS owner onboarding](docs-owner-saas-onboarding.md).

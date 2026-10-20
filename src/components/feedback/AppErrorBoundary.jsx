@@ -51,10 +51,16 @@ export class AppErrorBoundary extends React.Component {
   render() {
     if (!this.state.hasError) return this.props.children;
 
-    const { error, componentStack } = this.state;
-    const errorName = error?.name || 'React render error';
-    const errorMessage = error?.message || 'Unknown render error';
-    const stack = error?.stack || '';
+    const { error, componentStack: capturedStack } = this.state;
+    // Raw error messages, stack traces and component paths can contain tenant data.
+    // Show diagnostics only during local development, never to customers.
+    const isDevelopment = import.meta.env.DEV;
+    const errorName = isDevelopment ? error?.name || 'React render error' : 'Application error';
+    const errorMessage = isDevelopment
+      ? error?.message || 'Unknown render error'
+      : 'This page encountered a problem. Reload it or contact support if the issue continues.';
+    const stack = isDevelopment ? error?.stack || '' : '';
+    const componentStack = isDevelopment ? capturedStack : '';
 
     return (
       <div style={{
@@ -80,7 +86,7 @@ export class AppErrorBoundary extends React.Component {
             letterSpacing: '.12em',
             color: '#1677ff'
           }}>
-            CUBIXGEAR · REACT ERROR
+            CUBIXGEAR · APPLICATION STATUS
           </div>
 
           <h1 style={{
@@ -160,7 +166,7 @@ export class AppErrorBoundary extends React.Component {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
+            gridTemplateColumns: isDevelopment ? 'repeat(3,minmax(0,1fr))' : 'repeat(2,minmax(0,1fr))',
             gap: '9px',
             marginTop: '18px'
           }}>
@@ -194,6 +200,7 @@ export class AppErrorBoundary extends React.Component {
               Dashboard
             </button>
 
+            {isDevelopment && (
             <button
               onClick={this.handleCopy}
               style={{
@@ -208,6 +215,7 @@ export class AppErrorBoundary extends React.Component {
             >
               Copy Error
             </button>
+            )}
           </div>
         </div>
       </div>

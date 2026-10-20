@@ -37,7 +37,7 @@ const OutsideLabourPage = lazyPage(() => import('../pages/jobs/OutsideLabourPage
 const JobDetails = lazyPage(() => import('../pages/jobs/JobDetails'), 'JobDetails');
 const JobStatus = lazyPage(() => import('../pages/jobs/JobStatus'), 'JobStatus');
 const JobReports = lazyPage(() => import('../pages/jobs/JobReports'), 'JobReports');
-import StockEasyPage from '../pages/stock/StockEasyPage';
+const StockEasyPage = lazyPage(() => import('../pages/stock/StockEasyPage'), 'default');
 const InvoiceList = lazyPage(() => import('../pages/invoices/InvoiceList'), 'InvoiceList');
 const EWayBillPage = lazyPage(() => import('../pages/invoices/EWayBillPage'), 'EWayBillPage');
 const PaymentList = lazyPage(() => import('../pages/payments/PaymentList'), 'PaymentList');
