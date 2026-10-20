@@ -113,6 +113,31 @@ export function InvoiceRoutePage() {
     } else loadDocument();
   }, [location.pathname, location.search, id]);
 
+  useEffect(() => {
+    if (mode !== 'create') return undefined;
+    let active = true;
+    // The seller is the actual workshop from Django, not editable template
+    // branding. This keeps the live preview consistent with the legal PDF.
+    billingService.getGstContext().then((context) => {
+      if (!active || !context) return;
+      setForm((old) => ({
+        ...old,
+        invoiceType: context.registered ? 'gst' : 'regular',
+        seller: {
+          ...old.seller,
+          name: context.companyName || old.seller?.name,
+          address: [context.companyAddress, context.companyCity, context.companyPincode].filter(Boolean).join(', '),
+          phone: context.companyPhone || '',
+          email: context.companyEmail || '',
+          gstin: context.gstin || '',
+          state: context.companyState || '',
+          stateCode: context.supplierState || '',
+        },
+      }));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [mode, location.search]);
+
   const totals = useMemo(() => calculateDocumentTotals(form), [form]);
 
   const activeDocuments = useMemo(
