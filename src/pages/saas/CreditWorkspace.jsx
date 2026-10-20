@@ -380,7 +380,7 @@ export function CreditWorkspace({ section = 'overview' }) {
             <div className="cg-bundle-price">
               {bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY'
                 ? <><span>Included free</span><strong>0 <small>credits — no purchase needed</small></strong></>
-                : <><span>{bundle.billingMode === 'monthly_postpaid' ? 'Usage rate (monthly settlement)' : 'Per user credits'}</span>
+                : <><span>{bundle.cyclePostpaid || bundle.billingMode === 'monthly_postpaid' ? 'Usage rate (monthly settlement)' : 'Per user credits'}</span>
                   <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
                   <div className="cg-bundle-summary">
                     <span>{bundle.userCount ?? '—'} active login users</span>
