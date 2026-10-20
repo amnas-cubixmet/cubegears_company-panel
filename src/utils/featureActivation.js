@@ -38,15 +38,18 @@ export function featureLabelStatus(bundle, wallet) {
 
   if (bundle.canResume) return { label: 'Inactive', message: 'Resume your paid access without another charge.', allow: true };
   const price = Number(bundle.totalCredits);
-  const balance = Number(wallet.balance);
   if (!Number.isFinite(price) || price <= 0) {
     return { label: 'Unavailable', message: 'No verified server quote is available. Refresh the page.', allow: false };
   }
+  // The chosen rate unit can be 10 seconds, hourly, daily, weekly or 30 days.
+  // It does not define the date of collection. A time-metered postpaid module
+  // never needs an upfront wallet balance; the backend settles once monthly.
   if (bundle.billingMode === 'monthly_postpaid') {
     return bundle.active
-      ? {label:'Active', message:'Usage is recorded and payable next month.', allow:false}
-      : {label:'Monthly postpaid', message:'No upfront deduction. Usage is collected on your monthly due date.', allow:true};
+      ? { label: 'Active', message: 'Active seconds are recorded. Payment is due next month.', allow: false }
+      : { label: 'Deferred', message: 'Enable now; ON time is logged at the selected rate and settled next month.', allow: true };
   }
+  const balance = Number(wallet.balance);
   if (!Number.isFinite(balance) || balance < price) {
     return { label: 'Low credits', message: 'Buy credits before activating this label.', allow: false };
   }
