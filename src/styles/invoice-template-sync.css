@@ -41,3 +41,8 @@
 @media print {
   .invoice-print-sheet.invoice-creative-template { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+.invoice-print-sheet.invoice-creative-template .invoice-creative-subheading {
+  display: block; margin-top: 3px; font-size: 9px; font-weight: 600;
+  letter-spacing: 0; text-transform: none; opacity: .85;
+}
