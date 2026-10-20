@@ -49,7 +49,7 @@ export const saveDocumentTemplateSettings = async (settings) =>
 export const resolveDocumentAppearance = (kind, currentSettings, savedSnapshot = null, finalized = false) => {
   const source = savedSnapshot && Object.keys(savedSnapshot).length
     ? savedSnapshot
-    : finalized ? templateDefaults : currentSettings;
+    : finalized ? { ...templateDefaults, accent: 'blue' } : currentSettings;
   return { ...templateDefaults, ...(source || {}),
     selectedTemplate: kind === 'estimate'
       ? (source?.estimateTemplate || templateDefaults.estimateTemplate)
