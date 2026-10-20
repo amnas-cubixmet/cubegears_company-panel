@@ -14,6 +14,17 @@ const nf = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });
 const money = (value) => value == null ? '—' : `₹${nf.format(Number(value))}`;
 const credits = (value) => value == null ? '—' : nf.format(Number(value));
 const when = (value) => value ? new Date(value).toLocaleString('en-IN') : '—';
+const timeUsed = (total) => {
+  const seconds = Math.max(0, Number(total) || 0);
+  if (seconds >= 86400) return `${nf.format(seconds / 86400)} days`;
+  if (seconds >= 3600) return `${nf.format(seconds / 3600)} hours`;
+  if (seconds >= 60) return `${nf.format(seconds / 60)} min`;
+  return `${seconds} sec`;
+};
+const ratePeriod = (period) => ({
+  ten_seconds: '10 seconds', hourly: 'hour', daily: 'day',
+  weekly: 'week', monthly: '30 days', permanent: 'lifetime',
+})[period] || period || '—';
 
 export function CreditWorkspace({ section = 'overview' }) {
   const navigate = useNavigate();
@@ -22,6 +33,7 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [wallet, setWallet] = useState(null);
   const [account, setAccount] = useState(null);
   const [featureActivity, setFeatureActivity] = useState([]);
+  const [featureUsage, setFeatureUsage] = useState(null);
   const [packages, setPackages] = useState([]);
   const [featureBundles, setFeatureBundles] = useState([]);
   const [features, setFeatures] = useState([]);
@@ -36,14 +48,20 @@ export function CreditWorkspace({ section = 'overview' }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [balance, bundles, catalog, history, labels, statements, accountInfo, activity, calendarResult] = await Promise.allSettled([
+    const [balance, bundles, catalog, history, labels, statements, accountInfo, activity, calendarResult, usageResult] = await Promise.allSettled([
       creditWalletService.overview(), creditWalletService.packages(),
       creditWalletService.features(), creditWalletService.logs(),
       creditWalletService.bundles(), creditWalletService.monthlyStatements(),
       creditWalletService.account(), creditWalletService.featureActivity(),
       creditWalletService.calendarBilling(),
+      creditWalletService.featureUsageLogs(),
     ]);
     const problems = [];
+    if (usageResult.status === 'fulfilled') setFeatureUsage(usageResult.value);
+    else {
+      setFeatureUsage(null);
+      if (usageResult.reason?.status !== 404) problems.push('module usage logs');
+    }
     if (calendarResult.status === 'fulfilled') setCalendarBilling(calendarResult.value);
     else {
       setCalendarBilling(null);
@@ -295,7 +313,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       <p>Only purchased active labels unlock paid modules; Dashboard, Settings, Staff Management, Roles & Permissions and SaaS Account are free. Staff still need their role permissions. Wallet Logs show actual debits.</p>
       {activeBundles.length ? <div className="cg-credit-active-label-grid">
         {activeBundles.map(bundle => {
-          const period = bundle.billingMode === 'monthly_postpaid' ? 'calendar month' : ({ permanent: 'one-time', monthly: '30 days', weekly: '7 days', daily: '24 hours', hourly: '1 hour', per_use: 'use' })[bundle.billingType] || bundle.billingType;
+          const period = ratePeriod(bundle.billingType);
           return <article key={bundle.id} className="cg-credit-active-label-card">
             <div className="cg-credit-active-label-head"><strong>{bundle.name}</strong><span className="cg-credit-pill active">Enabled</span></div>
             <div className="cg-credit-active-label-price">
@@ -348,7 +366,7 @@ export function CreditWorkspace({ section = 'overview' }) {
 
     {section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace" aria-label="Available modules">
       <header><div><span>MODULE PRICING</span><h2>Paid workshop modules ({paidBundles.length})</h2></div><Coins size={22}/></header>
-      <p>Free modules above do not need a purchase. Paid modules without a published price remain locked. In postpaid cycle mode, monthly labels start at zero upfront credits and bill the recorded active interval on the administrator's due date.</p>
+      <p>Free modules above do not need a purchase. Postpaid module credits accrue only while access is ON, using the period selected by the administrator. Usage is logged now and paid on the configured due date next month, not after every period.</p>
       <div className="cg-bundle-grid">
         {paidBundles.map((bundle) => {
           const status = featureLabelStatus(bundle, wallet);
@@ -362,7 +380,7 @@ export function CreditWorkspace({ section = 'overview' }) {
             <div className="cg-bundle-price">
               {bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY'
                 ? <><span>Included free</span><strong>0 <small>credits — no purchase needed</small></strong></>
-                : <><span>{bundle.cyclePostpaid ? 'Monthly usage rate (deferred)' : 'Per user credits'}</span>
+                : <><span>{bundle.billingMode === 'monthly_postpaid' ? 'Usage rate (monthly settlement)' : 'Per user credits'}</span>
                   <strong>{credits(bundle.perUserCredits)} <small>credits / user / {period}</small></strong>
                   <div className="cg-bundle-summary">
                     <span>{bundle.userCount ?? '—'} active login users</span>
@@ -384,7 +402,7 @@ export function CreditWorkspace({ section = 'overview' }) {
                   : !status.allow && !bundle.active ? status.label
                   : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
                   : bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY' ? 'Included Free'
-                  : bundle.billingMode === 'monthly_postpaid' ? (bundle.active ? 'Active' : 'Activate monthly billing') : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
+                  : bundle.billingMode === 'monthly_postpaid' ? (bundle.active ? 'Active · usage metered' : 'Switch ON · pay next month') : bundle.canResume ? 'Switch On' : bundle.active ? 'Extend access' : 'Activate access'}
               </button>
               {bundle.active && <button className="secondary" type="button" disabled={busy !== '' || !wallet?.canManage}
                 onClick={() => stopBundle(bundle)}>Switch Off</button>}
@@ -397,12 +415,12 @@ export function CreditWorkspace({ section = 'overview' }) {
     </section>}
 
     {section === 'features' && !featureAccess.labelOnly && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
-      <p>Each module uses the backend-configured credit price. Prepaid modules deduct credits on activation and renewal; monthly-postpaid modules record timed usage and debit only after month-end. Every staff member still requires their role permission.</p>
+      <p>Each module uses the backend-configured credit price. Prepaid modules deduct credits on activation and renewal; deferred modules log ON time at the selected rate period and collect on the next month's due date. Every staff member still requires their role permission.</p>
       <div className="cg-credit-features">{features.filter(feature => !freeKeys.includes(feature.key)).map((feature) => <article key={feature.key}>
         <div className="cg-credit-feature-main"><div><h3>{feature.label}</h3><p>{feature.description || 'Workshop management module'}</p></div><span className={feature.enabled ? 'cg-credit-pill active' : 'cg-credit-pill'}>{feature.enabled ? 'Active' : 'Off'}</span></div>
         <div className="cg-credit-feature-cost">
           <span>Activation: <b>{credits(feature.activationCredits)} cr</b></span>
-          <span>Base / {feature.billingMode === 'monthly_postpaid' ? 'calendar month' : feature.billingPeriod}: <b>{credits(feature.baseCredits)} cr</b></span>
+          <span>Base / {feature.billingPeriod}: <b>{credits(feature.baseCredits)} cr</b></span>
           <span>Per user: <b>{credits(feature.perUserCredits)} cr</b> × {feature.userCount ?? '—'}</span>
           <span>Per employee: <b>{credits(feature.perStaffCredits)} cr</b> × {feature.staffCount ?? '—'}</span>
           <span>Recurring / {feature.billingPeriod}: <b>{credits(feature.periodCredits)} cr</b></span>
@@ -414,6 +432,38 @@ export function CreditWorkspace({ section = 'overview' }) {
       </article>)}</div>
       {!features.length && !loading && <p className="cg-credit-empty">No feature pricing has been configured by the administrator.</p>}
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only the company account owner can change paid features.</p>}
+    </section>}
+
+    {(section === 'overview' || section === 'features' || section === 'logs') && featureUsage && <section className="cg-credit-panel" aria-label="Module time-based credit usage">
+      <header><div><span>SERVER-RECORDED USAGE</span><h2>Module Time Usage · {featureUsage.currentMonth}</h2></div><FileClock size={22}/></header>
+      <p>Credits accrue only for observed ON seconds at the module's selected rate (10 seconds, hourly, daily, weekly or 30 days). Turning OFF stops new usage, but logged credits remain payable. The wallet is charged on the next month's configured due date, not after each interval.</p>
+      <div className="cg-credit-inline"><span>Current-month logged feature usage</span><strong>{credits(featureUsage.currentMonthLoggedCredits)} credits (not debited)</strong></div>
+      <div className="cg-credit-inline"><span>Monthly payment due day</span><strong>{featureUsage.dueDay ? `Day ${featureUsage.dueDay} of next month` : 'Configure Calendar Billing in SaaS Admin'}</strong></div>
+      <div className="cg-credit-table-wrap"><table><thead><tr><th>Module</th><th>ON / OFF</th><th>Credits / period</th><th>Last measured</th></tr></thead><tbody>
+        {(featureUsage.activeModules || []).map(item => <tr key={item.feature}>
+          <td><strong>{item.name}</strong></td>
+          <td><span className={item.enabled ? 'cg-credit-pill active' : 'cg-credit-pill'}>{item.suspended ? 'Suspended' : item.enabled ? 'ON · metering' : 'OFF'}</span></td>
+          <td>{credits(item.rateCredits)} / {ratePeriod(item.billingPeriod)}{item.billingPeriod === 'permanent' ? ' (one time)' : ''}</td>
+          <td>{when(item.lastMeteredAt)}</td>
+        </tr>)}
+        {!(featureUsage.activeModules || []).length && <tr><td colSpan={4} className="cg-credit-empty">No timed modules have been enabled yet.</td></tr>}
+      </tbody></table></div>
+      {section !== 'logs' && <button type="button" className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View detailed usage logs <ArrowRight size={16}/></button>}
+    </section>}
+
+    {section === 'logs' && featureUsage && <section className="cg-credit-panel" aria-label="Metered module usage history">
+      <header><div><span>TIME-BASED BILLING LOG</span><h2>Recorded usage checkpoints</h2></div><FileClock size={22}/></header>
+      <p>Each row is company-scoped. Used time and accrued credits are recorded by Django. A zero-second entry marks activation or a rate change; OFF still leaves previous usage logs and their payable credits.</p>
+      <div className="cg-credit-table-wrap"><table><thead><tr><th>Recorded at</th><th>Module</th><th>Used time</th><th>Rate</th><th>Accrued</th><th>Login users</th></tr></thead><tbody>
+        {(featureUsage.readings || []).map(row => <tr key={row.id}>
+          <td>{when(row.sampledAt)}</td><td><strong>{row.name}</strong></td>
+          <td>{timeUsed(row.coveredSeconds)}</td>
+          <td>{credits(row.rateCredits)} / {ratePeriod(row.billingPeriod)}</td>
+          <td><strong>{credits(row.accruedCredits)}</strong></td><td>{row.userCount}</td>
+        </tr>)}
+        {!(featureUsage.readings || []).length && <tr><td colSpan={6} className="cg-credit-empty">No usage checkpoints yet. Start a module, then switch it OFF or refresh after metering.</td></tr>}
+      </tbody></table></div>
+      <p className="cg-credit-note">These are credits, not rupees. Monthly statements are authoritative for wallet settlement. Usage checkpoints do not individually debit the wallet.</p>
     </section>}
 
     {section === 'logs' && <section className="cg-credit-panel" aria-label="Feature activation history">
