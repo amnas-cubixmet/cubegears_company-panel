@@ -11,11 +11,11 @@ export default defineConfig(({ command, mode }) => {
   plugins: [react(), tailwindcss()],
   build: {
     sourcemap: false,
-    minify: 'esbuild',
+    minify: 'oxc',
     target: 'es2020',
     cssCodeSplit: true,
     chunkSizeWarningLimit: 850,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],
