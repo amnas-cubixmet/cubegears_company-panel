@@ -811,3 +811,76 @@
     grid-column:auto;
   }
 }
+
+
+/* Readable attendance calendar text on desktop and mobile.
+   Legacy typography used 7–10px for most labels, values and tables. */
+.attendance-calendar-redesign{font-size:15px;line-height:1.5}
+.attendance-dashboard-heading h2{font-size:21px}
+.attendance-dashboard-heading p,
+.attendance-employee-copy p,
+.attendance-dashboard-card .attendance-card-header p,
+.attendance-dashboard-stats article>small,
+.attendance-stat-top>span,
+.attendance-legend,
+.attendance-employee-copy>span,
+.attendance-employee-meta small,
+.attendance-days-empty,
+.attendance-session-times small,
+.attendance-session-auto{font-size:13px;line-height:1.5}
+.attendance-employee-copy h3{font-size:17px}
+.attendance-employee-meta strong{font-size:14px}
+.attendance-dashboard-card .attendance-card-header h3{font-size:17px}
+.attendance-dashboard-stats article>strong{font-size:23px;line-height:1.25}
+.attendance-month-selects select{font-size:14px;min-width:0}
+.attendance-month-controls>button,.attendance-month-selects{min-height:40px;height:40px}
+.attendance-month-controls>button{width:40px}
+.attendance-days-row{grid-auto-columns:40px;gap:7px}
+.attendance-day-chip{width:40px;height:49px}
+.attendance-day-chip span{font-size:14px}
+.attendance-day-chip i{width:17px;height:17px}
+.attendance-history-search{min-height:42px;height:42px}
+.attendance-history-search input,
+.attendance-export-button,
+.attendance-history-table-new th,
+.attendance-history-table-new td,
+.attendance-history-table-new td:first-child strong,
+.attendance-history-table-new td:first-child span,
+.attendance-status-badge,
+.attendance-empty-state{font-size:14px;line-height:1.4}
+.attendance-export-button{min-height:42px;height:42px}
+.attendance-status-badge{min-height:26px;padding:4px 9px}
+.attendance-history-table-new th,.attendance-history-table-new td{padding:12px}
+.attendance-punch-card.is-loading,
+.attendance-punch-note span,
+.attendance-punch-error,
+.attendance-session-title strong,
+.attendance-session-title span,
+.attendance-session-times b,
+.attendance-session-location{font-size:13px;line-height:1.45}
+.attendance-punch-status small,.attendance-punch-meta small{font-size:13px}
+.attendance-punch-status strong,.attendance-punch-meta strong{font-size:15px}
+.attendance-punch-action button{font-size:15px;min-height:42px}
+.attendance-session-strip{gap:9px}
+.attendance-session-strip article{padding:11px}
+.attendance-calendar-fetch-error{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  padding:12px 14px;border:1px solid var(--danger);border-radius:10px;
+  background:var(--danger-soft);color:var(--danger);font-size:14px;line-height:1.5
+}
+.attendance-calendar-fetch-error button{
+  border:1px solid currentColor;border-radius:8px;padding:8px 13px;background:transparent;
+  color:inherit;font:inherit;font-weight:700;cursor:pointer
+}
+.attendance-calendar-fetch-error button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.attendance-calendar-loading{margin:0;color:var(--text-secondary);font-size:14px}
+
+@media(max-width:600px){
+  .attendance-dashboard-heading h2{font-size:19px}
+  .attendance-month-selects{flex:1;justify-content:center;min-width:0}
+  .attendance-month-selects select{font-size:13px;max-width:92px}
+  .attendance-dashboard-stats article>strong{font-size:20px}
+  .attendance-history-table-new{min-width:760px}
+  .attendance-card-header{gap:10px}
+  .attendance-punch-action button{min-height:44px}
+}
