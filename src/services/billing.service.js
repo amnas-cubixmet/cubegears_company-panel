@@ -1,4 +1,5 @@
 import apiClient from '../api/apiClient';
+import { prepareInvoicePayloadForApi } from '../utils/invoicePayload';
 import { USE_MOCK_API } from '../api/apiConfig';
 
 const DOCS_KEY = 'cubixgear:billing-documents';
@@ -298,7 +299,10 @@ export const billingService = {
     return read(DOCS_KEY, seedDocuments).find((row) => row.id === documentId) || null;
   },
   async saveDraft(payload) {
-    if (!USE_MOCK_API) return payload.id ? apiClient.put(`/billing/documents/${payload.id}`, payload) : apiClient.post('/billing/documents', payload);
+    if (!USE_MOCK_API) {
+      const clean = prepareInvoicePayloadForApi(payload);
+      return payload.id ? apiClient.put(`/billing/documents/${payload.id}`, clean) : apiClient.post('/billing/documents', clean);
+    }
     const docs = read(DOCS_KEY, seedDocuments);
     if (payload.id) {
       const next = docs.map((row) => row.id === payload.id ? { ...row, ...payload, updatedAt: new Date().toISOString() } : row);
