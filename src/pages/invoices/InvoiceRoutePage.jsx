@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
-import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError } from '../../utils/invoicePayload';
+import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, normalizeHsnSacCode } from '../../utils/invoicePayload';
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import '../../styles/invoice-field-validation.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
@@ -377,7 +377,7 @@ export function InvoiceRoutePage() {
         type: 'Stock Part',
         description: stock?.name || '',
         code: stock?.sku || '',
-        hsnCode: stock?.hsnCode || stock?.hsn || '',
+        hsnCode: normalizeHsnSacCode(stock?.hsnCode || stock?.hsn || ''),
         unit: stock?.unit || 'PCS',
         purchasePrice: stock?.cost ? String(stock.cost) : '',
         rate: stock?.price ? String(stock.price) : '',
@@ -870,7 +870,7 @@ export function InvoiceRoutePage() {
                     : <input aria-label="Item name" value={row.description || ''} onChange={(e) => updateItem(row.id, 'description', e.target.value)} placeholder="Item / service name"/>
                   }
                 </div>
-                <input aria-label="HSN or SAC" value={row.hsnCode || ''} onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value.replace(/[^0-9A-Za-z]/g, ''))} placeholder="HSN / SAC"/>
+                <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
                 <div className="invoice-field-wrap">
                   <input className="plain-number-input" aria-label="Quantity" aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])} inputMode="decimal" value={inputNumber(row.qty)} placeholder="1" onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
                   {fieldErrors[`items.${index}.qty`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.qty`]}</small>}
