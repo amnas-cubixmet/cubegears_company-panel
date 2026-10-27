@@ -64,8 +64,7 @@ export const validateInvoiceDraft = (draft) => {
 };
 
 export const extractInvoiceFieldErrors = (error) => {
-  if (error?.fieldErrors) return error.fieldErrors;
-  if (!error?.data || typeof error.data !== 'object') return {};
+  if (!error?.data || typeof error.data !== 'object') return error?.fieldErrors || {};
   const fields = {};
   const walk = (value, path) => {
     if (Array.isArray(value)) {
