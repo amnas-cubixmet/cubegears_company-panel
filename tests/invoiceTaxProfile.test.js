@@ -47,12 +47,14 @@ test('missing or inconsistent registration blocks save instead of guessing', () 
   assert.throws(() => workshopInvoiceType({ registered: false, gstin: '32ABCDE1234F1Z5' }), /inconsistent/i);
 });
 
-test('HSN is a digit string and preserves leading zeroes when typed', () => {
-  assert.equal(normalizeHsnSacCode('00 123A-4'), '001234');
+test('HSN / SAC accepts letters and digits while preserving leading zeroes', () => {
+  assert.equal(normalizeHsnSacCode('00 123A-4'), '00123A4');
   assert.equal(normalizeHsnSacCode('000123'), '000123');
+  assert.equal(normalizeHsnSacCode('sac12a34'), 'SAC12A34');
+  assert.equal(normalizeHsnSacCode('0'.repeat(40)).length, 30);
   assert.equal(normalizeHsnSacCode(''), '');
   const input = draft();
   input.invoiceType = 'regular';
-  input.items[0].hsnCode = '000123';
-  assert.equal(prepareInvoicePayloadForApi(input).items[0].hsnCode, '000123');
+  input.items[0].hsnCode = '0A00123';
+  assert.equal(prepareInvoicePayloadForApi(input).items[0].hsnCode, '0A00123');
 });
