@@ -81,3 +81,97 @@
     outline-offset: 2px;
   }
 }
+
+/* Authentication routes follow the same saved appearance preference. */
+:root[data-theme='light'] .login-page {
+  background: var(--app-bg) !important;
+  color: var(--text-primary) !important;
+}
+:root[data-theme='light'] .login-page .login-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme='light'] .login-page :is(.login-brand-name, .login-title) {
+  color: var(--text-primary) !important;
+}
+:root[data-theme='light'] .login-page :is(.login-brand-subtitle, .login-description, .login-field-label) {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme='light'] .login-page :is(.login-input-shell, .auth-mode-tabs, .auth-dev-link) {
+  background: var(--field-bg) !important;
+  border-color: var(--field-border) !important;
+}
+:root[data-theme='light'] .login-page .login-input {
+  color: var(--text-primary) !important;
+  caret-color: var(--primary);
+}
+:root[data-theme='light'] .login-page .login-input::placeholder {
+  color: var(--text-muted) !important;
+}
+:root[data-theme='light'] .login-page :is(.login-input-icon, .login-password-toggle, .auth-mode-tabs button) {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme='light'] .login-page .auth-mode-tabs button.active {
+  background: var(--surface) !important;
+  color: var(--primary) !important;
+}
+:root[data-theme='light'] .login-page :is(.login-forgot, .auth-back, .auth-dev-link a, .auth-bottom-link a) {
+  color: var(--primary) !important;
+}
+:root[data-theme='light'] .login-page .login-error {
+  background: var(--danger-soft) !important;
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent) !important;
+  color: var(--danger) !important;
+}
+:root[data-theme='light'] .login-page .login-success {
+  background: var(--success-soft) !important;
+  border-color: color-mix(in srgb, var(--success) 35%, transparent) !important;
+  color: var(--success) !important;
+}
+:root[data-theme='light'] .login-page .login-input:-webkit-autofill,
+:root[data-theme='light'] .login-page .login-input:-webkit-autofill:hover,
+:root[data-theme='light'] .login-page .login-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--field-bg) inset !important;
+}
+
+/* Secure billing uses the same theme tokens as the rest of the workspace. */
+:root[data-theme='dark'] .cg-subscribe {
+  background: var(--app-bg);
+  color: var(--text-primary);
+}
+:root[data-theme='dark'] .cg-subscribe :is(.cg-subscribe-plan, .cg-subscribe-history) {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+:root[data-theme='dark'] .cg-subscribe :is(.cg-subscribe-head p, .cg-subscribe-plan p, .cg-subscribe-plan li, .cg-subscribe-trust) {
+  color: var(--text-secondary);
+}
+:root[data-theme='dark'] .cg-subscribe :is(.cg-subscribe-plan-name, .cg-subscribe-price, .cg-subscribe-history-head h2) {
+  color: var(--text-primary);
+}
+:root[data-theme='dark'] .cg-subscribe :is(.cg-subscribe-price small, .cg-subscribe-history th, .cg-subscribe-history td) {
+  color: var(--text-muted);
+}
+:root[data-theme='dark'] .cg-subscribe :is(.cg-subscribe-details, .cg-subscribe-segments) {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-segments button {
+  color: var(--text-secondary);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-segments button.active {
+  background: var(--surface);
+  color: var(--primary);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-history button {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-history :is(th, td) {
+  border-color: var(--border);
+}
