@@ -1,0 +1,9 @@
+/* Visible, accessible validation for invoice inputs without disrupting editor layout. */
+.invoice-field-wrap{display:flex;flex-direction:column;gap:4px;min-width:0;width:100%}
+.billing-page input[aria-invalid="true"],.billing-page select[aria-invalid="true"]{
+  border-color:#dc2626!important;
+  box-shadow:0 0 0 2px rgba(220,38,38,.12);
+}
+.invoice-input-error{display:block;font-size:11px;line-height:1.35;font-weight:600;color:#b91c1c;overflow-wrap:anywhere}
+.invoice-item-validation-summary{grid-column:1 / -1;font-size:11px;line-height:1.5;color:#b91c1c;background:rgba(220,38,38,.05);padding:6px 9px;border-radius:7px}
+.invoice-item-validation-summary p{margin:2px 0;color:inherit;font-size:inherit}
