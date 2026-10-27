@@ -8,12 +8,12 @@ import {
 } from '../src/utils/invoicePayload.js';
 
 const draft = () => ({
-  invoiceType: 'regular',
+  invoiceType: 'regular', date: '2026-10-27',
   customer: { name: 'Walk-in customer' },
   paid: '', discount: '', adjustment: '',
   cgstRate: 9, sgstRate: 9, igstRate: 18,
   items: [{
-    id: 'ROW-1', type: 'Labour', description: 'Car wash',
+    id: 'ROW-1', type: 'Labour', unit: 'PCS', description: 'Car wash',
     qty: 1, rate: '', purchasePrice: '', discount: '',
     taxRate: '', inventoryId: '', hsnCode: ''
   }]
