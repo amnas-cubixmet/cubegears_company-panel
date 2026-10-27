@@ -7,6 +7,7 @@ const INVENTORY_KEY = 'cubixgear:inventory';
 const STOCK_LEDGER_KEY = 'cubixgear:stock-ledger';
 const JOB_PREFILL_KEY = 'cubixgear:invoice-job-prefill';
 import { calculateEstimateIndiaGst } from '../utils/indiaGst';
+import { localInvoiceDate } from '../utils/invoiceTaxUi';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance } from './documentTemplates.service';
 
 const seedDocuments = [
@@ -147,7 +148,7 @@ export const blankBillingDocument = (kind = 'invoice', { emptyInputs = false } =
     kind,
     invoiceType: 'regular', // Replaced by verified workshop registration on create.
     status: 'Draft',
-    date: emptyInputs ? '' : today(),
+    date: emptyInputs ? localInvoiceDate() : today(),
     seller: { name: emptyInputs ? '' : 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '' },
     customer: { name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
     vehicle: { registration: '', makeModel: '', odometer: '', vin: '', ...(prefill?.vehicle || {}) },
