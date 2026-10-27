@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
 import { creditWalletService, notifyCreditChange, purchaseCredits } from '../../services/creditWallet.service';
@@ -43,6 +43,8 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [cycleBusy, setCycleBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
+  const purchaseInFlightRef = useRef(false);
+  const [purchaseRetryAt, setPurchaseRetryAt] = useState(0);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -148,7 +150,18 @@ export function CreditWorkspace({ section = 'overview' }) {
     finally { setBusy(''); }
   };
 
+  useEffect(() => {
+    if (!purchaseRetryAt) return undefined;
+    const timer = window.setTimeout(() => setPurchaseRetryAt(0),
+      Math.max(0, purchaseRetryAt - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [purchaseRetryAt]);
+
   const buyBundle = async (bundle) => {
+    // A ref prevents double-clicks before React can render its busy state.
+    // Never automatically replay financial/purchase mutations.
+    if (purchaseInFlightRef.current || busy || !bundle?.id || purchaseRetryAt > Date.now()) return;
+    purchaseInFlightRef.current = true;
     setBusy(`bundle:${bundle.id}`); setError(''); setNotice('');
     try {
       const result = await creditWalletService.purchaseBundle(bundle.id);
@@ -159,8 +172,22 @@ export function CreditWorkspace({ section = 'overview' }) {
         : `${bundle.name} enabled. ${credits(result.chargedCredits)} credits charged by the server.`);
       await load();
       notifyCreditChange();
-    } catch (e) { setError(e?.message || 'Label purchase could not be verified.'); }
-    finally { setBusy(''); }
+    } catch (e) {
+      if (e?.status === 429) {
+        const seconds = Number(e?.retryAfterSeconds);
+        if (Number.isFinite(seconds) && seconds > 0) {
+          setPurchaseRetryAt(Date.now() + seconds * 1000);
+          setError(`Too many activation attempts. Try again in about ${Math.ceil(seconds / 60)} minute(s). No automatic retry was made. Check feature status before retrying.`);
+        } else {
+          setError('Too many activation attempts. Wait before trying again. No automatic retry was made.');
+        }
+      } else {
+        setError(e?.message || 'Label purchase could not be verified.');
+      }
+    } finally {
+      purchaseInFlightRef.current = false;
+      setBusy('');
+    }
   };
 
   const stopBundle = async (bundle) => {
@@ -396,9 +423,10 @@ export function CreditWorkspace({ section = 'overview' }) {
             {bundle.active && <small>{bundle.validUntil ? `Available until ${when(bundle.validUntil)}` : 'Permanent entitlement'}</small>}
             {status.message && <p className="cg-bundle-reason" role="status">{status.message}</p>}
             <div className="cg-bundle-actions">
-              <button className="primary" type="button" disabled={busy !== '' || !status.allow || featureAccess.billingStatus?.blocked}
+              <button className="primary" type="button" disabled={busy !== '' || purchaseRetryAt > Date.now() || !status.allow || featureAccess.billingStatus?.blocked}
                 onClick={() => buyBundle(bundle)}>
-                {busy === `bundle:${bundle.id}` ? 'Saving…'
+                {purchaseRetryAt > Date.now() ? 'Temporarily rate limited'
+                 : busy === `bundle:${bundle.id}` ? 'Saving…'
                   : !status.allow && !bundle.active ? status.label
                   : bundle.billingType === 'permanent' && bundle.active ? 'Owned permanently'
                   : bundle.purchaseDisabledReason === 'FREE_MODULES_ONLY' ? 'Included Free'

@@ -141,6 +141,16 @@ apiClient.interceptors.response.use(
     normalized.status = status;
     normalized.data = payload;
     normalized.fieldErrors = fieldErrors;
+    // DRF throttling includes Retry-After. Preserve the duration for UI
+    // cooldowns; never automatically replay mutations such as purchases.
+    const retryAfterHeader = error?.response?.headers?.['retry-after'];
+    let retrySeconds = Number(retryAfterHeader);
+    if (retryAfterHeader && !Number.isFinite(retrySeconds)) {
+      retrySeconds = (Date.parse(retryAfterHeader) - Date.now()) / 1000;
+    }
+    if (status === 429 && Number.isFinite(retrySeconds) && retrySeconds > 0) {
+      normalized.retryAfterSeconds = Math.ceil(retrySeconds);
+    }
 
     return Promise.reject(normalized);
   }
