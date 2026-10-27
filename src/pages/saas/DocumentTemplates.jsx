@@ -5,6 +5,7 @@ import { settingsService } from '../../services/settings.service';
 import { templateDefaults as defaults, loadDocumentTemplateSettings, saveDocumentTemplateSettings } from '../../services/documentTemplates.service';
 import { validateDocumentTemplateSettings, templateApiFieldErrors, templateErrorSummary } from '../../utils/documentTemplateValidation';
 import { AccountHeader } from '../../components/account';
+import { optimizeDocumentLogo } from '../../utils/optimizeDocumentLogo';
 import '../../styles/document-templates.css';
 import '../../styles/account-dashboard.css';
 
@@ -106,6 +107,7 @@ export function DocumentTemplates() {
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsReady, setSettingsReady] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [preparingLogo, setPreparingLogo] = useState(false);
   const [settingsError, setSettingsError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [saved, setSaved] = useState(false);
@@ -160,7 +162,7 @@ export function DocumentTemplates() {
   };
 
   const save = async () => {
-    if (savingSettings || settingsLoading || !settingsReady) return;
+    if (savingSettings || settingsLoading || preparingLogo || !settingsReady) return;
     setSaved(false);
     const problems = validateDocumentTemplateSettings(settings);
     setFieldErrors(problems);
@@ -185,38 +187,27 @@ export function DocumentTemplates() {
     }
   };
 
-  const uploadLogo = (event) => {
+  const uploadLogo = async (event) => {
     const file = event.target.files?.[0];
+    event.target.value = '';
     if (!file) return;
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 250 * 1024) {
-      const message = 'Logo must be PNG, JPG or WEBP and at most 250 KB.';
+    setPreparingLogo(true);
+    setSettingsError('');
+    setFieldErrors((old) => {
+      const next = { ...old };
+      delete next.businessLogo;
+      return next;
+    });
+    try {
+      const value = await optimizeDocumentLogo(file);
+      update('businessLogo', value);
+    } catch (error) {
+      const message = error?.message || 'Unable to prepare this image.';
       setFieldErrors((old) => ({ ...old, businessLogo: message }));
       setSettingsError(message);
-      return;
+    } finally {
+      setPreparingLogo(false);
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const value = String(reader.result || '');
-      const image = new Image();
-      image.onload = () => {
-        if (image.naturalWidth > 2048 || image.naturalHeight > 2048) {
-          const message = 'Logo dimensions must be at most 2048 × 2048 pixels.';
-          setFieldErrors((old) => ({ ...old, businessLogo: message }));
-          setSettingsError(message);
-        } else {
-          setSettingsError('');
-          update('businessLogo', value);
-        }
-      };
-      image.onerror = () => {
-        const message = 'Unable to read the uploaded image.';
-        setFieldErrors((old) => ({ ...old, businessLogo: message }));
-        setSettingsError(message);
-      };
-      image.src = value;
-    };
-    reader.readAsDataURL(file);
-    event.target.value = '';
   };
 
   return (
@@ -227,7 +218,7 @@ export function DocumentTemplates() {
         active="templates"
         onNavigate={navigate}
         actions={
-          <button className="template-save-button" type="button" disabled={!settingsReady || settingsLoading || savingSettings} onClick={save}>
+          <button className="template-save-button" type="button" disabled={!settingsReady || settingsLoading || savingSettings || preparingLogo} onClick={save}>
             {saved ? <Check size={15}/> : <Save size={15}/>}
             {savingSettings ? 'Saving…' : saved ? 'Saved' : 'Save Templates'}
           </button>
@@ -252,22 +243,21 @@ export function DocumentTemplates() {
               {settings.businessLogo ? <img src={settings.businessLogo} alt="Business logo"/> : <span>{(settings.businessName || 'CG').split(/\s+/).map((word) => word[0]).join('').slice(0, 2).toUpperCase()}</span>}
             </div>
             <div className="business-logo-actions">
-              <label className="template-upload-button"><ImagePlus size={15}/>Upload Logo<input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadLogo}/></label>
+              <label className="template-upload-button"><ImagePlus size={15}/>{preparingLogo ? "Preparing logo…" : "Upload Logo"}<input type="file" accept="image/*" disabled={preparingLogo} onChange={uploadLogo}/></label>
               {settings.businessLogo && <button type="button" className="template-remove-logo" onClick={() => update('businessLogo', '')}><Trash2 size={14}/>Remove</button>}
             </div>
-            <small>PNG, JPG or WEBP, up to 250 KB and 2048 × 2048 pixels. Saved securely with your company template settings.</small>
             {fieldErrors.businessLogo && <small className="template-input-error" role="alert">{fieldErrors.businessLogo}</small>}
           </div>
 
           <div className="business-fields-grid">
-            <label>Business / Brand Name<input value={settings.businessName || ''} onChange={(e) => update('businessName', e.target.value)} placeholder="CubixGear Workshop" aria-invalid={Boolean(fieldErrors.businessName)}/>{fieldErrors.businessName && <small className="template-input-error" role="alert">{fieldErrors.businessName}</small>}</label>
+            <label>Business / Brand Name<input value={settings.businessName || ''} onChange={(e) => update('businessName', e.target.value)} placeholder="Business / brand name" aria-invalid={Boolean(fieldErrors.businessName)}/>{fieldErrors.businessName && <small className="template-input-error" role="alert">{fieldErrors.businessName}</small>}</label>
             <label>Legal Business Name<input value={settings.businessLegalName || ''} onChange={(e) => update('businessLegalName', e.target.value)} placeholder="Registered legal name" aria-invalid={Boolean(fieldErrors.businessLegalName)}/>{fieldErrors.businessLegalName && <small className="template-input-error" role="alert">{fieldErrors.businessLegalName}</small>}</label>
             <label>GSTIN<input value={settings.businessGstin || ''} onChange={(e) => update('businessGstin', e.target.value.toUpperCase())} placeholder="32XXXXXXXXXXXXX" aria-invalid={Boolean(fieldErrors.businessGstin)}/>{fieldErrors.businessGstin && <small className="template-input-error" role="alert">{fieldErrors.businessGstin}</small>}</label>
             <label>PAN<input value={settings.businessPan || ''} onChange={(e) => update('businessPan', e.target.value.toUpperCase())} placeholder="ABCDE1234F" aria-invalid={Boolean(fieldErrors.businessPan)}/>{fieldErrors.businessPan && <small className="template-input-error" role="alert">{fieldErrors.businessPan}</small>}</label>
             <label>Phone<input value={settings.businessPhone || ''} onChange={(e) => update('businessPhone', e.target.value)} placeholder="+91 98765 43210" aria-invalid={Boolean(fieldErrors.businessPhone)}/>{fieldErrors.businessPhone && <small className="template-input-error" role="alert">{fieldErrors.businessPhone}</small>}</label>
             <label>Email<input type="email" value={settings.businessEmail || ''} onChange={(e) => update('businessEmail', e.target.value)} placeholder="accounts@company.com" aria-invalid={Boolean(fieldErrors.businessEmail)}/>{fieldErrors.businessEmail && <small className="template-input-error" role="alert">{fieldErrors.businessEmail}</small>}</label>
-            <label>State<input value={settings.businessState || ''} onChange={(e) => update('businessState', e.target.value)} placeholder="Kerala" aria-invalid={Boolean(fieldErrors.businessState)}/>{fieldErrors.businessState && <small className="template-input-error" role="alert">{fieldErrors.businessState}</small>}</label>
-            <label>State Code<input value={settings.businessStateCode || ''} onChange={(e) => update('businessStateCode', e.target.value)} placeholder="32" aria-invalid={Boolean(fieldErrors.businessStateCode)}/>{fieldErrors.businessStateCode && <small className="template-input-error" role="alert">{fieldErrors.businessStateCode}</small>}</label>
+            <label>State<input value={settings.businessState || ''} onChange={(e) => update('businessState', e.target.value)} placeholder="State" aria-invalid={Boolean(fieldErrors.businessState)}/>{fieldErrors.businessState && <small className="template-input-error" role="alert">{fieldErrors.businessState}</small>}</label>
+            <label>State Code<input value={settings.businessStateCode || ''} onChange={(e) => update('businessStateCode', e.target.value)} placeholder="State code" aria-invalid={Boolean(fieldErrors.businessStateCode)}/>{fieldErrors.businessStateCode && <small className="template-input-error" role="alert">{fieldErrors.businessStateCode}</small>}</label>
             <label>Website<input value={settings.businessWebsite || ''} onChange={(e) => update('businessWebsite', e.target.value)} placeholder="www.company.com" aria-invalid={Boolean(fieldErrors.businessWebsite)}/>{fieldErrors.businessWebsite && <small className="template-input-error" role="alert">{fieldErrors.businessWebsite}</small>}</label>
             <label className="business-field-wide">Registered Address<textarea value={settings.businessAddress || ''} onChange={(e) => update('businessAddress', e.target.value)} placeholder="Full registered business address" aria-invalid={Boolean(fieldErrors.businessAddress)}/>{fieldErrors.businessAddress && <small className="template-input-error" role="alert">{fieldErrors.businessAddress}</small>}</label>
           </div>
@@ -350,13 +340,13 @@ export function DocumentTemplates() {
 
             <div className="custom-template-grid">
               <label>Template Name
-                <input value={settings.customName || ''} onChange={(e) => update('customName', e.target.value)} placeholder="My Custom Template" aria-invalid={Boolean(fieldErrors.customName)}/>
+                <input value={settings.customName || ''} onChange={(e) => update('customName', e.target.value)} placeholder="Template name" aria-invalid={Boolean(fieldErrors.customName)}/>
               {fieldErrors.customName && <small className="template-input-error" role="alert">{fieldErrors.customName}</small>}</label>
               <label>Document Heading
-                <input value={settings.customHeader || ''} onChange={(e) => update('customHeader', e.target.value)} placeholder="Tax Invoice" aria-invalid={Boolean(fieldErrors.customHeader)}/>
+                <input value={settings.customHeader || ''} onChange={(e) => update('customHeader', e.target.value)} placeholder="Document heading" aria-invalid={Boolean(fieldErrors.customHeader)}/>
               {fieldErrors.customHeader && <small className="template-input-error" role="alert">{fieldErrors.customHeader}</small>}</label>
               <label className="custom-template-wide">Footer Note
-                <textarea value={settings.customFooter || ''} onChange={(e) => update('customFooter', e.target.value)} placeholder="Thank you for your business." aria-invalid={Boolean(fieldErrors.customFooter)}/>
+                <textarea value={settings.customFooter || ''} onChange={(e) => update('customFooter', e.target.value)} placeholder="Footer note" aria-invalid={Boolean(fieldErrors.customFooter)}/>
               {fieldErrors.customFooter && <small className="template-input-error" role="alert">{fieldErrors.customFooter}</small>}</label>
             </div>
 
