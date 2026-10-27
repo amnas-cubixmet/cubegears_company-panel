@@ -307,6 +307,22 @@ export const downloadBillingPdf = async (savedInvoice) => {
 
 export const billingService = {
   downloadPdf: downloadBillingPdf,
+  async previewTotals(document) {
+    if (!USE_MOCK_API) {
+      return apiClient.post('/billing/documents/preview', {
+        kind: document.kind,
+        invoiceType: document.invoiceType,
+        customer: { placeOfSupply: document.customer?.placeOfSupply ||
+          document.customer?.stateCode || document.customer?.state || '' },
+        items: (document.items || []).map(({ qty, rate, discount, taxRate }) =>
+          ({ qty, rate, discount, taxRate })),
+        discount: document.discount,
+        adjustment: document.adjustment,
+        paid: document.paid,
+      });
+    }
+    return calculateDocumentTotals(document);
+  },
   async getGstContext() {
     if (!USE_MOCK_API) return apiClient.get('/billing/documents/gst-context');
     return { registered: false, gstin: '', supplierState: '', companyName: 'Sample Workshop' };

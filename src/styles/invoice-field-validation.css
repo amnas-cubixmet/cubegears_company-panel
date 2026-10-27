@@ -51,3 +51,17 @@
   line-height: 1.45;
   font-weight: 650;
 }
+
+/* Live server GST calculation status on invoices and estimates. */
+.billing-page .invoice-backend-preview-ok{
+  display:flex;align-items:center;gap:6px;margin:9px 0;
+  color:var(--success);font-size:13px;line-height:1.5;font-weight:650;
+}
+.billing-page .invoice-backend-preview-error{
+  margin:10px 0;padding:10px 12px;border:1px solid var(--border);
+  border-radius:9px;background:var(--surface-2);color:var(--text-secondary);
+  font-size:13px;line-height:1.5;
+}
+.billing-page input[aria-label="Place of Supply"]{
+  font-size:16px;min-height:44px;
+}
