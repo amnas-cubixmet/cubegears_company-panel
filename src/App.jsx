@@ -53,6 +53,7 @@ import './styles/form-controls-unified.css';
 import './styles/form-errors-unified.css';
 // Final regular-weight typography and responsive hierarchy over legacy page styles.
 import './styles/desktop-typography.css';
+import './styles/route-ui-visibility.css';
 
 export function App() {
   return (
@@ -77,4 +78,3 @@ export function App() {
 }
 
 export default App;
-import './styles/route-ui-visibility.css';
