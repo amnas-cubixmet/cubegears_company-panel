@@ -1,4 +1,4 @@
-import { invoiceTaxMode } from './invoiceTaxUi.js';
+import { invoiceStateCode, invoiceTaxMode } from './invoiceTaxUi.js';
 
 /**
  * Build a clean Django invoice payload without changing the editable draft.
@@ -37,8 +37,13 @@ export const validateInvoiceDraft = (draft) => {
   if (!draft.date || !/^\d{4}-\d{2}-\d{2}$/.test(String(draft.date))) {
     errors.date = 'Select a valid invoice date.';
   }
-  if (draft.invoiceType === 'gst' && invoiceTaxMode(draft) === 'unknown') {
-    errors['customer.placeOfSupply'] = 'Choose a valid state for GST place of supply.';
+  // GST percentages can be selected before entering the customer's state,
+  // but the legal Place of Supply must be valid when saving the document.
+  const suppliedPlace = draft.customer?.placeOfSupply ||
+    draft.customer?.stateCode || draft.customer?.state || '';
+  if (draft.invoiceType === 'gst' &&
+      (!invoiceStateCode(suppliedPlace) || invoiceTaxMode(draft) === 'unknown')) {
+    errors['customer.placeOfSupply'] = 'Enter a valid Place of Supply state before saving.';
   }
   if (!String(draft.customer?.name || '').trim()) errors['customer.name'] = 'Customer name is required.';
   if (!draft.items?.length) errors.items = 'Add at least one item.';
