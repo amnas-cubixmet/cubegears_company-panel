@@ -766,13 +766,13 @@ export function InvoiceRoutePage() {
           </div>
 
           <div className="invoice-sale-head">
-            <span>Item Name / Source</span>
+            <span>Item Name</span>
             <span>HSN / SAC</span>
             <span>Qty</span>
             <span>Unit</span>
             <span>Price / Unit</span>
             <span>GST Rate</span>
-            <span>Amount</span>
+            <span>Amount (Incl. GST)</span>
             <span></span>
           </div>
 
@@ -802,9 +802,9 @@ export function InvoiceRoutePage() {
               return <div className="invoice-sale-row" key={row.id}>
                 <div className="invoice-item-main-cell">
                   <div className="invoice-field-wrap invoice-item-type-field">
-                    <span className="invoice-mobile-label">Item Type</span>
-                    <select aria-label="Item source" aria-invalid={Boolean(fieldErrors[`items.${index}.type`])} value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
-                    <option value="">Select item type</option>
+                    <span className="invoice-mobile-label">Type</span>
+                    <select aria-label="Type" aria-invalid={Boolean(fieldErrors[`items.${index}.type`])} value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
+                    <option value="">Select type</option>
                     {itemTypes.map((type) => <option key={type}>{type}</option>)}
                     </select>
                   </div>
@@ -821,7 +821,7 @@ export function InvoiceRoutePage() {
                 </div>
                 <div className="invoice-field-wrap invoice-hsn-field">
                   <span className="invoice-mobile-label">HSN / SAC</span>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
+                  <input type="text" inputMode="text" maxLength={30} autoComplete="off" aria-label="HSN or SAC code" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC code"/>
                 </div>
                 <div className="invoice-field-wrap invoice-qty-field">
                   <span className="invoice-mobile-label">Quantity</span>
