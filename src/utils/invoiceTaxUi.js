@@ -48,26 +48,35 @@ export const invoiceTaxMode = (form) => {
   return indiaTaxMode(true, supplier, actualPlace || (!location ? supplier : ''));
 };
 
-// Rates represent the *entire line*. For CGST + SGST the percentage is split
-// equally by Django. Do not send a component GST rate as the full line rate.
+// The component controls are a *paired* intra-state GST choice. Django's
+// invoice item has one total taxRate, which it splits equally into CGST/SGST.
+// Never persist the CGST or SGST component alone as the whole tax rate.
+export const INVOICE_CGST_SGST_RATES = Object.freeze(['2.5', '5', '9', '18']);
+export const INVOICE_IGST_RATES = Object.freeze(['2.5', '9']);
+
+export const invoiceComponentFromTotalRate = (totalRate) =>
+  totalRate === '' || totalRate == null ? '' : String(Number(totalRate) / 2);
+
+export const invoiceTotalFromGstComponent = (componentRate) =>
+  componentRate === '' ? '' : String(Number(componentRate) * 2);
+
 export const invoiceLineTaxChoices = (mode) => {
   if (mode === 'cgst_sgst') return [
-    { value: '0', label: 'No GST (0%)' },
-    ...[2.5, 5, 6, 9, 14, 18].map((rate) => ({
-      value: String(rate * 2),
-      label: `CGST ${rate}% + SGST ${rate}% = ${rate * 2}%`,
+    { value: '0', label: 'GST None (0%)' },
+    ...INVOICE_CGST_SGST_RATES.map((rate) => ({
+      value: invoiceTotalFromGstComponent(rate),
+      label: `CGST ${rate}% + SGST ${rate}% = ${Number(rate) * 2}%`,
     })),
   ];
   if (mode === 'igst') return [
-    { value: '0', label: 'No GST (0%)' },
-    ...[2.5, 5, 9, 12, 18, 28, 36].map((rate) => ({
-      value: String(rate), label: `IGST ${rate}%`,
+    { value: '0', label: 'GST None (0%)' },
+    ...INVOICE_IGST_RATES.map((rate) => ({
+      value: rate, label: `IGST ${rate}%`,
     })),
   ];
-  // Keep the GST-rate selector usable while a customer state is being
-  // entered. The *legal* CGST/SGST vs IGST split is determined by the
-  // place-of-supply field and still validated before saving.
-  if (mode === 'unknown') return [0, 2.5, 5, 9, 10, 12, 18, 28, 36]
-    .map((rate) => ({ value: String(rate), label: `GST ${rate}%` }));
+  // Let users choose while the legal place of supply is still being entered.
+  // Saving still requires a valid state; no invented CGST/IGST classification.
+  if (mode === 'unknown') return [0, 2.5, 5, 9, 10, 18, 36]
+    .map((rate) => ({ value: String(rate), label: rate === 0 ? 'GST None (0%)' : `GST ${rate}%` }));
   return [];
 };
