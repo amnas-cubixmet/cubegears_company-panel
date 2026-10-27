@@ -14,7 +14,7 @@ test('new invoices and estimates request an empty form while edit keeps saved da
 });
 
 test('date, sample seller name, amounts and invoice terms start blank for new documents', () => {
-  assert.match(billing, /date: emptyInputs \? '' : today\(\)/);
+  assert.match(billing, /date: emptyInputs \? localInvoiceDate\(\) : today\(\)/);
   assert.match(billing, /name: emptyInputs \? '' : 'CubixGear Workshop'/);
   assert.match(billing, /discount: emptyInputs \? '' : 0/);
   assert.match(billing, /paymentMode: emptyInputs \? '' : 'Cash'/);
@@ -31,7 +31,7 @@ test('adding a line has no prefilled quantity, item type, unit, tax rate or disc
   assert.match(invoice, /const emptyItem = \(\) => \(\{[^\n]*type: '',[^\n]*qty: '', unit: '',[^\n]*taxRate: '', discount: ''/);
   assert.match(invoice, /<option value="">Select item type<\/option>/);
   assert.match(invoice, /<option value="">Select unit<\/option>/);
-  assert.match(invoice, /<option value="">Select tax type<\/option>/);
+  assert.match(invoice, /GST Type \(automatic\)/);
   assert.match(invoice, /<option value="">Select payment type<\/option>/);
   assert.match(invoice, /<option value="">Select payment mode<\/option>/);
   assert.match(invoice, /value=\{row\.unit \|\| ''\}/);

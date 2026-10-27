@@ -10,13 +10,13 @@ const gstContext = {
   registered: true, gstin: '32ABCDE1234F1Z5', companyName: 'Registered Workshop',
 };
 const draft = () => ({
-  kind: 'invoice', invoiceType: 'gst', taxMode: 'igst',
-  seller: { name: 'Workshop', gstin: 'FAKE' },
-  customer: { name: 'Walk-in' },
+  kind: 'invoice', invoiceType: 'gst', taxMode: 'igst', date: '2026-10-27',
+  seller: { name: 'Workshop', gstin: 'FAKE', stateCode: '32', state: 'Kerala' },
+  customer: { name: 'Walk-in', placeOfSupply: '32-Kerala' },
   paid: '', discount: '', adjustment: '',
   cgstRate: 9, sgstRate: 9, igstRate: 18,
   items: [{ id: '1', type: 'Labour', description: 'Service', hsnCode: '000123',
-    qty: 1, rate: 100, discount: 0, purchasePrice: 0,
+    qty: 1, unit: 'PCS', rate: 100, discount: 0, purchasePrice: 0,
     inventoryId: '', taxRate: 18 }],
 });
 

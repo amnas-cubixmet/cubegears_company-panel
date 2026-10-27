@@ -7,6 +7,7 @@ const INVENTORY_KEY = 'cubixgear:inventory';
 const STOCK_LEDGER_KEY = 'cubixgear:stock-ledger';
 const JOB_PREFILL_KEY = 'cubixgear:invoice-job-prefill';
 import { calculateEstimateIndiaGst } from '../utils/indiaGst';
+import { localInvoiceDate } from '../utils/invoiceTaxUi';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance } from './documentTemplates.service';
 
 const seedDocuments = [
@@ -147,7 +148,7 @@ export const blankBillingDocument = (kind = 'invoice', { emptyInputs = false } =
     kind,
     invoiceType: 'regular', // Replaced by verified workshop registration on create.
     status: 'Draft',
-    date: emptyInputs ? '' : today(),
+    date: emptyInputs ? localInvoiceDate() : today(),
     seller: { name: emptyInputs ? '' : 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '' },
     customer: { name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
     vehicle: { registration: '', makeModel: '', odometer: '', vin: '', ...(prefill?.vehicle || {}) },
@@ -204,10 +205,19 @@ export const calculateDocumentTotals = (doc) => {
     current.tax += row.cgst + row.sgst + row.igst;
     taxGroups.set(key, current);
   });
+  // Line totals use the same GST and invoice-discount allocation as the
+  // grand total. This prevents the estimate, invoice and print preview from
+  // showing a pre-tax amount while the backend saves a GST-inclusive amount.
+  const lineTotals = gst.taxRows.map((row) => ({
+    taxable: row.taxable,
+    gst: row.cgst + row.sgst + row.igst,
+    total: Number((row.taxable + row.cgst + row.sgst + row.igst).toFixed(2)),
+  }));
   const adjustment = Number(doc.adjustment || 0);
   const total = Number((gst.total + adjustment).toFixed(2));
   const paid = Number(doc.paid || 0);
   return {
+    lineTotals,
     itemSubtotal: gst.subtotal,
     documentDiscount,
     taxable: gst.taxable,
