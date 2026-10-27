@@ -42,7 +42,7 @@ test('incorrect quantity and rate show item-level actionable messages', () => {
   assert.match(errors['items.0.qty'], /required/);
   assert.match(errors['items.0.rate'], /valid number/);
   assert.throws(() => prepareInvoicePayloadForApi(input), (error) =>
-    error.fieldErrors['items.0.qty'] && error.fieldErrors['items.0.rate']);
+    Boolean(error.fieldErrors['items.0.qty'] && error.fieldErrors['items.0.rate']));
 });
 
 test('GST invoice requires classified tax rate and HSN', () => {
