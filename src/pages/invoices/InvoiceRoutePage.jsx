@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { billingService, blankBillingDocument, calculateDocumentTotals, normalizeBackendInvoiceTotals } from '../../services/billing.service';
+import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
+import { normalizeBackendInvoiceTotals } from '../../utils/invoiceBackendTotals';
 import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, normalizeHsnSacCode } from '../../utils/invoicePayload';
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
