@@ -1,0 +1,83 @@
+/* Route-wide theme and text-contrast guardrails.
+   Keep these overrides scoped to application UI; printable documents retain their authored colors. */
+@media screen {
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  :root[data-theme='dark'] :is(body, #root, .app-shell, .main-area, .main-content, .saas-account-shell) {
+    color: var(--text-primary);
+  }
+
+  /* Legacy utility colors that otherwise stay nearly black in dark mode. */
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'], [role='menu'])
+  :is(
+    [class~='text-black'], [class~='text-gray-900'], [class~='text-gray-800'],
+    [class~='text-slate-900'], [class~='text-slate-800'],
+    [class~='text-zinc-900'], [class~='text-neutral-900']
+  ) {
+    color: var(--text-primary) !important;
+  }
+
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'], [role='menu'])
+  :is(
+    [class~='text-gray-700'], [class~='text-gray-600'],
+    [class~='text-slate-700'], [class~='text-slate-600'],
+    [class~='text-zinc-700'], [class~='text-neutral-700']
+  ) {
+    color: var(--text-secondary) !important;
+  }
+
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'], [role='menu'])
+  :is(
+    [class~='text-gray-500'], [class~='text-gray-400'],
+    [class~='text-slate-500'], [class~='text-slate-400'],
+    [class~='text-zinc-500'], [class~='text-neutral-500']
+  ) {
+    color: var(--text-muted) !important;
+  }
+
+  /* Light utility surfaces and borders need theme-aware equivalents. */
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'], [role='menu'])
+  :is(
+    [class~='bg-white'], [class~='bg-gray-50'], [class~='bg-gray-100'],
+    [class~='bg-slate-50'], [class~='bg-slate-100'],
+    [class~='bg-zinc-50'], [class~='bg-neutral-50']
+  ) {
+    background-color: var(--surface) !important;
+  }
+
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'], [role='menu'])
+  :is(
+    [class~='border-gray-100'], [class~='border-gray-200'],
+    [class~='border-slate-100'], [class~='border-slate-200'],
+    [class~='border-zinc-100'], [class~='border-neutral-200']
+  ) {
+    border-color: var(--border) !important;
+  }
+
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'])
+  :is(input:not([type='checkbox']):not([type='radio']):not([type='file']),
+      select, textarea, [role='combobox']) {
+    color: var(--text-primary);
+    background-color: var(--field-bg);
+    border-color: var(--field-border);
+  }
+
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'])
+  :is(input, select, textarea)::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  :root[data-theme='dark'] :is(.app-shell, .saas-account-shell, [role='dialog'])
+  select option {
+    color: var(--text-primary);
+    background-color: var(--surface);
+  }
+
+  :is(.app-shell, .saas-account-shell) :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
