@@ -90,8 +90,10 @@ const paths=[...new Set(templates.map(path=>path.replace(/:([A-Za-z]+)/g,(_,key)
     payments:'PAY-0001',expenses:'EXP-0001',services:'SVC-001',reports:'REP-001',notifications:'NOT-001'})[path.split('/')[1]] || 'fixture-id';
 }).replace('*','fixture-unknown')))].filter(path=>!process.env.UI_PATH_FILTER||path.includes(process.env.UI_PATH_FILTER));
 const profiles = process.env.UI_QUICK ? [{width:390,height:844,theme:'light'}] : [
-  {width:1440,height:1000,theme:'light'}, {width:768,height:1024,theme:'dark'},
-  {width:390,height:844,theme:'light'}, {width:360,height:800,theme:'dark'},
+  {width:320,height:720,theme:'dark'}, {width:375,height:812,theme:'light'},
+  {width:390,height:844,theme:'dark'}, {width:430,height:932,theme:'light'},
+  {width:768,height:1024,theme:'dark'}, {width:1024,height:768,theme:'light'},
+  {width:1440,height:1000,theme:'dark'}, {width:1920,height:1080,theme:'light'},
 ];
 const server=spawn(process.execPath,['node_modules/vite/bin/vite.js',...(process.env.UI_PRODUCTION ? ['preview'] : []),'--host','127.0.0.1','--port',String(port),'--strictPort'],{
   cwd:new URL('..',import.meta.url),env:{...process.env,VITE_API_URL:'http://127.0.0.1:8000/api/v1'},stdio:['ignore','pipe','pipe'],
@@ -123,7 +125,8 @@ try {
   await Promise.all(profiles.map(async (profile) => {
     const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},colorScheme:profile.theme==='dark'?'dark':'light'});
     await context.addInitScript(({user,theme})=>{
-      localStorage.setItem('auth_token','fixture-token');localStorage.setItem('auth_user',JSON.stringify(user));localStorage.setItem('cubegears-theme',theme);
+      localStorage.setItem('auth_token','fixture-token');localStorage.setItem('auth_user',JSON.stringify(user));
+      if(!localStorage.getItem('cubegears-theme'))localStorage.setItem('cubegears-theme',theme);
     },{user,theme:profile.theme});
     await context.route('**/*',route=>{
       const url=new URL(route.request().url());
@@ -201,6 +204,7 @@ try {
           await page.getByText('Ajmal K', {exact:true}).waitFor();
         }
         if(path==='/settings' && profile.width<=760){
+          await page.getByRole('heading',{name:'Settings',exact:true}).waitFor({state:'visible'});
           const gap=await page.evaluate(()=>{
             const heading=document.querySelector('.settings-dashboard-heading');
             const actions=document.querySelector('.settings-dashboard-header-actions');
@@ -234,6 +238,31 @@ try {
         console.error(failures.at(-1));
         await page.screenshot({path:join(artifacts,name+'.png'),timeout:2000}).catch(()=>{});
       }
+    }
+    let themeStep='open settings';
+    try {
+      await page.goto(baseURL+'/settings',{waitUntil:'networkidle',timeout:15000});
+      await page.locator('.route-loading').waitFor({state:'hidden',timeout:15000});
+      const appearance=page.getByLabel('Appearance');
+      const alternateTheme=profile.theme==='dark'?'light':'dark';
+      themeStep='apply alternate theme';
+      await appearance.selectOption(alternateTheme);
+      await page.waitForFunction(theme=>document.documentElement.dataset.theme===theme,alternateTheme);
+      themeStep='check persisted theme';
+      if(await page.evaluate(()=>localStorage.getItem('cubegears-theme'))!==alternateTheme) throw Error('Theme preference was not persisted');
+      themeStep='reload saved theme';
+      await page.reload({waitUntil:'networkidle'});
+      await page.locator('.route-loading').waitFor({state:'hidden',timeout:15000});
+      await page.waitForFunction(theme=>document.documentElement.dataset.theme===theme,alternateTheme);
+      if(await page.getByLabel('Appearance').inputValue()!==alternateTheme) throw Error('Saved theme was not restored after reload');
+      themeStep='restore starting theme';
+      await page.getByLabel('Appearance').selectOption(profile.theme);
+      await page.waitForFunction(theme=>document.documentElement.dataset.theme===theme,profile.theme);
+      tested++;
+    } catch(error) {
+      const themeState=await page.evaluate(()=>({theme:document.documentElement.dataset.theme,saved:localStorage.getItem('cubegears-theme'),path:location.pathname,selected:document.querySelector('[aria-label="Appearance"]')?.value}));
+      failures.push(`${profile.width}/${profile.theme} Settings theme switch (${themeStep}): ${error.message}; state=${JSON.stringify(themeState)}`);
+      console.error(failures.at(-1));
     }
     await context.close();
     console.log(`Checked ${paths.length} routes at ${profile.width}px (${profile.theme})`);
