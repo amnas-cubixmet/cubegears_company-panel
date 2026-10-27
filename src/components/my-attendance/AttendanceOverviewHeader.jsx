@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const months = [
@@ -26,14 +25,13 @@ export const AttendanceOverviewHeader = ({
     ? maxDate
     : new Date();
 
-  const years = useMemo(() => {
-    const firstYear = minimum.getFullYear();
-    const lastYear = maximum.getFullYear();
-    return Array.from(
-      { length: Math.max(1, lastYear - firstYear + 1) },
-      (_, index) => firstYear + index,
-    );
-  }, [minimum.getFullYear(), maximum.getFullYear()]);
+  // Small derived array; avoids invalid computed-expression hook dependencies.
+  const firstYear = minimum.getFullYear();
+  const lastYear = maximum.getFullYear();
+  const years = Array.from(
+    { length: Math.max(1, lastYear - firstYear + 1) },
+    (_, index) => firstYear + index,
+  );
 
   const availableMonths = months
     .map((name, index) => ({ name, index }))
