@@ -304,7 +304,7 @@ export function InvoiceRoutePage() {
           gstin: '',
           state: '',
           stateCode: '',
-          placeOfSupply: ''
+          placeOfSupply: workshopPlaceOfSupply(workshopTaxProfile)
         },
         transportation: {
           ...(old.transportation || {}),
@@ -453,7 +453,6 @@ export function InvoiceRoutePage() {
       setFieldErrors(extractInvoiceFieldErrors(e));
       setError(formatInvoiceValidationError(e));
       highlightInvalidFields();
-      highlightInvalidFields();
     } finally {
       setSaving(false);
     }
@@ -484,6 +483,7 @@ export function InvoiceRoutePage() {
     } catch (e) {
       setFieldErrors(extractInvoiceFieldErrors(e));
       setError(formatInvoiceValidationError(e));
+      highlightInvalidFields();
     } finally {
       setSaving(false);
     }
@@ -899,6 +899,14 @@ export function InvoiceRoutePage() {
             <span></span>
           </div>
 
+          {form.invoiceType === 'gst' && <p className="invoice-gst-rate-help">
+            {appliedTaxMode === 'cgst_sgst'
+              ? 'Same-state supply: each GST line rate is split equally into CGST and SGST.'
+              : appliedTaxMode === 'igst'
+                ? 'Inter-state supply: each GST line rate is charged as IGST.'
+                : 'Select a valid state in Place of Supply to choose GST rates.'}
+            {' '}Choose the legally applicable HSN / SAC rate; these options do not determine tax classification.
+          </p>}
           <div className="invoice-sale-editor">
             {form.items.map((row, index) => {
               const base = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
