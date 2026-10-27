@@ -26,6 +26,10 @@ const numberField = (value, label, { blank = '0', positive = false, min = 0, max
 };
 
 
+// HSN/SAC are digit strings, not quantities: keep leading zeroes intact.
+export const normalizeHsnSacCode = (value) =>
+  String(value ?? '').replace(/[^0-9]/g, '');
+
 export const validateInvoiceDraft = (draft) => {
   const errors = {};
   if (!String(draft.customer?.name || '').trim()) errors['customer.name'] = 'Customer name is required.';
@@ -47,6 +51,9 @@ export const validateInvoiceDraft = (draft) => {
     }
     if (draft.invoiceType === 'gst' && !String(item.hsnCode || '').trim()) {
       errors[path + '.hsnCode'] = 'HSN / SAC is required for GST invoices.';
+    }
+    if (String(item.hsnCode || '') && !/^[0-9]+$/.test(String(item.hsnCode))) {
+      errors[path + '.hsnCode'] = 'HSN / SAC must contain digits only.';
     }
     if (item.type === 'Stock Part' && !item.inventoryId) {
       errors[path + '.inventoryId'] = 'Select a stock item.';
@@ -103,6 +110,7 @@ export const prepareInvoicePayloadForApi = (draft) => {
       const label = 'Item ' + (index + 1);
       return {
         ...item,
+        hsnCode: String(item.hsnCode ?? ''),
         qty: numberField(item.qty, label + ' quantity', { blank: null, positive: true }),
         rate: numberField(item.rate, label + ' price per unit'),
         purchasePrice: numberField(item.purchasePrice, label + ' purchase price'),
