@@ -139,14 +139,16 @@ const getJobInvoicePrefill = () => {
   }
 };
 
-export const blankBillingDocument = (kind = 'invoice') => {
+export const blankBillingDocument = (kind = 'invoice', { emptyInputs = false } = {}) => {
+  // Only the New Invoice editor opts into blank inputs. Other consumers keep
+  // their existing defaults and Job Card navigation still keeps explicit data.
   const prefill = kind === 'invoice' ? getJobInvoicePrefill() : null;
   return {
     kind,
-    invoiceType: 'regular',
+    invoiceType: 'regular', // Replaced by verified workshop registration on create.
     status: 'Draft',
-    date: today(),
-    seller: { name: 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '' },
+    date: emptyInputs ? '' : today(),
+    seller: { name: emptyInputs ? '' : 'CubixGear Workshop', address: '', phone: '', email: '', gstin: '', state: '', stateCode: '' },
     customer: { name: '', phone: '', address: '', gstin: '', state: '', stateCode: '', placeOfSupply: '', ...(prefill?.customer || {}) },
     vehicle: { registration: '', makeModel: '', odometer: '', vin: '', ...(prefill?.vehicle || {}) },
     jobCardNo: prefill?.jobNumber || prefill?.jobId || '',
@@ -155,13 +157,15 @@ export const blankBillingDocument = (kind = 'invoice') => {
     transportation: { vehicleNo: '', transporterName: '', ...(prefill?.transportation || {}) },
     notes: prefill?.jobId ? `Created from Job Card ${prefill.jobNumber || prefill.jobId}` : '',
     items: Array.isArray(prefill?.items)
-      ? clone(prefill.items).map((item) => ({ unit: 'PCS', hsnCode: '', taxRate: '', ...item }))
+      ? clone(prefill.items).map((item) => ({ unit: emptyInputs ? '' : 'PCS', hsnCode: '', taxRate: '', ...item }))
       : [],
-    discount: 0,
+    discount: emptyInputs ? '' : 0,
     adjustment: '',
-    taxMode: 'none', cgstRate: 9, sgstRate: 9, igstRate: 18,
-    paid: '', paymentMode: 'Cash', paymentType: 'Credit', paymentTerms: 'C.O.D',
-    termsAndConditions: 'Thank you for choosing CubixGear.'
+    taxMode: emptyInputs ? '' : 'none', cgstRate: emptyInputs ? '' : 9,
+    sgstRate: emptyInputs ? '' : 9, igstRate: emptyInputs ? '' : 18,
+    paid: '', paymentMode: emptyInputs ? '' : 'Cash',
+    paymentType: emptyInputs ? '' : 'Credit', paymentTerms: emptyInputs ? '' : 'C.O.D',
+    termsAndConditions: emptyInputs ? '' : 'Thank you for choosing CubixGear.'
   };
 };
 
