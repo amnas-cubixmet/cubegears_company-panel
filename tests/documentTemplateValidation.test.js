@@ -50,3 +50,14 @@ test('Django validation messages are mapped and readable', () => {
   assert.match(templateErrorSummary(errors), /Business Logo/);
   assert.match(templateErrorSummary(errors), /Email: Invalid email/);
 });
+
+
+test('new template fields stay blank and logo size copy is not shown', () => {
+  const service = readFileSync(new URL('../src/services/documentTemplates.service.js', import.meta.url), 'utf8');
+  for (const key of ['businessName','businessState','businessStateCode','customName','customHeader','customFooter','termsText']) {
+    assert.match(service, new RegExp(key + ": ''"));
+  }
+  assert.doesNotMatch(source, /PNG, JPG or WEBP, up to 250 KB/);
+  assert.ok(source.includes('optimizeDocumentLogo(file)'));
+  assert.match(source, /preparingLogo/);
+});
