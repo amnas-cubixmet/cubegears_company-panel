@@ -82,6 +82,7 @@
   }
 }
 
+@media screen {
 /* Authentication routes follow the same saved appearance preference. */
 :root[data-theme='light'] .login-page {
   background: var(--app-bg) !important;
@@ -227,4 +228,5 @@
 }
 :root[data-theme='dark'] .cg-subscribe .cg-subscribe-paid {
   color: var(--success);
+}
 }
