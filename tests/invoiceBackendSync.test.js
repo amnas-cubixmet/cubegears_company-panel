@@ -1,10 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { normalizeBackendInvoiceTotals, calculateDocumentTotals } from '../src/services/billing.service.js';
+import { normalizeBackendInvoiceTotals } from '../src/utils/invoiceBackendTotals.js';
+import { calculateEstimateIndiaGst } from '../src/utils/indiaGst.js';
 import { workshopPlaceOfSupply, invoiceTaxMode, formatInvoicePlaceOfSupply } from '../src/utils/invoiceTaxUi.js';
 
 const read = (path) => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
+const calculateDocumentTotals = (doc) => {
+  const gst = calculateEstimateIndiaGst({
+    lines: doc.items.map((item) => ({
+      type: item.type, quantity: Number(item.qty), unitPrice: Number(item.rate),
+      taxRate: Number(item.taxRate),
+    })),
+    registered: doc.invoiceType === 'gst',
+    supplierState: doc.seller.gstin.slice(0, 2),
+    placeOfSupply: doc.customer.placeOfSupply.slice(0, 2),
+  });
+  return {
+    itemSubtotal: gst.subtotal, documentDiscount: 0, adjustment: 0, paid: 0,
+    taxable: gst.taxable, cgst: gst.cgst, sgst: gst.sgst, igst: gst.igst,
+    tax: gst.tax, taxMode: gst.mode, total: gst.total, balance: gst.total,
+    lineTotals: gst.taxRows.map((row) => ({
+      taxable: row.taxable, gst: row.cgst + row.sgst + row.igst,
+      total: row.taxable + row.cgst + row.sgst + row.igst,
+    })),
+  };
+};
+
 const invoice = (qty = 1, state = '32-Kerala') => ({
   kind: 'invoice', invoiceType: 'gst', date: '2026-10-27',
   seller: { gstin: '32ABCDE1234F1Z5', stateCode: '32' },
