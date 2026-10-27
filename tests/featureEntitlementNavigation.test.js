@@ -32,8 +32,9 @@ test('dashboard and direct routes block disabled workshop modules', () => {
   assert.match(guard, /featureAccess\.can\(requiredPermission\)/);
   assert.match(guard, /moduleIsVisible\(featureAccess, requiredPermission\)/);
   const dashboard = file('src/pages/dashboard/Dashboard.jsx');
-  assert.match(dashboard, /featureAccess\.enforced/);
-  assert.match(dashboard, /featureAccess\.can\(route\.permission\)/);
+  assert.doesNotMatch(dashboard, /Your available modules|routeConfig\.filter/);
+  assert.match(dashboard, /can\('jobs\.view'\)/);
+  assert.match(file('src/components/layout/Sidebar.jsx'), /featureAccess\.can\(route\.permission\)/);
 });
 
 test('feature activation remains server-validated and refreshes account access', () => {
