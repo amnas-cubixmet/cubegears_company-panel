@@ -17,9 +17,11 @@ export default defineConfig(({ command, mode }) => {
     chunkSizeWarningLimit: 850,
     rolldownOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom'],
-          vendor: ['axios', 'lucide-react']
+        // Rolldown (Vite 8) requires a function rather than Rollup's object map.
+        manualChunks(id) {
+          if (/node_modules[\\/](?:react|react-dom|react-router|react-router-dom)[\\/]/.test(id)) return 'react';
+          if (/node_modules[\\/](?:axios|lucide-react)[\\/]/.test(id)) return 'vendor';
+          return undefined;
         }
       }
     }
