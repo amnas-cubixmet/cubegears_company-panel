@@ -3,6 +3,7 @@ import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truc
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError } from '../../utils/invoicePayload';
+import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import '../../styles/invoice-field-validation.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
@@ -56,6 +57,11 @@ export function InvoiceRoutePage() {
   const [documentAppearance, setDocumentAppearance] = useState(templateDefaults);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [workshopTaxProfile, setWorkshopTaxProfile] = useState(null);
+  const [workshopTaxError, setWorkshopTaxError] = useState('');
+  const [workshopTaxLoading, setWorkshopTaxLoading] = useState(false);
+  const [workshopTaxRetry, setWorkshopTaxRetry] = useState(0);
+  const newInvoiceTaxReady = mode !== 'create' || Boolean(workshopTaxProfile);
 
   useEffect(() => {
     let active = true;
@@ -133,27 +139,33 @@ export function InvoiceRoutePage() {
   useEffect(() => {
     if (mode !== 'create') return undefined;
     let active = true;
-    // The seller is the actual workshop from Django, not editable template
-    // branding. This keeps the live preview consistent with the legal PDF.
+    setWorkshopTaxProfile(null);
+    setWorkshopTaxError('');
+    setWorkshopTaxLoading(true);
+    // Only Django Company Settings decide which invoice type is legal.
     billingService.getGstContext().then((context) => {
-      if (!active || !context) return;
-      setForm((old) => ({
+      if (!active) return;
+      workshopInvoiceType(context);
+      setWorkshopTaxProfile(context);
+      setForm((old) => applyWorkshopTaxProfile({
         ...old,
-        invoiceType: context.registered ? 'gst' : 'regular',
         seller: {
           ...old.seller,
           name: context.companyName || old.seller?.name,
           address: [context.companyAddress, context.companyCity, context.companyPincode].filter(Boolean).join(', '),
           phone: context.companyPhone || '',
           email: context.companyEmail || '',
-          gstin: context.gstin || '',
           state: context.companyState || '',
           stateCode: context.supplierState || '',
         },
-      }));
-    }).catch(() => {});
+      }, context));
+    }).catch((e) => {
+      if (active) setWorkshopTaxError(e?.message || 'Unable to verify workshop GST registration. Retry verification.');
+    }).finally(() => {
+      if (active) setWorkshopTaxLoading(false);
+    });
     return () => { active = false; };
-  }, [mode, location.search]);
+  }, [mode, location.search, workshopTaxRetry]);
 
   const totals = useMemo(() => calculateDocumentTotals(form), [form]);
 
@@ -369,7 +381,7 @@ export function InvoiceRoutePage() {
         unit: stock?.unit || 'PCS',
         purchasePrice: stock?.cost ? String(stock.cost) : '',
         rate: stock?.price ? String(stock.price) : '',
-        taxRate: stock?.taxRate ?? 18
+        taxRate: form.invoiceType === 'gst' ? stock?.taxRate ?? 18 : 0
       } : row)
     }));
   };
@@ -383,7 +395,12 @@ export function InvoiceRoutePage() {
   };
 
   const save = async () => {
-    const invalidInputs = validateInvoiceDraft(form);
+    if (!newInvoiceTaxReady) {
+      setError('Verify workshop GST registration before saving.');
+      return;
+    }
+    const draft = mode === 'create' ? applyWorkshopTaxProfile(form, workshopTaxProfile) : form;
+    const invalidInputs = validateInvoiceDraft(draft);
     setFieldErrors(invalidInputs);
     const validation = validate();
     if (validation || Object.keys(invalidInputs).length) {
@@ -393,7 +410,7 @@ export function InvoiceRoutePage() {
     setError('');
     setSaving(true);
     try {
-      const saved = await billingService.saveDraft(form);
+      const saved = await billingService.saveDraft(draft);
       navigate(`/invoices/${saved.id}`, { replace: true });
     } catch (e) {
       setFieldErrors(extractInvoiceFieldErrors(e));
@@ -404,7 +421,12 @@ export function InvoiceRoutePage() {
   };
 
   const finalize = async () => {
-    const invalidInputs = validateInvoiceDraft(form);
+    if (!newInvoiceTaxReady) {
+      setError('Verify workshop GST registration before finalizing.');
+      return;
+    }
+    const draft = mode === 'create' ? applyWorkshopTaxProfile(form, workshopTaxProfile) : form;
+    const invalidInputs = validateInvoiceDraft(draft);
     setFieldErrors(invalidInputs);
     const validation = validate();
     if (validation || Object.keys(invalidInputs).length) {
@@ -414,7 +436,7 @@ export function InvoiceRoutePage() {
     setError('');
     setSaving(true);
     try {
-      let current = form;
+      let current = draft;
       if (!current.id) current = await billingService.saveDraft(current);
       const done = await billingService.finalize(current.id);
       navigate(`/invoices/${done.id}`, { replace: true });
@@ -612,22 +634,27 @@ export function InvoiceRoutePage() {
         <div>
           <span className="billing-kicker">{form.kind === 'estimate' ? 'ESTIMATE' : 'TAX / SALES INVOICE'}</span>
           <h1>{mode === 'edit' ? `Edit ${form.number || id}` : form.kind === 'estimate' ? 'New Estimate' : 'New Invoice'}</h1>
-          <p>{mode === 'edit' ? `Editing ID: ${id}` : 'Create a clean GST-ready invoice with transport and item tax details.'}</p>
+          <p>{mode === 'edit' ? `Editing ID: ${id}` : form.invoiceType === 'gst' ? 'GST Tax Invoice based on verified Company Settings.' : 'Normal Invoice without GST, based on Company Settings.'}</p>
         </div>
         <div className="billing-head-actions">
           <button type="button" className="bill-btn secondary" onClick={() => navigate(`/invoices?kind=${form.kind === 'estimate' ? 'estimate' : 'invoice'}`)}>Back to List</button>
-          <button className="bill-btn secondary" disabled={saving} onClick={save}>Save Draft</button>
+          <button className="bill-btn secondary" disabled={saving || !newInvoiceTaxReady} onClick={save}>Save Draft</button>
           <button className="bill-btn secondary" type="button" disabled={!form.id || saving || pdfLoading}
             title={form.id ? 'Download saved invoice (unsaved edits are not included)' : 'Save Draft first to download PDF'}
             onClick={() => downloadPdf(form)}>
             <Download size={16}/>{pdfLoading ? 'Generating PDF…' : 'Download Saved PDF'}
           </button>
-          <button className="bill-btn" disabled={saving} onClick={finalize}>
+          <button className="bill-btn" disabled={saving || !newInvoiceTaxReady} onClick={finalize}>
             <CheckCircle2 size={16}/>{form.kind === 'estimate' ? 'Issue Estimate' : 'Finalize Invoice'}
           </button>
         </div>
       </div>
 
+      {mode === 'create' && workshopTaxLoading && <p role="status" className="billing-empty">Verifying workshop GST registration…</p>}
+      {mode === 'create' && workshopTaxError && <div className="billing-error no-print" role="alert">
+        {workshopTaxError}
+        <button type="button" className="bill-btn secondary" onClick={() => setWorkshopTaxRetry((n) => n + 1)}>Retry Verification</button>
+      </div>}
       {error && <div className="billing-error no-print" role="alert">{error}</div>}
 
       {loading && mode === 'edit' ? <div className="billing-empty">Loading…</div> : <>
@@ -650,8 +677,8 @@ export function InvoiceRoutePage() {
                 <input type="email" value={form.seller?.email || ''} onChange={(e) => update('seller.email', e.target.value)} placeholder="accounts@example.com"/>
               </label>
             </div>
-            <label>GSTIN
-              <input value={form.seller?.gstin || ''} onChange={(e) => update('seller.gstin', e.target.value.toUpperCase())} placeholder="GSTIN"/>
+            <label>GSTIN (from Company Settings)
+              <input value={form.seller?.gstin || ''} readOnly aria-readonly="true" placeholder="Not GST registered"/>
             </label>
             <div className="invoice-two-col">
               <label>State
@@ -780,10 +807,15 @@ export function InvoiceRoutePage() {
             <span className="billing-kicker">INVOICE DETAILS</span>
             <h3>Document Details</h3>
             <label>Invoice Type
-              <select value={form.invoiceType} onChange={(e) => update('invoiceType', e.target.value)}>
-                <option value="regular">Regular Bill</option>
+              <select value={form.invoiceType} disabled aria-label="Invoice type from workshop registration">
+                <option value="regular">Normal Invoice — No GST</option>
                 <option value="gst">GST Tax Invoice</option>
               </select>
+              <small>{mode === 'create' && !newInvoiceTaxReady
+                ? 'Checking workshop GST registration before enabling invoices.'
+                : form.invoiceType === 'gst'
+                  ? 'GST invoice enabled by the verified workshop GSTIN in Company Settings.'
+                  : 'Workshop has no GSTIN. No GST will be charged.'}</small>
             </label>
             <label>Date
               <input type="date" value={form.date || ''} onChange={(e) => update('date', e.target.value)}/>
@@ -851,7 +883,7 @@ export function InvoiceRoutePage() {
                   {fieldErrors[`items.${index}.rate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.rate`]}</small>}
                 </div>
                 <div className="invoice-field-wrap">
-                  <input className="plain-number-input" aria-label="GST rate" aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])} inputMode="decimal" value={inputNumber(row.taxRate)} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder="18"/>
+                  <input className="plain-number-input" aria-label="GST rate" aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])} inputMode="decimal" disabled={form.invoiceType !== 'gst'} value={form.invoiceType === 'gst' ? inputNumber(row.taxRate) : '0'} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder={form.invoiceType === 'gst' ? '18' : 'No GST'}/>
                   {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}
                 </div>
                 <strong className="billing-line-total">{money.format(lineAmount)}</strong>
