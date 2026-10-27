@@ -131,3 +131,7 @@
 .document-templates-page .template-preview-card{padding:10px}
 .document-templates-page .template-preview-card-head h2{font-size:11px}
 @media(max-width:760px){.document-templates-page .business-branding-layout{grid-template-columns:1fr}.document-templates-page .business-logo-panel{align-items:center}.document-templates-page .business-fields-grid{grid-template-columns:1fr}.document-templates-page .business-field-wide{grid-column:auto}}
+
+/* API-backed field validation. Accessible on desktop and mobile. */
+.document-templates-page input[aria-invalid="true"],.document-templates-page textarea[aria-invalid="true"],.document-templates-page select[aria-invalid="true"]{border-color:#dc2626!important;box-shadow:0 0 0 2px rgba(220,38,38,.12)}
+.document-templates-page .template-input-error{display:block;margin-top:4px;color:#b91c1c;font-size:11px;line-height:1.4;font-weight:650;overflow-wrap:anywhere}
