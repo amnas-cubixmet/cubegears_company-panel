@@ -1,3 +1,5 @@
+import { invoiceTaxMode } from './invoiceTaxUi.js';
+
 /**
  * Build a clean Django invoice payload without changing the editable draft.
  * DRF DecimalField rejects blank strings, and UUIDField rejects "".
@@ -32,6 +34,12 @@ export const normalizeHsnSacCode = (value) =>
 
 export const validateInvoiceDraft = (draft) => {
   const errors = {};
+  if (!draft.date || !/^\d{4}-\d{2}-\d{2}$/.test(String(draft.date))) {
+    errors.date = 'Select a valid invoice date.';
+  }
+  if (draft.invoiceType === 'gst' && invoiceTaxMode(draft) === 'unknown') {
+    errors['customer.placeOfSupply'] = 'Choose a valid state for GST place of supply.';
+  }
   if (!String(draft.customer?.name || '').trim()) errors['customer.name'] = 'Customer name is required.';
   if (!draft.items?.length) errors.items = 'Add at least one item.';
   const check = (path, value, label, options) => {
@@ -46,6 +54,8 @@ export const validateInvoiceDraft = (draft) => {
   }
   (draft.items || []).forEach((item, index) => {
     const path = 'items.' + index;
+    if (!item.type) errors[path + '.type'] = 'Select item type.';
+    if (!item.unit) errors[path + '.unit'] = 'Select item unit.';
     if (!String(item.description || '').trim() && item.type !== 'Stock Part') {
       errors[path + '.description'] = 'Item name / description is required.';
     }
