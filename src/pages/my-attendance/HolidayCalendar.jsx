@@ -7,16 +7,9 @@ import {
   AttendancePunchPanel,
   EmployeeAttendanceCard,
 } from '../../components/my-attendance';
-import { minutesToHours } from '../../components/my-attendance/attendance.utils';
+import { minutesToHours, parseAttendanceLocalDate } from '../../components/my-attendance/attendance.utils';
 import { attendanceService } from '../../services/attendance.service';
 import '../../styles/attendance-calendar.css';
-
-const asLocalDate = (value) => {
-  if (!value) return null;
-  const date = value instanceof Date ? new Date(value) : new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-};
 
 const monthKey = (date) => date.getFullYear() * 12 + date.getMonth();
 
@@ -27,30 +20,49 @@ export const HolidayCalendar = () => {
   const [selectedDay, setSelectedDay] = useState(() => new Date().getDate());
   const [search, setSearch] = useState('');
   const [attendanceStatus, setAttendanceStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let active = true;
-
     const load = async () => {
       const month = currentDate.getMonth() + 1;
       const year = currentDate.getFullYear();
-      const [calendarEvents, attendanceLogs, currentStatus] = await Promise.all([
+      setLoading(true);
+      setLoadError('');
+      // Do not display previous-month records while a new month is loading.
+      setEvents([]);
+      setLogs([]);
+      // Calendar, history and profile are separate endpoints. Keep successful
+      // results visible if one endpoint fails, and never reject the effect.
+      const [calendarResult, logsResult, statusResult] = await Promise.allSettled([
         attendanceService.getCalendarEvents(month, year),
         attendanceService.getPersonalAttendanceLogs({ month, year }),
         attendanceService.getAttendanceStatus(),
       ]);
-
       if (!active) return;
-      setEvents(Array.isArray(calendarEvents) ? calendarEvents : []);
-      setLogs(Array.isArray(attendanceLogs) ? attendanceLogs : []);
-      setAttendanceStatus(currentStatus);
+      setEvents(calendarResult.status === 'fulfilled' && Array.isArray(calendarResult.value)
+        ? calendarResult.value : []);
+      setLogs(logsResult.status === 'fulfilled' && Array.isArray(logsResult.value)
+        ? logsResult.value : []);
+      if (statusResult.status === 'fulfilled') setAttendanceStatus(statusResult.value || null);
+      const failures = [
+        ['calendar', calendarResult],
+        ['attendance records', logsResult],
+        ['employee profile', statusResult],
+      ].filter(([, result]) => result.status === 'rejected');
+      if (failures.length) {
+        setLoadError(`Could not load ${failures.map(([name]) => name).join(', ')}. Check your connection and retry.`);
+      }
+      setLoading(false);
     };
 
     load();
     return () => {
       active = false;
     };
-  }, [currentDate]);
+  }, [currentDate, refreshKey]);
 
   const today = useMemo(() => {
     const now = new Date();
@@ -58,15 +70,15 @@ export const HolidayCalendar = () => {
   }, []);
 
   const attendanceStartDate = useMemo(() => {
-    const joiningDate = asLocalDate(
+    const joiningDate = parseAttendanceLocalDate(
       attendanceStatus?.employee?.joiningDate ||
       attendanceStatus?.employee?.joining_date,
     );
 
-    if (joiningDate) return joiningDate;
+    if (joiningDate) return joiningDate > today ? today : joiningDate;
 
     const logDates = logs
-      .map((log) => asLocalDate(log.date))
+      .map((log) => parseAttendanceLocalDate(log.date))
       .filter(Boolean)
       .sort((a, b) => a - b);
 
@@ -131,8 +143,8 @@ export const HolidayCalendar = () => {
   const monthLogs = useMemo(
     () =>
       logs.filter((log) => {
-        const date = new Date(`${log.date}T00:00:00`);
-        return (
+        const date = parseAttendanceLocalDate(log.date);
+        return Boolean(date) && (
           date.getFullYear() === year &&
           date.getMonth() === month &&
           date >= attendanceStartDate &&
@@ -145,8 +157,8 @@ export const HolidayCalendar = () => {
   const logByDay = useMemo(() => {
     const map = new Map();
     monthLogs.forEach((log) => {
-      const date = new Date(`${log.date}T00:00:00`);
-      map.set(date.getDate(), log);
+      const date = parseAttendanceLocalDate(log.date);
+      if (date) map.set(date.getDate(), log);
     });
     return map;
   }, [monthLogs]);
@@ -154,8 +166,9 @@ export const HolidayCalendar = () => {
   const eventByDay = useMemo(() => {
     const map = new Map();
     events.forEach((event) => {
-      const date = new Date(`${event.date}T00:00:00`);
+      const date = parseAttendanceLocalDate(event.date);
       if (
+        date &&
         date.getFullYear() === year &&
         date.getMonth() === month &&
         date >= attendanceStartDate &&
@@ -205,6 +218,15 @@ export const HolidayCalendar = () => {
 
   return (
     <div className="attendance-calendar-redesign">
+      {loadError && (
+        <div className="attendance-calendar-fetch-error" role="alert">
+          <span>{loadError}</span>
+          <button type="button" onClick={() => setRefreshKey((value) => value + 1)}>
+            Retry
+          </button>
+        </div>
+      )}
+      {loading && <p className="attendance-calendar-loading" role="status">Loading attendance calendar…</p>}
       <AttendanceOverviewHeader
         monthLabel={monthLabel}
         month={month}
@@ -219,13 +241,7 @@ export const HolidayCalendar = () => {
 
       <EmployeeAttendanceCard employee={attendanceStatus?.employee || null} />
 
-      <AttendancePunchPanel
-        onChanged={() =>
-          setCurrentDate((value) =>
-            new Date(value.getFullYear(), value.getMonth(), value.getDate())
-          )
-        }
-      />
+      <AttendancePunchPanel onChanged={() => setRefreshKey((value) => value + 1)} />
 
       <AttendanceKpis logs={monthLogs} />
 
@@ -242,6 +258,7 @@ export const HolidayCalendar = () => {
 
       <AttendanceHistoryTable
         logs={filteredLogs}
+        loading={loading}
         search={search}
         onSearchChange={setSearch}
         onExport={exportCsv}
