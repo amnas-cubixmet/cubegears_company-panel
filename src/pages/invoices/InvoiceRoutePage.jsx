@@ -703,19 +703,23 @@ export function InvoiceRoutePage() {
           <section className="billing-card invoice-seller-card">
             <span className="billing-kicker">SELLER / FROM</span>
             <h3>Business Details</h3>
+            <p className="invoice-seller-source-note">
+              Auto-filled from Company Settings. Change your business details in
+              <button type="button" className="invoice-settings-link" onClick={() => navigate('/account/company')}>Company Settings</button>.
+            </p>
 
             <label>Business Name
-              <input value={form.seller?.name || ''} onChange={(e) => update('seller.name', e.target.value)} placeholder="Business / company name"/>
+              <input value={form.seller?.name || ''} readOnly aria-readonly="true" placeholder="Business / company name"/>
             </label>
             <label>Address
-              <textarea value={form.seller?.address || ''} onChange={(e) => update('seller.address', e.target.value)} placeholder="Registered / dispatch address"/>
+              <textarea value={form.seller?.address || ''} readOnly aria-readonly="true" placeholder="Registered / dispatch address"/>
             </label>
             <div className="invoice-two-col">
               <label>Phone
-                <input value={form.seller?.phone || ''} onChange={(e) => update('seller.phone', e.target.value)} placeholder="+91"/>
+                <input value={form.seller?.phone || ''} readOnly aria-readonly="true" placeholder="+91"/>
               </label>
               <label>Email
-                <input type="email" value={form.seller?.email || ''} onChange={(e) => update('seller.email', e.target.value)} placeholder="accounts@example.com"/>
+                <input type="email" value={form.seller?.email || ''} readOnly aria-readonly="true" placeholder="accounts@example.com"/>
               </label>
             </div>
             <label>GSTIN (from Company Settings)
@@ -723,10 +727,10 @@ export function InvoiceRoutePage() {
             </label>
             <div className="invoice-two-col">
               <label>State
-                <input value={form.seller?.state || ''} onChange={(e) => update('seller.state', e.target.value)} placeholder="Kerala"/>
+                <input value={form.seller?.state || ''} readOnly aria-readonly="true" placeholder="Kerala"/>
               </label>
               <label>State Code
-                <input value={form.seller?.stateCode || ''} onChange={(e) => update('seller.stateCode', e.target.value.replace(/\D/g,'').slice(0,2))} placeholder="32"/>
+                <input value={form.seller?.stateCode || ''} readOnly aria-readonly="true" placeholder="32"/>
               </label>
             </div>
           </section>
@@ -782,7 +786,7 @@ export function InvoiceRoutePage() {
                 <input value={form.customer?.state || ''} onChange={(e) => update('customer.state', e.target.value)} placeholder="Kerala"/>
               </label>
               <label>Place of Supply
-                <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', e.target.value)} placeholder="32-Kerala"/>
+                <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))} placeholder="State code or state name"/>
               </label>
             </div>
           </section>
@@ -859,10 +863,13 @@ export function InvoiceRoutePage() {
                   : 'Workshop has no GSTIN. No GST will be charged.'}</small>
             </label>
             <label>Date
-              <input type="date" value={form.date || ''} required onChange={(e) => update('date', e.target.value)}/>
+              <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)} onChange={(e) => update('date', e.target.value)}/>
+              {fieldErrors.date && <small className="invoice-input-error" role="alert">{fieldErrors.date}</small>}
             </label>
             <label>Place of Supply
-              <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', e.target.value)} placeholder="32-Kerala"/>
+              <input value={form.customer?.placeOfSupply || ''} aria-invalid={Boolean(fieldErrors['customer.placeOfSupply'])} onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))} placeholder="State code or state name"/>
+              {fieldErrors['customer.placeOfSupply'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.placeOfSupply']}</small>}
+              <small>Auto-filled from workshop state; change it for a different legal place of supply.</small>
             </label>
             <div className="invoice-two-col">
               <label>Job Card No.
@@ -887,7 +894,7 @@ export function InvoiceRoutePage() {
             <span>Qty</span>
             <span>Unit</span>
             <span>Price / Unit</span>
-            <span>GST %</span>
+            <span>GST Rate</span>
             <span>Amount</span>
             <span></span>
           </div>
@@ -895,29 +902,29 @@ export function InvoiceRoutePage() {
           <div className="invoice-sale-editor">
             {form.items.map((row, index) => {
               const base = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
-              const rate = form.invoiceType === 'gst' && form.taxMode !== 'none' ? n(row.taxRate) : 0;
+              const rate = form.invoiceType === 'gst' && !['none', 'unknown'].includes(appliedTaxMode) ? n(row.taxRate) : 0;
               const lineAmount = base + (base * rate / 100);
 
               return <div className="invoice-sale-row" key={row.id}>
                 <div className="invoice-item-main-cell">
-                  <select aria-label="Item source" value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
+                  <select aria-label="Item source" aria-invalid={Boolean(fieldErrors[`items.${index}.type`])} value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
                     <option value="">Select item type</option>
                     {itemTypes.map((type) => <option key={type}>{type}</option>)}
                   </select>
                   {row.type === 'Stock Part'
-                    ? <select aria-label="Stock item" value={row.inventoryId || ''} onChange={(e) => chooseInventory(row.id, e.target.value)}>
+                    ? <select aria-label="Stock item" aria-invalid={Boolean(fieldErrors[`items.${index}.inventoryId`])} value={row.inventoryId || ''} onChange={(e) => chooseInventory(row.id, e.target.value)}>
                         <option value="">Select stock item</option>
                         {inventory.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.sku} · Stock {item.onHand}</option>)}
                       </select>
-                    : <input aria-label="Item name" value={row.description || ''} onChange={(e) => updateItem(row.id, 'description', e.target.value)} placeholder="Item / service name"/>
+                    : <input aria-label="Item name" aria-invalid={Boolean(fieldErrors[`items.${index}.description`])} value={row.description || ''} onChange={(e) => updateItem(row.id, 'description', e.target.value)} placeholder="Item / service name"/>
                   }
                 </div>
-                <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
+                <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
                 <div className="invoice-field-wrap">
                   <input className="plain-number-input" aria-label="Quantity" aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])} inputMode="decimal" value={inputNumber(row.qty)} placeholder="" onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
                   {fieldErrors[`items.${index}.qty`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.qty`]}</small>}
                 </div>
-                <select aria-label="Unit" value={row.unit || ''} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
+                <select aria-label="Unit" aria-invalid={Boolean(fieldErrors[`items.${index}.unit`])} value={row.unit || ''} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
                   <option value="">Select unit</option>
                   {['PCS','NOS','SET','KG','LTR','MTR','BOX','PAIR','HRS','JOB'].map((unit) => <option key={unit}>{unit}</option>)}
                 </select>
@@ -926,7 +933,18 @@ export function InvoiceRoutePage() {
                   {fieldErrors[`items.${index}.rate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.rate`]}</small>}
                 </div>
                 <div className="invoice-field-wrap">
-                  <input className="plain-number-input" aria-label="GST rate" aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])} inputMode="decimal" disabled={form.invoiceType !== 'gst'} value={form.invoiceType === 'gst' ? inputNumber(row.taxRate) : ''} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder={form.invoiceType === 'gst' ? '' : 'Not applicable'}/>
+                  <select
+                    aria-label="GST rate"
+                    aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])}
+                    disabled={form.invoiceType !== 'gst' || appliedTaxMode === 'unknown'}
+                    value={form.invoiceType === 'gst' ? String(row.taxRate ?? '') : ''}
+                    onChange={(e) => updateItem(row.id, 'taxRate', e.target.value)}
+                  >
+                    <option value="">{form.invoiceType !== 'gst' ? 'No GST' : appliedTaxMode === 'unknown' ? 'Select Place of Supply' : 'Select GST rate'}</option>
+                    {taxChoices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
+                    {row.taxRate !== '' && row.taxRate != null && !taxChoices.some((choice) => choice.value === String(row.taxRate)) &&
+                      <option value={row.taxRate}>{row.taxRate}% — stock classification</option>}
+                  </select>
                   {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}
                 </div>
                 <strong className="billing-line-total">{money.format(lineAmount)}</strong>
@@ -946,14 +964,10 @@ export function InvoiceRoutePage() {
             <span className="billing-kicker">PAYMENT & TERMS</span>
             <h3>Invoice Terms</h3>
             <div className="invoice-two-col">
-              {form.invoiceType === 'gst' && <label>Tax Type
-                <select value={form.taxMode} onChange={(e) => update('taxMode', e.target.value)}>
-                  <option value="">Select tax type</option>
-                  <option value="igst">IGST</option>
-                  <option value="cgst_sgst">CGST + SGST</option>
-                  <option value="none">No Tax</option>
-                </select>
-              </label>}
+              <label>GST Type (automatic)
+                <input readOnly aria-readonly="true" value={appliedTaxMode === 'none' ? 'None — Normal Invoice' : appliedTaxMode === 'cgst_sgst' ? 'CGST + SGST (same-state supply)' : appliedTaxMode === 'igst' ? 'IGST (inter-state supply)' : 'Select a valid Place of Supply'} />
+                <small>Tax type follows your GST registration and legal place of supply. Pick the correct HSN/SAC rate on each item.</small>
+              </label>
               <label>Payment Type
                 <select value={form.paymentType || ''} onChange={(e) => update('paymentType', e.target.value)}>
                   <option value="">Select payment type</option>
