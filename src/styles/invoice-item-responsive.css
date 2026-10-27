@@ -1,0 +1,257 @@
+/* Goods / Services: retain the compact invoice table on desktop while
+ * providing a readable, touch-friendly mobile item editor.
+ * Keep these styles scoped to the invoice editor only. */
+.billing-page .invoice-mobile-label,
+.billing-page .invoice-mobile-item-number,
+.billing-page .invoice-mobile-remove-label,
+.billing-page .invoice-mobile-tax-breakdown {
+  display: none;
+}
+.billing-page .invoice-sale-items .invoice-item-amount {
+  min-width: 0;
+  text-align: right;
+}
+.billing-page .invoice-sale-items .invoice-item-amount .billing-line-total {
+  display: block;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.billing-page .invoice-sale-items .invoice-item-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+.billing-page .invoice-sale-items .invoice-item-row-actions .bill-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 6px;
+}
+.billing-page .invoice-sale-items .invoice-items-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 18px;
+  margin: 14px 0 4px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.billing-page .invoice-items-empty strong {
+  font-size: 16px;
+  color: var(--text-primary);
+}
+.billing-page .invoice-items-empty p {
+  max-width: 400px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.billing-page .invoice-sale-items .invoice-field-wrap {
+  min-width: 0;
+}
+.billing-page .invoice-sale-items .invoice-field-wrap > :is(input,select) {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Tablet + mobile: real item cards, not shrunk invoice-table columns. */
+@media (max-width: 1100px) {
+  .billing-page .invoice-sale-items {
+    overflow: visible;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-head {
+    display: none;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-editor {
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-label {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .billing-page .invoice-sale-items .invoice-item-row-actions {
+    order: -1;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    min-height: 38px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    gap: 8px;
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-item-number {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 750;
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-remove-label {
+    display: inline;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .billing-page .invoice-sale-items .invoice-item-row-actions .bill-icon-btn {
+    display: inline-flex;
+    gap: 7px;
+    min-height: 42px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--danger);
+    background: var(--danger-soft);
+  }
+  .billing-page .invoice-sale-items .invoice-item-main-cell {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+    display: grid;
+    gap: 12px;
+    align-items: start;
+  }
+  .billing-page .invoice-sale-items .invoice-item-main-cell > .invoice-field-wrap {
+    min-width: 0;
+  }
+  .billing-page .invoice-sale-items .invoice-hsn-field,
+  .billing-page .invoice-sale-items .invoice-price-field,
+  .billing-page .invoice-sale-items .invoice-tax-field {
+    grid-column: 1 / -1;
+  }
+  .billing-page .invoice-sale-items .invoice-qty-field,
+  .billing-page .invoice-sale-items .invoice-unit-field {
+    grid-column: auto;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-row :is(input, select) {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    height: 46px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 0 12px;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-size: 16px;
+    line-height: 1.3;
+    outline-offset: 2px;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-row :is(input,select):focus-visible {
+    border-color: var(--primary);
+    outline: 2px solid var(--primary);
+  }
+  .billing-page .invoice-sale-items .invoice-sale-row select:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+  .billing-page .invoice-sale-items .invoice-item-amount {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+    padding: 13px 14px;
+    border-radius: 11px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  .billing-page .invoice-sale-items .invoice-item-amount .billing-line-total {
+    display: block;
+    min-height: auto;
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 23px;
+    line-height: 1.25;
+    font-weight: 800;
+    text-align: left;
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-tax-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+  }
+  .billing-page .invoice-sale-items .invoice-item-validation-summary {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+}
+@media (max-width: 700px) {
+  .billing-page .invoice-source-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .billing-page .invoice-source-grid > .billing-card:last-child {
+    grid-column: auto;
+  }
+  .billing-page .invoice-sale-items {
+    padding: 12px;
+  }
+  .billing-page .invoice-sale-items .billing-section-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .billing-page .invoice-sale-items .billing-section-head h3 {
+    font-size: 18px;
+  }
+  .billing-page .invoice-sale-items .billing-section-head .bill-btn {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-row {
+    gap: 11px;
+    padding: 12px;
+  }
+  .billing-page .invoice-sale-items .invoice-gst-rate-help {
+    margin: 12px 0 8px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+}
+@media (max-width: 420px) {
+  .billing-page .invoice-sale-items .invoice-sale-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .billing-page .invoice-sale-items .billing-section-head .bill-btn {
+    width: 100%;
+  }
+  .billing-page .invoice-sale-items .invoice-item-main-cell,
+  .billing-page .invoice-sale-items .invoice-hsn-field,
+  .billing-page .invoice-sale-items .invoice-price-field,
+  .billing-page .invoice-sale-items .invoice-tax-field,
+  .billing-page .invoice-sale-items .invoice-item-amount,
+  .billing-page .invoice-sale-items .invoice-item-row-actions {
+    grid-column: 1 / -1;
+  }
+}
