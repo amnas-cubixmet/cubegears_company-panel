@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, normalizeHsnSacCode } from '../../utils/invoicePayload';
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
+import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
 import '../../styles/invoice-field-validation.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
@@ -57,11 +58,29 @@ export function InvoiceRoutePage() {
   const [documentAppearance, setDocumentAppearance] = useState(templateDefaults);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const invoiceEditorRef = useRef(null);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(0);
   const [workshopTaxProfile, setWorkshopTaxProfile] = useState(null);
   const [workshopTaxError, setWorkshopTaxError] = useState('');
   const [workshopTaxLoading, setWorkshopTaxLoading] = useState(false);
   const [workshopTaxRetry, setWorkshopTaxRetry] = useState(0);
   const newInvoiceTaxReady = mode !== 'create' || Boolean(workshopTaxProfile);
+  const appliedTaxMode = invoiceTaxMode(form);
+  const taxChoices = invoiceLineTaxChoices(appliedTaxMode);
+
+  // After Save/Finalize or an API validation error, show the first invalid
+  // field in the scrolling app content area (not just a banner off-screen).
+  useEffect(() => {
+    if (!attemptedSubmit) return undefined;
+    const target = invoiceEditorRef.current?.querySelector('[aria-invalid="true"]')
+      || invoiceEditorRef.current?.querySelector('[data-invoice-error-summary]');
+    if (!target) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      if (target.matches('input,select,textarea')) target.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [attemptedSubmit, fieldErrors]);
 
   useEffect(() => {
     let active = true;
@@ -156,7 +175,11 @@ export function InvoiceRoutePage() {
           phone: context.companyPhone || '',
           email: context.companyEmail || '',
           state: context.companyState || '',
-          stateCode: context.supplierState || '',
+          stateCode: context.supplierState || invoiceStateCode(context.companyState),
+        },
+        customer: {
+          ...old.customer,
+          placeOfSupply: old.customer?.placeOfSupply || workshopPlaceOfSupply(context),
         },
       }, context));
     }).catch((e) => {
@@ -221,6 +244,12 @@ export function InvoiceRoutePage() {
     setForm((old) => {
       if (!path.includes('.')) return { ...old, [path]: value };
       const [group, key] = path.split('.');
+      if (path === 'customer.state') {
+        return { ...old, customer: {
+          ...old.customer, state: value,
+          placeOfSupply: formatInvoicePlaceOfSupply(value) || workshopPlaceOfSupply(workshopTaxProfile),
+        } };
+      }
       return { ...old, [group]: { ...old[group], [key]: value } };
     });
   };
@@ -309,9 +338,9 @@ export function InvoiceRoutePage() {
         gstin: customer.gstNo || customer.gstin || '',
         state: customer.state || '',
         stateCode: customer.stateCode || '',
-        placeOfSupply: customer.stateCode
-          ? `${customer.stateCode}-${customer.state || ''}`
-          : (customer.state || '')
+        placeOfSupply: formatInvoicePlaceOfSupply(
+          customer.stateCode || customer.state || workshopPlaceOfSupply(workshopTaxProfile)
+        )
       }
     }));
 
@@ -322,7 +351,8 @@ export function InvoiceRoutePage() {
       setCustomerVehicles(rows);
 
       if (rows.length) {
-        applyVehicle(rows[0], rows);
+        // Do not silently associate the first vehicle with a different job.
+        setSelectedVehicleId('');
       } else {
         setForm((old) => ({
           ...old,
@@ -397,9 +427,12 @@ export function InvoiceRoutePage() {
     return '';
   };
 
+  const highlightInvalidFields = () => setAttemptedSubmit((value) => value + 1);
+
   const save = async () => {
     if (!newInvoiceTaxReady) {
       setError('Verify workshop GST registration before saving.');
+      highlightInvalidFields();
       return;
     }
     const draft = mode === 'create' ? applyWorkshopTaxProfile(form, workshopTaxProfile) : form;
@@ -408,6 +441,7 @@ export function InvoiceRoutePage() {
     const validation = validate();
     if (validation || Object.keys(invalidInputs).length) {
       setError(validation || 'Correct the highlighted invoice fields before saving.');
+      highlightInvalidFields();
       return;
     }
     setError('');
@@ -418,6 +452,8 @@ export function InvoiceRoutePage() {
     } catch (e) {
       setFieldErrors(extractInvoiceFieldErrors(e));
       setError(formatInvoiceValidationError(e));
+      highlightInvalidFields();
+      highlightInvalidFields();
     } finally {
       setSaving(false);
     }
@@ -426,6 +462,7 @@ export function InvoiceRoutePage() {
   const finalize = async () => {
     if (!newInvoiceTaxReady) {
       setError('Verify workshop GST registration before finalizing.');
+      highlightInvalidFields();
       return;
     }
     const draft = mode === 'create' ? applyWorkshopTaxProfile(form, workshopTaxProfile) : form;
@@ -434,6 +471,7 @@ export function InvoiceRoutePage() {
     const validation = validate();
     if (validation || Object.keys(invalidInputs).length) {
       setError(validation || 'Correct the highlighted invoice fields before saving.');
+      highlightInvalidFields();
       return;
     }
     setError('');
@@ -632,7 +670,7 @@ export function InvoiceRoutePage() {
   );
 
   return (
-    <div className="billing-page">
+    <div className="billing-page" ref={invoiceEditorRef}>
       <div className="billing-editor-head no-print">
         <div>
           <span className="billing-kicker">{form.kind === 'estimate' ? 'ESTIMATE' : 'TAX / SALES INVOICE'}</span>
@@ -658,7 +696,7 @@ export function InvoiceRoutePage() {
         {workshopTaxError}
         <button type="button" className="bill-btn secondary" onClick={() => setWorkshopTaxRetry((n) => n + 1)}>Retry Verification</button>
       </div>}
-      {error && <div className="billing-error no-print" role="alert">{error}</div>}
+      {error && <div className="billing-error no-print" role="alert" data-invoice-error-summary>{error}</div>}
 
       {loading && mode === 'edit' ? <div className="billing-empty">Loading…</div> : <>
         <div className="invoice-source-grid no-print">
