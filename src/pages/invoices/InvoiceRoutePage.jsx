@@ -6,6 +6,7 @@ import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidatio
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
 import '../../styles/invoice-field-validation.css';
+import '../../styles/invoice-item-responsive.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
@@ -781,6 +782,16 @@ export function InvoiceRoutePage() {
                 : 'Select a valid state in Place of Supply to choose GST rates.'}
             {' '}Choose the legally applicable HSN / SAC rate; these options do not determine tax classification.
           </p>}
+          {!form.items.length && (
+            <div className="invoice-items-empty">
+              <ReceiptText size={24} aria-hidden="true" />
+              <strong>No goods or services added</strong>
+              <p>Add an item to calculate the amount and applicable GST automatically.</p>
+              <button type="button" className="bill-btn" onClick={() => update('items', [...form.items, emptyItem()])}>
+                <Plus size={16}/> Add first item
+              </button>
+            </div>
+          )}
           <div className="invoice-sale-editor">
             {form.items.map((row, index) => {
               const base = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
@@ -789,32 +800,47 @@ export function InvoiceRoutePage() {
 
               return <div className="invoice-sale-row" key={row.id}>
                 <div className="invoice-item-main-cell">
-                  <select aria-label="Item source" aria-invalid={Boolean(fieldErrors[`items.${index}.type`])} value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
+                  <div className="invoice-field-wrap invoice-item-type-field">
+                    <span className="invoice-mobile-label">Item Type</span>
+                    <select aria-label="Item source" aria-invalid={Boolean(fieldErrors[`items.${index}.type`])} value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
                     <option value="">Select item type</option>
                     {itemTypes.map((type) => <option key={type}>{type}</option>)}
-                  </select>
-                  {row.type === 'Stock Part'
+                    </select>
+                  </div>
+                  <div className="invoice-field-wrap invoice-item-name-field">
+                    <span className="invoice-mobile-label">{row.type === 'Stock Part' ? 'Stock item' : 'Item / Service name'}</span>
+                    {row.type === 'Stock Part'
                     ? <select aria-label="Stock item" aria-invalid={Boolean(fieldErrors[`items.${index}.inventoryId`])} value={row.inventoryId || ''} onChange={(e) => chooseInventory(row.id, e.target.value)}>
                         <option value="">Select stock item</option>
                         {inventory.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.sku} · Stock {item.onHand}</option>)}
                       </select>
                     : <input aria-label="Item name" aria-invalid={Boolean(fieldErrors[`items.${index}.description`])} value={row.description || ''} onChange={(e) => updateItem(row.id, 'description', e.target.value)} placeholder="Item / service name"/>
                   }
+                  </div>
                 </div>
-                <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
-                <div className="invoice-field-wrap">
+                <div className="invoice-field-wrap invoice-hsn-field">
+                  <span className="invoice-mobile-label">HSN / SAC</span>
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
+                </div>
+                <div className="invoice-field-wrap invoice-qty-field">
+                  <span className="invoice-mobile-label">Quantity</span>
                   <input className="plain-number-input" aria-label="Quantity" aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])} inputMode="decimal" value={inputNumber(row.qty)} placeholder="" onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
                   {fieldErrors[`items.${index}.qty`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.qty`]}</small>}
                 </div>
-                <select aria-label="Unit" aria-invalid={Boolean(fieldErrors[`items.${index}.unit`])} value={row.unit || ''} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
+                <div className="invoice-field-wrap invoice-unit-field">
+                  <span className="invoice-mobile-label">Unit</span>
+                  <select aria-label="Unit" aria-invalid={Boolean(fieldErrors[`items.${index}.unit`])} value={row.unit || ''} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
                   <option value="">Select unit</option>
                   {['PCS','NOS','SET','KG','LTR','MTR','BOX','PAIR','HRS','JOB'].map((unit) => <option key={unit}>{unit}</option>)}
-                </select>
-                <div className="invoice-field-wrap">
+                  </select>
+                </div>
+                <div className="invoice-field-wrap invoice-price-field">
+                  <span className="invoice-mobile-label">Price / Unit (₹)</span>
                   <input className="plain-number-input" aria-label="Price per unit" aria-invalid={Boolean(fieldErrors[`items.${index}.rate`])} inputMode="decimal" value={inputNumber(row.rate)} onChange={(e) => updateItem(row.id, 'rate', parseDecimal(e.target.value))} placeholder="₹ 0.00"/>
                   {fieldErrors[`items.${index}.rate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.rate`]}</small>}
                 </div>
-                <div className="invoice-field-wrap">
+                <div className="invoice-field-wrap invoice-tax-field">
+                  <span className="invoice-mobile-label">GST rate</span>
                   <select
                     aria-label="GST rate"
                     aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])}
@@ -829,8 +855,20 @@ export function InvoiceRoutePage() {
                   </select>
                   {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}
                 </div>
-                <strong className="billing-line-total">{money.format(totals.lineTotals[index]?.total ?? lineAmount)}</strong>
-                <button aria-label="Remove item" className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
+                <div className="invoice-item-amount">
+                  <span className="invoice-mobile-label">Total (incl. GST)</span>
+                  <strong className="billing-line-total">{money.format(totals.lineTotals[index]?.total ?? lineAmount)}</strong>
+                  <div className="invoice-mobile-tax-breakdown">
+                    <span>Taxable: {money.format(totals.lineTotals[index]?.taxable ?? base)}</span>
+                    <span>GST: {money.format(totals.lineTotals[index]?.gst ?? (lineAmount - base))}</span>
+                  </div>
+                </div>
+                <div className="invoice-item-row-actions">
+                  <span className="invoice-mobile-item-number">Item {String(index + 1).padStart(2, '0')}</span>
+                  <button type="button" aria-label={`Remove item ${index + 1}`} className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}>
+                    <Trash2 size={16}/><span className="invoice-mobile-remove-label">Remove</span>
+                  </button>
+                </div>
                 {Object.entries(fieldErrors).filter(([field]) =>
                   field.startsWith(`items.${index}.`) && !['qty', 'rate', 'taxRate'].includes(field.split('.').pop())
                 ).map(([field, message]) => (
