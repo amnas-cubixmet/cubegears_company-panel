@@ -241,7 +241,7 @@
   border-radius:11px;
   background:var(--surface-2);
 }
-.mobile-drawer-user img{
+.mobile-drawer-user img,.mobile-drawer-user-avatar-fallback{
   width:36px;
   height:36px;
   border-radius:50%;
@@ -249,6 +249,7 @@
   border:1px solid var(--border);
   background:var(--surface);
 }
+.mobile-drawer-user-avatar-fallback{display:grid;place-items:center;font-size:11px;font-weight:750;color:var(--text);line-height:1}
 .mobile-drawer-user>span{
   min-width:0;
   display:flex;
