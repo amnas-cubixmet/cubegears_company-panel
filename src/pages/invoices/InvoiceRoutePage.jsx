@@ -827,7 +827,7 @@ export function InvoiceRoutePage() {
                 </div>
                 <input aria-label="HSN or SAC" value={row.hsnCode || ''} onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value.replace(/[^0-9A-Za-z]/g, ''))} placeholder="HSN / SAC"/>
                 <div className="invoice-field-wrap">
-                  <input className="plain-number-input" aria-label="Quantity" aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])} inputMode="decimal" value={inputNumber(row.qty) || '1'} onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
+                  <input className="plain-number-input" aria-label="Quantity" aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])} inputMode="decimal" value={inputNumber(row.qty)} placeholder="1" onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
                   {fieldErrors[`items.${index}.qty`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.qty`]}</small>}
                 </div>
                 <select aria-label="Unit" value={row.unit || 'PCS'} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
@@ -843,6 +843,11 @@ export function InvoiceRoutePage() {
                 </div>
                 <strong className="billing-line-total">{money.format(lineAmount)}</strong>
                 <button aria-label="Remove item" className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
+                {Object.entries(fieldErrors).filter(([field]) =>
+                  field.startsWith(`items.${index}.`) && !['qty', 'rate', 'taxRate'].includes(field.split('.').pop())
+                ).map(([field, message]) => (
+                  <div className="invoice-item-validation-summary" role="alert" key={field}>{field.split('.').pop()}: {message}</div>
+                ))}
               </div>;
             })}
           </div>
