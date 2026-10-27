@@ -7,6 +7,7 @@ import '../../styles/invoice-field-validation.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
+import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import {
   InvoiceFilterToolbar,
   InvoiceListHeader,
@@ -33,6 +34,7 @@ const resolveMode = (pathname, id) => {
 export function InvoiceRoutePage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { can } = useFeatureAccess();
   const { id } = useParams();
   const mode = resolveMode(location.pathname, id);
   const kindFromUrl = new URLSearchParams(location.search).get('kind') === 'estimate' ? 'estimate' : 'invoice';
@@ -65,17 +67,28 @@ export function InvoiceRoutePage() {
     return () => { active = false; };
   }, []);
 
-  const loadList = async () => {
+  // Stock and Customers are separate paid modules. A user with Invoices
+  // access must never lose the invoice screen because either lookup is denied.
+  const loadReferences = async () => {
+    const [stock, customerRows] = await Promise.allSettled([
+      can('stock.view') ? billingService.inventory() : Promise.resolve([]),
+      can('customers.view') ? customerService.getCustomers({ status: 'Active' }) : Promise.resolve([])
+    ]);
+    setInventory(stock.status === 'fulfilled' && Array.isArray(stock.value) ? stock.value : []);
+    setCustomers(customerRows.status === 'fulfilled' && Array.isArray(customerRows.value) ? customerRows.value : []);
+  };
+
+  const loadList = async ({ withReferences = false } = {}) => {
     setLoading(true);
     try {
-      const [docs, stock, customerRows] = await Promise.all([
-        billingService.list(),
-        billingService.inventory(),
-        customerService.getCustomers({ status: 'Active' })
-      ]);
+      // Listing invoices is a standalone invoices.view operation.
+      const docs = await billingService.list();
       setDocuments(Array.isArray(docs) ? docs : []);
-      setInventory(Array.isArray(stock) ? stock : []);
-      setCustomers(Array.isArray(customerRows) ? customerRows : []);
+      if (withReferences) await loadReferences();
+      else {
+        setInventory([]);
+        setCustomers([]);
+      }
     } catch (e) {
       setError(e?.message || 'Unable to load billing data.');
     } finally {
@@ -87,15 +100,15 @@ export function InvoiceRoutePage() {
     if (!id) return;
     setLoading(true);
     try {
-      const [doc, stock, customerRows] = await Promise.all([
-        billingService.get(id),
-        billingService.inventory(),
-        customerService.getCustomers({ status: 'Active' })
-      ]);
+      const doc = await billingService.get(id);
       if (!doc) setError('Invoice / estimate not found.');
       else setForm(JSON.parse(JSON.stringify(doc)));
-      setInventory(Array.isArray(stock) ? stock : []);
-      setCustomers(Array.isArray(customerRows) ? customerRows : []);
+      // Viewing a document does not require Stock or Customers entitlements.
+      if (mode === 'edit') await loadReferences();
+      else {
+        setInventory([]);
+        setCustomers([]);
+      }
     } catch (e) {
       setError(e?.message || 'Unable to load document.');
     } finally {
@@ -113,7 +126,7 @@ export function InvoiceRoutePage() {
       setSelectedVehicleId('');
       setCustomerVehicles([]);
       setForm(blankBillingDocument(kindFromUrl));
-      loadList();
+      loadList({ withReferences: true });
     } else loadDocument();
   }, [location.pathname, location.search, id]);
 
