@@ -13,10 +13,11 @@ test('server entitlements must fail closed when API is unavailable', () => {
   assert.match(source, /if \(module === 'dashboard'\) return access\.permissions\.includes\('dashboard\.view'\)/);
 });
 
-test('dashboard shows only company-enabled and role-authorized modules', () => {
+test('dashboard hides module shortcuts while authorized navigation filters roles', () => {
   const source = read('src/pages/dashboard/Dashboard.jsx');
-  assert.match(source, /const can = featureAccess\.can/);
-  assert.match(source, /featureAccess\.can\(route\.permission\)/);
+  assert.doesNotMatch(source, /Your available modules|routeConfig\.filter/);
+  assert.match(source, /can\('jobs\.view'\)/);
+  assert.match(read('src/components/layout/Sidebar.jsx'), /featureAccess\.can\(route\.permission\)/);
   assert.match(read('src/routes/ProtectedRoute.jsx'), /setupRedirect\(featureAccess, location\.pathname\)/);
 });
 
