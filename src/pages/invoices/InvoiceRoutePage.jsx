@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
+import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError } from '../../utils/invoicePayload';
+import '../../styles/invoice-field-validation.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
@@ -51,6 +53,7 @@ export function InvoiceRoutePage() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [documentAppearance, setDocumentAppearance] = useState(templateDefaults);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     let active = true;
@@ -102,6 +105,7 @@ export function InvoiceRoutePage() {
 
   useEffect(() => {
     setError('');
+    setFieldErrors({});
     setActiveTab(kindFromUrl);
     if (mode === 'list') loadList();
     else if (mode === 'create') {
@@ -183,6 +187,12 @@ export function InvoiceRoutePage() {
   }, [mode, loading, location.search, form?.id]);
 
   const update = (path, value) => {
+    setFieldErrors((old) => {
+      if (!old[path]) return old;
+      const next = { ...old };
+      delete next[path];
+      return next;
+    });
     setForm((old) => {
       if (!path.includes('.')) return { ...old, [path]: value };
       const [group, key] = path.split('.');
@@ -317,10 +327,20 @@ export function InvoiceRoutePage() {
     applyVehicle(vehicle);
   };
 
-  const updateItem = (rowId, key, value) => setForm((old) => ({
-    ...old,
-    items: old.items.map((row) => row.id === rowId ? { ...row, [key]: value } : row)
-  }));
+  const updateItem = (rowId, key, value) => {
+    const rowIndex = form.items.findIndex((row) => row.id === rowId);
+    const path = `items.${rowIndex}.${key}`;
+    setFieldErrors((old) => {
+      if (!old[path]) return old;
+      const next = { ...old };
+      delete next[path];
+      return next;
+    });
+    setForm((old) => ({
+      ...old,
+      items: old.items.map((row) => row.id === rowId ? { ...row, [key]: value } : row)
+    }));
+  };
 
   const chooseInventory = (rowId, inventoryId) => {
     const stock = inventory.find((item) => String(item.id) === String(inventoryId));
@@ -350,22 +370,35 @@ export function InvoiceRoutePage() {
   };
 
   const save = async () => {
+    const invalidInputs = validateInvoiceDraft(form);
+    setFieldErrors(invalidInputs);
     const validation = validate();
-    if (validation) return setError(validation);
+    if (validation || Object.keys(invalidInputs).length) {
+      setError(validation || 'Correct the highlighted invoice fields before saving.');
+      return;
+    }
+    setError('');
     setSaving(true);
     try {
       const saved = await billingService.saveDraft(form);
       navigate(`/invoices/${saved.id}`, { replace: true });
     } catch (e) {
-      setError(e?.message || 'Unable to save document.');
+      setFieldErrors(extractInvoiceFieldErrors(e));
+      setError(formatInvoiceValidationError(e));
     } finally {
       setSaving(false);
     }
   };
 
   const finalize = async () => {
+    const invalidInputs = validateInvoiceDraft(form);
+    setFieldErrors(invalidInputs);
     const validation = validate();
-    if (validation) return setError(validation);
+    if (validation || Object.keys(invalidInputs).length) {
+      setError(validation || 'Correct the highlighted invoice fields before saving.');
+      return;
+    }
+    setError('');
     setSaving(true);
     try {
       let current = form;
@@ -373,7 +406,8 @@ export function InvoiceRoutePage() {
       const done = await billingService.finalize(current.id);
       navigate(`/invoices/${done.id}`, { replace: true });
     } catch (e) {
-      setError(e?.message || 'Unable to finalize document.');
+      setFieldErrors(extractInvoiceFieldErrors(e));
+      setError(formatInvoiceValidationError(e));
     } finally {
       setSaving(false);
     }
@@ -581,7 +615,7 @@ export function InvoiceRoutePage() {
         </div>
       </div>
 
-      {error && <div className="billing-error no-print">{error}</div>}
+      {error && <div className="billing-error no-print" role="alert">{error}</div>}
 
       {loading && mode === 'edit' ? <div className="billing-empty">Loading…</div> : <>
         <div className="invoice-source-grid no-print">
@@ -642,7 +676,8 @@ export function InvoiceRoutePage() {
             )}
 
             <label>Name
-              <input value={form.customer?.name || ''} onChange={(e) => update('customer.name', e.target.value)} placeholder="Customer / Company name"/>
+              <input aria-invalid={Boolean(fieldErrors['customer.name'])} value={form.customer?.name || ''} onChange={(e) => update('customer.name', e.target.value)} placeholder="Customer / Company name"/>
+              {fieldErrors['customer.name'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.name']}</small>}
             </label>
 
             <label>Phone
@@ -772,7 +807,7 @@ export function InvoiceRoutePage() {
           </div>
 
           <div className="invoice-sale-editor">
-            {form.items.map((row) => {
+            {form.items.map((row, index) => {
               const base = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
               const rate = form.invoiceType === 'gst' && form.taxMode !== 'none' ? n(row.taxRate) : 0;
               const lineAmount = base + (base * rate / 100);
@@ -791,12 +826,21 @@ export function InvoiceRoutePage() {
                   }
                 </div>
                 <input aria-label="HSN or SAC" value={row.hsnCode || ''} onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value.replace(/[^0-9A-Za-z]/g, ''))} placeholder="HSN / SAC"/>
-                <input className="plain-number-input" aria-label="Quantity" inputMode="decimal" value={inputNumber(row.qty) || '1'} onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
+                <div className="invoice-field-wrap">
+                  <input className="plain-number-input" aria-label="Quantity" aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])} inputMode="decimal" value={inputNumber(row.qty) || '1'} onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
+                  {fieldErrors[`items.${index}.qty`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.qty`]}</small>}
+                </div>
                 <select aria-label="Unit" value={row.unit || 'PCS'} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
                   {['PCS','NOS','SET','KG','LTR','MTR','BOX','PAIR','HRS','JOB'].map((unit) => <option key={unit}>{unit}</option>)}
                 </select>
-                <input className="plain-number-input" aria-label="Price per unit" inputMode="decimal" value={inputNumber(row.rate)} onChange={(e) => updateItem(row.id, 'rate', parseDecimal(e.target.value))} placeholder="₹ 0.00"/>
-                <input className="plain-number-input" aria-label="GST rate" inputMode="decimal" value={inputNumber(row.taxRate)} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder="18"/>
+                <div className="invoice-field-wrap">
+                  <input className="plain-number-input" aria-label="Price per unit" aria-invalid={Boolean(fieldErrors[`items.${index}.rate`])} inputMode="decimal" value={inputNumber(row.rate)} onChange={(e) => updateItem(row.id, 'rate', parseDecimal(e.target.value))} placeholder="₹ 0.00"/>
+                  {fieldErrors[`items.${index}.rate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.rate`]}</small>}
+                </div>
+                <div className="invoice-field-wrap">
+                  <input className="plain-number-input" aria-label="GST rate" aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])} inputMode="decimal" value={inputNumber(row.taxRate)} onChange={(e) => updateItem(row.id, 'taxRate', parseDecimal(e.target.value))} placeholder="18"/>
+                  {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}
+                </div>
                 <strong className="billing-line-total">{money.format(lineAmount)}</strong>
                 <button aria-label="Remove item" className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
               </div>;
@@ -829,13 +873,16 @@ export function InvoiceRoutePage() {
                 </select>
               </label>
               <label>Received ₹
-                <input className="plain-number-input" inputMode="decimal" value={inputNumber(form.paid)} onChange={(e) => update('paid', parseDecimal(e.target.value))} placeholder="0.00"/>
+                <input className="plain-number-input" inputMode="decimal" aria-invalid={Boolean(fieldErrors['paid'])} value={inputNumber(form.paid)} onChange={(e) => update('paid', parseDecimal(e.target.value))} placeholder="0.00"/>
+                {fieldErrors['paid'] && <small className="invoice-input-error" role="alert">{fieldErrors['paid']}</small>}
               </label>
               <label>Adjustment ₹
-                <input className="plain-number-input" inputMode="decimal" value={form.adjustment ?? ''} onChange={(e) => update('adjustment', e.target.value === '' ? '' : parseDecimal(e.target.value))} placeholder="Auto"/>
+                <input className="plain-number-input" inputMode="decimal" aria-invalid={Boolean(fieldErrors['adjustment'])} value={form.adjustment ?? ''} onChange={(e) => update('adjustment', e.target.value === '' ? '' : parseDecimal(e.target.value))} placeholder="Auto"/>
+                {fieldErrors['adjustment'] && <small className="invoice-input-error" role="alert">{fieldErrors['adjustment']}</small>}
               </label>
               <label>Discount ₹
-                <input className="plain-number-input" inputMode="decimal" value={inputNumber(form.discount)} onChange={(e) => update('discount', parseDecimal(e.target.value))} placeholder="0.00"/>
+                <input className="plain-number-input" inputMode="decimal" aria-invalid={Boolean(fieldErrors['discount'])} value={inputNumber(form.discount)} onChange={(e) => update('discount', parseDecimal(e.target.value))} placeholder="0.00"/>
+                {fieldErrors['discount'] && <small className="invoice-input-error" role="alert">{fieldErrors['discount']}</small>}
               </label>
             </div>
             <label>Terms and Conditions
