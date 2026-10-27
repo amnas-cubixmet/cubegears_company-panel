@@ -139,3 +139,17 @@
 
 .my-overtime-auto-note{display:block;margin-top:3px;color:var(--text-muted);font-size:7.5px;line-height:1.4;font-weight:500}
 .my-overtime-form input[readonly]{background:var(--primary-soft);color:var(--primary);font-weight:750}
+
+
+/* My Attendance navigation: legible labels without changing other workspace pages. */
+.my-attendance-pages .my-attendance-dashboard-header h1{font-size:21px;line-height:1.3}
+.my-attendance-pages .my-attendance-dashboard-header p{font-size:14px;line-height:1.5}
+.my-attendance-pages .my-attendance-dashboard-tabs{gap:8px;padding:7px}
+.my-attendance-pages .my-attendance-dashboard-tabs button{
+  min-height:44px;height:auto;padding:10px 9px;font-size:14px;line-height:1.35;
+}
+.my-attendance-pages .my-attendance-dashboard-tabs button svg{flex:0 0 auto}
+@media(max-width:700px){
+  .my-attendance-pages .my-attendance-dashboard-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .my-attendance-pages .my-attendance-dashboard-tabs button{font-size:13px;min-height:44px}
+}
