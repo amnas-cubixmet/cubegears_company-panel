@@ -6,6 +6,7 @@ import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidatio
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
 import '../../styles/invoice-field-validation.css';
+import '../../styles/invoice-item-responsive.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
@@ -45,9 +46,6 @@ export function InvoiceRoutePage() {
   const [inventory, setInventory] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [customerVehicles, setCustomerVehicles] = useState([]);
-  const [selectedVehicleId, setSelectedVehicleId] = useState('');
-  const [referenceLoading, setReferenceLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(kindFromUrl);
   const [listQuery, setListQuery] = useState('');
   const [listStatus, setListStatus] = useState('All');
@@ -148,8 +146,6 @@ export function InvoiceRoutePage() {
     if (mode === 'list') loadList();
     else if (mode === 'create') {
       setSelectedCustomerId('');
-      setSelectedVehicleId('');
-      setCustomerVehicles([]);
       setForm(blankBillingDocument(kindFromUrl, { emptyInputs: true }));
       loadList({ withReferences: true });
     } else loadDocument();
@@ -262,35 +258,8 @@ export function InvoiceRoutePage() {
     ].filter(Boolean).join(', ');
   };
 
-  const applyVehicle = (vehicle, vehicles = customerVehicles) => {
-    const resolved = vehicle || vehicles.find((row) => String(row.id) === String(vehicle));
-    if (!resolved) {
-      setSelectedVehicleId('');
-      return;
-    }
-
-    setSelectedVehicleId(String(resolved.id || ''));
-    setForm((old) => ({
-      ...old,
-      transportation: {
-        ...(old.transportation || {}),
-        vehicleNo: resolved.regNo || old.transportation?.vehicleNo || ''
-      },
-      vehicle: {
-        ...(old.vehicle || {}),
-        id: resolved.id || '',
-        registration: resolved.regNo || '',
-        makeModel: resolved.makeModel || '',
-        odometer: resolved.kilometres || '',
-        vin: resolved.vin || ''
-      }
-    }));
-  };
-
-  const selectCustomer = async (customerId) => {
+  const selectCustomer = (customerId) => {
     setSelectedCustomerId(customerId);
-    setSelectedVehicleId('');
-    setCustomerVehicles([]);
 
     if (!customerId) {
       // Manual customer mode: keep the form editable and clear customer-linked values.
@@ -344,42 +313,6 @@ export function InvoiceRoutePage() {
       }
     }));
 
-    setReferenceLoading(true);
-    try {
-      const vehicles = await customerService.getCustomerVehicles(customer.id);
-      const rows = Array.isArray(vehicles) ? vehicles : [];
-      setCustomerVehicles(rows);
-
-      if (rows.length) {
-        // Do not silently associate the first vehicle with a different job.
-        setSelectedVehicleId('');
-      } else {
-        setForm((old) => ({
-          ...old,
-          transportation: { ...(old.transportation || {}), vehicleNo: '' },
-          vehicle: { registration: '', makeModel: '', odometer: '', vin: '' }
-        }));
-      }
-    } catch (e) {
-      setError(e?.message || 'Unable to load customer vehicles.');
-    } finally {
-      setReferenceLoading(false);
-    }
-  };
-
-  const selectVehicle = (vehicleId) => {
-    if (!vehicleId) {
-      setSelectedVehicleId('');
-      setForm((old) => ({
-        ...old,
-        transportation: { ...(old.transportation || {}), vehicleNo: '' },
-        vehicle: { registration: '', makeModel: '', odometer: '', vin: '' }
-      }));
-      return;
-    }
-
-    const vehicle = customerVehicles.find((row) => String(row.id) === String(vehicleId));
-    applyVehicle(vehicle);
   };
 
   const updateItem = (rowId, key, value) => {
@@ -743,7 +676,6 @@ export function InvoiceRoutePage() {
               <select
                 value={selectedCustomerId}
                 onChange={(e) => selectCustomer(e.target.value)}
-                disabled={referenceLoading}
               >
                 <option value="">New / Manual Customer</option>
                 {customers.map((customer) => (
@@ -756,7 +688,7 @@ export function InvoiceRoutePage() {
 
             {selectedCustomerId && (
               <div className="invoice-autofill-note">
-                Existing customer selected — customer and vehicle details are filled automatically.
+                Existing customer selected — billing details are filled automatically.
               </div>
             )}
 
@@ -787,63 +719,6 @@ export function InvoiceRoutePage() {
               </label>
               <label>Place of Supply
                 <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))} placeholder="State code or state name"/>
-              </label>
-            </div>
-          </section>
-
-          <section className="billing-card invoice-transport-card">
-            <span className="billing-kicker">TRANSPORTATION DETAILS</span>
-            <h3>Vehicle / Transport</h3>
-
-            <label>Existing Customer Vehicle
-              <select
-                value={selectedVehicleId}
-                onChange={(e) => selectVehicle(e.target.value)}
-                disabled={!selectedCustomerId || referenceLoading}
-              >
-                <option value="">
-                  {referenceLoading
-                    ? 'Loading vehicles…'
-                    : selectedCustomerId
-                      ? customerVehicles.length
-                        ? 'Select vehicle'
-                        : 'No existing vehicle — enter manually'
-                      : 'Select customer first'}
-                </option>
-                {customerVehicles.map((vehicle) => (
-                  <option key={vehicle.id} value={vehicle.id}>
-                    {vehicle.regNo || 'No registration'} · {vehicle.makeModel || 'Vehicle'}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>Transport Vehicle Number
-              <input
-                value={form.transportation?.vehicleNo || ''}
-                onChange={(e) => update('transportation.vehicleNo', e.target.value.toUpperCase())}
-                placeholder="KL08AB1234"
-              />
-            </label>
-
-            <label>Transporter Name
-              <input value={form.transportation?.transporterName || ''} onChange={(e) => update('transportation.transporterName', e.target.value)} placeholder="Optional"/>
-            </label>
-
-            <label>Customer Vehicle Registration
-              <input value={form.vehicle?.registration || ''} onChange={(e) => update('vehicle.registration', e.target.value.toUpperCase())} placeholder="KL-08-BQ-4581"/>
-            </label>
-
-            <label>Vehicle Make / Model
-              <input value={form.vehicle?.makeModel || ''} onChange={(e) => update('vehicle.makeModel', e.target.value)} placeholder="Toyota Innova"/>
-            </label>
-
-            <div className="invoice-two-col">
-              <label>VIN / Chassis
-                <input value={form.vehicle?.vin || ''} onChange={(e) => update('vehicle.vin', e.target.value.toUpperCase())} placeholder="VIN"/>
-              </label>
-              <label>Odometer
-                <input value={form.vehicle?.odometer || ''} onChange={(e) => update('vehicle.odometer', e.target.value)} placeholder="52,400 km"/>
               </label>
             </div>
           </section>
@@ -907,6 +782,16 @@ export function InvoiceRoutePage() {
                 : 'Select a valid state in Place of Supply to choose GST rates.'}
             {' '}Choose the legally applicable HSN / SAC rate; these options do not determine tax classification.
           </p>}
+          {!form.items.length && (
+            <div className="invoice-items-empty">
+              <ReceiptText size={24} aria-hidden="true" />
+              <strong>No goods or services added</strong>
+              <p>Add an item to calculate the amount and applicable GST automatically.</p>
+              <button type="button" className="bill-btn" onClick={() => update('items', [...form.items, emptyItem()])}>
+                <Plus size={16}/> Add first item
+              </button>
+            </div>
+          )}
           <div className="invoice-sale-editor">
             {form.items.map((row, index) => {
               const base = Math.max(0, n(row.qty) * n(row.rate) - n(row.discount));
@@ -915,32 +800,47 @@ export function InvoiceRoutePage() {
 
               return <div className="invoice-sale-row" key={row.id}>
                 <div className="invoice-item-main-cell">
-                  <select aria-label="Item source" aria-invalid={Boolean(fieldErrors[`items.${index}.type`])} value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
+                  <div className="invoice-field-wrap invoice-item-type-field">
+                    <span className="invoice-mobile-label">Item Type</span>
+                    <select aria-label="Item source" aria-invalid={Boolean(fieldErrors[`items.${index}.type`])} value={row.type || ''} onChange={(e) => updateItem(row.id, 'type', e.target.value)}>
                     <option value="">Select item type</option>
                     {itemTypes.map((type) => <option key={type}>{type}</option>)}
-                  </select>
-                  {row.type === 'Stock Part'
+                    </select>
+                  </div>
+                  <div className="invoice-field-wrap invoice-item-name-field">
+                    <span className="invoice-mobile-label">{row.type === 'Stock Part' ? 'Stock item' : 'Item / Service name'}</span>
+                    {row.type === 'Stock Part'
                     ? <select aria-label="Stock item" aria-invalid={Boolean(fieldErrors[`items.${index}.inventoryId`])} value={row.inventoryId || ''} onChange={(e) => chooseInventory(row.id, e.target.value)}>
                         <option value="">Select stock item</option>
                         {inventory.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.sku} · Stock {item.onHand}</option>)}
                       </select>
                     : <input aria-label="Item name" aria-invalid={Boolean(fieldErrors[`items.${index}.description`])} value={row.description || ''} onChange={(e) => updateItem(row.id, 'description', e.target.value)} placeholder="Item / service name"/>
                   }
+                  </div>
                 </div>
-                <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
-                <div className="invoice-field-wrap">
+                <div className="invoice-field-wrap invoice-hsn-field">
+                  <span className="invoice-mobile-label">HSN / SAC</span>
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={30} autoComplete="off" aria-label="HSN or SAC number" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC digits"/>
+                </div>
+                <div className="invoice-field-wrap invoice-qty-field">
+                  <span className="invoice-mobile-label">Quantity</span>
                   <input className="plain-number-input" aria-label="Quantity" aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])} inputMode="decimal" value={inputNumber(row.qty)} placeholder="" onChange={(e) => updateItem(row.id, 'qty', parseDecimal(e.target.value))}/>
                   {fieldErrors[`items.${index}.qty`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.qty`]}</small>}
                 </div>
-                <select aria-label="Unit" aria-invalid={Boolean(fieldErrors[`items.${index}.unit`])} value={row.unit || ''} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
+                <div className="invoice-field-wrap invoice-unit-field">
+                  <span className="invoice-mobile-label">Unit</span>
+                  <select aria-label="Unit" aria-invalid={Boolean(fieldErrors[`items.${index}.unit`])} value={row.unit || ''} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
                   <option value="">Select unit</option>
                   {['PCS','NOS','SET','KG','LTR','MTR','BOX','PAIR','HRS','JOB'].map((unit) => <option key={unit}>{unit}</option>)}
-                </select>
-                <div className="invoice-field-wrap">
+                  </select>
+                </div>
+                <div className="invoice-field-wrap invoice-price-field">
+                  <span className="invoice-mobile-label">Price / Unit (₹)</span>
                   <input className="plain-number-input" aria-label="Price per unit" aria-invalid={Boolean(fieldErrors[`items.${index}.rate`])} inputMode="decimal" value={inputNumber(row.rate)} onChange={(e) => updateItem(row.id, 'rate', parseDecimal(e.target.value))} placeholder="₹ 0.00"/>
                   {fieldErrors[`items.${index}.rate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.rate`]}</small>}
                 </div>
-                <div className="invoice-field-wrap">
+                <div className="invoice-field-wrap invoice-tax-field">
+                  <span className="invoice-mobile-label">GST rate</span>
                   <select
                     aria-label="GST rate"
                     aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])}
@@ -955,8 +855,20 @@ export function InvoiceRoutePage() {
                   </select>
                   {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}
                 </div>
-                <strong className="billing-line-total">{money.format(totals.lineTotals[index]?.total ?? lineAmount)}</strong>
-                <button aria-label="Remove item" className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
+                <div className="invoice-item-amount">
+                  <span className="invoice-mobile-label">Total (incl. GST)</span>
+                  <strong className="billing-line-total">{money.format(totals.lineTotals[index]?.total ?? lineAmount)}</strong>
+                  <div className="invoice-mobile-tax-breakdown">
+                    <span>Taxable: {money.format(totals.lineTotals[index]?.taxable ?? base)}</span>
+                    <span>GST: {money.format(totals.lineTotals[index]?.gst ?? (lineAmount - base))}</span>
+                  </div>
+                </div>
+                <div className="invoice-item-row-actions">
+                  <span className="invoice-mobile-item-number">Item {String(index + 1).padStart(2, '0')}</span>
+                  <button type="button" aria-label={`Remove item ${index + 1}`} className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}>
+                    <Trash2 size={16}/><span className="invoice-mobile-remove-label">Remove</span>
+                  </button>
+                </div>
                 {Object.entries(fieldErrors).filter(([field]) =>
                   field.startsWith(`items.${index}.`) && !['qty', 'rate', 'taxRate'].includes(field.split('.').pop())
                 ).map(([field, message]) => (
@@ -1125,7 +1037,8 @@ function InvoicePrint({ doc, totals, appearance = templateDefaults }) {
         {doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
         {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
       </div>
-      {appearance.customShowTransport !== false && <div>
+      {appearance.customShowTransport !== false &&
+        (doc.transportation?.vehicleNo || doc.transportation?.transporterName || doc.vehicle?.registration) && <div>
         <strong>Transportation Details</strong>
         <span>Vehicle Number: {doc.transportation?.vehicleNo || doc.vehicle?.registration || '—'}</span>
         {doc.transportation?.transporterName && <span>Transporter: {doc.transportation.transporterName}</span>}
