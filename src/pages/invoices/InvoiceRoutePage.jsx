@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truck, XCircle } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
+import { billingService, blankBillingDocument, calculateDocumentTotals, normalizeBackendInvoiceTotals } from '../../services/billing.service';
 import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, normalizeHsnSacCode } from '../../utils/invoicePayload';
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
@@ -65,6 +65,16 @@ export function InvoiceRoutePage() {
   const newInvoiceTaxReady = mode !== 'create' || Boolean(workshopTaxProfile);
   const appliedTaxMode = invoiceTaxMode(form);
   const taxChoices = invoiceLineTaxChoices(appliedTaxMode);
+  const [verifiedTotals, setVerifiedTotals] = useState(null);
+  const [backendPreviewError, setBackendPreviewError] = useState('');
+  const previewFingerprint = useMemo(() => JSON.stringify({
+    invoiceType: form.invoiceType,
+    sellerGstin: form.seller?.gstin || '',
+    placeOfSupply: form.customer?.placeOfSupply || form.customer?.state || '',
+    items: (form.items || []).map(({ qty, rate, discount, taxRate }) =>
+      ({ qty, rate, discount, taxRate })),
+    discount: form.discount, adjustment: form.adjustment, paid: form.paid,
+  }), [form]);
 
   // After Save/Finalize or an API validation error, show the first invalid
   // field in the scrolling app content area (not just a banner off-screen).
@@ -188,7 +198,50 @@ export function InvoiceRoutePage() {
     return () => { active = false; };
   }, [mode, location.search, workshopTaxRetry]);
 
-  const totals = useMemo(() => calculateDocumentTotals(form), [form]);
+  // Browser arithmetic is an immediate preview while typing. Once Django
+  // answers, use its authoritative Decimal results for both item rows and totals.
+  const localTotals = useMemo(() => calculateDocumentTotals(form), [form]);
+  const totals = useMemo(() => {
+    const fromBackend = mode === 'view' ? form.calculation : (
+      verifiedTotals?.fingerprint === previewFingerprint ? verifiedTotals.data : null
+    );
+    return normalizeBackendInvoiceTotals(fromBackend, localTotals) || localTotals;
+  }, [localTotals, form.calculation, verifiedTotals, previewFingerprint, mode]);
+
+  useEffect(() => {
+    if (!['create', 'edit'].includes(mode) || !newInvoiceTaxReady) return undefined;
+    const validItems = (form.items || []).length > 0 &&
+      form.items.every((row) => Number(row.qty) > 0 && Number(row.rate) >= 0 &&
+        (form.invoiceType !== 'gst' || String(row.taxRate ?? '').trim() !== ''));
+    const validSupply = form.invoiceType !== 'gst' ||
+      Boolean(invoiceStateCode(form.customer?.placeOfSupply ||
+        form.customer?.stateCode || form.customer?.state));
+    if (!validItems || !validSupply) {
+      setBackendPreviewError('');
+      return undefined;
+    }
+    let active = true;
+    const request = window.setTimeout(() => {
+      billingService.previewTotals(form).then((response) => {
+        if (!active) return;
+        setVerifiedTotals({ fingerprint: previewFingerprint, data: response });
+        setBackendPreviewError('');
+      }).catch((error) => {
+        if (!active) return;
+        const missingEndpoint = error?.status === 404 || error?.response?.status === 404 ||
+          /404|not found/i.test(String(error?.message || ''));
+        setBackendPreviewError(missingEndpoint
+          ? 'Backend GST preview API is missing. Pull the latest Django backend and restart port 8000.'
+          : 'Backend calculation unavailable. Live amounts shown are provisional until the API reconnects.');
+      });
+    }, 450);
+    return () => {
+      active = false;
+      window.clearTimeout(request);
+    };
+  }, [mode, newInvoiceTaxReady, previewFingerprint]);
+
+
 
   const activeDocuments = useMemo(
     () => documents.filter((document) => document.kind === activeTab),
@@ -719,9 +772,7 @@ export function InvoiceRoutePage() {
               <label>State
                 <input value={form.customer?.state || ''} onChange={(e) => update('customer.state', e.target.value)} placeholder="Kerala"/>
               </label>
-              <label>Place of Supply
-                <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))} placeholder="State code or state name"/>
-              </label>
+
             </div>
           </section>
 
@@ -743,10 +794,13 @@ export function InvoiceRoutePage() {
               <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)} onChange={(e) => update('date', e.target.value)}/>
               {fieldErrors.date && <small className="invoice-input-error" role="alert">{fieldErrors.date}</small>}
             </label>
-            <label>Place of Supply
-              <input value={form.customer?.placeOfSupply || ''} aria-invalid={Boolean(fieldErrors['customer.placeOfSupply'])} onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))} placeholder="State code or state name"/>
+            <label>Place of Supply <small>(Auto-filled · Editable)</small>
+              <input aria-label="Place of Supply" value={form.customer?.placeOfSupply || ''}
+                aria-invalid={Boolean(fieldErrors['customer.placeOfSupply'])}
+                onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))}
+                placeholder="e.g. 32-Kerala" autoComplete="off"/>
               {fieldErrors['customer.placeOfSupply'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.placeOfSupply']}</small>}
-              <small>Auto-filled from workshop state; change it for a different legal place of supply.</small>
+              <small>Defaults to your workshop state. Change the state for another place of supply; GST recalculates automatically.</small>
             </label>
             <div className="invoice-two-col">
               <label>Job Card No.
@@ -926,6 +980,9 @@ export function InvoiceRoutePage() {
 
           <section className="billing-card invoice-live-summary">
             <span className="billing-kicker">AMOUNTS</span>
+            {backendPreviewError && <p className="invoice-backend-preview-error" role="status">{backendPreviewError}</p>}
+            {!backendPreviewError && verifiedTotals?.fingerprint === previewFingerprint &&
+              <p className="invoice-backend-preview-ok"><CheckCircle2 size={14}/> Calculated by Django backend</p>}
             <h3>{form.kind === 'estimate' ? 'Estimate Summary' : 'Invoice Summary'}</h3>
             <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal)}</strong></div>
             {totals.documentDiscount > 0 && <div><span>Discount</span><strong>- {money.format(totals.documentDiscount)}</strong></div>}
