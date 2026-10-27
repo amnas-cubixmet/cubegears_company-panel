@@ -25,7 +25,72 @@ const numberField = (value, label, { blank = '0', positive = false, min = 0, max
   return text;
 };
 
+
+export const validateInvoiceDraft = (draft) => {
+  const errors = {};
+  if (!String(draft.customer?.name || '').trim()) errors['customer.name'] = 'Customer name is required.';
+  if (!draft.items?.length) errors.items = 'Add at least one item.';
+  const check = (path, value, label, options) => {
+    try { numberField(value, label, options); }
+    catch (error) { errors[path] = error.message; }
+  };
+  check('paid', draft.paid, 'Received amount');
+  check('discount', draft.discount, 'Invoice discount');
+  check('adjustment', draft.adjustment, 'Adjustment', { min: -9999999999 });
+  for (const key of ['cgstRate', 'sgstRate', 'igstRate']) {
+    check(key, draft[key], key, { max: 100, integerDigits: 3 });
+  }
+  (draft.items || []).forEach((item, index) => {
+    const path = 'items.' + index;
+    if (!String(item.description || '').trim() && item.type !== 'Stock Part') {
+      errors[path + '.description'] = 'Item name / description is required.';
+    }
+    if (draft.invoiceType === 'gst' && !String(item.hsnCode || '').trim()) {
+      errors[path + '.hsnCode'] = 'HSN / SAC is required for GST invoices.';
+    }
+    if (item.type === 'Stock Part' && !item.inventoryId) {
+      errors[path + '.inventoryId'] = 'Select a stock item.';
+    }
+    check(path + '.qty', item.qty, 'Item ' + (index + 1) + ' quantity', { blank: null, positive: true });
+    check(path + '.rate', item.rate, 'Item ' + (index + 1) + ' price per unit');
+    check(path + '.purchasePrice', item.purchasePrice, 'Item ' + (index + 1) + ' purchase price');
+    check(path + '.discount', item.discount, 'Item ' + (index + 1) + ' discount');
+    check(path + '.taxRate', item.taxRate, 'Item ' + (index + 1) + ' GST rate', {
+      blank: draft.invoiceType === 'gst' ? null : '0',
+      max: 100, integerDigits: 3,
+    });
+  });
+  return errors;
+};
+
+export const extractInvoiceFieldErrors = (error) => {
+  if (error?.fieldErrors) return error.fieldErrors;
+  if (!error?.data || typeof error.data !== 'object') return {};
+  const fields = {};
+  const walk = (value, path) => {
+    if (Array.isArray(value)) {
+      if (value.every((item) => typeof item === 'string')) {
+        fields[path] = value.join(' ');
+      } else {
+        value.forEach((item, index) => walk(item, path ? path + '.' + index : String(index)));
+      }
+    } else if (value && typeof value === 'object') {
+      Object.entries(value).forEach(([key, item]) => walk(item, path ? path + '.' + key : key));
+    } else if (value !== undefined && value !== null && path) {
+      fields[path] = String(value);
+    }
+  };
+  walk(error.data, '');
+  return fields;
+};
+
 export const prepareInvoicePayloadForApi = (draft) => {
+  const fieldErrors = validateInvoiceDraft(draft);
+  if (Object.keys(fieldErrors).length) {
+    const error = new Error('Correct the highlighted invoice fields before saving.');
+    error.fieldErrors = fieldErrors;
+    throw error;
+  }
   const gst = draft.invoiceType === 'gst';
   return {
     ...draft,
