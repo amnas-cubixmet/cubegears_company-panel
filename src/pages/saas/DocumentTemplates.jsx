@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, Check, FileText, ImagePlus, LayoutTemplate, ReceiptText, Save, Sparkles, Trash2 } from 'lucide-react';
 import { settingsService } from '../../services/settings.service';
 import { templateDefaults as defaults, loadDocumentTemplateSettings, saveDocumentTemplateSettings } from '../../services/documentTemplates.service';
+import { validateDocumentTemplateSettings, templateApiFieldErrors, templateErrorSummary } from '../../utils/documentTemplateValidation';
 import { AccountHeader } from '../../components/account';
 import '../../styles/document-templates.css';
 import '../../styles/account-dashboard.css';
@@ -106,6 +107,7 @@ export function DocumentTemplates() {
   const [settingsReady, setSettingsReady] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsError, setSettingsError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [saved, setSaved] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
@@ -148,19 +150,36 @@ export function DocumentTemplates() {
 
   const update = (key, value) => {
     setSaved(false);
+    setFieldErrors((old) => {
+      if (!old[key]) return old;
+      const next = { ...old };
+      delete next[key];
+      return next;
+    });
     setSettings((old) => ({ ...old, [key]: value }));
   };
 
   const save = async () => {
     if (savingSettings || settingsLoading || !settingsReady) return;
+    setSaved(false);
+    const problems = validateDocumentTemplateSettings(settings);
+    setFieldErrors(problems);
+    if (Object.keys(problems).length) {
+      setSettingsError(templateErrorSummary(problems));
+      return;
+    }
     setSavingSettings(true);
     setSettingsError('');
     try {
       await saveDocumentTemplateSettings(settings);
       setSaved(true);
+      setFieldErrors({});
     } catch (error) {
-      setSaved(false);
-      setSettingsError(error?.message || 'Unable to save company invoice templates.');
+      const problems = templateApiFieldErrors(error);
+      setFieldErrors(problems);
+      setSettingsError(Object.keys(problems).length
+        ? templateErrorSummary(problems)
+        : error?.message || 'Unable to save company invoice templates.');
     } finally {
       setSavingSettings(false);
     }
@@ -170,11 +189,32 @@ export function DocumentTemplates() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 250 * 1024) {
-      setSettingsError('Logo must be PNG, JPG or WEBP and at most 250 KB.');
+      const message = 'Logo must be PNG, JPG or WEBP and at most 250 KB.';
+      setFieldErrors((old) => ({ ...old, businessLogo: message }));
+      setSettingsError(message);
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => update('businessLogo', String(reader.result || ''));
+    reader.onload = () => {
+      const value = String(reader.result || '');
+      const image = new Image();
+      image.onload = () => {
+        if (image.naturalWidth > 2048 || image.naturalHeight > 2048) {
+          const message = 'Logo dimensions must be at most 2048 × 2048 pixels.';
+          setFieldErrors((old) => ({ ...old, businessLogo: message }));
+          setSettingsError(message);
+        } else {
+          setSettingsError('');
+          update('businessLogo', value);
+        }
+      };
+      image.onerror = () => {
+        const message = 'Unable to read the uploaded image.';
+        setFieldErrors((old) => ({ ...old, businessLogo: message }));
+        setSettingsError(message);
+      };
+      image.src = value;
+    };
     reader.readAsDataURL(file);
     event.target.value = '';
   };
@@ -215,33 +255,34 @@ export function DocumentTemplates() {
               <label className="template-upload-button"><ImagePlus size={15}/>Upload Logo<input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadLogo}/></label>
               {settings.businessLogo && <button type="button" className="template-remove-logo" onClick={() => update('businessLogo', '')}><Trash2 size={14}/>Remove</button>}
             </div>
-            <small>PNG, JPG or WEBP, up to 250 KB. Saved securely with your company template settings.</small>
+            <small>PNG, JPG or WEBP, up to 250 KB and 2048 × 2048 pixels. Saved securely with your company template settings.</small>
+            {fieldErrors.businessLogo && <small className="template-input-error" role="alert">{fieldErrors.businessLogo}</small>}
           </div>
 
           <div className="business-fields-grid">
-            <label>Business / Brand Name<input value={settings.businessName || ''} onChange={(e) => update('businessName', e.target.value)} placeholder="CubixGear Workshop"/></label>
-            <label>Legal Business Name<input value={settings.businessLegalName || ''} onChange={(e) => update('businessLegalName', e.target.value)} placeholder="Registered legal name"/></label>
-            <label>GSTIN<input value={settings.businessGstin || ''} onChange={(e) => update('businessGstin', e.target.value.toUpperCase())} placeholder="32XXXXXXXXXXXXX"/></label>
-            <label>PAN<input value={settings.businessPan || ''} onChange={(e) => update('businessPan', e.target.value.toUpperCase())} placeholder="ABCDE1234F"/></label>
-            <label>Phone<input value={settings.businessPhone || ''} onChange={(e) => update('businessPhone', e.target.value)} placeholder="+91 98765 43210"/></label>
-            <label>Email<input type="email" value={settings.businessEmail || ''} onChange={(e) => update('businessEmail', e.target.value)} placeholder="accounts@company.com"/></label>
-            <label>State<input value={settings.businessState || ''} onChange={(e) => update('businessState', e.target.value)} placeholder="Kerala"/></label>
-            <label>State Code<input value={settings.businessStateCode || ''} onChange={(e) => update('businessStateCode', e.target.value)} placeholder="32"/></label>
-            <label>Website<input value={settings.businessWebsite || ''} onChange={(e) => update('businessWebsite', e.target.value)} placeholder="www.company.com"/></label>
-            <label className="business-field-wide">Registered Address<textarea value={settings.businessAddress || ''} onChange={(e) => update('businessAddress', e.target.value)} placeholder="Full registered business address"/></label>
+            <label>Business / Brand Name<input value={settings.businessName || ''} onChange={(e) => update('businessName', e.target.value)} placeholder="CubixGear Workshop" aria-invalid={Boolean(fieldErrors.businessName)}/>{fieldErrors.businessName && <small className="template-input-error" role="alert">{fieldErrors.businessName}</small>}</label>
+            <label>Legal Business Name<input value={settings.businessLegalName || ''} onChange={(e) => update('businessLegalName', e.target.value)} placeholder="Registered legal name" aria-invalid={Boolean(fieldErrors.businessLegalName)}/>{fieldErrors.businessLegalName && <small className="template-input-error" role="alert">{fieldErrors.businessLegalName}</small>}</label>
+            <label>GSTIN<input value={settings.businessGstin || ''} onChange={(e) => update('businessGstin', e.target.value.toUpperCase())} placeholder="32XXXXXXXXXXXXX" aria-invalid={Boolean(fieldErrors.businessGstin)}/>{fieldErrors.businessGstin && <small className="template-input-error" role="alert">{fieldErrors.businessGstin}</small>}</label>
+            <label>PAN<input value={settings.businessPan || ''} onChange={(e) => update('businessPan', e.target.value.toUpperCase())} placeholder="ABCDE1234F" aria-invalid={Boolean(fieldErrors.businessPan)}/>{fieldErrors.businessPan && <small className="template-input-error" role="alert">{fieldErrors.businessPan}</small>}</label>
+            <label>Phone<input value={settings.businessPhone || ''} onChange={(e) => update('businessPhone', e.target.value)} placeholder="+91 98765 43210" aria-invalid={Boolean(fieldErrors.businessPhone)}/>{fieldErrors.businessPhone && <small className="template-input-error" role="alert">{fieldErrors.businessPhone}</small>}</label>
+            <label>Email<input type="email" value={settings.businessEmail || ''} onChange={(e) => update('businessEmail', e.target.value)} placeholder="accounts@company.com" aria-invalid={Boolean(fieldErrors.businessEmail)}/>{fieldErrors.businessEmail && <small className="template-input-error" role="alert">{fieldErrors.businessEmail}</small>}</label>
+            <label>State<input value={settings.businessState || ''} onChange={(e) => update('businessState', e.target.value)} placeholder="Kerala" aria-invalid={Boolean(fieldErrors.businessState)}/>{fieldErrors.businessState && <small className="template-input-error" role="alert">{fieldErrors.businessState}</small>}</label>
+            <label>State Code<input value={settings.businessStateCode || ''} onChange={(e) => update('businessStateCode', e.target.value)} placeholder="32" aria-invalid={Boolean(fieldErrors.businessStateCode)}/>{fieldErrors.businessStateCode && <small className="template-input-error" role="alert">{fieldErrors.businessStateCode}</small>}</label>
+            <label>Website<input value={settings.businessWebsite || ''} onChange={(e) => update('businessWebsite', e.target.value)} placeholder="www.company.com" aria-invalid={Boolean(fieldErrors.businessWebsite)}/>{fieldErrors.businessWebsite && <small className="template-input-error" role="alert">{fieldErrors.businessWebsite}</small>}</label>
+            <label className="business-field-wide">Registered Address<textarea value={settings.businessAddress || ''} onChange={(e) => update('businessAddress', e.target.value)} placeholder="Full registered business address" aria-invalid={Boolean(fieldErrors.businessAddress)}/>{fieldErrors.businessAddress && <small className="template-input-error" role="alert">{fieldErrors.businessAddress}</small>}</label>
           </div>
         </div>
 
         <div className="business-subsection">
           <div className="business-subsection-head"><strong>Bank & Payment Details</strong><span>Optional details shown on invoice / estimate.</span></div>
           <div className="business-fields-grid">
-            <label>Bank Name<input value={settings.bankName || ''} onChange={(e) => update('bankName', e.target.value)} placeholder="Bank name"/></label>
-            <label>Account Name<input value={settings.bankAccountName || ''} onChange={(e) => update('bankAccountName', e.target.value)} placeholder="Account holder"/></label>
-            <label>Account Number<input value={settings.bankAccountNumber || ''} onChange={(e) => update('bankAccountNumber', e.target.value)} placeholder="Account number"/></label>
-            <label>IFSC<input value={settings.bankIfsc || ''} onChange={(e) => update('bankIfsc', e.target.value.toUpperCase())} placeholder="IFSC code"/></label>
-            <label>UPI ID<input value={settings.bankUpi || ''} onChange={(e) => update('bankUpi', e.target.value)} placeholder="business@upi"/></label>
-            <label>Authorised Signatory<input value={settings.authorizedSignatory || ''} onChange={(e) => update('authorizedSignatory', e.target.value)} placeholder="Name / designation"/></label>
-            <label className="business-field-wide">Terms & Conditions<textarea value={settings.termsText || ''} onChange={(e) => update('termsText', e.target.value)} placeholder="Payment / warranty / jurisdiction terms"/></label>
+            <label>Bank Name<input value={settings.bankName || ''} onChange={(e) => update('bankName', e.target.value)} placeholder="Bank name" aria-invalid={Boolean(fieldErrors.bankName)}/>{fieldErrors.bankName && <small className="template-input-error" role="alert">{fieldErrors.bankName}</small>}</label>
+            <label>Account Name<input value={settings.bankAccountName || ''} onChange={(e) => update('bankAccountName', e.target.value)} placeholder="Account holder" aria-invalid={Boolean(fieldErrors.bankAccountName)}/>{fieldErrors.bankAccountName && <small className="template-input-error" role="alert">{fieldErrors.bankAccountName}</small>}</label>
+            <label>Account Number<input value={settings.bankAccountNumber || ''} onChange={(e) => update('bankAccountNumber', e.target.value)} placeholder="Account number" aria-invalid={Boolean(fieldErrors.bankAccountNumber)}/>{fieldErrors.bankAccountNumber && <small className="template-input-error" role="alert">{fieldErrors.bankAccountNumber}</small>}</label>
+            <label>IFSC<input value={settings.bankIfsc || ''} onChange={(e) => update('bankIfsc', e.target.value.toUpperCase())} placeholder="IFSC code" aria-invalid={Boolean(fieldErrors.bankIfsc)}/>{fieldErrors.bankIfsc && <small className="template-input-error" role="alert">{fieldErrors.bankIfsc}</small>}</label>
+            <label>UPI ID<input value={settings.bankUpi || ''} onChange={(e) => update('bankUpi', e.target.value)} placeholder="business@upi" aria-invalid={Boolean(fieldErrors.bankUpi)}/>{fieldErrors.bankUpi && <small className="template-input-error" role="alert">{fieldErrors.bankUpi}</small>}</label>
+            <label>Authorised Signatory<input value={settings.authorizedSignatory || ''} onChange={(e) => update('authorizedSignatory', e.target.value)} placeholder="Name / designation" aria-invalid={Boolean(fieldErrors.authorizedSignatory)}/>{fieldErrors.authorizedSignatory && <small className="template-input-error" role="alert">{fieldErrors.authorizedSignatory}</small>}</label>
+            <label className="business-field-wide">Terms & Conditions<textarea value={settings.termsText || ''} onChange={(e) => update('termsText', e.target.value)} placeholder="Payment / warranty / jurisdiction terms" aria-invalid={Boolean(fieldErrors.termsText)}/>{fieldErrors.termsText && <small className="template-input-error" role="alert">{fieldErrors.termsText}</small>}</label>
           </div>
         </div>
 
@@ -265,26 +306,29 @@ export function DocumentTemplates() {
         <div className="template-control-grid">
           <label>
             <span><ReceiptText size={15}/>Invoice Template</span>
-            <select value={settings.invoiceTemplate} onChange={(e) => update('invoiceTemplate', e.target.value)}>
+            <select value={settings.invoiceTemplate} aria-invalid={Boolean(fieldErrors.invoiceTemplate)} onChange={(e) => update('invoiceTemplate', e.target.value)}>
               {templates.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select>
             <small>{invoiceTemplate.description}</small>
+            {fieldErrors.invoiceTemplate && <small className="template-input-error" role="alert">{fieldErrors.invoiceTemplate}</small>}
           </label>
 
           <label>
             <span><FileText size={15}/>Estimate Template</span>
-            <select value={settings.estimateTemplate} onChange={(e) => update('estimateTemplate', e.target.value)}>
+            <select value={settings.estimateTemplate} aria-invalid={Boolean(fieldErrors.estimateTemplate)} onChange={(e) => update('estimateTemplate', e.target.value)}>
               {templates.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select>
             <small>{estimateTemplate.description}</small>
+            {fieldErrors.estimateTemplate && <small className="template-input-error" role="alert">{fieldErrors.estimateTemplate}</small>}
           </label>
 
           <label>
             <span><LayoutTemplate size={15}/>Accent</span>
-            <select value={settings.accent} onChange={(e) => update('accent', e.target.value)}>
+            <select value={settings.accent} aria-invalid={Boolean(fieldErrors.accent)} onChange={(e) => update('accent', e.target.value)}>
               {accents.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
             </select>
             <small>Used for headings, document cards and totals.</small>
+            {fieldErrors.accent && <small className="template-input-error" role="alert">{fieldErrors.accent}</small>}
           </label>
         </div>
 
@@ -306,14 +350,14 @@ export function DocumentTemplates() {
 
             <div className="custom-template-grid">
               <label>Template Name
-                <input value={settings.customName || ''} onChange={(e) => update('customName', e.target.value)} placeholder="My Custom Template"/>
-              </label>
+                <input value={settings.customName || ''} onChange={(e) => update('customName', e.target.value)} placeholder="My Custom Template" aria-invalid={Boolean(fieldErrors.customName)}/>
+              {fieldErrors.customName && <small className="template-input-error" role="alert">{fieldErrors.customName}</small>}</label>
               <label>Document Heading
-                <input value={settings.customHeader || ''} onChange={(e) => update('customHeader', e.target.value)} placeholder="Tax Invoice"/>
-              </label>
+                <input value={settings.customHeader || ''} onChange={(e) => update('customHeader', e.target.value)} placeholder="Tax Invoice" aria-invalid={Boolean(fieldErrors.customHeader)}/>
+              {fieldErrors.customHeader && <small className="template-input-error" role="alert">{fieldErrors.customHeader}</small>}</label>
               <label className="custom-template-wide">Footer Note
-                <textarea value={settings.customFooter || ''} onChange={(e) => update('customFooter', e.target.value)} placeholder="Thank you for your business."/>
-              </label>
+                <textarea value={settings.customFooter || ''} onChange={(e) => update('customFooter', e.target.value)} placeholder="Thank you for your business." aria-invalid={Boolean(fieldErrors.customFooter)}/>
+              {fieldErrors.customFooter && <small className="template-input-error" role="alert">{fieldErrors.customFooter}</small>}</label>
             </div>
 
             <div className="template-toggle-row">
