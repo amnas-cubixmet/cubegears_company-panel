@@ -14,7 +14,7 @@ test('new invoices and estimates request an empty form while edit keeps saved da
 });
 
 test('date, sample seller name, amounts and invoice terms start blank for new documents', () => {
-  assert.match(billing, /date: emptyInputs \? '' : today\(\)/);
+  assert.match(billing, /date: emptyInputs \? localInvoiceDate\(\) : today\(\)/);
   assert.match(billing, /name: emptyInputs \? '' : 'CubixGear Workshop'/);
   assert.match(billing, /discount: emptyInputs \? '' : 0/);
   assert.match(billing, /paymentMode: emptyInputs \? '' : 'Cash'/);
