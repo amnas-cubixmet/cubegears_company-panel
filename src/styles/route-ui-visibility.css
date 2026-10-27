@@ -175,3 +175,56 @@
 :root[data-theme='dark'] .cg-subscribe .cg-subscribe-history :is(th, td) {
   border-color: var(--border);
 }
+
+:root[data-theme='light'] .login-page :is(.auth-message, .auth-dev-link span, .password-rules span, .login-footer) {
+  color: var(--text-secondary);
+}
+:root[data-theme='light'] .login-page .auth-dev-link {
+  border-color: var(--border);
+}
+:root[data-theme='light'] .login-page .auth-message.is-error {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  color: var(--danger);
+}
+:root[data-theme='light'] .login-page .auth-message.is-success {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 35%, transparent);
+  color: var(--success);
+}
+:root[data-theme='light'] .login-page .auth-message.is-warning {
+  background: var(--warning-soft);
+  border-color: color-mix(in srgb, var(--warning) 35%, transparent);
+  color: var(--warning);
+}
+:root[data-theme='light'] .login-page .password-rules span {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+:root[data-theme='light'] .login-page .password-rules span.ok {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 35%, transparent);
+  color: var(--success);
+}
+
+:root[data-theme='dark'] .cg-subscribe :is(.cg-subscribe-active, .cg-subscribe-error, .cg-subscribe-message) {
+  border: 1px solid var(--border);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-active {
+  background: var(--success-soft);
+  color: var(--success);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-message {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+:root[data-theme='dark'] .cg-subscribe :is(.cg-subscribe-note, .cg-subscribe-validity) {
+  color: var(--warning);
+}
+:root[data-theme='dark'] .cg-subscribe .cg-subscribe-paid {
+  color: var(--success);
+}
