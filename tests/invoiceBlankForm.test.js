@@ -29,7 +29,7 @@ test('date, sample seller name, amounts and invoice terms start blank for new do
 
 test('adding a line has no prefilled quantity, item type, unit, tax rate or discount', () => {
   assert.match(invoice, /const emptyItem = \(\) => \(\{[^\n]*type: '',[^\n]*qty: '', unit: '',[^\n]*taxRate: '', discount: ''/);
-  assert.match(invoice, /<option value="">Select item type<\/option>/);
+  assert.match(invoice, /<option value="">Select type<\/option>/);
   assert.match(invoice, /<option value="">Select unit<\/option>/);
   assert.match(invoice, /GST Type \(automatic\)/);
   assert.match(invoice, /<option value="">Select payment type<\/option>/);
