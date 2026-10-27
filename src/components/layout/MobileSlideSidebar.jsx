@@ -14,6 +14,9 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
   const featureAccess = useFeatureAccess();
   const { themeMode, setThemeMode } = useTheme();
   const roleLabel = getUserRoleLabel(user);
+  const avatarSrc = typeof user?.avatar === 'string' ? user.avatar.trim() : '';
+  const avatarInitials = String(user?.name || user?.email || 'CG')
+    .trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'CG';
   const activeItemRef = useRef(null);
 
   useEffect(() => {
@@ -144,7 +147,9 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
           </div>
 
           <div className="mobile-drawer-user">
-            <img src={user?.avatar} alt="User"/>
+            {avatarSrc
+              ? <img src={avatarSrc} alt="" />
+              : <span className="mobile-drawer-user-avatar-fallback" aria-hidden="true">{avatarInitials}</span>}
             <span>
               <strong>{user?.name || 'User'}</strong>
               <small>{roleLabel}</small>

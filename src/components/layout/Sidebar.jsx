@@ -17,6 +17,10 @@ export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const roleLabel = getUserRoleLabel(user);
+  // An empty image src reloads the current page in some browsers.
+  const avatarSrc = typeof user?.avatar === 'string' ? user.avatar.trim() : '';
+  const avatarInitials = String(user?.name || user?.email || 'CG')
+    .trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'CG';
   const activeItemRef = useRef(null);
 
   useEffect(() => {
@@ -133,7 +137,9 @@ export const Sidebar = () => {
         )}
 
         <div className={`sidebar-user ${collapsed ? 'is-collapsed-user' : ''}`}>
-          <img src={user?.avatar} alt="" />
+          {avatarSrc
+            ? <img src={avatarSrc} alt="" />
+            : <span className="sidebar-user-avatar-fallback" aria-hidden="true">{avatarInitials}</span>}
           {!collapsed && (
             <>
               <span className="sidebar-user-copy">

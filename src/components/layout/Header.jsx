@@ -37,6 +37,7 @@ export const Header = () => {
     resolveStaticPageTitle(location.pathname),
   );
   const roleLabel = getUserRoleLabel(user);
+  const avatarSrc = typeof user?.avatar === 'string' ? user.avatar.trim() : '';
   const initials = String(user?.name || user?.email || 'CG')
     .trim()
     .split(/\s+/)
@@ -163,8 +164,8 @@ export const Header = () => {
 
           <div className="header-profile-wrap" ref={desktopProfileRef}>
             <button type="button" className="header-profile-button" onClick={() => setProfileDropdownOpen((value) => !value)} aria-expanded={profileDropdownOpen}>
-              {user?.avatar ? (
-                <img src={user.avatar} alt="" />
+              {avatarSrc ? (
+                <img src={avatarSrc} alt="" />
               ) : (
                 <span className="header-avatar-fallback" aria-hidden="true">{initials}</span>
               )}
@@ -200,8 +201,8 @@ export const Header = () => {
             )}
             <div className="header-profile-wrap" ref={mobileProfileRef}>
               <button type="button" className="mobile-profile-button" onClick={() => setProfileDropdownOpen((value) => !value)} aria-expanded={profileDropdownOpen}>
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="Profile" />
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="Profile" />
                 ) : (
                   <span className="mobile-avatar-fallback" aria-hidden="true">{initials}</span>
                 )}

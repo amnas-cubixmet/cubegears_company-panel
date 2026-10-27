@@ -72,7 +72,8 @@ test('dashboard retains free overview widgets but hides paid data/actions by per
   const panels = source('src/components/dashboard/DashboardBottomGrid.jsx');
   assert.match(dashboard, /fetchDashboard\(\);/);
   assert.doesNotMatch(dashboard, /if \(featureAccess\.enforced\) \{\s*setLoading\(false\);/);
-  assert.match(dashboard, /featureAccess\.can\(route\.permission\)/);
+  assert.doesNotMatch(dashboard, /Your available modules|routeConfig\.filter/);
+  assert.match(source('src/components/layout/MobileBottomNav.jsx'), /featureAccess\.can\(route\.permission\)/);
   assert.match(dashboard, /can\('jobs\.view'\)/);
   assert.match(stat, /stats\.filter\(\(stat\) => can\(stat\.permission\)\)/);
   assert.match(panels, /can\('staff\.view'\)/);

@@ -31,7 +31,11 @@ test('protected routes, search, desktop and mobile navigation share authorizatio
 });
 
 test('dashboard and account never advertise inactive-label workshop modules', () => {
-  assert.match(read('src/pages/dashboard/Dashboard.jsx'), /featureAccess\.can\(route\.permission\)/);
+  const dashboard = read('src/pages/dashboard/Dashboard.jsx');
+  // Module shortcuts were intentionally removed; the sidebar still filters access.
+  assert.doesNotMatch(dashboard, /Your available modules|routeConfig\.filter/);
+  assert.match(dashboard, /can\('jobs\.view'\)/);
+  assert.match(read('src/components/layout/Sidebar.jsx'), /featureAccess\.can\(route\.permission\)/);
   const account = read('src/pages/saas/CreditWorkspace.jsx');
   assert.match(account, /featureAccess\.can\(route\.permission\)/);
   assert.match(account, /featureAccess\.activeLabelModules\.length/);
