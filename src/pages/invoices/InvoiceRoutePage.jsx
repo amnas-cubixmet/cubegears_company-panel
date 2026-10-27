@@ -772,7 +772,7 @@ export function InvoiceRoutePage() {
             <span>Unit</span>
             <span>Price / Unit</span>
             <span>GST Rate</span>
-            <span>Amount</span>
+            <span>Amount (Incl. GST)</span>
             <span></span>
           </div>
 
