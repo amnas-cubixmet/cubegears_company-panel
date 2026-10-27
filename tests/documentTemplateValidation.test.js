@@ -58,6 +58,6 @@ test('new template fields stay blank and logo size copy is not shown', () => {
     assert.match(service, new RegExp(key + ": ''"));
   }
   assert.doesNotMatch(source, /PNG, JPG or WEBP, up to 250 KB/);
-  assert.match(source, /optimizeDocumentLogo\\(file\\)/);
+  assert.ok(source.includes('optimizeDocumentLogo(file)'));
   assert.match(source, /preparingLogo/);
 });
