@@ -17,8 +17,15 @@ export const formatInvoicePlaceOfSupply = (value) => {
   return code ? `${code}-${STATE_BY_CODE.get(code)}` : text;
 };
 
-export const workshopPlaceOfSupply = (context) =>
-  formatInvoicePlaceOfSupply(context?.supplierState || context?.companyState || '');
+export const workshopPlaceOfSupply = (context) => {
+  // gst-context is authoritative. If an older backend omits supplierState,
+  // the verified seller GSTIN prefix still identifies its registered state.
+  const gstinState = invoiceStateCode(String(context?.gstin || '').slice(0, 2));
+  return formatInvoicePlaceOfSupply(
+    invoiceStateCode(context?.supplierState) || gstinState ||
+    invoiceStateCode(context?.companyState) || '',
+  );
+};
 
 export const localInvoiceDate = (now = new Date()) => {
   const year = now.getFullYear();
@@ -29,10 +36,16 @@ export const localInvoiceDate = (now = new Date()) => {
 
 export const invoiceTaxMode = (form) => {
   if (form.invoiceType !== 'gst') return 'none';
-  return indiaTaxMode(true,
-    invoiceStateCode(form.seller?.gstin?.slice(0, 2) || form.seller?.stateCode || form.seller?.state),
-    invoiceStateCode(form.customer?.placeOfSupply || form.customer?.stateCode || form.customer?.state),
+  const supplier = invoiceStateCode(
+    form.seller?.gstin?.slice(0, 2) || form.seller?.stateCode || form.seller?.state,
   );
+  const location = String(
+    form.customer?.placeOfSupply || form.customer?.stateCode || form.customer?.state || '',
+  ).trim();
+  const actualPlace = invoiceStateCode(location);
+  // New documents default to the workshop state until the customer supply
+  // location is known. A *supplied but invalid* state must not be guessed.
+  return indiaTaxMode(true, supplier, actualPlace || (!location ? supplier : ''));
 };
 
 // Rates represent the *entire line*. For CGST + SGST the percentage is split
@@ -51,5 +64,10 @@ export const invoiceLineTaxChoices = (mode) => {
       value: String(rate), label: `IGST ${rate}%`,
     })),
   ];
+  // Keep the GST-rate selector usable while a customer state is being
+  // entered. The *legal* CGST/SGST vs IGST split is determined by the
+  // place-of-supply field and still validated before saving.
+  if (mode === 'unknown') return [0, 2.5, 5, 9, 10, 12, 18, 28, 36]
+    .map((rate) => ({ value: String(rate), label: `GST ${rate}%` }));
   return [];
 };

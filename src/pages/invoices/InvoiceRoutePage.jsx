@@ -171,7 +171,9 @@ export function InvoiceRoutePage() {
           phone: context.companyPhone || '',
           email: context.companyEmail || '',
           state: context.companyState || '',
-          stateCode: context.supplierState || invoiceStateCode(context.companyState),
+          stateCode: invoiceStateCode(context.supplierState) ||
+            invoiceStateCode(context.gstin?.slice(0, 2)) ||
+            invoiceStateCode(context.companyState),
         },
         customer: {
           ...old.customer,
@@ -774,14 +776,13 @@ export function InvoiceRoutePage() {
             <span></span>
           </div>
 
-          {form.invoiceType === 'gst' && <p className="invoice-gst-rate-help">
-            {appliedTaxMode === 'cgst_sgst'
-              ? 'Same-state supply: each GST line rate is split equally into CGST and SGST.'
+          {form.invoiceType === 'gst' && <div className="invoice-tax-summary" aria-live="polite">
+            <span>{appliedTaxMode === 'cgst_sgst'
+              ? 'GST · CGST + SGST'
               : appliedTaxMode === 'igst'
-                ? 'Inter-state supply: each GST line rate is charged as IGST.'
-                : 'Select a valid state in Place of Supply to choose GST rates.'}
-            {' '}Choose the legally applicable HSN / SAC rate; these options do not determine tax classification.
-          </p>}
+                ? 'GST · IGST'
+                : 'GST · Rate selection available'}</span>
+          </div>}
           {!form.items.length && (
             <div className="invoice-items-empty">
               <ReceiptText size={24} aria-hidden="true" />
@@ -844,11 +845,11 @@ export function InvoiceRoutePage() {
                   <select
                     aria-label="GST rate"
                     aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])}
-                    disabled={form.invoiceType !== 'gst' || appliedTaxMode === 'unknown'}
+                    disabled={form.invoiceType !== 'gst'}
                     value={form.invoiceType === 'gst' ? String(row.taxRate ?? '') : ''}
                     onChange={(e) => updateItem(row.id, 'taxRate', e.target.value)}
                   >
-                    <option value="">{form.invoiceType !== 'gst' ? 'No GST' : appliedTaxMode === 'unknown' ? 'Select Place of Supply' : 'Select GST rate'}</option>
+                    <option value="">{form.invoiceType !== 'gst' ? 'No GST' : 'Select GST rate'}</option>
                     {taxChoices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
                     {row.taxRate !== '' && row.taxRate != null && !taxChoices.some((choice) => choice.value === String(row.taxRate)) &&
                       <option value={row.taxRate}>{row.taxRate}% — stock classification</option>}
@@ -885,7 +886,7 @@ export function InvoiceRoutePage() {
             <h3>Invoice Terms</h3>
             <div className="invoice-two-col">
               <label>GST Type (automatic)
-                <input readOnly aria-readonly="true" value={appliedTaxMode === 'none' ? 'None — Normal Invoice' : appliedTaxMode === 'cgst_sgst' ? 'CGST + SGST (same-state supply)' : appliedTaxMode === 'igst' ? 'IGST (inter-state supply)' : 'Select a valid Place of Supply'} />
+                <input readOnly aria-readonly="true" value={appliedTaxMode === 'none' ? 'None — Normal Invoice' : appliedTaxMode === 'cgst_sgst' ? 'CGST + SGST (same-state supply)' : appliedTaxMode === 'igst' ? 'IGST (inter-state supply)' : 'GST rate ready — verify supply state before saving'} />
                 <small>Tax type follows your GST registration and legal place of supply. Pick the correct HSN/SAC rate on each item.</small>
               </label>
               <label>Payment Type

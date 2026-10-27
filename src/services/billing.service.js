@@ -7,7 +7,7 @@ const INVENTORY_KEY = 'cubixgear:inventory';
 const STOCK_LEDGER_KEY = 'cubixgear:stock-ledger';
 const JOB_PREFILL_KEY = 'cubixgear:invoice-job-prefill';
 import { calculateEstimateIndiaGst } from '../utils/indiaGst';
-import { localInvoiceDate } from '../utils/invoiceTaxUi';
+import { invoiceStateCode, localInvoiceDate } from '../utils/invoiceTaxUi';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance } from './documentTemplates.service';
 
 const seedDocuments = [
@@ -178,10 +178,17 @@ export const calculateDocumentTotals = (doc) => {
     taxable: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) -
       Number(item.discount || 0)),
   }));
-  const supplier = String(doc.seller?.gstin || '').slice(0, 2) ||
-    doc.seller?.stateCode || '';
-  const placeOfSupply = String(doc.customer?.placeOfSupply ||
-    doc.customer?.stateCode || '').slice(0, 2);
+  // Accept a 2-digit state code OR a state name (e.g. "Kerala").
+  // String.slice(0, 2) used to turn "Kerala" into "Ke", causing the
+  // GST preview to lose its tax calculation even with a valid state.
+  const supplier = invoiceStateCode(
+    doc.seller?.gstin?.slice(0, 2) || doc.seller?.stateCode || doc.seller?.state,
+  );
+  const suppliedPlace = String(
+    doc.customer?.placeOfSupply || doc.customer?.stateCode || doc.customer?.state || '',
+  ).trim();
+  const placeOfSupply = invoiceStateCode(suppliedPlace) ||
+    (!suppliedPlace ? supplier : '');
   const documentDiscount = Number(doc.discount || 0);
   const gst = calculateEstimateIndiaGst({
     lines: rows.map(({ item, taxable }) => ({

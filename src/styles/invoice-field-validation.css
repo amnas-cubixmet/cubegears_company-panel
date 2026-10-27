@@ -40,3 +40,14 @@
   .billing-page .invoice-seller-source-note,
   .billing-page .invoice-gst-rate-help{font-size:14px}
 }
+
+/* Compact GST mode hint replaces the long validation banner above item rows. */
+.billing-page .invoice-tax-summary {
+  display: flex;
+  align-items: center;
+  margin: 10px 0 4px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 650;
+}
