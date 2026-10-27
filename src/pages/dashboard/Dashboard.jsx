@@ -12,7 +12,7 @@ import { getDashboardData } from '../../services/dashboard.service';
 import '../../styles/dashboard.css';
 
 export const Dashboard = () => {
-  const useNavigateValue = useNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { can } = useFeatureAccess();
 
@@ -53,13 +53,13 @@ export const Dashboard = () => {
         setFilterPeriod={setFilterPeriod}
         filterBranch={filterBranch}
         setFilterBranch={setFilterBranch}
-        onNavigate={useNavigateValue}
+        onNavigate={navigate}
       />}
 
       <DashboardBottomGrid
         data={data}
         user={user}
-        onNavigate={useNavigateValue}
+        onNavigate={navigate}
       />
     </div>
   );
