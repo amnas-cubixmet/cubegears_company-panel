@@ -955,7 +955,7 @@ export function InvoiceRoutePage() {
                   </select>
                   {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}
                 </div>
-                <strong className="billing-line-total">{money.format(lineAmount)}</strong>
+                <strong className="billing-line-total">{money.format(totals.lineTotals[index]?.total ?? lineAmount)}</strong>
                 <button aria-label="Remove item" className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
                 {Object.entries(fieldErrors).filter(([field]) =>
                   field.startsWith(`items.${index}.`) && !['qty', 'rate', 'taxRate'].includes(field.split('.').pop())
@@ -1013,13 +1013,18 @@ export function InvoiceRoutePage() {
 
           <section className="billing-card invoice-live-summary">
             <span className="billing-kicker">AMOUNTS</span>
-            <h3>Invoice Summary</h3>
+            <h3>{form.kind === 'estimate' ? 'Estimate Summary' : 'Invoice Summary'}</h3>
             <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal)}</strong></div>
             {totals.documentDiscount > 0 && <div><span>Discount</span><strong>- {money.format(totals.documentDiscount)}</strong></div>}
             <div><span>Taxable Amount</span><strong>{money.format(totals.taxable)}</strong></div>
-            <div><span>GST</span><strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong></div>
+            {totals.taxMode === 'cgst_sgst' && <>
+              <div><span>CGST (included in total)</span><strong>{money.format(totals.cgst)}</strong></div>
+              <div><span>SGST (included in total)</span><strong>{money.format(totals.sgst)}</strong></div>
+            </>}
+            {totals.taxMode === 'igst' && <div><span>IGST (included in total)</span><strong>{money.format(totals.igst)}</strong></div>}
+            <div><span>Total GST</span><strong>{money.format(totals.cgst + totals.sgst + totals.igst)}</strong></div>
             <div><span>Adjustment</span><strong>{money.format(totals.adjustment)}</strong></div>
-            <div className="grand"><span>Total</span><strong>{money.format(totals.total)}</strong></div>
+            <div className="grand"><span>Grand Total (incl. GST)</span><strong>{money.format(totals.total)}</strong></div>
             <div><span>Received</span><strong>{money.format(totals.paid)}</strong></div>
             <div><span>Balance</span><strong>{money.format(totals.balance)}</strong></div>
           </section>
@@ -1153,7 +1158,7 @@ function InvoicePrint({ doc, totals, appearance = templateDefaults }) {
           <span>{row.unit || 'PCS'}</span>
           <span>{money.format(n(row.rate))}</span>
           <span>{rate ? <>{money.format(tax)}<small>({rate}%)</small></> : '—'}</span>
-          <strong>{money.format(taxable + tax)}</strong>
+          <strong>{money.format(totals.lineTotals[index]?.total ?? taxable + tax)}</strong>
         </div>;
       })}
       <div className="invoice-sale-table-total">
