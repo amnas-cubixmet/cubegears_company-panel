@@ -45,9 +45,6 @@ export function InvoiceRoutePage() {
   const [inventory, setInventory] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [customerVehicles, setCustomerVehicles] = useState([]);
-  const [selectedVehicleId, setSelectedVehicleId] = useState('');
-  const [referenceLoading, setReferenceLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(kindFromUrl);
   const [listQuery, setListQuery] = useState('');
   const [listStatus, setListStatus] = useState('All');
@@ -148,8 +145,6 @@ export function InvoiceRoutePage() {
     if (mode === 'list') loadList();
     else if (mode === 'create') {
       setSelectedCustomerId('');
-      setSelectedVehicleId('');
-      setCustomerVehicles([]);
       setForm(blankBillingDocument(kindFromUrl, { emptyInputs: true }));
       loadList({ withReferences: true });
     } else loadDocument();
@@ -262,35 +257,8 @@ export function InvoiceRoutePage() {
     ].filter(Boolean).join(', ');
   };
 
-  const applyVehicle = (vehicle, vehicles = customerVehicles) => {
-    const resolved = vehicle || vehicles.find((row) => String(row.id) === String(vehicle));
-    if (!resolved) {
-      setSelectedVehicleId('');
-      return;
-    }
-
-    setSelectedVehicleId(String(resolved.id || ''));
-    setForm((old) => ({
-      ...old,
-      transportation: {
-        ...(old.transportation || {}),
-        vehicleNo: resolved.regNo || old.transportation?.vehicleNo || ''
-      },
-      vehicle: {
-        ...(old.vehicle || {}),
-        id: resolved.id || '',
-        registration: resolved.regNo || '',
-        makeModel: resolved.makeModel || '',
-        odometer: resolved.kilometres || '',
-        vin: resolved.vin || ''
-      }
-    }));
-  };
-
-  const selectCustomer = async (customerId) => {
+  const selectCustomer = (customerId) => {
     setSelectedCustomerId(customerId);
-    setSelectedVehicleId('');
-    setCustomerVehicles([]);
 
     if (!customerId) {
       // Manual customer mode: keep the form editable and clear customer-linked values.
@@ -344,42 +312,6 @@ export function InvoiceRoutePage() {
       }
     }));
 
-    setReferenceLoading(true);
-    try {
-      const vehicles = await customerService.getCustomerVehicles(customer.id);
-      const rows = Array.isArray(vehicles) ? vehicles : [];
-      setCustomerVehicles(rows);
-
-      if (rows.length) {
-        // Do not silently associate the first vehicle with a different job.
-        setSelectedVehicleId('');
-      } else {
-        setForm((old) => ({
-          ...old,
-          transportation: { ...(old.transportation || {}), vehicleNo: '' },
-          vehicle: { registration: '', makeModel: '', odometer: '', vin: '' }
-        }));
-      }
-    } catch (e) {
-      setError(e?.message || 'Unable to load customer vehicles.');
-    } finally {
-      setReferenceLoading(false);
-    }
-  };
-
-  const selectVehicle = (vehicleId) => {
-    if (!vehicleId) {
-      setSelectedVehicleId('');
-      setForm((old) => ({
-        ...old,
-        transportation: { ...(old.transportation || {}), vehicleNo: '' },
-        vehicle: { registration: '', makeModel: '', odometer: '', vin: '' }
-      }));
-      return;
-    }
-
-    const vehicle = customerVehicles.find((row) => String(row.id) === String(vehicleId));
-    applyVehicle(vehicle);
   };
 
   const updateItem = (rowId, key, value) => {
@@ -743,7 +675,6 @@ export function InvoiceRoutePage() {
               <select
                 value={selectedCustomerId}
                 onChange={(e) => selectCustomer(e.target.value)}
-                disabled={referenceLoading}
               >
                 <option value="">New / Manual Customer</option>
                 {customers.map((customer) => (
@@ -756,7 +687,7 @@ export function InvoiceRoutePage() {
 
             {selectedCustomerId && (
               <div className="invoice-autofill-note">
-                Existing customer selected — customer and vehicle details are filled automatically.
+                Existing customer selected — billing details are filled automatically.
               </div>
             )}
 
@@ -787,63 +718,6 @@ export function InvoiceRoutePage() {
               </label>
               <label>Place of Supply
                 <input value={form.customer?.placeOfSupply || ''} onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))} placeholder="State code or state name"/>
-              </label>
-            </div>
-          </section>
-
-          <section className="billing-card invoice-transport-card">
-            <span className="billing-kicker">TRANSPORTATION DETAILS</span>
-            <h3>Vehicle / Transport</h3>
-
-            <label>Existing Customer Vehicle
-              <select
-                value={selectedVehicleId}
-                onChange={(e) => selectVehicle(e.target.value)}
-                disabled={!selectedCustomerId || referenceLoading}
-              >
-                <option value="">
-                  {referenceLoading
-                    ? 'Loading vehicles…'
-                    : selectedCustomerId
-                      ? customerVehicles.length
-                        ? 'Select vehicle'
-                        : 'No existing vehicle — enter manually'
-                      : 'Select customer first'}
-                </option>
-                {customerVehicles.map((vehicle) => (
-                  <option key={vehicle.id} value={vehicle.id}>
-                    {vehicle.regNo || 'No registration'} · {vehicle.makeModel || 'Vehicle'}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>Transport Vehicle Number
-              <input
-                value={form.transportation?.vehicleNo || ''}
-                onChange={(e) => update('transportation.vehicleNo', e.target.value.toUpperCase())}
-                placeholder="KL08AB1234"
-              />
-            </label>
-
-            <label>Transporter Name
-              <input value={form.transportation?.transporterName || ''} onChange={(e) => update('transportation.transporterName', e.target.value)} placeholder="Optional"/>
-            </label>
-
-            <label>Customer Vehicle Registration
-              <input value={form.vehicle?.registration || ''} onChange={(e) => update('vehicle.registration', e.target.value.toUpperCase())} placeholder="KL-08-BQ-4581"/>
-            </label>
-
-            <label>Vehicle Make / Model
-              <input value={form.vehicle?.makeModel || ''} onChange={(e) => update('vehicle.makeModel', e.target.value)} placeholder="Toyota Innova"/>
-            </label>
-
-            <div className="invoice-two-col">
-              <label>VIN / Chassis
-                <input value={form.vehicle?.vin || ''} onChange={(e) => update('vehicle.vin', e.target.value.toUpperCase())} placeholder="VIN"/>
-              </label>
-              <label>Odometer
-                <input value={form.vehicle?.odometer || ''} onChange={(e) => update('vehicle.odometer', e.target.value)} placeholder="52,400 km"/>
               </label>
             </div>
           </section>
@@ -1125,7 +999,8 @@ function InvoicePrint({ doc, totals, appearance = templateDefaults }) {
         {doc.customer?.gstin && <span>GSTIN Number: {doc.customer.gstin}</span>}
         {(doc.customer?.state || doc.customer?.stateCode) && <span>State: {doc.customer?.stateCode ? `${doc.customer.stateCode}-${doc.customer?.state || ''}` : doc.customer?.state}</span>}
       </div>
-      {appearance.customShowTransport !== false && <div>
+      {appearance.customShowTransport !== false &&
+        (doc.transportation?.vehicleNo || doc.transportation?.transporterName || doc.vehicle?.registration) && <div>
         <strong>Transportation Details</strong>
         <span>Vehicle Number: {doc.transportation?.vehicleNo || doc.vehicle?.registration || '—'}</span>
         {doc.transportation?.transporterName && <span>Transporter: {doc.transportation.transporterName}</span>}
