@@ -7,3 +7,36 @@
 .invoice-input-error{display:block;font-size:11px;line-height:1.35;font-weight:600;color:#b91c1c;overflow-wrap:anywhere}
 .invoice-item-validation-summary{grid-column:1 / -1;font-size:11px;line-height:1.5;color:#b91c1c;background:rgba(220,38,38,.05);padding:6px 9px;border-radius:7px}
 .invoice-item-validation-summary p{margin:2px 0;color:inherit;font-size:inherit}
+
+/* Invoice seller identity is derived from the verified workshop profile. */
+.billing-page .invoice-seller-card :is(input,textarea)[readonly]{
+  background:var(--surface-2);border-color:var(--border);
+  color:var(--text-primary);cursor:default;opacity:1;
+}
+.billing-page .invoice-seller-source-note{
+  margin:7px 0 14px;font-size:13px;line-height:1.5;color:var(--text-secondary);
+}
+.billing-page .invoice-settings-link{
+  display:inline;padding:0 3px;border:0;background:transparent;
+  color:var(--primary);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;
+}
+.billing-page .invoice-settings-link:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.billing-page .invoice-gst-rate-help{
+  margin:12px 8px 7px;font-size:13px;line-height:1.5;
+  color:var(--text-secondary);
+}
+.billing-page .invoice-input-error,
+.billing-page .invoice-item-validation-summary{font-size:13px;line-height:1.5}
+.billing-page [aria-invalid="true"]{scroll-margin-block:140px}
+.billing-page .invoice-sale-items{overflow-x:auto}
+@media(min-width:1101px){
+  .billing-page .invoice-sale-head,
+  .billing-page .invoice-sale-row{
+    min-width:1040px;
+    grid-template-columns:minmax(220px,1.4fr) 100px 72px 82px 105px minmax(188px,1fr) 118px 38px;
+  }
+}
+@media(max-width:700px){
+  .billing-page .invoice-seller-source-note,
+  .billing-page .invoice-gst-rate-help{font-size:14px}
+}
