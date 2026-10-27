@@ -1,9 +1,10 @@
 
 import { Download, Search } from 'lucide-react';
-import { formatAttendanceTime, minutesToHours, statusTone } from './attendance.utils';
+import { formatAttendanceTime, minutesToHours, parseAttendanceLocalDate, statusTone } from './attendance.utils';
 
 export const AttendanceHistoryTable = ({
   logs,
+  loading = false,
   search,
   onSearchChange,
   onExport,
@@ -49,11 +50,11 @@ export const AttendanceHistoryTable = ({
             <tr key={log.id}>
               <td>
                 <strong>{log.dayOfWeek}</strong>
-                <span>{new Date(`${log.date}T00:00:00`).toLocaleDateString('en-US', {
+                <span>{parseAttendanceLocalDate(log.date)?.toLocaleDateString('en-US', {
                   day: '2-digit',
                   month: 'short',
                   year: 'numeric',
-                })}</span>
+                }) || '—'}</span>
               </td>
               <td>
                 <span className={`attendance-status-badge ${statusTone(log.status)}`}>
@@ -61,7 +62,7 @@ export const AttendanceHistoryTable = ({
                 </span>
               </td>
               <td>{formatAttendanceTime(log.sessions?.[0]?.clockIn)}</td>
-              <td>{formatAttendanceTime(log.sessions?.[log.sessions.length - 1]?.clockOut)}</td>
+              <td>{formatAttendanceTime(log.sessions?.at(-1)?.clockOut)}</td>
               <td>{minutesToHours(log.totalWorkedMinutes)}</td>
               <td>{log.shiftName || 'General Shift'}</td>
             </tr>
@@ -70,6 +71,6 @@ export const AttendanceHistoryTable = ({
       </table>
     </div>
 
-    {!logs.length && <div className="attendance-empty-state">No attendance records found.</div>}
+    {!loading && !logs.length && <div className="attendance-empty-state">No attendance records found.</div>}
   </section>
 );
