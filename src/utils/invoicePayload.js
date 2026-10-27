@@ -28,9 +28,10 @@ const numberField = (value, label, { blank = '0', positive = false, min = 0, max
 };
 
 
-// HSN/SAC are digit strings, not quantities: keep leading zeroes intact.
+// HSN/SAC is stored as text by Django: retain leading zeroes and allow
+// letters (for user-entered internal/service classifications), maximum 30 chars.
 export const normalizeHsnSacCode = (value) =>
-  String(value ?? '').replace(/[^0-9]/g, '');
+  String(value ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 30);
 
 export const validateInvoiceDraft = (draft) => {
   const errors = {};
@@ -67,8 +68,8 @@ export const validateInvoiceDraft = (draft) => {
     if (draft.invoiceType === 'gst' && !String(item.hsnCode || '').trim()) {
       errors[path + '.hsnCode'] = 'HSN / SAC is required for GST invoices.';
     }
-    if (String(item.hsnCode || '') && !/^[0-9]+$/.test(String(item.hsnCode))) {
-      errors[path + '.hsnCode'] = 'HSN / SAC must contain digits only.';
+    if (String(item.hsnCode || '') && !/^[A-Za-z0-9]{1,30}$/.test(String(item.hsnCode))) {
+      errors[path + '.hsnCode'] = 'HSN / SAC must contain letters or digits only (maximum 30 characters).';
     }
     if (item.type === 'Stock Part' && !item.inventoryId) {
       errors[path + '.inventoryId'] = 'Select a stock item.';
