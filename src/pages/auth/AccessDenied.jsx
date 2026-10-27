@@ -15,6 +15,7 @@ export const AccessDenied = () => {
   const landing = access.labelOnly ? firstAllowedRoute?.path || '/profile' : getStaffLandingPath(user);
   const params = new URLSearchParams(location.search);
   const permission = params.get('permission') || 'required permission';
+  const invoiceOwnerBlocked = access.isCompanyOwner && permission.startsWith('invoices.');
 
   return (
     <div style={{
@@ -53,7 +54,9 @@ export const AccessDenied = () => {
           fontSize: '13px',
           lineHeight: 1.6
         }}>
-          This module is not activated for your company, or your staff role does not allow it.
+          {invoiceOwnerBlocked
+            ? 'Your company owner account has invoice permissions. If Invoices is still unavailable, its paid feature label may not be active. Check Feature Controls to activate the server-verified module.'
+            : 'This module is not activated for your company, or your staff role does not allow it.'}
         </p>
 
         <div style={{
@@ -68,6 +71,13 @@ export const AccessDenied = () => {
           Required: {permission}
         </div>
 
+        {invoiceOwnerBlocked && <button
+          type="button"
+          onClick={() => navigate('/account/credits/features')}
+          style={{ width: '100%', minHeight: '44px', marginTop: '18px', border: 0, borderRadius: '10px', background: '#1677ff', color: '#fff', fontWeight: 800, cursor: 'pointer' }}
+        >
+          Check / Activate Invoice Module
+        </button>}
         <button
           type="button"
           onClick={() => navigate(landing, { replace: true })}
@@ -77,8 +87,8 @@ export const AccessDenied = () => {
             marginTop: '18px',
             border: 0,
             borderRadius: '10px',
-            background: '#1677ff',
-            color: '#fff',
+            background: invoiceOwnerBlocked ? 'var(--surface-soft, #f8fafc)' : '#1677ff',
+            color: invoiceOwnerBlocked ? 'var(--text-primary, #111827)' : '#fff',
             fontWeight: 800,
             cursor: 'pointer'
           }}
