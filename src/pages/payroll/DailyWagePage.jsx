@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Banknote, CalendarCheck2, CheckCircle2, Clock3, History, Search, Users, Wallet } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { dailyWageService } from '../../services/dailyWage.service';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import './daily-wage.css';
+import './daily-wage-readable.css';
 
 export const rupees = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2,
@@ -22,10 +23,13 @@ const sections = [
 ];
 
 export function DailyWageNav({ selected = 'overview' }) {
+  const { search } = useLocation();
+  // Moving between the three payroll views must retain the user's selected
+  // month, year, branch and staff query parameters.
   return (
     <nav className="dw-nav" aria-label="Daily Wage Navigation">
       {sections.map(([id, title, href, Icon]) => (
-        <Link key={id} to={href} className={selected === id ? 'is-active' : ''}>
+        <Link key={id} to={`${href}${search}`} aria-current={selected === id ? 'page' : undefined} className={selected === id ? 'is-active' : ''}>
           <Icon size={16} aria-hidden="true"/>{title}
         </Link>
       ))}
@@ -126,10 +130,10 @@ export const DailyWagePage = ({ mode = 'overview' }) => {
         </div>
       )}
       {error && <p className="dw-alert" role="alert">{error} <button type="button" onClick={() => setRefreshToken((v) => v + 1)}>Retry</button></p>}
-      <section className="dw-card">
+      <section className="dw-card" aria-labelledby="dw-records-heading">
         <div className="dw-card-head">
           <div>
-            <h2>{mode === 'overview' ? 'Employee Wage Accounts' : mode === 'history' ? 'Posted Daily Earnings' : 'Wage Payment Transactions'}</h2>
+            <h2 id="dw-records-heading">{mode === 'overview' ? 'Employee Wage Accounts' : mode === 'history' ? 'Posted Daily Earnings' : 'Wage Payment Transactions'}</h2>
             <p>{mode === 'overview' ? 'Select a worker to approve days, add earnings or settle unpaid wages.' : 'Permanent transaction history for the selected company.'}</p>
           </div>
           <span>{items.length} records</span>

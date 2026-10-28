@@ -1,0 +1,273 @@
+/* Daily Wage Payroll — shared readable layout for daily wages, history and
+   payments. Loaded after daily-wage.css. Only presentation and navigation.
+   Server permissions, wage calculations and period rules remain authoritative. */
+.dw-page {
+  font-size: 16px;
+  line-height: 1.5;
+  gap: 18px;
+  min-width: 0;
+  max-width: 100%;
+}
+.dw-page .dw-header { gap: 14px; align-items: center; }
+.dw-page .dw-header > div { min-width: 0; }
+.dw-page .dw-header h1 { font-size: clamp(22px, 2vw, 28px) !important; line-height: 1.3 !important; }
+.dw-page .dw-header p { font-size: 14px !important; line-height: 1.5 !important; }
+.dw-page .dw-button {
+  min-height: 44px;
+  height: auto;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  gap: 8px;
+  white-space: normal;
+}
+.dw-page .dw-button svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.dw-page .dw-text-link {
+  min-height: 40px;
+  padding-block: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: normal;
+  text-align: left;
+}
+.dw-page .dw-nav,
+.dw-page .dw-subtabs {
+  gap: 8px;
+  padding: 7px;
+  overscroll-behavior-inline: contain;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.dw-page .dw-nav a,
+.dw-page .dw-subtabs button {
+  min-height: 46px;
+  height: auto;
+  padding: 11px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  flex: 0 0 auto;
+}
+.dw-page .dw-nav svg,
+.dw-page .dw-subtabs svg { width: 18px; height: 18px; }
+
+/* Summary figures should read as financial figures, not tiny metadata. */
+.dw-page .dw-metrics { gap: 14px; }
+.dw-page .dw-metric {
+  min-height: 145px;
+  padding: 18px;
+  gap: 12px;
+}
+.dw-page .dw-metric-top > span:first-child,
+.dw-page .dw-metric > span {
+  font-size: 14px;
+  line-height: 1.4;
+}
+.dw-page .dw-metric > strong {
+  font-size: clamp(21px, 2vw, 28px);
+  line-height: 1.25;
+  letter-spacing: -.025em;
+  overflow-wrap: anywhere;
+}
+.dw-page .dw-metric > small {
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.dw-page .dw-metric-icon { width: 40px; height: 40px; flex-basis: 40px; }
+.dw-page .dw-metric-icon svg { width: 20px; height: 20px; }
+.dw-page .dw-attendance-summary { gap: 10px; }
+.dw-page .dw-attendance-summary span {
+  min-height: 42px;
+  padding: 10px 13px;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: normal;
+}
+.dw-page .dw-attendance-summary b { font-size: 16px; }
+
+/* Heading, toolbar and filters across the three requested routes. */
+.dw-page .dw-card { min-width: 0; border-radius: 14px; }
+.dw-page .dw-card-head { padding: 18px 20px; gap: 12px; }
+.dw-page .dw-card-head h2,
+.dw-page .dw-account-summary h2 {
+  font-size: 19px;
+  line-height: 1.35;
+}
+.dw-page .dw-card-head p,
+.dw-page .dw-account-summary p,
+.dw-page .dw-card-head > span {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.dw-page .dw-card-head > span { white-space: nowrap; }
+.dw-page .dw-toolbar { padding: 14px 18px; gap: 12px; }
+.dw-page .dw-search {
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  border-radius: 10px;
+}
+.dw-page .dw-search input {
+  min-height: 42px;
+  height: auto;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.dw-page .dw-search svg { width: 19px; height: 19px; flex: 0 0 auto; }
+.dw-page .dw-toolbar > label:not(.dw-search) {
+  font-size: 14px;
+  line-height: 1.4;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.dw-page .dw-toolbar select,
+.dw-page .dw-toolbar input[type="date"] {
+  min-height: 48px;
+  height: 48px;
+  min-width: 160px;
+  font-size: 16px;
+  line-height: 1.4;
+  border-radius: 10px;
+}
+.dw-page .dw-search:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
+}
+
+/* Dense finance tables remain scrollable within the card on desktop. */
+.dw-page .dw-table-scroll {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+.dw-page .dw-table {
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.dw-page .dw-table th {
+  padding: 14px 15px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 750;
+}
+.dw-page .dw-table td {
+  padding: 14px 15px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.dw-page .dw-table td strong { font-size: 15px; line-height: 1.45; }
+.dw-page .dw-table td small { font-size: 13px; line-height: 1.5; }
+.dw-page .dw-ok,
+.dw-page .dw-pending {
+  min-height: 30px;
+  padding: 5px 10px;
+  font-size: 13px;
+  line-height: 1.3;
+  white-space: normal;
+}
+.dw-page .dw-empty,
+.dw-page .dw-alert,
+.dw-page .dw-notice {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.dw-page .dw-alert button { min-height: 44px; font-size: 14px; padding: 9px 12px; }
+
+/* Wage account modal and subpages use same touch-friendly controls. */
+.dw-page .dw-rate-chips span,
+.dw-page .dw-payment-due,
+.dw-page .dw-modal-help { font-size: 14px; line-height: 1.5; }
+.dw-page .dw-modal-form label { font-size: 14px; line-height: 1.5; }
+.dw-page .dw-modal-form input,
+.dw-page .dw-modal-form select {
+  min-height: 48px;
+  font-size: 16px;
+}
+
+/* On phones the table uses its existing labeled-row cards; no page scroll. */
+@media (max-width: 1180px) {
+  .dw-page .dw-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .dw-page { gap: 14px; font-size: 15px; }
+  .dw-page .dw-header { align-items: flex-start; }
+  .dw-page .dw-header h1 { font-size: 23px !important; }
+  .dw-page .dw-header .dw-button { min-width: 110px; }
+  .dw-page .dw-metrics { gap: 10px; }
+  .dw-page .dw-metric { min-height: 138px; padding: 14px; }
+  .dw-page .dw-metric > strong { font-size: 21px; }
+  .dw-page .dw-metric > small { font-size: 13px; }
+  .dw-page .dw-card-head { padding: 15px; }
+  .dw-page .dw-toolbar { padding: 14px; }
+  .dw-page .dw-search { flex: 1 1 100%; max-width: none; }
+  .dw-page .dw-toolbar > select,
+  .dw-page .dw-toolbar > label:not(.dw-search) {
+    flex: 1 1 min(100%, 180px);
+    min-width: 0;
+  }
+  .dw-page .dw-toolbar select,
+  .dw-page .dw-toolbar input[type="date"] {
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 auto;
+  }
+  .dw-page .dw-table-scroll { overflow-x: hidden; }
+  .dw-page .dw-table,
+  .dw-page .dw-table tbody { display: block; width: 100%; white-space: normal; }
+  .dw-page .dw-table tr { padding: 14px 16px; }
+  .dw-page .dw-table td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    text-align: right;
+    gap: 12px;
+    padding: 9px 0;
+    font-size: 14px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .dw-page .dw-table td::before {
+    flex: 0 0 42%;
+    max-width: 42%;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+  }
+  .dw-page .dw-table td strong,
+  .dw-page .dw-table td small,
+  .dw-page .dw-table td .dw-text-link { max-width: 100%; overflow-wrap: anywhere; }
+  .dw-page .dw-table td .dw-button { min-width: 0; width: 100%; }
+  .dw-page .dw-table td[data-label="Action"] { align-items: stretch; }
+}
+@media (max-width: 390px) {
+  .dw-page .dw-header .dw-button { width: 100%; }
+  .dw-page .dw-metric { padding: 12px; }
+  .dw-page .dw-metric > strong { font-size: 19px; }
+  .dw-page .dw-nav a { padding: 10px 12px; }
+  .dw-page .dw-card-head > span { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dw-page .dw-button,
+  .dw-page .dw-nav a { transition: none; }
+}
+
+
+/* Shared dashboard rules sometimes override wage card headings at breakpoints.
+   These three payroll screens keep the same readable heading at all widths. */
+.dw-page.dashboard-page .dw-card > .dw-card-head h2,
+.dw-page.dashboard-page .dw-account-summary h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+
+
+/* Stable single heading per wage route; beats older global dashboard h2 rules. */
+#root .dw-page #dw-records-heading {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
