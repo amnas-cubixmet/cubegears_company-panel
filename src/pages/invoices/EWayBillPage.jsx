@@ -8,6 +8,7 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
+import { invoiceStateCode } from '../../utils/invoiceTaxUi';
 import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
 import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
@@ -149,7 +150,7 @@ export function EWayBillPage() {
                 tradeName: invoice.customer?.name || '',
                 address: invoice.customer?.address || '',
                 place: invoice.customer?.placeOfSupply || '',
-                stateCode: invoice.customer?.stateCode || base.to.stateCode
+                stateCode: invoiceStateCode(invoice.customer?.placeOfSupply || invoice.customer?.stateCode || invoice.customer?.state) || base.to.stateCode
               },
               items: goods.length ? goods : base.items,
               notes: invoice.number ? `Created from CubixGear invoice ${invoice.number}` : ''
@@ -173,8 +174,11 @@ export function EWayBillPage() {
         return;
       }
       setSupplyingParty(context.from);
-      setForm((old) => old.supplyType === 'Outward'
-        ? { ...old, from: context.from } : old);
+      setForm((old) => {
+        if (old.supplyType !== 'Outward') return old;
+        const next = { ...old, from: context.from };
+        return { ...next, items: eWayReconcileGst(next.items, eWayTaxMode(next)) };
+      });
     }).catch((err) => {
       if (active) setSupplyingError(err?.message || 'Cannot load supplying workshop details.');
     }).finally(() => {
