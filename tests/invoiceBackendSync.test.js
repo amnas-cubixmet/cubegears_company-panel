@@ -80,7 +80,7 @@ test('invoice + estimate editor requests backend preview and marks state as edit
   assert.match(page, /billingService\.previewTotals\(form\)/);
   assert.match(page, /setVerifiedTotals\(\{ fingerprint: previewFingerprint, data: response \}\)/);
   assert.match(page, /normalizeBackendInvoiceTotals\(fromBackend, localTotals\)/);
-  assert.match(page, /Calculated by Django backend/);
+  assert.match(page, /<p className="invoice-backend-preview-ok"><CheckCircle2 size=\{14\}\/> Calculated<\/p>/);
   assert.match(page, /<label>Place of Supply/);
   assert.doesNotMatch(page, /Auto-filled · Editable/);
   assert.match(page, /onChange=\{\(e\) => update\('customer\.placeOfSupply', formatInvoicePlaceOfSupply\(e\.target\.value\)\)\}/);

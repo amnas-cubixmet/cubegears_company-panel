@@ -13,6 +13,7 @@ import { JobInspectionPanel } from '../../components/jobs/JobInspectionPanel';
 import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
 import { JobQualityCheckPanel } from '../../components/jobs/JobQualityCheckPanel';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import { InvoicePdfShareSheet } from '../../components/invoices/InvoicePdfShareSheet';
 import { downloadApprovedEstimatePdf, latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 import '../../styles/approved-estimate-pdf.css';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
@@ -115,6 +116,7 @@ export function JobCardWorkspace() {
   const [jobInvoices, setJobInvoices] = useState([]);
   const [jobPayments, setJobPayments] = useState([]);
   const [invoicePdfLoading, setInvoicePdfLoading] = useState(false);
+  const [invoiceShareDocument, setInvoiceShareDocument] = useState(null);
   const [invoicePdfError, setInvoicePdfError] = useState('');
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState('');
@@ -691,17 +693,10 @@ export function JobCardWorkspace() {
     navigate(`/invoices/new?kind=invoice&jobId=${encodeURIComponent(job.id)}`);
   };
 
-  const downloadJobInvoicePdf = async () => {
+  const downloadJobInvoicePdf = () => {
     if (!linkedInvoice?.id || invoicePdfLoading) return;
     setInvoicePdfError('');
-    setInvoicePdfLoading(true);
-    try {
-      await billingService.downloadPdf(linkedInvoice);
-    } catch (err) {
-      setInvoicePdfError(err?.message || 'Unable to download invoice PDF.');
-    } finally {
-      setInvoicePdfLoading(false);
-    }
+    setInvoiceShareDocument(linkedInvoice);
   };
 
   const recordPayment = async (event) => {
@@ -1623,7 +1618,13 @@ export function JobCardWorkspace() {
           </div>
         </div>
       </ResponsiveModalSheet>
-
+      {invoiceShareDocument?.id && (
+        <InvoicePdfShareSheet
+          invoice={invoiceShareDocument}
+          onClose={() => setInvoiceShareDocument(null)}
+          onLoadingChange={setInvoicePdfLoading}
+        />
+      )}
     </div>
   );
 }

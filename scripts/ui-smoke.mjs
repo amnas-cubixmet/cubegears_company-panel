@@ -137,6 +137,10 @@ try {
         await route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({message:'Smoke tests do not write tenant data.'})});return;
       }
       const path=new URL(route.request().url()).pathname.replace('/api/v1','').replace(/\/$/,'');
+      if (/^\/billing\/documents\/[^/]+\/pdf$/.test(path)) {
+        await route.fulfill({status:200,contentType:'application/pdf',body:'%PDF-1.4\n% UI fixture\n%%EOF'});
+        return;
+      }
       await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(fixture(path))});
     });
     const page=await context.newPage();const errors=[];
@@ -220,6 +224,26 @@ try {
             if(broken) throw Error('Wallet balance wraps or overflows');
           }
         }
+        if(path==='/invoices/INV-0001' && profile.width<=430) {
+          await page.getByRole('button',{name:'Download Invoice PDF'}).click();
+          const sheet=page.getByRole('dialog',{name:'Share invoice PDF'});
+          await sheet.waitFor();
+          await sheet.getByRole('button',{name:'Download PDF'}).waitFor({state:'visible'});
+          await page.waitForFunction(()=>{
+            const download=document.querySelector('.invoice-pdf-share-download');
+            return download && !download.disabled;
+          });
+          const position=await sheet.evaluate(node=>{
+            const rect=node.querySelector('.responsive-modal-sheet')?.getBoundingClientRect();
+            return {bottom:rect?.bottom,viewport:window.innerHeight};
+          });
+          if(Math.abs(position.viewport-position.bottom)>2) {
+            throw Error('Invoice PDF bottom sheet does not align to phone bottom: '+JSON.stringify(position));
+          }
+          await sheet.getByRole('button',{name:'Cancel'}).click();
+          await sheet.waitFor({state:'hidden'});
+        }
+
         if(path==='/staff-management/overview') {
           const input=page.locator('.staff-simple-search input');
           const border=await input.evaluate(node=>getComputedStyle(node).borderTopWidth);
