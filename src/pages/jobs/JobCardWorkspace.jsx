@@ -16,6 +16,7 @@ import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalShe
 import { InvoicePdfShareSheet } from '../../components/invoices/InvoicePdfShareSheet';
 import { downloadApprovedEstimatePdf, latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 import '../../styles/approved-estimate-pdf.css';
+import '../../styles/job-workspace-readable.css';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
