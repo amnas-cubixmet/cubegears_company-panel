@@ -135,7 +135,9 @@
   min-height: var(--job-control-size);
   height: var(--job-control-size);
 }
-.cg-job-detail .cg-inspection .cg-inspection-search input:not([type="file"]) {
+/* Match the existing inspector search selector specificity (which has
+ * 13px !important), so Safari never enlarges the page on search focus. */
+.cg-job-detail .cg-inspection .cg-inspection-search input:not([type="checkbox"]):not([type="file"]) {
   font-size: var(--job-body-font) !important;
 }
 .cg-job-detail .cg-inspection :is(
