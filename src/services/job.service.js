@@ -93,7 +93,7 @@ const mockWorkflow = (job) => {
 export const issueJobStockPart = async (jobId, itemId, quantity) => {
   const qty = Number(quantity);
   if (!jobId || !itemId || !Number.isFinite(qty) || qty <= 0 ||
-      !/^\\d+(?:\\.\\d{1,2})?$/.test(String(quantity))) {
+      !/^\d+(?:\.\d{1,2})?$/.test(String(quantity))) {
     throw new Error('Select a part and enter a valid quantity (maximum 2 decimal places).');
   }
   if (USE_MOCK_API) {
