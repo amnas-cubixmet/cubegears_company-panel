@@ -399,7 +399,7 @@ export function QuickEstimatePanel({
       </header>
 
       {stale && <p className="job-quick-warning" role="status">
-        Inspection has changed. Save a revised estimate before approval.
+        Inspection has changed. Approve & Continue will save the revised estimate before approval.
       </p>}
       {feedback && <p className="job-quick-feedback" role="status">{feedback}</p>}
 
