@@ -8,9 +8,9 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
-import { invoiceStateCode } from '../../utils/invoiceTaxUi';
+import { invoiceStateCode, invoiceLineTaxChoices } from '../../utils/invoiceTaxUi';
 import { INDIA_STATES } from '../../utils/indiaGst.js';
-import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
+import { eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
 import { EWayBillPdfShareSheet } from '../../components/invoices/EWayBillPdfShareSheet';
 import { validateEWayForPreparation, parseEWayApiErrors } from '../../utils/eWayFormValidation';
@@ -63,6 +63,7 @@ export function EWayBillPage() {
   const [listQuery, setListQuery] = useState('');
   const [listStatus, setListStatus] = useState('All');
   const [supplyingParty, setSupplyingParty] = useState(null);
+  const [gstRateOptions, setGstRateOptions] = useState(null);
   const [supplyingError, setSupplyingError] = useState('');
   const [supplyingLoading, setSupplyingLoading] = useState(false);
 
@@ -89,6 +90,7 @@ export function EWayBillPage() {
 
   const totals = useMemo(() => calculateEWayTotals(form), [form]);
   const gstMode = eWayTaxMode(form);
+  const taxChoices = invoiceLineTaxChoices(gstMode, gstRateOptions);
   const showFieldError = (key) => fieldErrors[key]
     ? <small className="eway-input-error" role="alert">{fieldErrors[key]}</small> : null;
   const clearField = (key) => setFieldErrors((current) => {
@@ -207,6 +209,7 @@ export function EWayBillPage() {
         return;
       }
       setSupplyingParty(context.from);
+      setGstRateOptions(context.gstRateOptions || null);
       setForm((old) => {
         if (old.supplyType !== 'Outward') return old;
         const next = { ...old, from: context.from };
@@ -790,10 +793,10 @@ export function EWayBillPage() {
                       <select aria-label="GST rate" value={String(eWayTotalGstRate(item))}
                         onChange={(e) => updateItemGst(item.id, e.target.value)}
                         className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content">
-                        {!EWAY_GST_RATES.includes(String(eWayTotalGstRate(item))) &&
-                          <option value={String(eWayTotalGstRate(item))}>{eWayTotalGstRate(item)}%</option>}
-                        {EWAY_GST_RATES.map((rate) =>
-                          <option value={rate} key={rate}>{rate}%</option>)}
+                        {!taxChoices.some((choice) => choice.value === String(eWayTotalGstRate(item))) &&
+                          <option value={String(eWayTotalGstRate(item))}>{eWayTotalGstRate(item)}% — saved / unclassified</option>}
+                        {taxChoices.map((choice) =>
+                          <option value={choice.value} key={choice.value}>{choice.label}</option>)}
                       </select>
                     </label>
                     <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">
