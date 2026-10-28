@@ -42,6 +42,15 @@ test('New E-Way Bill never invents Kerala FROM/TO state values', () => {
   assert.match(source, /from: \{[\s\S]*?stateCode: ''[\s\S]*?to: \{[\s\S]*?stateCode: ''/);
 });
 
+test('Invoice-to-E-Way-Bill carries legal destination state and item tax rates', () => {
+  const page=read('src/pages/invoices/EWayBillPage.jsx');
+  assert.match(page, /invoiceStateCode\(invoice\.customer\?\.placeOfSupply \|\| invoice\.customer\?\.stateCode \|\| invoice\.customer\?\.state\)/);
+  assert.match(page, /item\.hsnCode \|\| ''/);
+  assert.match(page, /item\.unit \|\| 'PCS'/);
+  assert.match(page, /Number\(item\.taxRate \|\| 0\), invoice\.taxMode/);
+  assert.match(page, /items: eWayReconcileGst\(next\.items, eWayTaxMode\(next\)\)/);
+});
+
 test('Outward supplier fields are API-backed, read-only and server enforced', () => {
   const service=read('src/services/eWayBill.service.js');
   const page=read('src/pages/invoices/EWayBillPage.jsx');
