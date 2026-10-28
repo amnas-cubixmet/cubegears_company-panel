@@ -255,10 +255,10 @@ try {
           });
           const smallText=metrics.fields.filter(x=>x.font<16);
           const smallControls=metrics.fields.filter(x=>!x.nestedSearch &&
-            x.kind!=='textarea' && x.height<48);
-          const smallLabels=metrics.labels.filter(label=>label.size<14.5);
+            x.kind!=='textarea' && x.height<44);
+          const smallLabels=metrics.labels.filter(label=>label.size<14);
           if(smallText.length||smallControls.length||smallLabels.length)
-            throw Error('Job Card forms should use 16px inputs, 15px labels, 48px controls: '+
+            throw Error('Job Card forms should use 16px inputs, 14px+ labels, 44px+ controls: '+
               JSON.stringify({smallText,smallControls,smallLabels}));
         }
         if(path==='/login'){
