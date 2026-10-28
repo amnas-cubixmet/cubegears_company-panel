@@ -296,7 +296,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
 
         {loading && <div className="p-3 text-sm text-cg-muted" role="status">Loading stock and parts records…</div>}
         {notice && <div className="mx-3 mt-3 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800" role="status">{notice}</div>}
-        {error && (
+        {error && panel?.type !== 'order' && (
           <div className="mx-3 mt-3 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 md:mx-4">
             <AlertTriangle size={17} className="mt-0.5 shrink-0" />
             <span>{error}</span>
@@ -484,7 +484,7 @@ export function JobPartsWorkflow({ jobId, assignedTo = '' }) {
       )}
 
       {panel?.type === 'order' && (
-        <OrderPanel line={panel.line} onClose={() => setPanel(null)}
+        <OrderPanel line={panel.line} error={error} onClose={() => setPanel(null)}
           onSave={(payload) => act('order', () => jobPartsService.createOrder(jobId, panel.line.id, payload))} busy={busy === 'order'} />
       )}
 
@@ -834,18 +834,36 @@ function OutsidePartCompletionPanel({ purchase, onClose, onSave, busy, error }) 
   );
 }
 
-function OrderPanel({ line, onClose, onSave, busy }) {
+function OrderPanel({ line, error, onClose, onSave, busy }) {
   const [form, setForm] = useState({ vendor: line.stockItem?.supplier || '', type: 'Cash', orderDate: today(), orderedQty: String(line.pendingQty), unitCost: String(line.stockItem?.costPrice || ''), discount: '0', tax: '18' });
+  const errorRef = useRef(null);
+  const set = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+  useEffect(() => {
+    if (!error) return;
+    requestAnimationFrame(() => {
+      errorRef.current?.focus({ preventScroll: true });
+      errorRef.current?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'nearest',
+      });
+    });
+  }, [error]);
   return <Sheet title="Create Purchase Order" subtitle={`${line.partName} · ${line.pendingQty} pending`} onClose={onClose}>
-    <form className="job-parts-modal-form" onSubmit={(e) => { e.preventDefault(); onSave(form); }}>
-      <label className="form-label job-parts-modal-full">Vendor *<input className="cubegears-input mt-1" required value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })}/></label>
-      <label className="form-label">Type<select className="cubegears-select mt-1" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}><option>Cash</option><option>Credit</option></select></label>
-      <label className="form-label">Order Date<input type="date" className="cubegears-input mt-1" value={form.orderDate} onChange={(e) => setForm({ ...form, orderDate: e.target.value })}/></label>
-      <label className="form-label">Order Qty<input className="cubegears-input mt-1" inputMode="decimal" value={form.orderedQty} onChange={(e) => setForm({ ...form, orderedQty: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
-      <label className="form-label">Unit Cost ₹<input className="cubegears-input mt-1" inputMode="decimal" value={form.unitCost} onChange={(e) => setForm({ ...form, unitCost: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
-      <label className="form-label">Discount %<input className="cubegears-input mt-1" inputMode="decimal" value={form.discount} onChange={(e) => setForm({ ...form, discount: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
-      <label className="form-label">Tax %<input className="cubegears-input mt-1" inputMode="decimal" value={form.tax} onChange={(e) => setForm({ ...form, tax: e.target.value.replace(/[^0-9.]/g, '') })}/></label>
-      <button className="primary-button job-parts-modal-full" disabled={busy}>{busy ? 'Creating…' : 'Create Order'}</button>
+    <form className="job-parts-modal-form" onSubmit={(e) => { e.preventDefault(); onSave({ ...form, vendor: form.vendor.trim() }); }}>
+      {error && <p ref={errorRef} className="job-parts-modal-warning job-parts-modal-full" role="alert" tabIndex={-1}>{error}</p>}
+      <div className="job-parts-modal-stock-note job-parts-modal-full">
+        <strong>{line.pendingQty} still needed</strong><br />
+        Stock updates after you record the delivery in Inward / Goods Receipt.
+      </div>
+      <label className="form-label job-parts-modal-full">Supplier / Vendor *<input className="cubegears-input mt-1" name="vendor" autoComplete="organization" required maxLength={120} value={form.vendor} onChange={(e) => set('vendor', e.target.value)} placeholder="Enter supplier name"/></label>
+      <label className="form-label">Payment Type<select className="cubegears-select mt-1" name="type" value={form.type} onChange={(e) => set('type', e.target.value)}><option>Cash</option><option>Credit</option></select></label>
+      <label className="form-label">Order Date *<input name="orderDate" type="date" required className="cubegears-input mt-1" value={form.orderDate} onChange={(e) => set('orderDate', e.target.value)}/></label>
+      <label className="form-label">Order Quantity *<input name="orderedQty" className="cubegears-input mt-1" type="number" inputMode="decimal" min="0.01" step="0.01" required value={form.orderedQty} onChange={(e) => set('orderedQty', e.target.value)}/></label>
+      <label className="form-label">Unit Cost (₹) *<input name="unitCost" className="cubegears-input mt-1" type="number" inputMode="decimal" min="0" step="0.01" required value={form.unitCost} onChange={(e) => set('unitCost', e.target.value)} placeholder="Enter supplier price"/></label>
+      <label className="form-label">Discount (%)<input name="discount" className="cubegears-input mt-1" type="number" inputMode="decimal" min="0" max="100" step="0.01" value={form.discount} onChange={(e) => set('discount', e.target.value)}/></label>
+      <label className="form-label">GST Rate (%)<input name="tax" className="cubegears-input mt-1" type="number" inputMode="decimal" min="0" max="100" step="0.01" value={form.tax} onChange={(e) => set('tax', e.target.value)}/></label>
+      <button type="button" className="secondary-button" onClick={onClose} disabled={busy}>Cancel</button>
+      <button type="submit" className="primary-button" disabled={busy}>{busy ? 'Creating…' : 'Create Purchase Order'}</button>
     </form>
   </Sheet>;
 }

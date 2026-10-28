@@ -59,3 +59,13 @@ test('Add Required Part continues using existing backend service and stock selec
   assert.match(source, /requestedQty: '1'/);
   assert.match(source, /No stock is deducted until Issue/);
 });
+
+test('purchase order form guides the receipt workflow and validates numeric fields', () => {
+  assert.match(source, /Stock updates after you record the delivery in Inward \/ Goods Receipt/);
+  assert.match(source, /name="orderedQty"[^>]*type="number"[^>]*min="0\.01"[^>]*required/);
+  assert.match(source, /name="unitCost"[^>]*type="number"[^>]*min="0"[^>]*required/);
+  assert.match(source, /name="tax"[^>]*max="100"/);
+  assert.match(source, /Create Purchase Order/);
+  assert.match(source, /errorRef\.current\?\.scrollIntoView/);
+  assert.match(source, /function OrderPanel\(\{ line, error, onClose, onSave, busy \}\)/);
+});

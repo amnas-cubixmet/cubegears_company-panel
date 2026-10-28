@@ -86,9 +86,11 @@
 .business-logo-preview span{font-size:28px;font-weight:900;color:var(--primary)}
 .business-logo-actions{display:flex;flex-wrap:wrap;gap:7px}
 .template-upload-button,.template-remove-logo{min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text-primary);font-size:9px;font-weight:800;cursor:pointer}
-.template-upload-button input{display:none}
+.template-logo-input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.template-upload-button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .template-remove-logo{color:var(--danger)}
 .business-logo-panel small{color:var(--text-muted);font-size:8px;line-height:1.4}
+.document-templates-page .business-logo-panel .template-logo-help{font-size:11px;line-height:1.5}
 .business-fields-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .business-fields-grid label{display:flex;flex-direction:column;gap:5px;color:var(--text-secondary);font-size:9px;font-weight:800}
 .business-fields-grid input,.business-fields-grid textarea{width:100%;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text-primary);font:inherit;outline:none}

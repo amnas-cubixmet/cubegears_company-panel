@@ -24,10 +24,31 @@
   background-color: var(--surface-2);
   color: var(--text-primary);
 }
+:where(form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  form select) {
+  min-height: 44px;
+}
+:where(form textarea) {
+  min-height: 96px;
+  resize: vertical;
+}
 :where(input,textarea)::placeholder {
   font-weight: 400;
   color: var(--text-muted);
   opacity: 1;
+}
+:where(form button:focus-visible, form input:focus-visible, form select:focus-visible, form textarea:focus-visible) {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+@media (max-width: 767px) {
+  :where(form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+    form select, form textarea) {
+    font-size: 16px;
+  }
+  :where(form button, form input[type="submit"]) {
+    min-height: 44px;
+  }
 }
 
 /* Search shells that already provide a border and contain an input. */

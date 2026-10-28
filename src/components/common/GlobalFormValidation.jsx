@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { clearFieldValidation, focusField, setFieldValidation } from '../../utils/formValidation';
+import { addDefaultFormPlaceholders } from '../../utils/formPlaceholders';
 
 /**
  * Capture native constraint errors across the company panel, including
@@ -10,6 +11,19 @@ export function GlobalFormValidation() {
   useEffect(() => {
     let firstInvalid = null;
     let animationFrame = null;
+    let pendingReactField = null;
+
+    const isInvalid = (field) => field?.getAttribute('aria-invalid') === 'true'
+      || field?.dataset.cgErrorActive === 'true';
+
+    const focusFirstInForm = (field) => {
+      const form = field.closest('form');
+      const first = form
+        ? [...form.querySelectorAll('input:not([type="hidden"]), select, textarea')]
+          .find((candidate) => isInvalid(candidate) && candidate.getClientRects().length > 0)
+        : field;
+      if (first?.isConnected) focusField(first);
+    };
 
     const onInvalid = (event) => {
       const field = event.target;
@@ -42,6 +56,37 @@ export function GlobalFormValidation() {
       else setFieldValidation(field, field.validationMessage || 'Check this field.', false);
     };
 
+    const onReactValidation = (mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach((node) => {
+            if (node instanceof Element) addDefaultFormPlaceholders(node);
+          });
+        }
+        if (mutation.type !== 'attributes' || !isInvalid(mutation.target)) continue;
+        const target = mutation.target;
+        if (target instanceof HTMLInputElement
+          || target instanceof HTMLSelectElement
+          || target instanceof HTMLTextAreaElement) pendingReactField ||= target;
+      }
+      if (!pendingReactField || animationFrame !== null) return;
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = null;
+        const field = pendingReactField;
+        pendingReactField = null;
+        if (field?.isConnected && isInvalid(field)) focusFirstInForm(field);
+      });
+    };
+
+    addDefaultFormPlaceholders(document);
+    const observer = new MutationObserver(onReactValidation);
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['aria-invalid', 'data-cg-error-active'],
+    });
+
     document.addEventListener('invalid', onInvalid, true);
     document.addEventListener('input', onEdit, true);
     document.addEventListener('change', onEdit, true);
@@ -50,6 +95,7 @@ export function GlobalFormValidation() {
       document.removeEventListener('invalid', onInvalid, true);
       document.removeEventListener('input', onEdit, true);
       document.removeEventListener('change', onEdit, true);
+      observer.disconnect();
       if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
     };
   }, []);

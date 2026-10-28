@@ -1,10 +1,11 @@
 /**
  * Convert any browser-decodable local image to a safe document logo.
- * File picker has no displayed file-size restriction: optimize locally before
- * uploading, retaining transparency via WebP where the browser supports it.
- * The server still checks the bounded, optimized image it receives.
+ * Resize a reasonable local image before uploading, retaining transparency
+ * where the browser's WebP encoder supports it. Reject unusually large source
+ * files before decoding so a phone browser does not allocate a huge bitmap.
  */
 const MAX_LOGO_BYTES = 250 * 1024;
+export const MAX_SOURCE_LOGO_BYTES = 10 * 1024 * 1024;
 const MAX_LOGO_EDGE = 2048;
 
 const readImage = (file) => new Promise((resolve, reject) => {
@@ -45,6 +46,12 @@ const blobAsDataUrl = (blob) => new Promise((resolve, reject) => {
 
 export async function optimizeDocumentLogo(file) {
   if (!file) throw new Error('Choose a logo image.');
+  if (file.size > MAX_SOURCE_LOGO_BYTES) {
+    throw new Error('This image is larger than 10 MB. Choose a smaller image.');
+  }
+  if (file.type && !file.type.startsWith('image/')) {
+    throw new Error('Choose an image file for the business logo.');
+  }
   const image = await readImage(file);
   const originalWidth = image.naturalWidth;
   const originalHeight = image.naturalHeight;

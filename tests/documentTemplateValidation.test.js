@@ -6,6 +6,7 @@ import {
   templateApiFieldErrors,
   templateErrorSummary,
 } from '../src/utils/documentTemplateValidation.js';
+import { optimizeDocumentLogo, MAX_SOURCE_LOGO_BYTES } from '../src/utils/optimizeDocumentLogo.js';
 
 const source = readFileSync(new URL('../src/pages/saas/DocumentTemplates.jsx', import.meta.url), 'utf8');
 
@@ -52,12 +53,33 @@ test('Django validation messages are mapped and readable', () => {
 });
 
 
-test('new template fields stay blank and logo size copy is not shown', () => {
+test('new template fields stay blank and users see the logo source-size limit', () => {
   const service = readFileSync(new URL('../src/services/documentTemplates.service.js', import.meta.url), 'utf8');
   for (const key of ['businessName','businessState','businessStateCode','customName','customHeader','customFooter','termsText']) {
     assert.match(service, new RegExp(key + ": ''"));
   }
   assert.doesNotMatch(source, /PNG, JPG or WEBP, up to 250 KB/);
+  assert.match(source, /under 10 MB/);
+  assert.match(source, /resized and compressed before saving/);
+  assert.match(source, /aria-invalid=\{Boolean\(fieldErrors\.businessLogo\)\}/);
   assert.ok(source.includes('optimizeDocumentLogo(file)'));
   assert.match(source, /preparingLogo/);
+});
+
+test('invalid template fields are focused and scrolled into view', () => {
+  assert.match(source, /focusFirstTemplateError\(\)/);
+  assert.match(source, /field\.scrollIntoView\(/);
+  assert.match(source, /block: 'center'/);
+  assert.match(source, /focusFirstTemplateError\(\);/);
+});
+
+test('oversized and non-image logos are rejected before browser decoding', async () => {
+  await assert.rejects(
+    optimizeDocumentLogo({ size: MAX_SOURCE_LOGO_BYTES + 1, type: 'image/jpeg' }),
+    /larger than 10 MB/,
+  );
+  await assert.rejects(
+    optimizeDocumentLogo({ size: 10, type: 'application/pdf' }),
+    /Choose an image file/,
+  );
 });
