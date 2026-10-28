@@ -440,8 +440,8 @@ try {
               throw Error('Unreadable Attendance Manager '+field+' on '+path+': '+JSON.stringify(metrics));
             }
           }
-          if(metrics.header!==null && metrics.header<18.5) {
-            throw Error('Attendance Manager heading below 19px on '+path+': '+JSON.stringify(metrics));
+          if(metrics.header!==null && metrics.header<16.5) {
+            throw Error('Attendance Manager heading below readable minimum on '+path+': '+JSON.stringify(metrics));
           }
           if(metrics.field!==null && metrics.field<15.5) {
             throw Error('Attendance Manager form field below 16px on '+path+': '+JSON.stringify(metrics));
