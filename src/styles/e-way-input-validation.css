@@ -1,0 +1,26 @@
+/* E-Way Bill form: visible, accessible field-specific validation. */
+.billing-page [data-eway-field][aria-invalid="true"] {
+  border-color: #dc2626 !important;
+  outline-color: #dc2626;
+  box-shadow: 0 0 0 1px rgba(220,38,38,.15);
+}
+.billing-page .eway-input-error {
+  display: block;
+  margin-top: 5px;
+  color: #dc2626;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.billing-page [data-eway-field]:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
+  scroll-margin-top: 115px;
+}
+.billing-page [data-eway-field][aria-invalid="true"]:focus-visible {
+  outline-color: #dc2626;
+}
+@media (prefers-reduced-motion: reduce) {
+  .billing-page [data-eway-field] { scroll-behavior: auto; }
+}
