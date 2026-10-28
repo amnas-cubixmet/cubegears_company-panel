@@ -33,5 +33,7 @@ test('approved estimate sharing uses previously prepared File and retains downlo
   assert.match(source, /const result = navigator\.share\(\{/);
   assert.match(source, /files: \[approvedPdfFile\]/);
   assert.match(source, /onClick=\{shareApprovedPdf\}/);
+  assert.match(source, /pdfOffer\?\.nextStage \? 'Continue to Work' : 'Close'/);
+  assert.doesNotMatch(source, /\{pdfOffer\.nextStage \?/);
   assert.match(source, /onClick=\{\(\) => downloadApprovalPdf\(pdfOffer\.job, pdfOffer\.estimate\)\}/);
 });
