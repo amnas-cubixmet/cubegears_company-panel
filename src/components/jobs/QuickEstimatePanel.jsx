@@ -115,9 +115,20 @@ export function QuickEstimatePanel({
     return '';
   }, [lines, discount, registered, supplierState, placeOfSupply, taxMode, job?.gstInfo?.gstRateOptions]);
 
+  // Dropdown shows all ten labels, but a quote must use CGST/SGST for
+  // intra-state transactions and IGST for inter-state transactions.
+  // Normalize the selected label without changing the total tax percentage.
+  const legalChoice = (choice, mode) => {
+    if (!choice || !['cgst_sgst', 'igst'].includes(mode)) return choice;
+    if (choice.taxMode === mode) return choice;
+    const available = estimateGstOptions('', mode, job?.gstInfo?.gstRateOptions);
+    return available.find(option => option.taxMode === mode &&
+      Number(option.totalRate) === Number(choice.totalRate)) || null;
+  };
+
   const chooseGst = (key, selected) => {
-    const choice = estimateGstOptions('', taxMode, job?.gstInfo?.gstRateOptions)
-      .find(option => option.value === selected);
+    const choice = legalChoice(estimateGstOptions('', taxMode, job?.gstInfo?.gstRateOptions)
+      .find(option => option.value === selected), taxMode);
     setLines(current => current.map(line => line.key === key ? {
       ...line, taxChoice: choice?.value || '',
       taxRate: choice?.totalRate || '',
@@ -142,7 +153,7 @@ export function QuickEstimatePanel({
     setChanged(true);
     setFeedback('');
   };
-  const save = async () => {
+  const approve = async () => {
     if (!canEdit || busy) return;
     if (validation) {
       setShowValidation(true);
@@ -157,34 +168,26 @@ export function QuickEstimatePanel({
     setBusy(true);
     setFeedback('');
     try {
-      const draftId = latest?.status === 'Draft' && !stale ? latest.id : null;
-      await jobService.saveQuickJobEstimate(job.id, {
-        lines: lines.map(({ description, type, quantity, unitPrice, catalogId, taxRate, taxChoice, hsnSac }) => ({
-          description: description.trim(), type, quantity, unitPrice,
-          taxRate: taxRate || '0', taxChoice: taxChoice || '', hsnSac: hsnSac || '',
-          ...(catalogId ? { catalogId } : {})
-        })),
-        taxPercent: '0', discount,
-        gst: { mode: registered ? 'gst' : 'non_gst', placeOfSupply }
-      }, draftId);
-      await onSaved?.();
-      setChanged(false);
-      setShowValidation(false);
-      setFeedback('Estimate draft saved.');
+      // One click: save the current estimate first if it is new or changed,
+      // then approve using the existing stage-completion workflow.
+      if (!latest || changed || stale) {
+        const draftId = latest?.status === 'Draft' && !stale ? latest.id : null;
+        await jobService.saveQuickJobEstimate(job.id, {
+          lines: lines.map(({ description, type, quantity, unitPrice, catalogId, taxRate, taxChoice, hsnSac }) => ({
+            description: description.trim(), type, quantity, unitPrice,
+            taxRate: taxRate || '0', taxChoice: taxChoice || '', hsnSac: hsnSac || '',
+            ...(catalogId ? { catalogId } : {}),
+          })),
+          taxPercent: '0', discount,
+          gst: { mode: registered ? 'gst' : 'non_gst', placeOfSupply },
+        }, draftId);
+        await onSaved?.();
+        setChanged(false);
+        setShowValidation(false);
+      }
+      await onApprove?.();
     } catch (err) {
-      setFeedback(err?.message || 'Unable to save estimate.');
-    } finally {
-      setBusy(false);
-    }
-  };
-  const approve = async () => {
-    if (busy || !latest || changed || stale) return;
-    setBusy(true);
-    setFeedback('');
-    try {
-      await onApprove?.(latest);
-    } catch (err) {
-      setFeedback(err?.message || 'Unable to approve estimate.');
+      setFeedback(err?.message || 'Unable to save and approve estimate.');
     } finally {
       setBusy(false);
     }
@@ -442,7 +445,7 @@ export function QuickEstimatePanel({
               <ClipboardList size={15} aria-hidden="true"/> Add from Inspection Findings
             </button>
           )}
-          <p className="job-quick-save-note">Estimate only, not a tax invoice. Check applicable HSN/SAC and GST rate for each item. Car repair labour (SAC 998714) is generally 18%; do not assume every consumable has that rate. Stock is deducted only on actual issue.</p>
+
         </section>
 
         <section className="job-quick-panel job-quick-summary">
@@ -461,7 +464,24 @@ export function QuickEstimatePanel({
               </label>
               {registered && <label>Place of Supply (India)
                 <select value={placeOfSupply} disabled={!canEdit || busy}
-                  onChange={(e) => { setPlaceOfSupply(e.target.value); setChanged(true); }}>
+                  onChange={(e) => {
+                    const nextState = e.target.value;
+                    const nextMode = invoiceTaxMode({
+                      invoiceType: registered ? 'gst' : 'regular',
+                      seller: { stateCode: supplierState },
+                      customer: { placeOfSupply: nextState },
+                    });
+                    setPlaceOfSupply(nextState);
+                    setLines(current => current.map(line => {
+                      if (!line.taxChoice) return line;
+                      const choice = legalChoice(
+                        estimateGstOptions(line.taxRate, taxMode, job?.gstInfo?.gstRateOptions)
+                          .find(option => option.value === line.taxChoice), nextMode
+                      );
+                      return { ...line, taxChoice: choice?.value || '', taxRate: choice?.totalRate || line.taxRate };
+                    }));
+                    setChanged(true);
+                  }}>
                   <option value="">Choose State / UT</option>
                   {INDIA_STATES.map(([code, name]) =>
                     <option key={code} value={code}>{code} — {name}</option>)}
@@ -482,16 +502,11 @@ export function QuickEstimatePanel({
           {canEdit ? (
             <div className="job-quick-actions">
               {showValidation && validation && <p className="job-quick-invalid" role="alert">{validation}</p>}
-              <button type="button" className="job-quick-primary"
-                disabled={busy} onClick={save}>
-                {busy ? 'Please wait…' : 'Save Draft'}
-              </button>
               <button type="button" className="job-quick-approve"
-                disabled={busy || !latest || changed || stale || latest.status === 'Rejected'}
+                disabled={busy || latest?.status === 'Rejected'}
                 onClick={approve}>
-                <CheckCircle2 size={16} aria-hidden="true"/> Approve & Continue
+                <CheckCircle2 size={16} aria-hidden="true"/> {busy ? 'Please wait…' : 'Approve & Continue'}
               </button>
-              <small>Save changes first. Approval unlocks Work & Labour.</small>
             </div>
           ) : (
             <div className="job-quick-actions">
