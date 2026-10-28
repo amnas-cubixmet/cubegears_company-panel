@@ -57,6 +57,14 @@ test('an explicitly invalid customer state does not become a fabricated valid su
   assert.match(validateInvoiceDraft(current)['customer.placeOfSupply'], /valid Place of Supply/);
 });
 
+test('valid customer Place of Supply does not get a false invalid-state error for missing workshop GST settings', () => {
+  const missingWorkshop = draft('32-Kerala');
+  missingWorkshop.seller = { gstin: '', state: '', stateCode: '' };
+  const errors = validateInvoiceDraft(missingWorkshop);
+  assert.equal(errors['customer.placeOfSupply'], undefined);
+  assert.match(errors['seller.gstin'], /GSTIN and state in Company Settings/);
+});
+
 test('GST invoice still requires a legal explicit state before saving', () => {
   assert.match(validateInvoiceDraft(draft(''))['customer.placeOfSupply'], /before saving/);
   assert.equal(validateInvoiceDraft(draft('32-Kerala'))['customer.placeOfSupply'], undefined);
