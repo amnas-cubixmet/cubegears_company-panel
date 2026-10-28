@@ -229,6 +229,60 @@ try {
           const sizes=await page.locator('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').evaluateAll(nodes=>nodes.filter(e=>e.getClientRects().length).map(e=>parseFloat(getComputedStyle(e).fontSize)));
           if(sizes.some(size=>size<16))throw Error('Form control text below 16px: '+sizes.join(','));
         }
+        // Services: verify computed borderless styles on actual rendered controls.
+        // CI reads forms only and never posts a service or category.
+        if((path==='/services/new' || path==='/services') &&
+            (profile.width===390 || profile.width===1440)){
+          const checkFields=async (selector, expectedMin=4)=>{
+            const form=page.locator(selector);
+            await form.waitFor({state:'visible'});
+            const results=await form.evaluate(root=>{
+              const inputs=[...root.querySelectorAll('input,select,textarea')]
+                .filter(el=>el.getClientRects().length)
+                .map(el=>({
+                  border:parseFloat(getComputedStyle(el).borderLeftWidth),
+                  font:parseFloat(getComputedStyle(el).fontSize),
+                  height:Math.round(el.getBoundingClientRect().height),
+                }));
+              const labels=[...root.querySelectorAll('.service-field > span')]
+                .filter(el=>el.getClientRects().length)
+                .map(el=>parseFloat(getComputedStyle(el).fontSize));
+              const buttons=[...root.querySelectorAll('.service-form-actions button')]
+                .filter(el=>el.getClientRects().length)
+                .map(el=>Math.round(el.getBoundingClientRect().height));
+              return {inputs,labels,buttons};
+            });
+            if(results.inputs.length<expectedMin ||
+              results.inputs.some(input=>input.border>0 || input.font<16 || input.height<48) ||
+              results.labels.some(size=>size<14) ||
+              results.buttons.some(height=>height<48)){
+              throw Error('Services borderless form style mismatch: '+
+                JSON.stringify({path,width:profile.width,...results}));
+            }
+          };
+          if(path==='/services/new'){
+            await checkFields('.service-form-page form.service-form',8);
+          } else {
+            const search=page.locator('.service-dashboard-search');
+            await search.waitFor({state:'visible'});
+            const results=await search.evaluate(shell=>{
+              const input=shell.querySelector('input');
+              return {
+                border:parseFloat(getComputedStyle(shell).borderLeftWidth),
+                height:Math.round(shell.getBoundingClientRect().height),
+                innerBorder:parseFloat(getComputedStyle(input).borderLeftWidth),
+                innerFont:parseFloat(getComputedStyle(input).fontSize),
+              };
+            });
+            if(results.border>0||results.innerBorder>0||results.height<48||results.innerFont<16)
+              throw Error('Services directory search style mismatch: '+JSON.stringify(results));
+            await page.getByRole('button',{name:'Categories',exact:true}).click();
+            await page.getByRole('button',{name:'Add Category'}).click();
+            await checkFields('.service-category-form',3);
+            await page.getByRole('dialog',{name:'Add Service Category'})
+              .getByRole('button',{name:'Close dialog'}).click();
+          }
+        }
         // Customer creation popup: inspect rendered fields (not only CSS text).
         // Keep it read-only; never submit a customer in CI.
         if(path==='/customers' && (profile.width===390 || profile.width===1440)) {
