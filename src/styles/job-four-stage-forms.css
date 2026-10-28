@@ -280,3 +280,119 @@
     flex-basis: 100%;
   }
 }
+
+/* Final cascade reconciliation
+ * Legacy job-management.css forces 12px labels and 44px inputs with !important.
+ * These MORE SPECIFIC rules are intentionally scoped to four requested tabs;
+ * do not modify unrelated Job Card pages or native checkbox/file widgets.
+ */
+.cg-job-detail.job-workspace-dashboard :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) :is(label, .job-quick-name-field, .job-quick-type-fixed) {
+  font-size: var(--job-label-font) !important;
+  line-height: 1.45 !important;
+}
+.cg-job-detail.job-workspace-dashboard :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) :is(
+  input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+  select
+) {
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--job-control-size) !important;
+  font-size: var(--job-body-font) !important;
+  line-height: 1.45 !important;
+}
+.cg-job-detail.job-workspace-dashboard :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) textarea {
+  min-height: 96px !important;
+  font-size: var(--job-body-font) !important;
+  line-height: 1.5 !important;
+  resize: vertical;
+}
+/* Search inputs belong INSIDE separately bordered 48–50px comboboxes.
+ * They must stay borderless, stretch to the parent and not gain a second
+ * min-height or visible input border.
+ */
+.cg-job-detail.job-workspace-dashboard
+.job-quick-estimate .job-quick-catalog .job-quick-catalog-field
+> input:not([type="checkbox"]):not([type="file"]) {
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.cg-job-detail.job-workspace-dashboard
+.cg-inspection .cg-inspection-search
+input:not([type="checkbox"]):not([type="file"]) {
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: var(--job-body-font) !important;
+  background: transparent !important;
+}
+/* Inner Work forms were still inheriting 12px labels and 13px values
+ * from Outside Labour/Job Timer styles.  Keep them readable in this tab.
+ */
+.cg-job-detail.job-workspace-dashboard .job-work-simple :is(
+  .job-work-timer-form label,
+  .job-worker-assignment-add label,
+  .outside-labour-form label,
+  .outside-labour-pay-controls label
+) {
+  font-size: var(--job-label-font) !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple :is(
+  .job-work-timer-head h3,
+  .job-payroll-assignments__head h3,
+  .job-outside-staff-heading h3,
+  .job-work-items-head h3
+) {
+  font-size: 18px !important;
+  line-height: 1.4;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple :is(
+  .job-work-timer-empty,
+  .job-payroll-empty,
+  .job-work-items-empty,
+  .job-work-timer-hint,
+  .job-outside-staff-description
+) {
+  font-size: var(--job-meta-font) !important;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+/* Keep mobile controls and lists accessible without a horizontal scroll. */
+@media (max-width: 760px) {
+  .cg-job-detail.job-workspace-dashboard :is(
+    .job-overview-simple,
+    .cg-inspection,
+    .job-quick-estimate,
+    .job-work-simple
+  ) :is(label, select, textarea, input) {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-work-simple :is(
+    .job-worker-assignment-item,
+    .job-work-timer-row,
+    .job-work-items-row
+  ) {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
