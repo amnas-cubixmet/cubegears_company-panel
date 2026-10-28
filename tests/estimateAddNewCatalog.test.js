@@ -79,11 +79,13 @@ test('new catalogue entries save to the correct live API and only then add quote
   assert.match(panel, /if \(!selection\.catalogId\)/);
 });
 
-test('the only save button label is Save Draft, but existing draft updates still persist', () => {
-  assert.match(panel, /'Save Draft'/);
+test('only Approve & Continue is shown and changes are saved before approval', () => {
+  assert.doesNotMatch(panel, /'Save Draft'/);
   assert.doesNotMatch(panel, /Update Draft/);
+  assert.match(panel, /Approve & Continue/);
   assert.match(panel, /latest\?\.status === 'Draft' && !stale \? latest\.id : null/);
-  assert.match(panel, /saveQuickJobEstimate\(job\.id/);
+  assert.match(panel, /await jobService\.saveQuickJobEstimate\(job\.id/);
+  assert.match(panel, /await onApprove\?\.\(\)/);
   assert.match(panel, /, draftId\);/);
   assert.match(stylesheet, /job-quick-group-actions/);
   assert.match(stylesheet, /job-estimate-create-two/);
