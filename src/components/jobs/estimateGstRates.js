@@ -1,12 +1,16 @@
-import { EWAY_GST_RATES } from '../../utils/eWayGst.js';
+import { invoiceLineTaxChoices } from '../../utils/invoiceTaxUi.js';
 
-/** GST choices are total tax percentages; preserve legacy saved rates. */
-export const estimateGstChoices = (rate = '') => {
+/** Values sent to Django are TOTAL GST percentages, never the CGST half. */
+export const estimateGstOptions = (rate = '', mode = 'unknown', config = null) => {
+  const choices = invoiceLineTaxChoices(mode, config);
   const entered = String(rate ?? '').trim();
-  const choices = [...EWAY_GST_RATES];
-  if (entered && /^\d+(?:\.\d{1,2})?$/.test(entered)
-      && Number(entered) <= 100 && !choices.some(x => Number(x) === Number(entered))) {
-    choices.push(entered);
+  if (entered && /^\d+(?:\.\d{1,2})?$/.test(entered) &&
+      Number(entered) <= 100 && !choices.some(x => Number(x.value) === Number(entered))) {
+    return [...choices, { value: entered, label: `Previously saved GST ${entered}%` }];
   }
   return choices;
 };
+
+// Compatible utility for other callers that only need numeric rate strings.
+export const estimateGstChoices = (rate = '', mode = 'unknown', config = null) =>
+  estimateGstOptions(rate, mode, config).map(choice => choice.value);
