@@ -66,8 +66,8 @@ test('Goods tax control allows only one state-appropriate GST rate, plus indepen
   const page=read('src/pages/invoices/EWayBillPage.jsx');
   assert.match(page,/aria-label="GST rate"/);
   assert.match(page,/updateItemGst\(item\.id, e\.target\.value\)/);
-  assert.match(page,/Inter-state: IGST applies/);
-  assert.match(page,/Intra-state: GST is split equally/);
+  assert.doesNotMatch(page,/Inter-state: IGST applies/);
+  assert.doesNotMatch(page,/Intra-state: GST is split equally/);
   assert.match(page,/value=\{item\.cessRate\}/);
   assert.match(page,/CESS Non-Advol/);
   assert.match(page,/Other Amount/);
