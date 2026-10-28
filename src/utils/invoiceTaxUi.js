@@ -82,8 +82,8 @@ export const invoiceLineTaxChoices = (_mode, backendChoices = null) => {
       backendChoices.every(option =>
         typeof option?.value === 'string' &&
         typeof option?.label === 'string' &&
-        /^(cgst|sgst|igst):\\d+(?:\\.\\d+)?$/.test(option.value) &&
-        /^\\d+(?:\\.\\d+)?$/.test(String(option.totalRate)) &&
+        /^(cgst|sgst|igst):\d+(?:\.\d+)?$/.test(option.value) &&
+        /^\d+(?:\.\d+)?$/.test(String(option.totalRate)) &&
         ['cgst_sgst', 'igst'].includes(option.taxMode))) {
     return backendChoices;
   }
