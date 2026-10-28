@@ -275,32 +275,38 @@ const safePdfName = (value) => String(value || 'invoice')
   .replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 80) || 'invoice';
 
 /**
- * Download a PDF created from the saved, tenant-authorized invoice.
- * Do not use window.print() or unsaved editor state for financial documents.
+ * Fetch a saved, tenant-authorized PDF exactly once for sharing/downloading.
+ * Never build financial documents from unsaved editor state.
  */
-export const downloadBillingPdf = async (savedInvoice) => {
+export const getBillingPdfFile = async (savedInvoice) => {
   const documentId = typeof savedInvoice === 'object' ? savedInvoice?.id : savedInvoice;
   const number = typeof savedInvoice === 'object' ? savedInvoice?.number : '';
   if (!documentId) throw new Error('Save the invoice before downloading its PDF.');
   if (USE_MOCK_API) {
     throw new Error('Official invoice PDF download requires the connected Django backend.');
   }
-  const pdf = await apiClient.get(`/billing/documents/${encodeURIComponent(documentId)}/pdf`, {
+  const pdf = await apiClient.get('/billing/documents/' + encodeURIComponent(documentId) + '/pdf', {
     responseType: 'blob',
-    // Legacy Django DRF endpoints negotiate JSON before returning an HttpResponse
-    // with PDF bytes. Allow JSON negotiation as a fallback to avoid HTTP 406
-    // without ever accepting JSON as the downloaded invoice file.
+    // Old Django deployments can negotiate JSON before returning PDF bytes.
     headers: { Accept: 'application/pdf, application/json' }
   });
   if (!(pdf instanceof Blob) || (pdf.type && !pdf.type.includes('pdf'))) {
     throw new Error('The server did not return a valid invoice PDF.');
   }
-  const url = URL.createObjectURL(pdf);
   const filename = safePdfName(number || documentId) + '.pdf';
+  return new File([pdf], filename, { type: 'application/pdf' });
+};
+
+/** Save the already-fetched PDF locally, without another API call. */
+export const saveBillingPdfFile = (file) => {
+  if (!(file instanceof File) || file.type !== 'application/pdf') {
+    throw new Error('The PDF file is not ready to download.');
+  }
+  const url = URL.createObjectURL(file);
   try {
     const link = document.createElement('a');
     link.href = url;
-    link.download = filename;
+    link.download = file.name;
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
@@ -309,11 +315,19 @@ export const downloadBillingPdf = async (savedInvoice) => {
     // Some browsers need the blob URL to survive until the download starts.
     window.setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
-  return filename;
+  return file.name;
+};
+
+/** Existing direct download API is retained for other billing workflows. */
+export const downloadBillingPdf = async (savedInvoice) => {
+  const file = await getBillingPdfFile(savedInvoice);
+  return saveBillingPdfFile(file);
 };
 
 export const billingService = {
   downloadPdf: downloadBillingPdf,
+  getPdfFile: getBillingPdfFile,
+  savePdfFile: saveBillingPdfFile,
   async previewTotals(document) {
     if (!USE_MOCK_API) {
       return apiClient.post('/billing/documents/preview', {
