@@ -31,8 +31,8 @@ test('preview branch mismatch appears next to seller state, not as raw GST error
   assert.equal(isInvoiceBranchStateMismatch({status: 503, message:'Server unavailable'}), false);
   assert.match(page, /if \(isInvoiceBranchStateMismatch\(error\)\)/);
   assert.match(page, /setBranchStateMismatch\(true\)/);
-  assert.match(page, /aria-invalid=\{branchStateMismatch\}/);
-  assert.match(page, /Branch state and GSTIN state do not match/);
+  assert.match(page, /aria-invalid=\{registrationMismatch\}/);
+  assert.match(page, /Supplying branch state and company GSTIN state do not match/);
   assert.match(page, /setBackendPreviewError\(''\)/);
   assert.match(page, /setBranchStateMismatch\(false\)/);
 });

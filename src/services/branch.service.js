@@ -55,6 +55,25 @@ export const branchService = {
     return readMockBranches();
   },
 
+  updateBranchState: async (branchId, state) => {
+    if (!branchId) throw new Error('Choose a branch to update.');
+    const trimmed = String(state ?? '').trim();
+    if (!trimmed) throw new Error('Select the actual branch state.');
+    if (!USE_MOCK_API) {
+      // Django BranchDetailView is company-scoped and admin protected.
+      return apiClient.patch('/branches/' + encodeURIComponent(branchId), {
+        state: trimmed,
+      });
+    }
+    const rows = readMockBranches();
+    const found = rows.find((row) => String(row.id) === String(branchId));
+    if (!found) throw new Error('Branch not found.');
+    const next = rows.map((row) => String(row.id) === String(branchId)
+      ? { ...row, state: trimmed } : row);
+    writeMockBranches(next);
+    return next.find((row) => String(row.id) === String(branchId));
+  },
+
   createBranch: async (data) => {
     if (!USE_MOCK_API) {
       return apiClient.post('/branches', {

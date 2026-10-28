@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import apiClient from '../../api/apiClient';
+import { BranchRegistrationEditor } from './BranchRegistrationEditor';
 import {
   OWNER_COMPANY_FIELDS, validateOwnerCompanyDraft, extractOwnerCompanyApiErrors,
 } from './ownerCompanyValidation';
@@ -127,6 +128,7 @@ export function OwnerCompanyProfile() {
           </div>
         </form>
       )}
+      {values && <BranchRegistrationEditor companyState={values.state} gstin={values.gstin} />}
     </section>
   );
 }
