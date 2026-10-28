@@ -14,7 +14,7 @@ import { estimateGstChoices, estimateGstLabel } from './estimateGstRates';
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
   description: '', type, quantity: '1', unitPrice: '', catalogId: '', catalogCode: '',
-  taxRate: type === 'Part' ? '' : '18', hsnSac: type === 'Part' ? '' : '998714'
+  taxRate: '', hsnSac: type === 'Part' ? '' : '998714'
 });
 const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2
