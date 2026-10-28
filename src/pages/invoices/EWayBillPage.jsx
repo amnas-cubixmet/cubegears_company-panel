@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Edit3, Eye, Plus, Printer, Download, Trash2, Truck, Search, IndianRupee, FileClock } from "lucide-react";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -12,6 +12,8 @@ import { invoiceStateCode } from '../../utils/invoiceTaxUi';
 import { INDIA_STATES } from '../../utils/indiaGst.js';
 import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
+import { validateEWayForPreparation, parseEWayApiErrors } from '../../utils/eWayFormValidation';
+import '../../styles/e-way-input-validation.css';
 import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
@@ -54,6 +56,8 @@ export function EWayBillPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const eWayEditorRef = useRef(null);
   const [listQuery, setListQuery] = useState('');
   const [listStatus, setListStatus] = useState('All');
   const [supplyingParty, setSupplyingParty] = useState(null);
@@ -83,6 +87,24 @@ export function EWayBillPage() {
 
   const totals = useMemo(() => calculateEWayTotals(form), [form]);
   const gstMode = eWayTaxMode(form);
+  const showFieldError = (key) => fieldErrors[key]
+    ? <small className="eway-input-error" role="alert">{fieldErrors[key]}</small> : null;
+  const clearField = (key) => setFieldErrors((current) => {
+    if (!current[key] && !current.items) return current;
+    const next = { ...current };
+    delete next[key];
+    delete next.items;
+    return next;
+  });
+  useEffect(() => {
+    const key = Object.keys(fieldErrors)[0];
+    if (!key || !['create', 'edit'].includes(mode)) return;
+    const target = [...(eWayEditorRef.current?.querySelectorAll('[data-eway-field]') || [])]
+      .find((element) => element.getAttribute('data-eway-field') === key);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.focus({ preventScroll: true });
+  }, [fieldErrors, mode]);
   const isOutward = form.supplyType === 'Outward';
 
   const loadList = async () => {
@@ -196,7 +218,9 @@ export function EWayBillPage() {
     return () => { active = false; };
   }, [mode]);
 
-  const update = (key, value) => setForm((old) => {
+  const update = (key, value) => {
+    clearField(key);
+    setForm((old) => {
     if (key === 'supplyType') {
       // Inward: vendor dispatches goods; their FROM must remain editable.
       // Outward: the workshop identity is always read-only and server-derived.
@@ -211,8 +235,11 @@ export function EWayBillPage() {
       }
     }
     return { ...old, [key]: value };
-  });
-  const updateGroup = (group, key, value) => setForm((old) => {
+    });
+  };
+  const updateGroup = (group, key, value) => {
+    clearField(group + '.' + key);
+    setForm((old) => {
     // FROM is locked for outward supplies in UI AND Django serializer.
     if (group === 'from' && old.supplyType === 'Outward') return old;
     if (group === 'to' && key === 'stateCode' && eWayGstinStateCode(old.to?.gstin)) return old;
@@ -225,11 +252,16 @@ export function EWayBillPage() {
       next.items = eWayReconcileGst(next.items, eWayTaxMode(next));
     }
     return next;
-  });
-  const updateItem = (itemId, key, value) => setForm((old) => ({
+    });
+  };
+  const updateItem = (itemId, key, value) => {
+    const index = form.items.findIndex((item) => item.id === itemId);
+    clearField('items.' + index + '.' + key);
+    setForm((old) => ({
     ...old,
     items: old.items.map((item) => item.id === itemId ? { ...item, [key]: value } : item)
-  }));
+    }));
+  };
   const updateItemGst = (itemId, rate) => setForm((old) => ({
     ...old, items: old.items.map((item) => item.id === itemId
       ? eWaySetGstRate(item, rate, eWayTaxMode(old)) : item)
@@ -238,11 +270,14 @@ export function EWayBillPage() {
   const save = async () => {
     setSaving(true);
     setError('');
+    setFieldErrors({});
     try {
       const saved = await eWayBillService.save(form);
       navigate(`/invoices/e-way-bills/${saved.id}`, { replace: true });
     } catch (e) {
-      setError(e?.message || 'Unable to save E-Way Bill.');
+      const parsed = parseEWayApiErrors(e);
+      setFieldErrors(parsed.fieldErrors);
+      setError(parsed.message);
     } finally {
       setSaving(false);
     }
@@ -252,11 +287,18 @@ export function EWayBillPage() {
     if (isOutward && (!supplyingParty || supplyingLoading || supplyingError)) {
       return setError('Verify Company / Branch Settings before preparing an outward E-Way Bill.');
     }
+    const invalidFields = validateEWayForPreparation(form);
+    if (Object.keys(invalidFields).length) {
+      setFieldErrors(invalidFields);
+      setError('Complete the highlighted fields before preparing for API.');
+      return;
+    }
     const validation = validateEWayBill(form);
     if (validation) return setError(validation);
 
     setSaving(true);
     setError('');
+    setFieldErrors({});
     try {
       let current = form;
       if (!current.id) current = await eWayBillService.save(current);
@@ -264,7 +306,9 @@ export function EWayBillPage() {
       setForm(result);
       navigate(`/invoices/e-way-bills/${result.id}`, { replace: true });
     } catch (e) {
-      setError(e?.message || 'Unable to prepare E-Way Bill.');
+      const parsed = parseEWayApiErrors(e);
+      setFieldErrors(parsed.fieldErrors);
+      setError(parsed.message);
     } finally {
       setSaving(false);
     }
@@ -431,7 +475,7 @@ export function EWayBillPage() {
   }
 
   return (
-    <div className="billing-page">
+    <div ref={eWayEditorRef} className="billing-page">
       <DocumentFormHeader
         eyebrow="E-WAY BILL"
         title={mode === 'edit' ? 'Edit E-Way Bill' : 'Create E-Way Bill'}
