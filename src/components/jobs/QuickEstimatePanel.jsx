@@ -128,6 +128,17 @@ export function QuickEstimatePanel({
     return '';
   }, [lines, discount, registered, supplierState, placeOfSupply, taxMode, job?.gstInfo?.gstRateOptions]);
 
+  // Dropdown shows all ten labels, but a quote must use CGST/SGST for
+  // intra-state transactions and IGST for inter-state transactions.
+  // Normalize the selected label without changing the total tax percentage.
+  const legalChoice = (choice, mode) => {
+    if (!choice || !['cgst_sgst', 'igst'].includes(mode)) return choice;
+    if (choice.taxMode === mode) return choice;
+    const available = estimateGstOptions('', mode, job?.gstInfo?.gstRateOptions);
+    return available.find(option => option.taxMode === mode &&
+      Number(option.totalRate) === Number(choice.totalRate)) || null;
+  };
+
   const chooseGst = (key, selected) => {
     const choice = estimateGstOptions('', taxMode, job?.gstInfo?.gstRateOptions)
       .find(option => option.value === selected);
@@ -206,7 +217,7 @@ export function QuickEstimatePanel({
       }
       await onApprove?.();
     } catch (err) {
-      setFeedback(err?.message || 'Unable to approve estimate.');
+      setFeedback(err?.message || 'Unable to save and approve estimate.');
     } finally {
       setBusy(false);
     }
