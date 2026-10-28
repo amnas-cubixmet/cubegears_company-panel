@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Banknote, CalendarCheck2, CheckCircle2, Clock3, History, Search, Users, Wallet } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { dailyWageService } from '../../services/dailyWage.service';
 import { useAuth } from '../../hooks/useAuth';
 import { hasPermission } from '../../utils/permissions';
 import './daily-wage.css';
+import './daily-wage-readable.css';
 
 export const rupees = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2,
@@ -22,10 +23,13 @@ const sections = [
 ];
 
 export function DailyWageNav({ selected = 'overview' }) {
+  const { search } = useLocation();
+  // Moving between the three payroll views must retain the user's selected
+  // month, year, branch and staff query parameters.
   return (
     <nav className="dw-nav" aria-label="Daily Wage Navigation">
       {sections.map(([id, title, href, Icon]) => (
-        <Link key={id} to={href} className={selected === id ? 'is-active' : ''}>
+        <Link key={id} to={`${href}${search}`} aria-current={selected === id ? 'page' : undefined} className={selected === id ? 'is-active' : ''}>
           <Icon size={16} aria-hidden="true"/>{title}
         </Link>
       ))}
