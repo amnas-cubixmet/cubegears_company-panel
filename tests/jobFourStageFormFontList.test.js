@@ -50,3 +50,20 @@ test('stage-specific lists and fields have independent readable classes', () => 
   assert.match(src, /activeTab === 'estimate'/);
   assert.match(src, /activeTab === 'work'/);
 });
+
+test('legacy important rules are overridden only in the four stage forms', () => {
+  const legacy = read('src/styles/job-management.css');
+  assert.match(legacy, /\.cg-job-detail label\{min-width:0;font-size:12px!important/);
+  assert.match(legacy, /\.cg-job-detail input:not\(\[type="checkbox"\]\):not\(\[type="file"\]\)/);
+  assert.match(shared, /Final cascade reconciliation/);
+  assert.match(shared, /\.cg-job-detail\.job-workspace-dashboard :is\(/);
+  assert.match(shared, /font-size: var\(--job-label-font\) !important/);
+  assert.match(shared, /min-height: var\(--job-control-size\) !important/);
+  assert.match(shared, /font-size: var\(--job-body-font\) !important/);
+  assert.match(shared, /textarea \{/);
+  assert.match(shared, /min-height: 96px !important/);
+  assert.match(shared, /\.job-quick-catalog \.job-quick-catalog-field/);
+  assert.match(shared, /\.cg-inspection-search/);
+  assert.match(shared, /min-height: 0 !important/);
+  assert.match(shared, /input:not\(\[type="file"\]\):not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/);
+});
