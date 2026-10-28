@@ -41,7 +41,7 @@ test('readability overrides cover shared header, tab navigation and every manage
     '.am-approval-details strong', '.am-approval-actions > button',
     '.am-shift-list strong', '.am-shift-staff-grid small',
     '.am-report-filter label > span',
-    '.attendance-mode-copy small',
+    '.attendance-mode-copy .am-mode-description',
     '.attendance-rule-field input',
     '.attendance-rule-toggle small',
     '.attendance-holiday-list small',
