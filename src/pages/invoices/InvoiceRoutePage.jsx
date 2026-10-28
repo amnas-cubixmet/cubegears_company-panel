@@ -81,7 +81,7 @@ export function InvoiceRoutePage() {
   const [workshopTaxRetry, setWorkshopTaxRetry] = useState(0);
   const newInvoiceTaxReady = mode !== 'create' || Boolean(workshopTaxProfile);
   const appliedTaxMode = invoiceTaxMode(form);
-  const taxChoices = invoiceLineTaxChoices(appliedTaxMode);
+  const taxChoices = invoiceLineTaxChoices(appliedTaxMode, workshopTaxProfile?.gstRateOptions);
   const [verifiedTotals, setVerifiedTotals] = useState(null);
   const [backendPreviewError, setBackendPreviewError] = useState('');
   const [branchStateMismatch, setBranchStateMismatch] = useState(false);
