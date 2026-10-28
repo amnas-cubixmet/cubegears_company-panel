@@ -1,0 +1,123 @@
+/* CubeGears Payments — consistent borderless fields.
+   Scoped to /payments and /payments/new; no payment posting logic changes.
+   Loaded after payments.css and payments-unified.css.
+*/
+.payments-page.payments-entry-page .payment-form-grid > label {
+  display:flex; flex-direction:column; gap:8px; min-width:0;
+}
+.payments-page.payments-entry-page .payment-form-grid > label > span {
+  color:var(--text-secondary);
+  font-size:14px !important; font-weight:650; line-height:1.45;
+}
+.payments-page.payments-entry-page .payment-form-grid :is(input:not([type="checkbox"]):not([type="radio"]),select) {
+  display:block; width:100%; min-width:0; max-width:100%;
+  height:50px !important; min-height:50px !important; box-sizing:border-box;
+  padding:0 13px !important; border:0 !important;
+  border-radius:11px !important; outline:0 !important; box-shadow:none !important;
+  background:var(--surface-2) !important; color:var(--text-primary) !important;
+  font-family:inherit; font-size:16px !important; font-weight:400 !important;
+  line-height:1.45; -webkit-text-size-adjust:100%; touch-action:manipulation;
+}
+.payments-page.payments-entry-page .payment-form-grid :is(input,select):focus-visible {
+  outline:2px solid var(--primary) !important; outline-offset:2px;
+  border:0 !important; box-shadow:none !important;
+}
+.payments-page.payments-entry-page .payment-form-grid :is(input,select):disabled {
+  opacity:.65; cursor:not-allowed;
+}
+.payments-page.payments-entry-page .payment-form-grid input[readonly] {
+  color:var(--text-secondary) !important;
+  background:var(--surface-3,var(--surface-2)) !important;
+  cursor:default;
+}
+.payments-page.payments-entry-page .payment-form-grid select {
+  padding-right:30px !important; text-overflow:ellipsis;
+}
+.payments-page.payments-entry-page .payment-form-grid input::placeholder {
+  color:var(--text-muted); opacity:1;
+}
+.payments-page.payments-entry-page .payment-form-grid small {
+  font-size:13px; line-height:1.5; color:var(--text-muted);
+}
+.payments-page.payments-entry-page .payment-form-card {
+  padding:clamp(15px,2vw,24px);
+  border-radius:15px;
+}
+.payments-page.payments-entry-page .payment-form-grid {
+  gap:16px 14px; min-width:0;
+}
+.payments-page.payments-entry-page .payment-form-intro h2 {
+  font-size:18px; line-height:1.4;
+}
+.payments-page.payments-entry-page .payment-form-intro p {
+  font-size:14px; line-height:1.55;
+}
+.payments-page.payments-entry-page .payment-form-confirmation {
+  padding:14px 15px; border-radius:11px;
+  font-size:14px; line-height:1.55;
+}
+.payments-page.payments-entry-page .payment-form-actions {
+  display:flex; gap:12px; flex-wrap:wrap;
+  padding-top:16px; margin-top:22px;
+}
+.payments-page.payments-entry-page .payment-form-actions button {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:50px !important; padding:10px 19px;
+  border-radius:11px; font-size:15px !important; font-weight:700;
+  line-height:1.3; touch-action:manipulation;
+}
+.payments-page.payments-entry-page .payment-form-actions button:focus-visible {
+  outline:2px solid var(--primary); outline-offset:2px;
+}
+/* Dashboard: search and filters have borderless outer shells.
+   The inner input/select is transparent and never draws a second outline. */
+.payments-page.payments-dashboard :is(.payments-dashboard-search,.payments-dashboard-filter) {
+  display:flex; align-items:center; gap:10px; min-width:0;
+  height:50px !important; min-height:50px !important;
+  padding:0 13px; border:0 !important; border-radius:11px !important;
+  background:var(--surface-2) !important; box-shadow:none !important;
+}
+.payments-page.payments-dashboard :is(.payments-dashboard-search,.payments-dashboard-filter):focus-within {
+  outline:2px solid var(--primary) !important; outline-offset:2px;
+  border:0 !important; box-shadow:none !important;
+}
+.payments-page.payments-dashboard :is(.payments-dashboard-search,.payments-dashboard-filter) :is(input,select) {
+  flex:1 1 auto; width:100%; min-width:0; max-width:100%;
+  height:100% !important; min-height:0 !important;
+  padding:0 !important; margin:0;
+  border:0 !important; border-radius:0 !important;
+  background:transparent !important; outline:0 !important; box-shadow:none !important;
+  color:var(--text-primary); font-size:16px !important;
+  font-weight:400 !important; line-height:1.45;
+  -webkit-text-size-adjust:100%;
+}
+.payments-page.payments-dashboard :is(.payments-dashboard-search,.payments-dashboard-filter) :is(input,select):focus {
+  border:0 !important; outline:0 !important; box-shadow:none !important;
+}
+.payments-page.payments-dashboard .payments-dashboard-filter select {
+  padding-right:24px !important; text-overflow:ellipsis;
+}
+.payments-page.payments-dashboard .payments-dashboard-toolbar :is(.payments-toolbar-clear,.payments-toolbar-refresh) {
+  min-height:50px !important; border-radius:11px;
+  padding:9px 14px; font-size:14px !important; font-weight:650;
+}
+.payments-page.payments-dashboard .payments-dashboard-result-count {
+  min-height:50px !important; font-size:14px;
+}
+@media (max-width:760px) {
+  .payments-page.payments-entry-page .payment-form-grid {
+    grid-template-columns:minmax(0,1fr); gap:15px;
+  }
+  .payments-page.payments-entry-page .payment-form-card { padding:15px; }
+  .payments-page.payments-entry-page .payment-form-actions {
+    flex-direction:column-reverse; gap:10px;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .payments-page.payments-entry-page .payment-form-actions button { width:100%; }
+  .payments-page.payments-dashboard .payments-dashboard-toolbar {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .payments-page.payments-entry-page .payment-form-grid :is(input,select) { transition:none; }
+}
