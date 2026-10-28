@@ -1,4 +1,5 @@
 import { INDIA_STATES } from './indiaGst.js';
+import { GST_UNKNOWN_TOTAL_RATES, gstRateChoices } from './gstRatePresets.js';
 
 /** Tax-mode classification is meaningful only for real Indian state codes. */
 const validCodes = new Set(INDIA_STATES.map(([code]) => code));
@@ -62,4 +63,5 @@ export const eWayReconcileGst = (items, mode) =>
   (items || []).map((item) => eWaySetGstRate(item, eWayTotalGstRate(item), mode));
 
 // The selected options are a single TOTAL GST rate, never standalone CGST.
-export const EWAY_GST_RATES = Object.freeze(['0', '5', '12', '18', '28', '40']);
+export const EWAY_GST_RATES = GST_UNKNOWN_TOTAL_RATES;
+export const eWayGstChoices = (mode, selected) => gstRateChoices(mode, selected);
