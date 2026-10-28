@@ -30,12 +30,13 @@ test('Goods / Services offers only requested intra-state CGST and SGST pairs and
   }
 });
 
-test('Goods / Services offers only requested interstate IGST and GST None', () => {
-  assert.deepEqual(INVOICE_IGST_RATES, ['2.5', '9']);
+test('Goods / Services supports 18 percent interstate IGST and GST None', () => {
+  assert.deepEqual(INVOICE_IGST_RATES, ['2.5', '9', '18']);
   assert.deepEqual(invoiceLineTaxChoices('igst'), [
     { value: '0', label: 'GST None (0%)' },
     { value: '2.5', label: 'IGST 2.5%' },
     { value: '9', label: 'IGST 9%' },
+    { value: '18', label: 'IGST 18%' },
   ]);
 });
 
@@ -52,6 +53,20 @@ test('product ₹100 + 18 percent GST yields ₹118 incl GST for 1 quantity, ₹
     assert.equal(total.total, quantity * 118);
     assert.equal(total.taxRows[0].taxable + total.taxRows[0].cgst + total.taxRows[0].sgst, quantity * 118);
   }
+});
+
+test('interstate ₹100 with 18 percent IGST is ₹118, not ₹109 or ₹100', () => {
+  assert.ok(invoiceLineTaxChoices('igst').some((rate) => rate.value === '18'));
+  const result = calculateEstimateIndiaGst({
+    lines: [{ type: 'Service', quantity: 1, unitPrice: 100, taxRate: 18 }],
+    registered: true, supplierState: '32', placeOfSupply: '33',
+  });
+  assert.equal(result.mode, 'igst');
+  assert.equal(result.cgst, 0);
+  assert.equal(result.sgst, 0);
+  assert.equal(result.igst, 18);
+  assert.equal(result.taxRows[0].taxable, 100);
+  assert.equal(result.total, 118);
 });
 
 test('the same ₹100 example has no tax for non-GST and GST None', () => {
