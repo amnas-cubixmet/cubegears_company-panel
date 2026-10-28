@@ -48,12 +48,11 @@ export const invoiceTaxMode = (form) => {
   return indiaTaxMode(true, supplier, actualPlace || (!location ? supplier : ''));
 };
 
-// The component controls are a *paired* intra-state GST choice. Django's
-// invoice item has one total taxRate, which it splits equally into CGST/SGST.
-// Never persist the CGST or SGST component alone as the whole tax rate.
+// Exactly ten separate labels as requested. A CGST or SGST choice represents
+// one half of a paired intra-state total; the Django line taxRate is TOTAL GST.
+// Example: selecting CGST 9% yields 18% total, split 9% + 9% by Django.
 export const INVOICE_CGST_SGST_RATES = Object.freeze(['2.5', '5', '9', '18']);
-// IGST is the entire GST percentage. Repeated IGST 5% is one option.
-export const INVOICE_IGST_RATES = Object.freeze(['5']);
+export const INVOICE_IGST_RATES = Object.freeze(['5', '18']);
 
 export const invoiceComponentFromTotalRate = (totalRate) =>
   totalRate === '' || totalRate == null ? '' : String(Number(totalRate) / 2);
@@ -61,29 +60,55 @@ export const invoiceComponentFromTotalRate = (totalRate) =>
 export const invoiceTotalFromGstComponent = (componentRate) =>
   componentRate === '' ? '' : String(Number(componentRate) * 2);
 
-/** Dropdown presets; Django still validates/calculate taxes using total taxRate.
- * Saved documents with older classified rates remain selectable in the editors.
- */
-export const invoiceLineTaxChoices = (mode, backendChoices = null) => {
-  const supplied = backendChoices?.[mode];
-  if ((mode === 'cgst_sgst' || mode === 'igst') && Array.isArray(supplied)
-      && supplied.length && supplied.every(item => /^\d+(?:\.\d+)?$/.test(String(item?.value))
-        && typeof item?.label === 'string')) {
-    return supplied.filter((item, index) =>
-      supplied.findIndex(other => String(other.value) === String(item.value)) === index);
+const LOCAL_GST_CHOICES = Object.freeze([
+  ...INVOICE_CGST_SGST_RATES.map(rate => ({
+    value: `cgst:${rate}`, label: `CGST ${rate}%`,
+    totalRate: invoiceTotalFromGstComponent(rate), taxMode: 'cgst_sgst',
+  })),
+  ...INVOICE_CGST_SGST_RATES.map(rate => ({
+    value: `sgst:${rate}`, label: `SGST ${rate}%`,
+    totalRate: invoiceTotalFromGstComponent(rate), taxMode: 'cgst_sgst',
+  })),
+  ...INVOICE_IGST_RATES.map(rate => ({
+    value: `igst:${rate}`, label: `IGST ${rate}%`,
+    totalRate: rate, taxMode: 'igst',
+  })),
+]);
+
+/** Return all ten options in identical order on invoice, E-Way and estimate. */
+export const invoiceLineTaxChoices = (_mode, backendChoices = null) => {
+  // Server-provided presets take precedence if their shape is valid.
+  if (Array.isArray(backendChoices) && backendChoices.length === 10 &&
+      backendChoices.every(option =>
+        typeof option?.value === 'string' &&
+        typeof option?.label === 'string' &&
+        /^(cgst|sgst|igst):\\d+(?:\\.\\d+)?$/.test(option.value) &&
+        /^\\d+(?:\\.\\d+)?$/.test(String(option.totalRate)) &&
+        ['cgst_sgst', 'igst'].includes(option.taxMode))) {
+    return backendChoices;
   }
-  if (mode === 'cgst_sgst') return INVOICE_CGST_SGST_RATES.map(rate => ({
-    value: invoiceTotalFromGstComponent(rate),
-    label: `CGST ${rate}% + SGST ${rate}% = ${Number(rate) * 2}%`,
-  }));
-  if (mode === 'igst') return INVOICE_IGST_RATES.map(rate => ({
-    value: rate, label: `IGST ${rate}%`,
-  }));
-  // Allow a combined rate to be chosen while POS is entered; never guess tax mode.
-  // The server rejects saving without a valid legal place of supply.
-  if (mode === 'unknown') return [...new Set([
-    ...INVOICE_CGST_SGST_RATES.map(invoiceTotalFromGstComponent),
-    ...INVOICE_IGST_RATES,
-  ])].map(value => ({ value, label: `GST ${value}%` }));
-  return [];
+  return LOCAL_GST_CHOICES;
+};
+
+export const invoiceTotalRateFromChoice = (value, backendChoices = null) => {
+  const choice = invoiceLineTaxChoices('', backendChoices)
+    .find(item => item.value === String(value));
+  return choice ? String(choice.totalRate) : '';
+};
+
+/** Keeps SGST selection visible while editing; persisted invoices use paired
+ * rate so one deterministic choice is reconstructed on reload.
+ */
+export const invoiceChoiceFromTotalRate = (totalRate, mode, recentChoice = '', backendChoices = null) => {
+  const rate = String(totalRate ?? '').trim();
+  if (!rate) return '';
+  const choices = invoiceLineTaxChoices(mode, backendChoices);
+  if (recentChoice) {
+    const picked = choices.find(item => item.value === recentChoice &&
+      String(item.totalRate) === rate && (mode === 'unknown' || item.taxMode === mode));
+    if (picked) return picked.value;
+  }
+  const expected = choices.find(item => String(item.totalRate) === rate &&
+    (mode === 'unknown' || item.taxMode === mode));
+  return expected?.value || `saved:${rate}`;
 };
