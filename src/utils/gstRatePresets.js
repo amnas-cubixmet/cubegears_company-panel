@@ -33,7 +33,7 @@ export const gstPresetLabel = (mode, totalRate) => {
 export const gstRateChoices = (mode, currentRate = '', { includeZero = false } = {}) => {
   const rates = gstPresetRatesForMode(mode);
   const saved = String(currentRate ?? '').trim();
-  if (saved && /^\\d+(?:\\.\\d{1,2})?$/.test(saved) && Number(saved) <= 100
+  if (saved && /^\d+(?:\.\d{1,2})?$/.test(saved) && Number(saved) <= 100
       && !rates.some((rate) => Number(rate) === Number(saved))) {
     rates.push(saved); // preserve old documents and legally classified stock GST
   }
