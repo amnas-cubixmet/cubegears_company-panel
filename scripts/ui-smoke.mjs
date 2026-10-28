@@ -229,6 +229,60 @@ try {
           const sizes=await page.locator('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').evaluateAll(nodes=>nodes.filter(e=>e.getClientRects().length).map(e=>parseFloat(getComputedStyle(e).fontSize)));
           if(sizes.some(size=>size<16))throw Error('Form control text below 16px: '+sizes.join(','));
         }
+        // Services: verify computed borderless styles on actual rendered controls.
+        // CI reads forms only and never posts a service or category.
+        if((path==='/services/new' || path==='/services') &&
+            (profile.width===390 || profile.width===1440)){
+          const checkFields=async (selector, expectedMin=4)=>{
+            const form=page.locator(selector);
+            await form.waitFor({state:'visible'});
+            const results=await form.evaluate(root=>{
+              const inputs=[...root.querySelectorAll('input,select,textarea')]
+                .filter(el=>el.getClientRects().length)
+                .map(el=>({
+                  border:parseFloat(getComputedStyle(el).borderLeftWidth),
+                  font:parseFloat(getComputedStyle(el).fontSize),
+                  height:Math.round(el.getBoundingClientRect().height),
+                }));
+              const labels=[...root.querySelectorAll('.service-field > span')]
+                .filter(el=>el.getClientRects().length)
+                .map(el=>parseFloat(getComputedStyle(el).fontSize));
+              const buttons=[...root.querySelectorAll('.service-form-actions button')]
+                .filter(el=>el.getClientRects().length)
+                .map(el=>Math.round(el.getBoundingClientRect().height));
+              return {inputs,labels,buttons};
+            });
+            if(results.inputs.length<expectedMin ||
+              results.inputs.some(input=>input.border>0 || input.font<16 || input.height<48) ||
+              results.labels.some(size=>size<14) ||
+              results.buttons.some(height=>height<48)){
+              throw Error('Services borderless form style mismatch: '+
+                JSON.stringify({path,width:profile.width,...results}));
+            }
+          };
+          if(path==='/services/new'){
+            await checkFields('.service-form-page form.service-form',8);
+          } else {
+            const search=page.locator('.service-dashboard-search');
+            await search.waitFor({state:'visible'});
+            const results=await search.evaluate(shell=>{
+              const input=shell.querySelector('input');
+              return {
+                border:parseFloat(getComputedStyle(shell).borderLeftWidth),
+                height:Math.round(shell.getBoundingClientRect().height),
+                innerBorder:parseFloat(getComputedStyle(input).borderLeftWidth),
+                innerFont:parseFloat(getComputedStyle(input).fontSize),
+              };
+            });
+            if(results.border>0||results.innerBorder>0||results.height<48||results.innerFont<16)
+              throw Error('Services directory search style mismatch: '+JSON.stringify(results));
+            await page.getByRole('button',{name:'Categories',exact:true}).click();
+            await page.getByRole('button',{name:'Add Category'}).click();
+            await checkFields('.service-category-form',3);
+            await page.getByRole('dialog',{name:'Add Service Category'})
+              .getByRole('button',{name:'Close dialog'}).click();
+          }
+        }
         // Customer creation popup: inspect rendered fields (not only CSS text).
         // Keep it read-only; never submit a customer in CI.
         if(path==='/customers' && (profile.width===390 || profile.width===1440)) {
@@ -272,13 +326,24 @@ try {
           await nameInput.focus();
           const focus=await nameInput.evaluate(input=>{
             const shell=input.closest('[data-cg-input-shell]');
-            const style=shell&&getComputedStyle(shell);
-            return {style:style?.outlineStyle,width:parseFloat(style?.outlineWidth||'0')};
+            const focused=getComputedStyle(shell);
+            const field=getComputedStyle(input);
+            return {
+              outline:focused.outlineStyle, border:parseFloat(focused.borderLeftWidth),
+              shadow:focused.boxShadow, innerOutline:field.outlineStyle,
+              innerBorder:parseFloat(field.borderLeftWidth),
+              background:focused.backgroundColor,
+            };
           });
-          if(focus.style==='none'||focus.width<2) {
-            throw Error('Workshop Customer borderless field lost focus indicator: '+JSON.stringify(focus));
+          const idle=await nameInput.evaluate(input=>{
+            input.blur();
+            return getComputedStyle(input.closest('[data-cg-input-shell]')).backgroundColor;
+          });
+          if(focus.outline!=='none'||focus.border!==0||focus.shadow!=='none'||
+             focus.innerOutline!=='none'||focus.innerBorder!==0||focus.background===idle){
+            throw Error('Workshop Customer fields should be borderless with focus tint: '+JSON.stringify({focus,idle}));
           }
-          await dialog.getByRole('button',{name:'Close dialog'}).click();
+                    await dialog.getByRole('button',{name:'Close dialog'}).click();
           await dialog.waitFor({state:'hidden'});
         }
         // Real computed styles: legacy !important Job Card rules must not
@@ -353,16 +418,26 @@ try {
           await addDialog.waitFor();
           const search=await addDialog.locator('.cg-easy-picker-search').evaluate(node=>{
             const input=node.querySelector('input');
+            const field=getComputedStyle(input),shell=getComputedStyle(node);
             return {
               shellHeight:Math.round(node.getBoundingClientRect().height),
-              font:parseFloat(getComputedStyle(input).fontSize),
-              inputBorder:parseFloat(getComputedStyle(input).borderLeftWidth),
+              font:parseFloat(field.fontSize), inputBorder:parseFloat(field.borderLeftWidth),
+              inputOutline:field.outlineStyle, inputShadow:field.boxShadow,
+              shellBorder:parseFloat(shell.borderLeftWidth), shellOutline:shell.outlineStyle,
+              shellShadow:shell.boxShadow, focusedBackground:shell.backgroundColor,
             };
           });
-          if(search.shellHeight<48||search.font<16||search.inputBorder>0) {
-            throw Error('Stock picker missing single-border 16px styling: '+JSON.stringify(search));
+          const stockIdle=await addDialog.locator('.cg-easy-picker-search').evaluate(node=>{
+            node.querySelector('input').blur();
+            return getComputedStyle(node).backgroundColor;
+          });
+          if(search.shellHeight<48||search.font<16||search.inputBorder!==0||
+             search.inputOutline!=='none'||search.inputShadow!=='none'||
+             search.shellBorder!==0||search.shellOutline!=='none'||
+             search.shellShadow!=='none'||search.focusedBackground===stockIdle){
+            throw Error('Stock search has nested borders or no focus tint: '+JSON.stringify({search,stockIdle}));
           }
-          await addDialog.getByRole('button',{name:'Add as New Product'}).click();
+                    await addDialog.getByRole('button',{name:'Add as New Product'}).click();
           const partStyles=await addDialog.locator('form.cg-easy-form').evaluate(form=>{
             const inputs=[...form.querySelectorAll('input:not([type=radio]),select')]
               .filter(node=>node.getClientRects().length)
@@ -787,6 +862,52 @@ try {
           }
           if(!metrics.scrollArea || !metrics.bodyRows) {
             throw Error('Payroll fixture data table not rendered '+path+': '+JSON.stringify(metrics));
+          }
+        }
+
+        if(path==='/vehicles' || /^\/vehicles\/[^/]+$/.test(path)) {
+          const metrics = await page.evaluate(() => {
+            const root=document.querySelector('.cg-vehicles');
+            const font = selector => {
+              const el=root?.querySelector(selector);
+              return el ? parseFloat(getComputedStyle(el).fontSize) : null;
+            };
+            const height = selector => {
+              const el=root?.querySelector(selector);
+              return el ? el.getBoundingClientRect().height : null;
+            };
+            const input=root?.querySelector('.vehicle-dashboard-search input');
+            const border = input ? getComputedStyle(input).borderTopWidth : null;
+            return {
+              missing:!root,
+              listHeading:font('.vehicle-dashboard-header h1'),
+              listLabel:font('.vehicle-dashboard-stat-top span'),
+              listSearch:font('.vehicle-dashboard-search input'),
+              searchBorder:border,
+              profileTitle:font('.vehicle-profile-header h1'),
+              profileLabel:font('.vehicle-profile-kpis span'),
+              profileValue:font('.vehicle-info-card strong'),
+              tab:font('.vehicle-profile-tabs button'),
+              actionHeight:height('.vehicle-profile-actions button,.vehicle-primary-button'),
+              pageOverflow:document.documentElement.scrollWidth>innerWidth+2,
+            };
+          });
+          if(metrics.missing || metrics.pageOverflow) {
+            throw Error('Vehicle page overflow or missing root '+path+': '+JSON.stringify(metrics));
+          }
+          for(const [key,min] of Object.entries({
+            listHeading:22,listLabel:13.5,listSearch:15.5,
+            profileTitle:22,profileLabel:13.5,profileValue:14.5,tab:13.5,
+          })) {
+            if(metrics[key]!==null && metrics[key]<min) {
+              throw Error('Vehicle font too small '+key+' on '+path+': '+JSON.stringify(metrics));
+            }
+          }
+          if(metrics.searchBorder!==null && metrics.searchBorder!=='0px') {
+            throw Error('Vehicle search has double border: '+JSON.stringify(metrics));
+          }
+          if(metrics.actionHeight!==null && metrics.actionHeight<43.5) {
+            throw Error('Vehicle action too small: '+JSON.stringify(metrics));
           }
         }
 

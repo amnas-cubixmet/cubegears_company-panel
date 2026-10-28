@@ -39,13 +39,13 @@
   transition: background-color .15s ease;
 }
 :is(#root, body) .customer-directory-form [data-cg-input-shell="true"]:focus-within {
-  /* Visible keyboard/focus indication WITHOUT adding an input border. */
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  /* Borderless focus treatment: subtle surface tint, no blue rectangle. */
+  outline: 0 !important;
   box-shadow: none !important;
+  background: color-mix(in srgb, var(--primary, #2563eb) 14%, var(--surface-2, #f8fafc)) !important;
 }
 :is(#root, body) .customer-directory-form [data-cg-input-shell="true"]:has([aria-invalid="true"]):focus-within {
-  outline-color: var(--danger);
+  background: var(--danger-soft, #fff1f1) !important;
 }
 :is(#root, body) .customer-directory-form [data-cg-input-shell="true"] > svg {
   flex: 0 0 auto;
@@ -107,9 +107,9 @@
   opacity: 1;
 }
 :is(#root, body) .customer-directory-form textarea:focus-visible {
-  outline: 2px solid var(--primary) !important;
-  outline-offset: 2px;
+  outline: 0 !important;
   box-shadow: none !important;
+  background: color-mix(in srgb, var(--primary, #2563eb) 14%, var(--surface-2, #f8fafc)) !important;
 }
 :is(#root, body) .customer-directory-form .customer-directory-form-grid {
   display: grid;
@@ -204,4 +204,13 @@
   :is(#root, body) .customer-directory-form [data-cg-input-shell="true"] {
     transition: none;
   }
+}
+
+
+/* Keep a visible keyboard focus state without a border or focus ring. */
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"]:focus-within > svg {
+  color: var(--primary);
+}
+:is(#root, body) .customer-directory-form textarea:focus-visible {
+  caret-color: var(--primary);
 }

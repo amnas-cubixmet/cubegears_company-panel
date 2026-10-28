@@ -13,6 +13,7 @@ import {
 } from '../../components/services';
 import { serviceService } from '../../services/service.service';
 import '../../styles/service-management.css';
+import '../../styles/service-borderless-forms.css';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
