@@ -31,23 +31,24 @@ test('GSTIN state prefix fills Place of Supply even when backend supplierState i
   assert.equal(formatInvoicePlaceOfSupply('Tamil Nadu'), '33-Tamil Nadu');
 });
 
-test('GST workshop can select a line tax rate before the customer supply state is entered', () => {
+test('all ten GST component choices are available before choosing Place of Supply', () => {
   const current = draft('');
   assert.equal(invoiceTaxMode(current), 'cgst_sgst');
-  const eligible = invoiceLineTaxChoices(invoiceTaxMode(current));
-  assert.ok(eligible.some((row) => row.value === '18'));
-  assert.match(eligible.find((row) => row.value === '18').label, /CGST 9% \+ SGST 9%/);
-  assert.ok(invoiceLineTaxChoices('unknown').some((row) => row.value === '18'));
-  assert.ok(invoiceLineTaxChoices('unknown').some((row) => row.value === '10'));
+  const options = invoiceLineTaxChoices(invoiceTaxMode(current));
+  assert.equal(options.length, 10);
+  assert.ok(options.some(item => item.value === 'cgst:9' && item.label === 'CGST 9%'));
+  assert.ok(options.some(item => item.value === 'sgst:9' && item.label === 'SGST 9%'));
+  assert.ok(options.some(item => item.value === 'igst:18' && item.label === 'IGST 18%'));
+  assert.equal(invoiceLineTaxChoices('unknown').length, 10);
 });
 
-test('correct rate options follow an actual inter-state customer supply location', () => {
+test('the ten options remain visible when customer supply state is interstate', () => {
   const current = draft('33-Tamil Nadu');
   assert.equal(invoiceTaxMode(current), 'igst');
   const options = invoiceLineTaxChoices(invoiceTaxMode(current));
-  assert.deepEqual(options.map((row) => row.value), ['5']);
-  assert.ok(options.some((row) => row.value === '5' && row.label === 'IGST 5%'));
-  assert.ok(!options.some((row) => row.value === '18'));
+  assert.equal(options.length, 10);
+  assert.ok(options.some(item => item.value === 'igst:5'));
+  assert.ok(options.some(item => item.value === 'igst:18'));
 });
 
 test('an explicitly invalid customer state does not become a fabricated valid supply', () => {
@@ -77,7 +78,7 @@ test('non-GST workshops remain non-taxable', () => {
   assert.equal(prepared.invoiceType, 'regular');
   assert.equal(prepared.items[0].taxRate, 0);
   assert.equal(invoiceTaxMode(prepared), 'none');
-  assert.equal(invoiceLineTaxChoices('none').length, 0);
+  assert.equal(invoiceLineTaxChoices('none').length, 10);
 });
 
 test('invoice editor never disables GST rate dropdown to wait for Place of Supply', () => {

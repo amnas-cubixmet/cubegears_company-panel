@@ -1,10 +1,16 @@
-import { gstRateChoices, gstPresetLabel, gstPresetRatesForMode } from '../../utils/gstRatePresets.js';
+import { invoiceLineTaxChoices } from '../../utils/invoiceTaxUi.js';
 
-/** Dropdown returns total GST percentages; backend does all tax splitting. */
-export const estimateGstChoices = (currentRate = '', mode = 'unknown') =>
-  gstRateChoices(mode, currentRate).map(({ value }) => value);
+/** Values sent to Django are TOTAL GST percentages, never the CGST half. */
+export const estimateGstOptions = (rate = '', mode = 'unknown', config = null) => {
+  const choices = invoiceLineTaxChoices(mode, config);
+  const entered = String(rate ?? '').trim();
+  if (entered && /^\d+(?:\.\d{1,2})?$/.test(entered) &&
+      Number(entered) <= 100 && !choices.some(x => Number(x.totalRate) === Number(entered))) {
+    return [...choices, { value: `saved:${entered}`, label: `Previously saved GST ${entered}%`, totalRate: entered }];
+  }
+  return choices;
+};
 
-export const estimateGstLabel = (rate, mode = 'unknown') =>
-  gstPresetRatesForMode(mode).includes(String(rate))
-    ? gstPresetLabel(mode, rate)
-    : `Saved / classified GST ${rate}%`;
+// Compatible utility for other callers that only need numeric rate strings.
+export const estimateGstChoices = (rate = '', mode = 'unknown', config = null) =>
+  estimateGstOptions(rate, mode, config).map(choice => choice.value);

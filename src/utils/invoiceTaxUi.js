@@ -1,5 +1,4 @@
 import { INDIA_STATES, indiaTaxMode } from './indiaGst.js';
-import { GST_CGST_SGST_COMPONENT_RATES, GST_IGST_RATES, gstRateChoices } from './gstRatePresets.js';
 
 const STATE_BY_CODE = new Map(INDIA_STATES);
 const CODE_BY_STATE = new Map(INDIA_STATES.map(([code, name]) => [name.toLowerCase(), code]));
@@ -49,9 +48,11 @@ export const invoiceTaxMode = (form) => {
   return indiaTaxMode(true, supplier, actualPlace || (!location ? supplier : ''));
 };
 
-// Django stores TOTAL GST per item and splits it into CGST and SGST.
-export const INVOICE_CGST_SGST_RATES = GST_CGST_SGST_COMPONENT_RATES;
-export const INVOICE_IGST_RATES = GST_IGST_RATES;
+// Exactly ten separate labels as requested. A CGST or SGST choice represents
+// one half of a paired intra-state total; the Django line taxRate is TOTAL GST.
+// Example: selecting CGST 9% yields 18% total, split 9% + 9% by Django.
+export const INVOICE_CGST_SGST_RATES = Object.freeze(['2.5', '5', '9', '18']);
+export const INVOICE_IGST_RATES = Object.freeze(['5', '18']);
 
 export const invoiceComponentFromTotalRate = (totalRate) =>
   totalRate === '' || totalRate == null ? '' : String(Number(totalRate) / 2);
@@ -59,7 +60,55 @@ export const invoiceComponentFromTotalRate = (totalRate) =>
 export const invoiceTotalFromGstComponent = (componentRate) =>
   componentRate === '' ? '' : String(Number(componentRate) * 2);
 
-// Exempt / nil-rated and existing historical rates are still supported
-// through the saved rate option, not added as new taxable rate presets.
-export const invoiceLineTaxChoices = (mode, currentRate = '') =>
-  gstRateChoices(mode, currentRate);
+const LOCAL_GST_CHOICES = Object.freeze([
+  ...INVOICE_CGST_SGST_RATES.map(rate => ({
+    value: `cgst:${rate}`, label: `CGST ${rate}%`,
+    totalRate: invoiceTotalFromGstComponent(rate), taxMode: 'cgst_sgst',
+  })),
+  ...INVOICE_CGST_SGST_RATES.map(rate => ({
+    value: `sgst:${rate}`, label: `SGST ${rate}%`,
+    totalRate: invoiceTotalFromGstComponent(rate), taxMode: 'cgst_sgst',
+  })),
+  ...INVOICE_IGST_RATES.map(rate => ({
+    value: `igst:${rate}`, label: `IGST ${rate}%`,
+    totalRate: rate, taxMode: 'igst',
+  })),
+]);
+
+/** Return all ten options in identical order on invoice, E-Way and estimate. */
+export const invoiceLineTaxChoices = (_mode, backendChoices = null) => {
+  // Server-provided presets take precedence if their shape is valid.
+  if (Array.isArray(backendChoices) && backendChoices.length === 10 &&
+      backendChoices.every(option =>
+        typeof option?.value === 'string' &&
+        typeof option?.label === 'string' &&
+        /^(cgst|sgst|igst):\d+(?:\.\d+)?$/.test(option.value) &&
+        /^\d+(?:\.\d+)?$/.test(String(option.totalRate)) &&
+        ['cgst_sgst', 'igst'].includes(option.taxMode))) {
+    return backendChoices;
+  }
+  return LOCAL_GST_CHOICES;
+};
+
+export const invoiceTotalRateFromChoice = (value, backendChoices = null) => {
+  const choice = invoiceLineTaxChoices('', backendChoices)
+    .find(item => item.value === String(value));
+  return choice ? String(choice.totalRate) : '';
+};
+
+/** Preserve an explicit saved CGST/SGST/IGST label; infer the correct-mode
+ * default for old documents without taxChoice metadata.
+ */
+export const invoiceChoiceFromTotalRate = (totalRate, mode, recentChoice = '', backendChoices = null) => {
+  const rate = String(totalRate ?? '').trim();
+  if (!rate) return '';
+  const choices = invoiceLineTaxChoices(mode, backendChoices);
+  if (recentChoice) {
+    const picked = choices.find(item => item.value === recentChoice &&
+      Number(item.totalRate) === Number(rate));
+    if (picked) return picked.value;
+  }
+  const expected = choices.find(item => Number(item.totalRate) === Number(rate) &&
+    (mode === 'unknown' || item.taxMode === mode));
+  return expected?.value || `saved:${rate}`;
+};

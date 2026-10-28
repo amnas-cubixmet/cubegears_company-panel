@@ -8,13 +8,14 @@ import { EstimateAddCatalogModal } from './EstimateAddCatalogModal';
 import { buildEstimateCatalogSelection } from './estimateNewCatalog';
 import { estimateLineErrors, estimateFormValidation } from './quickEstimateValidation';
 import { latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
-import { INDIA_STATES, calculateEstimateIndiaGst, indiaTaxMode } from '../../utils/indiaGst';
-import { estimateGstChoices, estimateGstLabel } from './estimateGstRates';
+import { INDIA_STATES, calculateEstimateIndiaGst } from '../../utils/indiaGst';
+import { estimateGstOptions } from './estimateGstRates';
+import { invoiceTaxMode, invoiceChoiceFromTotalRate } from '../../utils/invoiceTaxUi';
 
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
   description: '', type, quantity: '1', unitPrice: '', catalogId: '', catalogCode: '',
-  taxRate: '', hsnSac: type === 'Part' ? '' : '998714'
+  taxRate: type === 'Part' ? '' : '18', hsnSac: type === 'Part' ? '' : '998714'
 });
 const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2
@@ -30,6 +31,7 @@ const parseItems = (estimate) => (estimate?.items || [])
     catalogId: row.catalogId || '',
     catalogCode: row.catalogCode || '',
     taxRate: String(row.taxRate ?? (row.type === 'Part' ? '' : '18')),
+    taxChoice: row.taxChoice || '',
     hsnSac: row.hsnSac || ''
   }));
 const inspectSuggestions = (findings) => findings.flatMap((item) => {
@@ -59,7 +61,11 @@ export function QuickEstimatePanel({
   const registered = Boolean(job?.gstInfo?.registered);
   const supplierState = job?.gstInfo?.supplierState || '';
   const [placeOfSupply, setPlaceOfSupply] = useState('');
-  const selectedGstMode = indiaTaxMode(registered, supplierState, placeOfSupply);
+  const taxMode = invoiceTaxMode({
+    invoiceType: registered ? 'gst' : 'regular',
+    seller: { stateCode: supplierState },
+    customer: { placeOfSupply },
+  });
   const [busy, setBusy] = useState(false);
   const [changed, setChanged] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -94,13 +100,31 @@ export function QuickEstimatePanel({
     if (basic) return basic;
     if (registered && !supplierState) return 'Configure the workshop GSTIN / supplying state in Company Settings.';
     if (registered && !placeOfSupply) return 'Select the legal place-of-supply state.';
+    if (registered && lines.some(line => {
+      if (!line.taxChoice) return false;
+      const selection = estimateGstOptions(line.taxRate, taxMode, job?.gstInfo?.gstRateOptions)
+        .find(choice => choice.value === line.taxChoice);
+      return !selection || selection.taxMode !== taxMode ||
+        Number(selection.totalRate) !== Number(line.taxRate);
+    })) return 'Selected CGST / SGST / IGST type conflicts with Place of Supply.';
     if (registered && lines.some((line) => !String(line.taxRate ?? '').trim() ||
       Number(line.taxRate) < 0 || Number(line.taxRate) > 100 ||
       !/^\d+(?:\.\d{1,2})?$/.test(String(line.taxRate)))) {
       return 'Set a valid item-wise GST rate for every work and spare part.';
     }
     return '';
-  }, [lines, discount, registered, supplierState, placeOfSupply]);
+  }, [lines, discount, registered, supplierState, placeOfSupply, taxMode, job?.gstInfo?.gstRateOptions]);
+
+  const chooseGst = (key, selected) => {
+    const choice = estimateGstOptions('', taxMode, job?.gstInfo?.gstRateOptions)
+      .find(option => option.value === selected);
+    setLines(current => current.map(line => line.key === key ? {
+      ...line, taxChoice: choice?.value || '',
+      taxRate: choice?.totalRate || '',
+    } : line));
+    setChanged(true);
+    setFeedback('');
+  };
 
   const edit = (key, field, value) => {
     setLines((current) => current.map((line) => line.key === key
@@ -135,9 +159,9 @@ export function QuickEstimatePanel({
     try {
       const draftId = latest?.status === 'Draft' && !stale ? latest.id : null;
       await jobService.saveQuickJobEstimate(job.id, {
-        lines: lines.map(({ description, type, quantity, unitPrice, catalogId, taxRate, hsnSac }) => ({
+        lines: lines.map(({ description, type, quantity, unitPrice, catalogId, taxRate, taxChoice, hsnSac }) => ({
           description: description.trim(), type, quantity, unitPrice,
-          taxRate: taxRate || '0', hsnSac: hsnSac || '',
+          taxRate: taxRate || '0', taxChoice: taxChoice || '', hsnSac: hsnSac || '',
           ...(catalogId ? { catalogId } : {})
         })),
         taxPercent: '0', discount,
@@ -309,13 +333,13 @@ export function QuickEstimatePanel({
               <select
                 className="job-quick-gst-select"
                 aria-label={`GST Rate (%) for ${part ? 'spare part' : 'work item'} ${index + 1}`}
-                value={String(line.taxRate ?? '')}
+                value={invoiceChoiceFromTotalRate(line.taxRate, taxMode, line.taxChoice, job?.gstInfo?.gstRateOptions)}
                 disabled={!canEdit || busy}
-                onChange={(event) => edit(line.key, 'taxRate', event.target.value)}
+                onChange={(event) => chooseGst(line.key, event.target.value)}
               >
                 <option value="">Select GST Rate</option>
-                {estimateGstChoices(line.taxRate, selectedGstMode).map((rate) => (
-                  <option value={rate} key={rate}>{estimateGstLabel(rate, selectedGstMode)}</option>
+                {estimateGstOptions(line.taxRate, taxMode, job?.gstInfo?.gstRateOptions).map((choice) => (
+                  <option value={choice.value} key={choice.value}>{choice.label}</option>
                 ))}
               </select>
             </label>

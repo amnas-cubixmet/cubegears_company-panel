@@ -14,26 +14,22 @@ import { calculateEstimateIndiaGst } from '../src/utils/indiaGst.js';
 const read = (path) => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const editor = read('src/pages/invoices/InvoiceRoutePage.jsx');
 
-test('Goods / Services offers only requested intra-state CGST and SGST pairs and GST None', () => {
+test('Goods / Services GST dropdown has exactly ten distinct labels', () => {
   assert.deepEqual(INVOICE_CGST_SGST_RATES, ['2.5', '5', '9', '18']);
-  const choices = invoiceLineTaxChoices('cgst_sgst');
-  assert.deepEqual(choices.map(x => x.value), ['5', '10', '18', '36']);
-  assert.deepEqual(choices.map(x => x.label), [
-    'CGST 2.5% + SGST 2.5% = 5%',
-    'CGST 5% + SGST 5% = 10%',
-    'CGST 9% + SGST 9% = 18%',
-    'CGST 18% + SGST 18% = 36%',
+  assert.deepEqual(INVOICE_IGST_RATES, ['5', '18']);
+  const options = invoiceLineTaxChoices('cgst_sgst');
+  assert.deepEqual(options.map(item => item.label), [
+    'CGST 2.5%', 'CGST 5%', 'CGST 9%', 'CGST 18%',
+    'SGST 2.5%', 'SGST 5%', 'SGST 9%', 'SGST 18%',
+    'IGST 5%', 'IGST 18%',
   ]);
+  assert.equal(new Set(options.map(item => item.value)).size, 10);
+  assert.deepEqual(options.map(item => item.totalRate), ['5','10','18','36','5','10','18','36','5','18']);
   for (const x of INVOICE_CGST_SGST_RATES) {
     assert.equal(invoiceComponentFromTotalRate(invoiceTotalFromGstComponent(x)), x);
   }
-});
-
-test('Goods / Services supports 18 percent interstate IGST and GST None', () => {
-  assert.deepEqual(INVOICE_IGST_RATES, ['5']);
-  assert.deepEqual(invoiceLineTaxChoices('igst'), [
-    { value: '5', label: 'IGST 5%' },
-  ]);
+  assert.deepEqual(invoiceLineTaxChoices('igst'), options);
+  assert.deepEqual(invoiceLineTaxChoices('unknown'), options);
 });
 
 test('product ₹100 + 18 percent GST yields ₹118 incl GST for 1 quantity, ₹236 for 2', () => {
@@ -52,7 +48,7 @@ test('product ₹100 + 18 percent GST yields ₹118 incl GST for 1 quantity, ₹
 });
 
 test('interstate ₹100 with 18 percent IGST is ₹118, not ₹109 or ₹100', () => {
-  assert.ok(invoiceLineTaxChoices('igst', '18').some((rate) => rate.value === '18'));
+  assert.ok(invoiceLineTaxChoices('igst').some((rate) => rate.value === 'igst:18'))
   const result = calculateEstimateIndiaGst({
     lines: [{ type: 'Service', quantity: 1, unitPrice: 100, taxRate: 18 }],
     registered: true, supplierState: '32', placeOfSupply: '33',
