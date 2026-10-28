@@ -790,6 +790,52 @@ try {
           }
         }
 
+        if(path==='/vehicles' || /^\/vehicles\/[^/]+$/.test(path)) {
+          const metrics = await page.evaluate(() => {
+            const root=document.querySelector('.cg-vehicles');
+            const font = selector => {
+              const el=root?.querySelector(selector);
+              return el ? parseFloat(getComputedStyle(el).fontSize) : null;
+            };
+            const height = selector => {
+              const el=root?.querySelector(selector);
+              return el ? el.getBoundingClientRect().height : null;
+            };
+            const input=root?.querySelector('.vehicle-dashboard-search input');
+            const border = input ? getComputedStyle(input).borderTopWidth : null;
+            return {
+              missing:!root,
+              listHeading:font('.vehicle-dashboard-header h1'),
+              listLabel:font('.vehicle-dashboard-stat-top span'),
+              listSearch:font('.vehicle-dashboard-search input'),
+              searchBorder:border,
+              profileTitle:font('.vehicle-profile-header h1'),
+              profileLabel:font('.vehicle-profile-kpis span'),
+              profileValue:font('.vehicle-info-card strong'),
+              tab:font('.vehicle-profile-tabs button'),
+              actionHeight:height('.vehicle-profile-actions button,.vehicle-primary-button'),
+              pageOverflow:document.documentElement.scrollWidth>innerWidth+2,
+            };
+          });
+          if(metrics.missing || metrics.pageOverflow) {
+            throw Error('Vehicle page overflow or missing root '+path+': '+JSON.stringify(metrics));
+          }
+          for(const [key,min] of Object.entries({
+            listHeading:22,listLabel:13.5,listSearch:15.5,
+            profileTitle:22,profileLabel:13.5,profileValue:14.5,tab:13.5,
+          })) {
+            if(metrics[key]!==null && metrics[key]<min) {
+              throw Error('Vehicle font too small '+key+' on '+path+': '+JSON.stringify(metrics));
+            }
+          }
+          if(metrics.searchBorder!==null && metrics.searchBorder!=='0px') {
+            throw Error('Vehicle search has double border: '+JSON.stringify(metrics));
+          }
+          if(metrics.actionHeight!==null && metrics.actionHeight<43.5) {
+            throw Error('Vehicle action too small: '+JSON.stringify(metrics));
+          }
+        }
+
         if(path==='/staff-management/overview') {
           const input=page.locator('.staff-simple-search input');
           const border=await input.evaluate(node=>getComputedStyle(node).borderTopWidth);
