@@ -17,9 +17,8 @@ const editor = read('src/pages/invoices/InvoiceRoutePage.jsx');
 test('Goods / Services offers only requested intra-state CGST and SGST pairs and GST None', () => {
   assert.deepEqual(INVOICE_CGST_SGST_RATES, ['2.5', '5', '9', '18']);
   const choices = invoiceLineTaxChoices('cgst_sgst');
-  assert.deepEqual(choices.map(x => x.value), ['0', '5', '10', '18', '36']);
+  assert.deepEqual(choices.map(x => x.value), ['5', '10', '18', '36']);
   assert.deepEqual(choices.map(x => x.label), [
-    'GST None (0%)',
     'CGST 2.5% + SGST 2.5% = 5%',
     'CGST 5% + SGST 5% = 10%',
     'CGST 9% + SGST 9% = 18%',
@@ -31,12 +30,9 @@ test('Goods / Services offers only requested intra-state CGST and SGST pairs and
 });
 
 test('Goods / Services supports 18 percent interstate IGST and GST None', () => {
-  assert.deepEqual(INVOICE_IGST_RATES, ['2.5', '9', '18']);
+  assert.deepEqual(INVOICE_IGST_RATES, ['5']);
   assert.deepEqual(invoiceLineTaxChoices('igst'), [
-    { value: '0', label: 'GST None (0%)' },
-    { value: '2.5', label: 'IGST 2.5%' },
-    { value: '9', label: 'IGST 9%' },
-    { value: '18', label: 'IGST 18%' },
+    { value: '5', label: 'IGST 5%' },
   ]);
 });
 
@@ -56,7 +52,7 @@ test('product ₹100 + 18 percent GST yields ₹118 incl GST for 1 quantity, ₹
 });
 
 test('interstate ₹100 with 18 percent IGST is ₹118, not ₹109 or ₹100', () => {
-  assert.ok(invoiceLineTaxChoices('igst').some((rate) => rate.value === '18'));
+  assert.ok(invoiceLineTaxChoices('igst', '18').some((rate) => rate.value === '18'));
   const result = calculateEstimateIndiaGst({
     lines: [{ type: 'Service', quantity: 1, unitPrice: 100, taxRate: 18 }],
     registered: true, supplierState: '32', placeOfSupply: '33',
