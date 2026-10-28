@@ -5,8 +5,8 @@ export const estimateGstOptions = (rate = '', mode = 'unknown', config = null) =
   const choices = invoiceLineTaxChoices(mode, config);
   const entered = String(rate ?? '').trim();
   if (entered && /^\d+(?:\.\d{1,2})?$/.test(entered) &&
-      Number(entered) <= 100 && !choices.some(x => Number(x.value) === Number(entered))) {
-    return [...choices, { value: entered, label: `Previously saved GST ${entered}%` }];
+      Number(entered) <= 100 && !choices.some(x => Number(x.totalRate) === Number(entered))) {
+    return [...choices, { value: `saved:${entered}`, label: `Previously saved GST ${entered}%`, totalRate: entered }];
   }
   return choices;
 };
