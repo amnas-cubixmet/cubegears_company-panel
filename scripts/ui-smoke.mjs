@@ -229,6 +229,58 @@ try {
           const sizes=await page.locator('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').evaluateAll(nodes=>nodes.filter(e=>e.getClientRects().length).map(e=>parseFloat(getComputedStyle(e).fontSize)));
           if(sizes.some(size=>size<16))throw Error('Form control text below 16px: '+sizes.join(','));
         }
+        // Customer creation popup: inspect rendered fields (not only CSS text).
+        // Keep it read-only; never submit a customer in CI.
+        if(path==='/customers' && (profile.width===390 || profile.width===1440)) {
+          await page.getByRole('button',{name:'Add Customer'}).first().click();
+          const dialog=page.getByRole('dialog',{name:'Add Workshop Customer'});
+          await dialog.waitFor({state:'visible'});
+          const form=dialog.locator('form.customer-directory-form');
+          const measurements=await form.evaluate(root=>{
+            const shells=[...root.querySelectorAll('[data-cg-input-shell="true"]')];
+            const controls=shells.map(shell=>{
+              const control=shell.querySelector('input,select');
+              return {
+                border:parseFloat(getComputedStyle(shell).borderLeftWidth),
+                height:Math.round(shell.getBoundingClientRect().height),
+                textSize:control?parseFloat(getComputedStyle(control).fontSize):0,
+                controlBorder:control?parseFloat(getComputedStyle(control).borderLeftWidth):0,
+              };
+            });
+            const notes=[...root.querySelectorAll('textarea')].map(el=>({
+              border:parseFloat(getComputedStyle(el).borderLeftWidth),
+              textSize:parseFloat(getComputedStyle(el).fontSize),
+            }));
+            const labels=[...root.querySelectorAll('.ui-label')].map(el=>
+              parseFloat(getComputedStyle(el).fontSize));
+            const firstGrid=root.querySelector('.customer-directory-form-grid');
+            const columns=firstGrid?getComputedStyle(firstGrid).gridTemplateColumns.split(' ').length:0;
+            const action=root.querySelector('.customer-directory-form-submit');
+            return {controls,notes,labels,columns,
+              actionHeight:action?Math.round(action.getBoundingClientRect().height):0};
+          });
+          const expectedColumns=profile.width<=520?1:2;
+          if(!measurements.controls.length||!measurements.notes.length||
+            measurements.controls.some(item=>item.border>0||item.controlBorder>0||
+              item.height<48||item.textSize<16)||
+            measurements.notes.some(item=>item.border>0||item.textSize<16)||
+            measurements.labels.some(size=>size<14)||
+            measurements.actionHeight<48||measurements.columns!==expectedColumns) {
+            throw Error('Workshop Customer form style mismatch: '+JSON.stringify({width:profile.width,...measurements}));
+          }
+          const nameInput=dialog.getByRole('textbox',{name:/Customer Name/}).first();
+          await nameInput.focus();
+          const focus=await nameInput.evaluate(input=>{
+            const shell=input.closest('[data-cg-input-shell]');
+            const style=shell&&getComputedStyle(shell);
+            return {style:style?.outlineStyle,width:parseFloat(style?.outlineWidth||'0')};
+          });
+          if(focus.style==='none'||focus.width<2) {
+            throw Error('Workshop Customer borderless field lost focus indicator: '+JSON.stringify(focus));
+          }
+          await dialog.getByRole('button',{name:'Close dialog'}).click();
+          await dialog.waitFor({state:'hidden'});
+        }
         // Real computed styles: legacy !important Job Card rules must not
         // shrink iPhone input fonts/labels after the CSS is bundled.
         if(/^\/jobs\/JOB-00251\/(overview|inspection|estimate|work)$/.test(path)){
