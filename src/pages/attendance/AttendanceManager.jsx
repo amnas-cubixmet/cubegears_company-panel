@@ -14,6 +14,7 @@ import { RulesSettings } from '../attendance-manager/RulesSettings';
 import { ShiftSettings } from '../attendance-manager/Shifts';
 import '../../styles/attendance-manager.css';
 import '../../styles/attendance-manager-pages.css';
+import '../../styles/attendance-manager-readable.css';
 
 export const AttendanceManager = () => {
   const location = useLocation();
