@@ -20,9 +20,11 @@ import '../../styles/job-workspace-readable.css';
 import '../../styles/job-estimate-iphone.css';
 import '../../styles/job-four-stage-forms.css';
 import '../../styles/job-work-mechanic-panel.css';
+import '../../styles/job-work-stock-panel.css';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
+import { JobWorkStockPanel } from '../../components/jobs/JobWorkStockPanel';
 import { JobTotalCostPanel } from '../../components/jobs/JobTotalCostPanel';
 import { JobActivityTimeline } from '../../components/jobs/JobActivityTimeline';
 import { JobWorkPhotoPanel } from '../../components/jobs/JobWorkPhotoPanel';
@@ -1355,6 +1357,17 @@ export function JobCardWorkspace() {
             labourRecords={labourRecords}
             onChanged={() => setTimerRefreshVersion((value) => value + 1)}
           />
+
+          {hasStockAccess && (
+            <JobWorkStockPanel
+              jobId={job.id}
+              issuedParts={job.parts || []}
+              onChanged={async () => {
+                const updated = await jobService.getJobById(job.id);
+                if (updated) setJob(updated);
+              }}
+            />
+          )}
 
           <section className="job-panel job-work-items-panel rounded-2xl border border-line bg-surface p-4" aria-label="Labour and Work Items">
             <header className="job-work-items-head">
