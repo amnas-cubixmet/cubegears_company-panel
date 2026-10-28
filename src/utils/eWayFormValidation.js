@@ -23,7 +23,7 @@ const validParty = (party, prefix, errors) => {
   if (!String(party?.place || '').trim()) {
     errors[prefix + '.place'] = 'Enter the city or place.';
   }
-  if (!/^\d{6}$/.test(String(party?.pincode || ''))) {
+  if (!/^[1-9]\d{5}$/.test(String(party?.pincode || ''))) {
     errors[prefix + '.pincode'] = 'Enter a valid 6-digit PIN code.';
   }
 };
@@ -39,7 +39,11 @@ export const validateEWayForPreparation = (doc) => {
   }
   if (!doc?.documentDate || Number.isNaN(Date.parse(doc.documentDate))) {
     errors.documentDate = 'Select a valid document date.';
-  } else if (doc.documentDate > new Date().toLocaleDateString('en-CA')) {
+  } else if (doc.documentDate > (() => {
+    const today = new Date();
+    return [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0')].join('-');
+  })()) {
     errors.documentDate = 'Document date cannot be in the future.';
   }
   validParty(doc?.from, 'from', errors);
@@ -93,9 +97,17 @@ export const parseEWayApiErrors = (error) => {
               : /address/i.test(message) ? 'address' : 'tradeName';
         fieldErrors[key + '.' + field] = message;
       } else if (key === 'items') {
-        fieldErrors['items.0.hsnCode'] = message;
+        const index = Math.max(0, (Number(/item\s+(\d+)/i.exec(message)?.[1]) || 1) - 1);
+        const field = /hsn/i.test(message) ? 'hsnCode'
+          : /quantity|qty/i.test(message) ? 'qty'
+            : /unit/i.test(message) ? 'unit'
+              : /taxable/i.test(message) ? 'taxableValue'
+                : /name|goods/i.test(message) ? 'productName' : 'hsnCode';
+        fieldErrors['items.' + index + '.' + field] = message;
       } else if (key === 'transport') {
-        fieldErrors['transport.vehicleNo'] = message;
+        const field = /distance/i.test(message) ? 'distanceKm'
+          : /document/i.test(message) ? 'transportDocNo' : 'vehicleNo';
+        fieldErrors['transport.' + field] = message;
       } else {
         fieldErrors[key] = message;
       }
