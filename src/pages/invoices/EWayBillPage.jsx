@@ -10,7 +10,7 @@ import {
 import { billingService } from '../../services/billing.service';
 import { invoiceStateCode } from '../../utils/invoiceTaxUi';
 import { INDIA_STATES } from '../../utils/indiaGst.js';
-import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
+import { eWayGstChoices, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
 import { EWayBillPdfShareSheet } from '../../components/invoices/EWayBillPdfShareSheet';
 import { validateEWayForPreparation, parseEWayApiErrors } from '../../utils/eWayFormValidation';
@@ -790,10 +790,8 @@ export function EWayBillPage() {
                       <select aria-label="GST rate" value={String(eWayTotalGstRate(item))}
                         onChange={(e) => updateItemGst(item.id, e.target.value)}
                         className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content">
-                        {!EWAY_GST_RATES.includes(String(eWayTotalGstRate(item))) &&
-                          <option value={String(eWayTotalGstRate(item))}>{eWayTotalGstRate(item)}%</option>}
-                        {EWAY_GST_RATES.map((rate) =>
-                          <option value={rate} key={rate}>{rate}%</option>)}
+                        {eWayGstChoices(gstMode, eWayTotalGstRate(item)).map(({ value, label }) =>
+                          <option value={value} key={value}>{label}</option>)}
                       </select>
                     </label>
                     <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">

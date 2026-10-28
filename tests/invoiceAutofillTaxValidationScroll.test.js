@@ -51,10 +51,7 @@ test('GST options show requested CGST and SGST halves and IGST amounts correctly
   assert.match(eighteen.label, /CGST 9% \+ SGST 9%/);
   assert.match(thirtySix.label, /CGST 18% \+ SGST 18%/);
   const igst = invoiceLineTaxChoices('igst');
-  assert.ok(igst.some(x => x.value === '2.5' && x.label === 'IGST 2.5%'));
-  assert.ok(igst.some(x => x.value === '9' && x.label === 'IGST 9%'));
-  assert.ok(igst.some(x => x.value === '18' && x.label === 'IGST 18%'));
-  assert.ok(igst.some(x => x.value === '0'));
+  assert.deepEqual(igst, [{ value: '5', label: 'IGST 5%' }]);
   assert.equal(invoiceLineTaxChoices('none').length, 0);
 });
 
