@@ -124,19 +124,16 @@ export function EWayBillPage() {
             const base = blankEWayBill();
             const goods = (invoice.items || [])
               .filter((item) => ['Stock Part', 'Outside Purchase', 'Consumable', 'Custom Item'].includes(item.type))
-              .map((item, index) => ({
+              .map((item, index) => eWaySetGstRate({
                 id: `EWI-PREFILL-${index}-${Date.now()}`,
                 productName: item.description || 'Goods',
                 description: item.code || '',
-                hsnCode: '',
+                hsnCode: item.hsnCode || '',
                 qty: Number(item.qty || 1),
-                unit: 'PCS',
+                unit: item.unit || 'PCS',
                 taxableValue: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) - Number(item.discount || 0)),
-                cgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.cgstRate || 0) : '',
-                sgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.sgstRate || 0) : '',
-                igstRate: invoice.taxMode === 'igst' ? Number(invoice.igstRate || 0) : '',
-                cessRate: ''
-              }));
+                cgstRate: '', sgstRate: '', igstRate: '', cessRate: ''
+              }, Number(item.taxRate || 0), invoice.taxMode));
 
             setForm((previous) => ({
               ...base,
