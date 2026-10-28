@@ -105,6 +105,10 @@ export const LeaveRequestsManager = () => {
     event.preventDefault();
 
     if (!selected || !decision) return;
+    if (selected.canReview === false) {
+      setApprovalError(selected.reviewBlockReason || 'Another authorized manager must review your own request.');
+      return;
+    }
     if (decision === 'reject' && !note.trim()) {
       setApprovalError('Rejection reason is required.');
       return;
@@ -125,6 +129,7 @@ export const LeaveRequestsManager = () => {
       await load();
     } catch (error) {
       setApprovalError(
+        error?.data?.message ||
         error?.response?.data?.message ||
         error?.message ||
         'Unable to update this leave request.',
@@ -201,7 +206,11 @@ export const LeaveRequestsManager = () => {
                 </div>
               </div>
 
-              {item.status === 'Pending' ? (
+              {item.status === 'Pending' && item.canReview === false ? (
+                <p className="am-approval-blocked-note" role="status">
+                  {item.reviewBlockReason || 'Another authorized manager must review your request.'}
+                </p>
+              ) : item.status === 'Pending' ? (
                 <div className="am-approval-actions">
                   <button
                     type="button"
