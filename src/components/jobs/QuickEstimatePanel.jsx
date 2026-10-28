@@ -95,6 +95,20 @@ export function QuickEstimatePanel({
     lines, discount, registered, supplierState, placeOfSupply
   }), [lines, discount, registered, supplierState, placeOfSupply]);
 
+  const legalizeLineGst = (line, mode) => {
+    if (!line.taxChoice || !['cgst_sgst', 'igst'].includes(mode)) return line;
+    const options = estimateGstOptions('', mode, job?.gstInfo?.gstRateOptions);
+    const picked = options.find(option => option.value === line.taxChoice);
+    if (!picked || picked.taxMode === mode) return line;
+    // CGST 9% and IGST 18% each mean 18% total, but the jurisdiction
+    // determines which tax appears in the estimate's final calculation.
+    const replacement = options.find(option => option.taxMode === mode &&
+      Number(option.totalRate) === Number(line.taxRate));
+    return replacement
+      ? { ...line, taxChoice: replacement.value }
+      : { ...line, taxChoice: '', taxRate: '' };
+  };
+
   const validation = useMemo(() => {
     const basic = estimateFormValidation(lines, discount, '0');
     if (basic) return basic;
@@ -114,19 +128,6 @@ export function QuickEstimatePanel({
     return '';
   }, [lines, discount, registered, supplierState, placeOfSupply, taxMode, job?.gstInfo?.gstRateOptions]);
 
-  const legalizeLineGst = (line, mode) => {
-    if (!line.taxChoice || !['cgst_sgst', 'igst'].includes(mode)) return line;
-    const options = estimateGstOptions('', mode, job?.gstInfo?.gstRateOptions);
-    const picked = options.find(option => option.value === line.taxChoice);
-    if (!picked || picked.taxMode === mode) return line;
-    // CGST 9% and IGST 18% each mean 18% total, but the jurisdiction
-    // determines which tax appears in the estimate's final calculation.
-    const replacement = options.find(option => option.taxMode === mode &&
-      Number(option.totalRate) === Number(line.taxRate));
-    return replacement
-      ? { ...line, taxChoice: replacement.value }
-      : { ...line, taxChoice: '', taxRate: '' };
-  };
   const chooseGst = (key, selected) => {
     const choice = estimateGstOptions('', taxMode, job?.gstInfo?.gstRateOptions)
       .find(option => option.value === selected);
