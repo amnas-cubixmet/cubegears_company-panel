@@ -1,0 +1,100 @@
+.owner-company-page {
+  width:100%;
+  min-width:0;
+  padding:clamp(16px,2.5vw,30px);
+  color:var(--text-primary);
+}
+.owner-company-page > header {margin-bottom:22px}
+.owner-company-page > header h1 {
+  margin:0 0 7px;
+  font-size:clamp(23px,2.3vw,28px);
+  font-weight:700;
+}
+.owner-company-page > header p {
+  margin:0;
+  color:var(--text-secondary, var(--text-muted));
+  font-size:14px;
+}
+.owner-company-page form {
+  padding:clamp(16px,2vw,24px);
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--surface);
+  max-width:1050px;
+}
+.owner-company-fields {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:17px 20px;
+}
+.owner-company-fields label {
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  gap:7px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-primary);
+}
+.owner-company-fields label.is-wide {grid-column:1/-1}
+.owner-company-fields :is(input,textarea) {
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  padding:10px 12px;
+  border-radius:9px;
+  border:1px solid var(--border);
+  background:var(--input-bg, var(--surface));
+  color:var(--text-primary);
+  font-size:15px;
+  line-height:1.45;
+  font-weight:400;
+  outline-offset:2px;
+}
+.owner-company-fields textarea {min-height:92px;resize:vertical}
+.owner-company-fields :is(input,textarea):focus-visible {
+  border-color:var(--primary);
+  outline:2px solid var(--primary-soft,rgba(59,130,246,.25));
+}
+.owner-company-field-error {
+  display:block;
+  color:#dc2626;
+  line-height:1.5;
+  font-size:12px;
+  font-weight:500;
+  overflow-wrap:anywhere;
+}
+.owner-company-notice {
+  margin:0 0 15px;
+  padding:11px 13px;
+  border-radius:9px;
+  font-size:13px;
+  line-height:1.5;
+  background:var(--surface-2);
+}
+.owner-company-notice.is-error {color:#dc2626}
+.owner-company-notice.is-success {color:var(--text-primary)}
+.owner-company-actions {
+  display:flex;
+  justify-content:flex-end;
+  padding-top:22px;
+}
+.owner-company-actions button {
+  min-height:44px;
+  padding:11px 20px;
+  border:0;
+  border-radius:9px;
+  background:var(--primary,#2563eb);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+.owner-company-actions button:disabled {opacity:.55;cursor:wait}
+@media(max-width:720px) {
+  .owner-company-page {padding:16px 14px 90px}
+  .owner-company-fields {grid-template-columns:1fr;gap:14px}
+  .owner-company-fields label.is-wide {grid-column:auto}
+  .owner-company-page form {padding:16px}
+  .owner-company-actions button {width:100%}
+}
