@@ -67,7 +67,7 @@ export const invoiceTotalFromGstComponent = (componentRate) =>
 export const invoiceLineTaxChoices = (mode, backendChoices = null) => {
   const supplied = backendChoices?.[mode];
   if ((mode === 'cgst_sgst' || mode === 'igst') && Array.isArray(supplied)
-      && supplied.length && supplied.every(item => /^\\d+(?:\\.\\d+)?$/.test(String(item?.value))
+      && supplied.length && supplied.every(item => /^\d+(?:\.\d+)?$/.test(String(item?.value))
         && typeof item?.label === 'string')) {
     return supplied.filter((item, index) =>
       supplied.findIndex(other => String(other.value) === String(item.value)) === index);
