@@ -255,3 +255,12 @@
   .dw-page .dw-button,
   .dw-page .dw-nav a { transition: none; }
 }
+
+
+/* Shared dashboard rules sometimes override wage card headings at breakpoints.
+   These three payroll screens keep the same readable heading at all widths. */
+.dw-page.dashboard-page .dw-card > .dw-card-head h2,
+.dw-page.dashboard-page .dw-account-summary h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
