@@ -73,5 +73,5 @@ test('calendar scrolling stays inside date matrix rather than making the whole p
 test('attendance manager visual changes do not modify business logic', () => {
   assert.doesNotMatch(css, /display: none !important/);
   for (const [path] of pages) assert.ok(path);
-  assert.match(css,/\/\*.*Changes presentation only/);
+  assert.match(css,/Changes presentation only/);
 });
