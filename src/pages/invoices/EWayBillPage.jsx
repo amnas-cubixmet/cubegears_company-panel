@@ -102,7 +102,13 @@ export function EWayBillPage() {
     try {
       const doc = await eWayBillService.get(ewbId);
       if (!doc) setError('E-Way Bill not found.');
-      else setForm(JSON.parse(JSON.stringify(doc)));
+      else setForm(() => {
+        const current = JSON.parse(JSON.stringify(doc));
+        if (!eWayGstinStateCode(current.to?.gstin)) return current;
+        const next = { ...current,
+          to: eWayRecipientWithGstin(current.to, current.to.gstin) };
+        return { ...next, items: eWayReconcileGst(next.items, eWayTaxMode(next)) };
+      });
     } catch (e) {
       setError(e?.message || 'Unable to load E-Way Bill.');
     } finally {
@@ -151,7 +157,9 @@ export function EWayBillPage() {
                 tradeName: invoice.customer?.name || '',
                 address: invoice.customer?.address || '',
                 place: invoice.customer?.placeOfSupply || '',
-                stateCode: invoiceStateCode(invoice.customer?.placeOfSupply || invoice.customer?.stateCode || invoice.customer?.state) || base.to.stateCode
+                stateCode: eWayGstinStateCode(invoice.customer?.gstin)
+                  || invoiceStateCode(invoice.customer?.placeOfSupply || invoice.customer?.stateCode || invoice.customer?.state)
+                  || base.to.stateCode
               },
               items: goods.length ? goods : base.items,
               notes: invoice.number ? `Created from CubixGear invoice ${invoice.number}` : ''
