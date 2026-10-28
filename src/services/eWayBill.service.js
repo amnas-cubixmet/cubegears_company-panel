@@ -1,5 +1,6 @@
 import { USE_MOCK_API } from '../api/apiConfig';
 import apiClient from '../api/apiClient';
+import { saveBillingPdfFile } from './billing.service';
 import { calculateEWayTotals } from '../utils/eWayBillTotals.js';
 export { calculateEWayTotals } from '../utils/eWayBillTotals.js';
 
@@ -168,6 +169,27 @@ export const listEWayBills = async () => {
   return apiClient.get('/e-way-bills');
 };
 
+/** Fetch a saved tenant-owned E-Way Bill PDF from Django (never a print dialog). */
+export const getEWayBillPdfFile = async (document) => {
+  const docId = typeof document === 'object' ? document?.id : document;
+  const docNo = typeof document === 'object' ? document?.documentNo : '';
+  if (!docId) throw new Error('Save the E-Way Bill before downloading PDF.');
+  if (USE_MOCK_API) {
+    throw new Error('E-Way Bill PDF requires the connected Django backend.');
+  }
+  const pdf = await apiClient.get('/e-way-bills/' + encodeURIComponent(docId) + '/pdf', {
+    responseType: 'blob',
+    headers: { Accept: 'application/pdf, application/json' },
+  });
+  if (!(pdf instanceof Blob) || (pdf.type && !pdf.type.includes('pdf'))) {
+    throw new Error('The server did not return an E-Way Bill PDF.');
+  }
+  const safeName = String(docNo || docId).replace(/[^A-Za-z0-9_-]/g, '-').slice(0, 70);
+  return new File([pdf], 'EWayBill-' + safeName + '.pdf', { type: 'application/pdf' });
+};
+
+export const saveEWayBillPdfFile = (file) => saveBillingPdfFile(file);
+
 export const getEWayBill = async (billId) => {
   if (USE_MOCK_API) return read().find((row) => row.id === billId) || null;
   return apiClient.get(`/e-way-bills/${billId}`);
@@ -230,6 +252,8 @@ export const submitEWayBill = async (billId) => {
 };
 
 export const eWayBillService = {
+  getPdfFile: getEWayBillPdfFile,
+  savePdfFile: saveEWayBillPdfFile,
   getFromContext: getEWayFromContext,
   list: listEWayBills,
   get: getEWayBill,
