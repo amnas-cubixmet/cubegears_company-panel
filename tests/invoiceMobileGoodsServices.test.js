@@ -31,7 +31,7 @@ test('each item has a labeled mobile card with visible GST inclusive amount', ()
   assert.match(editor, /totals\.lineTotals\[index\]\?\.total \?\? lineAmount/);
   assert.match(editor, /totals\.lineTotals\[index\]\?\.gst/);
   assert.match(editor, /aria-label="GST rate"/);
-  assert.match(editor, /onChange=\{\(e\) => updateItem\(row\.id, 'taxRate', e\.target\.value\)\}/);
+  assert.match(editor, /onChange=\{\(e\) => chooseItemGst\(row\.id, e\.target\.value\)\}/);
 });
 
 test('mobile input cards have stacked labels and accessible touch sizes at phone widths', () => {
@@ -54,7 +54,7 @@ test('GST choice still updates the item tax and total for both invoice and estim
   const mode = invoiceTaxMode(gst);
   assert.equal(mode, 'cgst_sgst');
   const options = invoiceLineTaxChoices(mode);
-  assert.ok(options.some(x => x.value === '18' && x.label.includes('CGST 9% + SGST 9%')));
+  assert.ok(options.some(x => x.value === 'cgst:9' && x.label === 'CGST 9%' && x.totalRate === '18'));
   for (const kind of ['invoice', 'estimate']) {
     assert.ok(kind);
     const totals = calculateEstimateIndiaGst({

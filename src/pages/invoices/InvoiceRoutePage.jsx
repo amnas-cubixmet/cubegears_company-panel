@@ -950,7 +950,7 @@ export function InvoiceRoutePage() {
                       <option value="">{form.invoiceType !== 'gst' ? 'No GST' : 'Select GST rate'}</option>
                       {taxChoices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
                       {row.taxRate !== '' && row.taxRate != null &&
-                        !taxChoices.some((choice) => String(choice.totalRate) === String(row.taxRate)) &&
+                        !taxChoices.some((choice) => Number(choice.totalRate) === Number(row.taxRate)) &&
                         <option value={`saved:${row.taxRate}`}>{row.taxRate}% — saved classification</option>}
                   </select>
                   {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}

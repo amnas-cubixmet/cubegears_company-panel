@@ -40,19 +40,19 @@ test('GST mode respects seller registration and place of supply', () => {
   assert.equal(invoiceTaxMode({ ...intrastate, customer: { name: 'x', placeOfSupply: 'invalid' } }), 'unknown');
 });
 
-test('GST options show requested CGST and SGST halves and IGST amounts correctly', () => {
-  const pairs = invoiceLineTaxChoices('cgst_sgst');
-  const five = pairs.find(x => x.value === '5');
-  const ten = pairs.find(x => x.value === '10');
-  const eighteen = pairs.find(x => x.value === '18');
-  const thirtySix = pairs.find(x => x.value === '36');
-  assert.match(five.label, /CGST 2.5% \+ SGST 2.5%/);
-  assert.match(ten.label, /CGST 5% \+ SGST 5%/);
-  assert.match(eighteen.label, /CGST 9% \+ SGST 9%/);
-  assert.match(thirtySix.label, /CGST 18% \+ SGST 18%/);
-  const igst = invoiceLineTaxChoices('igst');
-  assert.deepEqual(igst, [{ value: '5', label: 'IGST 5%' }]);
-  assert.equal(invoiceLineTaxChoices('none').length, 0);
+test('GST choices expose exactly ten separate CGST, SGST and IGST labels', () => {
+  const options = invoiceLineTaxChoices('cgst_sgst');
+  assert.deepEqual(options.map(x => x.label), [
+    'CGST 2.5%', 'CGST 5%', 'CGST 9%', 'CGST 18%',
+    'SGST 2.5%', 'SGST 5%', 'SGST 9%', 'SGST 18%',
+    'IGST 5%', 'IGST 18%',
+  ]);
+  assert.equal(options.find(x => x.value === 'cgst:9').totalRate, '18');
+  assert.equal(options.find(x => x.value === 'sgst:9').totalRate, '18');
+  assert.equal(options.find(x => x.value === 'igst:18').totalRate, '18');
+  assert.equal(options.find(x => x.value === 'igst:5').totalRate, '5');
+  assert.deepEqual(invoiceLineTaxChoices('igst'), options);
+  assert.equal(invoiceLineTaxChoices('none').length, 10);
 });
 
 test('validation highlights exact missing date, location, item source and unit', () => {
@@ -78,5 +78,5 @@ test('seller profile inputs are read-only and Save scrolls to invalid input', ()
   assert.match(editor, /focus\(\{ preventScroll: true \}\)/);
   assert.match(editor, /aria-invalid=\{Boolean\(fieldErrors\.date\)\}/);
   assert.match(editor, /aria-invalid=\{Boolean\(fieldErrors\['seller\.gstin'\]\)\}/);
-  assert.match(editor, /invoiceLineTaxChoices\(appliedTaxMode\)/);
+  assert.match(editor, /invoiceLineTaxChoices\(appliedTaxMode,/);
 });
