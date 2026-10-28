@@ -9,7 +9,8 @@ import {
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
 import { invoiceStateCode } from '../../utils/invoiceTaxUi';
-import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst } from '../../utils/eWayGst';
+import { INDIA_STATES } from '../../utils/indiaGst.js';
+import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
 import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
 
@@ -206,8 +207,13 @@ export function EWayBillPage() {
   const updateGroup = (group, key, value) => setForm((old) => {
     // FROM is locked for outward supplies in UI AND Django serializer.
     if (group === 'from' && old.supplyType === 'Outward') return old;
+    if (group === 'to' && key === 'stateCode' && eWayGstinStateCode(old.to?.gstin)) return old;
     const next = { ...old, [group]: { ...old[group], [key]: value } };
-    if (key === 'stateCode' && ['to','from'].includes(group)) {
+    if (group === 'to' && key === 'gstin') {
+      next.to = eWayRecipientWithGstin(old.to, value);
+    }
+    if ((key === 'stateCode' && ['to', 'from'].includes(group)) ||
+        (group === 'to' && key === 'gstin')) {
       next.items = eWayReconcileGst(next.items, eWayTaxMode(next));
     }
     return next;
@@ -561,7 +567,17 @@ export function EWayBillPage() {
                 <input inputMode="numeric" maxLength={6} value={form.to?.pincode || ''} onChange={(e) => updateGroup('to', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="PIN"/>
               </label>
               <label>State Code
-                <input inputMode="numeric" maxLength={2} value={form.to?.stateCode || ''} onChange={(e) => updateGroup('to', 'stateCode', e.target.value.replace(/\D/g, '').slice(0,2))} placeholder="32"/>
+                <select aria-label="TO State Code" value={form.to?.stateCode || ''}
+                  disabled={Boolean(eWayGstinStateCode(form.to?.gstin))}
+                  onChange={(e) => updateGroup('to', 'stateCode', e.target.value)}>
+                  <option value="">Select destination state</option>
+                  {INDIA_STATES.map(([code, name]) => (
+                    <option key={code} value={code}>{code} — {name}</option>
+                  ))}
+                </select>
+                {eWayGstinStateCode(form.to?.gstin)
+                  ? <small role="status">Auto-filled from customer GSTIN</small>
+                  : <small>Select state for URP or customers without a registered GSTIN</small>}
               </label>
             </div>
           </section>
@@ -608,10 +624,12 @@ export function EWayBillPage() {
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">HSN
                     <input
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      type="text"
                       inputMode="numeric"
+                      maxLength={8}
                       value={item.hsnCode}
-                      onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, ''))}
-                      placeholder="HSN code"
+                      onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, '').slice(0, 8))}
+                      placeholder="e.g. 8708"
                     />
                   </label>
 
@@ -672,7 +690,6 @@ export function EWayBillPage() {
                     <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">
                       GST Rate (%)
                       <select aria-label="GST rate" value={String(eWayTotalGstRate(item))}
-                        disabled={gstMode === 'unknown'}
                         onChange={(e) => updateItemGst(item.id, e.target.value)}
                         className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content">
                         {!EWAY_GST_RATES.includes(String(eWayTotalGstRate(item))) &&
@@ -691,15 +708,19 @@ export function EWayBillPage() {
                   </div>
                   <p className="eway-gst-explanation" role="status">
                     {gstMode === 'unknown'
-                      ? 'Enter valid FROM and TO state codes to select GST.'
+                      ? 'Select a GST rate now; enter valid FROM and TO state codes to calculate tax.'
                       : gstMode === 'igst'
                         ? 'Inter-state: IGST applies. CGST and SGST are zero.'
                         : 'Intra-state: GST is split equally between CGST and SGST.'}
                   </p>
                   <div className="eway-gst-breakdown">
-                    <span>CGST: {item.cgstRate || 0}%</span>
-                    <span>SGST: {item.sgstRate || 0}%</span>
-                    <span>IGST: {item.igstRate || 0}%</span>
+                    {gstMode === 'unknown' && eWayTotalGstRate(item) > 0
+                      ? <span role="status">GST {eWayTotalGstRate(item)}% selected · Tax split pending State Code</span>
+                      : <>
+                        <span>CGST: {item.cgstRate || 0}%</span>
+                        <span>SGST: {item.sgstRate || 0}%</span>
+                        <span>IGST: {item.igstRate || 0}%</span>
+                      </>}
                   </div>
                 </div>
               </article>
