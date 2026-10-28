@@ -317,6 +317,40 @@ try {
           }
         }
 
+        if(path==='/dashboard') {
+          const dimensions = await page.evaluate(() => {
+            const top = document.querySelector('.dashboard-top-actions');
+            const stats = document.querySelector('.dashboard-stats');
+            const quick = document.querySelector('.dashboard-top-actions .quick-actions button');
+            const finance = document.querySelector('.finance-list > div');
+            const staff = document.querySelector('.staff-copy strong');
+            const progress = document.querySelector('.overall-progress [role="progressbar"]');
+            const width = document.documentElement.scrollWidth;
+            const size = node => node ? parseFloat(getComputedStyle(node).fontSize) : null;
+            return {
+              topY: top?.getBoundingClientRect().top,
+              statsY: stats?.getBoundingClientRect().top,
+              quickFont: size(quick), financeFont: size(finance),
+              staffFont: size(staff), progressWidth: progress?.getAttribute('aria-valuenow'),
+              contentWidth: width,
+            };
+          });
+          if(!(dimensions.topY < dimensions.statsY)){
+            throw Error('Quick Actions does not appear above stats: '+JSON.stringify(dimensions));
+          }
+          for(const name of ['quickFont','financeFont','staffFont']){
+            if(dimensions[name] != null && dimensions[name]<14){
+              throw Error('Unreadable Dashboard '+name+': '+JSON.stringify(dimensions));
+            }
+          }
+          if(dimensions.contentWidth>profile.width+2){
+            throw Error('Dashboard overflows viewport: '+JSON.stringify(dimensions));
+          }
+          if(dimensions.progressWidth==='70'){
+            throw Error('Overall Job Progress is still hardcoded to 70%');
+          }
+        }
+
         if(path==='/staff-management/overview') {
           const input=page.locator('.staff-simple-search input');
           const border=await input.evaluate(node=>getComputedStyle(node).borderTopWidth);
