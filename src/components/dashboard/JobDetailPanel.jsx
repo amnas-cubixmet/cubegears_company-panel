@@ -1,5 +1,4 @@
 
-import { CheckCircle2 } from 'lucide-react';
 import { dashboardText, repairStages, statusClass } from './dashboard.utils';
 
 export const JobDetailPanel = ({ selectedBooking, jobProgress, advisorName, onViewJob }) => (
@@ -34,17 +33,15 @@ export const JobDetailPanel = ({ selectedBooking, jobProgress, advisorName, onVi
 
         <div className="progress-card">
           <div className="progress-title-row">
-            <strong>Progress</strong>
-            <span>Live workshop stages</span>
+            <strong>Workshop Job Stages</strong>
+            <span>Job counts by stage</span>
           </div>
           <div className="progress-grid">
             {repairStages.map((stage, index) => (
               <div key={stage.key} className="progress-stage">
-                <span className={`progress-circle ${index < 3 ? 'is-done' : ''}`}>
-                  {index < 3 ? <CheckCircle2 size={12} /> : index + 1}
-                </span>
+                <span className="progress-circle" aria-hidden="true">{index + 1}</span>
                 <small>{stage.label}</small>
-                <strong>{jobProgress?.[stage.key] ?? 0}</strong>
+                <strong>{jobProgress?.[stage.key] ?? 0} jobs</strong>
               </div>
             ))}
           </div>
