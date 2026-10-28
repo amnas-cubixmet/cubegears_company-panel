@@ -39,3 +39,13 @@ test('Add New Part, Receive Stock and Internal Use retain current save logic', (
   assert.match(smoke,/Stock Add Product form UI mismatch/);
   assert.match(smoke,/Stock Receive form UI mismatch/);
 });
+
+test('Stock inputs have no border yet keep focus visibility and a soft background', () => {
+  assert.match(css, /Borderless Stock form inputs/);
+  assert.match(css, /input:not\(\[type="radio"\]\):not\(\[type="checkbox"\]\) \{/);
+  assert.match(css, /border: 0 !important/);
+  assert.match(css, /background: var\(--surface-2,#f8fafc\)/);
+  assert.match(css, /input:not\(\[type="radio"\]\):not\(\[type="checkbox"\]\):focus-visible/);
+  assert.match(css, /outline: 2px solid var\(--primary,#2563eb\)/);
+  assert.match(css, /\.cg-easy-picker-search:focus-within/);
+});
