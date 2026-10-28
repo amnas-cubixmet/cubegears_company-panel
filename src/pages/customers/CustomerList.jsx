@@ -6,6 +6,7 @@ import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
 import { Textarea } from '../../components/common/Textarea';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
+import '../../styles/customer-workshop-form.css';
 import { customerService } from '../../services/customer.service';
 import { customerInvoiceMoney, customerStatusLabel, formatCustomerMoney } from './customerDirectoryMoney';
 import { CustomerContactActions } from '../../components/customers/CustomerContactActions';
@@ -475,7 +476,7 @@ export const CustomerList = () => {
         title={editingCustomerId ? "Edit Customer Details" : "Add Workshop Customer"}
         maxWidth="540px"
       >
-        <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <form className="customer-directory-form" onSubmit={handleFormSubmit}>
           
           <Input
             label="Customer Name"
@@ -486,9 +487,11 @@ export const CustomerList = () => {
             placeholder="e.g. Rahul Kumar"
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="customer-directory-form-grid">
             <Input
               label="Phone Number"
+              type="tel"
+              inputMode="tel"
               required
               icon={Phone}
               value={phone}
@@ -497,6 +500,8 @@ export const CustomerList = () => {
             />
             <Input
               label="WhatsApp Number"
+              type="tel"
+              inputMode="tel"
               icon={MessageSquare}
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
@@ -513,7 +518,7 @@ export const CustomerList = () => {
             placeholder="rahul.k@example.com"
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="customer-directory-form-grid">
             <Select
               label="Customer Type"
               value={customerType}
@@ -534,7 +539,7 @@ export const CustomerList = () => {
           </div>
 
           {customerType === 'Business / Company' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="customer-directory-form-grid">
               <Input
                 label="Company Name"
                 value={companyName}
@@ -558,7 +563,7 @@ export const CustomerList = () => {
             placeholder="Street address, building details..."
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+          <div className="customer-directory-location-grid">
             <Input label="City" value={city} onChange={(e) => setCity(e.target.value)} />
             <Input label="State" value={state} onChange={(e) => setState(e.target.value)} />
             <Input label="PIN Code" value={pincode} onChange={(e) => setPincode(e.target.value)} placeholder="682031" />
@@ -572,17 +577,17 @@ export const CustomerList = () => {
             placeholder="e.g. Call before replacing additional parts..."
           />
 
-          <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+          <div className="customer-directory-form-actions">
             <button
               type="button"
               onClick={() => setIsAddCustomerOpen(false)}
-              style={{ flex: 1, height: '44px', borderRadius: '11px', border: '1px solid var(--border)', backgroundColor: 'var(--surface)', color: 'var(--text-primary)', fontWeight: '600' }}
+              className="customer-directory-form-cancel"
             >
               Cancel
             </button>
             <button
               type="submit"
-              style={{ flex: 1, height: '44px', borderRadius: '11px', border: 'none', backgroundColor: 'var(--primary)', color: '#ffffff', fontWeight: '700' }}
+              className="customer-directory-form-submit"
             >
               {editingCustomerId ? "Save Changes" : "Create Customer"}
             </button>
