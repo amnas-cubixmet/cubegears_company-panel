@@ -993,7 +993,7 @@ export function InvoiceRoutePage() {
             <span className="billing-kicker">AMOUNTS</span>
             {backendPreviewError && <p className="invoice-backend-preview-error" role="status">{backendPreviewError}</p>}
             {!backendPreviewError && verifiedTotals?.fingerprint === previewFingerprint &&
-              <p className="invoice-backend-preview-ok"><CheckCircle2 size={14}/> Calculated by Django backend</p>}
+              <p className="invoice-backend-preview-ok"><CheckCircle2 size={14}/> Calculated</p>}
             <h3>{form.kind === 'estimate' ? 'Estimate Summary' : 'Invoice Summary'}</h3>
             <div><span>Sub Total</span><strong>{money.format(totals.itemSubtotal)}</strong></div>
             {totals.documentDiscount > 0 && <div><span>Discount</span><strong>- {money.format(totals.documentDiscount)}</strong></div>}
