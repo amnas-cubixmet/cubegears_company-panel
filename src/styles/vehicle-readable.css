@@ -1,0 +1,281 @@
+/* Vehicle Directory + Vehicle Profile: readable responsive UI.
+ * Imported AFTER vehicle-management.css on the two existing routes only.
+ * No billing, workshop record, or role behavior changes.
+ */
+.cg-vehicles.vehicle-management-page {
+  font-size: 16px;
+  line-height: 1.5;
+  gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+.cg-vehicles .vehicle-dashboard-header h1,
+.cg-vehicles.vehicle-profile-page .vehicle-profile-header h1 {
+  font-size: clamp(23px, 2.2vw, 28px) !important;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.cg-vehicles .vehicle-dashboard-header p,
+.cg-vehicles .vehicle-profile-header p {
+  font-size: 14px !important;
+  line-height: 1.5;
+  white-space: normal;
+}
+.cg-vehicles .vehicle-dashboard-header-actions { gap: 10px; flex-wrap: wrap; }
+.cg-vehicles .vehicle-dashboard-header-badge {
+  min-height: 44px;
+  height: auto;
+  padding: 9px 13px;
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-vehicles .vehicle-primary-button,
+.cg-vehicles .vehicle-profile-actions button {
+  min-height: 46px !important;
+  height: auto !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  line-height: 1.45;
+  gap: 8px;
+  white-space: normal;
+}
+.cg-vehicles .vehicle-primary-button svg,
+.cg-vehicles .vehicle-profile-actions button svg { width: 18px; height: 18px; }
+.cg-vehicles .vehicle-dashboard-stats { gap: 12px; }
+.cg-vehicles .vehicle-dashboard-stat-card { padding: 17px; min-height: 126px; }
+.cg-vehicles .vehicle-dashboard-stat-top span {
+  font-size: 14px !important;
+  line-height: 1.4;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+.cg-vehicles .vehicle-dashboard-stat-top strong { font-size: 27px !important; line-height: 1.2; }
+.cg-vehicles .vehicle-dashboard-stat-card > small {
+  font-size: 13px !important;
+  line-height: 1.5;
+}
+.cg-vehicles .vehicle-dashboard-stat-top i { width: 40px; height: 40px; }
+.cg-vehicles .vehicle-dashboard-stat-top i svg { width: 20px; height: 20px; }
+
+/* One visible border around the search control (no second input outline). */
+.cg-vehicles .vehicle-dashboard-toolbar {
+  gap: 12px;
+  padding: 12px;
+}
+.cg-vehicles .vehicle-dashboard-search {
+  height: 48px;
+  min-height: 48px;
+  padding: 0 12px;
+  gap: 10px;
+}
+.cg-vehicles .vehicle-dashboard-search > svg { width: 19px; height: 19px; flex: 0 0 auto; }
+.cg-vehicles .vehicle-dashboard-search input,
+.cg-vehicles .vehicle-dashboard-search input:focus,
+.cg-vehicles .vehicle-dashboard-search input:focus-visible {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 16px !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.cg-vehicles .vehicle-dashboard-search:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
+}
+.cg-vehicles .vehicle-dashboard-result-count {
+  min-height: 48px;
+  height: auto;
+  padding: 10px 13px;
+}
+.cg-vehicles .vehicle-dashboard-result-count span,
+.cg-vehicles .vehicle-dashboard-result-count strong {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-vehicles .vehicle-dashboard-section-title { padding: 17px 19px; }
+.cg-vehicles .vehicle-dashboard-section-title h2 {
+  font-size: 19px !important;
+  line-height: 1.35;
+}
+.cg-vehicles .vehicle-dashboard-section-title p,
+.cg-vehicles .vehicle-dashboard-section-title > span {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.cg-vehicles .vehicle-dashboard-section-title > span { min-height: 32px; padding: 6px 10px; }
+
+/* Desktop vehicle rows remain a table; narrow phones use card layout. */
+.cg-vehicles .vehicle-table-wrap { overflow-x: auto; scrollbar-width: thin; }
+.cg-vehicles .vehicle-table { min-width: 940px; }
+.cg-vehicles .vehicle-table th { font-size: 13px !important; padding: 13px 15px; }
+.cg-vehicles .vehicle-table td { font-size: 14px !important; padding: 14px 15px; line-height: 1.5; }
+.cg-vehicles .vehicle-table td strong { font-size: 15px !important; line-height: 1.45; }
+.cg-vehicles .vehicle-table td > span:not(.vehicle-status):not(.vehicle-table-empty),
+.cg-vehicles .vehicle-table-empty { font-size: 13px !important; line-height: 1.45; }
+.cg-vehicles .vehicle-table-job {
+  min-height: 42px;
+  padding: 9px 12px;
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-vehicles .vehicle-status {
+  min-height: 29px;
+  height: auto;
+  font-size: 13px !important;
+  line-height: 1.4;
+  padding: 5px 10px;
+  white-space: normal;
+}
+.cg-vehicles .vehicle-dashboard-loading,
+.cg-vehicles .vehicle-dashboard-empty { font-size: 15px !important; line-height: 1.5; }
+
+/* Profile summary, owner, service history, parts, invoices and reminders. */
+.cg-vehicles.vehicle-profile-page .vehicle-profile-header { padding: 18px; gap: 14px; }
+.cg-vehicles .vehicle-profile-actions { gap: 10px; }
+.cg-vehicles .vehicle-current-job { min-height: 70px; padding: 14px; gap: 12px; }
+.cg-vehicles .vehicle-current-job strong { font-size: 16px !important; line-height: 1.45; }
+.cg-vehicles .vehicle-current-job span {
+  font-size: 14px !important;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: visible;
+}
+.cg-vehicles .vehicle-current-job > b { font-size: 14px !important; }
+.cg-vehicles .vehicle-profile-kpis { gap: 12px; }
+.cg-vehicles .vehicle-profile-kpis > div { min-height: 98px; padding: 16px; gap: 7px 10px; }
+.cg-vehicles .vehicle-profile-kpis svg { width: 20px; height: 20px; }
+.cg-vehicles .vehicle-profile-kpis span { font-size: 14px !important; line-height: 1.4; }
+.cg-vehicles .vehicle-profile-kpis strong {
+  font-size: 18px !important;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  text-overflow: clip;
+}
+.cg-vehicles .vehicle-profile-tabs { gap: 7px; padding: 7px; overscroll-behavior-inline: contain; }
+.cg-vehicles .vehicle-profile-tabs button {
+  min-height: 46px;
+  height: auto;
+  padding: 10px 14px;
+  font-size: 14px !important;
+  line-height: 1.45;
+  white-space: normal;
+}
+.cg-vehicles .vehicle-two-column { gap: 14px; min-width: 0; }
+.cg-vehicles .vehicle-panel { min-width: 0; padding: 18px; }
+.cg-vehicles .vehicle-section-header h2 { font-size: 19px !important; line-height: 1.35; }
+.cg-vehicles .vehicle-section-header p { font-size: 14px !important; line-height: 1.5; }
+.cg-vehicles .vehicle-info-grid { gap: 11px; }
+.cg-vehicles .vehicle-info-card { padding: 13px; min-width: 0; }
+.cg-vehicles .vehicle-info-card span { font-size: 13px !important; line-height: 1.4; }
+.cg-vehicles .vehicle-info-card strong {
+  font-size: 15px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.cg-vehicles .vehicle-owner-profile { min-height: 64px; padding: 12px; gap: 12px; }
+.cg-vehicles .vehicle-owner-profile strong { font-size: 15px !important; line-height: 1.45; }
+.cg-vehicles .vehicle-owner-profile span { font-size: 14px !important; line-height: 1.45; }
+.cg-vehicles .vehicle-contact-button,
+.cg-vehicles .vehicle-delete-button {
+  min-height: 44px;
+  height: auto;
+  padding: 10px 13px;
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-vehicles .vehicle-note-box { font-size: 14px !important; line-height: 1.5; padding: 14px; }
+.cg-vehicles .vehicle-history-card,
+.cg-vehicles .vehicle-part-card,
+.cg-vehicles .vehicle-invoice-row,
+.cg-vehicles .vehicle-reminder-card { padding: 15px; }
+.cg-vehicles .vehicle-history-card__head strong,
+.cg-vehicles .vehicle-part-card > div:first-child strong,
+.cg-vehicles .vehicle-invoice-row strong,
+.cg-vehicles .vehicle-reminder-card strong { font-size: 16px !important; line-height: 1.4; }
+.cg-vehicles .vehicle-history-card__head span,
+.cg-vehicles .vehicle-history-card__meta span,
+.cg-vehicles .vehicle-part-card > div:first-child span,
+.cg-vehicles .vehicle-part-card__meta span,
+.cg-vehicles .vehicle-invoice-row > div:first-child span,
+.cg-vehicles .vehicle-invoice-row > div:not(:first-child) span,
+.cg-vehicles .vehicle-invoice-row > div:not(:first-child) b,
+.cg-vehicles .vehicle-invoice-row > em,
+.cg-vehicles .vehicle-reminder-card span,
+.cg-vehicles .vehicle-reminder-card small {
+  font-size: 14px !important;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.cg-vehicles .vehicle-history-card__head > b,
+.cg-vehicles .vehicle-part-card__meta b { font-size: 14px !important; }
+.cg-vehicles .vehicle-history-card,
+.cg-vehicles .vehicle-invoice-row { min-height: 56px; }
+
+/* Phone cards: no tiny labels or ellipsis-only values. */
+@media (max-width: 900px) {
+  .cg-vehicles .vehicle-profile-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cg-vehicles .vehicle-two-column { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+  .cg-vehicles.vehicle-management-page { gap: 13px; }
+  .cg-vehicles .vehicle-dashboard-header-actions { width: 100%; }
+  .cg-vehicles .vehicle-dashboard-toolbar { grid-template-columns: minmax(0, 1fr); }
+  .cg-vehicles .vehicle-dashboard-search { min-width: 0; height: 48px; }
+  .cg-vehicles .vehicle-dashboard-result-count { width: 100%; justify-content: flex-start; }
+  .cg-vehicles .vehicle-dashboard-stats { gap: 10px; }
+  .cg-vehicles .vehicle-dashboard-stat-card { min-height: 122px; padding: 14px; }
+  .cg-vehicles .vehicle-dashboard-stat-top strong { font-size: 23px !important; }
+  .cg-vehicles .vehicle-mobile-grid { gap: 12px; padding: 12px; }
+  .cg-vehicles .vehicle-mobile-card { padding: 15px; }
+  .cg-vehicles .vehicle-mobile-card-head strong { font-size: 17px !important; }
+  .cg-vehicles .vehicle-mobile-card-head > div > span { font-size: 14px !important; line-height: 1.45; }
+  .cg-vehicles .vehicle-owner-row strong { font-size: 15px !important; }
+  .cg-vehicles .vehicle-owner-row span { font-size: 14px !important; }
+  .cg-vehicles .vehicle-mobile-meta { gap: 9px; margin-top: 13px; }
+  .cg-vehicles .vehicle-mobile-meta > div { padding: 11px; min-height: 70px; }
+  .cg-vehicles .vehicle-mobile-meta span { font-size: 13px !important; line-height: 1.4; }
+  .cg-vehicles .vehicle-mobile-meta strong {
+    font-size: 15px !important;
+    line-height: 1.45;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+  }
+  .cg-vehicles .vehicle-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .cg-vehicles .vehicle-card-actions button {
+    min-height: 44px;
+    height: auto;
+    padding: 10px 12px;
+    font-size: 14px !important;
+    line-height: 1.4;
+  }
+  .cg-vehicles .vehicle-open-job { min-height: 46px; font-size: 14px !important; }
+  .cg-vehicles.vehicle-profile-page .vehicle-profile-header,
+  .cg-vehicles.vehicle-profile-page .vehicle-panel { padding: 14px; }
+  .cg-vehicles .vehicle-profile-actions button { width: 100%; }
+  .cg-vehicles .vehicle-profile-tabs { scrollbar-width: thin; }
+  .cg-vehicles .vehicle-current-job { grid-template-columns: auto minmax(0, 1fr); }
+  .cg-vehicles .vehicle-current-job > b { grid-column: 2; }
+}
+@media (max-width: 420px) {
+  .cg-vehicles .vehicle-dashboard-header-actions { grid-template-columns: minmax(0, 1fr); }
+  .cg-vehicles .vehicle-profile-kpis { gap: 8px; }
+  .cg-vehicles .vehicle-profile-kpis > div { padding: 12px; }
+  .cg-vehicles .vehicle-profile-actions { grid-template-columns: minmax(0, 1fr); }
+  .cg-vehicles .vehicle-card-actions { grid-template-columns: minmax(0, 1fr); }
+  .cg-vehicles .vehicle-info-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cg-vehicles .vehicle-table tbody tr { transition: none; }
+}
