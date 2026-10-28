@@ -52,9 +52,8 @@ export const invoiceTaxMode = (form) => {
 // invoice item has one total taxRate, which it splits equally into CGST/SGST.
 // Never persist the CGST or SGST component alone as the whole tax rate.
 export const INVOICE_CGST_SGST_RATES = Object.freeze(['2.5', '5', '9', '18']);
-// IGST is the entire GST percentage, not one half of CGST + SGST.
-// Include 18% so an inter-state ₹100 taxable item can be invoiced at ₹118.
-export const INVOICE_IGST_RATES = Object.freeze(['2.5', '9', '18']);
+// IGST is the entire GST percentage. Repeated IGST 5% is one option.
+export const INVOICE_IGST_RATES = Object.freeze(['5']);
 
 export const invoiceComponentFromTotalRate = (totalRate) =>
   totalRate === '' || totalRate == null ? '' : String(Number(totalRate) / 2);
@@ -62,23 +61,29 @@ export const invoiceComponentFromTotalRate = (totalRate) =>
 export const invoiceTotalFromGstComponent = (componentRate) =>
   componentRate === '' ? '' : String(Number(componentRate) * 2);
 
-export const invoiceLineTaxChoices = (mode) => {
-  if (mode === 'cgst_sgst') return [
-    { value: '0', label: 'GST None (0%)' },
-    ...INVOICE_CGST_SGST_RATES.map((rate) => ({
-      value: invoiceTotalFromGstComponent(rate),
-      label: `CGST ${rate}% + SGST ${rate}% = ${Number(rate) * 2}%`,
-    })),
-  ];
-  if (mode === 'igst') return [
-    { value: '0', label: 'GST None (0%)' },
-    ...INVOICE_IGST_RATES.map((rate) => ({
-      value: rate, label: `IGST ${rate}%`,
-    })),
-  ];
-  // Let users choose while the legal place of supply is still being entered.
-  // Saving still requires a valid state; no invented CGST/IGST classification.
-  if (mode === 'unknown') return [0, 2.5, 5, 9, 10, 18, 36]
-    .map((rate) => ({ value: String(rate), label: rate === 0 ? 'GST None (0%)' : `GST ${rate}%` }));
+/** Dropdown presets; Django still validates/calculate taxes using total taxRate.
+ * Saved documents with older classified rates remain selectable in the editors.
+ */
+export const invoiceLineTaxChoices = (mode, backendChoices = null) => {
+  const supplied = backendChoices?.[mode];
+  if ((mode === 'cgst_sgst' || mode === 'igst') && Array.isArray(supplied)
+      && supplied.length && supplied.every(item => /^\\d+(?:\\.\\d+)?$/.test(String(item?.value))
+        && typeof item?.label === 'string')) {
+    return supplied.filter((item, index) =>
+      supplied.findIndex(other => String(other.value) === String(item.value)) === index);
+  }
+  if (mode === 'cgst_sgst') return INVOICE_CGST_SGST_RATES.map(rate => ({
+    value: invoiceTotalFromGstComponent(rate),
+    label: `CGST ${rate}% + SGST ${rate}% = ${Number(rate) * 2}%`,
+  }));
+  if (mode === 'igst') return INVOICE_IGST_RATES.map(rate => ({
+    value: rate, label: `IGST ${rate}%`,
+  }));
+  // Allow a combined rate to be chosen while POS is entered; never guess tax mode.
+  // The server rejects saving without a valid legal place of supply.
+  if (mode === 'unknown') return [...new Set([
+    ...INVOICE_CGST_SGST_RATES.map(invoiceTotalFromGstComponent),
+    ...INVOICE_IGST_RATES,
+  ])].map(value => ({ value, label: `GST ${value}%` }));
   return [];
 };
