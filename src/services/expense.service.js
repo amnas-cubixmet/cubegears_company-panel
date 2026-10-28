@@ -48,21 +48,23 @@ export const getExpenseById = async (id) => {
 };
 
 export const createExpense = async (data) => {
+  const payload = expenseToApiPayload(data);
   if (USE_MOCK_API) {
     await delay();
     return normalizeExpense(addMockExpense(data));
   }
-  const row = await apiClient.post(API_ENDPOINTS.EXPENSES, expenseToApiPayload(data));
+  const row = await apiClient.post(API_ENDPOINTS.EXPENSES, payload);
   return normalizeExpense(row);
 };
 
 export const updateExpense = async (id, data) => {
+  const payload = expenseToApiPayload(data);
   if (USE_MOCK_API) {
     await delay();
     const row = updateMockExpense(id, data);
     return row ? normalizeExpense(row) : null;
   }
-  const row = await apiClient.put(`${API_ENDPOINTS.EXPENSES}/${id}`, expenseToApiPayload(data));
+  const row = await apiClient.put(`${API_ENDPOINTS.EXPENSES}/${id}`, payload);
   return normalizeExpense(row);
 };
 
