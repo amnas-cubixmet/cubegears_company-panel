@@ -130,10 +130,10 @@ export const DailyWagePage = ({ mode = 'overview' }) => {
         </div>
       )}
       {error && <p className="dw-alert" role="alert">{error} <button type="button" onClick={() => setRefreshToken((v) => v + 1)}>Retry</button></p>}
-      <section className="dw-card">
+      <section className="dw-card" aria-labelledby="dw-records-heading">
         <div className="dw-card-head">
           <div>
-            <h2>{mode === 'overview' ? 'Employee Wage Accounts' : mode === 'history' ? 'Posted Daily Earnings' : 'Wage Payment Transactions'}</h2>
+            <h2 id="dw-records-heading">{mode === 'overview' ? 'Employee Wage Accounts' : mode === 'history' ? 'Posted Daily Earnings' : 'Wage Payment Transactions'}</h2>
             <p>{mode === 'overview' ? 'Select a worker to approve days, add earnings or settle unpaid wages.' : 'Permanent transaction history for the selected company.'}</p>
           </div>
           <span>{items.length} records</span>
