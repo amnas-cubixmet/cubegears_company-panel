@@ -311,8 +311,8 @@ try {
           await taxRate.waitFor();
           if(await taxRate.isDisabled()) throw Error('GST rate must be selectable before TO state.');
           await page.locator('.eway-goods-fields').getByPlaceholder('0.00').first().fill('100');
-          await taxRate.selectOption('18');
-          if(await taxRate.inputValue()!=='18') throw Error('GST 18% choice was lost before state selection.');
+          await taxRate.selectOption('igst:18');
+          if(await taxRate.inputValue()!=='igst:18') throw Error('IGST 18% choice was lost before state selection.');
           await toGstin.fill('33ABCDE1234F1Z5');
           if(await toState.inputValue()!=='33' || !(await toState.isDisabled())) {
             throw Error('TO State Code was not auto-filled and locked from Tamil Nadu GSTIN.');
@@ -322,12 +322,14 @@ try {
           await toGstin.fill('URP');
           if(await toState.isDisabled()) throw Error('URP recipient must allow manual State selection.');
           await toState.selectOption('32');
+          // After crossing back to the supplier state the legal tax is CGST + SGST.
+          await taxRate.selectOption('cgst:9');
           await page.waitForFunction(() => {
             const rows = [...document.querySelectorAll('.eway-goods-totals > div')];
             return rows.some(node => node.innerText.includes('CGST') && node.innerText.includes('₹9.00')) &&
               rows.some(node => node.innerText.includes('SGST') && node.innerText.includes('₹9.00'));
           });
-          if(await taxRate.inputValue()!=='18') throw Error('GST rate did not survive URP state change.');
+          if(await taxRate.inputValue()!=='cgst:9') throw Error('CGST 9% was not selected for intra-state supply.');
         }
 
         if(path==='/invoices/e-way-bills/new' && profile.width===390) {
