@@ -1,0 +1,178 @@
+/* Job Card: Overview, Inspection, Estimate. Scoped to the job workspace. */
+.cg-job-detail.job-workspace-dashboard {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.cg-job-detail .job-detail-header h1 {
+  font-size: clamp(23px, 2vw, 29px) !important;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.cg-job-detail .job-detail-header p { font-size: 14px !important; line-height: 1.5; }
+.cg-job-detail .job-detail-header select,
+.cg-job-detail .job-detail-header button {
+  min-height: 46px;
+  height: auto;
+  padding-block: 10px;
+  font-size: 14px;
+}
+.cg-job-detail .job-page-breadcrumb { font-size: 14px; line-height: 1.5; }
+.cg-job-detail .job-page-breadcrumb-link { min-height: 42px; }
+.cg-job-detail .job-workspace-toolbar { gap: 12px; flex-wrap: wrap; }
+.cg-job-detail .job-workspace-toolbar,
+.cg-job-detail .job-workspace-toolbar span,
+.cg-job-detail .job-workspace-lock-note { font-size: 14px; line-height: 1.5; }
+.cg-job-detail .job-workspace-toolbar button {
+  min-height: 44px;
+  padding: 9px 13px;
+  font-size: 14px;
+}
+.cg-job-detail .job-detail-summary > div {
+  min-width: 0;
+  padding: 15px;
+  border-radius: 12px;
+}
+.cg-job-detail .job-detail-summary > div > div:first-child { font-size: 13px !important; line-height: 1.4; }
+.cg-job-detail .job-detail-summary > div > div:last-child {
+  font-size: 15px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.cg-job-detail .job-workflow-tabs { max-width: 100%; overflow-x: auto; scrollbar-width: thin; }
+.cg-job-detail .job-workflow-tab,
+.cg-job-detail .job-full-log-tab {
+  min-height: 46px;
+  height: auto;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.cg-job-detail .job-workflow-tab-label { font-size: 14px; white-space: normal; }
+
+/* Inspection: labels, checklist, form fields and action buttons. */
+.cg-job-detail .cg-inspection-overview,
+.cg-job-detail .cg-inspection-checklist,
+.cg-job-detail .cg-inspection-findings { padding: 18px; }
+.cg-job-detail .cg-inspection-kicker { font-size: 13px; line-height: 1.4; }
+.cg-job-detail .cg-inspection-overview h3 { font-size: 20px; line-height: 1.4; }
+.cg-job-detail .cg-inspection-overview h3 span,
+.cg-job-detail .cg-inspection-overview p,
+.cg-job-detail .cg-inspection-section-heading p { font-size: 14px; line-height: 1.5; }
+.cg-job-detail .cg-inspection-section-heading h3 { font-size: 19px; line-height: 1.4; }
+.cg-job-detail .cg-inspection-stats span,
+.cg-job-detail .cg-inspection-progress-head,
+.cg-job-detail .cg-inspection-hint,
+.cg-job-detail .cg-inspection-category-row label,
+.cg-job-detail .cg-inspection-category-row > span { font-size: 14px; line-height: 1.5; }
+.cg-job-detail .cg-inspection-stats strong { font-size: 23px; }
+.cg-job-detail .cg-inspection-check-name > span { font-size: 15px; line-height: 1.45; }
+.cg-job-detail .cg-inspection-check-name small,
+.cg-job-detail .cg-inspection-finding-body small,
+.cg-job-detail .cg-inspection-finding-body p { font-size: 13px; line-height: 1.5; }
+.cg-job-detail .cg-inspection-finding-body strong { font-size: 15px; line-height: 1.45; }
+.cg-job-detail .cg-inspection-condition,
+.cg-job-detail .cg-inspection-primary,
+.cg-job-detail .cg-inspection-category-footer button,
+.cg-job-detail .cg-inspection-finding-actions button,
+.cg-job-detail .cg-inspection-footer button {
+  min-height: 44px;
+  height: auto;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.cg-job-detail .cg-inspection .cg-inspection-search input:not([type="checkbox"]):not([type="file"]),
+.cg-job-detail .cg-inspection :is(input:not([type="checkbox"]):not([type="file"]),textarea,select) {
+  min-height: 46px;
+  font-size: 16px !important;
+  line-height: 1.45;
+}
+.cg-job-detail .cg-inspection-form label,
+.cg-job-detail .cg-inspection-category-row label { font-size: 14px; line-height: 1.45; }
+.cg-job-detail .cg-inspection-expand > summary { font-size: 15px; line-height: 1.45; min-height: 45px; }
+
+/* Estimate GST dropdown (total item GST %, not component CGST %). */
+.cg-job-detail .job-quick-estimate { gap: 18px; }
+.cg-job-detail .job-quick-header,
+.cg-job-detail .job-quick-panel,
+.cg-job-detail .job-quick-history { padding: 18px; }
+.cg-job-detail .job-quick-header h2 { font-size: 21px; line-height: 1.4; }
+.cg-job-detail .job-quick-section-head h3 { font-size: 19px; line-height: 1.4; }
+.cg-job-detail .job-quick-group-heading h4 { font-size: 16px; line-height: 1.45; }
+.cg-job-detail .job-quick-group-heading p,
+.cg-job-detail .job-quick-header p,
+.cg-job-detail .job-quick-section-head p,
+.cg-job-detail .job-quick-save-note { font-size: 14px; line-height: 1.5; }
+.cg-job-detail .job-quick-eyebrow,
+.cg-job-detail .job-quick-count { font-size: 13px; }
+.cg-job-detail .job-quick-line-header strong { font-size: 15px; }
+.cg-job-detail .job-quick-line-fields {
+  grid-template-columns: minmax(155px,1.5fr) minmax(110px,.8fr) minmax(90px,.6fr) minmax(115px,.8fr);
+  gap: 12px;
+}
+.cg-job-detail .job-quick-line-fields label,
+.cg-job-detail .job-quick-name-field,
+.cg-job-detail .job-quick-type-fixed,
+.cg-job-detail .job-quick-adjustments label {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.cg-job-detail .job-quick-estimate :is(input,select),
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field input {
+  min-height: 46px;
+  font-size: 16px !important;
+  line-height: 1.4;
+}
+.cg-job-detail .job-quick-estimate select.job-quick-gst-select {
+  min-width: 0;
+  font-size: 16px !important;
+  font-weight: 650;
+  cursor: pointer;
+}
+.cg-job-detail .job-quick-line-total { font-size: 14px; line-height: 1.4; }
+.cg-job-detail .job-quick-line-total strong { font-size: 16px; }
+.cg-job-detail .job-quick-amounts dt { font-size: 14px; }
+.cg-job-detail .job-quick-amounts dd { font-size: 16px; }
+.cg-job-detail .job-quick-grand-total dd { font-size: 25px; }
+.cg-job-detail .job-quick-outline,
+.cg-job-detail .job-quick-group-heading .job-quick-add-button,
+.cg-job-detail .job-quick-import,
+.cg-job-detail .job-quick-actions button,
+.cg-job-detail .job-quick-line-header button {
+  min-height: 44px;
+  font-size: 14px;
+}
+.cg-job-detail .job-quick-line-header button { min-width: 44px; width: 44px; height: 44px; }
+.cg-job-detail .job-quick-type-fixed strong { min-height: 46px; font-size: 15px; }
+.cg-job-detail .job-quick-actions small,
+.cg-job-detail .job-quick-history-list,
+.cg-job-detail .job-quick-history summary { font-size: 14px; line-height: 1.45; }
+.cg-job-detail .job-quick-field-error,
+.cg-job-detail .job-quick-invalid { font-size: 13px; line-height: 1.45; }
+.cg-job-detail .job-quick-estimate :is(input,select):focus-visible {
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+@media (max-width: 1200px) {
+  .cg-job-detail .job-quick-line-fields { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cg-job-detail .job-quick-line-fields .job-quick-description { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .cg-job-detail .job-detail-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cg-job-detail .job-quick-grid { grid-template-columns: minmax(0,1fr); }
+  .cg-job-detail .job-quick-header,
+  .cg-job-detail .job-quick-panel,
+  .cg-job-detail .cg-inspection-overview,
+  .cg-job-detail .cg-inspection-checklist,
+  .cg-job-detail .cg-inspection-findings { padding: 14px; }
+  .cg-job-detail .job-quick-adjustments { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 420px) {
+  .cg-job-detail .job-quick-line-fields { grid-template-columns: minmax(0,1fr); }
+  .cg-job-detail .job-quick-line-fields .job-quick-description { grid-column: auto; }
+  .cg-job-detail .job-workspace-tab-label { white-space: normal; }
+  .cg-job-detail .job-detail-summary { gap: 8px; }
+}
