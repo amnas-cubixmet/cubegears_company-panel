@@ -85,6 +85,11 @@ function fixture(path) {
   if(path==='/saas/billing') return {plan:null,usage:{seatsUsed:0},users:[],invoices:[]};
   if(path==='/saas/storage') return {usedGb:0,files:[],settings:{allowedTypes:['image/png'],maxFileMb:10,retentionDays:0},billing:{creditsPerGb:'10',includedGb:'0',period:'monthly',active:true}};
   if(path==='/saas/storage/events') return {count:0,results:[]};
+  if(path==='/attendance-manager/approvals') return [{
+    id:'LEAVE-TEST-1',type:'Leave Request',status:'Pending',staffName:'Belle Trujillo',
+    staffId:'EMP-0001',startDate:'2026-10-30',endDate:'2026-10-30',
+    totalDays:1,reason:'Personal leave request',halfDay:false,
+  }];
   if(path==='/attendance/status') return {status:'CLOCKED_OUT',workedHours:'0h'};
   return [];
 }
@@ -400,6 +405,53 @@ try {
             throw Error('Leave Date did not reset to today on reopening.');
           }
           await dialog.getByRole('button', { name: 'Cancel' }).click();
+        }
+
+        if(path.startsWith('/attendance-manager/') && [
+          'overview','daily','calendar','leave-requests','shifts','reports','rules'
+        ].includes(path.split('/')[2])) {
+          const metrics = await page.evaluate(() => {
+            const root = document.querySelector('.cg-attendance-manager');
+            if (!root) return { missing: true };
+            const font = selector => {
+              const element = root.querySelector(selector);
+              return element ? parseFloat(getComputedStyle(element).fontSize) : null;
+            };
+            const size = selector => {
+              const element = root.querySelector(selector);
+              return element ? Math.round(element.getBoundingClientRect().height) : null;
+            };
+            return {
+              tab: font('.attendance-manager-dashboard-tabs button'),
+              dailyWages: font('.attendance-manager-header-actions .dw-button'),
+              rulesBadge: font('.attendance-manager-header-badge'),
+              header: font('.am-section-header h2,.am-calendar-header h2,.am-daily-heading h2,.attendance-rules-header h2'),
+              label: font('.am-approval-details strong,.am-table-card td,.am-dashboard-stat-top span,.am-shift-list strong,.am-report-filter label > span,.attendance-mode-copy small'),
+              leaveButton: font('.am-approval-actions > button'),
+              leaveButtonHeight: size('.am-approval-actions > button'),
+              field: font('.am-daily-date input,.am-calendar-month-controls select,.am-shift-form input,.am-report-filter select,.attendance-rule-field input'),
+              mainWidth: document.documentElement.scrollWidth,
+              viewport: window.innerWidth,
+            };
+          });
+          if(metrics.missing) throw Error('Attendance Manager route missing shared layout: '+path);
+          for (const field of ['tab','dailyWages','rulesBadge','label','leaveButton']) {
+            if(metrics[field]!==null && metrics[field]<13.5) {
+              throw Error('Unreadable Attendance Manager '+field+' on '+path+': '+JSON.stringify(metrics));
+            }
+          }
+          if(metrics.header!==null && metrics.header<18.5) {
+            throw Error('Attendance Manager heading below 19px on '+path+': '+JSON.stringify(metrics));
+          }
+          if(metrics.field!==null && metrics.field<15.5) {
+            throw Error('Attendance Manager form field below 16px on '+path+': '+JSON.stringify(metrics));
+          }
+          if(metrics.leaveButtonHeight!==null && metrics.leaveButtonHeight<44) {
+            throw Error('Leave approval button below 44px: '+JSON.stringify(metrics));
+          }
+          if(metrics.mainWidth>metrics.viewport+2) {
+            throw Error('Attendance Manager horizontal page overflow on '+path+': '+JSON.stringify(metrics));
+          }
         }
 
         if(path==='/staff-management/overview') {
