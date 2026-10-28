@@ -38,16 +38,16 @@ test('GST workshop can select a line tax rate before the customer supply state i
   assert.ok(eligible.some((row) => row.value === '18'));
   assert.match(eligible.find((row) => row.value === '18').label, /CGST 9% \+ SGST 9%/);
   assert.ok(invoiceLineTaxChoices('unknown').some((row) => row.value === '18'));
-  assert.ok(invoiceLineTaxChoices('unknown').some((row) => row.value === '9'));
+  assert.ok(invoiceLineTaxChoices('unknown').some((row) => row.value === '10'));
 });
 
 test('correct rate options follow an actual inter-state customer supply location', () => {
   const current = draft('33-Tamil Nadu');
   assert.equal(invoiceTaxMode(current), 'igst');
   const options = invoiceLineTaxChoices(invoiceTaxMode(current));
-  assert.deepEqual(options.map((row) => row.value), ['0', '2.5', '9', '18']);
-  assert.ok(options.some((row) => row.value === '9' && row.label === 'IGST 9%'));
-  assert.ok(options.some((row) => row.value === '18' && row.label === 'IGST 18%'));
+  assert.deepEqual(options.map((row) => row.value), ['5']);
+  assert.ok(options.some((row) => row.value === '5' && row.label === 'IGST 5%'));
+  assert.ok(!options.some((row) => row.value === '18'));
 });
 
 test('an explicitly invalid customer state does not become a fabricated valid supply', () => {
