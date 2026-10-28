@@ -73,6 +73,7 @@ export function InvoiceRoutePage() {
   const [verifiedTotals, setVerifiedTotals] = useState(null);
   const [backendPreviewError, setBackendPreviewError] = useState('');
   const [branchStateMismatch, setBranchStateMismatch] = useState(false);
+  const registrationMismatch = branchStateMismatch || Boolean(workshopTaxProfile?.registrationStateMismatch);
   const previewFingerprint = useMemo(() => JSON.stringify({
     invoiceType: form.invoiceType,
     sellerGstin: form.seller?.gstin || '',
@@ -725,9 +726,17 @@ export function InvoiceRoutePage() {
             <div className="invoice-two-col">
               <label>State
                 <input value={form.seller?.state || ''} readOnly aria-readonly="true"
-                  aria-invalid={branchStateMismatch} placeholder="Kerala"/>
-                {branchStateMismatch && <small className="invoice-input-error" role="alert">
-                  Branch state and GSTIN state do not match. Review your branch GST settings.
+                  aria-invalid={registrationMismatch} placeholder="Kerala"/>
+                {registrationMismatch && <small className="invoice-input-error" role="alert">
+                  {workshopTaxProfile?.registrationStateMismatch
+                    ? `Supplying ${workshopTaxProfile.stateSource === 'branch' ? 'branch' : 'company'} state (${workshopTaxProfile.supplyingState || 'Not specified'}) does not match the GSTIN state (${workshopTaxProfile.supplierState}).`
+                    : 'Supplying branch state and company GSTIN state do not match.'}
+                  {' '}
+                  <button type="button" className="invoice-settings-link" onClick={() => navigate(
+                    workshopTaxProfile?.stateSource === 'branch' && workshopTaxProfile?.branchId
+                      ? '/account/company?branchId=' + encodeURIComponent(workshopTaxProfile.branchId) + '#workshop-branches'
+                      : '/account/company#workshop-branches'
+                  )}>Review branch settings</button>
                 </small>}
               </label>
               <label>State Code
