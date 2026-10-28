@@ -706,18 +706,21 @@ export function EWayBillPage() {
                 </div>
 
                 <div className="eway-goods-fields grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[110px_minmax(180px,1.25fr)_minmax(180px,1.25fr)_90px_100px_150px]">
-                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">HSN
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">HSN / Item Code
                     <input
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       data-eway-field={`items.${index}.hsnCode`} aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])}
                       type="text"
-                      inputMode="numeric"
-                      maxLength={8}
+                      inputMode="text"
+                      maxLength={16}
                       value={item.hsnCode}
-                      onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, '').slice(0, 8))}
-                      placeholder="e.g. 8708"
+                      onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 16))}
+                      placeholder="8708 or AB12"
                     />
                     {showFieldError(`items.${index}.hsnCode`)}
+                    <small className="text-muted text-[11px] leading-4">
+                      Letters allowed in drafts. Official HSN for API preparation must be 2–8 digits.
+                    </small>
                   </label>
 
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Product Name
