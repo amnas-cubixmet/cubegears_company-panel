@@ -553,3 +553,25 @@
     grid-template-columns: 44px minmax(0,1fr) minmax(70px,.7fr) 44px;
   }
 }
+
+
+/* Stronger specificity for late legacy headings and Rules descriptions.
+   Existing route-level styles previously kept these at 17–18px / 12px. */
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module :is(
+  .am-section-header,
+  .am-calendar-header,
+  .am-daily-heading,
+  .am-panel__header,
+  .attendance-rules-header,
+  .am-rules-header
+) h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-rules
+:is(.attendance-mode-copy small, .attendance-rule-toggle small,
+    .attendance-rule-title p, .attendance-rule-note,
+    .attendance-rule-field > small, .attendance-rule-field > span) {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
