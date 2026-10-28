@@ -15,6 +15,7 @@ import {
 } from '../../components/payments/payments.utils';
 import '../../styles/payments.css';
 import '../../styles/payments-unified.css';
+import '../../styles/payments-borderless-forms.css';
 
 const paymentService = resourceConfigs.payments.service;
 const money = new Intl.NumberFormat('en-IN', {
