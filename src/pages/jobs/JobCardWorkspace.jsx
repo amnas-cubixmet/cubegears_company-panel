@@ -1690,7 +1690,7 @@ export function JobCardWorkspace() {
             </button>
             <button type="button" className="job-approved-pdf-continue"
               onClick={continueAfterApproval}>
-              {pdfOffer.nextStage ? 'Continue to Work' : 'Close'} <ChevronRight size={16} aria-hidden="true"/>
+              {pdfOffer?.nextStage ? 'Continue to Work' : 'Close'} <ChevronRight size={16} aria-hidden="true"/>
             </button>
           </div>
         </div>
