@@ -51,7 +51,10 @@ export function InvoiceRoutePage() {
   const [activeTab, setActiveTab] = useState(kindFromUrl);
   const [listQuery, setListQuery] = useState('');
   const [listStatus, setListStatus] = useState('All');
-  const [form, setForm] = useState(() => blankBillingDocument(kindFromUrl, { emptyInputs: mode === 'create' }));
+  const [form, setForm] = useState(() => blankBillingDocument(kindFromUrl, {
+    emptyInputs: mode === 'create',
+    jobId: new URLSearchParams(location.search).get('jobId'),
+  }));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -159,7 +162,10 @@ export function InvoiceRoutePage() {
     if (mode === 'list') loadList();
     else if (mode === 'create') {
       setSelectedCustomerId('');
-      setForm(blankBillingDocument(kindFromUrl, { emptyInputs: true }));
+      setForm(blankBillingDocument(kindFromUrl, {
+        emptyInputs: true,
+        jobId: new URLSearchParams(location.search).get('jobId'),
+      }));
       loadList({ withReferences: true });
     } else loadDocument();
   }, [location.pathname, location.search, id]);
@@ -772,12 +778,12 @@ export function InvoiceRoutePage() {
             </label>
 
             <label>GSTIN
-              <input value={form.customer?.gstin || ''} onChange={(e) => update('customer.gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
+              <input value={form.customer?.gstin || ''} onChange={(e) => update('customer.gstin', e.target.value.toUpperCase())} placeholder=""/>
             </label>
 
             <div className="invoice-two-col">
               <label>State
-                <input value={form.customer?.state || ''} onChange={(e) => update('customer.state', e.target.value)} placeholder="Kerala"/>
+                <input value={form.customer?.state || ''} onChange={(e) => update('customer.state', e.target.value)} placeholder=""/>
               </label>
 
             </div>
@@ -805,7 +811,7 @@ export function InvoiceRoutePage() {
             </label>
             <div className="invoice-two-col">
               <label>Job Card No.
-                <input value={form.jobCardNo || ''} onChange={(e) => update('jobCardNo', e.target.value)} placeholder="JOB-2048"/>
+                <input value={form.jobCardNo || ''} onChange={(e) => update('jobCardNo', e.target.value)} placeholder=""/>
               </label>
               <label>Staff / Advisor
                 <input value={form.staff || ''} onChange={(e) => update('staff', e.target.value)}/>

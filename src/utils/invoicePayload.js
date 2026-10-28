@@ -119,8 +119,12 @@ export const prepareInvoicePayloadForApi = (draft) => {
     throw error;
   }
   const gst = draft.invoiceType === 'gst';
+  // taxMode is calculated by Django from workshop GSTIN and legal place of supply.
+  // A new draft may contain taxMode: '' for display; never send that blank or a
+  // user-edited tax mode to the invoice serializer.
+  const { taxMode: _ignoredTaxMode, ...editableDraft } = draft;
   return {
-    ...draft,
+    ...editableDraft,
     paid: numberField(draft.paid, 'Received amount'),
     discount: numberField(draft.discount, 'Invoice discount'),
     adjustment: numberField(draft.adjustment, 'Adjustment', { min: -9999999999 }),

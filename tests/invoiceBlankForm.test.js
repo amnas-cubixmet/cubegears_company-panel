@@ -7,10 +7,10 @@ const invoice = read('src/pages/invoices/InvoiceRoutePage.jsx');
 const billing = read('src/services/billing.service.js');
 
 test('new invoices and estimates request an empty form while edit keeps saved data', () => {
-  assert.match(invoice, /blankBillingDocument\(kindFromUrl, \{ emptyInputs: mode === 'create' \}\)/);
-  assert.match(invoice, /setForm\(blankBillingDocument\(kindFromUrl, \{ emptyInputs: true \}\)\)/);
+  assert.match(invoice, /blankBillingDocument\(kindFromUrl, \{\s*emptyInputs: mode === 'create',\s*jobId: new URLSearchParams\(location\.search\)\.get\('jobId'\)/);
+  assert.match(invoice, /setForm\(blankBillingDocument\(kindFromUrl, \{\s*emptyInputs: true,\s*jobId: new URLSearchParams\(location\.search\)\.get\('jobId'\)/);
   assert.match(invoice, /else setForm\(JSON\.parse\(JSON\.stringify\(doc\)\)\)/);
-  assert.match(billing, /blankBillingDocument = \(kind = 'invoice', \{ emptyInputs = false \} = \{\}\)/);
+  assert.match(billing, /blankBillingDocument = \(kind = 'invoice', \{ emptyInputs = false, jobId = '' \} = \{\}\)/);
 });
 
 test('date, sample seller name, amounts and invoice terms start blank for new documents', () => {

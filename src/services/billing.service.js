@@ -140,10 +140,14 @@ const getJobInvoicePrefill = () => {
   }
 };
 
-export const blankBillingDocument = (kind = 'invoice', { emptyInputs = false } = {}) => {
-  // Only the New Invoice editor opts into blank inputs. Other consumers keep
-  // their existing defaults and Job Card navigation still keeps explicit data.
-  const prefill = kind === 'invoice' ? getJobInvoicePrefill() : null;
+export const blankBillingDocument = (kind = 'invoice', { emptyInputs = false, jobId = '' } = {}) => {
+  // A normal New Invoice must start blank even when an old Job Card prefill
+  // remains in localStorage. Only an explicit jobId deep link may use it.
+  const storedPrefill = kind === 'invoice' ? getJobInvoicePrefill() : null;
+  const linkedJobId = String(jobId || '').trim();
+  const prefill = storedPrefill && (
+    !emptyInputs || (linkedJobId && String(storedPrefill.jobId) === linkedJobId)
+  ) ? storedPrefill : null;
   return {
     kind,
     invoiceType: 'regular', // Replaced by verified workshop registration on create.
