@@ -10,7 +10,7 @@ const workspace = read('src/pages/jobs/JobCardWorkspace.jsx');
 const css = read('src/styles/job-workspace-readable.css');
 
 test('GST rate dropdown offers selectable total GST % and preserves saved nonstandard rates', () => {
-  assert.deepEqual(estimateGstChoices(), ['0','5','12','18','28','40']);
+  assert.deepEqual(estimateGstChoices(), ['5','10','18','36']);
   assert.deepEqual(estimateGstChoices('18'), ['0','5','12','18','28','40']);
   assert.ok(estimateGstChoices('2.5').includes('2.5'));
   assert.ok(estimateGstChoices('9').includes('9'));
@@ -19,7 +19,7 @@ test('GST rate dropdown offers selectable total GST % and preserves saved nonsta
   assert.ok(!estimateGstChoices('invalid').includes('invalid'));
   assert.match(estimate, /<select[\s\S]*?className="job-quick-gst-select"/);
   assert.match(estimate, /<option value="">Select GST Rate<\/option>/);
-  assert.match(estimate, /estimateGstChoices\(line\.taxRate\)\.map/);
+  assert.match(estimate, /estimateGstChoices\(line\.taxRate, selectedGstMode\)\.map/);
   assert.match(estimate, /edit\(line\.key, 'taxRate', event\.target\.value\)/);
   assert.doesNotMatch(estimate, /<input type="number" min="0" max="100" step="0.01"/);
 });
