@@ -62,7 +62,7 @@ export function JobWorkStockPanel({ jobId, issuedParts = [], onChanged }) {
   const stockQty = selected ? available(selected) : 0;
   const requested = Number(quantity);
   const validQty = Number.isFinite(requested) && requested > 0 &&
-    requested <= stockQty && Math.round(requested * 100) === requested * 100;
+    requested <= stockQty && /^\\d+(?:\\.\\d{1,2})?$/.test(quantity);
 
   const issue = async (event) => {
     event.preventDefault();
@@ -80,16 +80,20 @@ export function JobWorkStockPanel({ jobId, issuedParts = [], onChanged }) {
     setSuccess('');
     try {
       await jobService.issueJobStockPart(jobId, selected.id, requested);
-      // Refresh stock and job independently so no accidental second issue.
-      const [freshItems] = await Promise.all([
-        stockService.getStockItems(),
-        onChanged?.(),
-      ]);
-      setInventory(Array.isArray(freshItems) ? freshItems : freshItems?.results || []);
       setSelectedId('');
       setLookup('');
       setQuantity('1');
       setSuccess('Stock issued to this Job Card. Inventory balance updated.');
+      // The issue succeeded. A refresh failure must not make it appear as
+      // though nothing was issued, otherwise users might issue it twice.
+      const refreshed = await Promise.allSettled([stockService.getStockItems(), onChanged?.()]);
+      if (refreshed[0].status === 'fulfilled') {
+        const items = refreshed[0].value;
+        setInventory(Array.isArray(items) ? items : items?.results || []);
+      }
+      if (refreshed.some(result => result.status === 'rejected')) {
+        setSuccess('Stock issued successfully. Refresh this page to update the list.');
+      }
     } catch (e) {
       setError(e?.response?.data?.message || e?.message || 'Stock issue failed. Check quantity and permissions.');
     } finally {
