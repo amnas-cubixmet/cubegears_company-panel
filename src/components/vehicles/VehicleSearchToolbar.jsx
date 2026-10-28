@@ -6,6 +6,8 @@ export const VehicleSearchToolbar = ({ query, onQueryChange, resultCount }) => (
     <label className="vehicle-dashboard-search">
       <Search size={14} />
       <input
+        aria-label="Search vehicles"
+        type="search"
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
         placeholder="Search registration, VIN, make/model, customer or phone"
