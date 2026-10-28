@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Check, FileText, ImagePlus, LayoutTemplate, ReceiptText, Save, Sparkles, Trash2 } from 'lucide-react';
 import { settingsService } from '../../services/settings.service';
@@ -37,6 +37,19 @@ const accents = [
   { id: 'blue', label: 'Blue' },
   { id: 'graphite', label: 'Graphite' }
 ];
+
+function focusFirstTemplateError() {
+  window.requestAnimationFrame(() => {
+    const field = document.querySelector('.document-templates-page [aria-invalid="true"]');
+    if (!field) return;
+    field.focus({ preventScroll: true });
+    field.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'center',
+      inline: 'nearest',
+    });
+  });
+}
 
 function Preview({ kind, settings }) {
   const selected = kind === 'invoice' ? settings.invoiceTemplate : settings.estimateTemplate;
@@ -103,6 +116,7 @@ function Preview({ kind, settings }) {
 
 export function DocumentTemplates() {
   const navigate = useNavigate();
+  const logoInputRef = useRef(null);
   const [settings, setSettings] = useState(defaults);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsReady, setSettingsReady] = useState(false);
@@ -168,6 +182,7 @@ export function DocumentTemplates() {
     setFieldErrors(problems);
     if (Object.keys(problems).length) {
       setSettingsError(templateErrorSummary(problems));
+      focusFirstTemplateError();
       return;
     }
     setSavingSettings(true);
@@ -182,6 +197,7 @@ export function DocumentTemplates() {
       setSettingsError(Object.keys(problems).length
         ? templateErrorSummary(problems)
         : error?.message || 'Unable to save company invoice templates.');
+      if (Object.keys(problems).length) focusFirstTemplateError();
     } finally {
       setSavingSettings(false);
     }
@@ -205,6 +221,7 @@ export function DocumentTemplates() {
       const message = error?.message || 'Unable to prepare this image.';
       setFieldErrors((old) => ({ ...old, businessLogo: message }));
       setSettingsError(message);
+      focusFirstTemplateError();
     } finally {
       setPreparingLogo(false);
     }
@@ -243,10 +260,12 @@ export function DocumentTemplates() {
               {settings.businessLogo ? <img src={settings.businessLogo} alt="Business logo"/> : <span>{(settings.businessName || 'CG').split(/\s+/).map((word) => word[0]).join('').slice(0, 2).toUpperCase()}</span>}
             </div>
             <div className="business-logo-actions">
-              <label className="template-upload-button"><ImagePlus size={15}/>{preparingLogo ? "Preparing logo…" : "Upload Logo"}<input type="file" accept="image/*" disabled={preparingLogo} onChange={uploadLogo}/></label>
+              <button type="button" className="template-upload-button" aria-controls="business-logo-input" aria-invalid={Boolean(fieldErrors.businessLogo)} aria-describedby={fieldErrors.businessLogo ? 'business-logo-error' : 'business-logo-help'} disabled={preparingLogo} onClick={() => logoInputRef.current?.click()}><ImagePlus size={15}/>{preparingLogo ? 'Preparing logo…' : 'Upload Logo'}</button>
+              <input ref={logoInputRef} id="business-logo-input" className="template-logo-input" type="file" accept="image/*" aria-label="Choose business logo image" disabled={preparingLogo} onChange={uploadLogo}/>
               {settings.businessLogo && <button type="button" className="template-remove-logo" onClick={() => update('businessLogo', '')}><Trash2 size={14}/>Remove</button>}
             </div>
-            {fieldErrors.businessLogo && <small className="template-input-error" role="alert">{fieldErrors.businessLogo}</small>}
+            <small id="business-logo-help" className="template-logo-help">Choose an image under 10 MB. It will be resized and compressed before saving.</small>
+            {fieldErrors.businessLogo && <small id="business-logo-error" className="template-input-error" role="alert">{fieldErrors.businessLogo}</small>}
           </div>
 
           <div className="business-fields-grid">
