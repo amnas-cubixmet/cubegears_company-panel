@@ -9,6 +9,7 @@ import { WorkshopStaffSection } from '../staff-management/WorkshopStaffSection';
 import { SimpleStaffOverview } from '../staff-management/SimpleStaffOverview';
 import '../../styles/staff-management.css';
 import '../../styles/staff-simple-overview.css';
+import '../../styles/staff-management-readable.css';
 
 const resolveSection = (pathname) => {
   if (pathname.endsWith('/overview')) return 'overview';
