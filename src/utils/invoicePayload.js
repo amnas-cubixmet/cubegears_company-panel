@@ -42,9 +42,12 @@ export const validateInvoiceDraft = (draft) => {
   // but the legal Place of Supply must be valid when saving the document.
   const suppliedPlace = draft.customer?.placeOfSupply ||
     draft.customer?.stateCode || draft.customer?.state || '';
-  if (draft.invoiceType === 'gst' &&
-      (!invoiceStateCode(suppliedPlace) || invoiceTaxMode(draft) === 'unknown')) {
-    errors['customer.placeOfSupply'] = 'Enter a valid Place of Supply state before saving.';
+  if (draft.invoiceType === 'gst') {
+    if (!invoiceStateCode(suppliedPlace)) {
+      errors['customer.placeOfSupply'] = 'Enter a valid Place of Supply state before saving.';
+    } else if (invoiceTaxMode(draft) === 'unknown') {
+      errors.invoiceType = 'Workshop GST registration or state could not be verified. Check Company Settings.';
+    }
   }
   if (!String(draft.customer?.name || '').trim()) errors['customer.name'] = 'Customer name is required.';
   if (!draft.items?.length) errors.items = 'Add at least one item.';
