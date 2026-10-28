@@ -1,0 +1,609 @@
+/* Attendance Manager readable UI — all seven routes, desktop + mobile.
+   Imported LAST after attendance-manager.css and attendance-manager-pages.css.
+   Changes presentation only; underlying attendance, wage and leave rules stay intact.
+*/
+.cg-attendance-manager {
+  font-size: 16px;
+  line-height: 1.5;
+  gap: 16px !important;
+}
+.cg-attendance-manager .attendance-manager-pages-content,
+.cg-attendance-manager .attendance-manager-module,
+.cg-attendance-manager .attendance-manager-module > section,
+.cg-attendance-manager .am-panel,
+.cg-attendance-manager .am-table-card,
+.cg-attendance-manager .am-calendar-block {
+  min-width: 0;
+}
+.cg-attendance-manager .attendance-manager-dashboard-header h1 {
+  font-size: 24px !important;
+  line-height: 1.3;
+}
+.cg-attendance-manager .attendance-manager-dashboard-header p {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+.cg-attendance-manager .attendance-manager-header-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cg-attendance-manager .attendance-manager-header-actions .dw-button,
+.cg-attendance-manager .attendance-manager-header-badge {
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: normal;
+}
+.cg-attendance-manager .attendance-manager-header-actions svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.cg-attendance-manager .attendance-manager-dashboard-tabs {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  padding: 7px;
+}
+.cg-attendance-manager .attendance-manager-dashboard-tabs button {
+  min-height: 46px;
+  height: auto;
+  padding: 10px 9px;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.cg-attendance-manager .attendance-manager-dashboard-tabs button svg {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+}
+.cg-attendance-manager .attendance-manager-dashboard-tabs button span {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+/* Consistent headings, explanatory text, text inputs, and action targets. */
+.cg-attendance-manager .am-panel__header h2,
+.cg-attendance-manager .am-section-header h2,
+.cg-attendance-manager .am-calendar-header h2,
+.cg-attendance-manager .am-daily-heading h2,
+.cg-attendance-manager .am-dashboard-panel-title h2,
+.cg-attendance-manager .am-dashboard-panel-title h3,
+.cg-attendance-manager .attendance-rules-header h2,
+.cg-attendance-manager .am-rules-header h2 {
+  font-size: 19px !important;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+.cg-attendance-manager .am-panel__header p,
+.cg-attendance-manager .am-section-header p,
+.cg-attendance-manager .am-calendar-header p,
+.cg-attendance-manager .am-daily-heading p,
+.cg-attendance-manager .attendance-rules-header p,
+.cg-attendance-manager .am-rules-header p {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+.cg-attendance-manager .am-panel,
+.cg-attendance-manager .am-section-header,
+.cg-attendance-manager .am-calendar-header,
+.cg-attendance-manager .am-approval-card,
+.cg-attendance-manager .am-report-filter,
+.cg-attendance-manager .am-rule-card,
+.cg-attendance-manager .rules-header {
+  padding: 18px !important;
+}
+.cg-attendance-manager .am-primary-button,
+.cg-attendance-manager .am-secondary-button,
+.cg-attendance-manager .am-action-button,
+.cg-attendance-manager .am-edit-button,
+.cg-attendance-manager .am-approve-button,
+.cg-attendance-manager .am-reject-button,
+.cg-attendance-manager .am-save-button,
+.cg-attendance-manager .am-employee-name-button,
+.cg-attendance-manager .am-employee-table-link {
+  min-height: 44px !important;
+  height: auto;
+  padding: 10px 14px;
+  font-size: 14px !important;
+  line-height: 1.35;
+  white-space: normal;
+}
+.cg-attendance-manager input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.cg-attendance-manager select,
+.cg-attendance-manager textarea {
+  min-height: 46px;
+  font-size: 16px !important;
+  line-height: 1.4;
+}
+.cg-attendance-manager input[type="checkbox"],
+.cg-attendance-manager input[type="radio"] {
+  min-width: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+  accent-color: var(--primary);
+}
+.cg-attendance-manager label,
+.cg-attendance-manager .am-form-grid label,
+.cg-attendance-manager .am-shift-form > label,
+.cg-attendance-manager .am-shift-assignment-controls label {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+.cg-attendance-manager input::placeholder,
+.cg-attendance-manager textarea::placeholder { opacity: 1; }
+.cg-attendance-manager .am-empty-state,
+.cg-attendance-manager .am-loading-state,
+.cg-attendance-manager .am-dashboard-empty,
+.cg-attendance-manager .am-dashboard-loading,
+.cg-attendance-manager .attendance-rules-loading {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+/* Overview: KPI, productivity, quick actions, attention cards. */
+.cg-attendance-manager .am-dashboard-stats { gap: 12px; }
+.cg-attendance-manager .am-dashboard-stat-card { padding: 17px; min-height: 125px; }
+.cg-attendance-manager .am-dashboard-stat-top span,
+.cg-attendance-manager .am-dashboard-stat-card small,
+.cg-attendance-manager .am-stat-card__top,
+.cg-attendance-manager .am-mini-metric span,
+.cg-attendance-manager .am-dashboard-mini-grid span,
+.cg-attendance-manager .am-dashboard-attention-list span {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-attendance-manager .am-dashboard-stat-top strong,
+.cg-attendance-manager .am-stat-card__value {
+  font-size: 27px !important;
+  line-height: 1.2;
+}
+.cg-attendance-manager .am-dashboard-panel { padding: 18px !important; }
+.cg-attendance-manager .am-dashboard-panel-title,
+.cg-attendance-manager .am-dashboard-productivity-row,
+.cg-attendance-manager .am-dashboard-attention-list,
+.cg-attendance-manager .am-productivity-row,
+.cg-attendance-manager .am-mini-metric strong,
+.cg-attendance-manager .am-dashboard-mini-grid strong,
+.cg-attendance-manager .am-dashboard-attention-list b {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.cg-attendance-manager .am-dashboard-productivity-row strong,
+.cg-attendance-manager .am-productivity-row > strong { font-size: 14px !important; }
+.cg-attendance-manager .am-dashboard-panel-actions button,
+.cg-attendance-manager .am-dashboard-quick-actions button,
+.cg-attendance-manager .am-action-grid button {
+  min-height: 44px;
+  font-size: 14px !important;
+  line-height: 1.4;
+  padding: 10px 12px;
+}
+
+/* Daily attendance: visible dates, staff data, sessions and table text. */
+.cg-attendance-manager .attendance-manager-daily .am-daily-date {
+  height: 46px;
+  min-height: 46px;
+  width: 205px;
+}
+.cg-attendance-manager .attendance-manager-daily .am-daily-date input[type="date"],
+.cg-attendance-manager .attendance-manager-daily .am-search-field input,
+.cg-attendance-manager .attendance-manager-calendar .am-search-field input,
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-month-controls select {
+  font-size: 16px !important;
+}
+.cg-attendance-manager .attendance-manager-daily .am-search-field,
+.cg-attendance-manager .attendance-manager-calendar .am-search-field {
+  min-height: 46px !important;
+  height: 46px !important;
+}
+.cg-attendance-manager .attendance-manager-daily .am-filter-card > select,
+.cg-attendance-manager .attendance-manager-calendar .am-calendar-filter-card > select {
+  min-height: 46px !important;
+  height: 46px !important;
+  font-size: 16px !important;
+}
+.cg-attendance-manager .am-table-card table { font-size: 14px; }
+.cg-attendance-manager .am-table-card th {
+  font-size: 13px !important;
+  padding: 13px 14px;
+  line-height: 1.5;
+}
+.cg-attendance-manager .am-table-card td {
+  font-size: 14px !important;
+  padding: 13px 14px;
+  line-height: 1.5;
+}
+.cg-attendance-manager .am-table-subtext,
+.cg-attendance-manager .am-location-cell,
+.cg-attendance-manager .am-staff-card__head span,
+.cg-attendance-manager .am-staff-card__grid span {
+  font-size: 13px !important;
+  line-height: 1.45;
+}
+.cg-attendance-manager .am-staff-card { padding: 15px; }
+.cg-attendance-manager .am-staff-card__head strong,
+.cg-attendance-manager .am-staff-card__grid strong {
+  font-size: 15px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.cg-attendance-manager .am-staff-card__head select {
+  min-height: 44px;
+  height: auto;
+  font-size: 16px !important;
+}
+.cg-attendance-manager .am-session-mini-list > div,
+.cg-attendance-manager .am-session-mini-list strong,
+.cg-attendance-manager .am-session-mini-list b,
+.cg-attendance-manager .am-location-row,
+.cg-attendance-manager .am-edit-summary {
+  font-size: 13px !important;
+  line-height: 1.45;
+}
+
+/* Monthly Calendar: scroll the dense date matrix inside the card, not the page. */
+.cg-attendance-manager .am-calendar-legend,
+.cg-attendance-manager .am-calendar-block__title,
+.cg-attendance-manager .am-calendar-holiday-strip strong,
+.cg-attendance-manager .am-calendar-holiday-strip small {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-attendance-manager .am-calendar-scroll {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+.cg-attendance-manager .am-calendar-employee-head,
+.cg-attendance-manager .am-calendar-day-head,
+.cg-attendance-manager .am-calendar-employee strong,
+.cg-attendance-manager .am-calendar-employee span,
+.cg-attendance-manager .am-calendar-employee,
+.cg-attendance-manager .am-day {
+  font-size: 13px !important;
+  line-height: 1.3;
+}
+.cg-attendance-manager .am-calendar-employee,
+.cg-attendance-manager .am-day {
+  min-height: 39px;
+  height: auto;
+}
+.cg-attendance-manager .am-calendar-grid {
+  grid-template-columns: minmax(175px, 1.4fr) repeat(var(--am-days), minmax(36px,1fr));
+  min-width: 890px;
+  gap: 5px;
+}
+.cg-attendance-manager .am-calendar-month-controls > button {
+  min-width: 44px;
+  min-height: 44px;
+  height: 44px;
+  width: 44px;
+}
+.cg-attendance-manager .am-calendar-month-controls > label,
+.cg-attendance-manager .am-calendar-month-controls > select {
+  min-height: 46px;
+}
+
+/* Leave Requests: all screenshot elements are 13–16px, including reason/date. */
+.cg-attendance-manager .am-approval-grid {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 16px;
+  align-items: start;
+}
+.cg-attendance-manager .am-approval-card { padding: 18px !important; }
+.cg-attendance-manager .am-approval-person strong {
+  font-size: 16px !important;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.cg-attendance-manager .am-approval-person span,
+.cg-attendance-manager .am-count-badge,
+.cg-attendance-manager .am-status-badge {
+  font-size: 13px !important;
+  line-height: 1.4;
+}
+.cg-attendance-manager .am-count-badge,
+.cg-attendance-manager .am-status-badge { min-height: 30px; padding: 5px 10px; }
+.cg-attendance-manager .am-approval-avatar-fallback {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  font-size: 16px !important;
+}
+.cg-attendance-manager .am-approval-details {
+  gap: 10px;
+  margin-top: 15px;
+}
+.cg-attendance-manager .am-approval-details > div {
+  padding: 12px;
+  min-height: 66px;
+}
+.cg-attendance-manager .am-approval-details span,
+.cg-attendance-manager .am-approval-details strong {
+  font-size: 14px !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.cg-attendance-manager .am-approval-details strong { font-size: 15px !important; }
+.cg-attendance-manager .am-approval-actions {
+  gap: 12px !important;
+  margin-top: 16px;
+  padding-top: 14px !important;
+}
+.cg-attendance-manager .am-approval-actions > button {
+  min-height: 46px !important;
+  font-size: 15px !important;
+}
+
+/* Shifts and staff assignment: no clipped employee names or tiny checkboxes. */
+.cg-attendance-manager .am-shift-layout { gap: 16px; }
+.cg-attendance-manager .am-shift-form { gap: 14px; }
+.cg-attendance-manager .am-shift-form > label,
+.cg-attendance-manager .am-shift-assignment-controls label { font-size: 14px !important; }
+.cg-attendance-manager .am-shift-form input,
+.cg-attendance-manager .am-shift-assignment-controls select {
+  min-height: 46px;
+  height: 46px;
+  font-size: 16px !important;
+}
+.cg-attendance-manager .am-rule-toggle-row strong,
+.cg-attendance-manager .am-shift-list strong,
+.cg-attendance-manager .am-shift-staff-grid strong,
+.cg-attendance-manager .am-rule-list strong {
+  font-size: 15px !important;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.cg-attendance-manager .am-rule-toggle-row small,
+.cg-attendance-manager .am-shift-list span,
+.cg-attendance-manager .am-shift-list b,
+.cg-attendance-manager .am-shift-staff-grid small,
+.cg-attendance-manager .am-rule-list span,
+.cg-attendance-manager .am-shift-assignment-footer {
+  font-size: 14px !important;
+  line-height: 1.45;
+  white-space: normal;
+}
+.cg-attendance-manager .am-shift-list > button { min-height: 64px; padding: 12px 14px; }
+.cg-attendance-manager .am-shift-form-actions > button:not(.am-primary-button) {
+  min-height: 44px;
+  font-size: 14px !important;
+  padding: 10px 14px;
+}
+.cg-attendance-manager .am-shift-staff-grid { gap: 10px; }
+.cg-attendance-manager .am-shift-staff-grid label {
+  padding: 12px;
+  min-height: 64px;
+}
+
+/* Reports and filters: standard table/input sizes. */
+.cg-attendance-manager .am-report-filter label > span,
+.cg-attendance-manager .am-report-count span {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-attendance-manager .am-report-count strong {
+  font-size: 22px;
+  line-height: 1.3;
+}
+.cg-attendance-manager .am-header-actions { gap: 10px; }
+.cg-attendance-manager .am-header-actions button {
+  min-height: 44px;
+  font-size: 14px !important;
+}
+
+/* Rules: punch mode, schedules, holidays and settings. */
+.cg-attendance-manager .attendance-rules-header h2,
+.cg-attendance-manager .am-leave-types-heading h2 { font-size: 20px !important; }
+.cg-attendance-manager .attendance-rules-header p,
+.cg-attendance-manager .am-leave-types-heading p,
+.cg-attendance-manager .attendance-rule-title p {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+.cg-attendance-manager .attendance-rule-title h3 {
+  font-size: 17px !important;
+  line-height: 1.4;
+}
+.cg-attendance-manager .attendance-mode-copy strong,
+.cg-attendance-manager .attendance-rule-toggle strong,
+.cg-attendance-manager .am-leave-type-card > header strong,
+.cg-attendance-manager .am-leave-type-toggles strong {
+  font-size: 15px !important;
+  line-height: 1.4;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
+.cg-attendance-manager .attendance-mode-copy small,
+.cg-attendance-manager .attendance-rule-toggle small,
+.cg-attendance-manager .attendance-rule-field > small,
+.cg-attendance-manager .attendance-rule-field > span,
+.cg-attendance-manager .am-leave-type-card > header span,
+.cg-attendance-manager .am-leave-type-toggles small,
+.cg-attendance-manager .am-leave-type-details span {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.cg-attendance-manager .attendance-rules-save,
+.cg-attendance-manager .attendance-weekdays button,
+.cg-attendance-manager .attendance-holiday-form > button,
+.cg-attendance-manager .am-primary-action,
+.cg-attendance-manager .am-leave-type-card > button,
+.cg-attendance-manager .am-leave-type-form-actions button {
+  min-height: 44px;
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-attendance-manager .attendance-rule-field input,
+.cg-attendance-manager .attendance-rule-field select,
+.cg-attendance-manager .attendance-holiday-form > input,
+.cg-attendance-manager .attendance-holiday-form > select,
+.cg-attendance-manager .am-leave-type-form-grid input,
+.cg-attendance-manager .am-leave-type-form-grid select {
+  min-height: 46px;
+  font-size: 16px !important;
+}
+.cg-attendance-manager .attendance-holiday-list strong,
+.cg-attendance-manager .attendance-holiday-list small,
+.cg-attendance-manager .attendance-holiday-empty,
+.cg-attendance-manager .attendance-rule-note,
+.cg-attendance-manager .attendance-rule-toggle small,
+.cg-attendance-manager .am-leave-types-summary span,
+.cg-attendance-manager .am-leave-types-summary small,
+.cg-attendance-manager .am-leave-type-details strong,
+.cg-attendance-manager .am-leave-type-grid b,
+.cg-attendance-manager .am-inline-message,
+.cg-attendance-manager .am-leave-types-empty {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.cg-attendance-manager .attendance-mode-card { min-height: 140px; padding: 14px; }
+.cg-attendance-manager .attendance-rule-section { padding: 18px; }
+.cg-attendance-manager .am-leave-type-card { padding: 16px; }
+
+/* The approval dialog uses ResponsiveModalSheet inside the module, but
+   style its own contents explicitly, including on narrow touch screens. */
+.cg-attendance-manager .leave-approval-sheet { font-size: 15px; gap: 16px; }
+.cg-attendance-manager .leave-approval-summary { padding: 15px; }
+.cg-attendance-manager .leave-approval-summary__person strong { font-size: 16px; }
+.cg-attendance-manager .leave-approval-summary__person small,
+.cg-attendance-manager .leave-approval-summary__dates span,
+.cg-attendance-manager .leave-approval-summary__reason span,
+.cg-attendance-manager .leave-approval-note > span small {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.cg-attendance-manager .leave-approval-summary__dates strong,
+.cg-attendance-manager .leave-approval-summary__reason strong,
+.cg-attendance-manager .leave-approval-note > span {
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.cg-attendance-manager .leave-approval-note textarea { font-size: 16px !important; }
+.cg-attendance-manager .leave-approval-actions button { min-height: 46px; font-size: 15px; }
+
+/* Responsive card arrangement and forms — not desktop-only scaling. */
+@media (max-width: 1180px) {
+  .cg-attendance-manager .attendance-manager-dashboard-tabs {
+    grid-template-columns: repeat(4, minmax(0,1fr));
+  }
+  .cg-attendance-manager .am-approval-grid {
+    grid-template-columns: minmax(0,1fr);
+  }
+  .cg-attendance-manager .am-calendar-grid { min-width: 890px; }
+}
+@media (max-width: 760px) {
+  .cg-attendance-manager { font-size: 15px; gap: 14px !important; }
+  .cg-attendance-manager .attendance-manager-dashboard-header h1 { font-size: 22px !important; }
+  .cg-attendance-manager .attendance-manager-header-actions { width: 100%; }
+  .cg-attendance-manager .attendance-manager-dashboard-tabs {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .cg-attendance-manager .attendance-manager-dashboard-tabs button {
+    min-height: 46px;
+    font-size: 14px;
+  }
+  .cg-attendance-manager .am-panel,
+  .cg-attendance-manager .am-section-header,
+  .cg-attendance-manager .am-calendar-header,
+  .cg-attendance-manager .am-approval-card,
+  .cg-attendance-manager .am-report-filter,
+  .cg-attendance-manager .am-rule-card {
+    padding: 15px !important;
+  }
+  .cg-attendance-manager .am-approval-details { grid-template-columns: minmax(0,1fr); }
+  .cg-attendance-manager .am-approval-details__wide { grid-column: auto; }
+  .cg-attendance-manager .am-shift-staff-grid { grid-template-columns: minmax(0,1fr); }
+  .cg-attendance-manager .attendance-mode-grid { grid-template-columns: minmax(0,1fr); }
+  .cg-attendance-manager .attendance-rule-form-grid { grid-template-columns: minmax(0,1fr); }
+  .cg-attendance-manager .attendance-holiday-form { grid-template-columns: minmax(0,1fr); }
+  .cg-attendance-manager .attendance-holiday-form > button { grid-column: auto; }
+  .cg-attendance-manager .am-leave-type-form-grid { grid-template-columns: minmax(0,1fr); }
+  .cg-attendance-manager .am-calendar-month-controls {
+    grid-template-columns: 44px minmax(0,1fr) minmax(78px,.7fr) 44px;
+  }
+  .cg-attendance-manager .am-calendar-month-controls > button { width: 44px; }
+  .cg-attendance-manager .attendance-manager-daily .am-daily-date { width: 100%; }
+  .cg-attendance-manager .attendance-manager-daily .am-filter-card,
+  .cg-attendance-manager .attendance-manager-calendar .am-calendar-filter-card {
+    grid-template-columns: minmax(0,1fr);
+  }
+  .cg-attendance-manager .attendance-manager-daily .am-filter-card .am-search-field { grid-column: auto; }
+}
+@media (max-width: 380px) {
+  .cg-attendance-manager .attendance-manager-dashboard-tabs {
+    gap: 6px;
+    padding: 6px;
+  }
+  .cg-attendance-manager .attendance-manager-dashboard-tabs button { padding: 10px 5px; }
+  .cg-attendance-manager .am-approval-actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cg-attendance-manager .am-calendar-month-controls {
+    grid-template-columns: 44px minmax(0,1fr) minmax(70px,.7fr) 44px;
+  }
+}
+
+
+/* Stronger specificity for late legacy headings and Rules descriptions.
+   Existing route-level styles previously kept these at 17–18px / 12px. */
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module :is(
+  .am-section-header,
+  .am-calendar-header,
+  .am-daily-heading,
+  .am-panel__header,
+  .attendance-rules-header,
+  .am-rules-header
+) h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+.cg-attendance-manager.attendance-manager-pages .attendance-rules-page
+:is(.attendance-mode-copy small, .attendance-rule-toggle small,
+    .attendance-rule-title p, .attendance-rule-note,
+    .attendance-rule-field > small, .attendance-rule-field > span) {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+.cg-attendance-manager.attendance-manager-pages .attendance-rules-page .attendance-rules-header h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+
+
+/* Explicit route selectors avoid any ambiguity from legacy selector groups. */
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-section-header h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-daily-heading h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-calendar-header h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-panel__header h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-rules-page .attendance-rules-header h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+.cg-attendance-manager.attendance-manager-pages .attendance-rules-page .attendance-mode-card .attendance-mode-copy small {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+
+/* Mode descriptions use a dedicated span so legacy small-text rules cannot shrink them. */
+.cg-attendance-manager .attendance-mode-copy .am-mode-description {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 15px !important;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

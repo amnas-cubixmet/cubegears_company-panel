@@ -42,7 +42,7 @@ export const AttendanceModeSelector = ({ value, onChange }) => (
           <span className="attendance-mode-icon"><Icon size={17} /></span>
           <span className="attendance-mode-copy">
             <strong>{title}</strong>
-            <small>{description}</small>
+            <span className="am-mode-description">{description}</span>
           </span>
           <span className="attendance-mode-radio" aria-hidden="true" />
         </button>
