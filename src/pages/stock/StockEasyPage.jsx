@@ -7,6 +7,7 @@ import {
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { stockCatalogService } from '../../services/stockCatalog.service';
 import '../../styles/stock-easy.css';
+import '../../styles/stock-form-polish.css';
 
 const cash = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', maximumFractionDigits: 2,
