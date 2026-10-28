@@ -1,0 +1,374 @@
+/* Staff Management — consistent readable UI for Overview, Staff, Roles, Teams,
+   Shifts. Imported last. Presentation-only; no permission or API changes. */
+.cg-staff-management {
+  font-size: 16px;
+  line-height: 1.5;
+  gap: 18px !important;
+}
+.cg-staff-management .staff-management-content,
+.cg-staff-management .staff-dashboard-subpage,
+.cg-staff-management .staff-simple-overview,
+.cg-staff-management .staff-directory,
+.cg-staff-management .roles-dashboard { min-width: 0; max-width: 100%; }
+.cg-staff-management .staff-overview-page-heading h1,
+.cg-staff-management .staff-dashboard-header h1 {
+  font-size: 24px !important;
+  line-height: 1.35 !important;
+}
+.cg-staff-management .staff-overview-page-heading p,
+.cg-staff-management .staff-dashboard-header p {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+.cg-staff-management .staff-dashboard-tabs { max-width: 100%; min-width: 0; }
+.cg-staff-management .staff-dashboard-tabs__rail {
+  gap: 9px;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+#root .app-shell .cg-staff-management .staff-dashboard-tab {
+  min-height: 46px !important;
+  height: auto !important;
+  padding: 10px 14px !important;
+  gap: 9px;
+  line-height: 1.4 !important;
+  font-size: 14px !important;
+  white-space: normal;
+}
+#root .app-shell .cg-staff-management .staff-dashboard-tab span {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.cg-staff-management .staff-dashboard-tab svg { width: 18px; height: 18px; flex: 0 0 auto; }
+
+/* Shared headings, primary actions and controls */
+.cg-staff-management .staff-subpage-header h2,
+.cg-staff-management .roles-dashboard-header h2,
+.cg-staff-management .staff-simple-list-head h3,
+.cg-staff-management .staff-workshop-panel h2,
+.cg-staff-management .staff-workshop-panel h3 {
+  font-size: 20px !important;
+  line-height: 1.35 !important;
+}
+.cg-staff-management .staff-subpage-header p,
+.cg-staff-management .roles-dashboard-header p,
+.cg-staff-management .staff-simple-list-head p {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+.cg-staff-management .staff-primary-action,
+.cg-staff-management .staff-secondary-action,
+.cg-staff-management .roles-primary-button,
+.cg-staff-management .staff-add-button,
+.cg-staff-management .staff-simple-toolbar-actions button,
+.cg-staff-management .staff-simple-list-head button,
+.cg-staff-management .staff-simple-error button,
+.cg-staff-management .staff-simple-empty button {
+  min-height: 46px !important;
+  height: auto !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  line-height: 1.4;
+  white-space: normal;
+}
+.cg-staff-management input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.cg-staff-management select,
+.cg-staff-management textarea {
+  font-size: 16px !important;
+  line-height: 1.45;
+}
+.cg-staff-management input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.cg-staff-management select {
+  min-height: 46px !important;
+  height: auto;
+}
+.cg-staff-management label { font-size: 14px; line-height: 1.5; }
+.cg-staff-management .staff-workshop-empty,
+.cg-staff-management .staff-directory-message,
+.cg-staff-management .roles-dashboard-empty,
+.cg-staff-management .roles-dashboard-loading,
+.cg-staff-management .roles-dashboard-error {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+/* Overview: KPI figures, employee names, status and search. */
+.cg-staff-management .staff-simple-metrics { gap: 14px; }
+.cg-staff-management .staff-simple-metrics article { padding: 18px; min-height: 125px; }
+.cg-staff-management .staff-simple-metrics span {
+  font-size: 15px !important;
+  line-height: 1.4;
+  flex-wrap: wrap;
+}
+.cg-staff-management .staff-simple-metrics strong { font-size: 29px; }
+.cg-staff-management .staff-simple-list-head { padding: 18px; }
+.cg-staff-management .staff-simple-search { min-height: 48px; }
+.cg-staff-management .staff-simple-search input {
+  min-height: 44px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.cg-staff-management .staff-simple-person { min-height: 76px; padding: 14px; }
+.cg-staff-management .staff-simple-person-details strong {
+  font-size: 16px !important;
+  line-height: 1.4;
+}
+.cg-staff-management .staff-simple-person-details small,
+.cg-staff-management .staff-simple-person-branch,
+.cg-staff-management .staff-simple-status,
+.cg-staff-management .staff-simple-more {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.cg-staff-management .staff-simple-empty,
+.cg-staff-management .staff-simple-error { font-size: 14px; line-height: 1.5; }
+
+/* Staff Directory: avoid 7–10px card details and tiny filter/action controls. */
+.cg-staff-management .staff-directory-toolbar {
+  gap: 12px;
+  padding: 14px;
+}
+.cg-staff-management .staff-directory-search,
+.cg-staff-management .staff-directory-toolbar > select,
+.cg-staff-management .staff-directory-toolbar .staff-add-button {
+  min-height: 46px !important;
+  height: auto;
+  font-size: 16px !important;
+}
+.cg-staff-management .staff-directory-search input {
+  font-size: 16px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.cg-staff-management .staff-card-grid { gap: 16px; }
+.cg-staff-management .staff-directory-card { padding: 17px; min-width: 0; }
+.cg-staff-management .staff-directory-person strong {
+  font-size: 17px !important;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .staff-directory-person span,
+.cg-staff-management .staff-directory-details span,
+.cg-staff-management .staff-directory-status,
+.cg-staff-management .staff-directory-skills span {
+  font-size: 14px !important;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .staff-directory-details { gap: 10px; }
+.cg-staff-management .staff-directory-card__actions { gap: 10px; }
+.cg-staff-management .staff-directory-card__actions button,
+.cg-staff-management .staff-pay-config-button {
+  min-height: 44px !important;
+  height: auto !important;
+  font-size: 14px !important;
+  line-height: 1.4;
+  padding: 9px 12px !important;
+  white-space: normal;
+}
+
+/* Roles & permissions: readable counts, badges, permission matrix and modal. */
+.cg-staff-management .roles-dashboard-header { gap: 16px; }
+.cg-staff-management .roles-dashboard-badge {
+  min-height: 38px;
+  padding: 8px 12px;
+  font-size: 14px !important;
+}
+.cg-staff-management .roles-dashboard-stats,
+.cg-staff-management .roles-dashboard-grid { gap: 14px; }
+.cg-staff-management .roles-dashboard-stat-card,
+.cg-staff-management .roles-dashboard-card { padding: 17px; }
+.cg-staff-management .roles-dashboard-stat-top span,
+.cg-staff-management .roles-dashboard-stat-card > small,
+.cg-staff-management .roles-dashboard-card-head p,
+.cg-staff-management .roles-dashboard-card-title span,
+.cg-staff-management .roles-dashboard-card-head > b,
+.cg-staff-management .roles-dashboard-card-meta span,
+.cg-staff-management .roles-dashboard-card-meta strong {
+  font-size: 14px !important;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .roles-dashboard-stat-top strong { font-size: 27px !important; }
+.cg-staff-management .roles-dashboard-card-title strong { font-size: 17px !important; line-height: 1.4; }
+.cg-staff-management .roles-dashboard-card-meta { gap: 10px; }
+.cg-staff-management .roles-dashboard-card-actions button,
+.cg-staff-management .roles-dashboard-card > button {
+  min-height: 44px !important;
+  font-size: 14px !important;
+  padding: 10px !important;
+}
+.role-editor-form { font-size: 15px; line-height: 1.5; }
+.role-editor-field > span,
+.role-permission-matrix-head p,
+.role-permission-module > header span,
+.role-permission-actions label {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.role-editor-field input,
+.role-editor-field select {
+  min-height: 46px !important;
+  height: 46px !important;
+  font-size: 16px !important;
+}
+.role-permission-matrix-head h3,
+.role-permission-module > header strong { font-size: 16px !important; }
+.role-permission-module > header button,
+.role-editor-actions button {
+  min-height: 44px;
+  font-size: 14px !important;
+}
+.role-permission-actions input[type="checkbox"] { min-width: 18px; min-height: 18px; }
+
+/* Teams & Shifts cards: names, metadata, shift details, buttons. */
+.cg-staff-management .staff-subpage-header { gap: 14px; }
+.cg-staff-management .staff-subpage-actions { gap: 10px; }
+.cg-staff-management .staff-subpage-kpis { gap: 12px; }
+.cg-staff-management .staff-subpage-kpis > article { padding: 16px; }
+.cg-staff-management .staff-subpage-kpis > article > span {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.cg-staff-management .staff-subpage-kpis > article > strong {
+  font-size: 25px !important;
+  line-height: 1.2;
+}
+.cg-staff-management .staff-team-grid,
+.cg-staff-management .staff-crud-card-grid { gap: 16px; }
+.cg-staff-management .staff-team-card,
+.cg-staff-management .staff-crud-card { padding: 17px; }
+.cg-staff-management .staff-team-card__head h3,
+.cg-staff-management .staff-crud-card__head h3 {
+  font-size: 17px !important;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .staff-team-card__head p,
+.cg-staff-management .staff-crud-card__head p,
+.cg-staff-management .staff-team-card__meta,
+.cg-staff-management .staff-team-card__meta > span,
+.cg-staff-management .staff-team-card__meta > p,
+.cg-staff-management .staff-crud-detail-grid span,
+.cg-staff-management .staff-crud-detail-grid strong,
+.cg-staff-management .staff-crud-assignees > span,
+.cg-staff-management .staff-crud-protected {
+  font-size: 14px !important;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .staff-team-member strong,
+.cg-staff-management .staff-team-member span {
+  font-size: 14px !important;
+  line-height: 1.45;
+}
+.cg-staff-management .staff-team-assign-button,
+.cg-staff-management .staff-crud-actions button {
+  min-height: 46px !important;
+  height: auto !important;
+  padding: 10px !important;
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+
+/* Modal sheets may be portals; target their own specific form class. */
+.staff-crud-form,
+.staff-branch-form { gap: 14px; font-size: 15px; }
+.staff-crud-form > label,
+.staff-branch-form > label,
+.staff-crud-form__grid > label,
+.staff-crud-assignment-fieldset legend {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+.staff-crud-form input:not([type="checkbox"]),
+.staff-crud-form select,
+.staff-crud-form textarea,
+.staff-branch-form input:not([type="checkbox"]),
+.staff-branch-form select,
+.staff-branch-form textarea {
+  font-size: 16px !important;
+  line-height: 1.45;
+}
+.staff-crud-form input:not([type="checkbox"]),
+.staff-crud-form select,
+.staff-branch-form input:not([type="checkbox"]),
+.staff-branch-form select {
+  min-height: 46px !important;
+  height: auto !important;
+}
+.staff-crud-form textarea,
+.staff-branch-form textarea { min-height: 110px; }
+.staff-crud-form__actions button,
+.staff-inline-create-button,
+.staff-crud-check-grid button,
+.staff-branch-form button {
+  min-height: 46px;
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.staff-crud-check { padding: 12px; }
+.staff-crud-check input[type="checkbox"] { width: 19px; height: 19px; flex: 0 0 19px; }
+.staff-crud-check strong,
+.staff-crud-check small,
+.staff-branch-checkbox strong,
+.staff-branch-checkbox small,
+.staff-branch-form__intro strong,
+.staff-branch-form__intro span {
+  font-size: 14px !important;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Layout remains responsive; card grids collapse rather than page overflow. */
+@media (max-width: 1100px) {
+  .cg-staff-management .staff-dashboard-tabs__rail {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .cg-staff-management .staff-dashboard-tab { flex: 0 0 auto; }
+  .cg-staff-management .staff-card-grid,
+  .cg-staff-management .roles-dashboard-grid,
+  .cg-staff-management .staff-team-grid,
+  .cg-staff-management .staff-crud-card-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 700px) {
+  .cg-staff-management { gap: 14px !important; }
+  .cg-staff-management .staff-simple-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cg-staff-management .staff-card-grid,
+  .cg-staff-management .roles-dashboard-grid,
+  .cg-staff-management .staff-team-grid,
+  .cg-staff-management .staff-crud-card-grid { grid-template-columns: minmax(0,1fr); }
+  .cg-staff-management .staff-subpage-header,
+  .cg-staff-management .roles-dashboard-header { flex-direction: column; align-items: stretch; }
+  .cg-staff-management .staff-subpage-actions { flex-wrap: wrap; width: 100%; }
+  .cg-staff-management .staff-subpage-actions button { flex: 1 1 145px; }
+  .cg-staff-management .staff-subpage-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cg-staff-management .staff-directory-toolbar { grid-template-columns: minmax(0,1fr); }
+  .cg-staff-management .staff-simple-person-branch { display: none; }
+  .cg-staff-management .staff-crud-detail-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .staff-crud-form__grid,.role-editor-grid { grid-template-columns: minmax(0,1fr); }
+  .staff-crud-check-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 420px) {
+  .cg-staff-management .staff-simple-metrics { gap: 8px; }
+  .cg-staff-management .staff-simple-metrics article { padding: 13px; }
+  .cg-staff-management .staff-simple-person { gap: 10px; padding: 12px 8px; }
+  .cg-staff-management .staff-simple-person-details strong { font-size: 15px !important; }
+  .cg-staff-management .staff-simple-status { display: none; }
+  .cg-staff-management .staff-subpage-kpis > article { padding: 12px; }
+  .cg-staff-management .staff-directory-card { padding: 14px; }
+  .cg-staff-management .staff-crud-detail-grid { grid-template-columns: minmax(0,1fr); }
+  .cg-staff-management .staff-dashboard-tabs__rail { gap: 6px; }
+  .cg-staff-management .staff-dashboard-tab { padding: 10px !important; }
+}
