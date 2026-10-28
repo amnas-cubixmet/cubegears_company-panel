@@ -326,13 +326,24 @@ try {
           await nameInput.focus();
           const focus=await nameInput.evaluate(input=>{
             const shell=input.closest('[data-cg-input-shell]');
-            const style=shell&&getComputedStyle(shell);
-            return {style:style?.outlineStyle,width:parseFloat(style?.outlineWidth||'0')};
+            const focused=getComputedStyle(shell);
+            const field=getComputedStyle(input);
+            return {
+              outline:focused.outlineStyle, border:parseFloat(focused.borderLeftWidth),
+              shadow:focused.boxShadow, innerOutline:field.outlineStyle,
+              innerBorder:parseFloat(field.borderLeftWidth),
+              background:focused.backgroundColor,
+            };
           });
-          if(focus.style==='none'||focus.width<2) {
-            throw Error('Workshop Customer borderless field lost focus indicator: '+JSON.stringify(focus));
+          const idle=await nameInput.evaluate(input=>{
+            input.blur();
+            return getComputedStyle(input.closest('[data-cg-input-shell]')).backgroundColor;
+          });
+          if(focus.outline!=='none'||focus.border!==0||focus.shadow!=='none'||
+             focus.innerOutline!=='none'||focus.innerBorder!==0||focus.background===idle){
+            throw Error('Workshop Customer fields should be borderless with focus tint: '+JSON.stringify({focus,idle}));
           }
-          await dialog.getByRole('button',{name:'Close dialog'}).click();
+                    await dialog.getByRole('button',{name:'Close dialog'}).click();
           await dialog.waitFor({state:'hidden'});
         }
         // Real computed styles: legacy !important Job Card rules must not
@@ -407,16 +418,26 @@ try {
           await addDialog.waitFor();
           const search=await addDialog.locator('.cg-easy-picker-search').evaluate(node=>{
             const input=node.querySelector('input');
+            const field=getComputedStyle(input),shell=getComputedStyle(node);
             return {
               shellHeight:Math.round(node.getBoundingClientRect().height),
-              font:parseFloat(getComputedStyle(input).fontSize),
-              inputBorder:parseFloat(getComputedStyle(input).borderLeftWidth),
+              font:parseFloat(field.fontSize), inputBorder:parseFloat(field.borderLeftWidth),
+              inputOutline:field.outlineStyle, inputShadow:field.boxShadow,
+              shellBorder:parseFloat(shell.borderLeftWidth), shellOutline:shell.outlineStyle,
+              shellShadow:shell.boxShadow, focusedBackground:shell.backgroundColor,
             };
           });
-          if(search.shellHeight<48||search.font<16||search.inputBorder>0) {
-            throw Error('Stock picker missing single-border 16px styling: '+JSON.stringify(search));
+          const stockIdle=await addDialog.locator('.cg-easy-picker-search').evaluate(node=>{
+            node.querySelector('input').blur();
+            return getComputedStyle(node).backgroundColor;
+          });
+          if(search.shellHeight<48||search.font<16||search.inputBorder!==0||
+             search.inputOutline!=='none'||search.inputShadow!=='none'||
+             search.shellBorder!==0||search.shellOutline!=='none'||
+             search.shellShadow!=='none'||search.focusedBackground===stockIdle){
+            throw Error('Stock search has nested borders or no focus tint: '+JSON.stringify({search,stockIdle}));
           }
-          await addDialog.getByRole('button',{name:'Add as New Product'}).click();
+                    await addDialog.getByRole('button',{name:'Add as New Product'}).click();
           const partStyles=await addDialog.locator('form.cg-easy-form').evaluate(form=>{
             const inputs=[...form.querySelectorAll('input:not([type=radio]),select')]
               .filter(node=>node.getClientRects().length)
