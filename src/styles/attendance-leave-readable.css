@@ -1,0 +1,145 @@
+/* Leave request form and records: readable at desktop and phone widths. */
+.attendance-leave-dashboard {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.attendance-leave-dashboard .leave-page-heading h2 { font-size: 21px; line-height: 1.35; }
+.attendance-leave-dashboard .leave-page-heading p { font-size: 14px; line-height: 1.5; }
+.attendance-leave-dashboard .leave-apply-button {
+  min-height: 46px;
+  font-size: 15px;
+  padding: 10px 16px;
+}
+.attendance-leave-dashboard .leave-records-header h3 {
+  font-size: 18px;
+  line-height: 1.4;
+}
+.attendance-leave-dashboard .leave-records-header p {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.attendance-leave-dashboard .leave-records-header > span {
+  font-size: 14px;
+}
+.attendance-leave-dashboard .leave-request-table th,
+.attendance-leave-dashboard .leave-request-table td {
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+}
+.attendance-leave-dashboard .leave-request-table td strong,
+.attendance-leave-dashboard .leave-request-table td span,
+.attendance-leave-dashboard .leave-status-pill {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.attendance-leave-dashboard .leave-records-empty,
+.attendance-leave-dashboard .leave-page-loading,
+.attendance-leave-dashboard .leave-page-error {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Modal is sibling to leave dashboard's root, not a portal. Scope to leave
+ * form itself so these rules apply regardless of modal positioning.
+ */
+.apply-leave-form {
+  gap: 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  min-width: 0;
+}
+.apply-leave-form .apply-leave-grid {
+  gap: 14px;
+}
+.apply-leave-form label {
+  gap: 8px;
+  min-width: 0;
+}
+.apply-leave-form label > span,
+.apply-leave-form .apply-half-day > span {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 650;
+}
+.apply-leave-form input:not([type="file"]),
+.apply-leave-form select,
+.apply-leave-form textarea {
+  width: 100%;
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  border-radius: 10px;
+}
+.apply-leave-form input:not([type="file"]),
+.apply-leave-form select {
+  height: 48px;
+  padding: 9px 13px;
+}
+.apply-leave-form textarea {
+  min-height: 115px;
+  padding: 13px;
+}
+.apply-leave-form .apply-half-day {
+  gap: 10px;
+}
+.apply-leave-form .apply-half-day > div {
+  gap: 10px;
+}
+.apply-leave-form .apply-half-day button {
+  min-height: 46px;
+  font-size: 15px;
+  padding: 9px 12px;
+}
+.apply-leave-form .apply-leave-file > div {
+  min-height: 50px;
+  padding: 10px 12px;
+}
+.apply-leave-form .apply-leave-file > div input[type="file"] {
+  width: 100%;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.apply-leave-form .apply-leave-file small { font-size: 13px; overflow-wrap: anywhere; }
+.apply-leave-form .apply-leave-actions {
+  gap: 12px;
+  margin-top: 8px;
+}
+.apply-leave-form .apply-leave-actions button {
+  min-height: 48px;
+  font-size: 15px;
+  padding: 10px 14px;
+}
+@media (max-width: 767px) {
+  .attendance-leave-dashboard .leave-request-mobile-list { gap: 12px; padding: 12px; }
+  .attendance-leave-dashboard .leave-request-mobile-card { padding: 14px; }
+  .attendance-leave-dashboard .leave-request-mobile-head strong { font-size: 16px; }
+  .attendance-leave-dashboard .leave-request-mobile-head > div > span,
+  .attendance-leave-dashboard .leave-request-date,
+  .attendance-leave-dashboard .leave-request-date b,
+  .attendance-leave-dashboard .leave-request-reason small,
+  .attendance-leave-dashboard .leave-request-reason span,
+  .attendance-leave-dashboard .leave-request-mobile-footer {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .attendance-leave-dashboard .leave-request-mobile-footer button {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 520px) {
+  .apply-leave-form .apply-leave-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .apply-leave-form .apply-leave-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 360px) {
+  .apply-leave-form .apply-leave-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
