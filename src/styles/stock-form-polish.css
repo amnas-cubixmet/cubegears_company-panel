@@ -440,3 +440,43 @@ input:not([type="radio"]):not([type="checkbox"]):focus-visible {
   height: auto !important;
   min-height: 50px !important;
 }
+
+
+/* Stock > Add New Part > Search existing products:
+ * This field is a single flat search surface. Shared form input focus styles
+ * previously applied both an input ring and a wrapper ring (double blue border).
+ * Keep a visible focus state through background contrast, not a border.
+ */
+.cg-easy-stock .cg-easy-form .cg-easy-picker-search {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: var(--surface-2, #f8fafc);
+  transition: background-color .15s ease;
+}
+.cg-easy-stock .cg-easy-form .cg-easy-picker-search:focus-within {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: var(--primary-soft, #eef2ff);
+}
+.cg-easy-stock .cg-easy-form .cg-easy-picker-search > input:not([type="radio"]):not([type="checkbox"]),
+.cg-easy-stock .cg-easy-form .cg-easy-picker-search > input:not([type="radio"]):not([type="checkbox"]):focus,
+.cg-easy-stock .cg-easy-form .cg-easy-picker-search > input:not([type="radio"]):not([type="checkbox"]):focus-visible {
+  min-height: 48px;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 16px;
+}
+.cg-easy-stock .cg-easy-form .cg-easy-picker-search:focus-within > svg {
+  color: var(--primary, #2563eb);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cg-easy-stock .cg-easy-form .cg-easy-picker-search {
+    transition: none;
+  }
+}
