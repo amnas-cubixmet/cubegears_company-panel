@@ -95,18 +95,31 @@ export function QuickEstimatePanel({
     lines, discount, registered, supplierState, placeOfSupply
   }), [lines, discount, registered, supplierState, placeOfSupply]);
 
+  const legalizeLineGst = (line, mode) => {
+    if (!line.taxChoice || !['cgst_sgst', 'igst'].includes(mode)) return line;
+    const options = estimateGstOptions('', mode, job?.gstInfo?.gstRateOptions);
+    const picked = options.find(option => option.value === line.taxChoice);
+    if (!picked || picked.taxMode === mode) return line;
+    // CGST 9% and IGST 18% each mean 18% total, but the jurisdiction
+    // determines which tax appears in the estimate's final calculation.
+    const replacement = options.find(option => option.taxMode === mode &&
+      Number(option.totalRate) === Number(line.taxRate));
+    return replacement
+      ? { ...line, taxChoice: replacement.value }
+      : { ...line, taxChoice: '', taxRate: '' };
+  };
+
   const validation = useMemo(() => {
     const basic = estimateFormValidation(lines, discount, '0');
     if (basic) return basic;
     if (registered && !supplierState) return 'Configure the workshop GSTIN / supplying state in Company Settings.';
     if (registered && !placeOfSupply) return 'Select the legal place-of-supply state.';
-    if (registered && lines.some(line => {
-      if (!line.taxChoice) return false;
-      const selection = estimateGstOptions(line.taxRate, taxMode, job?.gstInfo?.gstRateOptions)
-        .find(choice => choice.value === line.taxChoice);
-      return !selection || selection.taxMode !== taxMode ||
-        Number(selection.totalRate) !== Number(line.taxRate);
-    })) return 'Selected CGST / SGST / IGST type conflicts with Place of Supply.';
+    // The tax jurisdiction follows the legal supply state. When a previously
+    // chosen label cannot be translated without changing its rate, ask for a
+    // new classification instead of showing a technical tax-mode conflict.
+    if (registered && lines.some(line => !legalizeLineGst(line, taxMode).taxRate)) {
+      return 'Select a GST rate for each item based on the Place of Supply.';
+    }
     if (registered && lines.some((line) => !String(line.taxRate ?? '').trim() ||
       Number(line.taxRate) < 0 || Number(line.taxRate) > 100 ||
       !/^\d+(?:\.\d{1,2})?$/.test(String(line.taxRate)))) {
@@ -127,12 +140,23 @@ export function QuickEstimatePanel({
   };
 
   const chooseGst = (key, selected) => {
-    const choice = legalChoice(estimateGstOptions('', taxMode, job?.gstInfo?.gstRateOptions)
-      .find(option => option.value === selected), taxMode);
-    setLines(current => current.map(line => line.key === key ? {
-      ...line, taxChoice: choice?.value || '',
-      taxRate: choice?.totalRate || '',
-    } : line));
+    const choice = estimateGstOptions('', taxMode, job?.gstInfo?.gstRateOptions)
+      .find(option => option.value === selected);
+    setLines(current => current.map(line => line.key === key
+      ? legalizeLineGst({ ...line, taxChoice: choice?.value || '',
+          taxRate: choice?.totalRate || '' }, taxMode)
+      : line));
+    setChanged(true);
+    setFeedback('');
+  };
+  const changePlaceOfSupply = (value) => {
+    const nextMode = invoiceTaxMode({
+      invoiceType: registered ? 'gst' : 'regular',
+      seller: { stateCode: supplierState },
+      customer: { placeOfSupply: value },
+    });
+    setPlaceOfSupply(value);
+    setLines(current => current.map(line => legalizeLineGst(line, nextMode)));
     setChanged(true);
     setFeedback('');
   };
@@ -168,12 +192,18 @@ export function QuickEstimatePanel({
     setBusy(true);
     setFeedback('');
     try {
-      // One click: save the current estimate first if it is new or changed,
-      // then approve using the existing stage-completion workflow.
-      if (!latest || changed || stale) {
+      // One primary action: save a fresh estimate when necessary, then
+      // request the existing server-side customer approval/workflow transition.
+      if (!latest || changed || stale || latest.status === 'Rejected') {
+        const preparedLines = lines.map(line => legalizeLineGst(line, taxMode));
+        if (registered && preparedLines.some(line => !String(line.taxRate ?? '').trim())) {
+          setShowValidation(true);
+          setFeedback('Choose an applicable GST rate for each item before approval.');
+          return;
+        }
         const draftId = latest?.status === 'Draft' && !stale ? latest.id : null;
         await jobService.saveQuickJobEstimate(job.id, {
-          lines: lines.map(({ description, type, quantity, unitPrice, catalogId, taxRate, taxChoice, hsnSac }) => ({
+          lines: preparedLines.map(({ description, type, quantity, unitPrice, catalogId, taxRate, taxChoice, hsnSac }) => ({
             description: description.trim(), type, quantity, unitPrice,
             taxRate: taxRate || '0', taxChoice: taxChoice || '', hsnSac: hsnSac || '',
             ...(catalogId ? { catalogId } : {}),
@@ -380,7 +410,7 @@ export function QuickEstimatePanel({
       </header>
 
       {stale && <p className="job-quick-warning" role="status">
-        Inspection has changed. Save a revised estimate before approval.
+        Inspection has changed. Approve & Continue will save the revised estimate before approval.
       </p>}
       {feedback && <p className="job-quick-feedback" role="status">{feedback}</p>}
 
@@ -445,7 +475,6 @@ export function QuickEstimatePanel({
               <ClipboardList size={15} aria-hidden="true"/> Add from Inspection Findings
             </button>
           )}
-
         </section>
 
         <section className="job-quick-panel job-quick-summary">
@@ -464,24 +493,7 @@ export function QuickEstimatePanel({
               </label>
               {registered && <label>Place of Supply (India)
                 <select value={placeOfSupply} disabled={!canEdit || busy}
-                  onChange={(e) => {
-                    const nextState = e.target.value;
-                    const nextMode = invoiceTaxMode({
-                      invoiceType: registered ? 'gst' : 'regular',
-                      seller: { stateCode: supplierState },
-                      customer: { placeOfSupply: nextState },
-                    });
-                    setPlaceOfSupply(nextState);
-                    setLines(current => current.map(line => {
-                      if (!line.taxChoice) return line;
-                      const choice = legalChoice(
-                        estimateGstOptions(line.taxRate, taxMode, job?.gstInfo?.gstRateOptions)
-                          .find(option => option.value === line.taxChoice), nextMode
-                      );
-                      return { ...line, taxChoice: choice?.value || '', taxRate: choice?.totalRate || line.taxRate };
-                    }));
-                    setChanged(true);
-                  }}>
+                  onChange={(e) => changePlaceOfSupply(e.target.value)}>
                   <option value="">Choose State / UT</option>
                   {INDIA_STATES.map(([code, name]) =>
                     <option key={code} value={code}>{code} — {name}</option>)}
@@ -503,9 +515,9 @@ export function QuickEstimatePanel({
             <div className="job-quick-actions">
               {showValidation && validation && <p className="job-quick-invalid" role="alert">{validation}</p>}
               <button type="button" className="job-quick-approve"
-                disabled={busy || latest?.status === 'Rejected'}
-                onClick={approve}>
-                <CheckCircle2 size={16} aria-hidden="true"/> {busy ? 'Please wait…' : 'Approve & Continue'}
+                disabled={busy} onClick={approve}>
+                <CheckCircle2 size={16} aria-hidden="true"/>
+                {busy ? 'Please wait…' : 'Approve & Continue'}
               </button>
             </div>
           ) : (
