@@ -1,0 +1,207 @@
+/* Add / Edit Workshop Customer, mounted inside /customers directory modal.
+ * Borderless fields with soft backgrounds. Do NOT alter other customer search,
+ * profile and filter controls or the shared Input/Select components.
+ */
+:is(#root, body) .customer-directory-form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+}
+:is(#root, body) .customer-directory-form [data-cg-input-wrapper] {
+  min-width: 0;
+  width: 100%;
+}
+:is(#root, body) .customer-directory-form .ui-label {
+  font-size: 14px !important;
+  font-weight: 650;
+  line-height: 1.45;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+/* Input and native Select are both enclosed in a data-cg-input-shell.
+ * The shell is the field background; there is no input border inside it.
+ */
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"] {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 50px !important;
+  padding: 0 13px;
+  border: 0 !important;
+  border-radius: 11px !important;
+  outline: 0;
+  background: var(--surface-2) !important;
+  box-shadow: none !important;
+  transition: background-color .15s ease;
+}
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"]:focus-within {
+  /* Visible keyboard/focus indication WITHOUT adding an input border. */
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: none !important;
+}
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"]:has([aria-invalid="true"]):focus-within {
+  outline-color: var(--danger);
+}
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"] > svg {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+}
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"] :is(input:not([type="checkbox"]):not([type="radio"]), select) {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0 !important;
+  max-width: 100%;
+  width: 100%;
+  height: 48px !important;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  font-family: inherit;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.45;
+  color: var(--text-primary);
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"] select {
+  padding-right: 24px !important;
+  text-overflow: ellipsis;
+}
+:is(#root, body) .customer-directory-form [data-cg-input-shell="true"] input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+:is(#root, body) .customer-directory-form textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 100px !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  padding: 13px !important;
+  outline: 0;
+  background: var(--surface-2) !important;
+  box-shadow: none !important;
+  font-family: inherit;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.55;
+  color: var(--text-primary);
+  resize: vertical;
+  -webkit-text-size-adjust: 100%;
+}
+:is(#root, body) .customer-directory-form textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+:is(#root, body) .customer-directory-form textarea:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px;
+  box-shadow: none !important;
+}
+:is(#root, body) .customer-directory-form .customer-directory-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 13px;
+  min-width: 0;
+}
+:is(#root, body) .customer-directory-form .customer-directory-location-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+:is(#root, body) .customer-directory-form :is(
+  .customer-directory-form-grid,
+  .customer-directory-location-grid
+) > * {
+  min-width: 0;
+}
+:is(#root, body) .customer-directory-form .customer-directory-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 3px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+:is(#root, body) .customer-directory-form .customer-directory-form-actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 50px;
+  padding: 11px 14px;
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+:is(#root, body) .customer-directory-form .customer-directory-form-cancel {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+}
+:is(#root, body) .customer-directory-form .customer-directory-form-submit {
+  border: 0;
+  background: var(--primary);
+  color: #fff;
+}
+:is(#root, body) .customer-directory-form .customer-directory-form-actions button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+:is(#root, body) .customer-directory-form .customer-directory-form-actions button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+@media (max-width: 767px) {
+  :is(#root, body) .customer-directory-form {
+    gap: 15px;
+  }
+  :is(#root, body) .customer-directory-form [data-cg-input-shell="true"] {
+    min-height: 50px !important;
+  }
+  :is(#root, body) .customer-directory-form .customer-directory-location-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  :is(#root, body) .customer-directory-form .customer-directory-form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    background: var(--surface);
+    padding: 13px 0 max(12px, env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (max-width: 520px) {
+  :is(#root, body) .customer-directory-form :is(
+    .customer-directory-form-grid,
+    .customer-directory-location-grid
+  ) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :is(#root, body) .customer-directory-form .customer-directory-form-actions button {
+    min-height: 50px;
+    padding: 11px 9px;
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(#root, body) .customer-directory-form [data-cg-input-shell="true"] {
+    transition: none;
+  }
+}
