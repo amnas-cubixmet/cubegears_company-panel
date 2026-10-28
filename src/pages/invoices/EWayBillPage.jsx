@@ -551,15 +551,21 @@ export function EWayBillPage() {
             </label>
 
             <label>Document Number
-              <input value={form.documentNo} onChange={(e) => update('documentNo', e.target.value)} placeholder="Invoice / Challan No."/>
+              <input data-eway-field="documentNo" aria-invalid={Boolean(fieldErrors.documentNo)}
+                value={form.documentNo} onChange={(e) => update('documentNo', e.target.value)} placeholder="Invoice / Challan No."/>
+              {showFieldError('documentNo')}
             </label>
 
             <label>Document Date
-              <input type="date" value={form.documentDate} onChange={(e) => update('documentDate', e.target.value)}/>
+              <input data-eway-field="documentDate" aria-invalid={Boolean(fieldErrors.documentDate)}
+                type="date" value={form.documentDate} onChange={(e) => update('documentDate', e.target.value)}/>
+              {showFieldError('documentDate')}
             </label>
 
             <label>Approx Distance (km)
-              <input inputMode="numeric" value={form.transport.distanceKm} onChange={(e) => updateGroup('transport', 'distanceKm', dec(e.target.value))} placeholder="0"/>
+              <input data-eway-field="transport.distanceKm" aria-invalid={Boolean(fieldErrors['transport.distanceKm'])}
+                inputMode="numeric" value={form.transport.distanceKm} onChange={(e) => updateGroup('transport', 'distanceKm', dec(e.target.value))} placeholder="0"/>
+              {showFieldError('transport.distanceKm')}
             </label>
           </div>
         </section>
@@ -758,22 +764,7 @@ export function EWayBillPage() {
                         placeholder="0" />
                     </label>
                   </div>
-                  <p className="eway-gst-explanation" role="status">
-                    {gstMode === 'unknown'
-                      ? 'Select a GST rate now; enter valid FROM and TO state codes to calculate tax.'
-                      : gstMode === 'igst'
-                        ? 'Inter-state: IGST applies. CGST and SGST are zero.'
-                        : 'Intra-state: GST is split equally between CGST and SGST.'}
-                  </p>
-                  <div className="eway-gst-breakdown">
-                    {gstMode === 'unknown' && eWayTotalGstRate(item) > 0
-                      ? <span role="status">GST {eWayTotalGstRate(item)}% selected · Tax split pending State Code</span>
-                      : <>
-                        <span>CGST: {item.cgstRate || 0}%</span>
-                        <span>SGST: {item.sgstRate || 0}%</span>
-                        <span>IGST: {item.igstRate || 0}%</span>
-                      </>}
-                  </div>
+
                 </div>
               </article>
             ))}
@@ -834,7 +825,9 @@ export function EWayBillPage() {
                 <input value={form.transport.transporterName} onChange={(e) => updateGroup('transport', 'transporterName', e.target.value)} placeholder="Transporter name"/>
               </label>
               <label>Transport Document No.
-                <input value={form.transport.transportDocNo} onChange={(e) => updateGroup('transport', 'transportDocNo', e.target.value)} placeholder="LR / GR / RR / AWB / BL"/>
+                <input data-eway-field="transport.transportDocNo" aria-invalid={Boolean(fieldErrors['transport.transportDocNo'])}
+                  value={form.transport.transportDocNo} onChange={(e) => updateGroup('transport', 'transportDocNo', e.target.value)} placeholder="LR / GR / RR / AWB / BL"/>
+                {showFieldError('transport.transportDocNo')}
               </label>
               <label>Transport Document Date
                 <input type="date" value={form.transport.transportDocDate} onChange={(e) => updateGroup('transport', 'transportDocDate', e.target.value)}/>
@@ -848,7 +841,9 @@ export function EWayBillPage() {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label>Vehicle Number
-                <input value={form.transport.vehicleNo} onChange={(e) => updateGroup('transport', 'vehicleNo', e.target.value.toUpperCase())} placeholder="KL08AB1234"/>
+                <input data-eway-field="transport.vehicleNo" aria-invalid={Boolean(fieldErrors['transport.vehicleNo'])}
+                  value={form.transport.vehicleNo} onChange={(e) => updateGroup('transport', 'vehicleNo', e.target.value.toUpperCase())} placeholder="KL08AB1234"/>
+                {showFieldError('transport.vehicleNo')}
               </label>
               <label>Vehicle Type
                 <select value={form.transport.vehicleType || 'Regular'} onChange={(e) => updateGroup('transport', 'vehicleType', e.target.value)}>
