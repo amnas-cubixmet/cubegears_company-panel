@@ -425,7 +425,7 @@ export function InvoiceRoutePage() {
     setFieldErrors(invalidInputs);
     const validation = validate();
     if (validation || Object.keys(invalidInputs).length) {
-      setError(validation || 'Correct the highlighted invoice fields before saving.');
+      setError(validation || Object.values(invalidInputs)[0] || 'Correct the highlighted invoice fields before saving.');
       highlightInvalidFields();
       return;
     }
@@ -454,7 +454,7 @@ export function InvoiceRoutePage() {
     setFieldErrors(invalidInputs);
     const validation = validate();
     if (validation || Object.keys(invalidInputs).length) {
-      setError(validation || 'Correct the highlighted invoice fields before saving.');
+      setError(validation || Object.values(invalidInputs)[0] || 'Correct the highlighted invoice fields before saving.');
       highlightInvalidFields();
       return;
     }
