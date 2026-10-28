@@ -163,3 +163,25 @@ export const formatInvoiceValidationError = (error) => {
   }
   return messages.join(' | ') || error?.message || 'Unable to save invoice.';
 };
+
+/** Explain why an authoritative invoice preview was rejected. */
+export const invoicePreviewFailureMessage = (error) => {
+  const status = Number(error?.status || error?.response?.status || 0);
+  if (status === 404) {
+    return 'Backend GST preview API is missing. Pull the latest Django backend and restart port 8000.';
+  }
+  if (status === 401) {
+    return 'Your session has expired. Sign in again to verify invoice amounts.';
+  }
+  if (status === 403) {
+    return 'Your account does not have permission to calculate invoice totals.';
+  }
+  if (status === 400) {
+    const details = formatInvoiceValidationError(error);
+    if (details && !/^request failed with status code 400$/i.test(details)) {
+      return 'Invoice preview needs correction: ' + details;
+    }
+    return 'Invoice preview was rejected. Check the highlighted invoice fields and workshop GST settings.';
+  }
+  return 'Backend calculation unavailable. Live amounts shown are provisional until the API reconnects.';
+};
