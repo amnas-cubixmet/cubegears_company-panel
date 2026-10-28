@@ -41,6 +41,27 @@ function fixture(path) {
       discount:0,adjustment:0,taxMode:'none',paid:0};
     return path==='/billing/documents'?[document]:document;
   }
+  if(path==='/payroll/daily-wages') return {
+    totalWorkers:1,todayExpense:600,outstanding:600,workersUnpaid:1,totalPayments:0,
+    todayAttendance:{full:1,half:0,pending:0},
+    employees:[{
+      id:'EMP-0012',name:'Ajmal K',employeeCode:'EMP-0012',designation:'Mechanic',
+      branchId:'branch-a',branchName:'Main Branch',dailyRate:600,currentBalance:600,
+      lastPaymentDate:'2026-10-20',
+      today:{finalized:true,attendance:'Full Day',totalWage:600,extraEarnings:0},
+    }],
+  };
+  if(path==='/payroll/daily-wages/history') return [{
+    id:'HIST-001',date:'2026-10-28',employeeId:'EMP-0012',
+    employeeName:'Ajmal K',branchId:'branch-a',branchName:'Main Branch',
+    attendance:'Full Day',dailyRate:600,baseWage:600,extras:0,
+    adjustments:0,total:600,paymentStatus:'Unpaid',
+  }];
+  if(path==='/payroll/daily-wages/payments') return [{
+    id:'PAY-001',date:'2026-10-28',employeeId:'EMP-0012',
+    employeeName:'Ajmal K',branchId:'branch-a',branchName:'Main Branch',
+    amount:300,method:'Cash',reference:'PAY-TEST',reversed:false,
+  }];
   if(path.startsWith('/payroll/daily-wages/employees/')) return {
     employee:mockStaffList[0], currentRate:600, currentBalance:600, totalEarned:600, totalPaid:0,
     today:{date:'2026-10-19', finalized:true, attendance:'Full Day', totalWage:600, baseWage:600, extraEarnings:0},
@@ -546,6 +567,50 @@ try {
           const power=card.locator('.staff-status-button');
           if(await power.count() && !(await power.getAttribute('aria-label'))) {
             throw Error('Staff account status icon lacks accessible label.');
+          }
+        }
+
+        if ([
+          '/payroll/daily-wages',
+          '/payroll/daily-wages/history',
+          '/payroll/payments',
+        ].includes(path)) {
+          const metrics = await page.evaluate(() => {
+            const root = document.querySelector('.dw-page');
+            const font = selector => {
+              const el = root?.querySelector(selector);
+              return el ? parseFloat(getComputedStyle(el).fontSize) : null;
+            };
+            const height = selector => {
+              const el = root?.querySelector(selector);
+              return el ? el.getBoundingClientRect().height : null;
+            };
+            return {
+              heading: font('.dw-header h1'), subtitle: font('.dw-header p'),
+              nav: font('.dw-nav a'), cardTitle: font('.dw-card-head h2'),
+              count: font('.dw-card-head > span'),
+              table: font('.dw-table tbody td'), tableLabel: font('.dw-table tbody td::before'),
+              input: font('.dw-search input'), select: font('.dw-toolbar select'),
+              actionHeight: height('.dw-button'),
+              navHeight: height('.dw-nav a'),
+              pageOverflow: document.documentElement.scrollWidth > innerWidth+2,
+              scrollArea: !!root?.querySelector('.dw-table-scroll'),
+              bodyRows: root?.querySelectorAll('.dw-table tbody tr').length || 0,
+            };
+          });
+          for(const [key,min] of Object.entries({
+            heading:21.5,subtitle:13.5,nav:13.5,cardTitle:18.5,
+            count:13.5,table:13.5,input:15.5,select:15.5,
+          })) {
+            if(metrics[key]!==null && metrics[key]<min) {
+              throw Error('Payroll unreadable '+key+' '+path+': '+JSON.stringify(metrics));
+            }
+          }
+          if(metrics.pageOverflow || metrics.actionHeight<43.5 || metrics.navHeight<43.5) {
+            throw Error('Payroll overflow or tiny button '+path+': '+JSON.stringify(metrics));
+          }
+          if(!metrics.scrollArea || !metrics.bodyRows) {
+            throw Error('Payroll fixture data table not rendered '+path+': '+JSON.stringify(metrics));
           }
         }
 
