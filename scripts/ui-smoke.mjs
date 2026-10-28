@@ -426,7 +426,7 @@ try {
               dailyWages: font('.attendance-manager-header-actions .dw-button'),
               rulesBadge: font('.attendance-manager-header-badge'),
               header: font('.am-section-header h2,.am-calendar-header h2,.am-daily-heading h2,.attendance-rules-header h2'),
-              label: font('.am-approval-details strong,.am-table-card td,.am-dashboard-stat-top span,.am-shift-list strong,.am-report-filter label > span,.attendance-mode-copy small'),
+              label: font('.am-approval-details strong,.am-table-card td,.am-dashboard-stat-top span,.am-shift-list strong,.am-report-filter label > span,.attendance-mode-copy .am-mode-description'),
               leaveButton: font('.am-approval-actions > button'),
               leaveButtonHeight: size('.am-approval-actions > button'),
               field: font('.am-daily-date input,.am-calendar-month-controls select,.am-shift-form input,.am-report-filter select,.attendance-rule-field input'),
