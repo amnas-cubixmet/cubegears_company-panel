@@ -42,19 +42,46 @@ export const StaffDirectoryCard = ({
     </header>
 
     <div className="staff-directory-details">
-      <span><Building2 size={13} />{staff.branch || 'No branch'}</span>
-      <span><UserRound size={13} />{staff.department || 'Workshop'} · {staff.role || 'No role'}</span>
-      <span><ShieldCheck size={13} />{staff.shift || 'No shift assigned'}</span>
-      <span><CalendarDays size={13} />Joined {staff.joiningDate || '—'}</span>
+      <div className="staff-directory-fact">
+        <Building2 size={18} aria-hidden="true" />
+        <div className="staff-directory-fact__copy">
+          <small>Branch</small>
+          <span>{staff.branch || 'No branch'}</span>
+        </div>
+      </div>
+      <div className="staff-directory-fact">
+        <UserRound size={18} aria-hidden="true" />
+        <div className="staff-directory-fact__copy">
+          <small>Department / Role</small>
+          <span>{staff.department || 'Workshop'} · {staff.role || 'No role'}</span>
+        </div>
+      </div>
+      <div className="staff-directory-fact">
+        <ShieldCheck size={18} aria-hidden="true" />
+        <div className="staff-directory-fact__copy">
+          <small>Shift</small>
+          <span>{staff.shift || 'No shift assigned'}</span>
+        </div>
+      </div>
+      <div className="staff-directory-fact">
+        <CalendarDays size={18} aria-hidden="true" />
+        <div className="staff-directory-fact__copy">
+          <small>Joined</small>
+          <span>{staff.joiningDate || '—'}</span>
+        </div>
+      </div>
       {canViewPay && (
-        <span className="staff-directory-paytype">
-          <WalletCards size={13} />
-          <span>
-            {payPlan?.dailyRate
-              ? `Daily Wage · ₹${Number(payPlan.dailyRate).toLocaleString('en-IN')}/day`
-              : 'Daily wage not configured'}
-          </span>
-        </span>
+        <div className="staff-directory-fact staff-directory-fact--wage">
+          <WalletCards size={18} aria-hidden="true" />
+          <div className="staff-directory-fact__copy">
+            <small>Daily wage</small>
+            <span>
+              {payPlan?.dailyRate != null && payPlan.dailyRate !== '' && Number.isFinite(Number(payPlan.dailyRate))
+                ? `₹${Number(payPlan.dailyRate).toLocaleString('en-IN')}/day`
+                : 'Not configured'}
+            </span>
+          </div>
+        </div>
       )}
     </div>
 
@@ -100,6 +127,7 @@ export const StaffDirectoryCard = ({
         type="button"
         className={`staff-status-button ${staff.accountStatus === 'Active' ? 'is-danger' : 'is-success'}`}
         title={staff.accountStatus === 'Active' ? 'Deactivate Staff' : 'Activate Staff'}
+        aria-label={staff.accountStatus === 'Active' ? `Deactivate ${staff.name}` : `Activate ${staff.name}`}
         onClick={(event) => {
           event.stopPropagation();
           onToggleStatus();
