@@ -595,3 +595,15 @@
   font-size: 15px !important;
   line-height: 1.5 !important;
 }
+
+
+/* Mode descriptions use a dedicated span so legacy small-text rules cannot shrink them. */
+.cg-attendance-manager .attendance-mode-copy .am-mode-description {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 15px !important;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
