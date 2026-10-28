@@ -58,8 +58,8 @@ export function QuickEstimatePanel({
   const [discount, setDiscount] = useState('0');
   const registered = Boolean(job?.gstInfo?.registered);
   const supplierState = job?.gstInfo?.supplierState || '';
-  const selectedGstMode = indiaTaxMode(registered, supplierState, placeOfSupply);
   const [placeOfSupply, setPlaceOfSupply] = useState('');
+  const selectedGstMode = indiaTaxMode(registered, supplierState, placeOfSupply);
   const [busy, setBusy] = useState(false);
   const [changed, setChanged] = useState(false);
   const [feedback, setFeedback] = useState('');
