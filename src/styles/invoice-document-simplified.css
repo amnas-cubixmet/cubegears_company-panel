@@ -1,0 +1,38 @@
+/* The invoice editor has two source cards: seller and customer.
+ * Date and legal Place of Supply remain editable within Customer Details.
+ * Do not restore the removed, disabled Invoice Type or optional job/staff card.
+ */
+.billing-page .invoice-source-grid--compact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.billing-page .invoice-source-grid--compact > .billing-card:last-child {
+  grid-column: auto;
+}
+.billing-page .invoice-customer-card .invoice-essential-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+  margin-top: 10px;
+  padding-top: 13px;
+  border-top: 1px solid var(--border);
+}
+.billing-page .invoice-customer-card .invoice-essential-fields label {
+  min-width: 0;
+}
+@media (max-width: 850px) {
+  .billing-page .invoice-source-grid--compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .billing-page .invoice-source-grid--compact > .billing-card:last-child {
+    grid-column: auto;
+  }
+}
+@media (max-width: 420px) {
+  .billing-page .invoice-customer-card .invoice-essential-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

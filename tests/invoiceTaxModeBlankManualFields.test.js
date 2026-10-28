@@ -57,14 +57,14 @@ test('manually opened New Invoice ignores stale local Job Card prefills', () => 
   assert.match(billing, /staff: ''/);
   assert.match(billing, /gstin: '', state: '', stateCode: '', placeOfSupply: ''/);
   assert.match(page, /jobId: new URLSearchParams\(location\.search\)\.get\('jobId'\)/);
-  assert.match(page, /value=\{form\.jobCardNo \|\| ''\}/);
-  assert.match(page, /value=\{form\.staff \|\| ''\}/);
   assert.match(page, /value=\{form\.customer\?\.gstin \|\| ''\}/);
   assert.match(page, /value=\{form\.customer\?\.state \|\| ''\}/);
   assert.doesNotMatch(page, /placeholder="GSTIN \/ URP"/);
   assert.doesNotMatch(page, /placeholder="JOB-2048"/);
-  const details = page.slice(page.indexOf('<label>Invoice Type'), page.indexOf('<label>Date'));
-  assert.doesNotMatch(details, /GST invoice enabled by the verified workshop GSTIN/);
+  assert.doesNotMatch(page, /<label>Invoice Type/);
+  assert.doesNotMatch(page, /GST invoice enabled by the verified workshop GSTIN/);
+  assert.doesNotMatch(page, /<label>Job Card No\./);
+  assert.doesNotMatch(page, /<label>Staff \/ Advisor/);
 });
 
 test('existing company profile retains legal invoice type and authoritative backend totals', () => {
