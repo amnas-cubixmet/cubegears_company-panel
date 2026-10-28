@@ -88,7 +88,12 @@ function fixture(path) {
   if(path==='/attendance-manager/approvals') return [{
     id:'LEAVE-TEST-1',type:'Leave Request',status:'Pending',staffName:'Belle Trujillo',
     staffId:'EMP-0001',startDate:'2026-10-30',endDate:'2026-10-30',
-    totalDays:1,reason:'Personal leave request',halfDay:false,
+    totalDays:1,reason:'Personal leave request',halfDay:false,canReview:true,
+  },{
+    id:'LEAVE-SELF-TEST',type:'Leave Request',status:'Pending',staffName:'Logged In Owner',
+    staffId:'EMP-0002',startDate:'2026-10-30',endDate:'2026-10-30',
+    totalDays:1,reason:'Own leave request',halfDay:false,canReview:false,
+    reviewBlockReason:'Your own request must be reviewed by another authorized manager.',
   }];
   if(path==='/attendance/status') return {status:'CLOCKED_OUT',workedHours:'0h'};
   return [];
@@ -405,6 +410,22 @@ try {
             throw Error('Leave Date did not reset to today on reopening.');
           }
           await dialog.getByRole('button', { name: 'Cancel' }).click();
+        }
+
+        if(path==='/attendance-manager/leave-requests') {
+          const blockedCard = page.locator('.am-approval-card').filter({hasText:'Logged In Owner'});
+          await blockedCard.waitFor();
+          await blockedCard.getByText('Your own request must be reviewed by another authorized manager.').waitFor();
+          if(await blockedCard.getByRole('button',{name:'Approve'}).count()!==0) {
+            throw Error('Own leave request still displays Approve action.');
+          }
+          if(await blockedCard.getByRole('button',{name:'Reject'}).count()!==0) {
+            throw Error('Own leave request still displays Reject action.');
+          }
+          const other = page.locator('.am-approval-card').filter({hasText:'Belle Trujillo'});
+          if(await other.getByRole('button',{name:'Approve'}).count()!==1) {
+            throw Error('Another employee leave request lost approval action.');
+          }
         }
 
         if(path.startsWith('/attendance-manager/') && [
