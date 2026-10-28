@@ -5,7 +5,7 @@ import { billingService, blankBillingDocument, calculateDocumentTotals } from '.
 import { normalizeBackendInvoiceTotals } from '../../utils/invoiceBackendTotals';
 import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, invoicePreviewFailureMessage, isInvoiceBranchStateMismatch, normalizeHsnSacCode } from '../../utils/invoicePayload';
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
-import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
+import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, invoiceChoiceFromTotalRate, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
 import '../../styles/invoice-field-validation.css';
 import '../../styles/invoice-item-responsive.css';
 import '../../styles/invoice-goods-services-layout.css';
@@ -396,6 +396,23 @@ export function InvoiceRoutePage() {
 
   };
 
+  const chooseItemGst = (rowId, selection) => {
+    const item = taxChoices.find(choice => choice.value === selection);
+    setForm(old => ({
+      ...old,
+      items: old.items.map(row => row.id === rowId ? {
+        ...row, taxChoice: item?.value || '',
+        taxRate: item?.totalRate || '',
+      } : row),
+    }));
+    setFieldErrors(old => {
+      const next = { ...old };
+      const index = form.items.findIndex(row => row.id === rowId);
+      delete next[`items.${index}.taxRate`];
+      return next;
+    });
+  };
+
   const updateItem = (rowId, key, value) => {
     const rowIndex = form.items.findIndex((row) => row.id === rowId);
     const path = `items.${rowIndex}.${key}`;
@@ -438,6 +455,12 @@ export function InvoiceRoutePage() {
     if (form.items.some((row) => !row.unit)) return 'Select a unit for every item.';
     if (form.items.some((row) => !row.description?.trim() && row.type !== 'Stock Part')) return 'Enter an item / service description.';
     if (form.invoiceType === 'gst' && form.items.some((row) => !String(row.hsnCode || '').trim())) return 'HSN / SAC is required for every GST invoice item.';
+    if (form.invoiceType === 'gst' && form.items.some((row) => {
+      if (!row.taxChoice) return false;
+      const choice = taxChoices.find(option => option.value === row.taxChoice);
+      return !choice || choice.taxMode !== appliedTaxMode ||
+        Number(choice.totalRate) !== Number(row.taxRate);
+    })) return 'Selected GST component conflicts with Place of Supply or the item tax rate.';
     return '';
   };
 
@@ -919,13 +942,16 @@ export function InvoiceRoutePage() {
                     aria-label="GST rate"
                     aria-invalid={Boolean(fieldErrors[`items.${index}.taxRate`])}
                     disabled={form.invoiceType !== 'gst'}
-                    value={form.invoiceType === 'gst' ? String(row.taxRate ?? '') : ''}
-                    onChange={(e) => updateItem(row.id, 'taxRate', e.target.value)}
-                  >
-                    <option value="">{form.invoiceType !== 'gst' ? 'No GST' : 'Select GST rate'}</option>
-                    {taxChoices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
-                    {row.taxRate !== '' && row.taxRate != null && !taxChoices.some((choice) => choice.value === String(row.taxRate)) &&
-                      <option value={row.taxRate}>{row.taxRate}% — stock classification</option>}
+                    value={form.invoiceType === 'gst' ? invoiceChoiceFromTotalRate(
+                        row.taxRate, appliedTaxMode, row.taxChoice, workshopTaxProfile?.gstRateOptions
+                      ) : ''}
+                      onChange={(e) => chooseItemGst(row.id, e.target.value)}
+                    >
+                      <option value="">{form.invoiceType !== 'gst' ? 'No GST' : 'Select GST rate'}</option>
+                      {taxChoices.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
+                      {row.taxRate !== '' && row.taxRate != null &&
+                        !taxChoices.some((choice) => String(choice.totalRate) === String(row.taxRate)) &&
+                        <option value={`saved:${row.taxRate}`}>{row.taxRate}% — saved classification</option>}
                   </select>
                   {fieldErrors[`items.${index}.taxRate`] && <small className="invoice-input-error" role="alert">{fieldErrors[`items.${index}.taxRate`]}</small>}
                 </div>
