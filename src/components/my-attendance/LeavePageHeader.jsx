@@ -5,7 +5,7 @@ export const LeavePageHeader = ({ onApply, disabled = false }) => (
   <section className="leave-page-heading">
     <div>
       <h2>Leave Management</h2>
-      <p>Apply for unpaid leave and track approval status. Leave earns ₹0 base wage.</p>
+      <p>Apply for leave and track your request status.</p>
     </div>
 
     <button

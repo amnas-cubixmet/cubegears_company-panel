@@ -351,6 +351,57 @@ try {
           }
         }
 
+        if(path==='/my-attendance/calendar') {
+          const punch = page.locator('.attendance-punch-card');
+          await punch.waitFor();
+          const measured = await punch.evaluate(node => {
+            const status = node.querySelector('.attendance-punch-status strong');
+            const note = node.querySelector('.attendance-punch-note span');
+            return {
+              statusFont: status ? parseFloat(getComputedStyle(status).fontSize) : null,
+              noteFont: note ? parseFloat(getComputedStyle(note).fontSize) : null,
+              width: node.getBoundingClientRect().width,
+            };
+          });
+          if (measured.statusFont != null && measured.statusFont < 16) {
+            throw Error('My Attendance status too small: ' + JSON.stringify(measured));
+          }
+          if (measured.noteFont != null && measured.noteFont < 14) {
+            throw Error('My Attendance completion note too small: ' + JSON.stringify(measured));
+          }
+          if (measured.width > profile.width + 2) {
+            throw Error('My Attendance punch card overflows viewport: ' + JSON.stringify(measured));
+          }
+        }
+        if(path==='/my-attendance/leave' && (profile.width === 390 || profile.width === 1440)) {
+          await page.getByRole('button', { name: 'Apply Leave' }).click();
+          const dialog = page.getByRole('dialog', { name: 'Apply for Leave' });
+          await dialog.waitFor();
+          const date = dialog.locator('input[type="date"]');
+          const expected = await page.evaluate(() => {
+            const d = new Date();
+            return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'),
+              String(d.getDate()).padStart(2,'0')].join('-');
+          });
+          if(await date.inputValue() !== expected) {
+            throw Error('Leave Date not auto-filled to local today.');
+          }
+          const font = await date.evaluate(node => parseFloat(getComputedStyle(node).fontSize));
+          if(font < 16) throw Error('Leave Date input font below 16px: '+font);
+          if(await dialog.getByText('All leave is unpaid.').count()) {
+            throw Error('Old unpaid wage explanation still shown.');
+          }
+          await date.fill('2026-11-04');
+          await dialog.getByRole('button', { name: 'Cancel' }).click();
+          await dialog.waitFor({ state: 'hidden' });
+          await page.getByRole('button', { name: 'Apply Leave' }).click();
+          await date.waitFor();
+          if(await date.inputValue() !== expected) {
+            throw Error('Leave Date did not reset to today on reopening.');
+          }
+          await dialog.getByRole('button', { name: 'Cancel' }).click();
+        }
+
         if(path==='/staff-management/overview') {
           const input=page.locator('.staff-simple-search input');
           const border=await input.evaluate(node=>getComputedStyle(node).borderTopWidth);

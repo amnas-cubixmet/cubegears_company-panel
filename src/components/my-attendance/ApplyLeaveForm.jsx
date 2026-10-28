@@ -1,7 +1,7 @@
 
 import { Paperclip } from 'lucide-react';
 
-/** CubixGear Daily Wage Only: every leave day is unpaid, no Leave Type field. */
+/** Leave form keeps the backend payroll rules unchanged; no redundant wage notice. */
 export const ApplyLeaveForm = ({
   form, setForm, submitting, onSubmit, onCancel,
 }) => (
@@ -32,11 +32,6 @@ export const ApplyLeaveForm = ({
           required
         />
       </label>
-    </div>
-
-    <div className="apply-leave-balance-note is-unpaid" role="note">
-      All leave is unpaid. A full-day leave earns ₹0 daily wage.
-      Half-day leave earns wages only for verified half-day work.
     </div>
 
     {form.leaveMode === 'Half Day' && (

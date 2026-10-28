@@ -6,16 +6,21 @@ import {
 } from '../../components/my-attendance';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { leaveService } from '../../services/leave.service';
+import { todayForLeaveDate } from '../../components/my-attendance/leaveDate.utils.js';
 import '../../styles/attendance-leave.css';
+import '../../styles/attendance-leave-readable.css';
 
-const createInitialForm = () => ({
-  leaveMode: 'Full Day',
-  halfDaySession: 'First Half',
-  startDate: '',
-  endDate: '',
-  reason: '',
-  attachment: null,
-});
+const createInitialForm = () => {
+  const today = todayForLeaveDate();
+  return {
+    leaveMode: 'Full Day',
+    halfDaySession: 'First Half',
+    startDate: today,
+    endDate: today,
+    reason: '',
+    attachment: null,
+  };
+};
 
 export const LeaveRequests = () => {
   const [requests, setRequests] = useState([]);
