@@ -266,12 +266,16 @@ try {
           if(await toState.inputValue()!=='33' || !(await toState.isDisabled())) {
             throw Error('TO State Code was not auto-filled and locked from Tamil Nadu GSTIN.');
           }
-          await page.waitForFunction(()=>document.body.innerText.includes('IGST: 18%'));
+          await page.waitForFunction(() => [...document.querySelectorAll('.eway-goods-totals > div')]
+            .some(node => node.innerText.includes('IGST') && node.innerText.includes('₹18.00')));
           await toGstin.fill('URP');
           if(await toState.isDisabled()) throw Error('URP recipient must allow manual State selection.');
           await toState.selectOption('32');
-          await page.waitForFunction(()=>document.body.innerText.includes('CGST: 9%')&&
-            document.body.innerText.includes('SGST: 9%'));
+          await page.waitForFunction(() => {
+            const rows = [...document.querySelectorAll('.eway-goods-totals > div')];
+            return rows.some(node => node.innerText.includes('CGST') && node.innerText.includes('₹9.00')) &&
+              rows.some(node => node.innerText.includes('SGST') && node.innerText.includes('₹9.00'));
+          });
           if(await taxRate.inputValue()!=='18') throw Error('GST rate did not survive URP state change.');
         }
 
