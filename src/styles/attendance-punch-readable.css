@@ -1,0 +1,163 @@
+/* My Attendance calendar status + sessions. Larger text, sensible wrapping,
+ * and no tiny 7–10px labels on desktop or mobile.
+ */
+.my-attendance-pages .attendance-punch-card {
+  width: 100%;
+  min-width: 0;
+  min-height: 120px;
+  padding: 18px 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 245px);
+  gap: 16px;
+  align-items: start;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.my-attendance-pages .attendance-punch-main {
+  align-items: center;
+  gap: 14px;
+}
+.my-attendance-pages .attendance-punch-status {
+  gap: 12px;
+  padding: 6px 16px 6px 2px;
+}
+.my-attendance-pages .attendance-live-dot {
+  width: 10px;
+  height: 10px;
+}
+.my-attendance-pages .attendance-punch-status small,
+.my-attendance-pages .attendance-punch-meta small {
+  font-size: 13px;
+  line-height: 1.45;
+}
+.my-attendance-pages .attendance-punch-status strong,
+.my-attendance-pages .attendance-punch-meta strong {
+  margin-top: 3px;
+  font-size: 16px;
+  line-height: 1.4;
+  white-space: normal;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+.my-attendance-pages .attendance-punch-meta {
+  gap: 10px;
+}
+.my-attendance-pages .attendance-punch-meta > div {
+  min-height: 56px;
+  padding: 9px 12px;
+  gap: 10px;
+}
+.my-attendance-pages .attendance-punch-meta svg {
+  width: 18px;
+  height: 18px;
+}
+.my-attendance-pages .attendance-punch-action {
+  justify-content: flex-end;
+  min-width: 0;
+}
+.my-attendance-pages .attendance-punch-action button {
+  min-width: 145px;
+  width: 100%;
+  min-height: 46px;
+  height: auto;
+  padding: 10px 14px;
+  font-size: 15px;
+}
+.my-attendance-pages .attendance-punch-note {
+  max-width: none;
+  width: 100%;
+  min-height: 58px;
+  padding: 12px;
+  align-items: center;
+}
+.my-attendance-pages .attendance-punch-note svg {
+  width: 18px;
+  height: 18px;
+}
+.my-attendance-pages .attendance-punch-note span {
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.my-attendance-pages .attendance-punch-error,
+.my-attendance-pages .attendance-punch-card.is-loading {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.my-attendance-pages .attendance-session-strip {
+  gap: 12px;
+  padding-top: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr));
+}
+.my-attendance-pages .attendance-session-strip article {
+  padding: 13px;
+  min-height: 112px;
+}
+.my-attendance-pages .attendance-session-title {
+  gap: 10px;
+}
+.my-attendance-pages .attendance-session-title strong,
+.my-attendance-pages .attendance-session-title span {
+  font-size: 14px;
+  line-height: 1.4;
+}
+.my-attendance-pages .attendance-session-times {
+  gap: 10px;
+  margin-top: 10px;
+}
+.my-attendance-pages .attendance-session-times small {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.my-attendance-pages .attendance-session-times b {
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: normal;
+}
+.my-attendance-pages .attendance-session-location,
+.my-attendance-pages .attendance-session-auto {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .my-attendance-pages .attendance-punch-card {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 15px;
+  }
+  .my-attendance-pages .attendance-punch-action {
+    justify-content: stretch;
+  }
+  .my-attendance-pages .attendance-punch-meta > div { min-width: 0; }
+  .my-attendance-pages .attendance-punch-note { min-height: 48px; }
+}
+@media (max-width: 620px) {
+  .my-attendance-pages .attendance-punch-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .my-attendance-pages .attendance-punch-status {
+    border-right: 0;
+    padding: 2px 0;
+  }
+  .my-attendance-pages .attendance-punch-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+  .my-attendance-pages .attendance-punch-meta > div:last-child:nth-child(3) {
+    grid-column: 1/-1;
+  }
+  .my-attendance-pages .attendance-session-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 380px) {
+  .my-attendance-pages .attendance-punch-meta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .my-attendance-pages .attendance-punch-meta > div:last-child:nth-child(3) {
+    grid-column: auto;
+  }
+}
