@@ -10,6 +10,7 @@ import {
 import { minutesToHours, parseAttendanceLocalDate } from '../../components/my-attendance/attendance.utils';
 import { attendanceService } from '../../services/attendance.service';
 import '../../styles/attendance-calendar.css';
+import '../../styles/attendance-punch-readable.css';
 
 const monthKey = (date) => date.getFullYear() * 12 + date.getMonth();
 
