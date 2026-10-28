@@ -665,53 +665,40 @@ export function EWayBillPage() {
 
                 <div className="eway-goods-tax mt-4 rounded-xl border border-line bg-surface p-3 sm:p-4">
                   <div className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted">
-                    Tax Rates %
+                    GST &amp; CESS
                   </div>
-
-                  <div className="eway-goods-tax-grid grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">CGST
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="CGST rate"
-                        inputMode="decimal"
-                        value={item.cgstRate}
-                        onChange={(e) => updateItem(item.id, 'cgstRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
+                  <div className="eway-goods-tax-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">
+                      GST Rate (%)
+                      <select aria-label="GST rate" value={String(eWayTotalGstRate(item))}
+                        disabled={gstMode === 'unknown'}
+                        onChange={(e) => updateItemGst(item.id, e.target.value)}
+                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content">
+                        {!EWAY_GST_RATES.includes(String(eWayTotalGstRate(item))) &&
+                          <option value={String(eWayTotalGstRate(item))}>{eWayTotalGstRate(item)}%</option>}
+                        {EWAY_GST_RATES.map((rate) =>
+                          <option value={rate} key={rate}>{rate}%</option>)}
+                      </select>
                     </label>
-
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">SGST
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="SGST rate"
-                        inputMode="decimal"
-                        value={item.sgstRate}
-                        onChange={(e) => updateItem(item.id, 'sgstRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
-                    </label>
-
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">IGST
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="IGST rate"
-                        inputMode="decimal"
-                        value={item.igstRate}
-                        onChange={(e) => updateItem(item.id, 'igstRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
-                    </label>
-
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">CESS
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="CESS rate"
-                        inputMode="decimal"
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">
+                      CESS Rate (%)
+                      <input aria-label="CESS rate" inputMode="decimal"
                         value={item.cessRate}
                         onChange={(e) => updateItem(item.id, 'cessRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
+                        placeholder="0" />
                     </label>
+                  </div>
+                  <p className="eway-gst-explanation" role="status">
+                    {gstMode === 'unknown'
+                      ? 'Enter valid FROM and TO state codes to select GST.'
+                      : gstMode === 'igst'
+                        ? 'Inter-state: IGST applies. CGST and SGST are zero.'
+                        : 'Intra-state: GST is split equally between CGST and SGST.'}
+                  </p>
+                  <div className="eway-gst-breakdown">
+                    <span>CGST: {item.cgstRate || 0}%</span>
+                    <span>SGST: {item.sgstRate || 0}%</span>
+                    <span>IGST: {item.igstRate || 0}%</span>
                   </div>
                 </div>
               </article>
