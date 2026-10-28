@@ -1,8 +1,11 @@
 
 import { Activity, ArrowRight, Car, PackageSearch } from 'lucide-react';
 import { dashboardText } from './dashboard.utils';
+import { jobWorkflowProgress } from './jobWorkflowProgress';
 
-export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onReviewStock, canViewStock = false }) => (
+export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onReviewStock, canViewStock = false }) => {
+  const progress = jobWorkflowProgress(activeRepair);
+  return (
   <aside className="repair-pane">
     <button
       type="button"
@@ -17,7 +20,7 @@ export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onRevi
           <strong>{dashboardText(activeRepair?.vehicle, 'Vehicle')}</strong>
           <small>{dashboardText(activeRepair?.jobNumber || activeRepair?.id)}</small>
         </div>
-        <span className="status-pill is-success">In Progress</span>
+        <span className="status-pill is-info">{dashboardText(activeRepair?.status, 'Status unavailable')}</span>
       </div>
 
       <div className="repair-meta">
@@ -26,8 +29,24 @@ export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onRevi
       </div>
 
       <div className="overall-progress">
-        <div><span>Overall Progress</span><strong>70%</strong></div>
-        <div className="progress-track"><span /></div>
+        <div className="overall-progress-heading">
+          <span>Job Workflow Progress</span>
+          <strong>{progress ? `${progress.percentage}%` : '—'}</strong>
+        </div>
+        <div className="progress-track" role="progressbar"
+          aria-label="Completed job workflow stages"
+          aria-valuemin={0} aria-valuemax={100}
+          aria-valuenow={progress?.percentage ?? 0}
+          aria-valuetext={progress
+            ? `${progress.completed} of ${progress.total} stages complete`
+            : 'Workflow progress not yet available'}>
+          <span style={{ width: `${progress?.percentage ?? 0}%` }} />
+        </div>
+        <small className="overall-progress-caption">
+          {progress
+            ? `${progress.completed} of ${progress.total} job stages completed`
+            : 'No job workflow progress available'}
+        </small>
       </div>
 
       <div className="active-repair-open-hint">
@@ -52,4 +71,5 @@ export const ActiveRepairPanel = ({ activeRepair, stockAlerts, onOpenJob, onRevi
       <button type="button" className="dashboard-button is-primary full-width" onClick={onReviewStock}>Review Stock</button>
     </div>}
   </aside>
-);
+  );
+};
