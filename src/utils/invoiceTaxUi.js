@@ -1,4 +1,5 @@
 import { INDIA_STATES, indiaTaxMode } from './indiaGst.js';
+import { GST_CGST_SGST_COMPONENT_RATES, GST_IGST_RATES, gstRateChoices } from './gstRatePresets.js';
 
 const STATE_BY_CODE = new Map(INDIA_STATES);
 const CODE_BY_STATE = new Map(INDIA_STATES.map(([code, name]) => [name.toLowerCase(), code]));
@@ -48,13 +49,9 @@ export const invoiceTaxMode = (form) => {
   return indiaTaxMode(true, supplier, actualPlace || (!location ? supplier : ''));
 };
 
-// The component controls are a *paired* intra-state GST choice. Django's
-// invoice item has one total taxRate, which it splits equally into CGST/SGST.
-// Never persist the CGST or SGST component alone as the whole tax rate.
-export const INVOICE_CGST_SGST_RATES = Object.freeze(['2.5', '5', '9', '18']);
-// IGST is the entire GST percentage, not one half of CGST + SGST.
-// Include 18% so an inter-state ₹100 taxable item can be invoiced at ₹118.
-export const INVOICE_IGST_RATES = Object.freeze(['2.5', '9', '18']);
+// Django stores TOTAL GST per item and splits it into CGST and SGST.
+export const INVOICE_CGST_SGST_RATES = GST_CGST_SGST_COMPONENT_RATES;
+export const INVOICE_IGST_RATES = GST_IGST_RATES;
 
 export const invoiceComponentFromTotalRate = (totalRate) =>
   totalRate === '' || totalRate == null ? '' : String(Number(totalRate) / 2);
@@ -62,23 +59,7 @@ export const invoiceComponentFromTotalRate = (totalRate) =>
 export const invoiceTotalFromGstComponent = (componentRate) =>
   componentRate === '' ? '' : String(Number(componentRate) * 2);
 
-export const invoiceLineTaxChoices = (mode) => {
-  if (mode === 'cgst_sgst') return [
-    { value: '0', label: 'GST None (0%)' },
-    ...INVOICE_CGST_SGST_RATES.map((rate) => ({
-      value: invoiceTotalFromGstComponent(rate),
-      label: `CGST ${rate}% + SGST ${rate}% = ${Number(rate) * 2}%`,
-    })),
-  ];
-  if (mode === 'igst') return [
-    { value: '0', label: 'GST None (0%)' },
-    ...INVOICE_IGST_RATES.map((rate) => ({
-      value: rate, label: `IGST ${rate}%`,
-    })),
-  ];
-  // Let users choose while the legal place of supply is still being entered.
-  // Saving still requires a valid state; no invented CGST/IGST classification.
-  if (mode === 'unknown') return [0, 2.5, 5, 9, 10, 18, 36]
-    .map((rate) => ({ value: String(rate), label: rate === 0 ? 'GST None (0%)' : `GST ${rate}%` }));
-  return [];
-};
+// Exempt / nil-rated and existing historical rates are still supported
+// through the saved rate option, not added as new taxable rate presets.
+export const invoiceLineTaxChoices = (mode, currentRate = '') =>
+  gstRateChoices(mode, currentRate);
