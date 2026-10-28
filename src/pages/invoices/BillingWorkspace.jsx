@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FileText, Plus, Printer, ReceiptText, Trash2, CheckCircle2, XCircle, CopyPlus } from 'lucide-react';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { INDIA_STATES } from '../../utils/indiaGst';
+import { invoiceTaxMode, invoiceLineTaxChoices, invoiceChoiceFromTotalRate } from '../../utils/invoiceTaxUi';
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const itemTypes = ['Stock Part', 'Outside Purchase', 'Labour', 'Service', 'Consumable', 'Custom Item'];
@@ -32,6 +33,8 @@ export function BillingWorkspace() {
   useEffect(() => { load(); }, []);
 
   const totals = useMemo(() => calculateDocumentTotals(form), [form]);
+  const gstMode = invoiceTaxMode(form);
+  const gstChoices = invoiceLineTaxChoices(gstMode, gstConfig?.gstRateOptions);
   const filteredDocs = documents.filter((doc) => doc.kind === activeTab);
 
   const startNew = (kind = activeTab) => {
@@ -82,6 +85,21 @@ export function BillingWorkspace() {
     } : row)
   }));
 
+  const chooseGst = (id, value) => {
+    const selected = gstChoices.find(item => item.value === value);
+    setForm(old => ({
+      ...old, items: old.items.map(row => row.id === id ? {
+        ...row, taxChoice: selected?.value || '',
+        taxRate: selected?.totalRate || '',
+      } : row),
+    }));
+  };
+
+  const invalidGstSelection = () => form.invoiceType === 'gst' &&
+    form.items.some(row => row.taxChoice && !gstChoices.some(choice =>
+      choice.value === row.taxChoice && choice.taxMode === gstMode &&
+      Number(choice.totalRate) === Number(row.taxRate)));
+
   const chooseInventory = (rowId, inventoryId) => {
     const stock = inventory.find((item) => item.id === inventoryId);
     setForm((old) => ({
@@ -108,6 +126,7 @@ export function BillingWorkspace() {
     if (form.invoiceType === 'gst' && (!gstConfig?.registered || !gstConfig?.supplierState)) {
       return setError('Configure your valid workshop GSTIN in Company Settings.');
     }
+    if (invalidGstSelection()) return setError('Selected GST type does not match Place of Supply.');
     try {
       const saved = await billingService.saveDraft(form);
       setForm(saved);
@@ -119,6 +138,7 @@ export function BillingWorkspace() {
 
   const finalize = async () => {
     try {
+      if (invalidGstSelection()) throw new Error('Selected GST type does not match Place of Supply.');
       if (form.invoiceType === 'gst') {
         if (!gstConfig?.registered || !gstConfig?.supplierState) throw new Error('Set workshop GSTIN before issuing a tax invoice.');
         if (!form.customer?.placeOfSupply) throw new Error('Select the legal Place of Supply (State/UT).');
@@ -229,8 +249,16 @@ export function BillingWorkspace() {
                 {form.invoiceType === 'gst' && <>
                   <input type="text" inputMode="numeric" maxLength={20} value={row.hsnCode || ''}
                     onChange={(e) => updateItem(row.id, 'hsnCode', e.target.value)} placeholder="HSN / SAC" aria-label="HSN or SAC" />
-                  <input type="number" min="0" max="100" step="0.01" value={row.taxRate ?? ''}
-                    onChange={(e) => updateItem(row.id, 'taxRate', e.target.value)} placeholder="GST %" aria-label="Item GST percentage" />
+                  <select aria-label="Item GST percentage" value={invoiceChoiceFromTotalRate(
+                     row.taxRate, gstMode, row.taxChoice, gstConfig?.gstRateOptions
+                   )} onChange={(e) => chooseGst(row.id, e.target.value)}>
+                     <option value="">Select GST rate</option>
+                     {gstChoices.map(choice =>
+                       <option value={choice.value} key={choice.value}>{choice.label}</option>)}
+                     {row.taxRate !== '' && row.taxRate != null &&
+                       !gstChoices.some(choice => Number(choice.totalRate) === Number(row.taxRate)) &&
+                       <option value={`saved:${row.taxRate}`}>Saved GST {row.taxRate}%</option>}
+                   </select>
                 </>}
                 <strong>{money.format(Math.max(0, Number(row.qty || 0) * Number(row.rate || 0) - Number(row.discount || 0)))}</strong>
                 <button className="bill-icon-btn" onClick={() => update('items', form.items.filter((item) => item.id !== row.id))}><Trash2 size={16}/></button>
