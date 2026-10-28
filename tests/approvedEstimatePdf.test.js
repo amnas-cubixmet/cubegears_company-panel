@@ -85,7 +85,7 @@ test('approval offers PDF only after server confirms successful stage completion
   assert.match(parent, /title="Estimate Approved"/);
   assert.match(parent, /Download PDF/);
   assert.match(parent, /Continue to Work/);
-  assert.match(parent, /onDownloadApproved=\{\(approvedEstimate\) => downloadApprovalPdf\(job, approvedEstimate\)\}/);
+  assert.match(parent, /onDownloadApproved=\{\(approvedEstimate\) => openApprovedPdfShare\(job, approvedEstimate\)\}/);
   assert.match(panel, /Download Approved PDF/);
   assert.match(css, /job-approved-pdf-offer-actions/);
 });
@@ -95,4 +95,20 @@ test('PDF is downloaded only when the user clicks, not automatically on approval
   assert.match(parent, /onClick=\{\(\) => downloadApprovalPdf\(pdfOffer\.job, pdfOffer\.estimate\)\}/);
   assert.match(parent, /onClick=\{continueAfterApproval\}/);
   assert.match(parent, /if \(!await appConfirm\('Confirm that the customer approved the latest estimate\?'\)\) return/);
+});
+
+test('iPhone and desktop share the approved PDF file without touching draft data', () => {
+  const parent = readFileSync(new URL('../src/pages/jobs/JobCardWorkspace.jsx', import.meta.url), 'utf8');
+  const utility = readFileSync(new URL('../src/utils/approvedEstimatePdf.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../src/styles/approved-estimate-pdf.css', import.meta.url), 'utf8');
+  assert.match(parent, /createApprovedEstimatePdfFile\(pdfOffer\.job, pdfOffer\.estimate\)/);
+  assert.match(parent, /navigator\.share\(\{/);
+  assert.match(parent, /files: \[approvedPdfFile\]/);
+  assert.match(parent, /onClick=\{shareApprovedPdf\}/);
+  assert.match(parent, /Share PDF/);
+  assert.match(parent, /Download PDF/);
+  assert.match(parent, /if \(next\) navigate/);
+  assert.match(utility, /export const createApprovedEstimatePdfFile/);
+  assert.match(utility, /return new File\(\[pdf\], filename, \{ type: 'application\/pdf' \}\)/);
+  assert.match(css, /safe-area-inset-bottom/);
 });
