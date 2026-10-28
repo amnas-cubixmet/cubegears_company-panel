@@ -55,6 +55,10 @@ function fixture(path) {
     sessions:[], correctionInfo:null, leaveInfo:null, auditHistory:[],
   };
   if(path==='/e-way-bills') return [];
+  if(path==='/e-way-bills/from-context') return {
+    from:{gstin:'32ABCDE1234F1Z5',tradeName:'Test Workshop',address:'Workshop Lane',
+      place:'Thrissur',pincode:'680001',stateCode:'32'},branchId:'BR-01',
+  };
   if(path.startsWith('/e-way-bills/')) return {id:'EWB-001',status:'Draft',supplyType:'Outward',subSupplyType:'Supply',transactionType:'Regular',documentType:'Tax Invoice',documentNo:'INV-0001',documentDate:'2026-10-19',from:{tradeName:'Test Workshop',stateCode:'32'},to:{tradeName:'Test Customer',stateCode:'32'},items:[],transport:{mode:'Road',distanceKm:'10',vehicleNo:'KL10AB1234'}};
   if(path==='/employees') return mockStaffList.map(row => ({...row, photo:''}));
   const records = {employees:mockStaffList, customers:customersMock, vehicles:vehiclesMock,
@@ -242,6 +246,29 @@ try {
           }
           await sheet.getByRole('button',{name:'Cancel'}).click();
           await sheet.waitFor({state:'hidden'});
+        }
+
+        if(path==='/invoices/e-way-bills/new' && profile.width===390) {
+          const to=page.locator('section').filter({has:page.getByText('SECTION 2 · TO',{exact:true})});
+          const toGstin=to.getByPlaceholder('GSTIN / URP');
+          const toState=to.getByRole('combobox',{name:'TO State Code'});
+          const taxRate=page.getByRole('combobox',{name:'GST rate'}).first();
+          await taxRate.waitFor();
+          if(await taxRate.isDisabled()) throw Error('GST rate must be selectable before TO state.');
+          await page.locator('.eway-goods-fields').getByPlaceholder('0.00').first().fill('100');
+          await taxRate.selectOption('18');
+          if(await taxRate.inputValue()!=='18') throw Error('GST 18% choice was lost before state selection.');
+          await toGstin.fill('33ABCDE1234F1Z5');
+          if(await toState.inputValue()!=='33' || !(await toState.isDisabled())) {
+            throw Error('TO State Code was not auto-filled and locked from Tamil Nadu GSTIN.');
+          }
+          await page.waitForFunction(()=>document.body.innerText.includes('IGST: 18%'));
+          await toGstin.fill('URP');
+          if(await toState.isDisabled()) throw Error('URP recipient must allow manual State selection.');
+          await toState.selectOption('32');
+          await page.waitForFunction(()=>document.body.innerText.includes('CGST: 9%')&&
+            document.body.innerText.includes('SGST: 9%'));
+          if(await taxRate.inputValue()!=='18') throw Error('GST rate did not survive URP state change.');
         }
 
         if(path==='/staff-management/overview') {
