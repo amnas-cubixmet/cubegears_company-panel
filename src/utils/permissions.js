@@ -62,8 +62,10 @@ const actionForCrudPath = (pathname, prefix) => {
   const suffix = pathname.slice(prefix.length);
 
   if (/\/(new|add)$/.test(suffix)) return 'create';
-  if (/\/[^/]+\/edit$/.test(suffix)) return 'edit';
-  if (/\/[^/]+\/delete$/.test(suffix)) return 'delete';
+  // Both /customers/:id/edit and the legacy /customers/edit/:id
+  // require write access, including direct links and refreshed tabs.
+  if (/\/(?:[^/]+\/edit|edit\/[^/]+)$/.test(suffix)) return 'edit';
+  if (/\/(?:[^/]+\/delete|delete\/[^/]+)$/.test(suffix)) return 'delete';
 
   return 'view';
 };
