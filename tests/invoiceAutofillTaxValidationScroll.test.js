@@ -53,6 +53,7 @@ test('GST options show requested CGST and SGST halves and IGST amounts correctly
   const igst = invoiceLineTaxChoices('igst');
   assert.ok(igst.some(x => x.value === '2.5' && x.label === 'IGST 2.5%'));
   assert.ok(igst.some(x => x.value === '9' && x.label === 'IGST 9%'));
+  assert.ok(igst.some(x => x.value === '18' && x.label === 'IGST 18%'));
   assert.ok(igst.some(x => x.value === '0'));
   assert.equal(invoiceLineTaxChoices('none').length, 0);
 });
@@ -79,5 +80,6 @@ test('seller profile inputs are read-only and Save scrolls to invalid input', ()
   assert.match(editor, /scrollIntoView\(\{ behavior: 'smooth', block: 'center'/);
   assert.match(editor, /focus\(\{ preventScroll: true \}\)/);
   assert.match(editor, /aria-invalid=\{Boolean\(fieldErrors\.date\)\}/);
+  assert.match(editor, /aria-invalid=\{Boolean\(fieldErrors\['seller\.gstin'\]\)\}/);
   assert.match(editor, /invoiceLineTaxChoices\(appliedTaxMode\)/);
 });

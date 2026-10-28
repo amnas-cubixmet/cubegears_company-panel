@@ -708,7 +708,8 @@ export function InvoiceRoutePage() {
               </label>
             </div>
             <label>GSTIN (from Company Settings)
-              <input value={form.seller?.gstin || ''} readOnly aria-readonly="true" placeholder="Not GST registered"/>
+              <input value={form.seller?.gstin || ''} readOnly aria-readonly="true" aria-invalid={Boolean(fieldErrors['seller.gstin'])} placeholder="Not GST registered"/>
+              {fieldErrors['seller.gstin'] && <small className="invoice-input-error" role="alert">{fieldErrors['seller.gstin']}</small>}
             </label>
             <div className="invoice-two-col">
               <label>State

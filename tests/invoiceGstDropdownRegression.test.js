@@ -45,8 +45,9 @@ test('correct rate options follow an actual inter-state customer supply location
   const current = draft('33-Tamil Nadu');
   assert.equal(invoiceTaxMode(current), 'igst');
   const options = invoiceLineTaxChoices(invoiceTaxMode(current));
-  assert.deepEqual(options.map((row) => row.value), ['0', '2.5', '9']);
+  assert.deepEqual(options.map((row) => row.value), ['0', '2.5', '9', '18']);
   assert.ok(options.some((row) => row.value === '9' && row.label === 'IGST 9%'));
+  assert.ok(options.some((row) => row.value === '18' && row.label === 'IGST 18%'));
 });
 
 test('an explicitly invalid customer state does not become a fabricated valid supply', () => {
@@ -54,6 +55,14 @@ test('an explicitly invalid customer state does not become a fabricated valid su
   assert.equal(invoiceTaxMode(current), 'unknown');
   assert.ok(invoiceLineTaxChoices('unknown').length > 0);
   assert.match(validateInvoiceDraft(current)['customer.placeOfSupply'], /valid Place of Supply/);
+});
+
+test('valid customer Place of Supply does not get a false invalid-state error for missing workshop GST settings', () => {
+  const missingWorkshop = draft('32-Kerala');
+  missingWorkshop.seller = { gstin: '', state: '', stateCode: '' };
+  const errors = validateInvoiceDraft(missingWorkshop);
+  assert.equal(errors['customer.placeOfSupply'], undefined);
+  assert.match(errors['seller.gstin'], /GSTIN and state in Company Settings/);
 });
 
 test('GST invoice still requires a legal explicit state before saving', () => {

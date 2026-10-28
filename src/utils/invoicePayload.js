@@ -46,7 +46,9 @@ export const validateInvoiceDraft = (draft) => {
     if (!invoiceStateCode(suppliedPlace)) {
       errors['customer.placeOfSupply'] = 'Enter a valid Place of Supply state before saving.';
     } else if (invoiceTaxMode(draft) === 'unknown') {
-      errors.invoiceType = 'Workshop GST registration or state could not be verified. Check Company Settings.';
+      // Do not blame a valid Place of Supply when the workshop's GSTIN / state
+      // is missing or cannot be verified from Company Settings.
+      errors['seller.gstin'] = 'Verify the workshop GSTIN and state in Company Settings before saving.';
     }
   }
   if (!String(draft.customer?.name || '').trim()) errors['customer.name'] = 'Customer name is required.';
