@@ -29,5 +29,5 @@ test('valid 32-Kerala place of supply is not blamed when workshop GST state is u
     items: [],
   });
   assert.equal(errors['customer.placeOfSupply'], undefined);
-  assert.equal(errors.invoiceType, 'Workshop GST registration or state could not be verified. Check Company Settings.');
+  assert.equal(errors['seller.gstin'], 'Verify the workshop GSTIN and state in Company Settings before saving.');
 });
