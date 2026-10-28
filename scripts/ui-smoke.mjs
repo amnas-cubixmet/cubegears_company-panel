@@ -454,6 +454,47 @@ try {
           }
         }
 
+        if ([
+          '/staff-management/overview',
+          '/staff-management/staff',
+          '/staff-management/roles',
+          '/staff-management/teams',
+          '/staff-management/shifts',
+        ].includes(path)) {
+          const measured = await page.evaluate(() => {
+            const root = document.querySelector('.cg-staff-management');
+            const font = selector => {
+              const element = root?.querySelector(selector);
+              return element ? parseFloat(getComputedStyle(element).fontSize) : null;
+            };
+            const height = selector => {
+              const element = root?.querySelector(selector);
+              return element ? element.getBoundingClientRect().height : null;
+            };
+            return {
+              tabs: font('.staff-dashboard-tab span'),
+              heading: font('.staff-overview-page-heading h1,.staff-dashboard-header h1'),
+              label: font('.staff-simple-metrics span,.staff-directory-details span,.roles-dashboard-card-meta span,.staff-team-card__meta,.staff-crud-detail-grid strong'),
+              person: font('.staff-simple-person-details strong,.staff-directory-person strong,.roles-dashboard-card-title strong,.staff-team-card__head h3,.staff-crud-card__head h3'),
+              button: font('.staff-simple-toolbar-actions button,.staff-add-button,.roles-primary-button,.staff-team-assign-button,.staff-crud-actions button'),
+              touch: height('.staff-simple-toolbar-actions button,.staff-add-button,.roles-primary-button,.staff-team-assign-button,.staff-crud-actions button'),
+              input: font('.staff-simple-search input,.staff-directory-search input,.roles-dashboard input'),
+              overflow: document.documentElement.scrollWidth > window.innerWidth + 2,
+            };
+          });
+          for (const [key, min] of Object.entries({tabs:13.5,heading:22,label:13.5,person:14.5,button:13.5,input:15.5})) {
+            if (measured[key] !== null && measured[key] < min) {
+              throw Error('Staff Management unreadable '+key+' on '+path+': '+JSON.stringify(measured));
+            }
+          }
+          if(measured.touch!==null && measured.touch < 43.5) {
+            throw Error('Staff Management small touch target on '+path+': '+JSON.stringify(measured));
+          }
+          if(measured.overflow) {
+            throw Error('Staff Management horizontal page overflow on '+path+': '+JSON.stringify(measured));
+          }
+        }
+
         if(path==='/staff-management/overview') {
           const input=page.locator('.staff-simple-search input');
           const border=await input.evaluate(node=>getComputedStyle(node).borderTopWidth);
