@@ -52,7 +52,9 @@ export const invoiceTaxMode = (form) => {
 // invoice item has one total taxRate, which it splits equally into CGST/SGST.
 // Never persist the CGST or SGST component alone as the whole tax rate.
 export const INVOICE_CGST_SGST_RATES = Object.freeze(['2.5', '5', '9', '18']);
-export const INVOICE_IGST_RATES = Object.freeze(['2.5', '9']);
+// IGST is the entire GST percentage, not one half of CGST + SGST.
+// Include 18% so an inter-state ₹100 taxable item can be invoiced at ₹118.
+export const INVOICE_IGST_RATES = Object.freeze(['2.5', '9', '18']);
 
 export const invoiceComponentFromTotalRate = (totalRate) =>
   totalRate === '' || totalRate == null ? '' : String(Number(totalRate) / 2);
