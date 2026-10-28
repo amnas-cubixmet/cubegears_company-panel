@@ -145,7 +145,7 @@ try {
         await route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({message:'Smoke tests do not write tenant data.'})});return;
       }
       const path=new URL(route.request().url()).pathname.replace('/api/v1','').replace(/\/$/,'');
-      if (/^\/billing\/documents\/[^/]+\/pdf$/.test(path)) {
+      if (/^\/(?:billing\/documents|e-way-bills)\/[^/]+\/pdf$/.test(path)) {
         await route.fulfill({status:200,contentType:'application/pdf',body:'%PDF-1.4\n% UI fixture\n%%EOF'});
         return;
       }
@@ -250,6 +250,26 @@ try {
           }
           await sheet.getByRole('button',{name:'Cancel'}).click();
           await sheet.waitFor({state:'hidden'});
+        }
+
+        if(path==='/invoices/e-way-bills/EWB-001' && profile.width===390) {
+          const open = page.getByRole('button',{name:'Download PDF'}).first();
+          await open.click();
+          const modal = page.getByRole('dialog',{name:'Share E-Way Bill PDF'});
+          await modal.waitFor();
+          const download = modal.getByRole('button',{name:'Download PDF'});
+          await page.waitForFunction(() =>
+            !!document.querySelector('.invoice-pdf-share-download:not(:disabled)'));
+          if(await download.isDisabled()) throw Error('Saved E-Way PDF did not become downloadable.');
+          const bounds=await modal.evaluate(node=>{
+            const sheet=node.querySelector('.responsive-modal-sheet')?.getBoundingClientRect();
+            return {bottom:sheet?.bottom,viewport:innerHeight};
+          });
+          if(Math.abs(bounds.bottom-bounds.viewport)>3){
+            throw Error('E-Way PDF share sheet not attached to phone bottom: '+JSON.stringify(bounds));
+          }
+          await modal.getByRole('button',{name:'Cancel'}).click();
+          await modal.waitFor({state:'hidden'});
         }
 
         if(path==='/invoices/e-way-bills/new' && profile.width===390) {

@@ -12,6 +12,7 @@ import { invoiceStateCode } from '../../utils/invoiceTaxUi';
 import { INDIA_STATES } from '../../utils/indiaGst.js';
 import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
+import { EWayBillPdfShareSheet } from '../../components/invoices/EWayBillPdfShareSheet';
 import { validateEWayForPreparation, parseEWayApiErrors } from '../../utils/eWayFormValidation';
 import '../../styles/e-way-input-validation.css';
 import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
@@ -55,6 +56,7 @@ export function EWayBillPage() {
   const [form, setForm] = useState(blankEWayBill());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pdfShareOpen, setPdfShareOpen] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const eWayEditorRef = useRef(null);
@@ -314,6 +316,18 @@ export function EWayBillPage() {
     }
   };
 
+  const openPdfShare = () => {
+    if (!form?.id) {
+      setError('Save the E-Way Bill draft before downloading its PDF.');
+      return;
+    }
+    setError('');
+    setPdfShareOpen(true);
+  };
+  const pdfShareSheet = pdfShareOpen && form?.id
+    ? <EWayBillPdfShareSheet document={form} onClose={() => setPdfShareOpen(false)}/>
+    : null;
+
   const remove = async () => {
     setSaving(true);
     try {
@@ -463,13 +477,14 @@ export function EWayBillPage() {
           <div className="billing-head-actions">
             <button className="bill-btn secondary" onClick={() => navigate(`/invoices/e-way-bills/${ewbId}/edit`)}><Edit3 size={16}/>Edit</button>
             <button className="bill-btn secondary" onClick={() => window.print()}><Printer size={16}/>Print</button>
-            <button className="bill-btn" onClick={() => window.print()}><Download size={16}/>Download PDF</button>
+            <button className="bill-btn" onClick={openPdfShare}><Download size={16}/>Download PDF</button>
             {form.status === 'Draft' && <button className="bill-btn" disabled={saving} onClick={submit}><CheckCircle2 size={16}/>Prepare for API</button>}
           </div>
         </div>
 
         {error && <div className="billing-error no-print">{error}</div>}
         {loading ? <div className="billing-empty">Loading…</div> : <EWayBillPrint doc={form} totals={totals}/>}
+        {pdfShareSheet}
       </div>
     );
   }
@@ -485,7 +500,7 @@ export function EWayBillPage() {
             <button className="bill-btn secondary" type="button" onClick={() => window.print()}>
               <Printer size={16}/>Preview
             </button>
-            <button className="bill-btn" type="button" onClick={() => window.print()}>
+            <button className="bill-btn" type="button" onClick={openPdfShare}>
               <Download size={16}/>Download PDF
             </button>
             <button className="bill-btn secondary" disabled={saving} onClick={save}>
@@ -691,18 +706,21 @@ export function EWayBillPage() {
                 </div>
 
                 <div className="eway-goods-fields grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[110px_minmax(180px,1.25fr)_minmax(180px,1.25fr)_90px_100px_150px]">
-                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">HSN
+                  <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">HSN / Item Code
                     <input
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       data-eway-field={`items.${index}.hsnCode`} aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])}
                       type="text"
-                      inputMode="numeric"
-                      maxLength={8}
+                      inputMode="text"
+                      maxLength={16}
                       value={item.hsnCode}
-                      onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, '').slice(0, 8))}
-                      placeholder="e.g. 8708"
+                      onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 16))}
+                      placeholder="8708 or AB12"
                     />
                     {showFieldError(`items.${index}.hsnCode`)}
+                    <small className="text-muted text-[11px] leading-4">
+                      Letters allowed in drafts. Official HSN for API preparation must be 2–8 digits.
+                    </small>
                   </label>
 
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Product Name
@@ -901,6 +919,7 @@ export function EWayBillPage() {
       <div className="eway-print-only">
         <EWayBillPrint doc={form} totals={totals}/>
       </div>
+      {pdfShareSheet}
     </div>
   );
 }

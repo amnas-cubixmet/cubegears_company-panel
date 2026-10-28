@@ -54,7 +54,7 @@ export const validateEWayForPreparation = (doc) => {
     doc.items.forEach((item, index) => {
       const key = 'items.' + index;
       if (!String(item.productName || '').trim()) errors[key + '.productName'] = 'Enter the goods name.';
-      if (!/^\d{2,8}$/.test(String(item.hsnCode || ''))) errors[key + '.hsnCode'] = 'Enter a valid goods HSN code (2–8 digits).';
+      if (!/^\d{2,8}$/.test(String(item.hsnCode || ''))) errors[key + '.hsnCode'] = 'Official HSN must contain 2–8 digits. Letters are allowed for draft item codes only.';
       if (!(Number(item.qty) > 0)) errors[key + '.qty'] = 'Quantity must be greater than zero.';
       if (!item.unit) errors[key + '.unit'] = 'Select a unit.';
       if (item.taxableValue === '' || !Number.isFinite(Number(item.taxableValue)) || Number(item.taxableValue) < 0) {
