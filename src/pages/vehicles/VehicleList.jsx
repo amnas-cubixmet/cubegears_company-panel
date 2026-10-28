@@ -12,6 +12,7 @@ import { jobService } from '../../services/job.service';
 import { vehicleService } from '../../services/vehicle.service';
 import '../../styles/vehicle-management.css';
 import '../../styles/vehicle-polish.css';
+import '../../styles/vehicle-readable.css';
 
 export const VehicleList = () => {
   const navigate = useNavigate();
