@@ -9,6 +9,17 @@ import { buildEstimateCatalogSelection } from './estimateNewCatalog';
 import { estimateLineErrors, estimateFormValidation } from './quickEstimateValidation';
 import { latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 import { INDIA_STATES, calculateEstimateIndiaGst } from '../../utils/indiaGst';
+import { EWAY_GST_RATES } from '../../utils/eWayGst';
+
+export const estimateGstChoices = (rate = '') => {
+  const entered = String(rate ?? '').trim();
+  const choices = [...EWAY_GST_RATES];
+  if (entered && Number.isFinite(Number(entered)) && Number(entered) >= 0
+      && Number(entered) <= 100 && !choices.some(x => Number(x) === Number(entered))) {
+    choices.push(entered);
+  }
+  return choices;
+};
 
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
@@ -303,11 +314,19 @@ export function QuickEstimatePanel({
                 disabled={!canEdit || busy}
                 onChange={(event) => edit(line.key, 'hsnSac', event.target.value)} />
             </label>
-            <label>GST rate (%)
-              <input type="number" min="0" max="100" step="0.01"
-                value={line.taxRate ?? ''} placeholder="Select applicable rate"
+            <label>GST Rate (%)
+              <select
+                className="job-quick-gst-select"
+                aria-label={`GST Rate (%) for ${part ? 'spare part' : 'work item'} ${index + 1}`}
+                value={String(line.taxRate ?? '')}
                 disabled={!canEdit || busy}
-                onChange={(event) => edit(line.key, 'taxRate', event.target.value)} />
+                onChange={(event) => edit(line.key, 'taxRate', event.target.value)}
+              >
+                <option value="">Select GST Rate</option>
+                {estimateGstChoices(line.taxRate).map((rate) => (
+                  <option value={rate} key={rate}>GST {rate}%</option>
+                ))}
+              </select>
             </label>
           </>}
         </div>
