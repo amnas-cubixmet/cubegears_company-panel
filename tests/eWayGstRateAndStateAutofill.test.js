@@ -87,9 +87,11 @@ test('GST Rate select stays enabled and TO State Code has an Indian-state dropdo
   assert.doesNotMatch(page, /GST .*selected · Tax split pending State Code/);
 });
 
-test('HSN is numeric text, retaining leading zeroes without a number spinner', () => {
+test('HSN / Item Code is an alphanumeric text field with a full keyboard', () => {
   const page=read('src/pages/invoices/EWayBillPage.jsx');
-  assert.match(page, /type="text"\s+inputMode="numeric"\s+maxLength=\{8\}/);
-  assert.match(page,/e.target.value.replace\(\/\\D\/g, ''\)\.slice\(0, 8\)/);
-  assert.match(page,/placeholder="e.g. 8708"/);
+  assert.match(page, /HSN \/ Item Code/);
+  assert.match(page, /type="text"\s+inputMode="text"\s+maxLength=\{16\}/);
+  assert.match(page, /e.target.value.replace\(\/\[\^A-Za-z0-9\]\/g, ''\).toUpperCase\(\).slice\(0, 16\)/);
+  assert.match(page, /placeholder="8708 or AB12"/);
+  assert.match(page, /Official HSN for API preparation must be 2–8 digits/);
 });
