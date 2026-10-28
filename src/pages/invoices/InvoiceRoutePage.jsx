@@ -807,17 +807,17 @@ export function InvoiceRoutePage() {
 
             </div>
             <div className="invoice-essential-fields">
-            <label>Invoice Date
-              <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)}
-                onChange={(e) => update('date', e.target.value)}/>
-              {fieldErrors.date && <small className="invoice-input-error" role="alert">{fieldErrors.date}</small>}
-            </label>
-            <label>Place of Supply
-              <input aria-label="Place of Supply" value={form.customer?.placeOfSupply || ''}
-                aria-invalid={Boolean(fieldErrors['customer.placeOfSupply'])}
-                onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))}
-                placeholder="e.g. 32-Kerala" autoComplete="off"/>
-              {fieldErrors['customer.placeOfSupply'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.placeOfSupply']}</small>}
+              <label>Invoice Date
+                <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)}
+                  onChange={(e) => update('date', e.target.value)}/>
+                {fieldErrors.date && <small className="invoice-input-error" role="alert">{fieldErrors.date}</small>}
+              </label>
+              <label>Place of Supply
+                <input aria-label="Place of Supply" value={form.customer?.placeOfSupply || ''}
+                  aria-invalid={Boolean(fieldErrors['customer.placeOfSupply'])}
+                  onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))}
+                  placeholder="e.g. 32-Kerala" autoComplete="off"/>
+                {fieldErrors['customer.placeOfSupply'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.placeOfSupply']}</small>}
               </label>
             </div>
           </section>
