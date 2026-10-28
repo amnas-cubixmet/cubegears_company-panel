@@ -9,7 +9,8 @@ import { buildEstimateCatalogSelection } from './estimateNewCatalog';
 import { estimateLineErrors, estimateFormValidation } from './quickEstimateValidation';
 import { latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 import { INDIA_STATES, calculateEstimateIndiaGst } from '../../utils/indiaGst';
-import { estimateGstChoices } from './estimateGstRates';
+import { estimateGstOptions } from './estimateGstRates';
+import { invoiceTaxMode } from '../../utils/invoiceTaxUi';
 
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
@@ -59,6 +60,11 @@ export function QuickEstimatePanel({
   const registered = Boolean(job?.gstInfo?.registered);
   const supplierState = job?.gstInfo?.supplierState || '';
   const [placeOfSupply, setPlaceOfSupply] = useState('');
+  const taxMode = invoiceTaxMode({
+    invoiceType: registered ? 'gst' : 'regular',
+    seller: { stateCode: supplierState },
+    customer: { placeOfSupply },
+  });
   const [busy, setBusy] = useState(false);
   const [changed, setChanged] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -313,8 +319,8 @@ export function QuickEstimatePanel({
                 onChange={(event) => edit(line.key, 'taxRate', event.target.value)}
               >
                 <option value="">Select GST Rate</option>
-                {estimateGstChoices(line.taxRate).map((rate) => (
-                  <option value={rate} key={rate}>GST {rate}%</option>
+                {estimateGstOptions(line.taxRate, taxMode, job?.gstInfo?.gstRateOptions).map((choice) => (
+                  <option value={choice.value} key={choice.value}>{choice.label}</option>
                 ))}
               </select>
             </label>
