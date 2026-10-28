@@ -304,7 +304,7 @@ export function QuickEstimatePanel({
                 disabled={!canEdit || busy}
                 onChange={(event) => edit(line.key, 'hsnSac', event.target.value)} />
             </label>
-            <label>GST Rate (%)
+            <label>GST rate (%)
               <select
                 className="job-quick-gst-select"
                 aria-label={`GST Rate (%) for ${part ? 'spare part' : 'work item'} ${index + 1}`}
