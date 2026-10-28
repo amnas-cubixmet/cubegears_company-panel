@@ -62,7 +62,7 @@ export function JobWorkStockPanel({ jobId, issuedParts = [], onChanged }) {
   const stockQty = selected ? available(selected) : 0;
   const requested = Number(quantity);
   const validQty = Number.isFinite(requested) && requested > 0 &&
-    requested <= stockQty && /^\\d+(?:\\.\\d{1,2})?$/.test(quantity);
+    requested <= stockQty && /^\d+(?:\.\d{1,2})?$/.test(quantity);
 
   const issue = async (event) => {
     event.preventDefault();
