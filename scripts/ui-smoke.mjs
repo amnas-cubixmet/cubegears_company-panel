@@ -293,6 +293,64 @@ try {
             throw Error('Mechanic form layout incomplete: '+JSON.stringify({width:profile.width,...layout}));
           }
         }
+        if(path==='/stock' && [390,1440].includes(profile.width)) {
+          // Use real browser computed styles for Stock modal search,
+          // Add New Product, and Receive Stock. No POSTs are made.
+          await page.getByRole('button',{name:'Add New Part'}).first().click();
+          const addDialog=page.getByRole('dialog',{name:'Add New Part'});
+          await addDialog.waitFor();
+          const search=await addDialog.locator('.cg-easy-picker-search').evaluate(node=>{
+            const input=node.querySelector('input');
+            return {
+              shellHeight:Math.round(node.getBoundingClientRect().height),
+              font:parseFloat(getComputedStyle(input).fontSize),
+              inputBorder:parseFloat(getComputedStyle(input).borderLeftWidth),
+            };
+          });
+          if(search.shellHeight<48||search.font<16||search.inputBorder>0) {
+            throw Error('Stock picker missing single-border 16px styling: '+JSON.stringify(search));
+          }
+          await addDialog.getByRole('button',{name:'Add as New Product'}).click();
+          const partStyles=await addDialog.locator('form.cg-easy-form').evaluate(form=>{
+            const inputs=[...form.querySelectorAll('input:not([type=radio]),select')]
+              .filter(node=>node.getClientRects().length)
+              .map(node=>({
+                font:parseFloat(getComputedStyle(node).fontSize),
+                height:Math.round(node.getBoundingClientRect().height),
+              }));
+            const labels=[...form.querySelectorAll('label')]
+              .filter(node=>node.getClientRects().length)
+              .map(node=>parseFloat(getComputedStyle(node).fontSize));
+            const grid=form.querySelector('.cg-easy-fields');
+            const columns=grid?getComputedStyle(grid).gridTemplateColumns.split(' ').length:0;
+            return {inputs,labels,columns};
+          });
+          const columnCount=profile.width<=520?1:2;
+          if(partStyles.inputs.some(x=>x.font<16||x.height<48)||
+              partStyles.labels.some(x=>x<14)||partStyles.columns!==columnCount) {
+            throw Error('Stock Add Product form UI mismatch: '+JSON.stringify({width:profile.width,...partStyles}));
+          }
+          await addDialog.getByRole('button',{name:'Close dialog'}).click();
+          await page.getByRole('button',{name:'Receive Stock'}).first().click();
+          const receiveDialog=page.getByRole('dialog',{name:'Receive Stock'});
+          await receiveDialog.waitFor();
+          const receiveStyles=await receiveDialog.locator('form.cg-easy-form').evaluate(form=>{
+            const input=form.querySelector('input[type=number]');
+            const picker=form.querySelector('.cg-easy-picker-search input');
+            const action=form.querySelector('.cg-easy-form-actions button[type=submit]');
+            return {
+              quantityHeight:input?Math.round(input.getBoundingClientRect().height):0,
+              quantityFont:input?parseFloat(getComputedStyle(input).fontSize):0,
+              pickerFont:picker?parseFloat(getComputedStyle(picker).fontSize):0,
+              buttonHeight:action?Math.round(action.getBoundingClientRect().height):0,
+            };
+          });
+          if(receiveStyles.quantityHeight<48||receiveStyles.quantityFont<16||
+              receiveStyles.pickerFont<16||receiveStyles.buttonHeight<48) {
+            throw Error('Stock Receive form UI mismatch: '+JSON.stringify(receiveStyles));
+          }
+          await receiveDialog.getByRole('button',{name:'Close dialog'}).click();
+        }
         if(path==='/login'){
           // Regression for double red outline: the outer div owns the border,
           // even when both nested inputs are aria-invalid and focused.
