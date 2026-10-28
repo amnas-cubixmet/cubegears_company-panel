@@ -8,7 +8,7 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
-import { invoiceStateCode, invoiceLineTaxChoices } from '../../utils/invoiceTaxUi';
+import { invoiceStateCode, invoiceLineTaxChoices, invoiceChoiceFromTotalRate } from '../../utils/invoiceTaxUi';
 import { INDIA_STATES } from '../../utils/indiaGst.js';
 import { eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst, eWayGstinStateCode, eWayRecipientWithGstin } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
@@ -267,10 +267,19 @@ export function EWayBillPage() {
     items: old.items.map((item) => item.id === itemId ? { ...item, [key]: value } : item)
     }));
   };
-  const updateItemGst = (itemId, rate) => setForm((old) => ({
-    ...old, items: old.items.map((item) => item.id === itemId
-      ? eWaySetGstRate(item, rate, eWayTaxMode(old)) : item)
-  }));
+  const updateItemGst = (itemId, selected) => setForm((old) => {
+    const choice = taxChoices.find(entry => entry.value === selected);
+    return {
+      ...old, items: old.items.map(item => item.id === itemId
+        ? { ...eWaySetGstRate(item, choice?.totalRate ?? '', eWayTaxMode(old)),
+            gstChoice: choice?.value || '' } : item),
+    };
+  });
+  const selectedItemGst = (item) => {
+    const rate = eWayTotalGstRate(item);
+    if (!item.gstChoice && !rate) return '';
+    return invoiceChoiceFromTotalRate(rate, gstMode, item.gstChoice, gstRateOptions);
+  };
 
   const save = async () => {
     setSaving(true);
@@ -291,6 +300,15 @@ export function EWayBillPage() {
   const submit = async () => {
     if (isOutward && (!supplyingParty || supplyingLoading || supplyingError)) {
       return setError('Verify Company / Branch Settings before preparing an outward E-Way Bill.');
+    }
+    const illegalGstChoice = (form.items || []).some(item => {
+      if (!item.gstChoice) return false;
+      const choice = taxChoices.find(option => option.value === item.gstChoice);
+      return !choice || choice.taxMode !== gstMode ||
+        Number(choice.totalRate) !== eWayTotalGstRate(item);
+    });
+    if (illegalGstChoice) {
+      return setError('Selected CGST / SGST / IGST does not match dispatch and destination states.');
     }
     const invalidFields = validateEWayForPreparation(form);
     if (Object.keys(invalidFields).length) {
@@ -790,11 +808,12 @@ export function EWayBillPage() {
                   <div className="eway-goods-tax-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">
                       GST Rate (%)
-                      <select aria-label="GST rate" value={String(eWayTotalGstRate(item))}
+                      <select aria-label="GST rate" value={selectedItemGst(item)}
                         onChange={(e) => updateItemGst(item.id, e.target.value)}
                         className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content">
-                        {!taxChoices.some((choice) => choice.value === String(eWayTotalGstRate(item))) &&
-                          <option value={String(eWayTotalGstRate(item))}>{eWayTotalGstRate(item)}% — saved / unclassified</option>}
+                        <option value="">Select GST rate</option>
+                        {selectedItemGst(item).startsWith('saved:') &&
+                          <option value={selectedItemGst(item)}>{eWayTotalGstRate(item)}% — saved classification</option>}
                         {taxChoices.map((choice) =>
                           <option value={choice.value} key={choice.value}>{choice.label}</option>)}
                       </select>
