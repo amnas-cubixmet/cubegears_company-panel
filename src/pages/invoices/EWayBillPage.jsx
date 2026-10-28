@@ -8,6 +8,7 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
+import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
 import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
 
@@ -53,6 +54,9 @@ export function EWayBillPage() {
   const [error, setError] = useState('');
   const [listQuery, setListQuery] = useState('');
   const [listStatus, setListStatus] = useState('All');
+  const [supplyingParty, setSupplyingParty] = useState(null);
+  const [supplyingError, setSupplyingError] = useState('');
+  const [supplyingLoading, setSupplyingLoading] = useState(false);
 
   const statuses = useMemo(
     () => [...new Set(rows.map((row) => row.status).filter(Boolean))].sort(),
@@ -76,6 +80,8 @@ export function EWayBillPage() {
   );
 
   const totals = useMemo(() => calculateEWayTotals(form), [form]);
+  const gstMode = eWayTaxMode(form);
+  const isOutward = form.supplyType === 'Outward';
 
   const loadList = async () => {
     setLoading(true);
@@ -157,14 +163,38 @@ export function EWayBillPage() {
     } else loadOne();
   }, [location.pathname, location.search, ewbId]);
 
-  const update = (key, value) => setForm((old) => ({ ...old, [key]: value }));
-  const updateGroup = (group, key, value) => setForm((old) => ({
-    ...old,
-    [group]: { ...old[group], [key]: value }
-  }));
+  const update = (key, value) => setForm((old) => {
+    if (key === 'supplyType') {
+      // Inward: vendor dispatches goods; their FROM must remain editable.
+      // Outward: the workshop identity is always read-only and server-derived.
+      if (value === 'Inward' && old.supplyType !== 'Inward') {
+        return { ...old, supplyType: value,
+          from: { gstin: '', tradeName: '', address: '', place: '', pincode: '', stateCode: '' },
+          to: supplyingParty || old.to };
+      }
+      if (value === 'Outward' && old.supplyType !== 'Outward') {
+        return { ...old, supplyType: value, from: supplyingParty || old.from,
+          to: { gstin: '', tradeName: '', address: '', place: '', pincode: '', stateCode: '' } };
+      }
+    }
+    return { ...old, [key]: value };
+  });
+  const updateGroup = (group, key, value) => setForm((old) => {
+    // FROM is locked for outward supplies in UI AND Django serializer.
+    if (group === 'from' && old.supplyType === 'Outward') return old;
+    const next = { ...old, [group]: { ...old[group], [key]: value } };
+    if (key === 'stateCode' && ['to','from'].includes(group)) {
+      next.items = eWayReconcileGst(next.items, eWayTaxMode(next));
+    }
+    return next;
+  });
   const updateItem = (itemId, key, value) => setForm((old) => ({
     ...old,
     items: old.items.map((item) => item.id === itemId ? { ...item, [key]: value } : item)
+  }));
+  const updateItemGst = (itemId, rate) => setForm((old) => ({
+    ...old, items: old.items.map((item) => item.id === itemId
+      ? eWaySetGstRate(item, rate, eWayTaxMode(old)) : item)
   }));
 
   const save = async () => {
@@ -395,7 +425,7 @@ export function EWayBillPage() {
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
             <label>Supply Type
-              <select value={form.supplyType} onChange={(e) => update('supplyType', e.target.value)}>
+              <select value={form.supplyType} onChange={(e) => update('supplyType', e.target.value)}> 
                 <option>Outward</option>
                 <option>Inward</option>
               </select>
