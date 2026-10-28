@@ -5,7 +5,7 @@
 .cg-job-detail {
   --job-control-size: 48px;
   --job-body-font: 16px;
-  --job-label-font: 15px;
+  --job-label-font: 14px;
   --job-meta-font: 14px;
 }
 .cg-job-detail :is(
