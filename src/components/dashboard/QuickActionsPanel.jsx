@@ -27,7 +27,7 @@ const actions = [
   ['Service Catalog', '/services', Plus, 'services.view'],
 ];
 
-export const QuickActionsPanel = ({ user, onNavigate }) => {
+export const QuickActionsPanel = ({ onNavigate }) => {
   const { can } = useFeatureAccess();
   const visibleActions = actions.filter(([label, , , permission]) =>
     can(permission) && (label !== 'Add Outside Labour' || can('expenses.view'))
