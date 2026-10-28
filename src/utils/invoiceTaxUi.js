@@ -96,8 +96,8 @@ export const invoiceTotalRateFromChoice = (value, backendChoices = null) => {
   return choice ? String(choice.totalRate) : '';
 };
 
-/** Keeps SGST selection visible while editing; persisted invoices use paired
- * rate so one deterministic choice is reconstructed on reload.
+/** Preserve an explicit saved CGST/SGST/IGST label; infer the correct-mode
+ * default for old documents without taxChoice metadata.
  */
 export const invoiceChoiceFromTotalRate = (totalRate, mode, recentChoice = '', backendChoices = null) => {
   const rate = String(totalRate ?? '').trim();
@@ -105,10 +105,10 @@ export const invoiceChoiceFromTotalRate = (totalRate, mode, recentChoice = '', b
   const choices = invoiceLineTaxChoices(mode, backendChoices);
   if (recentChoice) {
     const picked = choices.find(item => item.value === recentChoice &&
-      String(item.totalRate) === rate);
+      Number(item.totalRate) === Number(rate));
     if (picked) return picked.value;
   }
-  const expected = choices.find(item => String(item.totalRate) === rate &&
+  const expected = choices.find(item => Number(item.totalRate) === Number(rate) &&
     (mode === 'unknown' || item.taxMode === mode));
   return expected?.value || `saved:${rate}`;
 };
