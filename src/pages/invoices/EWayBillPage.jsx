@@ -584,22 +584,28 @@ export function EWayBillPage() {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label>GSTIN / URP
-                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.gstin || ''} onChange={(e) => updateGroup('from', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
+                <input data-eway-field="from.gstin" aria-invalid={Boolean(fieldErrors['from.gstin'])} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.gstin || ''} onChange={(e) => updateGroup('from', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
+              {showFieldError('from.gstin')}
               </label>
               <label>Trade Name
-                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.tradeName || ''} onChange={(e) => updateGroup('from', 'tradeName', e.target.value)} placeholder="Workshop / company"/>
+                <input data-eway-field="from.tradeName" aria-invalid={Boolean(fieldErrors['from.tradeName'])} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.tradeName || ''} onChange={(e) => updateGroup('from', 'tradeName', e.target.value)} placeholder="Workshop / company"/>
+              {showFieldError('from.tradeName')}
               </label>
               <label className="sm:col-span-2">Address
-                <textarea readOnly={isOutward} aria-readonly={isOutward} value={form.from?.address || ''} onChange={(e) => updateGroup('from', 'address', e.target.value)} placeholder="Dispatch address"/>
+                <textarea data-eway-field="from.address" aria-invalid={Boolean(fieldErrors['from.address'])} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.address || ''} onChange={(e) => updateGroup('from', 'address', e.target.value)} placeholder="Dispatch address"/>
+              {showFieldError('from.address')}
               </label>
               <label>Place
-                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.place || ''} onChange={(e) => updateGroup('from', 'place', e.target.value)} placeholder="Place"/>
+                <input data-eway-field="from.place" aria-invalid={Boolean(fieldErrors['from.place'])} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.place || ''} onChange={(e) => updateGroup('from', 'place', e.target.value)} placeholder="Place"/>
+              {showFieldError('from.place')}
               </label>
               <label>PIN Code
-                <input inputMode="numeric" maxLength={6} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.pincode || ''} onChange={(e) => updateGroup('from', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="680001"/>
+                <input data-eway-field="from.pincode" aria-invalid={Boolean(fieldErrors['from.pincode'])} inputMode="numeric" maxLength={6} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.pincode || ''} onChange={(e) => updateGroup('from', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="680001"/>
+              {showFieldError('from.pincode')}
               </label>
               <label>State Code
-                <input inputMode="numeric" maxLength={2} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.stateCode || ''} onChange={(e) => updateGroup('from', 'stateCode', e.target.value.replace(/\D/g, '').slice(0,2))} placeholder="32"/>
+                <input data-eway-field="from.stateCode" aria-invalid={Boolean(fieldErrors['from.stateCode'])} inputMode="numeric" maxLength={2} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.stateCode || ''} onChange={(e) => updateGroup('from', 'stateCode', e.target.value.replace(/\D/g, '').slice(0,2))} placeholder="32"/>
+              {showFieldError('from.stateCode')}
               </label>
             </div>
           </section>
@@ -610,22 +616,27 @@ export function EWayBillPage() {
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label>GSTIN / URP
-                <input value={form.to?.gstin || ''} onChange={(e) => updateGroup('to', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
+                <input data-eway-field="to.gstin" aria-invalid={Boolean(fieldErrors['to.gstin'])} value={form.to?.gstin || ''} onChange={(e) => updateGroup('to', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
+              {showFieldError('to.gstin')}
               </label>
               <label>Trade Name
-                <input value={form.to?.tradeName || ''} onChange={(e) => updateGroup('to', 'tradeName', e.target.value)} placeholder="Customer / destination"/>
+                <input data-eway-field="to.tradeName" aria-invalid={Boolean(fieldErrors['to.tradeName'])} value={form.to?.tradeName || ''} onChange={(e) => updateGroup('to', 'tradeName', e.target.value)} placeholder="Customer / destination"/>
+              {showFieldError('to.tradeName')}
               </label>
               <label className="sm:col-span-2">Address
-                <textarea value={form.to?.address || ''} onChange={(e) => updateGroup('to', 'address', e.target.value)} placeholder="Ship-to address"/>
+                <textarea data-eway-field="to.address" aria-invalid={Boolean(fieldErrors['to.address'])} value={form.to?.address || ''} onChange={(e) => updateGroup('to', 'address', e.target.value)} placeholder="Ship-to address"/>
+              {showFieldError('to.address')}
               </label>
               <label>Place
-                <input value={form.to?.place || ''} onChange={(e) => updateGroup('to', 'place', e.target.value)} placeholder="Place"/>
+                <input data-eway-field="to.place" aria-invalid={Boolean(fieldErrors['to.place'])} value={form.to?.place || ''} onChange={(e) => updateGroup('to', 'place', e.target.value)} placeholder="Place"/>
+              {showFieldError('to.place')}
               </label>
               <label>PIN Code
-                <input inputMode="numeric" maxLength={6} value={form.to?.pincode || ''} onChange={(e) => updateGroup('to', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="PIN"/>
+                <input data-eway-field="to.pincode" aria-invalid={Boolean(fieldErrors['to.pincode'])} inputMode="numeric" maxLength={6} value={form.to?.pincode || ''} onChange={(e) => updateGroup('to', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="PIN"/>
+              {showFieldError('to.pincode')}
               </label>
               <label>State Code
-                <select aria-label="TO State Code" value={form.to?.stateCode || ''}
+                <select aria-label="TO State Code" data-eway-field="to.stateCode" aria-invalid={Boolean(fieldErrors['to.stateCode'])} value={form.to?.stateCode || ''}
                   disabled={Boolean(eWayGstinStateCode(form.to?.gstin))}
                   onChange={(e) => updateGroup('to', 'stateCode', e.target.value)}>
                   <option value="">Select destination state</option>
@@ -636,6 +647,7 @@ export function EWayBillPage() {
                 {eWayGstinStateCode(form.to?.gstin)
                   ? <small role="status">Auto-filled from customer GSTIN</small>
                   : <small>Select state for URP or customers without a registered GSTIN</small>}
+                {showFieldError('to.stateCode')}
               </label>
             </div>
           </section>
