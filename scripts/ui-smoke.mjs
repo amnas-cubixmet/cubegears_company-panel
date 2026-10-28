@@ -283,6 +283,53 @@ try {
               .getByRole('button',{name:'Close dialog'}).click();
           }
         }
+        // Payments UI: inspect computed styles on actual entry and dashboard controls.
+        // Never submit/record a payment: the mock API fixture is read-only.
+        if(['/payments','/payments/new'].includes(path) &&
+            [390,1440].includes(profile.width)) {
+          if(path==='/payments/new'){
+            const entry=page.locator('.payments-entry-page .payment-form-card');
+            await entry.waitFor({state:'visible'});
+            const metrics=await entry.evaluate(root=>{
+              const inputs=[...root.querySelectorAll('.payment-form-grid input,.payment-form-grid select')]
+                .filter(node=>node.getClientRects().length)
+                .map(node=>{
+                  const c=getComputedStyle(node);
+                  return {font:parseFloat(c.fontSize), border:parseFloat(c.borderLeftWidth),
+                    height:Math.round(node.getBoundingClientRect().height)};
+                });
+              const labels=[...root.querySelectorAll('.payment-form-grid label > span')]
+                .map(node=>parseFloat(getComputedStyle(node).fontSize));
+              const actions=[...root.querySelectorAll('.payment-form-actions button')]
+                .map(node=>Math.round(node.getBoundingClientRect().height));
+              const grid=root.querySelector('.payment-form-grid');
+              return {inputs,labels,actions,columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length};
+            });
+            const cols=profile.width<=760?1:2;
+            if(metrics.inputs.length<6 || metrics.inputs.some(x=>x.font<16||x.border>0||x.height<48)
+              || metrics.labels.some(x=>x<14) || metrics.actions.some(x=>x<48)
+              || metrics.columns!==cols){
+              throw Error('Payment form computed styles mismatch: '+
+                JSON.stringify({width:profile.width,...metrics}));
+            }
+          } else {
+            const toolbar=page.locator('.payments-dashboard-toolbar');
+            await toolbar.waitFor({state:'visible'});
+            const metrics=await toolbar.evaluate(root=>
+              [...root.querySelectorAll('.payments-dashboard-search,.payments-dashboard-filter')].map(shell=>{
+                const inner=shell.querySelector('input,select');
+                return {border:parseFloat(getComputedStyle(shell).borderLeftWidth),
+                  height:Math.round(shell.getBoundingClientRect().height),
+                  font:parseFloat(getComputedStyle(inner).fontSize),
+                  innerBorder:parseFloat(getComputedStyle(inner).borderLeftWidth)};
+              })
+            );
+            if(metrics.length!==3 || metrics.some(x=>x.border>0||x.innerBorder>0||x.font<16||x.height<48)){
+              throw Error('Payment filter computed styles mismatch: '+
+                JSON.stringify({width:profile.width,metrics}));
+            }
+          }
+        }
         // Customer creation popup: inspect rendered fields (not only CSS text).
         // Keep it read-only; never submit a customer in CI.
         if(path==='/customers' && (profile.width===390 || profile.width===1440)) {
