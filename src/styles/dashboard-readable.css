@@ -1,0 +1,223 @@
+/* Readability and responsive layout for the company dashboard.
+ * Loaded after dashboard.css so legacy 8–11px desktop/mobile rules
+ * cannot shrink important information to microscopic text.
+ */
+.dashboard-page {
+  font-size: 16px;
+  line-height: 1.5;
+  gap: 18px;
+}
+.dashboard-page .dashboard-top-actions { min-width: 0; }
+.dashboard-page .dashboard-top-actions .dashboard-panel {
+  padding: 18px 20px;
+}
+.dashboard-page .dashboard-top-actions .panel-title { margin-bottom: 14px; }
+.dashboard-page .dashboard-top-actions .quick-actions {
+  margin-top: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.dashboard-page .dashboard-top-actions .quick-actions button {
+  min-height: 48px;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 11px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.dashboard-page .dashboard-top-actions .quick-action-leading { gap: 10px; }
+.dashboard-page .dashboard-top-actions .quick-action-leading > svg {
+  width: 18px;
+  height: 18px;
+}
+.dashboard-page .dashboard-top-actions .quick-actions button > svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+.dashboard-page .dashboard-top-actions .quick-action-leading > span {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.dashboard-page .dashboard-panel,
+.dashboard-page .dashboard-stat-card { padding: 17px 18px; }
+.dashboard-page .dashboard-stats { gap: 14px; }
+.dashboard-page .dashboard-stat-card { min-height: 126px; }
+.dashboard-page .panel-title h2,
+.dashboard-page .operations-header h2 {
+  font-size: 19px;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+.dashboard-page .panel-title svg { width: 20px; height: 20px; flex: 0 0 auto; }
+.dashboard-page .stat-label { font-size: 15px; line-height: 1.4; white-space: normal; }
+.dashboard-page .stat-value { font-size: 27px; line-height: 1.2; margin-top: 8px; }
+.dashboard-page .stat-meta { font-size: 14px; margin-top: 10px; white-space: normal; }
+.dashboard-page .stat-icon { width: 40px; height: 40px; }
+.dashboard-page .stat-icon svg { width: 19px; height: 19px; }
+
+.dashboard-page .operations-header { padding: 17px 18px; }
+.dashboard-page .operations-header p { font-size: 14px; line-height: 1.5; }
+.dashboard-page .operations-tools select,
+.dashboard-page .dashboard-button {
+  min-height: 44px;
+  font-size: 15px;
+}
+.dashboard-page .duty-status,
+.dashboard-page .duty-auto-message,
+.dashboard-page .dashboard-attendance-rule-note { font-size: 14px; }
+.dashboard-page .booking-pane,
+.dashboard-page .job-detail-pane,
+.dashboard-page .repair-pane { padding: 16px; }
+.dashboard-page .dashboard-search { min-height: 44px; }
+.dashboard-page .dashboard-search input { font-size: 15px; }
+.dashboard-page .booking-row { min-height: 108px; padding: 13px 14px; }
+.dashboard-page .booking-row-top strong { font-size: 15px; white-space: normal; }
+.dashboard-page .booking-vehicle { font-size: 14px; white-space: normal; }
+.dashboard-page .booking-row-bottom {
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+.dashboard-page .booking-row-bottom span {
+  white-space: normal;
+  overflow: visible;
+}
+.dashboard-page .status-pill { font-size: 12px; min-height: 26px; padding: 3px 9px; }
+.dashboard-page .job-detail,
+.dashboard-page .empty-job { min-height: 400px; }
+.dashboard-page .job-id-row strong { font-size: 16px; overflow-wrap: anywhere; }
+.dashboard-page .job-detail-head > div > span,
+.dashboard-page .text-link { font-size: 14px; }
+.dashboard-page .job-meta-grid small,
+.dashboard-page .repair-meta small { font-size: 12px; line-height: 1.4; }
+.dashboard-page .job-meta-grid strong,
+.dashboard-page .repair-meta strong {
+  font-size: 15px;
+  line-height: 1.4;
+  white-space: normal;
+}
+.dashboard-page .repair-details h3 { font-size: 15px; }
+.dashboard-page .repair-detail-grid span { font-size: 13px; }
+.dashboard-page .repair-detail-grid strong { font-size: 15px; }
+.dashboard-page .progress-card { padding: 15px; }
+.dashboard-page .progress-title-row { font-size: 15px; }
+.dashboard-page .progress-title-row span { font-size: 13px; }
+.dashboard-page .progress-grid { gap: 10px; }
+.dashboard-page .progress-circle { width: 36px; height: 36px; font-size: 14px; }
+.dashboard-page .progress-stage small {
+  font-size: 13px;
+  white-space: normal;
+  line-height: 1.4;
+}
+.dashboard-page .progress-stage strong { font-size: 14px; line-height: 1.4; }
+
+.dashboard-page .vehicle-visual { min-height: 106px; }
+.dashboard-page .active-repair-card,
+.dashboard-page .insights-card { padding: 15px; }
+.dashboard-page .active-repair-main strong { font-size: 16px; white-space: normal; }
+.dashboard-page .active-repair-main small { font-size: 13px; }
+.dashboard-page .overall-progress { margin-top: 18px; }
+.dashboard-page .overall-progress-heading {
+  align-items: baseline;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.dashboard-page .overall-progress-heading strong {
+  font-size: 18px;
+  color: var(--primary);
+}
+.dashboard-page .progress-track {
+  height: 9px;
+  margin-top: 9px;
+  background: var(--border);
+}
+.dashboard-page .progress-track span { transition: width .2s ease; }
+.dashboard-page .overall-progress-caption {
+  display: block;
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.dashboard-page .active-repair-open-hint { font-size: 14px; }
+.dashboard-page .insights-title { font-size: 15px; }
+.dashboard-page .insight-item { padding: 12px; gap: 10px; }
+.dashboard-page .insight-item strong { font-size: 15px; white-space: normal; }
+.dashboard-page .insight-item small { font-size: 13px; line-height: 1.5; }
+
+.dashboard-page .dashboard-bottom-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.dashboard-page .finance-list,
+.dashboard-page .staff-list { margin-top: 12px; }
+.dashboard-page .finance-list > div {
+  padding: 14px 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.dashboard-page .finance-list span { color: var(--text-secondary); }
+.dashboard-page .finance-list strong { font-size: 16px; font-variant-numeric: tabular-nums; }
+.dashboard-page .staff-list { gap: 10px; }
+.dashboard-page .staff-row { padding: 13px; gap: 12px; border-radius: 11px; }
+.dashboard-page .staff-avatar { width: 42px; height: 42px; }
+.dashboard-page .staff-avatar svg { width: 21px; height: 21px; }
+.dashboard-page .staff-copy strong {
+  font-size: 15px;
+  white-space: normal;
+  line-height: 1.4;
+}
+.dashboard-page .staff-copy small {
+  font-size: 14px;
+  white-space: normal;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+@media(max-width: 1400px) {
+  .dashboard-page .dashboard-top-actions .quick-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dashboard-page .operations-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-page .repair-pane { grid-column: 1/-1; border-top: 1px solid var(--border); }
+  .dashboard-page .job-detail-pane { border-right: 0; }
+}
+@media(max-width: 950px) {
+  .dashboard-page .operations-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-page .booking-pane,
+  .dashboard-page .job-detail-pane { border-right: 0; border-bottom: 1px solid var(--border); }
+  .dashboard-page .repair-pane { grid-column: auto; border-top: 0; }
+  .dashboard-page .dashboard-bottom-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media(max-width: 640px) {
+  .dashboard-page { gap: 14px; font-size: 15px; }
+  .dashboard-page .dashboard-top-actions .dashboard-panel { padding: 15px; }
+  .dashboard-page .dashboard-top-actions .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-page .dashboard-panel,
+  .dashboard-page .dashboard-stat-card { padding: 15px; }
+  .dashboard-page .dashboard-stats { gap: 10px; }
+  .dashboard-page .dashboard-stat-card { min-height: 120px; }
+  .dashboard-page .stat-label { font-size: 14px; }
+  .dashboard-page .stat-value { font-size: 23px; }
+  .dashboard-page .stat-meta { font-size: 13px; }
+  .dashboard-page .operations-header { padding: 15px; }
+  .dashboard-page .booking-pane,
+  .dashboard-page .job-detail-pane,
+  .dashboard-page .repair-pane { padding: 14px; }
+  .dashboard-page .job-meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-page .finance-list > div { font-size: 15px; }
+}
+@media(max-width: 420px) {
+  .dashboard-page .dashboard-top-actions .quick-actions { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-page .dashboard-top-actions .quick-actions button { min-height: 46px; font-size: 15px; }
+  .dashboard-page .dashboard-stat-card { padding: 12px; }
+  .dashboard-page .stat-value { font-size: 21px; }
+  .dashboard-page .stat-icon { width: 35px; height: 35px; }
+  .dashboard-page .operations-tools { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-page .operations-tools .dashboard-button { grid-column: 1; }
+  .dashboard-page .progress-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(prefers-reduced-motion: reduce) {
+  .dashboard-page .progress-track span { transition: none; }
+}
