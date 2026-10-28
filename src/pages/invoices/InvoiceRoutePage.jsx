@@ -3,7 +3,7 @@ import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truc
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { normalizeBackendInvoiceTotals } from '../../utils/invoiceBackendTotals';
-import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, normalizeHsnSacCode } from '../../utils/invoicePayload';
+import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, invoicePreviewFailureMessage, normalizeHsnSacCode } from '../../utils/invoicePayload';
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
 import '../../styles/invoice-field-validation.css';
@@ -229,11 +229,7 @@ export function InvoiceRoutePage() {
         setBackendPreviewError('');
       }).catch((error) => {
         if (!active) return;
-        const missingEndpoint = error?.status === 404 || error?.response?.status === 404 ||
-          /404|not found/i.test(String(error?.message || ''));
-        setBackendPreviewError(missingEndpoint
-          ? 'Backend GST preview API is missing. Pull the latest Django backend and restart port 8000.'
-          : 'Backend calculation unavailable. Live amounts shown are provisional until the API reconnects.');
+        setBackendPreviewError(invoicePreviewFailureMessage(error));
       });
     }, 450);
     return () => {
