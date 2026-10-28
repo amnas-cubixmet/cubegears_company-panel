@@ -24,6 +24,7 @@ import { vehicleService } from '../../services/vehicle.service';
 import { customerService } from '../../services/customer.service';
 import { jobService } from '../../services/job.service';
 import '../../styles/vehicle-management.css';
+import '../../styles/vehicle-polish.css';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
