@@ -580,3 +580,18 @@
   font-size: 20px !important;
   line-height: 1.4 !important;
 }
+
+
+/* Explicit route selectors avoid any ambiguity from legacy selector groups. */
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-section-header h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-daily-heading h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-calendar-header h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-manager-module .am-panel__header h2,
+.cg-attendance-manager.attendance-manager-pages .attendance-rules-page .attendance-rules-header h2 {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+.cg-attendance-manager.attendance-manager-pages .attendance-rules-page .attendance-mode-card .attendance-mode-copy small {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
