@@ -138,8 +138,9 @@ export function EWayBillPage() {
                 cessRate: ''
               }));
 
-            setForm({
+            setForm((previous) => ({
               ...base,
+              from: previous.from?.tradeName ? previous.from : base.from,
               documentType: invoice.invoiceType === 'gst' ? 'Tax Invoice' : 'Bill of Supply',
               documentNo: invoice.number || invoice.id || '',
               documentDate: invoice.date || base.documentDate,
@@ -155,13 +156,35 @@ export function EWayBillPage() {
               },
               items: goods.length ? goods : base.items,
               notes: invoice.number ? `Created from CubixGear invoice ${invoice.number}` : ''
-            });
+            }));
           })
           .catch((e) => setError(e?.message || 'Unable to prefill from invoice.'))
           .finally(() => setLoading(false));
       }
     } else loadOne();
   }, [location.pathname, location.search, ewbId]);
+
+  useEffect(() => {
+    if (!['create', 'edit'].includes(mode)) return undefined;
+    let active = true;
+    setSupplyingLoading(true);
+    setSupplyingError('');
+    eWayBillService.getFromContext().then((context) => {
+      if (!active) return;
+      if (!context?.from) {
+        setSupplyingError('Company Settings must include the correct workshop GSTIN, address, place, PIN and state.');
+        return;
+      }
+      setSupplyingParty(context.from);
+      setForm((old) => old.supplyType === 'Outward'
+        ? { ...old, from: context.from } : old);
+    }).catch((err) => {
+      if (active) setSupplyingError(err?.message || 'Cannot load supplying workshop details.');
+    }).finally(() => {
+      if (active) setSupplyingLoading(false);
+    });
+    return () => { active = false; };
+  }, [mode]);
 
   const update = (key, value) => setForm((old) => {
     if (key === 'supplyType') {
@@ -211,6 +234,9 @@ export function EWayBillPage() {
   };
 
   const submit = async () => {
+    if (isOutward && (!supplyingParty || supplyingLoading || supplyingError)) {
+      return setError('Verify Company / Branch Settings before preparing an outward E-Way Bill.');
+    }
     const validation = validateEWayBill(form);
     if (validation) return setError(validation);
 
@@ -483,25 +509,32 @@ export function EWayBillPage() {
           <section className="billing-card">
             <span className="billing-kicker">SECTION 2 · FROM</span>
             <h3>2. Address Details · Dispatch / Bill From</h3>
+            {isOutward && <p className="eway-from-source-note" role="status">
+              {supplyingLoading ? 'Loading workshop address…'
+                : 'Auto-filled from Company / Branch Settings · Read-only'}
+            </p>}
+            {isOutward && supplyingError && <p role="alert" className="eway-from-error">
+              {supplyingError} <button type="button" onClick={() => navigate('/account/company')}>Open Company Settings</button>
+            </p>}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label>GSTIN / URP
-                <input value={form.from?.gstin || ''} onChange={(e) => updateGroup('from', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
+                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.gstin || ''} onChange={(e) => updateGroup('from', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
               </label>
               <label>Trade Name
-                <input value={form.from?.tradeName || ''} onChange={(e) => updateGroup('from', 'tradeName', e.target.value)} placeholder="Workshop / company"/>
+                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.tradeName || ''} onChange={(e) => updateGroup('from', 'tradeName', e.target.value)} placeholder="Workshop / company"/>
               </label>
               <label className="sm:col-span-2">Address
-                <textarea value={form.from?.address || ''} onChange={(e) => updateGroup('from', 'address', e.target.value)} placeholder="Dispatch address"/>
+                <textarea readOnly={isOutward} aria-readonly={isOutward} value={form.from?.address || ''} onChange={(e) => updateGroup('from', 'address', e.target.value)} placeholder="Dispatch address"/>
               </label>
               <label>Place
-                <input value={form.from?.place || ''} onChange={(e) => updateGroup('from', 'place', e.target.value)} placeholder="Place"/>
+                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.place || ''} onChange={(e) => updateGroup('from', 'place', e.target.value)} placeholder="Place"/>
               </label>
               <label>PIN Code
-                <input inputMode="numeric" maxLength={6} value={form.from?.pincode || ''} onChange={(e) => updateGroup('from', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="680001"/>
+                <input inputMode="numeric" maxLength={6} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.pincode || ''} onChange={(e) => updateGroup('from', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="680001"/>
               </label>
               <label>State Code
-                <input inputMode="numeric" maxLength={2} value={form.from?.stateCode || ''} onChange={(e) => updateGroup('from', 'stateCode', e.target.value.replace(/\D/g, '').slice(0,2))} placeholder="32"/>
+                <input inputMode="numeric" maxLength={2} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.stateCode || ''} onChange={(e) => updateGroup('from', 'stateCode', e.target.value.replace(/\D/g, '').slice(0,2))} placeholder="32"/>
               </label>
             </div>
           </section>
