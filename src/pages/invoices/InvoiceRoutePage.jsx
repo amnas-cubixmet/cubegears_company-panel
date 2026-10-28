@@ -3,11 +3,12 @@ import { CheckCircle2, Download, Edit3, Plus, Printer, ReceiptText, Trash2, Truc
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { billingService, blankBillingDocument, calculateDocumentTotals } from '../../services/billing.service';
 import { normalizeBackendInvoiceTotals } from '../../utils/invoiceBackendTotals';
-import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, invoicePreviewFailureMessage, normalizeHsnSacCode } from '../../utils/invoicePayload';
+import { validateInvoiceDraft, extractInvoiceFieldErrors, formatInvoiceValidationError, invoicePreviewFailureMessage, isInvoiceBranchStateMismatch, normalizeHsnSacCode } from '../../utils/invoicePayload';
 import { applyWorkshopTaxProfile, workshopInvoiceType } from '../../utils/invoiceTaxProfile';
 import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, invoiceTaxMode, workshopPlaceOfSupply } from '../../utils/invoiceTaxUi';
 import '../../styles/invoice-field-validation.css';
 import '../../styles/invoice-item-responsive.css';
+import '../../styles/invoice-goods-services-layout.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
@@ -68,6 +69,7 @@ export function InvoiceRoutePage() {
   const taxChoices = invoiceLineTaxChoices(appliedTaxMode);
   const [verifiedTotals, setVerifiedTotals] = useState(null);
   const [backendPreviewError, setBackendPreviewError] = useState('');
+  const [branchStateMismatch, setBranchStateMismatch] = useState(false);
   const previewFingerprint = useMemo(() => JSON.stringify({
     invoiceType: form.invoiceType,
     sellerGstin: form.seller?.gstin || '',
@@ -219,6 +221,7 @@ export function InvoiceRoutePage() {
         form.customer?.stateCode || form.customer?.state));
     if (!validItems || !validSupply) {
       setBackendPreviewError('');
+      setBranchStateMismatch(false);
       return undefined;
     }
     let active = true;
@@ -227,9 +230,16 @@ export function InvoiceRoutePage() {
         if (!active) return;
         setVerifiedTotals({ fingerprint: previewFingerprint, data: response });
         setBackendPreviewError('');
+        setBranchStateMismatch(false);
       }).catch((error) => {
         if (!active) return;
-        setBackendPreviewError(invoicePreviewFailureMessage(error));
+        if (isInvoiceBranchStateMismatch(error)) {
+          setBranchStateMismatch(true);
+          setBackendPreviewError('');
+        } else {
+          setBranchStateMismatch(false);
+          setBackendPreviewError(invoicePreviewFailureMessage(error));
+        }
       });
     }, 450);
     return () => {
@@ -688,11 +698,6 @@ export function InvoiceRoutePage() {
           <section className="billing-card invoice-seller-card">
             <span className="billing-kicker">SELLER / FROM</span>
             <h3>Business Details</h3>
-            <p className="invoice-seller-source-note">
-              Auto-filled from Company Settings. Change your business details in
-              <button type="button" className="invoice-settings-link" onClick={() => navigate('/account/company')}>Company Settings</button>.
-            </p>
-
             <label>Business Name
               <input value={form.seller?.name || ''} readOnly aria-readonly="true" placeholder="Business / company name"/>
             </label>
@@ -707,13 +712,17 @@ export function InvoiceRoutePage() {
                 <input type="email" value={form.seller?.email || ''} readOnly aria-readonly="true" placeholder="accounts@example.com"/>
               </label>
             </div>
-            <label>GSTIN (from Company Settings)
+            <label>GSTIN
               <input value={form.seller?.gstin || ''} readOnly aria-readonly="true" aria-invalid={Boolean(fieldErrors['seller.gstin'])} placeholder="Not GST registered"/>
               {fieldErrors['seller.gstin'] && <small className="invoice-input-error" role="alert">{fieldErrors['seller.gstin']}</small>}
             </label>
             <div className="invoice-two-col">
               <label>State
-                <input value={form.seller?.state || ''} readOnly aria-readonly="true" placeholder="Kerala"/>
+                <input value={form.seller?.state || ''} readOnly aria-readonly="true"
+                  aria-invalid={branchStateMismatch} placeholder="Kerala"/>
+                {branchStateMismatch && <small className="invoice-input-error" role="alert">
+                  Branch state and GSTIN state do not match. Review your branch GST settings.
+                </small>}
               </label>
               <label>State Code
                 <input value={form.seller?.stateCode || ''} readOnly aria-readonly="true" placeholder="32"/>
@@ -782,23 +791,17 @@ export function InvoiceRoutePage() {
                 <option value="regular">Normal Invoice — No GST</option>
                 <option value="gst">GST Tax Invoice</option>
               </select>
-              <small>{mode === 'create' && !newInvoiceTaxReady
-                ? 'Checking workshop GST registration before enabling invoices.'
-                : form.invoiceType === 'gst'
-                  ? 'GST invoice enabled by the verified workshop GSTIN in Company Settings.'
-                  : 'Workshop has no GSTIN. No GST will be charged.'}</small>
             </label>
             <label>Date
               <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)} onChange={(e) => update('date', e.target.value)}/>
               {fieldErrors.date && <small className="invoice-input-error" role="alert">{fieldErrors.date}</small>}
             </label>
-            <label>Place of Supply <small>(Auto-filled · Editable)</small>
+            <label>Place of Supply
               <input aria-label="Place of Supply" value={form.customer?.placeOfSupply || ''}
                 aria-invalid={Boolean(fieldErrors['customer.placeOfSupply'])}
                 onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))}
                 placeholder="e.g. 32-Kerala" autoComplete="off"/>
               {fieldErrors['customer.placeOfSupply'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.placeOfSupply']}</small>}
-              <small>Defaults to your workshop state. Change the state for another place of supply; GST recalculates automatically.</small>
             </label>
             <div className="invoice-two-col">
               <label>Job Card No.
