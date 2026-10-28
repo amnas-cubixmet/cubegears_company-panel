@@ -173,10 +173,19 @@ export const getEWayBill = async (billId) => {
   return apiClient.get(`/e-way-bills/${billId}`);
 };
 
+export const prepareEWayBillForApi = (draft) => {
+  // Blank manual drafts do not have an invoice link. Omit the optional UUID
+  // instead of sending "" to Django's strict UUIDField.
+  const { invoiceId, ...payload } = draft || {};
+  if (invoiceId) payload.invoiceId = invoiceId;
+  return payload;
+};
+
 export const saveEWayBill = async (data) => {
   if (!USE_MOCK_API) {
-    if (data.id) return apiClient.put(`/e-way-bills/${data.id}`, data);
-    return apiClient.post('/e-way-bills', data);
+    const payload = prepareEWayBillForApi(data);
+    if (data.id) return apiClient.put(`/e-way-bills/${data.id}`, payload);
+    return apiClient.post('/e-way-bills', payload);
   }
 
   const rows = read();

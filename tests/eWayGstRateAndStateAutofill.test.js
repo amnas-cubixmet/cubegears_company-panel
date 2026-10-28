@@ -84,7 +84,7 @@ test('GST Rate select stays enabled and TO State Code has an Indian-state dropdo
   assert.match(page, /Auto-filled from customer GSTIN/);
   assert.match(page, /Select state for URP/);
   assert.match(page, /INDIA_STATES.map/);
-  assert.match(page, /GST .*selected · Tax split pending State Code/);
+  assert.doesNotMatch(page, /GST .*selected · Tax split pending State Code/);
 });
 
 test('HSN is numeric text, retaining leading zeroes without a number spinner', () => {

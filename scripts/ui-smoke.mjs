@@ -55,6 +55,10 @@ function fixture(path) {
     sessions:[], correctionInfo:null, leaveInfo:null, auditHistory:[],
   };
   if(path==='/e-way-bills') return [];
+  if(path==='/e-way-bills/from-context') return { from: {
+    gstin:'32ABCDE1234F1Z5', tradeName:'Test Workshop',address:'Main Road',
+    place:'Thrissur',pincode:'680001',stateCode:'32',
+  },branchId:'BR-01' };
   if(path==='/e-way-bills/from-context') return {
     from:{gstin:'32ABCDE1234F1Z5',tradeName:'Test Workshop',address:'Workshop Lane',
       place:'Thrissur',pincode:'680001',stateCode:'32'},branchId:'BR-01',
@@ -269,6 +273,24 @@ try {
           await page.waitForFunction(()=>document.body.innerText.includes('CGST: 9%')&&
             document.body.innerText.includes('SGST: 9%'));
           if(await taxRate.inputValue()!=='18') throw Error('GST rate did not survive URP state change.');
+        }
+
+        if(path==='/invoices/e-way-bills/new' && profile.width===390) {
+          await page.locator('[data-eway-field="from.gstin"]').waitFor();
+          await page.waitForFunction(() => document.querySelector('[data-eway-field="from.gstin"]')?.value === '32ABCDE1234F1Z5');
+          await page.getByRole('button',{name:'Prepare for API'}).click();
+          const invalid=page.locator('[data-eway-field="documentNo"]');
+          await page.waitForFunction(() => document.activeElement?.getAttribute('data-eway-field') === 'documentNo');
+          if(await invalid.getAttribute('aria-invalid')!=='true'){
+            throw Error('E-Way Bill should highlight first missing field');
+          }
+          await invalid.fill('INV-TEST-001');
+          if(await invalid.getAttribute('aria-invalid')==='true'){
+            throw Error('E-Way Bill error did not clear after correcting input');
+          }
+          if(await page.locator('.eway-gst-explanation,.eway-gst-breakdown').count()){
+            throw Error('Removed GST explanation still rendered');
+          }
         }
 
         if(path==='/staff-management/overview') {
