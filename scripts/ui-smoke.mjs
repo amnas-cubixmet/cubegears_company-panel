@@ -229,6 +229,34 @@ try {
           const sizes=await page.locator('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').evaluateAll(nodes=>nodes.filter(e=>e.getClientRects().length).map(e=>parseFloat(getComputedStyle(e).fontSize)));
           if(sizes.some(size=>size<16))throw Error('Form control text below 16px: '+sizes.join(','));
         }
+        // Real computed styles: legacy !important Job Card rules must not
+        // shrink iPhone input fonts/labels after the CSS is bundled.
+        if(/^\/jobs\/JOB-00251\/(overview|inspection|estimate|work)$/.test(path)){
+          const metrics=await page.evaluate(()=>{
+            const roots=[...document.querySelectorAll(
+              '.cg-job-detail :is(.job-overview-simple,.cg-inspection,.job-quick-estimate,.job-work-simple)'
+            )].filter(node=>node.getClientRects().length);
+            const fields=roots.flatMap(root=>[...root.querySelectorAll(
+              'input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),select,textarea'
+            )].filter(node=>node.getClientRects().length).map(node=>({
+              kind:node.tagName.toLowerCase(),
+              font:parseFloat(getComputedStyle(node).fontSize),
+              height:Math.round(node.getBoundingClientRect().height),
+              nestedSearch:Boolean(node.closest('.job-quick-catalog-field,.cg-inspection-search')),
+            })));
+            const labels=roots.flatMap(root=>[...root.querySelectorAll('label')]
+              .filter(node=>node.getClientRects().length)
+              .map(node=>parseFloat(getComputedStyle(node).fontSize)));
+            return {fields,labels};
+          });
+          const smallText=metrics.fields.filter(x=>x.font<16);
+          const smallControls=metrics.fields.filter(x=>!x.nestedSearch &&
+            x.kind!=='textarea' && x.height<48);
+          const smallLabels=metrics.labels.filter(size=>size<14.5);
+          if(smallText.length||smallControls.length||smallLabels.length)
+            throw Error('Job Card forms should use 16px inputs, 15px labels, 48px controls: '+
+              JSON.stringify({smallText,smallControls,smallLabels}));
+        }
         if(path==='/login'){
           // Regression for double red outline: the outer div owns the border,
           // even when both nested inputs are aria-invalid and focused.
