@@ -9,6 +9,7 @@ import { formatInvoicePlaceOfSupply, invoiceStateCode, invoiceLineTaxChoices, in
 import '../../styles/invoice-field-validation.css';
 import '../../styles/invoice-item-responsive.css';
 import '../../styles/invoice-goods-services-layout.css';
+import '../../styles/invoice-document-simplified.css';
 import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaults } from '../../services/documentTemplates.service';
 import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
@@ -805,7 +806,7 @@ export function InvoiceRoutePage() {
               </label>
 
             </div>
-          <div className="invoice-essential-fields">
+            <div className="invoice-essential-fields">
             <label>Invoice Date
               <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)}
                 onChange={(e) => update('date', e.target.value)}/>
@@ -817,8 +818,8 @@ export function InvoiceRoutePage() {
                 onChange={(e) => update('customer.placeOfSupply', formatInvoicePlaceOfSupply(e.target.value))}
                 placeholder="e.g. 32-Kerala" autoComplete="off"/>
               {fieldErrors['customer.placeOfSupply'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.placeOfSupply']}</small>}
-            </label>
-          </div>
+              </label>
+            </div>
           </section>
 
         </div>
