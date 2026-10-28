@@ -42,7 +42,7 @@
   /* Borderless focus treatment: subtle surface tint, no blue rectangle. */
   outline: 0 !important;
   box-shadow: none !important;
-  background: var(--primary-soft, #eef2ff) !important;
+  background: color-mix(in srgb, var(--primary, #2563eb) 14%, var(--surface-2, #f8fafc)) !important;
 }
 :is(#root, body) .customer-directory-form [data-cg-input-shell="true"]:has([aria-invalid="true"]):focus-within {
   background: var(--danger-soft, #fff1f1) !important;
@@ -109,7 +109,7 @@
 :is(#root, body) .customer-directory-form textarea:focus-visible {
   outline: 0 !important;
   box-shadow: none !important;
-  background: var(--primary-soft, #eef2ff) !important;
+  background: color-mix(in srgb, var(--primary, #2563eb) 14%, var(--surface-2, #f8fafc)) !important;
 }
 :is(#root, body) .customer-directory-form .customer-directory-form-grid {
   display: grid;
