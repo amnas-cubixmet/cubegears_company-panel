@@ -18,6 +18,7 @@ import { createApprovedEstimatePdfFile, downloadApprovedEstimatePdf, latestAppro
 import '../../styles/approved-estimate-pdf.css';
 import '../../styles/job-workspace-readable.css';
 import '../../styles/job-estimate-iphone.css';
+import '../../styles/job-four-stage-forms.css';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
