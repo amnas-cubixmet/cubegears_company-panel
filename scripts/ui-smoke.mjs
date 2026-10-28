@@ -866,6 +866,9 @@ try {
         }
 
         if(path==='/vehicles' || /^\/vehicles\/[^/]+$/.test(path)) {
+          // Vehicle details fetches customer and service history asynchronously.
+          // Avoid reading the loading placeholder before profile content appears.
+          await page.locator('.cg-vehicles').waitFor({state:'visible',timeout:12000});
           const metrics = await page.evaluate(() => {
             const root=document.querySelector('.cg-vehicles');
             const font = selector => {
