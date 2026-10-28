@@ -261,6 +261,38 @@ try {
             throw Error('Job Card forms should use 16px inputs, 14px+ labels, 44px+ controls: '+
               JSON.stringify({smallText,smallControls,smallLabels}));
         }
+        // Work > Mechanic must be a real responsive grid, not naked
+        // full-width controls. All API fixtures remain read-only.
+        if(path==='/jobs/JOB-00251/work'){
+          const mechanic = page.locator('.job-work-simple .job-work-timer-panel');
+          await mechanic.waitFor({state:'visible'});
+          const layout=await mechanic.evaluate(node=>{
+            const form=node.querySelector('.job-work-timer-form');
+            const header=node.querySelector('.job-work-timer-head');
+            const submit=form?.querySelector('button[type="submit"]');
+            const label=form?.querySelector('label');
+            const summary=node.querySelector('.job-work-timer-summary');
+            const p=node.querySelector('.job-work-timer-hint');
+            return {
+              panelPadding:parseFloat(getComputedStyle(node).paddingLeft),
+              headerDisplay:header&&getComputedStyle(header).display,
+              formDisplay:form&&getComputedStyle(form).display,
+              columns:form&&getComputedStyle(form).gridTemplateColumns.split(' ').length,
+              labelDisplay:label&&getComputedStyle(label).display,
+              buttonHeight:submit&&Math.round(submit.getBoundingClientRect().height),
+              buttonFill:submit&&getComputedStyle(submit).backgroundColor,
+              summaryDisplay:summary&&getComputedStyle(summary).display,
+              hintPadding:p&&parseFloat(getComputedStyle(p).paddingLeft),
+            };
+          });
+          const expectedCols=profile.width<=600?1:profile.width<=900?2:3;
+          if(layout.formDisplay!=='grid'||layout.headerDisplay!=='flex'||
+              layout.labelDisplay!=='flex'||layout.summaryDisplay!=='flex'||
+              layout.panelPadding<12||layout.buttonHeight<44||
+              layout.hintPadding<8||layout.columns!==expectedCols){
+            throw Error('Mechanic form layout incomplete: '+JSON.stringify({width:profile.width,...layout}));
+          }
+        }
         if(path==='/login'){
           // Regression for double red outline: the outer div owns the border,
           // even when both nested inputs are aria-invalid and focused.
