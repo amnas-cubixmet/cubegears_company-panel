@@ -81,7 +81,8 @@ test('invoice + estimate editor requests backend preview and marks state as edit
   assert.match(page, /setVerifiedTotals\(\{ fingerprint: previewFingerprint, data: response \}\)/);
   assert.match(page, /normalizeBackendInvoiceTotals\(fromBackend, localTotals\)/);
   assert.match(page, /Calculated by Django backend/);
-  assert.match(page, /Place of Supply <small>\(Auto-filled · Editable\)<\/small>/);
+  assert.match(page, /<label>Place of Supply/);
+  assert.doesNotMatch(page, /Auto-filled · Editable/);
   assert.match(page, /onChange=\{\(e\) => update\('customer\.placeOfSupply', formatInvoicePlaceOfSupply\(e\.target\.value\)\)\}/);
   assert.match(service, /apiClient\.post\('\/billing\/documents\/preview'/);
   assert.match(service, /apiClient\.post\('\/billing\/documents'/);

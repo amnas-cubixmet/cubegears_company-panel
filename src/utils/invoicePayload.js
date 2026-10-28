@@ -169,6 +169,21 @@ export const formatInvoiceValidationError = (error) => {
   return messages.join(' | ') || error?.message || 'Unable to save invoice.';
 };
 
+
+/**
+ * Django rejects a branch whose state differs from the company's GSTIN.
+ * This is a seller setup error, not an invalid customer Place of Supply.
+ * Keep the validation visible beside the seller state instead of repeating a
+ * long, raw API error in the invoice amount preview.
+ */
+export const isInvoiceBranchStateMismatch = (error) => {
+  const status = Number(error?.status || error?.response?.status || 0);
+  const details = error?.data?.gst ?? error?.response?.data?.gst ?? '';
+  return status === 400 && /workshop branch state differs from company gstin/i.test(
+    Array.isArray(details) ? details.join(' ') : String(details),
+  );
+};
+
 /** Explain why an authoritative invoice preview was rejected. */
 export const invoicePreviewFailureMessage = (error) => {
   const status = Number(error?.status || error?.response?.status || 0);
