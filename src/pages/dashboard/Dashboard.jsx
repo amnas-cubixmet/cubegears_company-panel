@@ -61,11 +61,7 @@ export const Dashboard = () => {
         onNavigate={navigate}
       />}
 
-      <DashboardBottomGrid
-        data={data}
-        user={user}
-        onNavigate={navigate}
-      />
+      <DashboardBottomGrid data={data} />
     </div>
   );
 };
