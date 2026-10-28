@@ -516,6 +516,39 @@ try {
           }
         }
 
+        if(path==='/staff-management/staff') {
+          const card=page.locator('.staff-directory-card').first();
+          await card.waitFor();
+          const stats=await card.evaluate(node => {
+            const facts=[...node.querySelectorAll('.staff-directory-fact')];
+            const actions=[...node.querySelectorAll('.staff-directory-card__actions button')];
+            const sizes=actions.map(b=>({w:b.getBoundingClientRect().width,h:b.getBoundingClientRect().height}));
+            const rect=node.getBoundingClientRect();
+            const minFont=Math.min(...facts.flatMap(f=>[
+              ...f.querySelectorAll('.staff-directory-fact__copy > span')
+            ]).map(el=>parseFloat(getComputedStyle(el).fontSize)));
+            const clipped=facts.some(f=>f.scrollWidth>f.clientWidth+2);
+            return {font:minFont,actions:sizes,clipped,
+              cardWidth:rect.width,viewport:innerWidth,
+              pageOverflow:document.documentElement.scrollWidth>innerWidth+2,
+              detailColumns:getComputedStyle(node.querySelector('.staff-directory-details')).gridTemplateColumns,
+            };
+          });
+          if(stats.font<13.5 || stats.clipped || stats.pageOverflow) {
+            throw Error('Staff Directory card text unreadable or clipped: '+JSON.stringify(stats));
+          }
+          if(stats.actions.some(b=>b.h<43.5 || b.w<43.5)) {
+            throw Error('Staff Directory card touch button below 44px: '+JSON.stringify(stats));
+          }
+          if(stats.cardWidth<305 && stats.detailColumns.split(' ').length!==1) {
+            throw Error('Narrow Staff card facts are not stacked: '+JSON.stringify(stats));
+          }
+          const power=card.locator('.staff-status-button');
+          if(await power.count() && !(await power.getAttribute('aria-label'))) {
+            throw Error('Staff account status icon lacks accessible label.');
+          }
+        }
+
         if(path==='/staff-management/overview') {
           const input=page.locator('.staff-simple-search input');
           const border=await input.evaluate(node=>getComputedStyle(node).borderTopWidth);
