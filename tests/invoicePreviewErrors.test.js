@@ -18,3 +18,16 @@ test('invoice preview keeps endpoint and network errors actionable', () => {
   assert.match(invoicePreviewFailureMessage({ status: 404 }), /preview API is missing/i);
   assert.match(invoicePreviewFailureMessage({ message: 'Network Error' }), /provisional/i);
 });
+
+test('valid 32-Kerala place of supply is not blamed when workshop GST state is unknown', async () => {
+  const { validateInvoiceDraft } = await import('../src/utils/invoicePayload.js');
+  const errors = validateInvoiceDraft({
+    date: '2026-10-28',
+    invoiceType: 'gst',
+    seller: { gstin: 'INVALID' },
+    customer: { name: 'Test Customer', placeOfSupply: '32-Kerala' },
+    items: [],
+  });
+  assert.equal(errors['customer.placeOfSupply'], undefined);
+  assert.equal(errors.invoiceType, 'Workshop GST registration or state could not be verified. Check Company Settings.');
+});
