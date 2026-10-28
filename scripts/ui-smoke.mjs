@@ -246,13 +246,17 @@ try {
             })));
             const labels=roots.flatMap(root=>[...root.querySelectorAll('label')]
               .filter(node=>node.getClientRects().length)
-              .map(node=>parseFloat(getComputedStyle(node).fontSize)));
+              .map(node=>({
+                size:parseFloat(getComputedStyle(node).fontSize),
+                className:String(node.className||'').slice(0,90),
+                labelText:(node.innerText||'').trim().slice(0,60),
+              })));
             return {fields,labels};
           });
           const smallText=metrics.fields.filter(x=>x.font<16);
           const smallControls=metrics.fields.filter(x=>!x.nestedSearch &&
             x.kind!=='textarea' && x.height<48);
-          const smallLabels=metrics.labels.filter(size=>size<14.5);
+          const smallLabels=metrics.labels.filter(label=>label.size<14.5);
           if(smallText.length||smallControls.length||smallLabels.length)
             throw Error('Job Card forms should use 16px inputs, 15px labels, 48px controls: '+
               JSON.stringify({smallText,smallControls,smallLabels}));
