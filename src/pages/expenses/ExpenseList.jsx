@@ -19,7 +19,8 @@ import '../../styles/expense-ui-polish.css';
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'INR',
-  maximumFractionDigits: 0
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
 });
 
 const expenseCategories = [
@@ -312,11 +313,7 @@ export const ExpenseList = () => {
     setSubmitting(true);
     setActionError('');
     try {
-      const payload = {
-        ...form,
-        amount: Number(form.amount || 0),
-        taxAmount: Number(form.taxAmount || 0)
-      };
+      const payload = { ...form };
 
       if (isEdit && id) {
         await expenseService.updateExpense(id, payload);
