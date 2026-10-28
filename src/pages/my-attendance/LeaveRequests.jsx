@@ -12,15 +12,14 @@ import '../../styles/attendance-leave-readable.css';
 
 const createInitialForm = () => {
   const today = todayForLeaveDate();
-  return ({
-
-  leaveMode: 'Full Day',
-  halfDaySession: 'First Half',
-  startDate: today,
-  endDate: today,
-  reason: '',
-  attachment: null,
-  });
+  return {
+    leaveMode: 'Full Day',
+    halfDaySession: 'First Half',
+    startDate: today,
+    endDate: today,
+    reason: '',
+    attachment: null,
+  };
 };
 
 export const LeaveRequests = () => {
