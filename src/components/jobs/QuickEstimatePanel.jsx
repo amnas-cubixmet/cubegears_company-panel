@@ -9,17 +9,7 @@ import { buildEstimateCatalogSelection } from './estimateNewCatalog';
 import { estimateLineErrors, estimateFormValidation } from './quickEstimateValidation';
 import { latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 import { INDIA_STATES, calculateEstimateIndiaGst } from '../../utils/indiaGst';
-import { EWAY_GST_RATES } from '../../utils/eWayGst';
-
-export const estimateGstChoices = (rate = '') => {
-  const entered = String(rate ?? '').trim();
-  const choices = [...EWAY_GST_RATES];
-  if (entered && Number.isFinite(Number(entered)) && Number(entered) >= 0
-      && Number(entered) <= 100 && !choices.some(x => Number(x) === Number(entered))) {
-    choices.push(entered);
-  }
-  return choices;
-};
+import { estimateGstChoices } from './estimateGstRates';
 
 const emptyLine = (type = 'Labour') => ({
   key: String(Date.now()) + '-' + String(Math.random()),
