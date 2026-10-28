@@ -316,10 +316,16 @@ export const ExpenseList = () => {
       const payload = { ...form };
 
       if (isEdit && id) {
-        await expenseService.updateExpense(id, payload);
+        const updated = await expenseService.updateExpense(id, payload);
+        if (updated) {
+          setExpenses((current) => current.map((item) =>
+            String(item.id) === String(id) ? updated : item
+          ));
+        }
         navigate(`/expenses/${id}`);
       } else {
         const created = await expenseService.createExpense(payload);
+        if (created?.id) setExpenses((current) => [created, ...current]);
         navigate(created?.id ? `/expenses/${created.id}` : '/expenses');
       }
     } catch (error) {
