@@ -49,14 +49,14 @@ test('valid amounts, taxes and discounts produce no validation error', () => {
   assert.match(estimateFormValidation(Array.from({ length: 76 }, () => line()), '0', '0'), /75/);
 });
 
-test('UI flags failing rows and focuses the first invalid field on Save', () => {
+test('UI flags invalid rows and focuses the first invalid field on Approve & Continue', () => {
   assert.match(source, /const errors = showValidation \? estimateLineErrors\(line\) : \{\}/);
   assert.match(source, /setShowValidation\(true\)/);
   assert.match(source, /querySelector\('\[aria-invalid="true"\]'\)/);
   assert.match(source, /aria-invalid=\{Boolean\(errors\.quantity\)\}/);
   assert.match(source, /aria-invalid=\{Boolean\(errors\.unitPrice\)\}/);
-  assert.match(source, /onClick=\{save\}/);
-  assert.match(source, /disabled=\{busy\} onClick=\{save\}/);
+  assert.match(source, /onClick=\{approve\}/);
+  assert.match(source, /disabled=\{busy\} onClick=\{approve\}/);
   assert.match(picker, /aria-invalid=\{invalid\}/);
   assert.match(css, /job-quick-line\.is-invalid/);
 });
