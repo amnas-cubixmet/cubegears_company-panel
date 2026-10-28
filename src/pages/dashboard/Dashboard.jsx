@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   DashboardBottomGrid,
   DashboardStats,
+  QuickActionsPanel,
   ServiceOperations,
 } from '../../components/dashboard';
 import { Loader } from '../../components/common/Loader';
@@ -10,6 +11,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
 import { getDashboardData } from '../../services/dashboard.service';
 import '../../styles/dashboard.css';
+import '../../styles/dashboard-readable.css';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -44,6 +46,9 @@ export const Dashboard = () => {
 
   return (
     <div className="dashboard-page">
+      <section className="dashboard-top-actions" aria-label="Dashboard Quick Actions">
+        <QuickActionsPanel onNavigate={navigate} />
+      </section>
       <DashboardStats data={data} />
 
       {can('jobs.view') && <ServiceOperations
