@@ -20,10 +20,11 @@ export const splitDescription = (description = '') => {
 
 export const normalizeExpense = (row = {}) => {
   const parsed = splitDescription(row.description);
-  const receiptUrl = row.receiptUrl || row.attachment || '';
+  const rawReceipt = row.receiptUrl || row.attachment || '';
+  const receiptUrl = /^https?:\/\//i.test(rawReceipt) ? rawReceipt : '';
   return {
     ...row,
-    title: row.title ?? parsed.title ?? row.category ?? '',
+    title: row.title || parsed.title || row.category || 'Workshop Expense',
     notes: row.notes ?? parsed.notes,
     category: row.category || 'Miscellaneous',
     amount: Number(row.amount ?? 0),
@@ -49,8 +50,12 @@ export const expenseToApiPayload = (values = {}) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(expenseDate)) throw new Error('Choose a valid expense date.');
   if (!Number.isFinite(amount) || amount <= 0) throw new Error('Expense amount must be greater than zero.');
   if (!Number.isFinite(tax) || tax < 0) throw new Error('Tax amount cannot be negative.');
-  if (!Number.isInteger(Math.round(amount * 100)) || !Number.isInteger(Math.round(tax * 100))) {
-    throw new Error('Enter valid amounts.');
+  if (!/^\d+(?:\.\d{1,2})?$/.test(String(values.amount).trim()) ||
+      (String(values.taxAmount || '').trim() && !/^\d+(?:\.\d{1,2})?$/.test(String(values.taxAmount).trim()))) {
+    throw new Error('Enter amounts with no more than two decimal places.');
+  }
+  if (receiptUrl && !/^https?:\/\/\S+$/i.test(receiptUrl)) {
+    throw new Error('Receipt link must start with https:// or http://.');
   }
 
   return {
