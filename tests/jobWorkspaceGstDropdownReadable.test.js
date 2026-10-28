@@ -11,10 +11,10 @@ const css = read('src/styles/job-workspace-readable.css');
 
 test('GST rate dropdown offers selectable total GST % and preserves saved nonstandard rates', () => {
   assert.deepEqual(estimateGstChoices(), ['5','10','18','36']);
-  assert.deepEqual(estimateGstChoices('18'), ['0','5','12','18','28','40']);
+  assert.deepEqual(estimateGstChoices('18'), ['5','10','18','36']);
   assert.ok(estimateGstChoices('2.5').includes('2.5'));
   assert.ok(estimateGstChoices('9').includes('9'));
-  assert.deepEqual(estimateGstChoices(''), ['0','5','12','18','28','40']); // presets not mutated
+  assert.deepEqual(estimateGstChoices(''), ['5','10','18','36']); // presets not mutated
   assert.ok(!estimateGstChoices('999').includes('999'));
   assert.ok(!estimateGstChoices('invalid').includes('invalid'));
   assert.match(estimate, /<select[\s\S]*?className="job-quick-gst-select"/);
