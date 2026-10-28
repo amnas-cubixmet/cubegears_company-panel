@@ -1,48 +1,48 @@
-/** Company request: paired CGST/SGST and a single deduplicated IGST 5%.
- * Values sent to Django are ALWAYS the total GST %, never a half rate.
- * Historical/stock-classified rates not in this preset stay readable and saved.
+/** Shared legacy GST preset helpers.
+ * Both this API and the four editors expose the same ten individual labels.
+ * Values sent to Django for tax calculation remain COMBINED GST percentages.
  */
-export const GST_CGST_SGST_COMPONENT_RATES = Object.freeze(['2.5', '5', '9', '18']);
-export const GST_IGST_RATES = Object.freeze(['5']); // supplied twice, one unique rate
+import {
+  INVOICE_CGST_SGST_RATES, INVOICE_IGST_RATES,
+  invoiceLineTaxChoices, invoiceChoiceFromTotalRate,
+} from './invoiceTaxUi.js';
 
+export const GST_CGST_SGST_COMPONENT_RATES = INVOICE_CGST_SGST_RATES;
+export const GST_IGST_RATES = INVOICE_IGST_RATES;
 export const GST_INTRA_TOTAL_RATES = Object.freeze(
-  GST_CGST_SGST_COMPONENT_RATES.map((rate) => String(Number(rate) * 2)),
+  GST_CGST_SGST_COMPONENT_RATES.map(rate => String(Number(rate) * 2)),
 );
-
 export const GST_UNKNOWN_TOTAL_RATES = Object.freeze(
   [...new Set([...GST_INTRA_TOTAL_RATES, ...GST_IGST_RATES])],
 );
 
-export const gstPresetRatesForMode = (mode) => {
-  if (mode === 'cgst_sgst') return [...GST_INTRA_TOTAL_RATES];
+// Legacy helper returns numeric combined rates; the actual dropdown uses
+// gstRateChoices() and retains individual CGST, SGST, and IGST selections.
+export const gstPresetRatesForMode = mode => {
   if (mode === 'igst') return [...GST_IGST_RATES];
+  if (mode === 'cgst_sgst') return [...GST_INTRA_TOTAL_RATES];
   if (mode === 'none') return [];
   return [...GST_UNKNOWN_TOTAL_RATES];
 };
 
 export const gstPresetLabel = (mode, totalRate) => {
-  const text = String(totalRate ?? '');
-  if (mode === 'cgst_sgst') {
-    const half = Number(text) / 2;
-    return `CGST ${half}% + SGST ${half}% = ${Number(text)}%`;
-  }
-  if (mode === 'igst') return `IGST ${text}%`;
-  return `GST ${text}%`;
+  const selected = invoiceChoiceFromTotalRate(totalRate, mode);
+  return invoiceLineTaxChoices(mode)
+    .find(option => option.value === selected)?.label ||
+    `Saved / classified GST ${totalRate}%`;
 };
 
 export const gstRateChoices = (mode, currentRate = '', { includeZero = false } = {}) => {
-  const rates = gstPresetRatesForMode(mode);
+  const options = [...invoiceLineTaxChoices(mode)];
   const saved = String(currentRate ?? '').trim();
-  if (saved && /^\d+(?:\.\d{1,2})?$/.test(saved) && Number(saved) <= 100
-      && !rates.some((rate) => Number(rate) === Number(saved))) {
-    rates.push(saved); // preserve old documents and legally classified stock GST
+  if (saved && /^\d+(?:\.\d{1,2})?$/.test(saved) && Number(saved) <= 100 &&
+      !options.some(option => Number(option.totalRate) === Number(saved))) {
+    options.push({
+      value: `saved:${saved}`, label: `Saved / classified GST ${saved}%`,
+      totalRate: saved, taxMode: mode,
+    });
   }
-  if (includeZero && !rates.some((rate) => Number(rate) === 0)) rates.unshift('0');
-  return rates.map((value) => ({
-    value,
-    label: value === '0' ? 'GST None (0%)' :
-      gstPresetRatesForMode(mode).includes(value)
-        ? gstPresetLabel(mode, value)
-        : `Saved / classified GST ${value}%`,
-  }));
+  if (includeZero) options.unshift({ value: 'saved:0', label: 'GST None (0%)',
+    totalRate: '0', taxMode: mode });
+  return options;
 };
