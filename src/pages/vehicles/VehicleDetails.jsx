@@ -82,6 +82,9 @@ export const VehicleDetails = () => {
     const load = async () => {
       setLoading(true);
       setError('');
+      setVehicle(null);
+      setCustomer(null);
+      setHistory([]);
       try {
         const nextVehicle = await vehicleService.getVehicleById(id);
         if (!nextVehicle) {
