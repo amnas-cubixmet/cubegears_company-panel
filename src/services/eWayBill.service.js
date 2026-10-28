@@ -81,7 +81,7 @@ export const blankEWayBill = () => ({
     address: '',
     place: '',
     pincode: '',
-    stateCode: '32'
+    stateCode: ''
   },
   to: {
     gstin: '',
@@ -89,7 +89,7 @@ export const blankEWayBill = () => ({
     address: '',
     place: '',
     pincode: '',
-    stateCode: '32'
+    stateCode: ''
   },
   items: [
     {
@@ -133,6 +133,13 @@ export const blankEWayBill = () => ({
   createdAt: '',
   updatedAt: ''
 });
+
+export const getEWayFromContext = async () => {
+  // Trusted supply identity comes from the tenant-authenticated Django API.
+  // Local mock documents have no verified registered supplier.
+  if (USE_MOCK_API) return { from: null, branchId: '' };
+  return apiClient.get('/e-way-bills/from-context');
+};
 
 export const calculateEWayTotals = (doc) => {
   const taxableValue = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0), 0);
@@ -231,6 +238,7 @@ export const submitEWayBill = async (billId) => {
 };
 
 export const eWayBillService = {
+  getFromContext: getEWayFromContext,
   list: listEWayBills,
   get: getEWayBill,
   save: saveEWayBill,
