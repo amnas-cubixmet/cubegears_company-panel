@@ -1,6 +1,7 @@
 import { USE_MOCK_API } from '../api/apiConfig';
 import { API_ENDPOINTS } from '../api/endpoints';
 import apiClient from '../api/apiClient';
+import { stockService } from './stock.service';
 import {
   getMockJobs,
   getMockJobById,
@@ -83,6 +84,45 @@ const mockWorkflow = (job) => {
     stages: WORKFLOW_STAGES,
     finished: completed.length === WORKFLOW_STAGES.length
   };
+};
+
+/** Record actual use of workshop stock directly against a Job Card.
+ * Django's issue-part endpoint writes the part, movement and balance atomically.
+ * Do not use generic Stock Out here: it does not create a JobPart record.
+ */
+export const issueJobStockPart = async (jobId, itemId, quantity) => {
+  const qty = Number(quantity);
+  if (!jobId || !itemId || !Number.isFinite(qty) || qty <= 0 ||
+      !/^\\d+(?:\\.\\d{1,2})?$/.test(String(quantity))) {
+    throw new Error('Select a part and enter a valid quantity (maximum 2 decimal places).');
+  }
+  if (USE_MOCK_API) {
+    const item = await stockService.getStockItemById(itemId);
+    if (!item) throw new Error('Stock product not found.');
+    const available = Number(item.available ?? (Number(item.onHand || 0) - Number(item.reserved || 0)));
+    if (qty > available) throw new Error(`Only ${available} available.`);
+    const job = getMockJobById(jobId);
+    if (!job) throw new Error('Job Card not found.');
+    await stockService.issueStock({
+      itemId, partName: item.partName || item.name, sku: item.sku, quantity: qty, jobId,
+    });
+    const part = {
+      id: `JOBPART-${Date.now()}`, item: itemId, itemName: item.partName || item.name,
+      sku: item.sku, quantity: qty, unit_price: item.sellingPrice, issued: true,
+    };
+    const previousParts = job.parts || [];
+    updateMockJob(jobId, {
+      parts: [part, ...previousParts],
+      partsUsed: [...(job.partsUsed || []), {
+        id: part.id, partId: itemId, name: part.itemName, sku: part.sku,
+        qty, unitPrice: Number(item.sellingPrice || 0), status: 'Issued',
+      }],
+    });
+    return part;
+  }
+  return apiClient.post(`${API_ENDPOINTS.JOBS}/${jobId}/issue-part`, {
+    item: itemId, quantity: qty,
+  });
 };
 
 export const getJobCostSummary = async (id) => {
