@@ -1,0 +1,338 @@
+/* Mechanic / internal work timer surface on Job Card > Work.
+ * The JSX already uses these classes, but older CSS only defined grid
+ * columns without display:grid. Keep this module scoped so payroll and
+ * other pages are not affected.
+ */
+.cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(14px, 2vw, 22px) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  background: var(--surface) !important;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.cg-job-detail .job-work-simple .job-work-timer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  min-width: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.cg-job-detail .job-work-simple .job-work-timer-head > div:first-child {
+  flex: 1 1 250px;
+  min-width: 0;
+}
+.cg-job-detail .job-work-simple .job-work-timer-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px !important;
+  font-weight: 750;
+  line-height: 1.35;
+}
+.cg-job-detail .job-work-simple .job-work-timer-head h3 svg {
+  flex: 0 0 auto;
+  color: var(--primary);
+}
+.cg-job-detail .job-work-simple .job-work-timer-head p {
+  margin: 6px 0 0;
+  font-size: 14px !important;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.cg-job-detail .job-work-simple .job-work-timer-summary {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.cg-job-detail .job-work-simple .job-work-timer-summary strong {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+.cg-job-detail .job-work-simple .job-work-timer-summary small {
+  display: block;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: end;
+  min-width: 0;
+  margin: 0;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  min-width: 0;
+  font-size: 14px !important;
+  font-weight: 650;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form
+:is(input:not([type="checkbox"]):not([type="file"]), select) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 13px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 11px !important;
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.35;
+  outline: none;
+  box-sizing: border-box;
+}
+.cg-job-detail .job-work-simple .job-work-timer-form input::placeholder {
+  opacity: 1;
+  color: var(--text-muted);
+}
+.cg-job-detail .job-work-simple .job-work-timer-form :is(input, select):focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form > button {
+  grid-column: 1 / -1;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: auto;
+  min-width: 190px;
+  min-height: 48px !important;
+  padding: 0 20px;
+  border: 1px solid var(--primary);
+  border-radius: 11px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 15px !important;
+  font-weight: 750;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: opacity .15s ease, filter .15s ease;
+}
+.cg-job-detail .job-work-simple .job-work-timer-form > button svg,
+.cg-job-detail .job-work-simple .job-work-timer-refresh svg,
+.cg-job-detail .job-work-simple .job-work-timer-actions button svg {
+  flex: 0 0 auto;
+}
+.cg-job-detail .job-work-simple .job-work-timer-form > button:not(:disabled):hover {
+  filter: brightness(.94);
+}
+.cg-job-detail .job-work-simple .job-work-timer-form > button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
+.cg-job-detail .job-work-simple .job-work-timer-hint {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 11px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: 14px !important;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.cg-job-detail .job-work-simple .job-work-timer-message {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-2);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+.cg-job-detail .job-work-simple .job-work-timer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.cg-job-detail .job-work-simple .job-work-timer-empty {
+  padding: 18px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: 14px !important;
+  line-height: 1.55;
+  text-align: center;
+}
+.cg-job-detail .job-work-simple .job-work-timer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, auto) auto;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.cg-job-detail .job-work-simple .job-work-timer-person,
+.cg-job-detail .job-work-simple .job-work-timer-duration {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.cg-job-detail .job-work-simple .job-work-timer-person strong {
+  color: var(--text-primary);
+  font-size: 16px !important;
+  font-weight: 750;
+}
+.cg-job-detail .job-work-simple .job-work-timer-person :is(span,small),
+.cg-job-detail .job-work-simple .job-work-timer-duration small {
+  color: var(--text-secondary);
+  font-size: 13px !important;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.cg-job-detail .job-work-simple .job-work-timer-duration strong {
+  color: var(--text-primary);
+  font-size: 19px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.cg-job-detail .job-work-simple .job-work-timer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-actions button,
+.cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 14px !important;
+  font-weight: 650;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.cg-job-detail .job-work-simple .job-work-timer-actions .is-primary {
+  border-color: var(--primary) !important;
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+.cg-job-detail .job-work-simple .job-work-timer-actions button:disabled,
+.cg-job-detail .job-work-simple .job-work-timer-refresh:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.cg-job-detail .job-work-simple .job-work-timer-refresh {
+  align-self: flex-start;
+}
+@media (max-width: 900px) {
+  .cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-form > label:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 600px) {
+  .cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-panel {
+    gap: 13px;
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-head {
+    gap: 12px;
+    padding-bottom: 13px;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-summary {
+    min-height: 58px;
+    flex: 1 1 100%;
+    align-items: flex-start;
+    text-align: left;
+    padding: 10px 13px;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-form > label:nth-child(3) {
+    grid-column: auto;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form
+  :is(input:not([type="file"]):not([type="checkbox"]), select) {
+    height: 50px !important;
+    min-height: 50px !important;
+  }
+  .cg-job-detail.job-workspace-dashboard .job-work-simple .job-work-timer-form > button {
+    width: 100%;
+    min-height: 50px !important;
+    justify-self: stretch;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-row {
+    grid-template-columns: minmax(0,1fr);
+    gap: 10px;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-actions {
+    grid-column: auto;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-actions button {
+    flex: 1 1 110px;
+    min-width: 0;
+  }
+  .cg-job-detail .job-work-simple .job-work-timer-refresh {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cg-job-detail .job-work-simple .job-work-timer-form > button {
+    transition: none;
+  }
+}
