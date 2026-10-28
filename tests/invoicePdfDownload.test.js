@@ -33,7 +33,7 @@ test('Invoice list and detail PDF buttons open the share sheet rather than print
 });
 
 test('Job Invoice has its own real Download Invoice PDF action', () => {
-  assert.match(job, /const downloadJobInvoicePdf = async/);
+  assert.match(job, /const downloadJobInvoicePdf = \(\) =>/);
   assert.match(job, /setInvoiceShareDocument\(linkedInvoice\)/);
   assert.match(job, /<InvoicePdfShareSheet/);
   assert.match(job, /linkedInvoice\?\.id && \(/);
