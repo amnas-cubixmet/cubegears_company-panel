@@ -5,7 +5,7 @@
 .cg-job-detail {
   --job-control-size: 48px;
   --job-body-font: 16px;
-  --job-label-font: 15px;
+  --job-label-font: 14px;
   --job-meta-font: 14px;
 }
 .cg-job-detail :is(
@@ -395,4 +395,28 @@ input:not([type="checkbox"]):not([type="file"]) {
     max-width: 100%;
     overflow-wrap: anywhere;
   }
+}
+
+/* Reconcile nested 14px labels still found by Playwright after the legacy
+ * cascade: slightly higher specificity, scoped to the four requested stages.
+ */
+.cg-job-detail.job-workspace-dashboard :is(
+  .job-overview-simple, .cg-inspection, .job-quick-estimate, .job-work-simple
+) label:not([data-compact-label]) {
+  font-size: var(--job-label-font) !important;
+}
+/* Outside Staff record search has a separately bordered 42px wrapper.
+ * Increase that wrapper, not its inner borderless text field. */
+.cg-job-detail.job-workspace-dashboard .job-work-simple .outside-labour-search {
+  min-height: var(--job-control-size) !important;
+  height: var(--job-control-size) !important;
+}
+.cg-job-detail.job-workspace-dashboard .job-work-simple
+.outside-labour-search > input:not([type="checkbox"]):not([type="file"]) {
+  min-height: 0 !important;
+  height: 100% !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background: transparent !important;
 }
