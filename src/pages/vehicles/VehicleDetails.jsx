@@ -1,8 +1,11 @@
 import { appConfirm } from '../../components/common/appDialogs';
+import { useAuth } from '../../hooks/useAuth';
+import { hasPermission } from '../../utils/permissions';
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   AlertTriangle,
+  ArrowLeft,
   CalendarClock,
   Car,
   ClipboardList,
@@ -21,7 +24,7 @@ import { vehicleService } from '../../services/vehicle.service';
 import { customerService } from '../../services/customer.service';
 import { jobService } from '../../services/job.service';
 import '../../styles/vehicle-management.css';
-import '../../styles/vehicle-readable.css';
+import '../../styles/vehicle-polish.css';
 
 const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -61,17 +64,27 @@ const Info = ({ label, value }) => (
 export const VehicleDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canEdit = hasPermission(user, 'vehicles.edit');
+  const canCreateJob = hasPermission(user, 'jobs.create');
+  const canDelete = hasPermission(user, 'vehicles.delete');
   const [vehicle, setVehicle] = useState(null);
   const [customer, setCustomer] = useState(null);
   const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let alive = true;
 
     const load = async () => {
       setLoading(true);
+      setError('');
+      setVehicle(null);
+      setCustomer(null);
+      setHistory([]);
       try {
         const nextVehicle = await vehicleService.getVehicleById(id);
         if (!nextVehicle) {
@@ -89,8 +102,10 @@ export const VehicleDetails = () => {
         if (alive) {
           setVehicle(nextVehicle);
           setCustomer(nextCustomer);
-          setHistory(nextHistory);
+          setHistory(Array.isArray(nextHistory) ? nextHistory : []);
         }
+      } catch (loadError) {
+        if (alive) setError(loadError?.message || 'Unable to load this vehicle.');
       } finally {
         if (alive) setLoading(false);
       }
@@ -98,7 +113,7 @@ export const VehicleDetails = () => {
 
     load();
     return () => { alive = false; };
-  }, [id]);
+  }, [id, reloadKey]);
 
   const openJob = useMemo(
     () => history.find((job) => OPEN_JOB_STATUSES.has(job.status)) || null,
@@ -142,16 +157,36 @@ export const VehicleDetails = () => {
   const latestJob = history[0] || null;
 
   const removeVehicle = async () => {
-    if (!vehicle || !await appConfirm(`Delete vehicle ${vehicle.registration}?`)) return;
-    await vehicleService.deleteVehicle(vehicle.id);
-    navigate('/vehicles');
+    if (!canDelete || !vehicle || !await appConfirm(`Delete vehicle ${vehicle.registration}?`)) return;
+    try {
+      await vehicleService.deleteVehicle(vehicle.id);
+      navigate('/vehicles');
+    } catch (deleteError) {
+      setError(deleteError?.message || 'Unable to delete this vehicle.');
+    }
   };
 
-  if (loading) return <div className="vehicle-empty">Loading vehicle profile...</div>;
-  if (!vehicle) return <div className="vehicle-empty">Vehicle not found.</div>;
+  if (loading) return <div className="vehicle-empty" role="status">Loading vehicle profile...</div>;
+  if (error && !vehicle) return (
+    <div className="vehicle-dashboard-error" role="alert">
+      <p>{error}</p>
+      <button type="button" onClick={() => setReloadKey((key) => key + 1)}>Retry</button>
+      <button type="button" onClick={() => navigate('/vehicles')}>Back to Vehicles</button>
+    </div>
+  );
+  if (!vehicle) return (
+    <div className="vehicle-dashboard-error">
+      <p>Vehicle not found.</p>
+      <button type="button" onClick={() => navigate('/vehicles')}>Back to Vehicles</button>
+    </div>
+  );
 
   return (
     <div className="vehicle-management-page vehicle-profile-page cg-vehicles">
+      <button type="button" className="vehicle-back-link" onClick={() => navigate('/vehicles')}>
+        <ArrowLeft size={16} /> Back to Vehicles
+      </button>
+      {error ? <div className="vehicle-dashboard-error" role="alert">{error}</div> : null}
       <header className="vehicle-profile-header">
         <div>
           <h1>{vehicle.registration}</h1>
@@ -159,18 +194,20 @@ export const VehicleDetails = () => {
         </div>
 
         <div className="vehicle-profile-actions">
-          <button type="button" onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}><Edit3 size={14}/> Edit</button>
-          <button
-            type="button"
-            className="is-primary"
-            onClick={() => navigate(`/jobs/new?customerId=${vehicle.customerId || ''}&vehicle=${encodeURIComponent(vehicle.registration || '')}`)}
-          >
-            <ClipboardList size={14}/> New Job Card
-          </button>
+          {canEdit ? <button type="button" onClick={() => navigate(`/vehicles/${vehicle.id}/edit`)}><Edit3 size={16}/> Edit</button> : null}
+          {canCreateJob ? (
+            <button
+              type="button"
+              className="is-primary"
+              onClick={() => navigate(`/jobs/new?customerId=${vehicle.customerId || ''}&vehicle=${encodeURIComponent(vehicle.registration || '')}`)}
+            >
+              <ClipboardList size={16}/> New Job Card
+            </button>
+          ) : null}
         </div>
       </header>
 
-      {openJob ? (
+      {openJob && hasPermission(user, 'jobs.view') ? (
         <button type="button" className="vehicle-current-job" onClick={() => navigate(`/jobs/${openJob.id}/overview`)}>
           <ClipboardList size={16}/>
           <div>
@@ -188,12 +225,13 @@ export const VehicleDetails = () => {
         <div><IndianRupee size={15}/><span>Total Spend</span><strong>{money.format(totalSpend)}</strong></div>
       </div>
 
-      <nav className="vehicle-profile-tabs scroll-hidden">
+      <nav className="vehicle-profile-tabs scroll-hidden" aria-label="Vehicle information sections">
         {tabs.map((tab) => (
           <button
             type="button"
             key={tab.id}
             className={activeTab === tab.id ? 'is-active' : ''}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.label}
@@ -396,9 +434,11 @@ export const VehicleDetails = () => {
         </div>
       ) : null}
 
-      <button type="button" className="vehicle-delete-button" onClick={removeVehicle}>
-        <Trash2 size={14}/> Delete Vehicle
-      </button>
+      {canDelete ? (
+        <button type="button" className="vehicle-delete-button" onClick={removeVehicle}>
+          <Trash2 size={16}/> Delete Vehicle
+        </button>
+      ) : null}
     </div>
   );
 };

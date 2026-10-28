@@ -53,6 +53,13 @@ export const VehicleDirectoryPanel = ({
                 <tr
                   key={vehicle.id}
                   onClick={() => onNavigate(`/vehicles/${vehicle.id}`)}
+                  onKeyDown={(event) => {
+                    if (event.target === event.currentTarget && event.key === 'Enter') {
+                      onNavigate(`/vehicles/${vehicle.id}`);
+                    }
+                  }}
+                  tabIndex={0}
+                  aria-label={`Open vehicle ${vehicle.registration || 'profile'}`}
                 >
                   <td>
                     <strong>{vehicle.registration || 'No Registration'}</strong>
@@ -63,7 +70,7 @@ export const VehicleDirectoryPanel = ({
                   </td>
                   <td>
                     <strong>{vehicle.customerName}</strong>
-                    <span>{vehicle.customerPhone || vehicle.customerId || 'No contact'}</span>
+                    <span>{vehicle.customerPhone || 'No contact'}</span>
                   </td>
                   <td>
                     <strong>{lastService}</strong>
@@ -127,7 +134,7 @@ export const VehicleDirectoryPanel = ({
                 <User size={14} />
                 <div>
                   <strong>{vehicle.customerName}</strong>
-                  <span>{vehicle.customerPhone || vehicle.customerId || 'No owner contact'}</span>
+                  <span>{vehicle.customerPhone || 'No owner contact'}</span>
                 </div>
               </div>
 

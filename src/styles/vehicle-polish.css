@@ -1,0 +1,148 @@
+/* Readability and responsive refinements for the Vehicles directory and profile.
+   Keep the existing theme tokens so light/dark themes remain consistent. */
+.cg-vehicles.vehicle-dashboard .vehicle-dashboard-header h1,
+.cg-vehicles.vehicle-profile-page .vehicle-profile-header h1 {
+  font-size: clamp(24px, 2.3vw, 30px);
+  line-height: 1.25;
+}
+.cg-vehicles.vehicle-dashboard .vehicle-dashboard-header p,
+.cg-vehicles.vehicle-profile-page .vehicle-profile-header p {
+  font-size: 14px;
+  line-height: 1.55;
+}
+.cg-vehicles .vehicle-dashboard-header-badge,
+.cg-vehicles .vehicle-primary-button,
+.cg-vehicles .vehicle-dashboard-section-title > span,
+.cg-vehicles .vehicle-dashboard-result-count span,
+.cg-vehicles .vehicle-dashboard-result-count strong {
+  font-size: 14px;
+}
+.cg-vehicles .vehicle-primary-button,
+.cg-vehicles .vehicle-profile-actions button {
+  min-height: 42px;
+  padding-inline: 14px;
+  font-size: 14px;
+}
+.cg-vehicles .vehicle-dashboard-stat-top span { font-size: 14px; }
+.cg-vehicles .vehicle-dashboard-stat-top strong { font-size: 26px; }
+.cg-vehicles .vehicle-dashboard-stat-card > small { font-size: 13px; }
+.cg-vehicles .vehicle-dashboard-section-title h2,
+.cg-vehicles .vehicle-section-header h2 { font-size: 18px; }
+.cg-vehicles .vehicle-dashboard-section-title p,
+.cg-vehicles .vehicle-section-header p { font-size: 13px; }
+.cg-vehicles .vehicle-dashboard-search { min-height: 44px; }
+.cg-vehicles .vehicle-dashboard-search input {
+  min-height: 42px;
+  font-size: 16px;
+  border: 0 !important;
+  outline: 0;
+}
+.cg-vehicles .vehicle-dashboard-result-count { min-height: 44px; }
+.cg-vehicles .vehicle-table th { font-size: 13px; }
+.cg-vehicles .vehicle-table td { font-size: 14px; }
+.cg-vehicles .vehicle-table td strong { font-size: 15px; }
+.cg-vehicles .vehicle-table td > span:not(.vehicle-status):not(.vehicle-table-empty) {
+  font-size: 13px;
+}
+.cg-vehicles .vehicle-table-job,
+.cg-vehicles .vehicle-table-empty { font-size: 13px; }
+.cg-vehicles .vehicle-status { font-size: 13px !important; min-height: 26px; }
+.cg-vehicles .vehicle-dashboard-loading,
+.cg-vehicles .vehicle-dashboard-empty,
+.cg-vehicles .vehicle-empty { font-size: 14px; }
+.cg-vehicles .vehicle-mobile-card-head strong { font-size: 17px; }
+.cg-vehicles .vehicle-mobile-card-head > div > span { font-size: 14px; }
+.cg-vehicles .vehicle-owner-row strong { font-size: 15px; }
+.cg-vehicles .vehicle-owner-row span { font-size: 13px; }
+.cg-vehicles .vehicle-mobile-meta span { font-size: 13px; }
+.cg-vehicles .vehicle-mobile-meta strong { font-size: 15px; }
+.cg-vehicles .vehicle-card-actions button,
+.cg-vehicles .vehicle-open-job > span,
+.cg-vehicles .vehicle-open-job > b { font-size: 14px; }
+
+.cg-vehicles.vehicle-profile-page .vehicle-back-link {
+  align-self: flex-start;
+  min-height: 40px;
+  font-size: 14px;
+}
+.cg-vehicles.vehicle-profile-page .vehicle-profile-kpis span { font-size: 14px; }
+.cg-vehicles.vehicle-profile-page .vehicle-profile-kpis strong { font-size: 19px; }
+.cg-vehicles.vehicle-profile-page .vehicle-profile-tabs button {
+  min-height: 44px;
+  font-size: 15px;
+}
+.cg-vehicles.vehicle-profile-page .vehicle-current-job strong { font-size: 16px; }
+.cg-vehicles.vehicle-profile-page .vehicle-current-job span { font-size: 14px; }
+.cg-vehicles.vehicle-profile-page .vehicle-current-job > b { font-size: 13px; }
+.cg-vehicles.vehicle-profile-page .vehicle-info-card span { font-size: 13px; }
+.cg-vehicles.vehicle-profile-page .vehicle-info-card strong {
+  font-size: 16px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.cg-vehicles.vehicle-profile-page .vehicle-owner-profile strong { font-size: 16px; }
+.cg-vehicles.vehicle-profile-page .vehicle-owner-profile span { font-size: 14px; }
+.cg-vehicles.vehicle-profile-page .vehicle-contact-button,
+.cg-vehicles.vehicle-profile-page .vehicle-note-box { font-size: 14px; }
+.cg-vehicles.vehicle-profile-page .vehicle-history-card__head strong,
+.cg-vehicles.vehicle-profile-page .vehicle-part-card > div:first-child strong,
+.cg-vehicles.vehicle-profile-page .vehicle-invoice-row strong { font-size: 16px; }
+.cg-vehicles.vehicle-profile-page .vehicle-history-card__head span,
+.cg-vehicles.vehicle-profile-page .vehicle-history-card__head > b,
+.cg-vehicles.vehicle-profile-page .vehicle-history-card__meta span,
+.cg-vehicles.vehicle-profile-page .vehicle-part-card > div:first-child span,
+.cg-vehicles.vehicle-profile-page .vehicle-part-card__meta span,
+.cg-vehicles.vehicle-profile-page .vehicle-part-card__meta b,
+.cg-vehicles.vehicle-profile-page .vehicle-invoice-row > div:first-child span,
+.cg-vehicles.vehicle-profile-page .vehicle-invoice-row > div:not(:first-child) span,
+.cg-vehicles.vehicle-profile-page .vehicle-invoice-row > div:not(:first-child) b,
+.cg-vehicles.vehicle-profile-page .vehicle-invoice-row > em,
+.cg-vehicles.vehicle-profile-page .vehicle-delete-button { font-size: 14px; }
+.cg-vehicles.vehicle-profile-page .vehicle-history-card__meta { gap: 8px; }
+.cg-vehicles.vehicle-profile-page .vehicle-invoice-row { overflow-wrap: anywhere; }
+
+.cg-vehicles .vehicle-dashboard-error,
+.vehicle-dashboard-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--vehicle-border);
+  border-radius: 12px;
+  background: var(--vehicle-surface);
+  color: var(--text-primary);
+  font-size: 15px;
+}
+.cg-vehicles .vehicle-dashboard-error p,
+.vehicle-dashboard-error p { width: 100%; margin: 0; }
+.cg-vehicles .vehicle-dashboard-error button,
+.vehicle-dashboard-error button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--vehicle-border);
+  border-radius: 9px;
+  background: var(--vehicle-soft);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+.cg-vehicles button:focus-visible,
+.cg-vehicles .vehicle-table tbody tr:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+@media (max-width: 767px) {
+  .cg-vehicles.vehicle-dashboard .vehicle-dashboard-stats { gap: 8px; }
+  .cg-vehicles .vehicle-dashboard-section-title { align-items: flex-start; }
+  .cg-vehicles.vehicle-profile-page .vehicle-profile-actions {
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  }
+  .cg-vehicles.vehicle-profile-page .vehicle-profile-kpis > div { min-height: 90px; }
+  .cg-vehicles.vehicle-profile-page .vehicle-history-card__meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cg-vehicles.vehicle-profile-page .vehicle-invoice-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.cg-vehicles.vehicle-profile-page .vehicle-reminder-card strong { font-size: 16px; }
+.cg-vehicles.vehicle-profile-page .vehicle-reminder-card span,
+.cg-vehicles.vehicle-profile-page .vehicle-reminder-card small { font-size: 14px; }
