@@ -10,7 +10,7 @@ test('Stock existing-products search is a flat focusable control with no nested 
   assert.match(page,/className="cg-easy-picker-search"/);
   assert.match(page,/placeholder="Search existing products\.\.\."/);
   assert.match(styles,/\.cg-easy-stock \.cg-easy-form \.cg-easy-picker-search \{[\s\S]*?border: 0 !important;[\s\S]*?outline: 0 !important;[\s\S]*?box-shadow: none !important/);
-  assert.match(styles,/\.cg-easy-picker-search:focus-within \{[\s\S]*?outline: 0 !important;[\s\S]*?background: var\(--primary-soft/);
+  assert.match(styles,/\.cg-easy-picker-search:focus-within \{[\s\S]*?outline: 0 !important;[\s\S]*?background: color-mix\(/);
   assert.match(styles,/\.cg-easy-picker-search > input:not\(\[type="radio"\]\):not\(\[type="checkbox"\]\):focus-visible \{/);
   assert.match(styles,/\.cg-easy-picker-search > input:not\(\[type="radio"\]\):not\(\[type="checkbox"\]\):focus-visible \{[\s\S]*?outline: 0 !important/);
 });
@@ -20,8 +20,8 @@ test('Add Workshop Customer retains borderless fields and a visible non-border f
   const styles=read('src/styles/customer-workshop-form.css');
   assert.match(page,/Add Workshop Customer/);
   assert.match(styles,/\.customer-directory-form \[data-cg-input-shell="true"\] \{/);
-  assert.match(styles,/\.customer-directory-form \[data-cg-input-shell="true"\]:focus-within \{[\s\S]*?outline: 0 !important;[\s\S]*?background: var\(--primary-soft/);
-  assert.match(styles,/\.customer-directory-form textarea:focus-visible \{[\s\S]*?outline: 0 !important;[\s\S]*?background: var\(--primary-soft/);
+  assert.match(styles,/\.customer-directory-form \[data-cg-input-shell="true"\]:focus-within \{[\s\S]*?outline: 0 !important;[\s\S]*?background: color-mix\(/);
+  assert.match(styles,/\.customer-directory-form textarea:focus-visible \{[\s\S]*?outline: 0 !important;[\s\S]*?background: color-mix\(/);
   assert.match(styles,/background: var\(--danger-soft/);
 });
 
