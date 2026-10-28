@@ -14,6 +14,7 @@ import { loadDocumentTemplateSettings, resolveDocumentAppearance, templateDefaul
 import '../../styles/invoice-template-sync.css';
 import { customerService } from '../../services/customer.service';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import { InvoicePdfShareSheet } from '../../components/invoices/InvoicePdfShareSheet';
 import {
   InvoiceFilterToolbar,
   InvoiceListHeader,
@@ -68,6 +69,7 @@ export function InvoiceRoutePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfShareInvoice, setPdfShareInvoice] = useState(null);
   const [documentAppearance, setDocumentAppearance] = useState(templateDefaults);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
@@ -530,18 +532,22 @@ export function InvoiceRoutePage() {
     }
   };
 
-  const downloadPdf = async (documentToDownload) => {
-    if (pdfLoading) return;
-    setPdfLoading(true);
-    setError('');
-    try {
-      await billingService.downloadPdf(documentToDownload);
-    } catch (e) {
-      setError(e?.message || 'Unable to download invoice PDF.');
-    } finally {
-      setPdfLoading(false);
+  const downloadPdf = (documentToDownload) => {
+    if (!documentToDownload?.id) {
+      setError('Save the invoice before sharing its PDF.');
+      return;
     }
+    setError('');
+    setPdfShareInvoice(documentToDownload);
   };
+  const shareSheet = pdfShareInvoice?.id ? (
+    <InvoicePdfShareSheet
+      key={pdfShareInvoice.id}
+      invoice={pdfShareInvoice}
+      onClose={() => setPdfShareInvoice(null)}
+      onLoadingChange={setPdfLoading}
+    />
+  ) : null;
 
   const deleteDocument = async () => {
     setSaving(true);
@@ -599,6 +605,7 @@ export function InvoiceRoutePage() {
         onEdit={(document) => navigate(`/invoices/${document.id}/edit`)}
         onDelete={(document) => navigate(`/invoices/${document.id}/delete`)}
       />
+      {shareSheet}
     </div>
   );
 
@@ -678,6 +685,7 @@ export function InvoiceRoutePage() {
 
       {error && <div className="billing-error no-print">{error}</div>}
       {loading ? <div className="billing-empty">Loading…</div> : <InvoicePrint doc={form} totals={totals} appearance={resolveDocumentAppearance(form.kind, documentAppearance, form.templateSnapshot, Boolean(form.finalizedAt || ['Finalized', 'Paid', 'Issued', 'Converted'].includes(form.status)))}/>}
+      {shareSheet}
     </div>
   );
 
@@ -1013,6 +1021,7 @@ export function InvoiceRoutePage() {
 
         <InvoicePrint doc={form} totals={totals} appearance={resolveDocumentAppearance(form.kind, documentAppearance, form.templateSnapshot, Boolean(form.finalizedAt || ['Finalized', 'Paid', 'Issued', 'Converted'].includes(form.status)))}/>
       </>}
+      {shareSheet}
     </div>
   );
 }
