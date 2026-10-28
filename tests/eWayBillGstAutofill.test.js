@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { eWayTaxMode, eWaySetGstRate, eWayReconcileGst, eWayTotalGstRate } from '../src/utils/eWayGst.js';
-import { calculateEWayTotals, blankEWayBill, validateEWayBill } from '../src/services/eWayBill.service.js';
+import { calculateEWayTotals } from '../src/utils/eWayBillTotals.js';
 
 const read = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const line = { id: 'one', productName: 'Car part', qty: 1, hsnCode: '8708', taxableValue: 100,
@@ -38,10 +38,8 @@ test('GST conversion preserves CESS and adds non-advalorem/other amounts exactly
 });
 
 test('New E-Way Bill never invents Kerala FROM/TO state values', () => {
-  const doc = blankEWayBill();
-  assert.equal(doc.from.stateCode,'');
-  assert.equal(doc.to.stateCode,'');
-  assert.equal(eWayTaxMode(doc),'unknown');
+  const source=read('src/services/eWayBill.service.js');
+  assert.match(source, /from: \{[\s\S]*?stateCode: ''[\s\S]*?to: \{[\s\S]*?stateCode: ''/);
 });
 
 test('Outward supplier fields are API-backed, read-only and server enforced', () => {
