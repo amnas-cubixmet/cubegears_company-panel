@@ -404,3 +404,32 @@
 @media (prefers-reduced-motion: reduce) {
   .cg-easy-stock .cg-easy-form button { transition: none; }
 }
+
+/* Borderless Stock form inputs. Keep fields identifiable with a soft fill,
+ * and retain accessible keyboard focus (a focus ring is not an input border).
+ */
+.cg-easy-stock .responsive-modal-sheet .cg-easy-form
+input:not([type="radio"]):not([type="checkbox"]) {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: var(--surface-2,#f8fafc);
+}
+.cg-easy-stock .responsive-modal-sheet .cg-easy-form
+input:not([type="radio"]):not([type="checkbox"]):focus-visible {
+  border: 0 !important;
+  outline: 2px solid var(--primary,#2563eb);
+  outline-offset: 2px;
+}
+.cg-easy-stock .responsive-modal-sheet .cg-easy-form
+.cg-easy-picker-search > input:not([type="radio"]) {
+  border: 0 !important;
+  background: transparent !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+/* The enclosing search field provides one focus indication. */
+.cg-easy-stock .responsive-modal-sheet .cg-easy-form
+.cg-easy-picker-search:focus-within {
+  outline: 2px solid var(--primary,#2563eb);
+  outline-offset: 2px;
+}
