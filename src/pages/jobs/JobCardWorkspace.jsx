@@ -1,6 +1,6 @@
 import { appConfirm } from '../../components/common/appDialogs';
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, Clock3, FileText, Gauge, History, PackageSearch, Plus, ReceiptText, ShieldCheck, Star, UserRound, Wrench, ChevronRight, Download, LockKeyhole } from "lucide-react";
+import { CheckCircle2, Clock3, FileText, Gauge, History, PackageSearch, Plus, ReceiptText, ShieldCheck, Star, UserRound, Wrench, ChevronRight, Download, Share2, LockKeyhole } from "lucide-react";
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { jobService } from '../../services/job.service';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
@@ -14,9 +14,11 @@ import { QuickEstimatePanel } from '../../components/jobs/QuickEstimatePanel';
 import { JobQualityCheckPanel } from '../../components/jobs/JobQualityCheckPanel';
 import { ResponsiveModalSheet } from '../../components/common/ResponsiveModalSheet';
 import { InvoicePdfShareSheet } from '../../components/invoices/InvoicePdfShareSheet';
-import { downloadApprovedEstimatePdf, latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
+import { createApprovedEstimatePdfFile, downloadApprovedEstimatePdf, latestApprovedEstimate } from '../../utils/approvedEstimatePdf';
 import '../../styles/approved-estimate-pdf.css';
 import '../../styles/job-workspace-readable.css';
+import '../../styles/job-estimate-iphone.css';
+import '../../styles/job-four-stage-forms.css';
 import { JobWorkerAssignments } from '../../components/jobs/JobWorkerAssignments';
 import { JobOutsideStaffSection } from '../../components/jobs/JobOutsideStaffSection';
 import { JobWorkTimerPanel } from '../../components/jobs/JobWorkTimerPanel';
@@ -131,6 +133,25 @@ export function JobCardWorkspace() {
   const [pdfOffer, setPdfOffer] = useState(null);
   const [pdfError, setPdfError] = useState('');
   const [pdfFilename, setPdfFilename] = useState('');
+  const [approvedPdfFile, setApprovedPdfFile] = useState(null);
+  const [approvedPdfSharing, setApprovedPdfSharing] = useState(false);
+  const [approvedPdfNotice, setApprovedPdfNotice] = useState('');
+
+  // Generate the approved PDF while the sheet is open. iPhone Safari's
+  // native Share must receive the File synchronously on the button tap.
+  useEffect(() => {
+    setApprovedPdfFile(null);
+    setApprovedPdfNotice('');
+    setApprovedPdfSharing(false);
+    if (!pdfOffer) return;
+    try {
+      const file = createApprovedEstimatePdfFile(pdfOffer.job, pdfOffer.estimate);
+      setApprovedPdfFile(file);
+      setPdfError('');
+    } catch (e) {
+      setPdfError(e?.message || 'Could not prepare approved estimate PDF.');
+    }
+  }, [pdfOffer]);
 
   const [complaintText, setComplaintText] = useState('');
   const [complaintFilter, setComplaintFilter] = useState('All');
@@ -453,11 +474,57 @@ export function JobCardWorkspace() {
 
   const continueAfterApproval = () => {
     if (!pdfOffer) return;
-    const next = pdfOffer.nextStage || 'work';
+    const next = pdfOffer.nextStage;
     setPdfOffer(null);
     setPdfError('');
     setPdfFilename('');
-    navigate('/jobs/' + job.id + '/' + next, { replace: true });
+    setApprovedPdfNotice('');
+    if (next) navigate('/jobs/' + job.id + '/' + next, { replace: true });
+  };
+
+  const openApprovedPdfShare = (approvedJob, approvedEstimate) => {
+    setPdfError('');
+    setPdfFilename('');
+    setApprovedPdfNotice('');
+    setPdfOffer({ job: approvedJob, estimate: approvedEstimate, nextStage: null });
+  };
+
+  const canShareApprovedPdf = (() => {
+    if (!approvedPdfFile || typeof navigator === 'undefined' ||
+        typeof navigator.share !== 'function') return false;
+    try {
+      return typeof navigator.canShare !== 'function' ||
+        navigator.canShare({ files: [approvedPdfFile] });
+    } catch {
+      return false;
+    }
+  })();
+
+  const shareApprovedPdf = () => {
+    if (!canShareApprovedPdf || approvedPdfSharing) return;
+    setPdfError('');
+    setApprovedPdfNotice('');
+    setApprovedPdfSharing(true);
+    try {
+      // No await or PDF generation BEFORE navigator.share: keep user activation.
+      const result = navigator.share({
+        files: [approvedPdfFile],
+        title: approvedPdfFile.name,
+        text: 'Approved workshop estimate',
+      });
+      Promise.resolve(result).then(() => {
+        setApprovedPdfSharing(false);
+        setApprovedPdfNotice('PDF shared successfully.');
+      }).catch((e) => {
+        setApprovedPdfSharing(false);
+        if (e?.name !== 'AbortError') {
+          setPdfError(e?.message || 'Sharing failed. Please use Download PDF.');
+        }
+      });
+    } catch (e) {
+      setApprovedPdfSharing(false);
+      if (e?.name !== 'AbortError') setPdfError(e?.message || 'Sharing is unavailable. Download the PDF instead.');
+    }
   };
 
   const downloadApprovalPdf = (approvedJob, approvedEstimate) => {
@@ -1339,7 +1406,7 @@ export function JobCardWorkspace() {
           onSaved={() => refreshJobWorkflow()}
           onApprove={() => completeStage('estimate')}
           onReject={(estimateId) => setEstimateApproval(estimateId, 'Rejected')}
-          onDownloadApproved={(approvedEstimate) => downloadApprovalPdf(job, approvedEstimate)}
+          onDownloadApproved={(approvedEstimate) => openApprovedPdfShare(job, approvedEstimate)}
           onEditInspection={() => navigate('/jobs/' + job.id + '/inspection?edit=1')}
           onGoToWork={() => navigate('/jobs/' + job.id + '/' + currentStage)}
         />
@@ -1605,16 +1672,31 @@ export function JobCardWorkspace() {
               <p>Approval is saved. Download the approved estimate PDF for your records or to share with the customer.</p>
             </div>
           </div>
+          <div className="job-approved-pdf-file">
+            <FileText size={22} aria-hidden="true" />
+            <span>{approvedPdfFile?.name || 'Preparing approved estimate PDF…'}</span>
+          </div>
           {pdfError && <p className="job-approved-pdf-error" role="alert">{pdfError}</p>}
+          {approvedPdfNotice && <p className="job-approved-pdf-success" role="status">{approvedPdfNotice}</p>}
+          {!canShareApprovedPdf && approvedPdfFile && (
+            <p className="job-approved-pdf-hint">
+              Native sharing is unavailable here. Download the PDF and share it from your device.
+            </p>
+          )}
           {pdfFilename && <p className="job-approved-pdf-success" role="status">PDF download started: {pdfFilename}</p>}
           <div className="job-approved-pdf-offer-actions">
+            <button type="button" className="job-approved-pdf-share"
+              disabled={!canShareApprovedPdf || approvedPdfSharing}
+              onClick={shareApprovedPdf}>
+              <Share2 size={18} aria-hidden="true"/> {approvedPdfSharing ? 'Opening share menu…' : 'Share PDF'}
+            </button>
             <button type="button" className="job-approved-pdf-download"
               onClick={() => downloadApprovalPdf(pdfOffer.job, pdfOffer.estimate)}>
-              <Download size={16} aria-hidden="true"/> Download PDF
+              <Download size={18} aria-hidden="true"/> Download PDF
             </button>
             <button type="button" className="job-approved-pdf-continue"
               onClick={continueAfterApproval}>
-              Continue to Work <ChevronRight size={16} aria-hidden="true"/>
+              {pdfOffer?.nextStage ? 'Continue to Work' : 'Close'} <ChevronRight size={16} aria-hidden="true"/>
             </button>
           </div>
         </div>

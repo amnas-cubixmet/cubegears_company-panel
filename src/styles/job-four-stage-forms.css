@@ -1,0 +1,280 @@
+/* Job Card four-stage form / input / list typography alignment.
+ * Applies only to Overview, Inspection, Estimate, and Work & Labour.
+ * Keeps validation, data models, and button actions unchanged.
+ */
+.cg-job-detail {
+  --job-control-size: 48px;
+  --job-body-font: 16px;
+  --job-label-font: 15px;
+  --job-meta-font: 14px;
+}
+.cg-job-detail :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) {
+  min-width: 0;
+  font-family: inherit;
+  color: var(--text-primary);
+  -webkit-text-size-adjust: 100%;
+}
+.cg-job-detail :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) :is(input:not([type="file"]):not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--job-control-size);
+  border-radius: 10px;
+  font: inherit;
+  font-size: var(--job-body-font) !important;
+  line-height: 1.45;
+  touch-action: manipulation;
+}
+.cg-job-detail :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) :is(input:not([type="file"]), textarea)::placeholder {
+  opacity: 1;
+  color: var(--text-muted);
+}
+.cg-job-detail :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) :is(input:not([type="file"]):not([type="checkbox"]), select, textarea):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.cg-job-detail :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) :is(label, .job-quick-name-field, .job-quick-type-fixed) {
+  min-width: 0;
+  font-size: var(--job-label-font);
+  line-height: 1.5;
+}
+.cg-job-detail :is(
+  .job-overview-simple,
+  .cg-inspection,
+  .job-quick-estimate,
+  .job-work-simple
+) :is(button, summary) {
+  font-family: inherit;
+  line-height: 1.4;
+}
+/* Avoid resizing icon-only controls; text actions gain readable type and tap size. */
+.cg-job-detail .job-overview-simple :is(
+  .job-overview-intro-actions button,
+  .job-overview-complaint button,
+  .job-overview-feedback-fields button
+),
+.cg-job-detail .cg-inspection :is(
+  .cg-inspection-primary,
+  .cg-inspection-condition,
+  .cg-inspection-category-footer button,
+  .cg-inspection-finding-actions button,
+  .cg-inspection-footer button
+),
+.cg-job-detail .job-work-simple :is(
+  .job-work-timer-form button,
+  .job-work-timer-actions button,
+  .job-worker-assignment-add button,
+  .job-outside-staff-add,
+  .outside-labour-primary
+) {
+  min-height: 44px;
+  font-size: var(--job-label-font) !important;
+}
+/* Overview: detail labels + values, mechanics dropdown and history list. */
+.cg-job-detail .job-overview-simple :is(
+  .job-overview-card-header h3,
+  .job-overview-complaint h3,
+  .job-overview-feedback h4,
+  .job-overview-history h4
+) {
+  font-size: 17px;
+  line-height: 1.4;
+}
+.cg-job-detail .job-overview-detail-grid dt,
+.cg-job-detail .job-overview-assignment-foot span,
+.cg-job-detail .job-overview-assignment-label {
+  font-size: var(--job-label-font) !important;
+  line-height: 1.5;
+}
+.cg-job-detail .job-overview-detail-grid dd,
+.cg-job-detail .job-overview-assignment-foot strong,
+.cg-job-detail .job-overview-history button strong,
+.cg-job-detail .job-overview-complaint p {
+  font-size: var(--job-body-font) !important;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.cg-job-detail .job-overview-simple :is(
+  .job-overview-history button small,
+  .job-overview-card-header p,
+  .job-overview-supporting-note
+) {
+  font-size: var(--job-meta-font) !important;
+  line-height: 1.5;
+}
+.cg-job-detail .job-overview-mechanic-select {
+  width: 100%;
+  min-height: var(--job-control-size);
+}
+/* Inspection: checklist, controls, findings and expandable forms. */
+.cg-job-detail .cg-inspection .cg-inspection-search {
+  min-height: var(--job-control-size);
+  height: var(--job-control-size);
+}
+.cg-job-detail .cg-inspection .cg-inspection-search input:not([type="file"]) {
+  font-size: var(--job-body-font) !important;
+}
+.cg-job-detail .cg-inspection :is(
+  .cg-inspection-check-name > span,
+  .cg-inspection-finding-body strong,
+  .cg-inspection-findings-list strong
+) {
+  font-size: var(--job-body-font) !important;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.cg-job-detail .cg-inspection :is(
+  .cg-inspection-check-name small,
+  .cg-inspection-finding-body small,
+  .cg-inspection-finding-body p,
+  .cg-inspection-category-row > span
+) {
+  font-size: var(--job-meta-font) !important;
+  line-height: 1.5;
+}
+.cg-job-detail .cg-inspection .cg-inspection-form :is(input,select,textarea) {
+  width: 100%;
+}
+.cg-job-detail .cg-inspection .cg-inspection-condition {
+  min-height: 44px;
+  padding-inline: 12px;
+}
+/* Estimate: retain custom iPhone grid and readable selected catalogue list. */
+.cg-job-detail .job-quick-estimate :is(
+  .job-quick-line-header strong,
+  .job-quick-catalog-options > button strong,
+  .job-quick-amounts dt,
+  .job-quick-history-list strong
+) {
+  font-size: var(--job-body-font) !important;
+}
+.cg-job-detail .job-quick-estimate :is(
+  .job-quick-catalog-selected,
+  .job-quick-catalog-options > button small,
+  .job-quick-field-error
+) {
+  font-size: var(--job-meta-font) !important;
+  line-height: 1.5;
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field input {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-options {
+  max-height: min(45vh, 300px);
+  overscroll-behavior: contain;
+}
+/* Work & Labour: consistent inputs and readable record rows. */
+.cg-job-detail .job-work-simple :is(
+  .job-work-timer-row,
+  .job-worker-assignment-item,
+  .job-work-items-row,
+  .outside-labour-entry
+) {
+  min-width: 0;
+}
+.cg-job-detail .job-work-simple :is(
+  .job-work-items-row strong,
+  .job-work-timer-person strong,
+  .job-worker-assignment-item strong,
+  .outside-labour-entry-main strong
+) {
+  font-size: var(--job-body-font) !important;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.cg-job-detail .job-work-simple :is(
+  .job-work-items-row span,
+  .job-work-timer-person small,
+  .job-worker-assignment-item small,
+  .outside-labour-entry-main small,
+  .job-work-items-head p
+) {
+  font-size: var(--job-meta-font) !important;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.cg-job-detail .job-work-simple :is(
+  .job-work-timer-form,
+  .job-worker-assignment-add,
+  .outside-labour-form-grid,
+  .job-work-items-list
+) {
+  min-width: 0;
+}
+@media (max-width: 760px) {
+  .cg-job-detail {
+    --job-control-size: 50px;
+  }
+  .cg-job-detail .job-overview-simple,
+  .cg-job-detail .cg-inspection,
+  .cg-job-detail .job-quick-estimate,
+  .cg-job-detail .job-work-simple {
+    width: 100%;
+    min-width: 0;
+  }
+  .cg-job-detail .job-overview-simple :is(
+    .job-overview-intro,
+    .job-overview-card,
+    .job-overview-more
+  ) {
+    padding: 14px;
+  }
+  .cg-job-detail .job-work-simple :is(
+    .job-work-timer-panel,
+    .job-payroll-assignments,
+    .job-outside-staff,
+    .job-work-items-panel
+  ) {
+    min-width: 0;
+  }
+  .cg-job-detail .job-work-simple :is(
+    .job-work-timer-row,
+    .job-work-items-row
+  ) {
+    gap: 10px;
+  }
+}
+@media (max-width: 420px) {
+  .cg-job-detail .job-work-simple :is(
+    .job-work-timer-form,
+    .job-worker-assignment-add
+  ) {
+    max-width: 100%;
+  }
+  .cg-job-detail .cg-inspection :is(
+    .cg-inspection-category-row,
+    .cg-inspection-section-heading
+  ) {
+    min-width: 0;
+  }
+  .cg-job-detail .cg-inspection .cg-inspection-search {
+    width: 100%;
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+}

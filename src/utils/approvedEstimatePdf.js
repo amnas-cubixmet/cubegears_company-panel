@@ -312,7 +312,11 @@ const drawApprovedPages = (data) => {
   return pages;
 };
 
-export const downloadApprovedEstimatePdf = (job, estimate) => {
+/** Build a named PDF File from the saved approved estimate.
+ * Create it before the user taps Share; iOS requires navigator.share to be
+ * invoked synchronously within the actual click event (user activation).
+ */
+export const createApprovedEstimatePdfFile = (job, estimate) => {
   const data = estimatePdfData(job, estimate);
   const jpegPages = drawApprovedPages(data);
   const pdf = pdfBytesFromJpegPages(jpegPages);
@@ -320,14 +324,23 @@ export const downloadApprovedEstimatePdf = (job, estimate) => {
     .toString().replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 55);
   const filename = 'Approved-Estimate-' + jobLabel + '-V' +
     String(data.version).replace(/[^a-zA-Z0-9_-]/g, '') + '.pdf';
-  const file = new Blob([pdf], { type: 'application/pdf' });
+  return new File([pdf], filename, { type: 'application/pdf' });
+};
+
+/** Download an existing named PDF without rebuilding it. */
+export const saveApprovedEstimatePdfFile = (file) => {
+  if (!file) throw new Error('Approved estimate PDF is not ready.');
   const url = URL.createObjectURL(file);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = filename;
+  anchor.download = file.name;
   document.body.append(anchor);
   anchor.click();
   anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  return filename;
+  // Safari may still be opening the generated PDF; do not revoke immediately.
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return file.name;
 };
+
+export const downloadApprovedEstimatePdf = (job, estimate) =>
+  saveApprovedEstimatePdfFile(createApprovedEstimatePdfFile(job, estimate));

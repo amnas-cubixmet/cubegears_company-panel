@@ -327,9 +327,9 @@ export function QuickEstimatePanel({
             )}
           </div>
           {part ? (
-            <span className="job-quick-type-fixed">Type <strong>Spare Part</strong></span>
+            <span className="job-quick-type-fixed job-quick-field-type">Type <strong>Spare Part</strong></span>
           ) : (
-            <label>Type
+            <label className="job-quick-field-type">Type
               <select value={line.type} disabled={!canEdit || busy} onChange={(event) => edit(line.key, 'type', event.target.value)}>
                 <option value="Labour">Labour</option>
                 <option value="Service">Service</option>
@@ -337,7 +337,7 @@ export function QuickEstimatePanel({
               </select>
             </label>
           )}
-          <label>Qty
+          <label className="job-quick-field-qty">Qty
             <input
               type="number" min="0.01" max="10000" step="0.01" inputMode="decimal"
               value={line.quantity} disabled={!canEdit || busy}
@@ -346,7 +346,7 @@ export function QuickEstimatePanel({
             />
             {errors.quantity && <small className="job-quick-field-error">{errors.quantity}</small>}
           </label>
-          <label>{part ? 'Unit Price (₹)' : 'Rate (₹)'}
+          <label className="job-quick-field-price">{part ? 'Unit Price (₹)' : 'Rate (₹)'}
             <input
               type="number" min="0" max="10000000" step="0.01" inputMode="decimal"
               value={line.unitPrice} disabled={!canEdit || busy} placeholder="0.00"
@@ -356,13 +356,13 @@ export function QuickEstimatePanel({
             {errors.unitPrice && <small className="job-quick-field-error">{errors.unitPrice}</small>}
           </label>
           {registered && <>
-            <label>HSN / SAC
+            <label className="job-quick-field-hsn">HSN / SAC
               <input value={line.hsnSac || ''} maxLength={20}
                 placeholder={part ? 'Part HSN' : 'Service SAC'}
                 disabled={!canEdit || busy}
                 onChange={(event) => edit(line.key, 'hsnSac', event.target.value)} />
             </label>
-            <label>GST rate (%)
+            <label className="job-quick-field-gst">GST rate (%)
               <select
                 className="job-quick-gst-select"
                 aria-label={`GST Rate (%) for ${part ? 'spare part' : 'work item'} ${index + 1}`}

@@ -39,3 +39,41 @@
   .job-approved-pdf-offer-actions button{width:100%;min-height:48px}
   .job-approved-pdf-offer-status{padding:13px}
 }
+
+/* Approved estimate document actions: mobile Safari/Android native share sheet. */
+.job-approved-pdf-file {
+  display:flex;align-items:center;gap:10px;
+  min-width:0;padding:12px 13px;
+  border:1px solid var(--border,#dce4ec);
+  border-radius:12px;background:var(--surface-2,#f5f8fb);
+  color:var(--text-primary,#192d43);
+}
+.job-approved-pdf-file svg{flex:0 0 22px;color:var(--primary,#225ed0)}
+.job-approved-pdf-file span {
+  min-width:0;overflow-wrap:anywhere;font-size:13px;font-weight:650;
+}
+.job-approved-pdf-hint {
+  margin:0;font-size:13px;line-height:1.5;
+  color:var(--text-secondary,#65758a);
+}
+.job-approved-pdf-offer-actions .job-approved-pdf-share {
+  background:var(--primary,#225ed0);
+  border:1px solid var(--primary,#225ed0);
+  color:#fff;
+}
+.job-approved-pdf-offer-actions .job-approved-pdf-download {
+  background:var(--surface,#fff);
+  border:1px solid var(--border,#dce4ec);
+  color:var(--text-primary,#192d43);
+}
+.job-approved-pdf-offer-actions .job-approved-pdf-share:disabled {
+  opacity:.45;cursor:not-allowed;
+}
+.job-approved-pdf-offer-actions .job-approved-pdf-share:focus-visible {
+  outline:2px solid var(--primary,#225ed0);outline-offset:2px;
+}
+@media(max-width:600px) {
+  .job-approved-pdf-offer {gap:13px;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .job-approved-pdf-offer-actions button {min-height:50px;font-size:16px}
+  .job-approved-pdf-file span {font-size:14px}
+}
