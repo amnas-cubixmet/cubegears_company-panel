@@ -80,5 +80,6 @@ test('seller profile inputs are read-only and Save scrolls to invalid input', ()
   assert.match(editor, /scrollIntoView\(\{ behavior: 'smooth', block: 'center'/);
   assert.match(editor, /focus\(\{ preventScroll: true \}\)/);
   assert.match(editor, /aria-invalid=\{Boolean\(fieldErrors\.date\)\}/);
+  assert.match(editor, /aria-invalid=\{Boolean\(fieldErrors\['seller\.gstin'\]\)\}/);
   assert.match(editor, /invoiceLineTaxChoices\(appliedTaxMode\)/);
 });
