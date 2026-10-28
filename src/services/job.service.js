@@ -267,6 +267,7 @@ export const jobService = {
   getJobs,
   getJobById,
   getJobCostSummary,
+  issueJobStockPart,
   uploadJobWorkPhoto,
   getJobWorkPhotoBlob,
   createJob,
