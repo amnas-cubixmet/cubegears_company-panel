@@ -42,6 +42,21 @@ test('a Django party error links to the corresponding input', () => {
   const goods=parseEWayApiErrors({data:{items:['Enter valid goods HSN for item 1.']}});
   assert.ok(goods.fieldErrors['items.0.hsnCode']);
 });
+test('Django transport and goods errors focus the exact editable input', () => {
+  const distance = parseEWayApiErrors({ data: {
+    transport: ['Enter approximate distance in whole kilometres.'],
+  } });
+  assert.ok(distance.fieldErrors['transport.distanceKm']);
+  const doc = parseEWayApiErrors({ data: {
+    transport: ['Transport document number is required.'],
+  } });
+  assert.ok(doc.fieldErrors['transport.transportDocNo']);
+  const name = parseEWayApiErrors({ data: {
+    items: ['Enter goods name for item 2.'],
+  } });
+  assert.ok(name.fieldErrors['items.1.productName']);
+});
+
 test('New E-Way Bill does not submit empty linked invoice UUID', () => {
   const service=read('src/services/eWayBill.service.js');
   assert.match(service,/export const prepareEWayBillForApi = \(draft\) =>/);
