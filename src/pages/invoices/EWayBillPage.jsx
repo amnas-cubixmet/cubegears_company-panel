@@ -8,6 +8,7 @@ import {
   validateEWayBill
 } from '../../services/eWayBill.service';
 import { billingService } from '../../services/billing.service';
+import { EWAY_GST_RATES, eWayTaxMode, eWayTotalGstRate, eWaySetGstRate, eWayReconcileGst } from '../../utils/eWayGst';
 import { DocumentFormHeader } from '../../components/common/DocumentFormShell';
 import { InvoiceTabs, InvoiceFilterToolbar } from '../../components/invoices';
 
@@ -53,6 +54,9 @@ export function EWayBillPage() {
   const [error, setError] = useState('');
   const [listQuery, setListQuery] = useState('');
   const [listStatus, setListStatus] = useState('All');
+  const [supplyingParty, setSupplyingParty] = useState(null);
+  const [supplyingError, setSupplyingError] = useState('');
+  const [supplyingLoading, setSupplyingLoading] = useState(false);
 
   const statuses = useMemo(
     () => [...new Set(rows.map((row) => row.status).filter(Boolean))].sort(),
@@ -76,6 +80,8 @@ export function EWayBillPage() {
   );
 
   const totals = useMemo(() => calculateEWayTotals(form), [form]);
+  const gstMode = eWayTaxMode(form);
+  const isOutward = form.supplyType === 'Outward';
 
   const loadList = async () => {
     setLoading(true);
@@ -118,22 +124,20 @@ export function EWayBillPage() {
             const base = blankEWayBill();
             const goods = (invoice.items || [])
               .filter((item) => ['Stock Part', 'Outside Purchase', 'Consumable', 'Custom Item'].includes(item.type))
-              .map((item, index) => ({
+              .map((item, index) => eWaySetGstRate({
                 id: `EWI-PREFILL-${index}-${Date.now()}`,
                 productName: item.description || 'Goods',
                 description: item.code || '',
-                hsnCode: '',
+                hsnCode: item.hsnCode || '',
                 qty: Number(item.qty || 1),
-                unit: 'PCS',
+                unit: item.unit || 'PCS',
                 taxableValue: Math.max(0, Number(item.qty || 0) * Number(item.rate || 0) - Number(item.discount || 0)),
-                cgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.cgstRate || 0) : '',
-                sgstRate: invoice.taxMode === 'cgst_sgst' ? Number(invoice.sgstRate || 0) : '',
-                igstRate: invoice.taxMode === 'igst' ? Number(invoice.igstRate || 0) : '',
-                cessRate: ''
-              }));
+                cgstRate: '', sgstRate: '', igstRate: '', cessRate: ''
+              }, Number(item.taxRate || 0), invoice.taxMode));
 
-            setForm({
+            setForm((previous) => ({
               ...base,
+              from: previous.from?.tradeName ? previous.from : base.from,
               documentType: invoice.invoiceType === 'gst' ? 'Tax Invoice' : 'Bill of Supply',
               documentNo: invoice.number || invoice.id || '',
               documentDate: invoice.date || base.documentDate,
@@ -149,7 +153,7 @@ export function EWayBillPage() {
               },
               items: goods.length ? goods : base.items,
               notes: invoice.number ? `Created from CubixGear invoice ${invoice.number}` : ''
-            });
+            }));
           })
           .catch((e) => setError(e?.message || 'Unable to prefill from invoice.'))
           .finally(() => setLoading(false));
@@ -157,14 +161,60 @@ export function EWayBillPage() {
     } else loadOne();
   }, [location.pathname, location.search, ewbId]);
 
-  const update = (key, value) => setForm((old) => ({ ...old, [key]: value }));
-  const updateGroup = (group, key, value) => setForm((old) => ({
-    ...old,
-    [group]: { ...old[group], [key]: value }
-  }));
+  useEffect(() => {
+    if (!['create', 'edit'].includes(mode)) return undefined;
+    let active = true;
+    setSupplyingLoading(true);
+    setSupplyingError('');
+    eWayBillService.getFromContext().then((context) => {
+      if (!active) return;
+      if (!context?.from) {
+        setSupplyingError('Company Settings must include the correct workshop GSTIN, address, place, PIN and state.');
+        return;
+      }
+      setSupplyingParty(context.from);
+      setForm((old) => old.supplyType === 'Outward'
+        ? { ...old, from: context.from } : old);
+    }).catch((err) => {
+      if (active) setSupplyingError(err?.message || 'Cannot load supplying workshop details.');
+    }).finally(() => {
+      if (active) setSupplyingLoading(false);
+    });
+    return () => { active = false; };
+  }, [mode]);
+
+  const update = (key, value) => setForm((old) => {
+    if (key === 'supplyType') {
+      // Inward: vendor dispatches goods; their FROM must remain editable.
+      // Outward: the workshop identity is always read-only and server-derived.
+      if (value === 'Inward' && old.supplyType !== 'Inward') {
+        return { ...old, supplyType: value,
+          from: { gstin: '', tradeName: '', address: '', place: '', pincode: '', stateCode: '' },
+          to: supplyingParty || old.to };
+      }
+      if (value === 'Outward' && old.supplyType !== 'Outward') {
+        return { ...old, supplyType: value, from: supplyingParty || old.from,
+          to: { gstin: '', tradeName: '', address: '', place: '', pincode: '', stateCode: '' } };
+      }
+    }
+    return { ...old, [key]: value };
+  });
+  const updateGroup = (group, key, value) => setForm((old) => {
+    // FROM is locked for outward supplies in UI AND Django serializer.
+    if (group === 'from' && old.supplyType === 'Outward') return old;
+    const next = { ...old, [group]: { ...old[group], [key]: value } };
+    if (key === 'stateCode' && ['to','from'].includes(group)) {
+      next.items = eWayReconcileGst(next.items, eWayTaxMode(next));
+    }
+    return next;
+  });
   const updateItem = (itemId, key, value) => setForm((old) => ({
     ...old,
     items: old.items.map((item) => item.id === itemId ? { ...item, [key]: value } : item)
+  }));
+  const updateItemGst = (itemId, rate) => setForm((old) => ({
+    ...old, items: old.items.map((item) => item.id === itemId
+      ? eWaySetGstRate(item, rate, eWayTaxMode(old)) : item)
   }));
 
   const save = async () => {
@@ -181,6 +231,9 @@ export function EWayBillPage() {
   };
 
   const submit = async () => {
+    if (isOutward && (!supplyingParty || supplyingLoading || supplyingError)) {
+      return setError('Verify Company / Branch Settings before preparing an outward E-Way Bill.');
+    }
     const validation = validateEWayBill(form);
     if (validation) return setError(validation);
 
@@ -395,7 +448,7 @@ export function EWayBillPage() {
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
             <label>Supply Type
-              <select value={form.supplyType} onChange={(e) => update('supplyType', e.target.value)}>
+              <select value={form.supplyType} onChange={(e) => update('supplyType', e.target.value)}> 
                 <option>Outward</option>
                 <option>Inward</option>
               </select>
@@ -453,25 +506,32 @@ export function EWayBillPage() {
           <section className="billing-card">
             <span className="billing-kicker">SECTION 2 · FROM</span>
             <h3>2. Address Details · Dispatch / Bill From</h3>
+            {isOutward && <p className="eway-from-source-note" role="status">
+              {supplyingLoading ? 'Loading workshop address…'
+                : 'Auto-filled from Company / Branch Settings · Read-only'}
+            </p>}
+            {isOutward && supplyingError && <p role="alert" className="eway-from-error">
+              {supplyingError} <button type="button" onClick={() => navigate('/account/company')}>Open Company Settings</button>
+            </p>}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label>GSTIN / URP
-                <input value={form.from?.gstin || ''} onChange={(e) => updateGroup('from', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
+                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.gstin || ''} onChange={(e) => updateGroup('from', 'gstin', e.target.value.toUpperCase())} placeholder="GSTIN / URP"/>
               </label>
               <label>Trade Name
-                <input value={form.from?.tradeName || ''} onChange={(e) => updateGroup('from', 'tradeName', e.target.value)} placeholder="Workshop / company"/>
+                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.tradeName || ''} onChange={(e) => updateGroup('from', 'tradeName', e.target.value)} placeholder="Workshop / company"/>
               </label>
               <label className="sm:col-span-2">Address
-                <textarea value={form.from?.address || ''} onChange={(e) => updateGroup('from', 'address', e.target.value)} placeholder="Dispatch address"/>
+                <textarea readOnly={isOutward} aria-readonly={isOutward} value={form.from?.address || ''} onChange={(e) => updateGroup('from', 'address', e.target.value)} placeholder="Dispatch address"/>
               </label>
               <label>Place
-                <input value={form.from?.place || ''} onChange={(e) => updateGroup('from', 'place', e.target.value)} placeholder="Place"/>
+                <input readOnly={isOutward} aria-readonly={isOutward} value={form.from?.place || ''} onChange={(e) => updateGroup('from', 'place', e.target.value)} placeholder="Place"/>
               </label>
               <label>PIN Code
-                <input inputMode="numeric" maxLength={6} value={form.from?.pincode || ''} onChange={(e) => updateGroup('from', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="680001"/>
+                <input inputMode="numeric" maxLength={6} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.pincode || ''} onChange={(e) => updateGroup('from', 'pincode', e.target.value.replace(/\D/g, '').slice(0,6))} placeholder="680001"/>
               </label>
               <label>State Code
-                <input inputMode="numeric" maxLength={2} value={form.from?.stateCode || ''} onChange={(e) => updateGroup('from', 'stateCode', e.target.value.replace(/\D/g, '').slice(0,2))} placeholder="32"/>
+                <input inputMode="numeric" maxLength={2} readOnly={isOutward} aria-readonly={isOutward} value={form.from?.stateCode || ''} onChange={(e) => updateGroup('from', 'stateCode', e.target.value.replace(/\D/g, '').slice(0,2))} placeholder="32"/>
               </label>
             </div>
           </section>
@@ -602,53 +662,40 @@ export function EWayBillPage() {
 
                 <div className="eway-goods-tax mt-4 rounded-xl border border-line bg-surface p-3 sm:p-4">
                   <div className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-muted">
-                    Tax Rates %
+                    GST &amp; CESS
                   </div>
-
-                  <div className="eway-goods-tax-grid grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">CGST
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="CGST rate"
-                        inputMode="decimal"
-                        value={item.cgstRate}
-                        onChange={(e) => updateItem(item.id, 'cgstRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
+                  <div className="eway-goods-tax-grid grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">
+                      GST Rate (%)
+                      <select aria-label="GST rate" value={String(eWayTotalGstRate(item))}
+                        disabled={gstMode === 'unknown'}
+                        onChange={(e) => updateItemGst(item.id, e.target.value)}
+                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content">
+                        {!EWAY_GST_RATES.includes(String(eWayTotalGstRate(item))) &&
+                          <option value={String(eWayTotalGstRate(item))}>{eWayTotalGstRate(item)}%</option>}
+                        {EWAY_GST_RATES.map((rate) =>
+                          <option value={rate} key={rate}>{rate}%</option>)}
+                      </select>
                     </label>
-
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">SGST
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="SGST rate"
-                        inputMode="decimal"
-                        value={item.sgstRate}
-                        onChange={(e) => updateItem(item.id, 'sgstRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
-                    </label>
-
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">IGST
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="IGST rate"
-                        inputMode="decimal"
-                        value={item.igstRate}
-                        onChange={(e) => updateItem(item.id, 'igstRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
-                    </label>
-
-                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">CESS
-                      <input
-                        className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
-                        aria-label="CESS rate"
-                        inputMode="decimal"
+                    <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">
+                      CESS Rate (%)
+                      <input aria-label="CESS rate" inputMode="decimal"
                         value={item.cessRate}
                         onChange={(e) => updateItem(item.id, 'cessRate', dec(e.target.value))}
-                        placeholder="0"
-                      />
+                        placeholder="0" />
                     </label>
+                  </div>
+                  <p className="eway-gst-explanation" role="status">
+                    {gstMode === 'unknown'
+                      ? 'Enter valid FROM and TO state codes to select GST.'
+                      : gstMode === 'igst'
+                        ? 'Inter-state: IGST applies. CGST and SGST are zero.'
+                        : 'Intra-state: GST is split equally between CGST and SGST.'}
+                  </p>
+                  <div className="eway-gst-breakdown">
+                    <span>CGST: {item.cgstRate || 0}%</span>
+                    <span>SGST: {item.sgstRate || 0}%</span>
+                    <span>IGST: {item.igstRate || 0}%</span>
                   </div>
                 </div>
               </article>

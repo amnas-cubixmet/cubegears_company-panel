@@ -1,5 +1,7 @@
 import { USE_MOCK_API } from '../api/apiConfig';
 import apiClient from '../api/apiClient';
+import { calculateEWayTotals } from '../utils/eWayBillTotals.js';
+export { calculateEWayTotals } from '../utils/eWayBillTotals.js';
 
 const STORAGE_KEY = 'cubixgear:e-way-bills';
 
@@ -81,7 +83,7 @@ export const blankEWayBill = () => ({
     address: '',
     place: '',
     pincode: '',
-    stateCode: '32'
+    stateCode: ''
   },
   to: {
     gstin: '',
@@ -89,7 +91,7 @@ export const blankEWayBill = () => ({
     address: '',
     place: '',
     pincode: '',
-    stateCode: '32'
+    stateCode: ''
   },
   items: [
     {
@@ -134,25 +136,13 @@ export const blankEWayBill = () => ({
   updatedAt: ''
 });
 
-export const calculateEWayTotals = (doc) => {
-  const taxableValue = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0), 0);
-  const cgst = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0) * Number(item.cgstRate || 0) / 100, 0);
-  const sgst = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0) * Number(item.sgstRate || 0) / 100, 0);
-  const igst = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0) * Number(item.igstRate || 0) / 100, 0);
-  const cess = (doc.items || []).reduce((sum, item) => sum + Number(item.taxableValue || 0) * Number(item.cessRate || 0) / 100, 0);
-  const cessNonAdvol = Number(doc.cessNonAdvolAmount || 0);
-  const otherAmount = Number(doc.otherAmount || 0);
-  return {
-    taxableValue,
-    cgst,
-    sgst,
-    igst,
-    cess,
-    cessNonAdvol,
-    otherAmount,
-    totalValue: taxableValue + cgst + sgst + igst + cess + cessNonAdvol + otherAmount
-  };
+export const getEWayFromContext = async () => {
+  // Trusted supply identity comes from the tenant-authenticated Django API.
+  // Local mock documents have no verified registered supplier.
+  if (USE_MOCK_API) return { from: null, branchId: '' };
+  return apiClient.get('/e-way-bills/from-context');
 };
+
 
 export const validateEWayBill = (doc) => {
   if (!doc.supplyType) return 'Supply type is required.';
@@ -231,6 +221,7 @@ export const submitEWayBill = async (billId) => {
 };
 
 export const eWayBillService = {
+  getFromContext: getEWayFromContext,
   list: listEWayBills,
   get: getEWayBill,
   save: saveEWayBill,
