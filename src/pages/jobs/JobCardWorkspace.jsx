@@ -488,11 +488,16 @@ export function JobCardWorkspace() {
     setPdfOffer({ job: approvedJob, estimate: approvedEstimate, nextStage: null });
   };
 
-  const canShareApprovedPdf = Boolean(approvedPdfFile) &&
-    typeof navigator !== 'undefined' &&
-    typeof navigator.share === 'function' &&
-    (typeof navigator.canShare !== 'function' ||
-      navigator.canShare({ files: [approvedPdfFile] }));
+  const canShareApprovedPdf = (() => {
+    if (!approvedPdfFile || typeof navigator === 'undefined' ||
+        typeof navigator.share !== 'function') return false;
+    try {
+      return typeof navigator.canShare !== 'function' ||
+        navigator.canShare({ files: [approvedPdfFile] });
+    } catch {
+      return false;
+    }
+  })();
 
   const shareApprovedPdf = () => {
     if (!canShareApprovedPdf || approvedPdfSharing) return;
