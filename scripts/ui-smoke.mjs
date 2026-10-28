@@ -186,6 +186,29 @@ try {
           const sizes=await page.locator('input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select').evaluateAll(nodes=>nodes.filter(e=>e.getClientRects().length).map(e=>parseFloat(getComputedStyle(e).fontSize)));
           if(sizes.some(size=>size<16))throw Error('Form control text below 16px: '+sizes.join(','));
         }
+        if(path==='/login'){
+          // Regression for double red outline: the outer div owns the border,
+          // even when both nested inputs are aria-invalid and focused.
+          await page.locator('.login-input-shell').first().waitFor();
+          await page.locator('.login-submit').click();
+          await page.waitForFunction(()=>document.querySelectorAll('.login-input-shell.is-error').length===2);
+          const styles=await page.locator('.login-input-shell').evaluateAll(nodes=>nodes.map(shell=>{
+            const wrapper=getComputedStyle(shell);
+            const input=getComputedStyle(shell.querySelector('input.login-input'));
+            return {
+              shellBorder:parseFloat(wrapper.borderTopWidth),
+              innerBorder:parseFloat(input.borderTopWidth),
+              innerOutline:input.outlineStyle,
+              innerShadow:input.boxShadow,
+              shellColor:wrapper.borderTopColor,
+            };
+          }));
+          if(styles.length!==2 || styles.some(s=>s.shellBorder!==1 ||
+            s.innerBorder!==0 || s.innerOutline!=='none' || s.innerShadow!=='none')) {
+            throw Error('Login email/password has a second inner border/outline: '+JSON.stringify(styles));
+          }
+        }
+
         if(profile.width < 1024) {
           const wallet=page.locator('.mobile-header-actions > .cg-credit-chip');
           if(await wallet.count()) {

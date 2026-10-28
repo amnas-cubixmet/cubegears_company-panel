@@ -73,3 +73,26 @@ select,textarea):is([aria-invalid="true"],[data-cg-error-active="true"]):focus {
 @media(max-width:767px) {
   :is(body,#root) .cg-inline-field-error {font-size:12px}
 }
+
+
+/* Login: the icon/input/password toggle sit inside ONE bordered shell.
+ * Match the global aria-invalid selector's #root specificity (and then some),
+ * so email/password never draw an inner border, radius, outline or error ring.
+ * The surrounding .login-input-shell is the sole visible validation border. */
+:is(body, #root) .login-page .login-input-shell > input.login-input,
+:is(body, #root) .login-page .login-input-shell > input.login-input:focus,
+:is(body, #root) .login-page .login-input-shell > input.login-input:focus-visible,
+:is(body, #root) .login-page .login-input-shell > input.login-input[aria-invalid="true"],
+:is(body, #root) .login-page .login-input-shell > input.login-input[data-cg-error-active="true"] {
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+:is(body, #root) .login-page .login-input-shell.is-error {
+  /* One red border; never a second halo around the shell. */
+  box-shadow: none !important;
+}
