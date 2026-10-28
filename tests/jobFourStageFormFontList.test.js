@@ -17,7 +17,7 @@ test('Overview, Inspection, Estimate and Work & Labour share one loaded input/li
   ]) assert.ok(shared.includes(section), section);
   assert.match(shared, /--job-body-font: 16px/);
   assert.match(shared, /--job-control-size: 48px/);
-  assert.match(shared, /--job-label-font: 15px/);
+  assert.match(shared, /--job-label-font: 14px/);
   assert.match(shared, /:is\(input:not\(\[type="file"\]\):not\(\[type="checkbox"\]\):not\(\[type="radio"\]\), select, textarea\)/);
   assert.match(shared, /font-size: var\(--job-body-font\) !important/);
 });
