@@ -23,6 +23,15 @@ import {
 
 const money = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
 const itemTypes = ['Stock Part', 'Outside Purchase', 'Labour', 'Service', 'Consumable', 'Custom Item'];
+const unitOptions = [
+  ['PCS', 'PCS — Pieces'], ['NOS', 'NOS — Numbers'], ['SET', 'SET — Set'],
+  ['KG', 'KG — Kilograms'], ['G', 'G — Grams'], ['LTR', 'LTR — Litres'],
+  ['ML', 'ML — Millilitres'], ['MTR', 'MTR — Metres'], ['CM', 'CM — Centimetres'],
+  ['BOX', 'BOX — Box'], ['PACK', 'PACK — Pack'], ['PAIR', 'PAIR — Pair'],
+  ['HRS', 'HRS — Hours'], ['MIN', 'MIN — Minutes'], ['DAY', 'DAY — Days'],
+  ['JOB', 'JOB — Job'], ['ROLL', 'ROLL — Roll'], ['BOTTLE', 'BOTTLE — Bottle'],
+  ['BAG', 'BAG — Bag'], ['TON', 'TON — Tonnes'],
+];
 const emptyItem = () => ({ id: `ROW-${Date.now()}-${Math.random()}`, type: '', description: '', code: '', hsnCode: '', qty: '', unit: '', purchasePrice: '', rate: '', taxRate: '', discount: '', inventoryId: '' });
 const n = (value) => Number(value || 0);
 const inputNumber = (value) => (value == null ? '' : String(value));
@@ -701,7 +710,7 @@ export function InvoiceRoutePage() {
       {error && <div className="billing-error no-print" role="alert" data-invoice-error-summary>{error}</div>}
 
       {loading && mode === 'edit' ? <div className="billing-empty">Loading…</div> : <>
-        <div className="invoice-source-grid no-print">
+        <div className="invoice-source-grid invoice-source-grid--compact no-print">
           <section className="billing-card invoice-seller-card">
             <span className="billing-kicker">SELLER / FROM</span>
             <h3>Business Details</h3>
@@ -796,19 +805,10 @@ export function InvoiceRoutePage() {
               </label>
 
             </div>
-          </section>
-
-          <section className="billing-card">
-            <span className="billing-kicker">INVOICE DETAILS</span>
-            <h3>Document Details</h3>
-            <label>Invoice Type
-              <select value={form.invoiceType} disabled aria-label="Invoice type from workshop registration">
-                <option value="regular">Normal Invoice — No GST</option>
-                <option value="gst">GST Tax Invoice</option>
-              </select>
-            </label>
-            <label>Date
-              <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)} onChange={(e) => update('date', e.target.value)}/>
+          <div className="invoice-essential-fields">
+            <label>Invoice Date
+              <input type="date" value={form.date || ''} required aria-invalid={Boolean(fieldErrors.date)}
+                onChange={(e) => update('date', e.target.value)}/>
               {fieldErrors.date && <small className="invoice-input-error" role="alert">{fieldErrors.date}</small>}
             </label>
             <label>Place of Supply
@@ -818,15 +818,9 @@ export function InvoiceRoutePage() {
                 placeholder="e.g. 32-Kerala" autoComplete="off"/>
               {fieldErrors['customer.placeOfSupply'] && <small className="invoice-input-error" role="alert">{fieldErrors['customer.placeOfSupply']}</small>}
             </label>
-            <div className="invoice-two-col">
-              <label>Job Card No.
-                <input value={form.jobCardNo || ''} onChange={(e) => update('jobCardNo', e.target.value)} placeholder=""/>
-              </label>
-              <label>Staff / Advisor
-                <input value={form.staff || ''} onChange={(e) => update('staff', e.target.value)}/>
-              </label>
-            </div>
+          </div>
           </section>
+
         </div>
 
         <section className="billing-card no-print billing-items-card invoice-sale-items">
@@ -891,7 +885,7 @@ export function InvoiceRoutePage() {
                 </div>
                 <div className="invoice-field-wrap invoice-hsn-field">
                   <span className="invoice-mobile-label">HSN / SAC</span>
-                  <input type="text" inputMode="text" maxLength={30} autoComplete="off" aria-label="HSN or SAC code" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="HSN / SAC code"/>
+                  <input type="text" inputMode="text" maxLength={30} autoComplete="off" aria-label="HSN or SAC code" aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])} value={row.hsnCode ?? ''} onChange={(e) => updateItem(row.id, 'hsnCode', normalizeHsnSacCode(e.target.value))} placeholder="e.g. 998729"/>
                 </div>
                 <div className="invoice-field-wrap invoice-qty-field">
                   <span className="invoice-mobile-label">Quantity</span>
@@ -902,7 +896,7 @@ export function InvoiceRoutePage() {
                   <span className="invoice-mobile-label">Unit</span>
                   <select aria-label="Unit" aria-invalid={Boolean(fieldErrors[`items.${index}.unit`])} value={row.unit || ''} onChange={(e) => updateItem(row.id, 'unit', e.target.value)}>
                   <option value="">Select unit</option>
-                  {['PCS','NOS','SET','KG','LTR','MTR','BOX','PAIR','HRS','JOB'].map((unit) => <option key={unit}>{unit}</option>)}
+                  {unitOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </select>
                 </div>
                 <div className="invoice-field-wrap invoice-price-field">
