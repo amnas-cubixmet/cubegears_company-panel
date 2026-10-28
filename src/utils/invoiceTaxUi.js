@@ -105,7 +105,7 @@ export const invoiceChoiceFromTotalRate = (totalRate, mode, recentChoice = '', b
   const choices = invoiceLineTaxChoices(mode, backendChoices);
   if (recentChoice) {
     const picked = choices.find(item => item.value === recentChoice &&
-      String(item.totalRate) === rate && (mode === 'unknown' || item.taxMode === mode));
+      String(item.totalRate) === rate);
     if (picked) return picked.value;
   }
   const expected = choices.find(item => String(item.totalRate) === rate &&
