@@ -372,3 +372,181 @@
   .cg-staff-management .staff-dashboard-tabs__rail { gap: 6px; }
   .cg-staff-management .staff-dashboard-tab { padding: 10px !important; }
 }
+
+
+/* Staff Directory card: labeled facts, consistent action sizes and no clipping.
+   This card is a named size container because the column can be narrow even
+   on wide desktop screens. */
+.cg-staff-management .staff-directory-card {
+  container: staff-directory-card / inline-size;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 14px;
+}
+.cg-staff-management .staff-directory-card__head {
+  gap: 12px;
+  align-items: flex-start;
+}
+.cg-staff-management .staff-directory-person {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 12px;
+}
+.cg-staff-management .staff-directory-person > div:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cg-staff-management .staff-directory-person strong {
+  font-size: 17px !important;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .staff-directory-person span {
+  font-size: 14px !important;
+  line-height: 1.45;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .staff-directory-card__head .staff-avatar--md {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+.cg-staff-management .staff-directory-card__head .staff-directory-status {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 5px 10px;
+  font-size: 13px !important;
+  line-height: 1.3;
+}
+.cg-staff-management .staff-directory-card .staff-directory-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--staff-soft);
+}
+.cg-staff-management .staff-directory-fact {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 7px;
+  color: var(--text-secondary);
+}
+.cg-staff-management .staff-directory-fact > svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+}
+.cg-staff-management .staff-directory-fact__copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.cg-staff-management .staff-directory-fact__copy small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.cg-staff-management .staff-directory-fact__copy > span {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px !important;
+  line-height: 1.45;
+  font-weight: 600;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere;
+}
+.cg-staff-management .staff-directory-fact--wage {
+  grid-column: 1 / -1;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--staff-border));
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.cg-staff-management .staff-directory-fact--wage > svg,
+.cg-staff-management .staff-directory-fact--wage .staff-directory-fact__copy > span {
+  color: var(--primary);
+}
+.cg-staff-management .staff-directory-card .staff-directory-card__actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+  justify-content: stretch !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  padding-top: 14px !important;
+  min-width: 0;
+}
+.cg-staff-management .staff-directory-card__actions .staff-view-button,
+.cg-staff-management .staff-directory-card__actions .staff-pay-config-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 44px !important;
+  flex: 1 1 auto !important;
+  padding: 9px 7px !important;
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+}
+.cg-staff-management .staff-directory-card__actions .staff-status-button {
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  flex: 0 0 44px !important;
+  justify-self: end;
+}
+.cg-staff-management .staff-directory-card__actions svg {
+  width: 17px;
+  height: 17px;
+}
+.cg-staff-management .staff-directory-card__actions > button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* When payroll/status buttons are unavailable, remaining buttons fill space. */
+.cg-staff-management .staff-directory-card__actions > button:first-child:nth-last-child(2) {
+  grid-column: 1 / 3;
+}
+.cg-staff-management .staff-directory-card__actions > button:first-child:only-child {
+  grid-column: 1 / -1;
+}
+
+@container staff-directory-card (max-width: 305px) {
+  .staff-directory-details {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .staff-directory-card__actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .staff-directory-card__actions .staff-status-button {
+    grid-column: 2;
+    justify-self: end;
+  }
+}
+@media (max-width: 420px) {
+  .cg-staff-management .staff-directory-card { padding: 14px; }
+  .cg-staff-management .staff-directory-card .staff-directory-details { padding: 9px; }
+}
