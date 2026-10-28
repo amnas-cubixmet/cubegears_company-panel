@@ -694,6 +694,7 @@ export function EWayBillPage() {
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">HSN
                     <input
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      data-eway-field={`items.${index}.hsnCode`} aria-invalid={Boolean(fieldErrors[`items.${index}.hsnCode`])}
                       type="text"
                       inputMode="numeric"
                       maxLength={8}
@@ -701,15 +702,18 @@ export function EWayBillPage() {
                       onChange={(e) => updateItem(item.id, 'hsnCode', e.target.value.replace(/\D/g, '').slice(0, 8))}
                       placeholder="e.g. 8708"
                     />
+                    {showFieldError(`items.${index}.hsnCode`)}
                   </label>
 
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Product Name
                     <input
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      data-eway-field={`items.${index}.productName`} aria-invalid={Boolean(fieldErrors[`items.${index}.productName`])}
                       value={item.productName}
                       onChange={(e) => updateItem(item.id, 'productName', e.target.value)}
                       placeholder={`Item ${index + 1} name`}
                     />
+                    {showFieldError(`items.${index}.productName`)}
                   </label>
 
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Description
@@ -725,30 +729,36 @@ export function EWayBillPage() {
                     <input
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       inputMode="decimal"
+                      data-eway-field={`items.${index}.qty`} aria-invalid={Boolean(fieldErrors[`items.${index}.qty`])}
                       value={item.qty}
                       onChange={(e) => updateItem(item.id, 'qty', dec(e.target.value))}
                       placeholder="1"
                     />
+                    {showFieldError(`items.${index}.qty`)}
                   </label>
 
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Unit
                     <select
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      data-eway-field={`items.${index}.unit`} aria-invalid={Boolean(fieldErrors[`items.${index}.unit`])}
                       value={item.unit}
                       onChange={(e) => updateItem(item.id, 'unit', e.target.value)}
                     >
                       <option>PCS</option><option>SET</option><option>UNT</option><option>KGS</option><option>LTR</option><option>BOX</option><option>OTH</option>
                     </select>
+                    {showFieldError(`items.${index}.unit`)}
                   </label>
 
                   <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-secondary">Taxable Value
                     <input
                       className="h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-medium text-content outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
                       inputMode="decimal"
+                      data-eway-field={`items.${index}.taxableValue`} aria-invalid={Boolean(fieldErrors[`items.${index}.taxableValue`])}
                       value={item.taxableValue}
                       onChange={(e) => updateItem(item.id, 'taxableValue', dec(e.target.value))}
                       placeholder="0.00"
                     />
+                    {showFieldError(`items.${index}.taxableValue`)}
                   </label>
                 </div>
 
