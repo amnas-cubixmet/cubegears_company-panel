@@ -1,0 +1,147 @@
+/* Responsive Estimate Work & Labour / Spare Parts: comfortable iPhone touch targets.
+ * Scoped to the Job Card Estimate so other modules retain their layout.
+ */
+.cg-job-detail .job-quick-estimate .job-quick-line {
+  min-width: 0;
+  border-radius: 16px;
+  background: var(--surface-2);
+  padding: clamp(12px, 1.6vw, 18px);
+}
+.cg-job-detail .job-quick-estimate .job-quick-line-fields {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 13px 12px;
+  align-items: end;
+  min-width: 0;
+}
+.cg-job-detail .job-quick-estimate .job-quick-line-fields > * { min-width: 0; }
+.cg-job-detail .job-quick-estimate .job-quick-description { grid-column: span 5; }
+.cg-job-detail .job-quick-estimate .job-quick-field-type { grid-column: span 3; }
+.cg-job-detail .job-quick-estimate .job-quick-field-qty { grid-column: span 2; }
+.cg-job-detail .job-quick-estimate .job-quick-field-price { grid-column: span 2; }
+.cg-job-detail .job-quick-estimate .job-quick-field-hsn { grid-column: span 5; }
+.cg-job-detail .job-quick-estimate .job-quick-field-gst { grid-column: span 4; }
+.cg-job-detail .job-quick-estimate .job-quick-line-fields :is(input,select),
+.cg-job-detail .job-quick-estimate .job-quick-type-fixed strong {
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 11px;
+  font-size: 16px !important; /* prevents Safari zoom on input focus */
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field {
+  height: 48px;
+  min-height: 48px;
+  border-radius: 11px;
+}
+.cg-job-detail .job-quick-estimate .job-quick-catalog-field input {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+.cg-job-detail .job-quick-estimate input[type="number"] {
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.cg-job-detail .job-quick-estimate input[type="number"]::-webkit-inner-spin-button,
+.cg-job-detail .job-quick-estimate input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.cg-job-detail .job-quick-estimate .job-quick-line-total {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  justify-content: space-between;
+  font-size: 14px;
+}
+.cg-job-detail .job-quick-estimate .job-quick-line-total strong {
+  font-size: 17px;
+  font-weight: 750;
+}
+.cg-job-detail .job-quick-estimate .job-quick-line-header {
+  margin-bottom: 14px;
+}
+@media (max-width: 1200px) {
+  .cg-job-detail .job-quick-estimate .job-quick-line-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-description { grid-column: 1 / -1; }
+  .cg-job-detail .job-quick-estimate .job-quick-field-type,
+  .cg-job-detail .job-quick-estimate .job-quick-field-qty,
+  .cg-job-detail .job-quick-estimate .job-quick-field-price,
+  .cg-job-detail .job-quick-estimate .job-quick-field-hsn { grid-column: span 1; }
+  .cg-job-detail .job-quick-estimate .job-quick-field-gst { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .cg-job-detail .job-quick-estimate,
+  .cg-job-detail .job-quick-estimate .job-quick-grid,
+  .cg-job-detail .job-quick-estimate .job-quick-work-parts,
+  .cg-job-detail .job-quick-estimate .job-quick-items,
+  .cg-job-detail .job-quick-estimate .job-quick-item-group { min-width: 0; }
+  .cg-job-detail .job-quick-estimate .job-quick-item-group {
+    padding: 10px;
+    border-radius: 14px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-line {
+    padding: 12px;
+    border-radius: 14px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-line-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px 10px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-line-fields label,
+  .cg-job-detail .job-quick-estimate .job-quick-name-field,
+  .cg-job-detail .job-quick-estimate .job-quick-type-fixed {
+    font-size: 13px;
+    line-height: 1.35;
+    gap: 7px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-description { grid-column: 1 / -1; }
+  .cg-job-detail .job-quick-estimate .job-quick-field-type,
+  .cg-job-detail .job-quick-estimate .job-quick-field-qty,
+  .cg-job-detail .job-quick-estimate .job-quick-field-price,
+  .cg-job-detail .job-quick-estimate .job-quick-field-hsn { grid-column: span 1; }
+  .cg-job-detail .job-quick-estimate .job-quick-field-gst { grid-column: 1 / -1; }
+  .cg-job-detail .job-quick-estimate .job-quick-line-fields :is(input,select),
+  .cg-job-detail .job-quick-estimate .job-quick-type-fixed strong,
+  .cg-job-detail .job-quick-estimate .job-quick-catalog-field {
+    min-height: 50px;
+  }
+  .cg-job-detail .job-quick-estimate select {
+    padding-right: 28px;
+    text-overflow: ellipsis;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-group-heading {
+    align-items: stretch;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-group-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-group-actions .job-quick-add-button {
+    min-width: 0;
+    width: 100%;
+    white-space: normal;
+    min-height: 48px;
+    padding: 9px 8px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-actions button {
+    min-height: 50px;
+    font-size: 16px;
+  }
+}
+@media (max-width: 350px) {
+  .cg-job-detail .job-quick-estimate .job-quick-line-fields {
+    column-gap: 8px;
+  }
+  .cg-job-detail .job-quick-estimate .job-quick-line { padding: 10px; }
+  .cg-job-detail .job-quick-estimate .job-quick-group-actions {
+    grid-template-columns: 1fr;
+  }
+}
