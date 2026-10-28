@@ -1,0 +1,179 @@
+/*
+ * Invoice Goods / Services adapts to the actual editor width, not the
+ * viewport width. The app sidebar can leave less than 1100px of content on a
+ * 1440px desktop screen. At that size the former one-row table clipped Type,
+ * Unit and GST selectors; use a readable labeled card layout instead.
+ */
+.billing-page .invoice-sale-items {
+  container: invoice-goods / inline-size;
+  overflow: visible;
+}
+.billing-page .invoice-sale-items .invoice-sale-head,
+.billing-page .invoice-sale-items .invoice-sale-row {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.billing-page .invoice-sale-items .invoice-sale-head,
+.billing-page .invoice-sale-items .invoice-sale-row {
+  grid-template-columns:
+    minmax(285px, 2fr) minmax(110px, .75fr) minmax(75px, .5fr)
+    minmax(82px, .55fr) minmax(115px, .8fr) minmax(180px, 1.35fr)
+    minmax(135px, .95fr) 42px;
+  gap: 10px;
+}
+.billing-page .invoice-sale-items .invoice-item-main-cell {
+  grid-template-columns: minmax(150px, .8fr) minmax(0, 1.65fr);
+  gap: 10px;
+}
+.billing-page .invoice-sale-items .invoice-sale-row :is(input, select) {
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  padding-inline: 11px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.billing-page .invoice-sale-items .invoice-sale-row select {
+  text-overflow: ellipsis;
+}
+.billing-page .invoice-sale-items .invoice-sale-row .invoice-item-amount {
+  min-width: 0;
+}
+
+/* Browser-width breakpoints miss laptops with a 250px sidebar. */
+@container invoice-goods (max-width: 1200px) {
+  .billing-page .invoice-sale-items .invoice-sale-head {
+    display: none;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-editor {
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-row {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    min-width: 0;
+  }
+  .billing-page .invoice-sale-items .invoice-item-main-cell {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(165px, .7fr) minmax(0, 1.8fr);
+    gap: 12px;
+    min-width: 0;
+    align-items: start;
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 650;
+    color: var(--text-secondary);
+  }
+  .billing-page .invoice-sale-items .invoice-hsn-field { grid-column: span 3; }
+  .billing-page .invoice-sale-items .invoice-qty-field { grid-column: span 2; }
+  .billing-page .invoice-sale-items .invoice-unit-field { grid-column: span 2; }
+  .billing-page .invoice-sale-items .invoice-price-field { grid-column: span 2; }
+  .billing-page .invoice-sale-items .invoice-tax-field { grid-column: span 3; }
+  .billing-page .invoice-sale-items .invoice-item-amount {
+    grid-column: span 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 11px 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface-2);
+    text-align: left;
+  }
+  .billing-page .invoice-sale-items .invoice-item-amount .billing-line-total {
+    font-size: 19px;
+    line-height: 1.25;
+    font-weight: 750;
+    text-align: left;
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-tax-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .billing-page .invoice-sale-items .invoice-item-row-actions {
+    order: 0;
+    grid-column: span 2;
+    align-self: stretch;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-item-number,
+  .billing-page .invoice-sale-items .invoice-mobile-remove-label {
+    display: none;
+  }
+  .billing-page .invoice-sale-items .invoice-item-row-actions .bill-icon-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .billing-page .invoice-sale-items .invoice-item-validation-summary {
+    grid-column: 1 / -1;
+  }
+}
+
+@container invoice-goods (max-width: 760px) {
+  .billing-page .invoice-sale-items .invoice-sale-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 12px;
+    gap: 12px;
+  }
+  .billing-page .invoice-sale-items .invoice-item-main-cell {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .billing-page .invoice-sale-items .invoice-hsn-field,
+  .billing-page .invoice-sale-items .invoice-price-field,
+  .billing-page .invoice-sale-items .invoice-tax-field,
+  .billing-page .invoice-sale-items .invoice-item-amount,
+  .billing-page .invoice-sale-items .invoice-item-row-actions {
+    grid-column: 1 / -1;
+  }
+  .billing-page .invoice-sale-items .invoice-qty-field,
+  .billing-page .invoice-sale-items .invoice-unit-field {
+    grid-column: span 1;
+  }
+  .billing-page .invoice-sale-items .invoice-item-row-actions {
+    order: -1;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    min-height: 44px;
+    padding-bottom: 9px;
+  }
+  .billing-page .invoice-sale-items .invoice-mobile-item-number,
+  .billing-page .invoice-sale-items .invoice-mobile-remove-label {
+    display: inline;
+  }
+  .billing-page .invoice-sale-items .invoice-sale-row :is(input, select) {
+    min-height: 46px;
+    height: 46px;
+    font-size: 16px;
+  }
+  .billing-page .invoice-sale-items .invoice-item-amount {
+    padding: 13px;
+  }
+  .billing-page .invoice-sale-items .invoice-item-amount .billing-line-total {
+    font-size: 22px;
+  }
+}
