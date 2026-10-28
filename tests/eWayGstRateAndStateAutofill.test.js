@@ -75,7 +75,7 @@ test('clearing destination state retains selected GST but removes stale tax amou
 
 test('GST Rate select stays enabled and TO State Code has an Indian-state dropdown', () => {
   const page = read('src/pages/invoices/EWayBillPage.jsx');
-  assert.match(page, /<select aria-label="GST rate" value=\{String\(eWayTotalGstRate\(item\)\)\}/);
+  assert.match(page, /<select aria-label="GST rate" value=\{selectedItemGst\(item\)\}/);
   assert.doesNotMatch(page, /disabled=\{gstMode === 'unknown'\}/);
   assert.match(page, /updateItemGst\(item.id, e.target.value\)/);
   assert.match(page, /<select aria-label="TO State Code"/);
