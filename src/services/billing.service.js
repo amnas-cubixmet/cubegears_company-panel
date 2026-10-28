@@ -287,7 +287,10 @@ export const downloadBillingPdf = async (savedInvoice) => {
   }
   const pdf = await apiClient.get(`/billing/documents/${encodeURIComponent(documentId)}/pdf`, {
     responseType: 'blob',
-    headers: { Accept: 'application/pdf' }
+    // Legacy Django DRF endpoints negotiate JSON before returning an HttpResponse
+    // with PDF bytes. Allow JSON negotiation as a fallback to avoid HTTP 406
+    // without ever accepting JSON as the downloaded invoice file.
+    headers: { Accept: 'application/pdf, application/json' }
   });
   if (!(pdf instanceof Blob) || (pdf.type && !pdf.type.includes('pdf'))) {
     throw new Error('The server did not return a valid invoice PDF.');

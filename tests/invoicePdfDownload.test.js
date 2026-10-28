@@ -11,6 +11,11 @@ test('PDF download uses authenticated backend PDF and a real blob file', () => {
   assert.match(billing, /export const downloadBillingPdf/);
   assert.match(billing, /\/billing\/documents\/\$\{encodeURIComponent\(documentId\)\}\/pdf/);
   assert.match(billing, /responseType: 'blob'/);
+  // PDF Accept alone caused DRF 406 on deployments that only negotiate JSON.
+  assert.match(billing, /Accept: 'application\/pdf, application\/json'/);
+  assert.doesNotMatch(billing, /Accept: 'application\/pdf'\s*\}/);
+  assert.match(billing, /pdf\.type\.includes\('pdf'\)/);
+  assert.match(billing, /The server did not return a valid invoice PDF/);
   assert.match(billing, /URL\.createObjectURL\(pdf\)/);
   assert.match(billing, /link\.download = filename/);
   assert.match(billing, /URL\.revokeObjectURL\(url\)/);
