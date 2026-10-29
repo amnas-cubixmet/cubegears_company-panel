@@ -19,6 +19,7 @@ const AttendanceManager = lazyPage(() => import('../pages/attendance/AttendanceM
 const StaffAttendanceDetails = lazyPage(() => import('../pages/attendance-manager/StaffAttendanceDetails'), 'StaffAttendanceDetails');
 const StaffManagement = lazyPage(() => import('../pages/employees/StaffManagement'), 'StaffManagement');
 const DailyWagePage = lazyPage(() => import('../pages/payroll/DailyWagePage'), 'DailyWagePage');
+const OvertimeApprovalPage = lazyPage(() => import('../pages/payroll/OvertimeApprovalPage'), 'OvertimeApprovalPage');
 const DailyWageAccountPage = lazyPage(() => import('../pages/payroll/DailyWageAccountPage'), 'DailyWageAccountPage');
 const CustomerList = lazyPage(() => import('../pages/customers/CustomerList'), 'CustomerList');
 const CustomerManagement = lazyPage(() => import('../pages/customers/CustomerManagement'), 'CustomerManagement');
@@ -119,12 +120,13 @@ export const AppRoutes = () => (
       <Route path="/payroll" element={<Navigate to="/payroll/daily-wages" replace />} />
       <Route path="/payroll/daily-wages" element={<DailyWagePage mode="overview" />} />
       <Route path="/payroll/daily-wages/history" element={<DailyWagePage mode="history" />} />
+      <Route path="/payroll/daily-wages/overtime-approvals" element={<OvertimeApprovalPage />} />
       <Route path="/payroll/payments" element={<DailyWagePage mode="payments" />} />
       <Route path="/staff/:id/wages" element={<DailyWageAccountPage />} />
       <Route path="/payroll/employees" element={<Navigate to="/payroll/daily-wages" replace />} />
       <Route path="/payroll/attendance" element={<Navigate to="/payroll/daily-wages" replace />} />
       <Route path="/payroll/incentives" element={<Navigate to="/payroll/daily-wages" replace />} />
-      <Route path="/payroll/overtime" element={<Navigate to="/payroll/daily-wages" replace />} />
+      <Route path="/payroll/overtime" element={<Navigate to="/payroll/daily-wages/overtime-approvals" replace />} />
       <Route path="/payroll/advances" element={<Navigate to="/payroll/daily-wages" replace />} />
       <Route path="/payroll/reports" element={<Navigate to="/payroll/daily-wages/history" replace />} />
 
