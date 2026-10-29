@@ -368,7 +368,7 @@ try {
             throw Error('Account Security password input layout mismatch: '+
               JSON.stringify({width:profile.width,measured}));
           }
-          const current=page.getByRole('textbox',{name:'Current password'});
+          const current=page.locator('input[aria-label="Current password"]');
           await current.fill('test-password-only');
           await page.getByRole('button',{name:'Show current password'}).click();
           if(await current.getAttribute('type')!=='text') {
@@ -378,7 +378,7 @@ try {
           if(await current.getAttribute('type')!=='password') {
             throw Error('Account Security password did not hide');
           }
-          const confirm=page.getByRole('textbox',{name:'Confirm new password'});
+          const confirm=page.locator('input[aria-label="Confirm new password"]');
           await page.getByRole('button',{name:'Show confirmed password'}).click();
           if(await confirm.getAttribute('type')!=='text') {
             throw Error('Account Security confirmed password visibility failed');
