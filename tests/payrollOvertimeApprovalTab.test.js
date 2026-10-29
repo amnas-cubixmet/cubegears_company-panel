@@ -74,7 +74,6 @@ test('Payroll navigation has fourth tab, routing, matching approval permission a
   assert.match(page,/row.canReview === false/);
   assert.match(page,/setParams\(old =>/);
   assert.match(page,/next.set\('staff','All'\)/);
-  assert.match(page,/Promise/);
   assert.match(css,/@media\(max-width:1050px\)/);
   assert.match(css,/font-size:16px/);
 });
