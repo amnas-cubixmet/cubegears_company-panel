@@ -19,12 +19,13 @@ export const todayISO = () => {
 const sections = [
   ['overview', 'Daily Wages', '/payroll/daily-wages', Wallet],
   ['history', 'Daily History', '/payroll/daily-wages/history', History],
+  ['overtime', 'Overtime Approval', '/payroll/daily-wages/overtime-approvals', Clock3],
   ['payments', 'Payments', '/payroll/payments', Banknote],
 ];
 
 export function DailyWageNav({ selected = 'overview' }) {
   const { search } = useLocation();
-  // Moving between the three payroll views must retain the user's selected
+  // Moving between the payroll views must retain the user's selected
   // month, year, branch and staff query parameters.
   return (
     <nav className="dw-nav" aria-label="Daily Wage Navigation">

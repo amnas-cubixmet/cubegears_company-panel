@@ -1,0 +1,123 @@
+/* Payroll > Daily Wages > Overtime Approval.
+ * Scoped to the new tab. No changes to approval policy, rates or wage ledger.
+ */
+.dw-overtime-page .dw-overtime-info{padding:20px;font-size:15px;line-height:1.6}
+.dw-overtime-page .dw-overtime-notice {
+  display:flex;align-items:center;gap:10px;margin:0;padding:14px 16px;
+  color:var(--success);background:var(--surface-2);
+  border:1px solid var(--border);border-radius:12px;font-size:14px;line-height:1.5;
+}
+.dw-overtime-page .dw-overtime-filters {
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;padding:16px 18px;border-bottom:1px solid var(--border);
+}
+.dw-overtime-page .dw-overtime-filters label {
+  display:flex;flex-direction:column;gap:7px;min-width:0;
+  color:var(--text-secondary);font-size:14px;font-weight:650;line-height:1.4;
+}
+.dw-overtime-page .dw-overtime-filters select {
+  width:100%;min-width:0;min-height:49px;padding:0 12px;
+  border:0;border-radius:10px;background:var(--surface-2);
+  color:var(--text-primary);font-size:16px;line-height:1.45;
+}
+.dw-overtime-page .dw-overtime-search-label{grid-column:1/-1}
+.dw-overtime-page .dw-overtime-search {
+  display:flex;align-items:center;gap:9px;width:100%;min-width:0;
+  min-height:49px;padding:0 12px;border-radius:10px;background:var(--surface-2);
+}
+.dw-overtime-page .dw-overtime-search svg{flex:0 0 18px}
+.dw-overtime-page .dw-overtime-search input {
+  width:100%;min-width:0;min-height:46px;padding:0;border:0;outline:0;
+  background:transparent;color:var(--text-primary);font-size:16px;
+}
+.dw-overtime-page :is(.dw-overtime-search,.dw-overtime-filters select):focus-within,
+.dw-overtime-page .dw-overtime-filters select:focus-visible {
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+.dw-overtime-page .dw-overtime-list {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;padding:16px;min-width:0;
+}
+.dw-overtime-page .dw-overtime-card {
+  display:flex;flex-direction:column;gap:13px;min-width:0;padding:17px;
+  border:1px solid var(--border);border-radius:13px;background:var(--surface-2);
+}
+.dw-overtime-page .dw-overtime-card-head {
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+.dw-overtime-page .dw-overtime-card-head>div {display:flex;flex-direction:column;gap:5px;min-width:0}
+.dw-overtime-page .dw-overtime-card-head strong {
+  font-size:17px;font-weight:750;color:var(--text-primary);overflow-wrap:anywhere;
+}
+.dw-overtime-page .dw-overtime-card-head small {
+  font-size:13px;line-height:1.5;color:var(--text-secondary);overflow-wrap:anywhere;
+}
+.dw-overtime-page .dw-overtime-facts {display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dw-overtime-page .dw-overtime-facts span {
+  display:inline-flex;align-items:center;gap:6px;font-size:14px;
+  color:var(--text-secondary);line-height:1.5;overflow-wrap:anywhere;
+}
+.dw-overtime-page .dw-overtime-reason {
+  flex:1;margin:0;font-size:14px;line-height:1.6;color:var(--text-primary);
+  overflow-wrap:anywhere;
+}
+.dw-overtime-page .dw-overtime-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dw-overtime-page .dw-overtime-actions button {flex:1 1 100px;min-height:48px;white-space:normal}
+.dw-overtime-page .dw-overtime-reject {
+  border-color:var(--danger);color:var(--danger);background:var(--surface);
+}
+.dw-overtime-page .dw-overtime-blocked {
+  display:flex;align-items:flex-start;gap:8px;margin:0;padding:12px;
+  border-radius:10px;border:1px solid var(--border);background:var(--surface);
+  font-size:14px;line-height:1.5;color:var(--text-secondary);
+}
+.dw-overtime-page .dw-overtime-blocked svg{flex:0 0 auto}
+.dw-overtime-page .dw-overtime-footnote {
+  margin:0;padding:0 3px;font-size:13px;line-height:1.55;color:var(--text-muted);
+}
+.dw-overtime-decision-form{display:flex;flex-direction:column;gap:16px;min-width:0}
+.dw-overtime-decision-form>p{margin:0;font-size:14px;line-height:1.6}
+.dw-overtime-decision-form label{
+  display:flex;flex-direction:column;gap:8px;font-size:14px;
+  color:var(--text-secondary);font-weight:650;
+}
+.dw-overtime-decision-form :is(input,textarea) {
+  width:100%;min-width:0;min-height:49px;
+  border:0;border-radius:11px;padding:12px 13px;
+  background:var(--surface-2);color:var(--text-primary);
+  font-size:16px;line-height:1.5;font-family:inherit;
+}
+.dw-overtime-decision-form textarea{min-height:105px;resize:vertical}
+.dw-overtime-decision-form :is(input,textarea):focus-visible {
+  outline:2px solid var(--primary);outline-offset:2px;
+}
+.dw-overtime-decision-form .dw-overtime-preview {
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px;border-radius:11px;background:var(--surface-2);
+  font-size:14px;line-height:1.4;color:var(--text-secondary);
+}
+.dw-overtime-preview strong{font-size:19px;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+.dw-overtime-decision-form .dw-overtime-dialog-actions {
+  display:flex;justify-content:flex-end;align-items:center;gap:11px;
+  border-top:1px solid var(--border);padding-top:15px;
+}
+.dw-overtime-decision-form .dw-overtime-dialog-actions button {
+  min-height:49px;min-width:120px;font-size:15px;
+}
+@media(max-width:1050px){
+  .dw-overtime-page .dw-overtime-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dw-overtime-page .dw-overtime-list{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:600px){
+  .dw-overtime-page .dw-overtime-filters{padding:13px;gap:11px}
+  .dw-overtime-page .dw-overtime-card{padding:14px}
+  .dw-overtime-page .dw-overtime-list{padding:12px}
+  .dw-overtime-page .dw-overtime-search-label{grid-column:1/-1}
+  .dw-overtime-decision-form .dw-overtime-dialog-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dw-overtime-decision-form .dw-overtime-dialog-actions button{min-width:0;width:100%}
+}
+@media(max-width:360px){
+  .dw-overtime-page .dw-overtime-filters{grid-template-columns:minmax(0,1fr)}
+  .dw-overtime-page .dw-overtime-actions{flex-direction:column}
+  .dw-overtime-page .dw-overtime-actions button{width:100%;flex:0 0 auto}
+}
