@@ -5,6 +5,7 @@ import { Eye, EyeOff, KeyRound, Link2, Lock, ShieldCheck } from 'lucide-react';
 import { authRecoveryService } from '../../services/authRecovery.service';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/account-security.css';
+import '../../styles/account-security-inputs.css';
 
 export const AccountSecurity = () => {
   const { user } = useAuth();
