@@ -29,6 +29,12 @@ test('credits are always server-authoritative, not generated in local storage', 
   assert.match(chip, /creditWalletService\.overview/);
 });
 
+test('Buy Credits header omits Razorpay Top-Up label without removing checkout', () => {
+  assert.doesNotMatch(credit, /RAZORPAY TOP-UP/);
+  assert.match(credit, /<h2>Choose a credit package<\/h2>/);
+  assert.match(credit, /purchaseCredits\(pack\.id\)/);
+});
+
 test('credit purchases and feature actions require confirmation from backend', () => {
   assert.match(credit, /purchaseCredits\(pack\.id\)/);
   assert.match(credit, /creditWalletService\.enableFeature\(feature\.key\)/);
