@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowDownLeft, ArrowRight, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Coins, CreditCard, Database, FileClock, RefreshCcw, ShieldCheck, Users, Wallet, Zap } from 'lucide-react';
 import { creditWalletService, notifyCreditChange, purchaseCredits } from '../../services/creditWallet.service';
 import { AccountHeader } from '../../components/account';
 import { CreditCycleCard } from '../../components/account/CreditCycleCard';
@@ -305,17 +305,17 @@ export function CreditWorkspace({ section = 'overview' }) {
         : <article className="cg-credit-metric"><div><span>Estimated Monthly Features</span><Coins size={20}/></div><strong>{credits(wallet?.monthlyCredits)}</strong><small>Credits / month; pending postpaid usage: {credits(wallet?.postpaidAccruedCredits)} credits</small></article>}
     </div>
 
-    {low && <div className="cg-credit-low" role="alert"><Coins size={20}/><div><strong>Your credit balance is running low.</strong><span>Buy more credits so paid modules can renew when due.</span></div><button onClick={() => navigate('/account/credits/buy')}>Buy Credits <ArrowRight size={16}/></button></div>}
+    {low && <div className="cg-credit-low" role="alert"><Coins size={20}/><div><strong>Your credit balance is running low.</strong><span>Buy more credits so paid modules can renew when due.</span></div><button onClick={() => navigate('/account/credits/buy')}>Buy Credits </button></div>}
 
     {section === 'overview' && featureAccess.paidAccessRequired && featureAccess.modules.length === 0 &&
-      <div className="cg-credit-low" role="status"><Zap size={20}/><div><strong>Welcome — activate your workshop modules</strong><span>Start by buying credits and selecting features. Only modules activated by the owner become available.</span></div><button onClick={() => navigate('/account/credits/features')}>Choose Features <ArrowRight size={16}/></button></div>}
+      <div className="cg-credit-low" role="status"><Zap size={20}/><div><strong>Welcome — activate your workshop modules</strong><span>Start by buying credits and selecting features. Only modules activated by the owner become available.</span></div><button onClick={() => navigate('/account/credits/features')}>Choose Features </button></div>}
 
     {(section === 'overview' || section === 'features') && <section className="cg-credit-panel" aria-label="Free modules">
       <header><div><span>INCLUDED — NO CREDITS</span><h2>Free modules for your company</h2></div><ShieldCheck size={22}/></header>
       <p>Dashboard, Settings, Staff Management, Roles & Permissions and SaaS Account have no feature activation or credit charge. Login and role permissions still apply. Other modules require an active paid Feature Label.</p>
       <div className="cg-credit-shortcuts">
         {freeRoutes.map(route => { const Icon = route.icon; return <button type="button" key={route.id} onClick={() => navigate(route.path)}>
-          <Icon size={19}/><strong>{route.label}</strong><small>Free • allowed by your role</small><ArrowRight size={16}/>
+          <Icon size={19}/><strong>{route.label}</strong><small>Free • allowed by your role</small>
         </button>; })}
       </div>
       {!freeRoutes.length && <p className="cg-credit-empty">No free modules are assigned to this login. Ask your company administrator about role permissions.</p>}
@@ -329,7 +329,7 @@ export function CreditWorkspace({ section = 'overview' }) {
           : 'Paid-feature enforcement is currently off. Visible modules follow your role permissions.'}</p>
         {availableRoutes.length ? <div className="cg-credit-shortcuts">
           {availableRoutes.map(route => { const Icon = route.icon; return <button key={route.id} type="button" onClick={() => navigate(route.path)}>
-            <Icon size={19}/><strong>{route.label}</strong><small>Open authorized module</small><ArrowRight size={16}/>
+            <Icon size={19}/><strong>{route.label}</strong><small>Open authorized module</small>
           </button>; })}
         </div> : <p className="cg-credit-empty">No workshop modules are available for this login. An authorized company admin can review Feature Controls.</p>}
       </>}
@@ -353,7 +353,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         })}
       </div> : <p className="cg-credit-empty">No active feature labels. Activate a published label to unlock paid workshop modules.</p>}
       <div className="cg-credit-actions">
-        <button type="button" className="primary" onClick={() => navigate('/account/credits/features')}>View Prices &amp; Activation <ArrowRight size={16}/></button>
+        <button type="button" className="primary" onClick={() => navigate('/account/credits/features')}>View Prices &amp; Activation </button>
         <button type="button" onClick={() => navigate('/account/credits/logs')}>Check Wallet Cash Flow <FileClock size={16}/></button>
       </div>
     </section>}
@@ -364,7 +364,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         <p>Buy wallet credits as needed. {wallet?.billingMode === 'monthly_postpaid'
         ? 'Monthly feature usage and actual storage GB-time accumulate in the backend and settle after month-end.'
         : 'Feature activation and renewals are recorded in the company wallet ledger.'}</p>
-        <div className="cg-credit-actions"><button className="primary" onClick={() => navigate('/account/credits/buy')}><CreditCard size={17}/> Buy Credits</button><button onClick={() => navigate('/account/credits/features')}>Manage Features <ArrowRight size={16}/></button></div>
+        <div className="cg-credit-actions"><button className="primary" onClick={() => navigate('/account/credits/buy')}><CreditCard size={17}/> Buy Credits</button><button onClick={() => navigate('/account/credits/features')}>Manage Features </button></div>
         {account && <div className="cg-credit-inline"><span>Company subdomain identifier</span><strong>{account.subdomain}</strong></div>}
         {account?.configuredTenantUrl && <p><a href={account.configuredTenantUrl}>{account.configuredTenantUrl}</a></p>}
         <div className="cg-credit-inline"><span>Low credit alert threshold</span><strong>{credits(wallet?.lowThreshold)} credits</strong></div>
@@ -373,17 +373,17 @@ export function CreditWorkspace({ section = 'overview' }) {
       <section className="cg-credit-panel"><header><div><span>RECENT ACTIVITY</span><h2>Latest wallet changes</h2></div><FileClock size={22}/></header>
         {logs.slice(0,5).map((row) => <div className="cg-credit-log" key={row.id}><div className={Number(row.delta) >= 0 ? 'in' : 'out'}>{Number(row.delta) >= 0 ? <ArrowDownLeft size={17}/> : <ArrowUpRight size={17}/>}</div><div><strong>{row.description}</strong><small>{when(row.createdAt)}</small></div><b>{Number(row.delta) > 0 ? '+' : ''}{credits(row.delta)}</b></div>)}
         {!logs.length && <p className="cg-credit-empty">No verified credit transactions available.</p>}
-        <button className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View all logs <ArrowRight size={16}/></button>
+        <button className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View all logs </button>
       </section>
       <section className="cg-credit-panel cg-credit-wide"><header><div><span>MANAGE YOUR TOOLS</span><h2>Features and storage</h2></div><Zap size={22}/></header>
-        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small><ArrowRight size={16}/></button>{featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small><ArrowRight size={16}/></button>}<button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small><ArrowRight size={16}/></button></div>
+        <div className="cg-credit-shortcuts"><button onClick={() => navigate('/account/credits/features')}><Zap size={19}/><strong>Feature Controls</strong><small>Enable modules and view 30-day prices</small></button>{featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <button onClick={() => navigate('/account/storage')}><Database size={19}/><strong>Storage Usage</strong><small>Files, GB and real storage event history</small></button>}<button onClick={() => navigate('/account/credits/logs')}><FileClock size={19}/><strong>Wallet Logs</strong><small>Charges, top-ups and adjustments</small></button></div>
       </section>
     </div>}
 
     {section === 'buy' && <section className="cg-credit-panel"><header><div><h2>Choose a credit package</h2></div><CreditCard size={22}/></header>
       <p>Package prices and credit amounts come from the server. No money or credits are created until Razorpay verifies a captured payment.</p>
       <div className="cg-credit-packages">{packages.filter(p => p.active).map((pack) => <article key={pack.id}>
-        <span>ONE-TIME TOP-UP</span><h3>{pack.name}</h3><strong>{credits(pack.credits)} <small>credits</small></strong><p>{money(pack.priceInr)} payable</p><button className="primary" type="button" disabled={busy !== '' || !wallet?.checkoutAvailable || !wallet?.canManage} onClick={() => buy(pack)}>{busy === `package:${pack.id}` ? 'Opening payment page…' : 'Buy Credits'} <ArrowRight size={16}/></button>
+        <span>ONE-TIME TOP-UP</span><h3>{pack.name}</h3><strong>{credits(pack.credits)} <small>credits</small></strong><p>{money(pack.priceInr)} payable</p><button className="primary" type="button" disabled={busy !== '' || !wallet?.checkoutAvailable || !wallet?.canManage} onClick={() => buy(pack)}>{busy === `package:${pack.id}` ? 'Opening payment page…' : 'Buy Credits'} </button>
       </article>)}</div>
       {!packages.some(p=>p.active) && !loading && <p className="cg-credit-empty">No credit packages have been published by the administrator.</p>}
       {wallet && !wallet.checkoutAvailable && <p className="cg-credit-note">Secure checkout is not configured on the backend yet. Buying credits is disabled.</p>}
@@ -476,7 +476,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         </tr>)}
         {!(featureUsage.activeModules || []).length && <tr><td colSpan={4} className="cg-credit-empty">No timed modules have been enabled yet.</td></tr>}
       </tbody></table></div>
-      {section !== 'logs' && <button type="button" className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View detailed usage logs <ArrowRight size={16}/></button>}
+      {section !== 'logs' && <button type="button" className="cg-credit-link" onClick={() => navigate('/account/credits/logs')}>View detailed usage logs </button>}
     </section>}
 
     {section === 'logs' && featureUsage && <section className="cg-credit-panel" aria-label="Metered module usage history">
@@ -523,7 +523,7 @@ export function CreditWorkspace({ section = 'overview' }) {
         {logs.map(row => <tr key={row.id}><td>{when(row.createdAt)}</td><td><strong>{row.description}</strong><small>{row.kind}</small></td><td className={Number(row.delta)>=0?'positive':'negative'}>{Number(row.delta)>0?'+':''}{credits(row.delta)}</td><td>{credits(row.balanceAfter)}</td><td>{row.reference || '—'}</td></tr>)}
         {!logs.length && <tr><td colSpan={5} className="cg-credit-empty">No credit transactions recorded.</td></tr>}
       </tbody></table></div>
-      <p className="cg-credit-note">Logs are read-only and company-scoped. {featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <>For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History <ArrowRight size={14}/></button>.</>}</p>
+      <p className="cg-credit-note">Logs are read-only and company-scoped. {featureAccess.isCompanyOwner && featureAccess.can('billing.view') && <>For storage upload/delete events, open <button onClick={() => navigate('/account/storage/history')}>Storage History </button>.</>}</p>
     </section>}
   </div>;
 }
