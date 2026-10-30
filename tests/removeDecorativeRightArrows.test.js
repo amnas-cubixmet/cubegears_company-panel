@@ -9,7 +9,7 @@ const files = (directory) => readdirSync(directory, { withFileTypes: true }).fla
   if (entry.isDirectory()) return files(fullPath);
   return /\.(jsx|tsx)$/.test(entry.name) ? [fullPath] : [];
 });
-const source = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
+const source = path => readFileSync(new URL('../src/' + path, import.meta.url), 'utf8');
 
 test('entire Company Panel renders no decorative ArrowRight icons', () => {
   const paths = files(root.pathname);
