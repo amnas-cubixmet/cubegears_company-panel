@@ -381,7 +381,6 @@ export function CreditWorkspace({ section = 'overview' }) {
     </div>}
 
     {section === 'buy' && <section className="cg-credit-panel"><header><div><h2>Choose a credit package</h2></div><CreditCard size={22}/></header>
-      <p>Package prices and credit amounts come from the server. No money or credits are created until Razorpay verifies a captured payment.</p>
       <div className="cg-credit-packages">{packages.filter(p => p.active).map((pack) => <article key={pack.id}>
         <span>ONE-TIME TOP-UP</span><h3>{pack.name}</h3><strong>{credits(pack.credits)} <small>credits</small></strong><p>{money(pack.priceInr)} payable</p><button className="primary" type="button" disabled={busy !== '' || !wallet?.checkoutAvailable || !wallet?.canManage} onClick={() => buy(pack)}>{busy === `package:${pack.id}` ? 'Opening payment page…' : 'Buy Credits'} </button>
       </article>)}</div>
