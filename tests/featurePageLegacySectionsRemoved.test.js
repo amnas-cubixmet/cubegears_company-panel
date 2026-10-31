@@ -14,16 +14,16 @@ test('Feature Controls no longer displays legacy Optional Modules section',()=>{
   assert.doesNotMatch(source,/const toggle = async/);
 });
 
-test('Server-Recorded Usage widget is not rendered on features page',()=>{
-  assert.match(source,/\(section === 'overview' \|\| section === 'logs'\) && featureUsage && <section/);
+test('Server-Recorded Usage summary widget is removed from company panel',()=>{
+  assert.doesNotMatch(source,/SERVER-RECORDED USAGE/);
   assert.doesNotMatch(source,/section === 'overview' \|\| section === 'features' \|\| section === 'logs'\) && featureUsage/);
-  assert.match(source,/Module Time Usage/);
-  assert.match(source,/currentMonthLoggedCredits/);
+  assert.doesNotMatch(source,/Module Time Usage/);
+  assert.doesNotMatch(source,/currentMonthLoggedCredits/);
   assert.match(source,/featureUsage\.readings/);
 });
 
-test('Still show paid label marketplace, free modules and server-authorized billing',()=>{
-  assert.match(source,/section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace"/);
+test('Paid label marketplace remains on overview, with free modules and server-authorized billing',()=>{
+  assert.match(source,/section === 'overview' && <section className="cg-credit-panel cg-bundle-marketplace"/);
   assert.match(source,/Paid workshop modules/);
   assert.match(source,/paidBundles\.map/);
   assert.match(source,/onClick=\{\(\) => buyBundle\(bundle\)\}/);
