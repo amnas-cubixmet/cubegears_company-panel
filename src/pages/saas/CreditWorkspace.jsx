@@ -36,7 +36,6 @@ export function CreditWorkspace({ section = 'overview' }) {
   const [featureUsage, setFeatureUsage] = useState(null);
   const [packages, setPackages] = useState([]);
   const [featureBundles, setFeatureBundles] = useState([]);
-  const [features, setFeatures] = useState([]);
   const [logs, setLogs] = useState([]);
   const [monthlyStatements, setMonthlyStatements] = useState([]);
   const [calendarBilling, setCalendarBilling] = useState(null);
@@ -50,9 +49,9 @@ export function CreditWorkspace({ section = 'overview' }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [balance, bundles, catalog, history, labels, statements, accountInfo, activity, calendarResult, usageResult] = await Promise.allSettled([
+    const [balance, bundles, history, labels, statements, accountInfo, activity, calendarResult, usageResult] = await Promise.allSettled([
       creditWalletService.overview(), creditWalletService.packages(),
-      creditWalletService.features(), creditWalletService.logs(),
+      creditWalletService.logs(),
       creditWalletService.bundles(), creditWalletService.monthlyStatements(),
       creditWalletService.account(), creditWalletService.featureActivity(),
       creditWalletService.calendarBilling(),
@@ -77,8 +76,6 @@ export function CreditWorkspace({ section = 'overview' }) {
     else { setWallet(null); problems.push('wallet balance'); }
     if (bundles.status === 'fulfilled') setPackages(Array.isArray(bundles.value) ? bundles.value : []);
     else { setPackages([]); problems.push('credit packages'); }
-    if (catalog.status === 'fulfilled') setFeatures(Array.isArray(catalog.value) ? catalog.value : []);
-    else { setFeatures([]); problems.push('feature prices'); }
     if (history.status === 'fulfilled') setLogs(Array.isArray(history.value) ? history.value : []);
     else { setLogs([]); problems.push('transaction logs'); }
     if (labels.status === 'fulfilled') setFeatureBundles(Array.isArray(labels.value) ? labels.value : []);
@@ -198,23 +195,6 @@ export function CreditWorkspace({ section = 'overview' }) {
       await load();
       notifyCreditChange();
     } catch (e) { setError(e?.message || 'Could not disable this module access.'); }
-    finally { setBusy(''); }
-  };
-
-  const toggle = async (feature) => {
-    setBusy(`feature:${feature.key}`); setError(''); setNotice('');
-    try {
-      const result = feature.enabled
-        ? await creditWalletService.disableFeature(feature.key)
-        : await creditWalletService.enableFeature(feature.key);
-      setNotice(feature.enabled
-        ? `${feature.label} switched off. Any postpaid usage will be settled at the month-end.`
-        : result?.billingMode === 'monthly_postpaid'
-          ? `${feature.label} activated. Credits will be calculated from active time and settled monthly.`
-          : `${feature.label} activated. ${credits(result?.chargedCredits)} credits debited by the server.`);
-      await load();
-      notifyCreditChange();
-    } catch (e) { setError(e?.message || 'Unable to change feature. Balance is unchanged unless the server confirms it.'); }
     finally { setBusy(''); }
   };
 
@@ -441,27 +421,7 @@ export function CreditWorkspace({ section = 'overview' }) {
       {wallet && !wallet.canManage && <p className="cg-credit-note">Only the company account owner can purchase module access.</p>}
     </section>}
 
-    {section === 'features' && !featureAccess.labelOnly && <section className="cg-credit-panel"><header><div><span>OPTIONAL MODULES</span><h2>Enable or disable features</h2></div><Zap size={22}/></header>
-      <p>Each module uses the backend-configured credit price. Prepaid modules deduct credits on activation and renewal; deferred modules log ON time at the selected rate period and collect on the next month's due date. Every staff member still requires their role permission.</p>
-      <div className="cg-credit-features">{features.filter(feature => !freeKeys.includes(feature.key)).map((feature) => <article key={feature.key}>
-        <div className="cg-credit-feature-main"><div><h3>{feature.label}</h3><p>{feature.description || 'Workshop management module'}</p></div><span className={feature.enabled ? 'cg-credit-pill active' : 'cg-credit-pill'}>{feature.enabled ? 'Active' : 'Off'}</span></div>
-        <div className="cg-credit-feature-cost">
-          <span>Activation: <b>{credits(feature.activationCredits)} cr</b></span>
-          <span>Base / {feature.billingPeriod}: <b>{credits(feature.baseCredits)} cr</b></span>
-          <span>Per user: <b>{credits(feature.perUserCredits)} cr</b> × {feature.userCount ?? '—'}</span>
-          <span>Per employee: <b>{credits(feature.perStaffCredits)} cr</b> × {feature.staffCount ?? '—'}</span>
-          <span>Recurring / {feature.billingPeriod}: <b>{credits(feature.periodCredits)} cr</b></span>
-          <span>Estimated / 30 days: <b>{credits(feature.monthlyCredits)} cr</b></span>
-        </div>
-        <div className="cg-credit-feature-footer"><small>{feature.suspended ? 'Suspended — insufficient wallet credits'
-          : feature.enabled && feature.billingMode === 'monthly_postpaid' ? 'Metered each cycle · charged after month-end'
-          : feature.enabled ? `Next charge: ${when(feature.nextChargeAt)}` : 'Not enabled'} · {feature.userCount ?? '—'} users, {feature.staffCount ?? '—'} employees</small><button type="button" disabled={busy !== '' || !feature.available || !wallet?.canManage} className={feature.enabled ? 'secondary' : 'primary'} onClick={() => toggle(feature)}>{busy === `feature:${feature.key}` ? 'Saving…' : feature.enabled ? 'Switch Off' : 'Enable Feature'}</button></div>
-      </article>)}</div>
-      {!features.length && !loading && <p className="cg-credit-empty">No feature pricing has been configured by the administrator.</p>}
-      {wallet && !wallet.canManage && <p className="cg-credit-note">Only the company account owner can change paid features.</p>}
-    </section>}
-
-    {(section === 'overview' || section === 'features' || section === 'logs') && featureUsage && <section className="cg-credit-panel" aria-label="Module time-based credit usage">
+    {(section === 'overview' || section === 'logs') && featureUsage && <section className="cg-credit-panel" aria-label="Module time-based credit usage">
       <header><div><span>SERVER-RECORDED USAGE</span><h2>Module Time Usage · {featureUsage.currentMonth}</h2></div><FileClock size={22}/></header>
       <p>Credits accrue only for observed ON seconds at the module's selected rate (10 seconds, hourly, daily, weekly or 30 days). Turning OFF stops new usage, but logged credits remain payable. The wallet is charged on the next month's configured due date, not after each interval.</p>
       <div className="cg-credit-inline"><span>Current-month logged feature usage</span><strong>{credits(featureUsage.currentMonthLoggedCredits)} credits (not debited)</strong></div>
