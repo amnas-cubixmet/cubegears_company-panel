@@ -56,9 +56,9 @@ test('wallet keeps real payment guards, refresh and staff based charges', () => 
   assert.match(credit, /purchaseCredits\(pack\.id\)/);
   assert.match(credit, /\!wallet\?\.checkoutAvailable \|\| \!wallet\?\.canManage/);
   assert.match(credit, /featureAccess\.refresh\(\)/);
-  assert.match(credit, /feature\.perStaffCredits/);
-  assert.match(credit, /feature\.monthlyCredits/);
-  assert.match(credit, /creditWalletService\.disableFeature/);
+  assert.match(credit, /bundle\.perUserCredits/);
+  assert.match(credit, /credits\(bundle\.totalCredits\)/);
+  assert.match(credit, /creditWalletService\.disableBundle/);
 });
 
 test('storage shows file usage and event history, not subscription price or plan lookup', () => {
