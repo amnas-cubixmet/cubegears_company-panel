@@ -35,6 +35,14 @@ test('Buy Credits header omits Razorpay Top-Up label without removing checkout',
   assert.match(credit, /purchaseCredits\(pack\.id\)/);
 });
 
+test('Buy Credits removes server verification explanatory paragraph only', () => {
+  assert.doesNotMatch(credit, /Package prices and credit amounts come from the server/);
+  assert.doesNotMatch(credit, /No money or credits are created until Razorpay verifies a captured payment/);
+  assert.match(credit, /<h2>Choose a credit package<\/h2>/);
+  assert.match(credit, /packages\.filter\(p => p\.active\)/);
+  assert.match(credit, /onClick=\{\(\) => buy\(pack\)\}/);
+});
+
 test('credit purchases and feature actions require confirmation from backend', () => {
   assert.match(credit, /purchaseCredits\(pack\.id\)/);
   assert.match(credit, /creditWalletService\.enableFeature\(feature\.key\)/);
