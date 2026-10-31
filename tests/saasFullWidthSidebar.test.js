@@ -47,6 +47,7 @@ test('overview shows authorized module count and server-based price/cash-flow ra
   assert.match(workspace, /credits\(bundle\.totalCredits\)/);
   assert.match(workspace, /bundle\.billingType === 'permanent'/);
   assert.match(workspace, /Check Wallet Cash Flow/);
-  assert.match(workspace, /section === 'features' && !featureAccess\.labelOnly/);
+  assert.doesNotMatch(workspace, /section === 'features' && !featureAccess\.labelOnly/);
+  assert.match(workspace, /section === 'features' && <section className="cg-credit-panel cg-bundle-marketplace"/);
   assert.match(workspace, /notifyCreditChange\(\)/);
 });

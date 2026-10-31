@@ -45,7 +45,7 @@ test('Buy Credits removes server verification explanatory paragraph only', () =>
 
 test('credit purchases and feature actions require confirmation from backend', () => {
   assert.match(credit, /purchaseCredits\(pack\.id\)/);
-  assert.match(credit, /creditWalletService\.enableFeature\(feature\.key\)/);
-  assert.match(credit, /creditWalletService\.disableFeature\(feature\.key\)/);
+  assert.match(credit, /creditWalletService\.purchaseBundle\(bundle\.id\)/);
+  assert.match(credit, /creditWalletService\.disableBundle\(bundle\.id\)/);
   assert.match(credit, /payment\.credited === true && payment\.status === 'credited'/);
 });

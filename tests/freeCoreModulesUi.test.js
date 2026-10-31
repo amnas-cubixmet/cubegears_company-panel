@@ -91,7 +91,7 @@ test('free module cards appear on SaaS account and feature controls without purc
   assert.match(wallet, /Paid workshop modules \(\{paidBundles\.length\}\)/);
   assert.match(wallet, /paidBundles\.map\(\(bundle\)/);
   assert.match(wallet, /!featureAccess\.freeModules\?\.includes/);
-  assert.match(wallet, /features\.filter\(feature => !freeKeys\.includes\(feature\.key\)\)/);
+  assert.doesNotMatch(wallet, /features\.filter\(feature => !freeKeys\.includes\(feature\.key\)\)\.map/);
   assert.match(wallet, /purchaseDisabledReason === 'FREE_MODULES_ONLY'/);
   assert.match(wallet, /freeKeys = \['dashboard', 'settings', 'staff', 'roles', 'billing'\]/);
   assert.match(wallet, /featureAccess\.freeModules\?\.includes\('roles'\)/);
