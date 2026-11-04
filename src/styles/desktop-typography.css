@@ -459,120 +459,29 @@
   color: var(--success);
 }
 }
-
-/*
- * Final high-specificity correction for nested fields. Dark-mode input styling
- * above applies a filled background to every input, including inputs that live
- * inside bordered search/icon shells. That creates the reported double-box UI.
- * Preserve one outer surface and retain the native/custom select arrow.
- */
+/* Final theme-safe shell reset: prevent a second border/background inside
+   icon and search controls; preserve borderless Stock/Customer styling. */
 @media screen {
-  :is(body, #root) :is(
-    .global-search-field,
-    .crud-search,
-    .dashboard-search,
-    .attendance-history-search,
-    .ui-input-shell,
-    [data-cg-input-shell="true"],
-    .login-input-shell,
-    .outside-labour-search,
-    .customer-lookup-input,
-    .customer-dashboard-search,
-    .job-customer-search,
-    .job-quick-catalog-field,
-    .cg-inspection-search,
-    .stock-search,
-    .service-search,
-    .service-dashboard-search,
-    .vehicle-search,
-    .vehicle-dashboard-search,
-    .staff-directory-search,
-    .staff-simple-search,
-    .expense-search,
-    .expense-dashboard-search,
-    .payments-dashboard-search,
-    .am-search-field,
-    .payroll-all-staff__search
+  :is(body,#root) :is(
+    .global-search-field,.crud-search,.dashboard-search,
+    .attendance-history-search,.ui-input-shell,[data-cg-input-shell="true"],
+    .login-input-shell,.outside-labour-search,.customer-lookup-input,
+    .customer-dashboard-search,.job-customer-search,.job-quick-catalog-field,
+    .cg-inspection-search,.stock-search,.service-search,.service-dashboard-search,
+    .vehicle-search,.vehicle-dashboard-search,.staff-directory-search,
+    .staff-simple-search,.expense-search,.expense-dashboard-search,
+    .payments-dashboard-search,.am-search-field,.payroll-all-staff__search
   ) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
-  :is(body, #root) .attendance-month-select-field select,
-  :is(body, #root) .customer-directory-form [data-cg-input-shell="true"] select {
-    min-width: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    background-color: transparent !important;
+  :is(body,#root) .attendance-month-select-field select,
+  :is(body,#root) .customer-directory-form [data-cg-input-shell="true"] select {
+    min-width:0!important;border:0!important;border-radius:0!important;
+    outline:0!important;box-shadow:none!important;
+    background:transparent!important;background-color:transparent!important;
   }
-
-  /* The outer control already handles focus or validation; the inner input
-     should not draw a second halo or outline. */
-  :is(body, #root) :is(
-    .global-search-field,
-    .crud-search,
-    .dashboard-search,
-    .attendance-history-search,
-    .ui-input-shell,
-    [data-cg-input-shell="true"],
-    .login-input-shell,
-    .outside-labour-search,
-    .customer-lookup-input,
-    .customer-dashboard-search,
-    .job-customer-search,
-    .job-quick-catalog-field,
-    .cg-inspection-search,
-    .stock-search,
-    .service-search,
-    .service-dashboard-search,
-    .vehicle-search,
-    .vehicle-dashboard-search,
-    .staff-directory-search,
-    .staff-simple-search,
-    .expense-search,
-    .expense-dashboard-search,
-    .payments-dashboard-search,
-    .am-search-field,
-    .payroll-all-staff__search
-  ) input:not([type="checkbox"]):not([type="radio"]):focus-visible,
-  :is(body, #root) .attendance-month-select-field select:focus-visible {
-    outline: 0 !important;
-    box-shadow: none !important;
-  }
-
-  /* Real focus treatment lives on the border-bearing parent. Keep the
-     deliberately borderless Add Workshop Customer and Stock picker styles. */
-  :is(body, #root) :is(
-    .global-search-field,
-    .crud-search,
-    .dashboard-search,
-    .attendance-history-search,
-    .ui-input-shell,
-    .attendance-month-select-field,
-    .outside-labour-search,
-    .customer-lookup-input,
-    .customer-dashboard-search,
-    .job-customer-search,
-    .job-quick-catalog-field,
-    .cg-inspection-search,
-    .service-search,
-    .service-dashboard-search,
-    .vehicle-search,
-    .vehicle-dashboard-search,
-    .staff-directory-search,
-    .staff-simple-search,
-    .expense-search,
-    .expense-dashboard-search,
-    .payments-dashboard-search,
-    .am-search-field,
-    .payroll-all-staff__search
+  :is(body,#root) :is(
+    .global-search-field,.crud-search,.dashboard-search,.attendance-history-search,
+    .ui-input-shell,.attendance-month-select-field,.outside-labour-search
   ):focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-soft);
-  }
-
-  :is(body, #root) :is(.app-shell, .saas-account-shell, .login-page)
-  :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]), textarea, select, [role="combobox"]) {
-    font-size: 16px !important;
-    line-height: 1.5;
+    border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);
   }
 }
