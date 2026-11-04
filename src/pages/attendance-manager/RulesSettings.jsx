@@ -363,8 +363,8 @@ export const RulesSettings = () => {
                 setRules((current) => ({
                   ...current,
                   punchLocationMode: mode,
-                  locationRequired: mode === 'workshop' ? true : current.locationRequired,
-                  locationTrackingEnabled: mode === 'workshop' ? true : current.locationTrackingEnabled,
+                  locationRequired: mode === 'workshop',
+                  locationTrackingEnabled: mode === 'workshop',
                 }));
                 setLocationStatus('');
               }}
