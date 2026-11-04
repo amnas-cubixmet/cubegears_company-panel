@@ -427,6 +427,7 @@ export const RulesSettings = () => {
             <input
               type="checkbox"
               checked={Boolean(rules.locationTrackingEnabled)}
+              disabled={rules.punchLocationMode === 'workshop'}
               onChange={(e) => {
                 if (rules.punchLocationMode === 'workshop') return;
                 setRules((current) => ({
@@ -445,7 +446,7 @@ export const RulesSettings = () => {
             </span>
             <input
               type="checkbox"
-              disabled={!rules.locationTrackingEnabled}
+              disabled={!rules.locationTrackingEnabled || rules.punchLocationMode === 'workshop'}
               checked={Boolean(rules.locationRequired)}
               onChange={(e) => change('locationRequired', e.target.checked)}
             />
