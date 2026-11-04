@@ -9,8 +9,8 @@ test('all ordinary fields have a consistent mobile-safe baseline', () => {
   assert.match(css, /--cg-field-height:\s*44px/);
   assert.match(css, /--cg-field-radius:\s*10px/);
   assert.match(css, /font-size:\s*16px/);
-  assert.match(css, /border-color:\s*var\(--field-border\)/);
-  assert.match(css, /background-color:\s*var\(--field-bg\)/);
+  assert.match(css, /--cg-field-border:\s*var\(--border\)/);
+  assert.match(css, /background-color:\s*var\(--surface-2\)/);
   assert.match(css, /:disabled\s*\{/);
   assert.match(css, /:read-only:not\(select\)/);
   assert.match(css, /\[type="checkbox"\]/);
@@ -30,11 +30,11 @@ test('bordered shell owns focus, nested icon/search inputs remain transparent an
   assert.match(css, /\.dashboard-search/);
   assert.match(css, /\.ui-input-shell/);
   assert.match(css, /\[data-cg-input-shell="true"\]/);
-  assert.match(css, /border:\s*0 !important/);
-  assert.match(css, /border-radius:\s*0 !important/);
-  assert.match(css, /outline:\s*0 !important/);
-  assert.match(css, /box-shadow:\s*none !important/);
-  assert.match(css, /background:\s*transparent !important/);
+  assert.match(css, /border:\s*0\s*!important/);
+  assert.match(css, /border-radius:\s*0\s*!important/);
+  assert.match(css, /outline:\s*0\s*!important/);
+  assert.match(css, /box-shadow:\s*none\s*!important/);
+  assert.match(css, /background:\s*transparent\s*!important/);
   assert.match(css, /:focus-within\s*\{[\s\S]*?border-color:\s*var\(--primary\)/);
 });
 
@@ -49,5 +49,5 @@ test('global field polish loads after page-specific styles and retains validatio
   assert.match(validation, /\[aria-invalid="true"\]/);
   assert.match(customer, /\.customer-directory-form \[data-cg-input-shell="true"\]/);
   assert.match(stock, /\.cg-easy-stock \.cg-easy-form \.cg-easy-picker-search/);
-  assert.match(typography, /deliberately borderless Add Workshop Customer and Stock picker/);
+  assert.match(typography, /preserve borderless Stock\/Customer styling/);
 });
