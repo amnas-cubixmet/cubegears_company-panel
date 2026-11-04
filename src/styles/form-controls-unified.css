@@ -192,23 +192,13 @@
     font-size: 16px !important;
   }
 }
-/* Shared field states; page-specific controls remain authoritative. */
-:root { --cg-field-height:44px; }
-@media screen {
+/* Shared touch height and disabled state; page-specific form UI stays in control. */
+:root{--cg-field-height:44px}
+@media screen{
   :where(.app-shell,.saas-account-shell,.login-page,.responsive-modal-sheet,[role="dialog"])
-  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="hidden"]),select,textarea) {
-    min-width:0;max-width:100%;font-size:16px;color:var(--text-primary);
-  }
-  :where(.app-shell,.saas-account-shell,.login-page,.responsive-modal-sheet,[role="dialog"])
-  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="hidden"]),select):not(:where(.ui-input-shell input,.attendance-month-select-field select)) {
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="hidden"]),select):not(:where(.ui-input-shell input,.attendance-month-select-field select)){
     min-height:var(--cg-field-height);
   }
   :where(.app-shell,.saas-account-shell,.login-page,.responsive-modal-sheet,[role="dialog"])
-  :where(input,textarea)::placeholder { color:var(--text-muted);opacity:1; }
-  :where(.app-shell,.saas-account-shell,.login-page,.responsive-modal-sheet,[role="dialog"])
-  :where(input,select,textarea):disabled { opacity:.65;cursor:not-allowed; }
-  :where(.app-shell,.saas-account-shell,.login-page,.responsive-modal-sheet,[role="dialog"])
-  :where(input,textarea):read-only:not(select) { cursor:default; }
-  :root[data-theme="dark"] :where(select,input[type="date"],input[type="time"],input[type="datetime-local"]){color-scheme:dark}
-  :root[data-theme="light"] :where(select,input[type="date"],input[type="time"],input[type="datetime-local"]){color-scheme:light}
+  :where(input,select,textarea):disabled{opacity:.65;cursor:not-allowed}
 }
