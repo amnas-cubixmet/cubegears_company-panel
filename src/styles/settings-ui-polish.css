@@ -345,7 +345,7 @@
 .settings-page .settings-logo-description{display:flex;flex:1 1 220px;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
 .settings-page .settings-logo-description strong{font-size:16px;color:var(--text-primary)}
 .settings-page .settings-logo-description p,.settings-page .settings-logo-description small{font-size:13px;line-height:1.45;color:var(--text-secondary)}
-.settings-page .settings-logo-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.settings-page .settings-logo-file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px}
 .settings-page .settings-logo-upload-button{margin-top:5px;min-height:44px}
 .settings-page .settings-logo-status{display:block;font-size:13px;line-height:1.4}
 .settings-page .settings-logo-status.is-success{color:var(--success)}
