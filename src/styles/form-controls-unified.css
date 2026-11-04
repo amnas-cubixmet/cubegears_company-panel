@@ -17,7 +17,7 @@
   min-width: 0;
   max-width: 100%;
   font-family: var(--cg-font-family, inherit);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
   border: 1px solid var(--cg-field-border);
   border-radius: var(--cg-field-radius);
@@ -147,7 +147,7 @@
   height: 16px;
 }
 :is(body, #root) .outside-labour-search input {
-  font-size: 13px !important;
+  font-size: 16px !important;
   line-height: normal;
 }
 :is(body, #root) .outside-labour-search input::placeholder {
@@ -190,5 +190,100 @@
     .payroll-all-staff__search
   ) input:not([type="checkbox"]) {
     font-size: 16px !important;
+  }
+}
+
+/*
+ * Form baseline used across Workshop, Account and Authentication screens.
+ * Low-specificity defaults deliberately respect specialized borderless forms,
+ * date pickers, select libraries and custom sized input components.
+ */
+:root {
+  --cg-field-height: 44px;
+  --cg-field-padding-inline: 12px;
+  --cg-field-transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+
+@media screen {
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]),
+    select, textarea, [role="combobox"]
+  ) {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    transition: var(--cg-field-transition);
+  }
+
+  /* Standalone fields own one border; their containing icons/search shells do not. */
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]),
+    select, textarea
+  ):not(:where(
+    .ui-input-shell input, .ui-input-shell select,
+    [data-cg-input-shell="true"] input, [data-cg-input-shell="true"] select,
+    .attendance-month-select-field select,
+    .attendance-history-search input, .dashboard-search input,
+    .global-search-field input, .crud-search input
+  )) {
+    border-radius: var(--cg-field-radius);
+    border-color: var(--field-border);
+    background-color: var(--field-bg);
+  }
+
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]),
+    select
+  ) {
+    min-height: var(--cg-field-height);
+  }
+
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(input, textarea)::placeholder {
+    color: var(--text-muted);
+    font-size: inherit;
+    opacity: 1;
+  }
+
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea):disabled {
+    color: var(--text-muted);
+    background-color: var(--field-disabled-bg);
+    cursor: not-allowed;
+    opacity: .65;
+  }
+
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):read-only:not(select) {
+    cursor: default;
+  }
+
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(input[type="number"]) {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Keep native select indicators; customized selects already provide their own SVG. */
+  :root[data-theme="dark"] :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(select, input[type="date"], input[type="time"], input[type="datetime-local"]) {
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(select, input[type="date"], input[type="time"], input[type="datetime-local"]) {
+    color-scheme: light;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(.app-shell, .saas-account-shell, .login-page, .responsive-modal-sheet, .ui-modal, [role="dialog"])
+  :where(input, select, textarea, [role="combobox"]) {
+    transition: none;
   }
 }
