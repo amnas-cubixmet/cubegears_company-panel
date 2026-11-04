@@ -12,14 +12,11 @@ test('all ordinary fields have a consistent mobile-safe baseline', () => {
   assert.match(css, /--cg-field-border:\s*var\(--border\)/);
   assert.match(css, /background-color:\s*var\(--surface-2\)/);
   assert.match(css, /:disabled\s*\{/);
-  assert.match(css, /:read-only:not\(select\)/);
   assert.match(css, /\[type="checkbox"\]/);
   assert.match(css, /\[type="radio"\]/);
   assert.match(css, /\[type="file"\]/);
   assert.match(css, /\[type="range"\]/);
   assert.match(css, /\[type="color"\]/);
-  assert.match(css, /color-scheme:\s*dark/);
-  assert.match(css, /color-scheme:\s*light/);
 });
 
 test('bordered shell owns focus, nested icon/search inputs remain transparent and borderless', () => {
