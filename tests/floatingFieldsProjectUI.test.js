@@ -30,6 +30,11 @@ test('shared form controls are outlined with visible associated floating labels'
   assert.match(css,/var\(--text-primary\)/);
 });
 
+test('floating label clears the top border when a field is focused or filled', () => {
+  assert.match(css, /transform:translateY\(-100%\);padding:0 4px;background:var\(--cg-floating-bg\)/);
+  assert.match(css, /\.cg-floating-control:not\(:placeholder-shown\)/);
+});
+
 test('searchable select is keyboard operable, themed, and clears values without altering parent state', () => {
   assert.match(searchable,/role="combobox"/);
   assert.match(searchable,/role="listbox"/);
