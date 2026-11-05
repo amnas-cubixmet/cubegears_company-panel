@@ -24,7 +24,9 @@ export function useDialogAccessibility(isOpen, onClose, dialogRef) {
     const onKeyDown = (event) => {
       // Nested dialogs take precedence over their underlying parent.
       const top = [...document.querySelectorAll('[aria-modal="true"]')].at(-1);
-      if (top !== dialogRef.current) return;
+      // Some legacy sheets put aria-modal on their overlay rather than the
+      // focusable inner sheet. Both must belong to the active top-level dialog.
+      if (top !== dialogRef.current && !top?.contains(dialogRef.current)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
