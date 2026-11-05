@@ -6,6 +6,7 @@ import { JobBreadcrumbs } from '../../components/jobs/JobBreadcrumbs';
 import { jobDisplayLabel } from '../../components/jobs/jobs.utils';
 import { statusForComplaint, complaintStatusClass, COMPLAINT_STATUSES } from '../../components/jobs/complaintStatus';
 import { useFeatureAccess } from '../../context/FeatureAccessContext';
+import '../../styles/job-complaint-manual.css';
 
 const textValue = (value, fallback = 'Not added') => {
   if (typeof value === 'string') return value.trim() || fallback;
