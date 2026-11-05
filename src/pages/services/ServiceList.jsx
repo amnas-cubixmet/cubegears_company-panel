@@ -400,7 +400,7 @@ export const ServiceList = () => {
       <ServiceForm
         values={form}
         setValues={setForm}
-        categories={categories}
+        categories={categoryTree}
         onSubmit={saveService}
         onCancel={()=>navigate('/services')}
         submitting={submitting}
@@ -415,7 +415,7 @@ export const ServiceList = () => {
       <ServiceForm
         values={form}
         setValues={setForm}
-        categories={categories}
+        categories={categoryTree}
         onSubmit={saveService}
         onCancel={()=>navigate(`/services/${id}`)}
         submitting={submitting}
