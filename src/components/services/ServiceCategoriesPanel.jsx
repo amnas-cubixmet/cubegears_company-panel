@@ -41,7 +41,7 @@ export const ServiceCategoriesPanel = ({ categories = [], services = [], onAdd, 
           return (
             <div role="treeitem" aria-level={category.depth + 1} key={category.id}
               className="service-category-tree-row"
-              style={{ '--service-category-depth': category.depth }}>
+              style={{ '--service-category-indent': Math.min(category.depth, 8) * 16 + 'px' }}>
               <span className="service-category-tree-icon"><FolderTree size={17} aria-hidden="true"/></span>
               <div className="service-category-tree-content">
                 <strong>{category.name}</strong>
