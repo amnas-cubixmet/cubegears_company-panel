@@ -5,7 +5,7 @@
 .cg-floating-field [data-cg-floating-icon=true]>.cg-floating-label{left:40px}
 .cg-floating-field .cg-floating-control::placeholder{opacity:0!important}
 .cg-floating-field:focus-within .cg-floating-control::placeholder{opacity:1!important}
-.cg-floating-field:focus-within .cg-floating-label,.cg-floating-field:has(:is(.cg-floating-control:not(:placeholder-shown),select.cg-floating-control,.cg-floating-control[aria-invalid=true],input[type=date])) .cg-floating-label{top:0;padding:0 4px;background:var(--cg-floating-bg);font-size:12px!important}
+.cg-floating-field:focus-within .cg-floating-label,.cg-floating-field:has(:is(.cg-floating-control:not(:placeholder-shown),select.cg-floating-control,.cg-floating-control[aria-invalid=true],input[type=date])) .cg-floating-label{top:0;transform:translateY(-100%);padding:0 4px;background:var(--cg-floating-bg);font-size:12px!important}
 .cg-floating-field:focus-within .cg-floating-label{color:var(--primary)}
 .cg-floating-field>[data-cg-input-shell]:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
 .cg-floating-field:has([aria-invalid=true]) .cg-floating-label{color:var(--danger)}
