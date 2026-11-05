@@ -24,7 +24,7 @@ export const ServiceCategoriesPanel = ({ categories = [], services = [], onAdd, 
     <section className="service-category-section">
       <div className="service-section-header">
         <div><h2>Service Categories</h2><p>Organize services into a category tree.</p></div>
-        {canCreate && <button type="button" className="service-primary-button" onClick={() => onAdd(null)}>
+        {canCreate && <button type="button" className="service-primary-button" aria-label="Add Category" onClick={() => onAdd(null)}>
           <Plus size={16}/> Main Category
         </button>}
       </div>
