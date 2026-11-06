@@ -21,7 +21,7 @@ const artifacts = process.env.UI_ARTIFACT_DIR || join(tmpdir(), 'cubegears-ui-sm
 mkdirSync(artifacts, { recursive: true });
 const permissions = [...new Set([
   ...ROLE_PERMISSION_MODULES.flatMap(module => module.actions.map(action => `${module.key}.${action}`)),
-  'billing.view', 'billing.edit', 'company.manage', 'storage.view', 'storage.manage', 'attendance.self',
+  'billing.view', 'billing.edit', 'company.manage', 'storage.view', 'storage.manage', 'attendance.self', 'gstr.view',
 ])];
 const user = {id:'owner',name:'Workshop Owner',email:'owner@example.test',companyId:'company-a',
   company:{id:'company-a',name:'Test Workshop'},role:{name:'Owner',permissions:['*']},effectivePermissions:permissions,isCompanyOwner:true};
