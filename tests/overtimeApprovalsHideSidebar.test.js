@@ -7,6 +7,9 @@ const layout = read('src/components/layout/DashboardLayout.jsx');
 const css = read('src/pages/payroll/daily-wage-compact.css');
 const page = read('src/pages/payroll/OvertimeApprovalPage.jsx');
 const routes = read('src/routes/AppRoutes.jsx');
+const menu = read('src/routes/routeConfig.js');
+const desktopSidebar = read('src/components/layout/Sidebar.jsx');
+const mobileSidebar = read('src/components/layout/MobileSlideSidebar.jsx');
 
 test('only Overtime Approvals omits the desktop left sidebar', () => {
   assert.ok(layout.includes("const isOvertimeApprovals = /^\\/payroll\\/daily-wages\\/overtime-approvals\\/?$/.test(location.pathname);"));
@@ -22,4 +25,15 @@ test('header, main content, breadcrumbs, footer and mobile navigation stay prese
   }
   assert.match(page, /<DailyWageNav selected="overtime"\/>/);
   assert.match(page, /attendanceManagerService\.updateApprovalStatus\(/);
+});
+
+test('Overtime stays in the sidebar menu and opens its dedicated route', () => {
+  assert.match(menu, /id: 'overtime-approvals', label: 'Overtime', path: '\/payroll\/daily-wages\/overtime-approvals'/);
+  assert.match(menu, /id: 'overtime-approvals'[^\n]*permission: 'attendance\.team\.view'/);
+  assert.match(desktopSidebar, /routeConfig\.filter\(/);
+  assert.match(desktopSidebar, /to=\{route\.path\}/);
+  assert.match(mobileSidebar, /visibleRoutes\.filter\(/);
+  assert.match(mobileSidebar, /to=\{route\.path\}/);
+  assert.match(mobileSidebar, /route\.path === '\/payroll' &&/);
+  assert.match(routes, /path="\/payroll\/daily-wages\/overtime-approvals" element=\{<OvertimeApprovalPage \/>\}/);
 });
