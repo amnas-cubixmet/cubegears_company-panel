@@ -47,6 +47,9 @@ export const MobileSlideSidebar = ({ isOpen, onClose }) => {
     (route.id !== 'credits' || featureAccess.isCompanyOwner));
   const isRouteActive = (route) => {
     if (route.path === '/dashboard') return location.pathname === '/dashboard';
+    // The Overtime menu item takes priority over its /payroll parent.
+    // The desktop left sidebar is hidden only on this destination route.
+    if (route.path === '/payroll' && /^\/payroll\/daily-wages\/overtime-approvals\/?$/.test(location.pathname)) return false;
     return location.pathname === route.path || location.pathname.startsWith(`${route.path}/`);
   };
 
