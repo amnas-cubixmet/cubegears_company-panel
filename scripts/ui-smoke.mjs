@@ -225,22 +225,25 @@ try {
         }
         await page.locator('.route-loading').waitFor({state:'hidden',timeout:15000});
         await page.waitForFunction(()=>document.body.innerText.length>=20);
-        // Supplier routes and responsive expandable menu, without money writes.
+        // Supplier routes use one sidebar link and four page-level tabs.
+        // Navigation only; no financial writes.
         if(path==='/suppliers' && (profile.width===390 || profile.width===1440)) {
           await page.getByRole('heading',{name:'Suppliers',exact:true}).waitFor({state:'visible'});
           await page.getByText('Fixture Auto Parts').first().waitFor({state:'visible'});
           const drawerMode=profile.width<1024;
           if(drawerMode) await page.getByRole('button',{name:'Open all authorized pages'}).click();
           const sidebar=page.locator(drawerMode ? '.mobile-drawer' : '.app-sidebar');
-          const toggle=sidebar.getByRole('button',{name:'Suppliers',exact:true});
-          await toggle.waitFor({state:'visible'});
-          if(await toggle.getAttribute('aria-expanded')!=='true') throw Error('Suppliers submenu must start expanded');
-          const submenu=sidebar.locator(drawerMode ? '#supplier-mobile-submenu' : '#supplier-desktop-submenu');
-          if(await submenu.getByRole('link').count()!==4) throw Error('Expected four supplier submenu links');
-          await toggle.click();
-          if(await toggle.getAttribute('aria-expanded')!=='false') throw Error('Collapse suppliers failed');
-          await toggle.click();
-          if(await toggle.getAttribute('aria-expanded')!=='true') throw Error('Expand suppliers failed');
+          const supplierLink=sidebar.getByRole('link',{name:'Suppliers',exact:true});
+          await supplierLink.waitFor({state:'visible'});
+          if(await supplierLink.getAttribute('href')!=='/suppliers')
+            throw Error('Supplier sidebar link must navigate to /suppliers');
+          const tabs=page.getByRole('navigation',{name:'Supplier sections'});
+          await tabs.waitFor({state:'visible'});
+          const expected=['All Suppliers','Credit Management','Purchase History','Supplier Payments'];
+          for(const label of expected) {
+            if(await tabs.getByRole('link',{name:label,exact:true}).count()!==1)
+              throw Error('Missing Supplier section tab: '+label);
+          }
           if(drawerMode) await sidebar.getByRole('button',{name:'Close menu',exact:true}).click();
         }
         // Job Card creation: exercise the actual React form, image blob URLs,
