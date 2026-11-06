@@ -36,7 +36,7 @@ export const routeConfig = [
     id: 'staff-management', label: 'Staff Management', path: '/staff-management', icon: UserPlus, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'staff.view'
   },
   {
-    id: 'overtime-approvals', label: 'Overtime Approval', path: '/payroll/daily-wages/overtime-approvals', icon: Clock, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'attendance.team.view'
+    id: 'overtime-approvals', label: 'Overtime', path: '/payroll/daily-wages/overtime-approvals', icon: Clock, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'attendance.team.view'
   },
   {
     id: 'payroll', label: 'Payroll', path: '/payroll', icon: DollarSign, section: ROUTE_SECTIONS.ATTENDANCE_HR, mobilePrimary: false, permission: 'payroll.view'
