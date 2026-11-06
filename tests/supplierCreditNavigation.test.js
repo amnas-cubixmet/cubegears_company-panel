@@ -31,13 +31,16 @@ test('Suppliers remains one parent with four available submenu URLs', () => {
   assert.match(menu, /export const supplierSubmenu/);
 });
 
-test('desktop and mobile Supplier navigation continue to use one submenu', () => {
-  assert.match(desktop, /aria-expanded=\{supplierExpanded\}/);
-  assert.match(desktop, /supplier-desktop-submenu/);
-  assert.match(desktop, /supplierSubmenu\.filter/);
-  assert.match(mobile, /aria-expanded=\{supplierExpanded\}/);
-  assert.match(mobile, /supplier-mobile-submenu/);
-  assert.match(mobile, /supplierSubmenu\.filter/);
+test('desktop and mobile Supplier navigation use the same single parent route', () => {
+  assert.match(menu, /id: 'suppliers', label: 'Suppliers', path: '\/suppliers'/);
+  assert.match(desktop, /routeConfig\.filter/);
+  assert.match(desktop, /items\.map\(\(route\) =>/);
+  assert.match(desktop, /to=\{route\.path\}/);
+  assert.match(mobile, /visibleRoutes\.filter/);
+  assert.match(mobile, /items\.map\(\(route\) =>/);
+  assert.match(mobile, /to=\{route\.path\}/);
+  // Supplier sub-pages remain accessible through page navigation and direct routes.
+  assert.match(menu, /export const supplierSubmenu/);
 });
 
 test('supplier financial pages use stock and payments permissions', () => {
